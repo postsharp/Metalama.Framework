@@ -1,12 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Templating.Mapping;
 using Microsoft.CodeAnalysis;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -18,10 +19,15 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal sealed class CompileTimeProject
     {
-        private readonly Compilation? _compilation;
         private readonly CompileTimeProjectManifest? _manifest;
-        private readonly byte[]? _assemblyImage;
+        private readonly string? _compiledAssemblyPath;
+        private readonly Func<string, TextMap?>? _getLocationMap;
         private Assembly? _assembly;
+
+        /// <summary>
+        /// Gets the full path of the directory containing the transformed source code (typically under a temp directory). 
+        /// </summary>
+        public string? Directory { get; }
 
         /// <summary>
         /// Gets the <see cref="CompileTimeDomain"/> to which the current project belong.
@@ -37,13 +43,13 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Gets the identity of the compile-time assembly, which is guaranteed to be unique in the
         /// current <see cref="Domain"/> for a given source code.
         /// </summary>
-        public AssemblyIdentity? CompileTimeIdentity => this._compilation?.Assembly.Identity;
+        public AssemblyIdentity? CompileTimeIdentity { get; }
 
         /// <summary>
         /// Gets the list of aspect types (identified by their fully qualified reflection name) of the aspects
         /// declared in the current project.
         /// </summary>
-        public IReadOnlyList<string> AspectTypes => this.AssertNotEmpty()._manifest!.AspectTypes ?? (IReadOnlyList<string>) Array.Empty<string>();
+        public IReadOnlyList<string> AspectTypes => this.AssertNotEmpty()._manifest!.AspectTypes;
 
         /// <summary>
         /// Gets the list of compile-time projects referenced by the current project.
@@ -51,27 +57,39 @@ namespace Caravela.Framework.Impl.CompileTime
         public IReadOnlyList<CompileTimeProject> References { get; }
 
         /// <summary>
-        /// Gets the list of syntax trees of the current project. These syntax trees are fully transformed
-        /// and ready to be compiled.
+        /// Gets the list of transformed code files in the current project. 
         /// </summary>
-        public IReadOnlyList<SyntaxTree> SyntaxTrees { get; }
+        public IReadOnlyList<string>? CodeFiles { get; }
 
         /// <summary>
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.
         /// </summary>
         /// <returns></returns>
-        public CompilationReference ToMetadataReference() => this.AssertNotEmpty()._compilation!.ToMetadataReference();
+        public MetadataReference ToMetadataReference() => MetadataReference.CreateFromFile( this.AssertNotEmpty()._compiledAssemblyPath! );
 
         /// <summary>
         /// Gets the unique hash of the project, computed from the source code.
         /// </summary>
-        public ulong Hash => this.AssertNotEmpty()._manifest!.Hash;
+        public ulong Hash => this.AssertNotEmpty()._manifest!.SourceHash;
 
         /// <summary>
         /// Gets a value indicating whether the current project is empty, i.e. does not contain any source code. Note that
         /// an empty project can STILL contain <see cref="References"/>.
         /// </summary>
-        public bool IsEmpty => this._compilation == null;
+        public bool IsEmpty => this._compiledAssemblyPath == null;
+
+        /// <summary>
+        /// Gets the CLR <see cref="System.Reflection.Assembly"/>, and loads it if necessary.
+        /// </summary>
+        private Assembly Assembly
+        {
+            get
+            {
+                this.LoadAssembly();
+
+                return this._assembly!;
+            }
+        }
 
         private CompileTimeProject AssertNotEmpty()
         {
@@ -86,25 +104,23 @@ namespace Caravela.Framework.Impl.CompileTime
         private CompileTimeProject(
             CompileTimeDomain domain,
             AssemblyIdentity runTimeIdentity,
+            AssemblyIdentity compileTimeIdentity,
             IReadOnlyList<CompileTimeProject> references,
             CompileTimeProjectManifest? manifest,
-            Compilation? compilation,
-            byte[]? assemblyImage,
-            IReadOnlyList<SyntaxTree>? syntaxTrees )
+            string? compiledAssemblyPath,
+            IReadOnlyList<string>? codeFiles,
+            Func<string, TextMap?>? getLocationMap,
+            string? directory )
         {
-            if ( compilation == null && references.Count == 0 )
-            {
-                // We should not create an instance in this case. This scenario is represented by `null`.
-                throw new AssertionFailedException();
-            }
-
             this.Domain = domain;
-            this._compilation = compilation;
-            this._assemblyImage = assemblyImage;
+            this._compiledAssemblyPath = compiledAssemblyPath;
+            this._getLocationMap = getLocationMap;
+            this.Directory = directory;
             this._manifest = manifest;
             this.RunTimeIdentity = runTimeIdentity;
+            this.CompileTimeIdentity = compileTimeIdentity;
             this.References = references;
-            this.SyntaxTrees = syntaxTrees ?? Array.Empty<SyntaxTree>();
+            this.CodeFiles = codeFiles;
         }
 
         /// <summary>
@@ -112,70 +128,69 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public static CompileTimeProject Create(
             CompileTimeDomain domain,
-            AssemblyIdentity identity,
+            AssemblyIdentity runTimeIdentity,
+            AssemblyIdentity compileTimeIdentity,
             IReadOnlyList<CompileTimeProject> references,
             CompileTimeProjectManifest manifest,
-            Compilation compilation,
-            byte[] assemblyImage,
-            IReadOnlyList<SyntaxTree>? syntaxTrees )
-            => new( domain, identity, references, manifest, compilation, assemblyImage, syntaxTrees );
+            string? compiledAssemblyPath,
+            string sourceDirectory,
+            IReadOnlyList<string> sourceFiles,
+            Func<string, TextMap?> getLocationMap )
+            => new( domain, runTimeIdentity, compileTimeIdentity, references, manifest, compiledAssemblyPath, sourceFiles, getLocationMap, sourceDirectory );
 
         /// <summary>
         /// Creates a <see cref="CompileTimeProject"/> that does not include any source code.
         /// </summary>
         public static CompileTimeProject CreateEmpty(
             CompileTimeDomain domain,
-            AssemblyIdentity identity,
+            AssemblyIdentity runTimeIdentity,
+            AssemblyIdentity compileTimeIdentity,
             IReadOnlyList<CompileTimeProject>? references = null )
-            => new( domain, identity, references ?? Array.Empty<CompileTimeProject>(), null, null, null, null );
+            => new( domain, runTimeIdentity, compileTimeIdentity, references ?? Array.Empty<CompileTimeProject>(), null, null, null, null, null );
 
         /// <summary>
         /// Serializes the current project (its manifest and source code) into a stream that can be embedded as a managed resource.
         /// </summary>
-        /// <returns></returns>
-        private MemoryStream Serialize()
+        public void Serialize( Stream stream )
         {
             this.AssertNotEmpty();
-
-            MemoryStream stream = new();
 
             using ( var archive = new ZipArchive( stream, ZipArchiveMode.Create, true, Encoding.UTF8 ) )
             {
                 // Write syntax trees.
-                var index = 0;
-
-                foreach ( var syntaxTree in this._compilation!.SyntaxTrees )
+                
+                foreach ( var sourceFile in this.CodeFiles! )
                 {
-                    index++;
-                    var filePath = syntaxTree.FilePath;
-
-                    if ( string.IsNullOrEmpty( filePath ) )
-                    {
-                        filePath = $"File{index}.cs";
-                    }
-
-                    var entry = archive.CreateEntry( filePath, CompressionLevel.Optimal );
-                    using var entryWriter = new StreamWriter( entry.Open(), syntaxTree.GetText().Encoding );
-                    syntaxTree.GetText().Write( entryWriter );
+                    var sourceText = File.ReadAllText( Path.Combine( this.Directory, sourceFile ) );
+                   
+                    var entry = archive.CreateEntry( sourceFile, CompressionLevel.Optimal );
+                    using var entryWriter = new StreamWriter( entry.Open() );
+                    entryWriter.Write( sourceText );
                 }
 
                 // Write manifest.
-                var manifestJson = JsonConvert.SerializeObject( this._manifest!, Formatting.Indented );
                 var manifestEntry = archive.CreateEntry( "manifest.json", CompressionLevel.Optimal );
-                using var manifestWriter = new StreamWriter( manifestEntry.Open(), Encoding.UTF8 );
-                manifestWriter.Write( manifestJson );
+                var manifestStream = manifestEntry.Open();
+                this._manifest!.Serialize( manifestStream );
             }
-
-            stream.Seek( 0, SeekOrigin.Begin );
-
-            return stream;
         }
 
         /// <summary>
         /// Returns a managed resource that contains the serialized project.
         /// </summary>
         /// <returns></returns>
-        public ResourceDescription ToResource() => new( CompileTimeCompilationBuilder.ResourceName, this.Serialize, true );
+        public ResourceDescription ToResource()
+            => new(
+                CompileTimeCompilationBuilder.ResourceName,
+                () =>
+                {
+                    var stream = new MemoryStream();
+                    this.Serialize( stream );
+                    _ = stream.Seek( 0, SeekOrigin.Begin );
+
+                    return stream;
+                },
+                true );
 
         /// <summary>
         /// Gets a compile-time reflection <see cref="Type"/> defined in the current project.
@@ -184,8 +199,16 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <returns></returns>
         public Type? GetType( string reflectionName ) => this.IsEmpty ? null : this.Assembly!.GetType( reflectionName, false );
 
+        public string? FindSourceFile( string name )
+            => this.CodeFiles.Where( t => name.EndsWith( t, StringComparison.OrdinalIgnoreCase ) )
+                .OrderByDescending( t => t.Length )
+                .Select( t => Path.Combine( this.Directory, t ) )
+                .FirstOrDefault();
+
         private void LoadAssembly()
         {
+            this.AssertNotEmpty();
+
             if ( this._assembly == null )
             {
                 // We need to recursively load all dependent assemblies to prevent FileNotFoundException.
@@ -198,22 +221,12 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
                 }
 
-                this._assembly = this.Domain.GetOrLoadAssembly( this.CompileTimeIdentity!, this._assemblyImage! );
-            }
-        }
-
-        private Assembly Assembly
-        {
-            get
-            {
-                this.AssertNotEmpty();
-
-                this.LoadAssembly();
-
-                return this._assembly!;
+                this._assembly = this.Domain.GetOrLoadAssembly( this.CompileTimeIdentity!, this._compiledAssemblyPath! );
             }
         }
 
         public override string ToString() => this.RunTimeIdentity.ToString();
+
+        public TextMap? GetTextMap( string csFilePath ) => this._getLocationMap?.Invoke( csFilePath );
     }
 }

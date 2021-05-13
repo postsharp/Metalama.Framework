@@ -1,0 +1,63 @@
+﻿<html>
+<head>
+<style>
+
+.caravelaClassification_CompileTime,
+.caravelaClassification_Conflict,
+.caravelaClassification_TemplateKeyword,
+.caravelaClassification_Dynamic,
+.caravelaClassification_CompileTimeVariable
+{
+    background-color: rgba(50,50,90,0.1);
+}
+
+.caravelaClassification_TemplateKeyword
+{
+    color: rgb(250, 0, 250) !important;
+    font-weight: bold;
+}
+
+.caravelaClassification_Dynamic
+{
+    text-decoration: underline;
+}
+
+.caravelaClassification_CompileTimeVariable
+{
+    font-style: italic;
+}
+
+</style>
+</head>
+<body><pre>
+using Caravela.Framework.Project;
+using Caravela.TestFramework;
+using Caravela.Framework.Aspects;
+
+namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStatements.TemplateKeywords
+{
+    [CompileTime]
+    <span class='caravelaClassification_CompileTime'>class Aspect</span>
+    <span class='caravelaClassification_CompileTime'>{</span>
+        [TestTemplate]
+        <span class='caravelaClassification_CompileTime'>dynamic Template()</span>
+        <span class='caravelaClassification_CompileTime'>{</span>
+            <span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.</span><span class='caravelaClassification_TemplateKeyword'>CompileTime</span><span class='caravelaClassification_CompileTime'>( 0 );</span>
+            <span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.</span><span class='caravelaClassification_TemplateKeyword'>CompileTime</span><span class='caravelaClassification_CompileTime'>&lt;long&gt;( 0 );</span>
+            <span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.</span><span class='caravelaClassification_TemplateKeyword'>Comment</span><span class='caravelaClassification_CompileTime'>( &quot;Hey&quot; );</span>
+            <span class='caravelaClassification_RunTime'>return </span><span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.</span><span class='caravelaClassification_TemplateKeyword'>Proceed</span><span class='caravelaClassification_CompileTime'>()</span><span class='caravelaClassification_RunTime'>;</span>
+        <span class='caravelaClassification_CompileTime'>}</span>
+    <span class='caravelaClassification_CompileTime'>}
+</span>}
+
+
+Legend:
+<span class='Default'>Default</span>
+<span class='RunTime'>RunTime</span>
+<span class='CompileTime'>CompileTime</span>
+<span class='Dynamic'>Dynamic</span>
+<span class='CompileTimeVariable'>CompileTimeVariable</span>
+<span class='TemplateKeyword'>TemplateKeyword</span>
+<span class='Conflict'>Conflict</span>
+</pre></body>
+</html>

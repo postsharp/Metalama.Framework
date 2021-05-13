@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Templating
                 this._reflectionMapper = ReflectionMapper.GetInstance( compilation );
             }
 
-            public TypeSyntax Type( Type type ) => this._reflectionMapper.GetTypeNameSyntax( type );
+            public TypeSyntax Type( Type type ) => this._reflectionMapper.GetTypeSyntax( type );
 
 #pragma warning disable CA1822 // Mark members as static
             public TypeSyntax Type( ITypeSymbol type ) => (TypeSyntax) CSharpSyntaxGenerator.Instance.NameExpression( type );
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Templating
                         SyntaxFactory.Identifier( name ),
                         SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( typeArguments ) ) ) );
 
-            public ExpressionSyntax Literal( string s ) => this.Literal( SyntaxFactoryEx.LiteralExpression( s ) );
+            public ExpressionSyntax Literal( string? s ) => s == null ? SyntaxFactoryEx.Null : this.Literal( SyntaxFactoryEx.LiteralExpression( s ) );
 
             public ExpressionSyntax Literal( char c ) => this.Literal( SyntaxFactoryEx.LiteralExpression( c ) );
 

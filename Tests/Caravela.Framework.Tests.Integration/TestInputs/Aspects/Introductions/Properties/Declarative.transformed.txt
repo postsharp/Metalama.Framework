@@ -2,8 +2,6 @@
 [Introduction]
 internal class TargetClass
 {
-    public global::System.Int32 IntroducedProperty_Auto { get; set; }
-
     public static global::System.Int32 IntroducedProperty_Auto_Static { get; }
 
     public global::System.Int32 IntroducedProperty_Accessors

@@ -212,8 +212,14 @@ namespace Caravela.Framework.Impl.Linking
                     }
                     else
                     {
-                        throw new NotSupportedException();
+                        // Auto property?.
+                        methodBodyInfos[symbol] = new MemberAnalysisResult( true );
                     }
+
+                    break;
+
+                case ArrowExpressionClauseSyntax _:
+                    methodBodyInfos[symbol] = new MemberAnalysisResult( true );
 
                     break;
 

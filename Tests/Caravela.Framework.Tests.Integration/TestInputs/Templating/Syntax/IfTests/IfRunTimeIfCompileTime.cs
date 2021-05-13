@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfRunTimeIfCompileTime
 {
@@ -11,9 +11,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfRunTi
         [TestTemplate]
         dynamic Template()
         {
-            if (target.Parameters[0].Value == null)
+            if (meta.Parameters[0].Value == null)
             {
-                if (target.Method.Name == "DontThrowMethod")
+                if (meta.Method.Name == "DontThrowMethod")
                 {
                     Console.WriteLine("Oops");
                 }
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfRunTi
                 }
             }
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

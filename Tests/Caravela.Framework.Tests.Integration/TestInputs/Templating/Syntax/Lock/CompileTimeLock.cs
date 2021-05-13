@@ -1,5 +1,5 @@
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lock.CompileTimeLock
 {
@@ -8,9 +8,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lock.CompileTim
         [TestTemplate]
         dynamic Template()
         {
-            lock (target.Compilation)
+            lock (meta.Compilation)
             {
-                return proceed();
+                return meta.Proceed();
             }
         }
     }

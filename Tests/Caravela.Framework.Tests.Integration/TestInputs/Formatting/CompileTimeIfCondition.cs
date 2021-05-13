@@ -1,6 +1,6 @@
 ﻿using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStatements.CompileTimeIfCondition
 {
@@ -28,22 +28,22 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
             var runTimeObject = new RunTimeClass();
             var compileTimeObject = new CompileTimeClass();
 
-            int compileTimeVariable = compileTime(0);
+            int compileTimeVariable = meta.CompileTime(0);
 
             if (compileTimeVariable == 0)
             {
                 runTimeObject.RunTimeMethod();
                 compileTimeObject.CompileTimeMethod();
-                target.Method.ToString();
+                meta.Method.ToString();
             }
             else
             {
                 runTimeObject.RunTimeMethod();
                 compileTimeObject.CompileTimeMethod();
-                target.Method.ToString();
+                meta.Method.ToString();
             }
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 }

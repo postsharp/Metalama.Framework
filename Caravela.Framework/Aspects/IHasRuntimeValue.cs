@@ -14,6 +14,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets or sets the value at run time.
         /// </summary>
+        [RunTimeOnly]
         dynamic Value { get; set; }
     }
 }

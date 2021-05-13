@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// This is typically the case for symbols of system libraries and
         /// aspects, or any declaration marked with <see cref="CompileTimeAttribute"/>.
         /// </summary>
-        Default,
+        Both,
 
         /// <summary>
         /// The symbol can be only used at run time only. This is the case for any symbol that is
@@ -30,6 +30,18 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Caravela, which is marked by <see cref="CompileTimeOnlyAttribute"/>.
         /// The node including all children nodes must be evaluated at compile time.
         /// </summary>
-        CompileTimeOnly
+        CompileTimeOnly,
+
+        /// <summary>
+        /// Unknown scope, for instance the scope of a lambda parameter that is not bound to a context.
+        /// </summary>
+        Unknown,
+
+        /// <summary>
+        /// A <see cref="CompileTimeOnly"/> member whose evaluated value is <see cref="RunTimeOnly"/>. The return
+        /// value does not need to be of the <c>dynamic</c> itself. However, the member must be decorated with both
+        /// <see cref="CompileTimeAttribute"/> (possibly inherited) and <see cref="RunTimeOnlyAttribute"/>.
+        /// </summary>
+        Dynamic
     }
 }

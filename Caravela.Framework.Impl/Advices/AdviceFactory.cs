@@ -27,6 +27,8 @@ namespace Caravela.Framework.Impl.Advices
 
         internal IReadOnlyList<IAdvice> Advices => this._advices;
 
+        public Dictionary<string, object?> Tags { get; } = new( StringComparer.Ordinal );
+
         public AdviceFactory( CompilationModel compilation, IDiagnosticAdder diagnosticAdder, INamedType aspectType, AspectInstance aspect )
         {
             this._aspectType = aspectType;
@@ -48,7 +50,7 @@ namespace Caravela.Framework.Impl.Advices
 
             if ( members.Count != 1 )
             {
-                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (this._aspectType, methodName) );
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMethod.CreateException( (this._aspectType, methodName) );
             }
 
             var method = members.OfType<IMethodSymbol>().Single();
@@ -83,7 +85,7 @@ namespace Caravela.Framework.Impl.Advices
 
             if ( members.Count != 1 )
             {
-                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (this._aspectType, propertyName) );
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMethod.CreateException( (this._aspectType, propertyName) );
             }
 
             var property = members.OfType<IPropertySymbol>().Single();
@@ -110,7 +112,7 @@ namespace Caravela.Framework.Impl.Advices
             var diagnosticList = new DiagnosticList();
             var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof(OverrideMethodTemplateAttribute), nameof(this.OverrideMethod) );
 
-            var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, aspectLinkerOptions );
+            var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, this.Tags.ToImmutableDictionary(), aspectLinkerOptions );
             advice.Initialize( diagnosticList );
             this._advices.Add( advice );
 
@@ -137,7 +139,15 @@ namespace Caravela.Framework.Impl.Advices
             var diagnosticList = new DiagnosticList();
             var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof(IntroduceMethodTemplateAttribute), nameof(this.IntroduceMethod) );
 
-            var advice = new IntroduceMethodAdvice( this._aspect, targetType, templateMethod, scope, conflictBehavior, aspectLinkerOptions );
+            var advice = new IntroduceMethodAdvice(
+                this._aspect,
+                targetType,
+                templateMethod,
+                scope,
+                conflictBehavior,
+                aspectLinkerOptions,
+                this.Tags.ToImmutableDictionary() );
+
             advice.Initialize( diagnosticList );
             this._advices.Add( advice );
 
@@ -164,7 +174,15 @@ namespace Caravela.Framework.Impl.Advices
                 typeof(OverrideFieldOrPropertyTemplateAttribute),
                 nameof(this.OverrideFieldOrProperty) );
 
-            var advice = new OverrideFieldOrPropertyAdvice( this._aspect, targetDeclaration, templateProperty, null, null, aspectLinkerOptions );
+            var advice = new OverrideFieldOrPropertyAdvice(
+                this._aspect,
+                targetDeclaration,
+                templateProperty,
+                null,
+                null,
+                this.Tags.ToImmutableDictionary(),
+                aspectLinkerOptions );
+
             this._advices.Add( advice );
 
             return advice;
@@ -187,7 +205,15 @@ namespace Caravela.Framework.Impl.Advices
                 typeof(OverrideFieldOrPropertySetTemplateAttribute),
                 nameof(this.OverrideFieldOrPropertyAccessors) );
 
-            var advice = new OverrideFieldOrPropertyAdvice( this._aspect, targetDeclaration, null, getTemplateMethod, setTemplateMethod, aspectLinkerOptions );
+            var advice = new OverrideFieldOrPropertyAdvice( 
+                this._aspect, 
+                targetDeclaration, 
+                null, 
+                getTemplateMethod, 
+                setTemplateMethod,
+                this.Tags.ToImmutableDictionary(),
+                aspectLinkerOptions );
+
             this._advices.Add( advice );
 
             return advice;
@@ -223,6 +249,7 @@ namespace Caravela.Framework.Impl.Advices
                 null,
                 scope,
                 conflictBehavior,
+                this.Tags.ToImmutableDictionary(),
                 aspectLinkerOptions );
 
             this._advices.Add( advice );
@@ -258,6 +285,7 @@ namespace Caravela.Framework.Impl.Advices
                 setTemplateMethod,
                 scope,
                 conflictBehavior,
+                this.Tags.ToImmutableDictionary(),
                 aspectLinkerOptions );
 
             this._advices.Add( advice );

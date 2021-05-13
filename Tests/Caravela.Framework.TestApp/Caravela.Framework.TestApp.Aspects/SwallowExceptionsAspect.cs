@@ -1,6 +1,6 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
-using static Caravela.Framework.Aspects.TemplateContext;
+
 
 namespace Caravela.Framework.TestApp.Aspects
 {
@@ -10,7 +10,7 @@ namespace Caravela.Framework.TestApp.Aspects
         {
             try
             {
-                return proceed();
+                return meta.Proceed();
             }
             catch ( Exception ex )
             {

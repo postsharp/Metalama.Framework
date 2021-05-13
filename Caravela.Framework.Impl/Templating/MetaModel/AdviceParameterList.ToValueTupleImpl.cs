@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -11,7 +12,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 {
     internal partial class AdviceParameterList
     {
-        private class ToValueTupleImpl : IDynamicMember
+        private class ToValueTupleImpl : IDynamicExpression
         {
             private readonly AdviceParameterList _parent;
 
@@ -20,7 +21,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 this._parent = parent;
             }
 
-            public RuntimeExpression CreateExpression()
+            public RuntimeExpression CreateExpression( string? expressionText, Location? location )
             {
                 ExpressionSyntax expression;
 

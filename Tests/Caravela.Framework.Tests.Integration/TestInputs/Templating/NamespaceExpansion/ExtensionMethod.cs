@@ -3,7 +3,7 @@ using System.Linq;
 using Caravela.Framework.Project;
 
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion
 {
@@ -24,9 +24,9 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
                 var take = list.Take(1);
 
                 // Dynamic argument.
-                var take2 = list.Take((int)target.Parameters[0].Value);
+                var take2 = list.Take((int)meta.Parameters[0].Value);
 
-                return proceed();
+                return meta.Proceed();
             }
         }
 

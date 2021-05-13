@@ -2,7 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -33,10 +35,14 @@ namespace Caravela.Framework.Impl.CodeModel
                 ? new PseudoAccessor( this, AccessorSemantic.Raise )
                 : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );
 
+        public EventInfo ToEventInfo() => new CompileTimeEventInfo( this._symbol, this.DeclaringType );
+
         public override CodeElementKind ElementKind => CodeElementKind.Event;
 
         public override bool IsReadOnly => false;
 
         public override bool IsAsync => false;
+
+        public override MemberInfo ToMemberInfo() => this.ToEventInfo();
     }
 }

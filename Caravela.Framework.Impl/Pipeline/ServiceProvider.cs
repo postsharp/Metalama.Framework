@@ -10,6 +10,8 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private readonly Dictionary<Type, object> _services = new();
 
+        public static IServiceProvider Empty { get; } = new EmptyProvider();
+
         public void AddService<T>( T service )
             where T : notnull
             => this._services.Add( typeof(T), service );
@@ -19,6 +21,11 @@ namespace Caravela.Framework.Impl.Pipeline
             _ = this._services.TryGetValue( serviceType, out var instance );
 
             return instance;
+        }
+
+        private class EmptyProvider : IServiceProvider
+        {
+            public object GetService( Type serviceType ) => null!;
         }
     }
 }

@@ -2,22 +2,33 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    public static class TemplateCompiler
+    public class TemplateCompiler
     {
         public const string TemplateMethodSuffix = "_Template";
 
-        private static bool TryAnnotate(
+        private readonly IServiceProvider _serviceProvider;
+        private readonly SemanticAnnotationMap _semanticAnnotationMap = new();
+
+        public TemplateCompiler( IServiceProvider? serviceProvider = null )
+        {
+            this._serviceProvider = serviceProvider ?? ServiceProvider.Empty;
+        }
+
+        public ILocationAnnotationMap LocationAnnotationMap => this._semanticAnnotationMap;
+
+        public bool TryAnnotate(
             SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
             IDiagnosticAdder diagnostics,
-            [NotNullWhen( true )] out SemanticAnnotationMap? symbolAnnotationMap,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot )
         {
             SyntaxNode currentSyntaxRoot;
@@ -36,15 +47,14 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // Annotate the syntax tree with symbols.
-            symbolAnnotationMap = new SemanticAnnotationMap();
-            currentSyntaxRoot = symbolAnnotationMap.AnnotateTree( sourceSyntaxRoot, semanticModel );
+            currentSyntaxRoot = this._semanticAnnotationMap.AnnotateTree( sourceSyntaxRoot, semanticModel );
 
             FixupTreeForDiagnostics();
 
             annotatedSyntaxRoot = currentSyntaxRoot;
 
             // Annotate the syntax tree with info about build- and run-time nodes,
-            var annotatorRewriter = new TemplateAnnotator( (CSharpCompilation) semanticModel.Compilation, symbolAnnotationMap, diagnostics );
+            var annotatorRewriter = new TemplateAnnotator( (CSharpCompilation) semanticModel.Compilation, this._semanticAnnotationMap, diagnostics );
             annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot )!;
 
             // Stop if we have any error.
@@ -56,17 +66,7 @@ namespace Caravela.Framework.Impl.Templating
             return true;
         }
 
-        public static bool TryAnnotate(
-            SyntaxNode sourceSyntaxRoot,
-            SemanticModel semanticModel,
-            bool reportDiagnosticsToInitialCompilation,
-            IDiagnosticAdder diagnostics,
-            [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot )
-        {
-            return TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out _, out annotatedSyntaxRoot );
-        }
-
-        public static bool TryCompile(
+        public bool TryCompile(
             string templateName,
             Compilation compileTimeCompilation,
             SyntaxNode sourceSyntaxRoot,
@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl.Templating
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot,
             [NotNullWhen( true )] out SyntaxNode? transformedSyntaxRoot )
         {
-            if ( !TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out var symbolAnnotationMap, out annotatedSyntaxRoot ) )
+            if ( !this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out annotatedSyntaxRoot ) )
             {
                 transformedSyntaxRoot = null;
 
@@ -83,7 +83,13 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // Compile the syntax tree.
-            var templateCompilerRewriter = new TemplateCompilerRewriter( templateName, compileTimeCompilation, symbolAnnotationMap, diagnostics );
+            var templateCompilerRewriter = new TemplateCompilerRewriter(
+                templateName,
+                compileTimeCompilation,
+                this._semanticAnnotationMap,
+                diagnostics,
+                this._serviceProvider );
+
             transformedSyntaxRoot = templateCompilerRewriter.Visit( annotatedSyntaxRoot );
 
             return transformedSyntaxRoot != null && templateCompilerRewriter.Success;

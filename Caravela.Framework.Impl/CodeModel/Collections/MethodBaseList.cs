@@ -234,7 +234,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         /// <param name="genericParameterCount">Required number of generic parameters, or <see langword="null"/> if there is no requirement.</param>
         /// <param name="parameterCount">Required number of parameters, or <see langword="null"/> if there is no requirement.</param>
         /// <param name="parameterPredicate">Predicate for matching parameters.</param>
-        /// <param name="isStatic">Required staticitity, or <see langword="null"/> if there is no requirement.</param>
+        /// <param name="isStatic">Required staticity, or <see langword="null"/> if there is no requirement.</param>
         /// <param name="expandParams">If true, methods with <see langword="params" /> are treated as having the requested number of parameters if possible.</param>
         /// <returns>Enumeration of all members matching all conditions.</returns>
         protected IEnumerable<T> OfSignature<TPayload>(
@@ -388,12 +388,12 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                     hashCode = HashCode.Combine( hashCode, xm.GenericParameters.Count );
                 }
 
-                for ( var i = 0; i < x.Parameters.Count; i++ )
+                foreach ( var parameter in x.Parameters )
                 {
                     hashCode = HashCode.Combine(
                         hashCode,
-                        x.Compilation.InvariantComparer.GetHashCode( x.Parameters[i].ParameterType ),
-                        x.Parameters[i].RefKind );
+                        x.Compilation.InvariantComparer.GetHashCode( parameter.ParameterType ),
+                        parameter.RefKind );
                 }
 
                 return hashCode;

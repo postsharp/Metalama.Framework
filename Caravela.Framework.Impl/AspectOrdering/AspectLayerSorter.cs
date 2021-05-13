@@ -177,7 +177,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                         cycleNodesString,
                         additionalLocations );
 
-                diagnosticAdder.ReportDiagnostic( diagnostic );
+                diagnosticAdder.Report( diagnostic );
 
                 return false;
             }

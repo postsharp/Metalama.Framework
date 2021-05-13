@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.Linking
+namespace Caravela.Framework.Impl.Utilities
 {
     /// <summary>
     /// Compares symbols, possibly from different compilations.
@@ -41,11 +41,11 @@ namespace Caravela.Framework.Impl.Linking
         {
             if ( x.Kind != y.Kind )
             {
-                // Inequal kinds.
+                // Unequal kinds.
                 return false;
             }
 
-            switch ( (x, y) )
+            switch (x, y)
             {
                 case (IMethodSymbol methodX, IMethodSymbol methodY):
                     if ( !MethodEquals( methodX, methodY, this._options ) )
@@ -122,7 +122,7 @@ namespace Caravela.Framework.Impl.Linking
             if ( options.HasFlag( StructuralSymbolComparerOptions.GenericArguments ) )
             {
                 // TODO: optimize using for loop.
-                foreach ( var (typeArgumentX, typeArgumentY) in Enumerable.Zip( namedTypeX.TypeArguments, namedTypeY.TypeArguments, ( x, y ) => (x, y) ) )
+                foreach ( var (typeArgumentX, typeArgumentY) in namedTypeX.TypeArguments.Zip( namedTypeY.TypeArguments, ( x, y ) => (x, y) ) )
                 {
                     if ( !TypeEquals( typeArgumentX, typeArgumentY ) )
                     {
@@ -154,14 +154,14 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 // TODO: optimize using for loop.
-                foreach ( var (parameterX, parameterY) in Enumerable.Zip( methodX.Parameters, methodY.Parameters, ( x, y ) => (x, y) ) )
+                foreach ( var (parameterX, parameterY) in methodX.Parameters.Zip( methodY.Parameters, ( x, y ) => (x, y) ) )
                 {
                     if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) && !TypeEquals( parameterX.Type, parameterY.Type ) )
                     {
                         return false;
                     }
 
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) && parameterY.RefKind != parameterY.RefKind )
+                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) && parameterX.RefKind != parameterY.RefKind )
                     {
                         return false;
                     }
@@ -217,11 +217,11 @@ namespace Caravela.Framework.Impl.Linking
         {
             if ( typeX.Kind != typeY.Kind )
             {
-                // Inequal kinds.
+                // Unequal kinds.
                 return false;
             }
 
-            switch ( (typeX, typeY) )
+            switch (typeX, typeY)
             {
                 case (ITypeParameterSymbol typeParamX, ITypeParameterSymbol typeParamY):
                     return StringComparer.Ordinal.Equals( typeParamX.Name, typeParamY.Name )
@@ -251,7 +251,7 @@ namespace Caravela.Framework.Impl.Linking
                     return false;
                 }
 
-                switch ( (currentX, currentY) )
+                switch (currentX, currentY)
                 {
                     case (IMethodSymbol methodX, IMethodSymbol methodY):
                         if ( !MethodEquals( methodX, methodY, StructuralSymbolComparerOptions.MethodSignature ) )

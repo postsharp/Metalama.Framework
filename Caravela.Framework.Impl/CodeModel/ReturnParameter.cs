@@ -4,9 +4,11 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
+using System.Reflection;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
 using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
@@ -29,6 +31,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsParams => false;
 
         public abstract IMember DeclaringMember { get; }
+
+        public ParameterInfo ToParameterInfo() => CompileTimeReturnParameterInfo.Create( this );
 
         CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
 

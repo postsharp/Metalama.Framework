@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.NameClashCompileTimeForEach
 {
@@ -11,13 +11,13 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.NameCla
         [TestTemplate]
         dynamic Template()
         {
-            foreach (var p in target.Parameters)
+            foreach (var p in meta.Parameters)
             {
                 string text = p.Name + " = " + p.Value;
                 Console.WriteLine(text);
             }
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

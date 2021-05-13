@@ -7,8 +7,10 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Caravela.TestFramework
 {
@@ -17,7 +19,9 @@ namespace Caravela.TestFramework
     /// </summary>
     public sealed class TestResult : IDiagnosticAdder
     {
+        private readonly TestInput _testInput;
         private readonly List<Diagnostic> _diagnostics = new();
+        private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TestResult"/> class.
@@ -26,15 +30,15 @@ namespace Caravela.TestFramework
         /// <param name="testName"></param>
         /// <param name="templateDocument">The source code document of the template.</param>
         /// <param name="initialCompilation"></param>
-        internal TestResult( Project project, string testName, Document templateDocument, Compilation initialCompilation )
+        internal TestResult( Project project, TestInput testInput, Document templateDocument, Compilation initialCompilation )
         {
+            this._testInput = testInput;
             this.Project = project;
-            this.TestName = testName;
             this.TemplateDocument = templateDocument;
             this.InitialCompilation = initialCompilation;
         }
 
-        public void ReportDiagnostic( Diagnostic diagnostic )
+        public void Report( Diagnostic diagnostic )
         {
             this._diagnostics.Add( diagnostic );
         }
@@ -53,11 +57,6 @@ namespace Caravela.TestFramework
         /// Gets the test project.
         /// </summary>
         public Project Project { get; }
-
-        /// <summary>
-        /// Gets the short name of the test.
-        /// </summary>
-        public string TestName { get; }
 
         /// <summary>
         /// Gets the source code document of the template.
@@ -84,6 +83,8 @@ namespace Caravela.TestFramework
         /// </summary>
         public SyntaxNode? TransformedTemplateSyntax { get; internal set; }
 
+        public string? TransformedTemplatePath { get; internal set; }
+
         /// <summary>
         /// Gets the root <see cref="SyntaxNode"/> of the transformed syntax tree of the target code element.
         /// </summary>
@@ -94,10 +95,43 @@ namespace Caravela.TestFramework
         /// </summary>
         public SourceText? TransformedTargetSourceText { get; private set; }
 
+        private static string CleanMessage( string text )
+        {
+            // Remove local-specific stuff.
+            text = _cleanCallStackRegex.Replace( text, "" );
+
+            // Comment all lines but the first one.
+            var lines = text.Split( '\n' );
+
+            if ( lines.Length == 1 )
+            {
+                return text;
+            }
+
+            lines[0] = lines[0].Trim( '\r' );
+
+            for ( var i = 1; i < lines.Length; i++ )
+            {
+                lines[i] = "// " + lines[i].Trim( '\r' );
+            }
+
+            return string.Join( Environment.NewLine, lines );
+        }
+
         internal void SetTransformedTarget( SyntaxNode syntaxNode )
         {
-            static string? GetTextUnderDiagnostic( Diagnostic diagnostic )
-                => diagnostic.Location!.SourceTree?.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
+            string? GetTextUnderDiagnostic( Diagnostic diagnostic )
+            {
+                var syntaxTree = diagnostic.Location!.SourceTree;
+
+                if ( syntaxTree == null )
+                {
+                    // If we don't have the a SyntaxTree, find it from the input compilation.
+                    syntaxTree = this.InitialCompilation.SyntaxTrees.SingleOrDefault( t => t.FilePath == diagnostic.Location.GetLineSpan().Path );
+                }
+
+                return syntaxTree?.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
+            }
 
             // Find notes annotated with [TestOutput] and choose the first one. If there is none, the test output is the whole tree
             // passed to this method.
@@ -116,8 +150,8 @@ namespace Caravela.TestFramework
             // Convert diagnostics into comments in the code.
             var comments =
                 this.Diagnostics
-                    .Where( d => !d.Id.StartsWith( "CS" ) || d.Severity >= DiagnosticSeverity.Warning )
-                    .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`: `{d.GetMessage()}`\n" )
+                    .Where( d => this._testInput.Options.IncludeAllSeverities || d.Severity >= DiagnosticSeverity.Warning )
+                    .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
                     .OrderByDescending( s => s )
                     .Select( SyntaxFactory.Comment )
                     .ToList();
@@ -128,6 +162,7 @@ namespace Caravela.TestFramework
             }
 
             // Format the output code.
+
             var outputNodeWithComments = outputNode.WithLeadingTrivia( outputNode.GetLeadingTrivia().AddRange( comments ) );
             var formattedOutput = Formatter.Format( outputNodeWithComments, this.Project.Solution.Workspace );
 
@@ -140,13 +175,26 @@ namespace Caravela.TestFramework
         /// </summary>
         public bool Success { get; private set; } = true;
 
-        internal void SetFailed( string reason )
+        public Exception? Exception { get; private set; }
+
+        internal void SetFailed( string reason, Exception? exception = null )
         {
+            this.Exception = exception;
             this.Success = false;
             this.ErrorMessage = reason;
 
+            if ( exception != null )
+            {
+                this.ErrorMessage += Environment.NewLine + exception;
+            }
+
+            var emptyStatement =
+                SyntaxFactory.ExpressionStatement( SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) ) )
+                    .WithSemicolonToken( SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
+
             this.SetTransformedTarget(
-                SyntaxFactory.EmptyStatement().WithLeadingTrivia( SyntaxFactory.Comment( "// Compilation error. Code not generated.\n" ) ) );
+                emptyStatement
+                    .WithLeadingTrivia( SyntaxFactory.Comment( $"// {reason} \n" ) ) );
         }
     }
 }

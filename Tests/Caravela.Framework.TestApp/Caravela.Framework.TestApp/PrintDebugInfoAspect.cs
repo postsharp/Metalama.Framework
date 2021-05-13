@@ -2,7 +2,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.TestApp.Aspects;
-using static Caravela.Framework.Aspects.TemplateContext;
+
 
 namespace Caravela.Framework.TestApp
 {
@@ -13,12 +13,12 @@ namespace Caravela.Framework.TestApp
          //   Debugger.Launch();
             base.Initialize( aspectBuilder );
 
-            aspectBuilder.ReportDiagnostic( Diagnostics.Severity.Warning, "MY000", "Hello, {0} v5.", aspectBuilder.TargetDeclaration );
+            aspectBuilder.Diagnostics.Report( Diagnostics.Severity.Warning, "MY000", "Hello, {0} v5.", aspectBuilder.TargetDeclaration );
         }
         public override dynamic OverrideMethod()
         {
             Console.WriteLine( DebugInfo.GetInfo() );
-            return proceed();
+            return meta.Proceed();
         }
     }
 }

@@ -4,8 +4,10 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Project;
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -68,6 +70,18 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         public dynamic SetValue( dynamic instance, dynamic value )
+        {
+            throw new NotImplementedException();
+        }
+
+        [return: RunTimeOnly]
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo()
+        {
+            throw new NotImplementedException();
+        }
+
+        [return: RunTimeOnly]
+        public PropertyInfo ToPropertyInfo()
         {
             throw new NotImplementedException();
         }

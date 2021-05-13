@@ -3,7 +3,6 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.Declarative
 {
@@ -15,8 +14,8 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.D
 
         // TODO: Indexers.    
 
-        [IntroduceProperty]
-        public int IntroducedProperty_Auto { get; set; }
+        //[IntroduceProperty]
+        //public int IntroducedProperty_Auto { get; set; }
 
         [IntroduceProperty]
         public static int IntroducedProperty_Auto_Static { get; }

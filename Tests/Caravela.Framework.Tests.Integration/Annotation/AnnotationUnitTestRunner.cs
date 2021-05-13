@@ -35,16 +35,18 @@ namespace Caravela.Framework.Tests.Integration.Annotation
 
             DiagnosticList diagnostics = new();
 
-            var templateCompilerSuccess = TemplateCompiler.TryAnnotate(
+            TemplateCompiler templateCompiler = new();
+
+            var templateCompilerSuccess = templateCompiler.TryAnnotate(
                 templateSyntaxRoot,
                 templateSemanticModel,
-                false,
                 diagnostics,
                 out var annotatedTemplateSyntax );
 
             if ( !templateCompilerSuccess )
             {
-                result.SetFailed( "Template compiler failed." );
+                result.ReportDiagnostics( diagnostics );
+                result.SetFailed( "TemplateCompiler.TryAnnotate failed." );
 
                 return result;
             }

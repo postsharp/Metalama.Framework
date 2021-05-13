@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -21,20 +22,16 @@ namespace Caravela.Framework.Impl.Templating
     {
         private static readonly SyntaxAnnotation _flattenBlockAnnotation = new( "flatten" );
 
-        [ThreadStatic]
-        private static TemplateExpansionContext? _expansionContext;
+        private static readonly AsyncLocal<TemplateExpansionContext?> _expansionContext = new();
 
         internal static TemplateExpansionContext ExpansionContext
-            => _expansionContext ?? throw new InvalidOperationException( "ExpansionContext cannot be null." );
+            => _expansionContext.Value ?? throw new InvalidOperationException( "ExpansionContext cannot be null." );
 
-        internal static void Initialize( TemplateExpansionContext expansionContext )
+        internal static IDisposable WithContext( TemplateExpansionContext expansionContext )
         {
-            _expansionContext = expansionContext;
-        }
+            _expansionContext.Value = expansionContext;
 
-        internal static void Close()
-        {
-            _expansionContext = null;
+            return new InitializeCookie();
         }
 
         public static void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement ) => list.Add( new StatementOrTrivia( statement ) );
@@ -50,6 +47,9 @@ namespace Caravela.Framework.Impl.Templating
         public static StatementSyntax[] ToStatementArray( List<StatementOrTrivia> list )
         {
             var statementList = new List<StatementSyntax>( list.Count );
+
+            // List of trivia added by previous items in the list, and not yet added to a statement.
+            // This is used when trivia are added before the first statement.
             var previousTrivia = SyntaxTriviaList.Empty;
 
             foreach ( var statementOrTrivia in list )
@@ -57,6 +57,7 @@ namespace Caravela.Framework.Impl.Templating
                 switch ( statementOrTrivia.Content )
                 {
                     case StatementSyntax statement:
+                        // Add
                         if ( previousTrivia.Count > 0 )
                         {
                             statement = statement.WithLeadingTrivia( previousTrivia );
@@ -71,7 +72,7 @@ namespace Caravela.Framework.Impl.Templating
                         if ( statementList.Count == 0 )
                         {
                             // It will be added as the leading trivia of the next statement.
-                            previousTrivia = trivia;
+                            previousTrivia = previousTrivia.AddRange( trivia );
                         }
                         else
                         {
@@ -86,6 +87,14 @@ namespace Caravela.Framework.Impl.Templating
                     default:
                         continue;
                 }
+            }
+
+            // If there was no statement at all and we have comments, we need to generate a dummy statement with trivia.
+            if ( previousTrivia.Count > 0 )
+            {
+                // This produce incorrectly indented code, but I didn't find a quick way to solve it.
+                previousTrivia = previousTrivia.Insert( 0, SyntaxFactory.ElasticLineFeed );
+                statementList.Add( SyntaxFactoryEx.EmptyStatement.WithTrailingTrivia( previousTrivia ) );
             }
 
             return statementList.ToArray();
@@ -105,20 +114,30 @@ namespace Caravela.Framework.Impl.Templating
         public static StatementSyntax TemplateReturnStatement( ExpressionSyntax? returnExpression )
             => ExpansionContext.CreateReturnStatement( returnExpression );
 
-        public static RuntimeExpression CreateDynamicMemberAccessExpression( IDynamicMember dynamicMember, string member )
+        public static RuntimeExpression CreateDynamicMemberAccessExpression( IDynamicExpression dynamicExpression, string member )
         {
-            if ( dynamicMember is IDynamicMemberDifferentiated metaMemberDifferentiated )
+            if ( dynamicExpression is IDynamicReceiver dynamicMemberAccess )
             {
-                return metaMemberDifferentiated.CreateMemberAccessExpression( member );
+                return dynamicMemberAccess.CreateMemberAccessExpression( member );
             }
 
             return new RuntimeExpression(
                 SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    dynamicMember.CreateExpression().Syntax,
+                    dynamicExpression.CreateExpression().Syntax,
                     SyntaxFactory.IdentifierName( member ) ) );
         }
 
         public static SyntaxToken GetUniqueIdentifier( string hint ) => SyntaxFactory.Identifier( ExpansionContext.LexicalScope.GetUniqueIdentifier( hint ) );
+
+        public static ExpressionSyntax Serialize<T>( T? o ) => ExpansionContext.SyntaxSerializationService.Serialize( o, ExpansionContext.SyntaxFactory );
+
+        private class InitializeCookie : IDisposable
+        {
+            public void Dispose()
+            {
+                _expansionContext.Value = null;
+            }
+        }
     }
 }

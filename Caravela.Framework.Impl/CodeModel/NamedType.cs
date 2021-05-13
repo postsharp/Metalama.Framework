@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 using TypeKind = Caravela.Framework.Code.TypeKind;
@@ -42,6 +44,10 @@ namespace Caravela.Framework.Impl.CodeModel
                 RoslynTypeKind.Struct => TypeKind.Struct,
                 _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
             };
+
+        public Type ToType() => CompileTimeType.Create( this.TypeSymbol );
+
+        public override MemberInfo ToMemberInfo() => this.ToType();
 
         public override bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
@@ -154,7 +160,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => new GenericParameterList(
                 this,
                 this.TypeSymbol.TypeParameters
-                    .Select( tp => CodeElementLink.FromSymbol<IGenericParameter>( tp ) ) );
+                    .Select( CodeElementLink.FromSymbol<IGenericParameter> ) );
 
         [Memo]
         public string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();

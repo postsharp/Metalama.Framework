@@ -7,6 +7,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Accessibility = Caravela.Framework.Code.Accessibility;
@@ -71,7 +72,8 @@ namespace Caravela.Framework.Impl.Advices
                             (IMethod) template,
                             scope,
                             conflictBehavior,
-                            aspectLinkerOptions );
+                            aspectLinkerOptions,
+                            ImmutableDictionary<string, object?>.Empty );
 
                         advice.Initialize( diagnosticAdder );
 
@@ -112,6 +114,7 @@ namespace Caravela.Framework.Impl.Advices
                             null,
                             scope,
                             conflictBehavior,
+                            ImmutableDictionary<string, object?>.Empty,
                             aspectLinkerOptions );
 
                         if ( TryGetNamedArgument<string>( nameof(IntroduceMethodAttribute.Name), out var name ) )

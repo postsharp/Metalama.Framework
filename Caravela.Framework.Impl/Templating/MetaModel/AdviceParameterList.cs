@@ -13,10 +13,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 {
     internal partial class AdviceParameterList : IAdviceParameterList, IAdviceParameterValueList
     {
-        private readonly IMethod _method;
+        private readonly IMethodBase _method;
         private readonly AdviceParameter[] _parameters;
 
-        public AdviceParameterList( IMethod method )
+        public AdviceParameterList( IMethodBase method )
         {
             this._method = method;
             this._parameters = method.Parameters.Select( p => new AdviceParameter( p ) ).ToArray();

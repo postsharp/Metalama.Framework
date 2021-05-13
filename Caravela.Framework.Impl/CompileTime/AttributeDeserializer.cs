@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( type == null )
             {
-                diagnosticAdder.ReportDiagnostic(
+                diagnosticAdder.Report(
                     AttributeDeserializerDiagnostics.CannotFindType.CreateDiagnostic( attribute.GetLocation(), constructorSymbol.ContainingType ) );
 
                 attributeInstance = null;
@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( constructors.Count == 0 )
             {
-                diagnosticAdder.ReportDiagnostic(
+                diagnosticAdder.Report(
                     AttributeDeserializerDiagnostics.NoConstructor.CreateDiagnostic( attribute.GetLocation(), constructorSymbol.ContainingType ) );
 
                 attributeInstance = null;
@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
             else if ( constructors.Count > 1 )
             {
-                diagnosticAdder.ReportDiagnostic(
+                diagnosticAdder.Report(
                     AttributeDeserializerDiagnostics.AmbiguousConstructor.CreateDiagnostic(
                         attribute.GetLocation(),
                         constructorSymbol.ContainingType ) );
@@ -173,7 +173,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    diagnosticAdder.ReportDiagnostic(
+                    diagnosticAdder.Report(
                         AttributeDeserializerDiagnostics.CannotFindMember.CreateDiagnostic(
                             attribute.GetLocation(),
                             (constructorSymbol.ContainingType, name) ) );
@@ -218,7 +218,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             void ReportInvalidTypeDiagnostic()
             {
-                diagnosticAdder.ReportDiagnostic(
+                diagnosticAdder.Report(
                     AttributeDeserializerDiagnostics.CannotReferenceCompileTimeOnly.CreateDiagnostic(
                         attribute.GetLocation(),
                         (value.GetType(), targetType) ) );

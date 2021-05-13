@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
+using System.Reflection;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -65,6 +66,10 @@ namespace Caravela.Framework.Impl.CodeModel
                     Microsoft.CodeAnalysis.MethodKind.FunctionPointerSignature => throw new NotSupportedException(),
                 _ => throw new InvalidOperationException()
             };
+
+        public abstract System.Reflection.MethodBase ToMethodBase();
+
+        public override MemberInfo ToMemberInfo() => this.ToMethodBase();
 
         public override string ToString() => this.MethodSymbol.ToString();
     }

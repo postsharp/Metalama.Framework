@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 if ( fallbackToMock )
                 {
-                    return new CompileTimeType( typeSymbol );
+                    return CompileTimeType.Create( typeSymbol );
                 }
 
                 return null;

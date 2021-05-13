@@ -1,14 +1,2 @@
-{
-    int i = 0;
-    while (i < 1)
-    {
-        i++;
-        i++;
-        i++;
-    }
-
-    global::System.Console.WriteLine("Test result = " + i);
-    global::System.Int32 result;
-    result = this.Method(a);
-    return (int)result;
-}
+// TestTemplateCompiler.TryCompile failed. 
+// Error CR0110 on `j < 2`: `The compile-time loop 'white' is not allowed here because it is a part of block whose execution depends on a run-time condition.`

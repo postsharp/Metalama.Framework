@@ -31,8 +31,6 @@ namespace Caravela.Framework.TestApp
             PrintDebugInfo();
 
             PrintArray();
-
-            ThisAccess.Run();
             
             Cancel();
         }

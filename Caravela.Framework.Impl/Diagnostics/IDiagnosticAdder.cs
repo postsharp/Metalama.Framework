@@ -7,6 +7,6 @@ namespace Caravela.Framework.Impl.Diagnostics
 {
     public interface IDiagnosticAdder
     {
-        void ReportDiagnostic( Diagnostic diagnostic );
+        void Report( Diagnostic diagnostic );
     }
 }

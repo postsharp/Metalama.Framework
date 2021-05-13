@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
-    public class ReflectionTestBase : TestBase
+    public class ReflectionTestBase : SerializerTestsBase
     {
         private readonly ITestOutputHelper _helper;
 

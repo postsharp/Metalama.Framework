@@ -85,7 +85,7 @@ namespace Caravela.Framework.Impl
                 _category,
                 Error );
 
-        public static readonly StrongDiagnosticDescriptor<(INamedType AspectType, string MethodName )> AspectMustHaveExactlyOneTemplateMember = new(
+        public static readonly StrongDiagnosticDescriptor<(INamedType AspectType, string MethodName)> AspectMustHaveExactlyOneTemplateMethod = new(
             "CR0024",
             "The aspect type must have exactly one member of a given name otherwise it cannot be used as a dynamic advice.",
             "The type '{0}' must have exactly one member named '{1}'.",
@@ -111,6 +111,22 @@ namespace Caravela.Framework.Impl
                 "CR0027",
                 "Compatible attribute constructor does not exist.",
                 "The aspect '{0}' cannot add attribute '{1}' to member '{2}' because no compatible constructor exists for given types.",
+                _category,
+                Error );
+        
+        public static readonly StrongDiagnosticDescriptor<string>
+            InvalidCachedManifestFile = new(
+                "CR0028",
+                "The compile-time project manifest file is corrupted.",
+                "The cache file '{0}' was corrupted. It has been deleted. Please restart the compilation.",
+                _category,
+                Error );
+
+        public static readonly StrongDiagnosticDescriptor<string>
+            InvalidCompileTimeProjectResource = new(
+                "CR0029",
+                "The compile-time project resource file was corrupted.",
+                "The compile-time project in assembly '{0}' is corrupted.",
                 _category,
                 Error );
     }

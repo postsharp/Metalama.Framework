@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -29,9 +30,9 @@ namespace Caravela.Framework.Impl.Transformations
 
         public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, IMethod templateMethod, AspectLinkerOptions? linkerOptions = null )
         {
-            Invariant.Assert( advice != null );
-            Invariant.Assert( overriddenDeclaration != null );
-            Invariant.Assert( templateMethod != null );
+            Invariant.Assert( advice != null! );
+            Invariant.Assert( overriddenDeclaration != null! );
+            Invariant.Assert( templateMethod != null! );
 
             this.Advice = advice;
             this.OverriddenDeclaration = overriddenDeclaration;
@@ -61,19 +62,19 @@ namespace Caravela.Framework.Impl.Transformations
                         LinkerAnnotationOrder.Default,
                         context.SyntaxFactory ),
                     context.LexicalScope,
-                    context.DiagnosticSink );
+                    context.DiagnosticSink,
+                    context.ServiceProvider.GetService<SyntaxSerializationService>(),
+                    (ISyntaxFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
+                    this.Advice.AspectLayerId,
+                    this.Advice.AspectBuilderTags );
 
-                var compiledTemplateMethodName = TemplateNameHelper.GetCompiledTemplateName( this.TemplateMethod.Name );
+                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( this.TemplateMethod );
 
-                var templateMethod = this.Advice.Aspect.GetTemplateMethod( compiledTemplateMethodName );
-
-                if ( templateMethod == null )
+                if ( !templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out var newMethodBody ) )
                 {
-                    // This is caused by an error upstream;
+                    // Template expansion error.
                     return Enumerable.Empty<IntroducedMember>();
                 }
-
-                var newMethodBody = new TemplateDriver( templateMethod ).ExpandDeclaration( expansionContext );
 
                 var overrides = new[]
                 {

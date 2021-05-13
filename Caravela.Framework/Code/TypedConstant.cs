@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Project;
 using System;
 
 namespace Caravela.Framework.Code
@@ -11,6 +12,7 @@ namespace Caravela.Framework.Code
     /// type, <see cref="Value"/> represents the underlying integer value and <see cref="Type"/> the type of the enum. For enum values whose
     /// type is compile-time, <see cref="Value"/> is of enum type.
     /// </summary>
+    [CompileTimeOnly]
     public readonly struct TypedConstant
     {
         // ReSharper disable once UnassignedReadonlyField

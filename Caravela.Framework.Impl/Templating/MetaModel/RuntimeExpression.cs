@@ -88,22 +88,22 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public RuntimeExpression( ExpressionSyntax syntax )
             : this( syntax, (ITypeSymbol?) null, false ) { }
 
-        public static ExpressionSyntax GetSyntaxFromDynamic( object? value )
-            => FromDynamic( value )?.Syntax ?? SyntaxFactory.LiteralExpression( SyntaxKind.NullKeyword );
+        public static ExpressionSyntax GetSyntaxFromValue( object? value )
+            => FromValue( value )?.Syntax ?? SyntaxFactory.LiteralExpression( SyntaxKind.NullKeyword );
 
-        public static RuntimeExpression? FromDynamic( object? value )
+        public static RuntimeExpression? FromValue( object? value )
             => value switch
             {
                 null => null,
                 RuntimeExpression runtimeExpression => runtimeExpression,
 
                 // This case is used to simplify tests.
-                IDynamicMember dynamicMember => dynamicMember.CreateExpression(),
+                IDynamicExpression dynamicMember => dynamicMember.CreateExpression(),
 
                 _ => throw new ArgumentOutOfRangeException( nameof(value) )
             };
 
-        public static RuntimeExpression[]? FromDynamic( object[]? array )
+        public static RuntimeExpression[]? FromValue( object[]? array )
         {
             RuntimeExpression[] ConvertArray()
             {
@@ -116,7 +116,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
                 for ( var i = 0; i < newArray.Length; i++ )
                 {
-                    newArray[i] = FromDynamic( array[i] ).AssertNotNull();
+                    newArray[i] = FromValue( array[i] ).AssertNotNull();
                 }
 
                 return newArray;

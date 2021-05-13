@@ -1,6 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.RunTimeWhile
 {
@@ -10,14 +10,14 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.RunTimeWh
         dynamic Template()
         {
             int i = 0;
-            while (i < target.Parameters.Count)
+            while (i < meta.Parameters.Count)
             {
                 i++;
             }
 
             Console.WriteLine("Test result = " + i);
 
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
             return result;
         }
     }

@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -26,6 +27,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IMember DeclaringMember => this._parameter.DeclaringMember;
 
+        public ParameterInfo ToParameterInfo() => this._parameter.ToParameterInfo();
+
         public IType ParameterType => this._parameter.ParameterType;
 
         public string Name => this._parameter.Name.AssertNotNull();
@@ -44,7 +47,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public dynamic Value
         {
-            get => new DynamicMember( SyntaxFactory.IdentifierName( this._parameter.Name! ), this._parameter.ParameterType, true );
+            get => new DynamicExpression( SyntaxFactory.IdentifierName( this._parameter.Name! ), this._parameter.ParameterType, true );
             set => throw new NotImplementedException();
         }
 

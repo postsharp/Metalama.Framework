@@ -4,11 +4,13 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -75,5 +77,9 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
             }
         }
+
+        public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
+
+        public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
     }
 }

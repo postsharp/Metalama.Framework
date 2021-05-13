@@ -1,9 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
-using System;
 using static Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 #pragma warning disable SA1118 // Allow multi-line parameters.
@@ -16,45 +14,31 @@ namespace Caravela.Framework.Impl.Serialization
 
         private const string _category = "Caravela.Serialization";
 
-        public static readonly StrongDiagnosticDescriptor<Type> UnsupportedSerialization = new(
+        public static readonly StrongDiagnosticDescriptor<object> UnsupportedSerialization = new(
             "CR0200",
-            "Build-time code not serializable.",
-            "Build-time code attempted to create {0} but no serializer is registered for that type.",
+            "Compile-time type not serializable.",
+            "Cannot serialize the compile-time value of type '{0}' to a run-time value because this type is not serializable.",
             _category,
             Error );
 
-        public static readonly StrongDiagnosticDescriptor<Type> CycleInSerialization = new(
+        public static readonly StrongDiagnosticDescriptor<object> CycleInSerialization = new(
             "CR0201",
             "A collection contains itself.",
-            "Build-time code attempted to create a collection which contains itself: {0} ",
+            "Cannot serialize the compile-time value of type '{0}' to a run-time value because it contains a cyclic reference.",
             _category,
             Error );
 
-        public static readonly StrongDiagnosticDescriptor<Type> MultidimensionalArray = new(
+        public static readonly StrongDiagnosticDescriptor<object> MultidimensionalArray = new(
             "CR0202",
             "Multidimensional arrays not supported.",
-            "Build-time array {0} has more than one dimension.",
+            "Cannot serialize the compile-time array of type '{0}' because it has more than one dimension.",
             _category,
             Error );
 
-        public static readonly StrongDiagnosticDescriptor<Type> UnsupportedDictionaryComparer = new(
+        public static readonly StrongDiagnosticDescriptor<object> UnsupportedDictionaryComparer = new(
             "CR0203", "Custom equality comparers not supported.",
-            "Build-time dictionary has an equality comparer '{0}' that is not supported. "
-            + "Only the default comparer and predefined string comparers are supported.",
-            _category,
-            Error );
-
-        public static readonly StrongDiagnosticDescriptor<IType> TypeNotSerializable = new(
-            "CR0204",
-            "Type not serializable.",
-            "Build-time type value '{0}' is of a form that is not supported for serialization.",
-            _category,
-            Error );
-
-        public static readonly StrongDiagnosticDescriptor<IType> MoreThanOneAdvicePerElement = new(
-            "CR0205",
-            "More than one advice per code element.",
-            "'{0}' has more than one advice, which is currently not supported.",
+            "Cannot serialize the compile-time dictionary into a run-time value because it has an unsupported equality comparer '{0}'. "
+            + " Only the default comparer and predefined string comparers are supported.",
             _category,
             Error );
     }

@@ -16,6 +16,8 @@ namespace Caravela.Framework.Impl.Serialization
         /// <returns>Roslyn expression that represents the invocation of the method. The type of the expression is a metadata token.</returns>
         public static InvocationExpressionSyntax CreateLdTokenExpression( string methodName, string documentationId )
         {
+            // For Instrinsics, we cannot use the SyntaxFactory because we cannot get a runtime Type for it, because
+            // we only have a reference assembly, not an implementation assembly.
             return SyntaxFactory.InvocationExpression(
                     SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
@@ -23,7 +25,9 @@ namespace Caravela.Framework.Impl.Serialization
                             SyntaxKind.SimpleMemberAccessExpression,
                             SyntaxFactory.MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
-                                SyntaxFactory.IdentifierName( "Caravela" ),
+                                SyntaxFactory.AliasQualifiedName(
+                                    SyntaxFactory.IdentifierName( SyntaxFactory.Token( SyntaxKind.GlobalKeyword ) ),
+                                    SyntaxFactory.IdentifierName( "Caravela" ) ),
                                 SyntaxFactory.IdentifierName( "Compiler" ) ),
                             SyntaxFactory.IdentifierName( "Intrinsics" ) ),
                         SyntaxFactory.IdentifierName( methodName ) ) )

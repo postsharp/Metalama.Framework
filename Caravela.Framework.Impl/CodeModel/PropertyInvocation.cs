@@ -35,21 +35,21 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public object GetIndexerValue( object? instance, params object[] args )
         {
-            return new DynamicMember(
+            return new DynamicExpression(
                 this.CreateIndexerAccess(
-                    RuntimeExpression.FromDynamic( instance ),
-                    RuntimeExpression.FromDynamic( args ) ),
+                    RuntimeExpression.FromValue( instance ),
+                    RuntimeExpression.FromValue( args ) ),
                 this.Member.Type,
                 false );
         }
 
         public object SetIndexerValue( object? instance, object value, params object[] args )
         {
-            var propertyAccess = this.CreateIndexerAccess( RuntimeExpression.FromDynamic( instance ), RuntimeExpression.FromDynamic( args ) );
+            var propertyAccess = this.CreateIndexerAccess( RuntimeExpression.FromValue( instance ), RuntimeExpression.FromValue( args ) );
 
-            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.GetSyntaxFromDynamic( value ) );
+            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.GetSyntaxFromValue( value ) );
 
-            return new DynamicMember( expression, this.Member.Type, false );
+            return new DynamicExpression( expression, this.Member.Type, false );
         }
 
         public PropertyInvocation( IProperty member ) : base( member ) { }

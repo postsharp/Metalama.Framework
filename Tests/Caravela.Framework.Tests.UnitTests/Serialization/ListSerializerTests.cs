@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,33 +9,25 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
-    public class ListSerializerTests
+    public class ListSerializerTests : SerializerTestsBase
     {
-        private readonly ListSerializer _serializer;
-
-        public ListSerializerTests()
-        {
-            var os = new ObjectSerializers();
-            this._serializer = new ListSerializer( os );
-        }
-
         [Fact]
         public void TestEmptyList()
         {
-            this.AssertSerialization( "new System.Collections.Generic.List<System.Single>{}", new List<float>() );
+            this.AssertSerialization( "new global::System.Collections.Generic.List<global::System.Single>{}", new List<float>() );
         }
 
         [Fact]
         public void TestBasicList()
         {
-            this.AssertSerialization( "new System.Collections.Generic.List<System.Single>{1F, 2F, 3F}", new List<float> { 1, 2, 3 } );
+            this.AssertSerialization( "new global::System.Collections.Generic.List<global::System.Single>{1F, 2F, 3F}", new List<float> { 1, 2, 3 } );
         }
 
         [Fact]
         public void TestListInList()
         {
             this.AssertSerialization(
-                "new System.Collections.Generic.List<System.Collections.Generic.List<System.Int32>>{new System.Collections.Generic.List<System.Int32>{1}}",
+                "new global::System.Collections.Generic.List<global::System.Collections.Generic.List<global::System.Int32>>{new global::System.Collections.Generic.List<global::System.Int32>{1}}",
                 new List<List<int>> { new() { 1 } } );
         }
 
@@ -46,12 +37,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
             var l = new List<IList>();
             l.Add( l );
 
-            Assert.Throws<InvalidUserCodeException>( () => this._serializer.SerializeObject( l ) );
+            Assert.Throws<InvalidUserCodeException>( () => this.Serialize( l ) );
         }
 
         private void AssertSerialization<T>( string expected, List<T> o )
         {
-            var creationExpression = this._serializer.SerializeObject( o ).NormalizeWhitespace().ToString();
+            var creationExpression = this.Serialize( o ).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );
         }
     }

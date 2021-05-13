@@ -1,7 +1,7 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Samples.SimpleLogging
 {
@@ -9,18 +9,18 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Samples.SimpleLogging
     {
         public override dynamic OverrideMethod()
         {
-            Console.WriteLine(target.Method.ToDisplayString() + " started.");
+            Console.WriteLine(meta.Method.ToDisplayString() + " started.");
 
             try
             {
-                dynamic result = proceed();
+                dynamic result = meta.Proceed();
 
-                Console.WriteLine(target.Method.ToDisplayString() + " succeeded.");
+                Console.WriteLine(meta.Method.ToDisplayString() + " succeeded.");
                 return result;
             }
             catch (Exception e)
             {
-                Console.WriteLine(target.Method.ToDisplayString() + " failed: " + e.Message);
+                Console.WriteLine(meta.Method.ToDisplayString() + " failed: " + e.Message);
                 throw;
             }
         }

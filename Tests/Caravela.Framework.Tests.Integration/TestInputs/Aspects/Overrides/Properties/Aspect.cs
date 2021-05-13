@@ -3,7 +3,6 @@ using Caravela.TestFramework;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using static Caravela.Framework.Aspects.TemplateContext;
 
 #pragma warning disable CS0169
 #pragma warning disable CS0414
@@ -19,13 +18,13 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             get
             {
                 Console.WriteLine("This is the overridden getter.");
-                return proceed();
+                return meta.Proceed();
             }
 
             set
             {
                 Console.WriteLine($"This is the overridden setter.");
-                var discard = proceed();
+                var discard = meta.Proceed();
             }
         }
     }

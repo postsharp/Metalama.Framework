@@ -10,6 +10,7 @@ using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
@@ -40,8 +41,9 @@ namespace Caravela.Framework.Impl.Advices
             IMethod? setTemplateMethod,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
+            IReadOnlyDictionary<string, object?> tags,
             AspectLinkerOptions? linkerOptions )
-            : base( aspect, targetDeclaration, templateProperty, scope, conflictBehavior, linkerOptions )
+            : base( aspect, targetDeclaration, templateProperty, scope, conflictBehavior, tags, linkerOptions )
         {
             this._getTemplateMethod = getTemplateMethod;
             this._setTemplateMethod = setTemplateMethod;

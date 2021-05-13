@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 
@@ -14,7 +15,7 @@ namespace Caravela.Framework.Impl.CodeModel
     /// <summary>
     /// Creates instances of <see cref="ICodeElement"/> for a given <see cref="CompilationModel"/>.
     /// </summary>
-    internal class CodeElementFactory : ITypeFactory
+    internal class CodeElementFactory : ITypeFactory, ISyntaxFactory
     {
         private readonly CompilationModel _compilation;
 
@@ -26,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._compilation = compilation;
         }
 
-        public ObjectSerializers Serializers { get; } = new();
+        public SyntaxSerializationService Serializers { get; } = new();
 
         private Compilation RoslynCompilation => this._compilation.RoslynCompilation;
 
@@ -189,5 +190,9 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             throw new NotImplementedException();
         }
+
+        TypeSyntax ISyntaxFactory.GetTypeSyntax( Type type ) => this._compilation.ReflectionMapper.GetTypeSyntax( type );
+
+        ITypeSymbol ISyntaxFactory.GetTypeSymbol( Type type ) => this._compilation.ReflectionMapper.GetTypeSymbol( type );
     }
 }

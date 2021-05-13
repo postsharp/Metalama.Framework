@@ -1,51 +1,46 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
     internal class ListSerializer : ObjectSerializer
     {
-        private readonly ObjectSerializers _serializers;
-
-        public ListSerializer( ObjectSerializers serializers )
+        public override ExpressionSyntax Serialize( object obj, ISyntaxFactory syntaxFactory )
         {
-            this._serializers = serializers;
-        }
+            var serializedItems = new List<ExpressionSyntax>();
 
-        public override ExpressionSyntax SerializeObject( object o )
-        {
-            var argument = o.GetType().GetGenericArguments()[0];
-
-            var lt = new List<ExpressionSyntax>();
-
-            foreach ( var obj in (IEnumerable) o )
+            foreach ( var item in (IEnumerable) obj )
             {
-                ThrowIfStackTooDeep( obj );
-                lt.Add( this._serializers.SerializeToRoslynCreationExpression( obj ) );
+                ThrowIfStackTooDeep( item );
+                serializedItems.Add( this.Service.Serialize( item, syntaxFactory ) );
             }
 
-            return ObjectCreationExpression(
-                    QualifiedName(
-                        QualifiedName(
-                            QualifiedName(
-                                IdentifierName( "System" ),
-                                IdentifierName( "Collections" ) ),
-                            IdentifierName( "Generic" ) ),
-                        GenericName( Identifier( "List" ) )
-                            .WithTypeArgumentList(
-                                TypeArgumentList( SingletonSeparatedList( ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( argument ) ) ) ) ) ) )
+            return ObjectCreationExpression( syntaxFactory.GetTypeSyntax( obj.GetType() ) )
                 .WithInitializer(
                     InitializerExpression(
                         SyntaxKind.CollectionInitializerExpression,
-                        SeparatedList( lt ) ) )
+                        SeparatedList( serializedItems ) ) )
                 .NormalizeWhitespace();
         }
+
+        public override Type InputType => typeof(IEnumerable<>);
+
+        public override Type OutputType => typeof(List<>);
+
+        public override int Priority => 1;
+
+        public ListSerializer( SyntaxSerializationService service ) : base( service ) { }
+
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(IReadOnlyList<>), typeof(IReadOnlyCollection<>) );
     }
 }

@@ -1,16 +1,15 @@
+using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
 
-// TODO: Change the namespace
-namespace Caravela.Framework.Tests.Integration.Templating.ChangeMe
+namespace Caravela.Framework.Tests.Integration.Templating.Pragma.Comments
 {
     class Aspect
     {
         [TestTemplate]
         dynamic Template()
         {
-            pragma.Comment("Oops 1", null, "Oops 2");
-            return proceed();
+            meta.Comment("Oops 1", null, "Oops 2");
+            return meta.Proceed();
         }
     }
 

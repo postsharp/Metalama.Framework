@@ -6,6 +6,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -21,7 +22,8 @@ namespace Caravela.Framework.Impl.Advices
             AspectInstance aspect,
             IMethod targetDeclaration,
             IMethod templateMethod,
-            AspectLinkerOptions? linkerOptions = null ) : base( aspect, targetDeclaration )
+            IReadOnlyDictionary<string, object?> tags,
+            AspectLinkerOptions? linkerOptions ) : base( aspect, targetDeclaration, tags )
         {
             this.TemplateMethod = templateMethod;
             this.LinkerOptions = linkerOptions;

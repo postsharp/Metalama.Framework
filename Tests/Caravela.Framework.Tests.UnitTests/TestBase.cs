@@ -21,7 +21,7 @@ namespace Caravela.Framework.Tests.UnitTests
         /// resulting syntax tree actually compiles and results in valid IL. This is slow but necessary during development, at least, since an incorrect syntax tree
         /// can easily be produced.
         /// </summary>
-        private const bool _doCodeExecutionTests = true;
+        private const bool _doCodeExecutionTests = false;
 
         public static CSharpCompilation CreateRoslynCompilation(
             string code,
@@ -129,11 +129,16 @@ class Expression
         /// <param name="withResult">Code to run on the result of the expression.</param>
         public static void TestExpression<T>( string context, string expression, Action<T> withResult )
         {
+#pragma warning disable CS0162 // Unreachable code detected
+
+            // ReSharper disable HeuristicUnreachableCode
+
             if ( _doCodeExecutionTests )
             {
                 var t = (T) ExecuteExpression( context, expression )!;
                 withResult( t );
             }
+#pragma warning restore CS0162 // Unreachable code detected
         }
     }
 }

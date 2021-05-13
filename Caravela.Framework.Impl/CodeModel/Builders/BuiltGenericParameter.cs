@@ -20,6 +20,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public TypeKind TypeKind => TypeKind.GenericParameter;
 
+        public Type ToType() => throw new NotImplementedException();
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public string Name => this.GenericParameterBuilder.Name;

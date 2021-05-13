@@ -23,6 +23,7 @@ namespace Caravela.Framework.Impl.CompileTime
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "hasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
             private readonly IDiagnosticAdder _diagnosticAdder;
+            private readonly TemplateCompiler _templateCompiler;
 
             public bool Success { get; private set; } = true;
 
@@ -31,11 +32,13 @@ namespace Caravela.Framework.Impl.CompileTime
             public ProduceCompileTimeCodeRewriter(
                 Compilation runTimeCompilation,
                 Compilation compileTimeCompilation,
-                IDiagnosticAdder diagnosticAdder )
+                IDiagnosticAdder diagnosticAdder,
+                TemplateCompiler templateCompiler )
                 : base( runTimeCompilation )
             {
                 this._compileTimeCompilation = compileTimeCompilation;
                 this._diagnosticAdder = diagnosticAdder;
+                this._templateCompiler = templateCompiler;
             }
 
             // TODO: assembly and module-level attributes?
@@ -104,7 +107,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 if ( methodSymbol != null && this.SymbolClassifier.IsTemplate( methodSymbol ) )
                 {
                     var success =
-                        TemplateCompiler.TryCompile(
+                        this._templateCompiler.TryCompile(
                             TemplateNameHelper.GetCompiledTemplateName( methodSymbol.Name ),
                             this._compileTimeCompilation,
                             node,
@@ -161,7 +164,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             if ( getAccessor != null && (getAccessor.Body != null || getAccessor.ExpressionBody != null) )
                             {
                                 success = success &&
-                                          TemplateCompiler.TryCompile(
+                                          this._templateCompiler.TryCompile(
                                               TemplateNameHelper.GetCompiledPropertyGetTemplateName( propertySymbol.Name ),
                                               this._compileTimeCompilation,
                                               getAccessor,
@@ -174,7 +177,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             if ( setAccessor != null && (setAccessor.Body != null || setAccessor.ExpressionBody != null) )
                             {
                                 success = success &&
-                                          TemplateCompiler.TryCompile(
+                                          this._templateCompiler.TryCompile(
                                               TemplateNameHelper.GetCompiledPropertySetTemplateName( propertySymbol.Name ),
                                               this._compileTimeCompilation,
                                               setAccessor,
@@ -189,7 +192,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             {
                                 // TODO: Does this preserve trivias in expression body?
                                 success = success &&
-                                          TemplateCompiler.TryCompile(
+                                          this._templateCompiler.TryCompile(
                                               TemplateNameHelper.GetCompiledPropertyGetTemplateName( propertySymbol.Name ),
                                               this._compileTimeCompilation,
                                               AccessorDeclaration(

@@ -1,28 +1,25 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Serialization;
 using System.Globalization;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
-    public class CultureInfoSerializerTests
+    public class CultureInfoSerializerTests : SerializerTestsBase
     {
         [Fact]
         public void TestCzech()
         {
-            var serializer = new CultureInfoSerializer();
             var ci = new CultureInfo( "cs-CZ", true );
-            Assert.Equal( @"new System.Globalization.CultureInfo(""cs-CZ"", true)", serializer.Serialize( ci ).ToString() );
+            Assert.Equal( @"new global::System.Globalization.CultureInfo(""cs-CZ"", true)", this.Serialize( ci ).ToString() );
         }
 
         [Fact]
         public void TestSlovakFalse()
         {
-            var serializer = new CultureInfoSerializer();
             var ci = new CultureInfo( "sk-SK", false );
-            Assert.Equal( @"new System.Globalization.CultureInfo(""sk-SK"", false)", serializer.Serialize( ci ).ToString() );
+            Assert.Equal( @"new global::System.Globalization.CultureInfo(""sk-SK"", false)", this.Serialize( ci ).ToString() );
         }
     }
 }

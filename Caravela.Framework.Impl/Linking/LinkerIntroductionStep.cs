@@ -62,9 +62,12 @@ namespace Caravela.Framework.Impl.Linking
     /// </summary>
     internal partial class LinkerIntroductionStep : AspectLinkerPipelineStep<AspectLinkerInput, LinkerIntroductionStepOutput>
     {
-        public static LinkerIntroductionStep Instance { get; } = new();
+        private readonly IServiceProvider _serviceProvider;
 
-        private LinkerIntroductionStep() { }
+        public LinkerIntroductionStep( IServiceProvider serviceProvider )
+        {
+            this._serviceProvider = serviceProvider;
+        }
 
         public override LinkerIntroductionStepOutput Execute( AspectLinkerInput input )
         {
@@ -91,7 +94,8 @@ namespace Caravela.Framework.Impl.Linking
                     diagnostics,
                     nameProvider,
                     lexicalScopeHelper.GetLexicalScope( memberIntroduction ),
-                    syntaxFactory );
+                    syntaxFactory,
+                    this._serviceProvider );
 
                 var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 

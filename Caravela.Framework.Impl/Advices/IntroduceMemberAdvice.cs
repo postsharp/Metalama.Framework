@@ -6,6 +6,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
@@ -31,7 +32,8 @@ namespace Caravela.Framework.Impl.Advices
             IMember? templateMember,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
-            AspectLinkerOptions? linkerOptions ) : base( aspect, targetDeclaration )
+            IReadOnlyDictionary<string, object?> tags,
+            AspectLinkerOptions? linkerOptions ) : base( aspect, targetDeclaration, tags )
         {
             this.TemplateMember = templateMember;
             this.Scope = scope;
@@ -67,7 +69,7 @@ namespace Caravela.Framework.Impl.Advices
                     if ( this.TargetDeclaration is IType && this.TargetDeclaration.IsStatic )
                     {
                         // Diagnostics are reported to a sink when the advice is declarative, but as an exception when it is programmatic. 
-                        diagnosticAdder.ReportDiagnostic(
+                        diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.CannotIntroduceInstanceMemberIntoStaticType.CreateDiagnostic(
                                 this.TargetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration) ) );

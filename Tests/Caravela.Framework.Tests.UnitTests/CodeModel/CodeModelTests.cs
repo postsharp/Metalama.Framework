@@ -355,20 +355,9 @@ class C : IDisposable
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
-            var methodKinds = new[]
-            {
-                Default,
-                Finalizer,
-                PropertyGet,
-                PropertySet,
-                EventAdd,
-                EventRemove,
-                ExplicitInterfaceImplementation,
-                ConversionOperator,
-                UserDefinedOperator
-            };
-
-            Assert.Equal( methodKinds, type.Methods.Select( m => m.MethodKind ) );
+            Assert.Equal( new[] { Default, Finalizer, ExplicitInterfaceImplementation, ConversionOperator, UserDefinedOperator }, type.Methods.Select( m => m.MethodKind ) );
+            Assert.Equal( new[] { PropertyGet, PropertySet }, type.Properties.SelectMany( p => new[] { p.Getter!.MethodKind, p.Setter!.MethodKind } ) );
+            Assert.Equal( new[] { EventAdd, EventRemove }, type.Events.SelectMany( p => new[] { p.Adder!.MethodKind, p.Remover!.MethodKind } ) );
             Assert.Single( type.Constructors );
             Assert.NotNull( type.StaticConstructor );
 
@@ -412,7 +401,7 @@ class C
 
     void M1(int i, in int j, ref int k, out int m) => m = 0;
     ref int M2() => ref i;
-    ref readonly int M3 => ref i;
+    ref readonly int M3() => ref i;
 }";
 
             var compilation = CreateCompilation( code );

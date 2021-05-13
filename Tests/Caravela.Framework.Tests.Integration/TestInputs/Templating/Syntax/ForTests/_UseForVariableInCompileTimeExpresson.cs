@@ -1,5 +1,5 @@
 using System;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
 
@@ -11,12 +11,12 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForTests.UseFor
         [TestTemplate]
         dynamic Template()
         {
-            for (int i = 0; i < target.Parameters.Count; i++)
+            for (int i = 0; i < meta.Parameters.Count; i++)
             {
-                Console.WriteLine(target.Parameters[i].Name);
+                Console.WriteLine(meta.Parameters[i].Name);
             }
 
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
             return result;
         }
     }

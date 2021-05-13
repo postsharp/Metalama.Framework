@@ -9,5 +9,5 @@ namespace Caravela.Framework.Impl.DesignTime
     /// Results returned by <see cref="Caravela.Framework.Impl.DesignTime.DesignTimeAspectPipelineCache"/>.
     /// </summary>
     /// <param name="SyntaxTreeResults"></param>
-    internal record DesignTimeResults ( ImmutableArray<DesignTimeSyntaxTreeResult> SyntaxTreeResults );
+    internal record DesignTimeResults( ImmutableArray<DesignTimeSyntaxTreeResult> SyntaxTreeResults );
 }

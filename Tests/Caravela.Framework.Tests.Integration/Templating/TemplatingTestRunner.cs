@@ -5,6 +5,7 @@ using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Sdk;
 using Caravela.TestFramework;
@@ -14,6 +15,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -32,6 +34,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
         private static string GeneratedDirectoryPath => Path.Combine( Environment.CurrentDirectory, "generated" );
 
         private readonly IEnumerable<CSharpSyntaxVisitor> _testAnalyzers;
+        private readonly SyntaxSerializationService _syntaxSerializationService = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
@@ -54,15 +57,15 @@ namespace Caravela.Framework.Tests.Integration.Templating
         /// <returns>The result of the test execution.</returns>
         public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
-            var result = await base.RunTestAsync( testInput );
+            var testResult = await base.RunTestAsync( testInput );
 
-            if ( !result.Success )
+            if ( !testResult.Success )
             {
-                return result;
+                return testResult;
             }
 
-            var templateSyntaxRoot = (await result.TemplateDocument.GetSyntaxRootAsync())!;
-            var templateSemanticModel = (await result.TemplateDocument.GetSemanticModelAsync())!;
+            var templateSyntaxRoot = (await testResult.TemplateDocument.GetSyntaxRootAsync())!;
+            var templateSemanticModel = (await testResult.TemplateDocument.GetSemanticModelAsync())!;
 
             foreach ( var testAnalyzer in this._testAnalyzers )
             {
@@ -73,10 +76,10 @@ namespace Caravela.Framework.Tests.Integration.Templating
             var compileTimeCompilation = CSharpCompilation.Create(
                 "assemblyName",
                 Array.Empty<SyntaxTree>(),
-                result.Project.MetadataReferences,
-                (CSharpCompilationOptions) result.Project.CompilationOptions! );
+                testResult.Project.MetadataReferences,
+                (CSharpCompilationOptions) testResult.Project.CompilationOptions! );
 
-            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, result );
+            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult );
 
             var templateCompilerSuccess = templateCompiler.TryCompile(
                 compileTimeCompilation,
@@ -91,19 +94,20 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 Assert.Equal( templateSyntaxRoot.ToString(), annotatedTemplateSyntax.ToString() );
             }
 
-            result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
-            result.TransformedTemplateSyntax = transformedTemplateSyntax;
+            testResult.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
+            testResult.TransformedTemplateSyntax = transformedTemplateSyntax;
 
             if ( !templateCompilerSuccess )
             {
-                result.SetFailed( "Template compiler failed." );
+                testResult.SetFailed( "TestTemplateCompiler.TryCompile failed." );
 
-                return result;
+                return testResult;
             }
 
             // Write the transformed code to disk.
-            var transformedTemplateText = result.TransformedTemplateSyntax!.SyntaxTree.GetText();
+            var transformedTemplateText = testResult.TransformedTemplateSyntax!.SyntaxTree.GetText();
             var transformedTemplatePath = Path.Combine( GeneratedDirectoryPath, Path.ChangeExtension( testInput.TestName, ".cs" ) );
+            testResult.TransformedTemplatePath = transformedTemplatePath;
             Directory.CreateDirectory( Path.GetDirectoryName( transformedTemplatePath ) );
 
             await using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
@@ -112,7 +116,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             }
 
             // Create a SyntaxTree that maps to the file we have just written.
-            var oldTransformedTemplateSyntaxTree = result.TransformedTemplateSyntax.SyntaxTree;
+            var oldTransformedTemplateSyntaxTree = testResult.TransformedTemplateSyntax.SyntaxTree;
 
             var newTransformedTemplateSyntaxTree = CSharpSyntaxTree.Create(
                 (CSharpSyntaxNode) oldTransformedTemplateSyntaxTree.GetRoot(),
@@ -135,9 +139,10 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             if ( !emitResult.Success )
             {
-                result.SetFailed( "The final template compilation failed." );
+                testResult.ReportDiagnostics( emitResult.Diagnostics );
+                testResult.SetFailed( "The final template compilation failed." );
 
-                return result;
+                return testResult;
             }
 
             buildTimeAssemblyStream.Seek( 0, SeekOrigin.Begin );
@@ -147,27 +152,43 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             try
             {
-                var aspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
-                var templateMethod = aspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
+                var compiledAspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
+                var compiledTemplateMethod = compiledAspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
 
-                Invariant.Assert( templateMethod != null );
-                var driver = new TemplateDriver( templateMethod );
+                var templateMethod = testResult.InitialCompilation.Assembly.GetTypes().Single( t => t.Name == "Aspect" ).GetMembers( "Template" ).Single();
 
-                var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) result.InitialCompilation );
-                var expansionContext = CreateTemplateExpansionContext( assembly, compilationModel );
+                Invariant.Assert( compiledTemplateMethod != null );
+                var driver = new TemplateDriver( null!, templateMethod, compiledTemplateMethod );
 
-                var output = driver.ExpandDeclaration( expansionContext );
-                result.SetTransformedTarget( output );
+                var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InitialCompilation );
+                var expansionContext = this.CreateTemplateExpansionContext( assembly, compilationModel );
+
+                var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult, out var output );
+
+                testResult.ReportDiagnostics( expansionContext.DiagnosticSink.ToImmutable().ReportedDiagnostics );
+
+                if ( !expandSuccessful )
+                {
+                    testResult.SetFailed( "The compiled template failed." );
+
+                    return testResult;
+                }
+
+                testResult.SetTransformedTarget( output! );
+            }
+            catch ( Exception e )
+            {
+                testResult.SetFailed( "Exception during template expansion: " + e.Message, e );
             }
             finally
             {
                 assemblyLoadContext.Unload();
             }
 
-            return result;
+            return testResult;
         }
 
-        private static TemplateExpansionContext CreateTemplateExpansionContext( Assembly assembly, CompilationModel compilation )
+        private TemplateExpansionContext CreateTemplateExpansionContext( Assembly assembly, CompilationModel compilation )
         {
             var roslynCompilation = compilation.RoslynCompilation;
 
@@ -196,7 +217,9 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 throw new InvalidOperationException( "The symbol of the target method was not found." );
             }
 
-            var lexicalScope = new TemplateExpansionLexicalScope( ((CodeElement) targetMethod).LookupSymbols() );
+            var lexicalScope = new TemplateLexicalScope( ((CodeElement) targetMethod).LookupSymbols() );
+
+            var syntaxFactory = ReflectionMapper.GetInstance( compilation.RoslynCompilation );
 
             return new TemplateExpansionContext(
                 templateInstance,
@@ -206,9 +229,13 @@ namespace Caravela.Framework.Tests.Integration.Templating
                     default,
                     targetMethod,
                     LinkerAnnotationOrder.Default,
-                    ReflectionMapper.GetInstance( compilation.RoslynCompilation ) ),
+                    syntaxFactory ),
                 lexicalScope,
-                diagnostics );
+                diagnostics,
+                this._syntaxSerializationService,
+                syntaxFactory,
+                default,
+                ImmutableDictionary<string, object?>.Empty );
         }
     }
 }

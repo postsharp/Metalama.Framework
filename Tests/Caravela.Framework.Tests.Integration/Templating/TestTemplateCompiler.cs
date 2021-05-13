@@ -3,6 +3,8 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
@@ -18,11 +20,15 @@ namespace Caravela.Framework.Tests.Integration.Templating
         private readonly SemanticModel _semanticModel;
         private readonly Dictionary<SyntaxNode, SyntaxNode[]> _transformedNodes = new();
         private readonly IDiagnosticAdder _diagnosticAdder;
+        private readonly TemplateCompiler _templateCompiler;
 
         public TestTemplateCompiler( SemanticModel semanticModel, IDiagnosticAdder diagnosticAdder )
         {
             this._semanticModel = semanticModel;
             this._diagnosticAdder = diagnosticAdder;
+            ServiceProvider serviceProvider = new();
+            serviceProvider.AddService( new SyntaxSerializationService() );
+            this._templateCompiler = new TemplateCompiler( serviceProvider );
         }
 
         public bool HasError { get; private set; }
@@ -81,7 +87,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             {
                 if ( this._parent.IsTemplate( node ) )
                 {
-                    if ( !TemplateCompiler.TryCompile(
+                    if ( !this._parent._templateCompiler.TryCompile(
                         TemplateNameHelper.GetCompiledTemplateName( node.Identifier.ValueText ),
                         this._compileTimeCompilation,
                         node,

@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.UnitTests
         public static void DynamicEquals( object expression, string expected )
         {
             _ = expression;
-            var meta = (IDynamicMember) expression;
+            var meta = (IDynamicExpression) expression;
             var actual = meta.CreateExpression().Syntax.NormalizeWhitespace().ToString();
 
             Assert.Equal( expected, actual );

@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitchCompileTime
 {
@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitc
         [TestTemplate]
         dynamic Template()
         {
-            var i = compileTime(SwitchEnum.one);
+            var i = meta.CompileTime(SwitchEnum.one);
 
             switch (i)
             {
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitc
                     break;
             }
             
-            return proceed();
+            return meta.Proceed();
         }
     }
 

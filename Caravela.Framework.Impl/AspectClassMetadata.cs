@@ -6,12 +6,15 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl
 {
@@ -20,6 +23,8 @@ namespace Caravela.Framework.Impl
     /// </summary>
     internal class AspectClassMetadata : IAspectClassMetadata
     {
+        private readonly Dictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
+
         private readonly IAspectDriver? _aspectDriver;
         private IReadOnlyList<AspectLayer>? _layers;
 
@@ -33,6 +38,8 @@ namespace Caravela.Framework.Impl
         /// Gets metadata of the base aspect class.
         /// </summary>
         public AspectClassMetadata? BaseClass { get; }
+
+        public CompileTimeProject Project { get; }
 
         /// <summary>
         /// Gets the aspect driver of the current class, responsible for executing the aspect.
@@ -54,12 +61,17 @@ namespace Caravela.Framework.Impl
         /// </summary>
         /// <param name="aspectTypeSymbol"></param>
         /// <param name="aspectDriver">Can be null for testing.</param>
-        private AspectClassMetadata( INamedTypeSymbol aspectTypeSymbol, AspectClassMetadata? baseClass, IAspectDriver? aspectDriver )
+        private AspectClassMetadata(
+            INamedTypeSymbol aspectTypeSymbol,
+            AspectClassMetadata? baseClass,
+            IAspectDriver? aspectDriver,
+            CompileTimeProject project )
         {
-            this.FullName = aspectTypeSymbol.GetReflectionName();
+            this.FullName = aspectTypeSymbol.GetReflectionNameSafe();
             this.DisplayName = aspectTypeSymbol.Name;
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.BaseClass = baseClass;
+            this.Project = project;
             this._aspectDriver = aspectDriver;
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
         }
@@ -79,12 +91,13 @@ namespace Caravela.Framework.Impl
             INamedTypeSymbol aspectNamedType,
             AspectClassMetadata? baseAspectType,
             IAspectDriver? aspectDriver,
+            CompileTimeProject compileTimeProject,
             IDiagnosticAdder diagnosticAdder,
             [NotNullWhen( true )] out AspectClassMetadata? aspectClassMetadata )
         {
             var layersBuilder = ImmutableArray.CreateBuilder<AspectLayer>();
 
-            var newAspectType = new AspectClassMetadata( aspectNamedType, baseAspectType, aspectDriver );
+            var newAspectType = new AspectClassMetadata( aspectNamedType, baseAspectType, aspectDriver, compileTimeProject );
 
             // Add the default part.
             layersBuilder.Add( new AspectLayer( newAspectType, null ) );
@@ -120,6 +133,51 @@ namespace Caravela.Framework.Impl
             aspectClassMetadata = newAspectType;
 
             return true;
+        }
+
+        public TemplateDriver GetTemplateDriver( ICodeElement sourceTemplate )
+        {
+            var id = sourceTemplate.GetSymbol().AssertNotNull().GetDocumentationCommentId()!;
+
+            if ( this._templateDrivers.TryGetValue( id, out var templateDriver ) )
+            {
+                return templateDriver;
+            }
+
+            var aspectType = this.Project.GetType( this.FullName ).AssertNotNull();
+
+            MethodInfo? compiledTemplateMethodInfo;
+
+            switch ( sourceTemplate )
+            {
+                case IMethod method when method.ContainingElement is IProperty property && property.Getter == method:
+                    var getterTemplateName = TemplateNameHelper.GetCompiledPropertyGetTemplateName( property.Name );
+                    compiledTemplateMethodInfo = aspectType.GetMethod( getterTemplateName );
+                    break;
+
+                case IMethod method when method.ContainingElement is IProperty property && property.Setter == method:
+                    var setterTemplateName = TemplateNameHelper.GetCompiledPropertyGetTemplateName( property.Name );
+                    compiledTemplateMethodInfo = aspectType.GetMethod( setterTemplateName );
+                    break;
+
+                case IMethod method when method.ContainingElement is not IProperty:
+                    var methodTemplateName = TemplateNameHelper.GetCompiledTemplateName( method.Name );
+                    compiledTemplateMethodInfo = aspectType.GetMethod( methodTemplateName );
+                    break;
+
+                default:
+                    throw new NotImplementedException();
+            }
+
+            if ( compiledTemplateMethodInfo == null )
+            {
+                throw new AssertionFailedException( $"Could not find the compile template for {sourceTemplate}." );
+            }
+
+            templateDriver = new TemplateDriver( this, sourceTemplate.GetSymbol().AssertNotNull(), compiledTemplateMethodInfo );
+            this._templateDrivers.Add( id, templateDriver );
+
+            return templateDriver;
         }
     }
 }

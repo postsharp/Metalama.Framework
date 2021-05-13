@@ -3,8 +3,10 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -151,6 +153,24 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethod WithGenericArguments( params IType[] genericArguments )
         {
             throw new NotSupportedException( "Cannot add generic parameters to accessors." );
+        }
+
+        [return: RunTimeOnly]
+        public MethodInfo ToMethodInfo()
+        {
+            throw new NotImplementedException();
+        }
+
+        [return: RunTimeOnly]
+        public System.Reflection.MethodBase ToMethodBase()
+        {
+            throw new NotImplementedException();
+        }
+
+        [return: RunTimeOnly]
+        public MemberInfo ToMemberInfo()
+        {
+            throw new NotImplementedException();
         }
     }
 }

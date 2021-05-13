@@ -5,6 +5,8 @@ using Caravela.Framework.Code;
 using System;
 using Xunit;
 
+// ReSharper disable StringLiteralTypo
+
 namespace Caravela.Framework.Tests.UnitTests.CodeModel
 {
     public class CodeModelMethodListOfCompatibleSignatureTests : TestBase

@@ -2,7 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Project;
 using System;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -48,6 +50,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             IType IParameter.ParameterType => this.ParameterType;
 
             TypedConstant IParameter.DefaultValue => this.DefaultValue;
+
+            [return: RunTimeOnly]
+            public ParameterInfo ToParameterInfo()
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private class PropertySetValueParameter : ParameterBase

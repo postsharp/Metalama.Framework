@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.ReflectionMocks;
-using Caravela.Framework.Impl.Serialization;
 using System.Linq;
 using System.Reflection;
 using Xunit;
@@ -14,12 +13,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class CaravelaPropertyInfoTests : ReflectionTestBase
     {
-        private readonly CaravelaLocationInfoSerializer _caravelaLocationInfoSerializer;
-
-        public CaravelaPropertyInfoTests( ITestOutputHelper helper ) : base( helper )
-        {
-            this._caravelaLocationInfoSerializer = new CaravelaLocationInfoSerializer( new ObjectSerializers() );
-        }
+        public CaravelaPropertyInfoTests( ITestOutputHelper helper ) : base( helper ) { }
 
         [Fact]
         public void TestProperty()
@@ -28,7 +22,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeProperty( code );
 
             this.AssertEqual(
-                @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetProperty(""Property"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance))",
+                @"new global::Caravela.Framework.Code.FieldOrPropertyInfo(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             TestExpression<PropertyInfo>(
@@ -50,7 +44,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeProperty( code );
 
             this.AssertEqual(
-                @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).GetProperty(""Property"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance))",
+                @"new global::Caravela.Framework.Code.FieldOrPropertyInfo(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             TestExpression<PropertyInfo>(
@@ -72,7 +66,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeProperty( code );
 
             this.AssertEqual(
-                @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetProperty(""Property"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance))",
+                @"new global::Caravela.Framework.Code.FieldOrPropertyInfo(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             TestExpression<PropertyInfo>(
@@ -94,7 +88,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeIndexerWithTarget( code );
 
             this.AssertEqual(
-                @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetProperty(""Item"", System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")), new System.Type[]{System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))}))",
+                @"new global::Caravela.Framework.Code.FieldOrPropertyInfo(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetProperty(""Item"", global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")), new global::System.Type[]{global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))}))",
                 serialized );
 
             TestExpression<PropertyInfo>(
@@ -118,10 +112,10 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var stringType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(string) );
             var properties = stringType.Properties;
             var property = properties.Single( p => p.Name == "this[]" );
-            var serialized = this._caravelaLocationInfoSerializer.Serialize( new CompileTimeLocationInfo( (Property) property ) ).ToString();
+            var serialized = this.Serialize( CompileTimeFieldOrPropertyInfo.Create( (Property) property ) ).ToString();
 
             this.AssertEqual(
-                @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")).GetProperty(""Chars"", System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Char"")), new System.Type[]{System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))}))",
+                @"new global::Caravela.Framework.Code.FieldOrPropertyInfo(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")).GetProperty(""Chars"", global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Char"")), new global::System.Type[]{global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))}))",
                 serialized );
 
             TestExpression<PropertyInfo>(
@@ -142,14 +136,16 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Parameters.Any( pp => pp.Name == "target" ) );
             var property = (Property) single;
-            var actual = this._caravelaLocationInfoSerializer.Serialize( new CompileTimeLocationInfo( property ) ).ToString();
+            var actual = this.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString();
 
             return actual;
         }
 
         public static string StripLocationInfo( string serialized )
         {
-            return serialized.Substring( "new Caravela.Framework.LocationInfo(".Length, serialized.Length - "new Caravela.Framework.LocationInfo(".Length - 1 );
+            const string prefix = "new global::Caravela.Framework.Code.FieldOrPropertyInfo(";
+
+            return serialized.Substring( prefix.Length, serialized.Length - prefix.Length - 1 );
         }
 
         private string SerializeProperty( string code )
@@ -157,7 +153,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" );
             var property = (Property) single;
-            var actual = this._caravelaLocationInfoSerializer.Serialize( new CompileTimeLocationInfo( property ) ).ToString();
+            var actual = this.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString();
 
             return actual;
         }

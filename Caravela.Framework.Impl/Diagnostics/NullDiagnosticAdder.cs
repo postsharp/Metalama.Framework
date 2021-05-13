@@ -11,6 +11,6 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         private NullDiagnosticAdder() { }
 
-        public void ReportDiagnostic( Diagnostic diagnostic ) { }
+        public void Report( Diagnostic diagnostic ) { }
     }
 }

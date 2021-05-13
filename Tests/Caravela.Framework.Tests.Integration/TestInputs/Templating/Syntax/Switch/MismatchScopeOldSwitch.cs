@@ -1,6 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitchMismatchScope
 {
@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitc
         [TestTemplate]
         dynamic Template()
         {
-            var i = compileTime(0);
+            var i = meta.CompileTime(0);
 
             switch (i)
             {
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitc
                     break;
             }
             
-            return proceed();
+            return meta.Proceed();
         }
     }
 

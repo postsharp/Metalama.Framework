@@ -3,7 +3,6 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.Programmatic
 {
@@ -11,10 +10,10 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
     {
         public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
         {
-            {
-                var advice = aspectBuilder.AdviceFactory.IntroduceProperty(aspectBuilder.TargetDeclaration, nameof(AutoProperty));
-                advice.Builder.Accessibility = Accessibility.Public;
-            }
+            //{
+            //    var advice = aspectBuilder.AdviceFactory.IntroduceProperty(aspectBuilder.TargetDeclaration, nameof(AutoProperty));
+            //    advice.Builder.Accessibility = Accessibility.Public;
+            //}
 
             {
                 var advice = aspectBuilder.AdviceFactory.IntroduceProperty(aspectBuilder.TargetDeclaration, nameof(Property));
@@ -29,8 +28,8 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
             // TODO: Expression bodied template.
         }
 
-        [IntroducePropertyTemplate]
-        public int AutoProperty { get; set; }
+        //[IntroducePropertyTemplate]
+        //public int AutoProperty { get; set; }
 
         [IntroducePropertyTemplate]
         public int Property
@@ -38,13 +37,13 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
             get
             {
                 Console.WriteLine("Get");
-                return proceed();
+                return meta.Proceed();
             }
 
             set
             {
                 Console.WriteLine("Set");
-                dynamic discard = proceed();
+                dynamic discard = meta.Proceed();
             }
         }
 
@@ -52,14 +51,14 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
         public int GetPropertyTemplate()
         {
             Console.WriteLine("Get");
-            return proceed();
+            return meta.Proceed();
         }
 
         [IntroducePropertySetTemplate]
         public void SetPropertyTemplate(int value)
         {
             Console.WriteLine("Set");
-            dynamic discard = proceed();
+            dynamic discard = meta.Proceed();
         }
     }
 

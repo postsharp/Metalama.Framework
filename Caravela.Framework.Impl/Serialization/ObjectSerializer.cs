@@ -1,27 +1,38 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.Serialization
 {
     /// <summary>
-    /// An object serializer can be registered with <see cref="ObjectSerializers"/> to serialize objects of a specific type into Roslyn creation expressions.
+    /// An object serializer can be registered with <see cref="SyntaxSerializationService"/> to serialize objects of a specific type into Roslyn creation expressions.
     /// </summary>
     internal abstract class ObjectSerializer
     {
+        public SyntaxSerializationService Service { get; }
+
+        protected ObjectSerializer( SyntaxSerializationService service )
+        {
+            this.Service = service;
+        }
+
         /// <summary>
         /// Serializes an object of a type supported by this object serializer into a Roslyn expression that creates such an object.
         /// </summary>
-        /// <param name="o">An object guaranteed to be of the type supported by this serializer.</param>
+        /// <param name="obj"></param>
+        /// <param name="syntaxFactory"></param>
         /// <returns>An expression that creates such an object.</returns>
-        public abstract ExpressionSyntax SerializeObject( object o );
+        public abstract ExpressionSyntax Serialize( object obj, ISyntaxFactory syntaxFactory );
 
         /// <summary>
         /// Throws a <see cref="InvalidUserCodeException"/> if we are in an infinite recursion cycle because of an attempt to serialize <paramref name="obj"/>.
         /// </summary>
-        protected internal static void ThrowIfStackTooDeep( object obj )
+        protected static void ThrowIfStackTooDeep( object obj )
         {
             try
             {
@@ -32,5 +43,15 @@ namespace Caravela.Framework.Impl.Serialization
                 throw SerializationDiagnosticDescriptors.CycleInSerialization.CreateException( obj.GetType() );
             }
         }
+
+        public abstract Type InputType { get; }
+
+        public abstract Type OutputType { get; }
+
+        public virtual ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray<Type>.Empty;
+
+        public ImmutableArray<Type> AllSupportedTypes => this.AdditionalSupportedTypes.Add( this.InputType ).Add( this.OutputType );
+
+        public virtual int Priority => 0;
     }
 }

@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace Caravela.Framework.Impl.Templating
     /// and the symbols can then be retrieved using <see cref="GetSymbol"/>,
     /// <see cref="GetExpressionType"/>, <see cref="GetDeclaredSymbol"/> and <see cref="GetLocation"/>.
     /// </summary>
-    internal sealed class SemanticAnnotationMap
+    internal sealed partial class SemanticAnnotationMap : ILocationAnnotationMap
     {
         private const string _locationAnnotationKind = "location";
         private const string _symbolAnnotationKind = "symbol";
@@ -31,8 +32,7 @@ namespace Caravela.Framework.Impl.Templating
             _expressionTypeAnnotationKind,
             _locationAnnotationKind );
 
-        private readonly List<Location> _indexToLocationMap = new();
-        private readonly Dictionary<Location, int> _locationToIndexMap = new();
+        private readonly List<(SyntaxTree Tree, TextSpan Span)> _indexToLocationMap = new();
         private readonly Dictionary<ISymbol, SyntaxAnnotation> _declaredSymbolToAnnotationMap = new();
         private readonly Dictionary<SyntaxAnnotation, ISymbol> _annotationToDeclaredSymbolMap = new();
         private readonly Dictionary<ISymbol, SyntaxAnnotation> _symbolToAnnotationMap = new();
@@ -55,6 +55,40 @@ namespace Caravela.Framework.Impl.Templating
             return rewriter.Visit( root )!;
         }
 
+        private SyntaxNodeOrToken AddLocationAnnotation( SyntaxNodeOrToken originalNode, SyntaxNodeOrToken annotatedNode )
+        {
+            if ( originalNode.SyntaxTree != null )
+            {
+                var index = this._indexToLocationMap.Count;
+
+                this._indexToLocationMap.Add( (originalNode.SyntaxTree, originalNode.Span) );
+
+                annotatedNode = annotatedNode.WithAdditionalAnnotations( new SyntaxAnnotation( _locationAnnotationKind, index.ToString() ) );
+            }
+
+            return annotatedNode;
+        }
+
+        private SyntaxToken GetAnnotatedToken( SyntaxToken originalToken )
+        {
+            switch ( originalToken.Kind() )
+            {
+                case SyntaxKind.IdentifierToken:
+                case SyntaxKind.DelegateKeyword:
+                case SyntaxKind.AwaitKeyword:
+                case SyntaxKind.GotoKeyword:
+                case SyntaxKind.FromKeyword:
+                case SyntaxKind.YieldKeyword:
+                case SyntaxKind.DoKeyword:
+                case SyntaxKind.EqualsGreaterThanToken:
+                    return this.AddLocationAnnotation( originalToken, originalToken ).AsToken();
+
+                default:
+                    // Don't annotate punctuation because this is expensive and not useful.
+                    return originalToken;
+            }
+        }
+
         /// <summary>
         /// Get the annotated node for an original node.
         /// </summary>
@@ -70,22 +104,8 @@ namespace Caravela.Framework.Impl.Templating
                 throw new AssertionFailedException();
             }
 
-            var annotatedNode = transformedNode;
-
             // Cache location.
-            var location = originalNode.GetLocation();
-
-            if ( location != null )
-            {
-                if ( !this._locationToIndexMap.TryGetValue( location, out var index ) )
-                {
-                    index = this._locationToIndexMap.Count;
-                    this._indexToLocationMap.Add( location );
-                    this._locationToIndexMap.Add( location, index );
-                }
-
-                annotatedNode = annotatedNode.WithAdditionalAnnotations( new SyntaxAnnotation( _locationAnnotationKind, index.ToString() ) );
-            }
+            var annotatedNode = this.AddLocationAnnotation( originalNode, transformedNode ).AsNode()!;
 
             // Get info from the semantic mode.
             var symbolInfo = semanticModel.GetSymbolInfo( originalNode );
@@ -137,7 +157,7 @@ namespace Caravela.Framework.Impl.Templating
             return annotatedNode;
         }
 
-        public Location? GetLocation( SyntaxNode node )
+        public Location? GetLocation( SyntaxNodeOrToken node )
         {
             var annotation = node.GetAnnotations( _locationAnnotationKind ).SingleOrDefault();
 
@@ -147,7 +167,9 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                return this._indexToLocationMap[int.Parse( annotation.Data! )];
+                var tuple = this._indexToLocationMap[int.Parse( annotation.Data! )];
+
+                return Location.Create( tuple.Tree, tuple.Span );
             }
         }
 
@@ -254,31 +276,6 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// A <see cref="CSharpSyntaxRewriter"/> that adds annotations.
-        /// </summary>
-        private class AnnotatingRewriter : CSharpSyntaxRewriter
-        {
-            private readonly SemanticModel _semanticModel;
-            private readonly SemanticAnnotationMap _map;
-
-            public AnnotatingRewriter( SemanticModel semanticModel, SemanticAnnotationMap map )
-            {
-                this._semanticModel = semanticModel;
-                this._map = map;
-            }
-
-            public override SyntaxNode? Visit( SyntaxNode? node )
-            {
-                if ( node == null )
-                {
-                    return null;
-                }
-
-                return this._map.GetAnnotatedNode( node, base.Visit( node ), this._semanticModel );
-            }
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Caravela.Framework.Advices
     /// <summary>
     /// Custom attribute that marks the target method as a template for <see cref="IIntroduceMethodAdvice"/>.
     /// </summary>
-    [AttributeUsage( AttributeTargets.Method, Inherited = true )]
+    [AttributeUsage( AttributeTargets.Method )]
     public class IntroduceMethodTemplateAttribute : TemplateAttribute
     {
         private Accessibility? _accessibility;

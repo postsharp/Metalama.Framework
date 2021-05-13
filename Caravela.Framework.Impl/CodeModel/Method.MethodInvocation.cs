@@ -33,26 +33,26 @@ namespace Caravela.Framework.Impl.CodeModel
                         this._method.GenericArguments.Select( a => a.GetSymbol() ) )
                     : SyntaxFactory.IdentifierName( this._method.Name );
 
-                var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromDynamic( args ) );
+                var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromValue( args ) );
 
                 if ( ((IMethod) this._method).MethodKind == MethodKind.LocalFunction )
                 {
-                    var instanceExpression = RuntimeExpression.FromDynamic( instance );
+                    var instanceExpression = RuntimeExpression.FromValue( instance );
 
                     if ( instanceExpression != null )
                     {
                         throw GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction.CreateException( this._method );
                     }
 
-                    return new DynamicMember(
+                    return new DynamicExpression(
                         SyntaxFactory.InvocationExpression( name ).AddArgumentListArguments( arguments ),
                         this._method.ReturnType,
                         false );
                 }
 
-                var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromDynamic( instance! ) );
+                var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromValue( instance! ) );
 
-                return new DynamicMember(
+                return new DynamicExpression(
                     SyntaxFactory.InvocationExpression( SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name ) )
                         .AddArgumentListArguments( arguments ),
                     this._method.ReturnType,

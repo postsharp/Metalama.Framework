@@ -17,7 +17,10 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public class CompileTimeAspectPipeline : AspectPipeline
     {
-        public CompileTimeAspectPipeline( IBuildOptions buildOptions, IAssemblyLocator? assemblyLocator = null ) : base( buildOptions, assemblyLocator )
+        public CompileTimeAspectPipeline( IBuildOptions buildOptions, CompileTimeDomain domain, IAssemblyLocator? assemblyLocator = null ) : base(
+            buildOptions,
+            domain,
+            assemblyLocator )
         {
             if ( this.BuildOptions.CompileTimeAttachDebugger )
             {
@@ -62,7 +65,8 @@ namespace Caravela.Framework.Impl.Pipeline
                     additionalResourcesBuilder.Add( resource );
                 }
 
-                if ( result.PartialCompilation.Compilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
+                if ( configuration.CompileTimeProject != null &&
+                     result.PartialCompilation.Compilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
                 {
                     additionalResourcesBuilder.Add( configuration.CompileTimeProject!.ToResource() );
                 }
@@ -76,7 +80,7 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 foreach ( var diagnostic in exception.Diagnostics )
                 {
-                    diagnosticAdder.ReportDiagnostic( diagnostic );
+                    diagnosticAdder.Report( diagnostic );
                 }
 
                 outputCompilation = null;

@@ -32,8 +32,9 @@ namespace Caravela.Framework.Impl.Advices
             IMethod templateMethod,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
-            AspectLinkerOptions? linkerOptions )
-            : base( aspect, targetDeclaration, templateMethod, scope, conflictBehavior, linkerOptions )
+            AspectLinkerOptions? linkerOptions,
+            IReadOnlyDictionary<string, object?> tags )
+            : base( aspect, targetDeclaration, templateMethod, scope, conflictBehavior, tags, linkerOptions )
         {
             this.MemberBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Name, this.LinkerOptions );
         }

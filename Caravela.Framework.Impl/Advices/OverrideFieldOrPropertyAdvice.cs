@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl
 {
@@ -29,8 +30,9 @@ namespace Caravela.Framework.Impl
             IProperty? templateProperty,
             IMethod? getTemplateMethod,
             IMethod? setTemplateMethod,
+            IReadOnlyDictionary<string, object?> tags,
             AspectLinkerOptions aspectLinkerOptions )
-            : base( aspect, targetDeclaration )
+            : base( aspect, targetDeclaration, tags )
         {
             // We need either property template or (one or more) accessor templates, but never both.
             Invariant.Assert( templateProperty != null || getTemplateMethod != null || setTemplateMethod != null );

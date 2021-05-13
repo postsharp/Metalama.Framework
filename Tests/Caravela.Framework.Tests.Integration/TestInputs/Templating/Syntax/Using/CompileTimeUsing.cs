@@ -1,7 +1,9 @@
+#pragma warning disable CS0162
+
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Using.CompileTimeUsing
 {
@@ -20,7 +22,11 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Using.CompileTi
         {
             using ( new DisposableClass() )
             {
-                return proceed();
+                return meta.Proceed();
+            }
+            
+            using ( DisposableClass c = null )
+            {
             }
         }
     }

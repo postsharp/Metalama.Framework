@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 {
     internal partial class AdviceParameterList
     {
-        private class ToArrayImpl : IDynamicMember
+        private class ToArrayImpl : IDynamicExpression
         {
             private readonly AdviceParameterList _parent;
 
@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 this._parent = parent;
             }
 
-            public RuntimeExpression CreateExpression()
+            public RuntimeExpression CreateExpression( string? expressionText, Location? location )
             {
                 var syntaxGenerator = this._parent.Compilation.SyntaxGenerator;
 

@@ -88,12 +88,14 @@ class T
     {
     }
 
+    int _foo;
     int Foo
     {
         get
         {
+            Test(""Get2"");
             Test(""Get1"");
-            var foo = link(this.Foo);
+            var foo = _foo;
             if (foo > 0)
             {
                 return foo;
@@ -107,10 +109,11 @@ class T
         set
         {
             Test(""Set1"");
+            Test(""Set1"");
             if (value != 0)
             {
-                link(this.Foo) = value;
-            }s
+                _foo = value;
+            }
             else
             {
                 throw new InvalidOperationException();
@@ -121,7 +124,7 @@ class T
 ";
 
             var linkerInput = CreateLinkerInput( code );
-            var linker = new AspectLinker( linkerInput );
+            var linker = new AspectLinker( this.ServiceProvider, linkerInput );
             var result = linker.ToResult();
 
             var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();

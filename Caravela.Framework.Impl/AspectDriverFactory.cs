@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl
 
         public IAspectDriver GetAspectDriver( INamedTypeSymbol type )
         {
-            var weavers = this._weaverTypes[type.GetReflectionName()].ToList();
+            var weavers = this._weaverTypes[type.GetReflectionNameSafe()].ToList();
 
             if ( weavers.Count > 1 )
             {

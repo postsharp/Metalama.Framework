@@ -4,9 +4,11 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
+using System.Reflection;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -70,6 +72,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IFieldOrPropertyInvocation IFieldOrProperty.Base => this.Base;
 
+        public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
+
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
+
         public IPropertyInvocation Base => this.Invocation.Base;
 
         public override string ToString() => this._symbol.ToString();
@@ -77,5 +83,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public override bool IsReadOnly => this._symbol.IsReadOnly;
 
         public override bool IsAsync => false;
+
+        public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
     }
 }

@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <param name="sourceText"></param>
         /// <param name="visitUnmarkedTypes">This is for backward compatibility with AspectWorkbench because
         /// test aspect classes are not marked at compile time.</param>
-        public TextSpanClassifier( SourceText sourceText, bool processAllTypes = false )
+        public TextSpanClassifier( SourceText sourceText, bool processAllTypes = false ) : base( SyntaxWalkerDepth.Token )
         {
             this._sourceText = sourceText;
             this._processAllTypes = processAllTypes;
@@ -153,7 +153,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( this._isInTemplate )
             {
-                if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+                if ( node.GetScopeFromAnnotation().DynamicToCompileTimeOnly() == SymbolDeclarationScope.CompileTimeOnly )
                 {
                     // This can be overwritten later in a child node.
                     this.Mark( node, TextSpanClassification.CompileTime );

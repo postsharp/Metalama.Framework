@@ -5,10 +5,12 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -108,6 +110,24 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
+        [return: RunTimeOnly]
+        public MemberInfo ToMemberInfo()
+        {
+            throw new NotImplementedException();
+        }
+
+        [return: RunTimeOnly]
+        public System.Reflection.MethodBase ToMethodBase()
+        {
+            throw new NotImplementedException();
+        }
+
+        [return: RunTimeOnly]
+        public MethodInfo ToMethodInfo()
+        {
+            throw new NotImplementedException();
+        }
+
         public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotSupportedException();
 
         private sealed class ReturnParam : IParameter
@@ -153,6 +173,12 @@ namespace Caravela.Framework.Impl.CodeModel
             }
 
             public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
+
+            [return: RunTimeOnly]
+            public ParameterInfo ToParameterInfo()
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

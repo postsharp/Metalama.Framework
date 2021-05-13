@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         {
             foreach ( var d in diagnostics )
             {
-                adder.ReportDiagnostic( d );
+                adder.Report( d );
             }
         }
     }

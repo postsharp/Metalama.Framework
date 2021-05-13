@@ -33,6 +33,8 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public FlowDocument? CompiledTemplateDocument { get; set; }
 
+        public string? CompiledTemplatePath { get; set; }
+
         public FlowDocument? TransformedTargetDocument { get; set; }
 
         public FlowDocument? ErrorsDocument { get; set; }
@@ -76,6 +78,8 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 if ( testResult.TransformedTemplateSyntax != null )
                 {
+                    this.CompiledTemplatePath = testResult.TransformedTemplatePath;
+
                     // Render the transformed tree.
                     var project3 = testRunner.CreateProject();
                     var document3 = project3.AddDocument( "name.cs", testResult.TransformedTemplateSyntax );
@@ -135,6 +139,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             {
                 var errorsDocument = new FlowDocument();
                 errorsDocument.Blocks.Add( new Paragraph( new Run( e.ToString() ) { Foreground = Brushes.Red } ) );
+                this.ErrorsDocument = errorsDocument;
             }
         }
 

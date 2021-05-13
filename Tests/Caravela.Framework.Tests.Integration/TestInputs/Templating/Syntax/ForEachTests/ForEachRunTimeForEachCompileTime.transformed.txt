@@ -1,19 +1,2 @@
-{
-    global::System.Collections.Generic.IEnumerable<global::System.Int32> array = global::System.Linq.Enumerable.Range(1, 2);
-    foreach (int n in array)
-    {
-        if (a <= n)
-        {
-            global::System.Console.WriteLine("Oops a <= " + n);
-        }
-
-        if (b <= n)
-        {
-            global::System.Console.WriteLine("Oops b <= " + n);
-        }
-    }
-
-    global::System.Int32 result;
-    result = this.Method(a, b);
-    return (int)result;
-}
+// TestTemplateCompiler.TryCompile failed. 
+// Error CR0110 on `meta.Parameters`: `The compile-time loop 'foreach' is not allowed here because it is a part of block whose execution depends on a run-time condition.`

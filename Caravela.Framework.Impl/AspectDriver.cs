@@ -61,7 +61,8 @@ namespace Caravela.Framework.Impl
                     false,
                     new ImmutableDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<IAdvice>.Empty,
-                    ImmutableArray<IAspectSource>.Empty );
+                    ImmutableArray<IAspectSource>.Empty,
+                    ImmutableDictionary<string, object?>.Empty );
 
             if ( aspect.Aspect is not IAspect<T> aspectOfT )
             {
@@ -100,7 +101,8 @@ namespace Caravela.Framework.Impl
                             false,
                             new ImmutableDiagnosticList( e.Diagnostics, ImmutableArray<ScopedSuppression>.Empty ),
                             ImmutableArray<IAdvice>.Empty,
-                            ImmutableArray<IAspectSource>.Empty );
+                            ImmutableArray<IAspectSource>.Empty,
+                            ImmutableDictionary<string, object?>.Empty );
                 }
                 catch ( Exception e )
                 {

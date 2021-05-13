@@ -23,6 +23,7 @@ namespace Caravela.Framework.Impl.Pipeline
         protected override PipelineStageResult GenerateCode( PipelineStageResult input, IPipelineStepsResult pipelineStepResult )
         {
             var linker = new AspectLinker(
+                this.PipelineProperties.ServiceProvider,
                 new AspectLinkerInput(
                     input.PartialCompilation,
                     pipelineStepResult.Compilation,

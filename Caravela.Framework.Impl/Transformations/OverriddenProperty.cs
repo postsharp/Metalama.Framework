@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -82,8 +83,8 @@ namespace Caravela.Framework.Impl.Transformations
                     compiledSetTemplateName = this.SetTemplateMethod != null ? TemplateNameHelper.GetCompiledTemplateName( this.SetTemplateMethod.Name ) : null;
                 }
 
-                var getTemplateMethod = compiledGetTemplateName != null ? this.Advice.Aspect.GetTemplateMethod( compiledGetTemplateName ) : null;
-                var setTemplateMethod = compiledSetTemplateName != null ? this.Advice.Aspect.GetTemplateMethod( compiledSetTemplateName ) : null;
+                var getTemplateMethod = this.TemplateProperty != null ? this.TemplateProperty.Getter : this.GetTemplateMethod;
+                var setTemplateMethod = this.TemplateProperty != null ? this.TemplateProperty.Setter : this.SetTemplateMethod;
 
                 var getAccessorBody = getTemplateMethod != null && this.OverriddenDeclaration.Getter != null
                     ? this.ExpandAccessorTemplate( context, getTemplateMethod, this.OverriddenDeclaration.Getter )
@@ -135,7 +136,7 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-        private BlockSyntax ExpandAccessorTemplate( in MemberIntroductionContext context, MethodInfo templateMethod, IMethod accessor )
+        private BlockSyntax? ExpandAccessorTemplate( in MemberIntroductionContext context, IMethod accessorTemplate, IMethod accessor )
         {
             using ( context.DiagnosticSink.WithDefaultScope( accessor ) )
             {
@@ -149,9 +150,21 @@ namespace Caravela.Framework.Impl.Transformations
                         LinkerAnnotationOrder.Default,
                         context.SyntaxFactory ),
                     context.LexicalScope,
-                    context.DiagnosticSink );
+                    context.DiagnosticSink,
+                    context.ServiceProvider.GetService<SyntaxSerializationService>(),
+                    (ISyntaxFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
+                    this.Advice.AspectLayerId,
+                    this.Advice.AspectBuilderTags );
 
-                return new TemplateDriver( templateMethod ).ExpandDeclaration( expansionContext );
+                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( accessorTemplate );
+
+                if ( !templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out var newMethodBody ) )
+                {
+                    // Template expansion error.
+                    return null;
+                }
+
+                return newMethodBody;
             }
         }
 

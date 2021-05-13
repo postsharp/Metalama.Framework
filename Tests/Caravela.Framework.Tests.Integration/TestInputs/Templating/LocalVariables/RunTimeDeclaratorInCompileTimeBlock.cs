@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.RunTimeDeclaratorInCompileTimeBlock
 {
@@ -11,19 +11,19 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.RunTime
         [TestTemplate]
         dynamic Template()
         {
-            if (target.Parameters.Count > 0)
+            if (meta.Parameters.Count > 0)
             {
                 var x = 0;
                 Console.WriteLine(x);
             }
 
-            foreach (var p in target.Parameters)
+            foreach (var p in meta.Parameters)
             {
                 var y = 0;
                 Console.WriteLine(y);
             }
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

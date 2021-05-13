@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
-    internal class CompileTimeEventInfo : EventInfo, IReflectionMockMember
+    internal class CompileTimeEventInfo : EventInfo, ICompileTimeReflectionMember
     {
         public CompileTimeEventInfo( ISymbol symbol, IType containingType )
         {

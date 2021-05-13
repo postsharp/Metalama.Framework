@@ -5,12 +5,14 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
@@ -257,6 +259,18 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                             : Block(),
                         null );
             }
+        }
+
+        [return: RunTimeOnly]
+        public PropertyInfo ToPropertyInfo()
+        {
+            throw new NotImplementedException();
+        }
+
+        [return: RunTimeOnly]
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo()
+        {
+            throw new NotImplementedException();
         }
     }
 }

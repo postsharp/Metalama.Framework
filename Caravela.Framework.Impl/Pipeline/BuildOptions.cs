@@ -1,9 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Immutable;
+using System.IO;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -36,6 +38,8 @@ namespace Caravela.Framework.Impl.Pipeline
         public string? CompileTimeProjectDirectory => this.GetStringOption( "CaravelaCompileTimeProjectDirectory" );
 
         public string? CrashReportDirectory => this.GetStringOption( "CaravelaCrashReportDirectory" );
+
+        public string CacheDirectory => this.GetStringOption( "CaravelaCacheDirectory" ) ?? Path.Combine( Path.GetTempPath(), "Caravela", "Cache", PackageVersions.BuildId.ToString() );
 
         public string ProjectId => this.GetStringOption( "CaravelaProjectId" ) ?? this._defaultProjectId;
 

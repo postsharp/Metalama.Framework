@@ -90,6 +90,10 @@ namespace Caravela.Framework.Impl.Templating
 
         protected virtual ExpressionSyntax TransformExpression( ExpressionSyntax expression ) => expression;
 
+        /// <summary>
+        /// Transforms an put <see cref="SyntaxNode"/> into an output <see cref="ExpressionSyntax"/> instantiating the input <see cref="SyntaxNode"/>,
+        /// irrespective of the <see cref="TransformationKind"/> returned by <see cref="GetTransformationKind"/>.
+        /// </summary>
         protected ExpressionSyntax Transform<T>( T? node )
             where T : SyntaxNode?
         {
@@ -98,27 +102,28 @@ namespace Caravela.Framework.Impl.Templating
                 return LiteralExpression( SyntaxKind.NullLiteralExpression );
             }
 
-            var transformedNode = this.Visit( node );
-
             if ( this.GetTransformationKind( node! ) != TransformationKind.Transform )
             {
-                // The previous call to Visit did not transform node (i.e. transformedNode == node) because the transformation
-                // kind was not set to Transform. The next code tries to "fix" it by using some tricks, but this is not clean.
+                // GetTransformationKind would not transform the node, so we have to call the transform method manually.
+                // We must call Visit on the node. Visit will not transform the node itself, but will apply transformations
+                // to children nodes.
 
-                switch ( transformedNode )
+                switch ( node )
                 {
                     case ExpressionSyntax expression:
-                        return this.TransformExpression( expression );
+                        return this.TransformExpression( (ExpressionSyntax) this.Visit( expression ) );
 
                     case ArgumentSyntax argument:
-                        return this.TransformArgument( argument );
+                        return this.TransformArgument( (ArgumentSyntax) this.Visit( argument ) );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected node kind: {node.Kind()}." );
                 }
             }
-
-            return (ExpressionSyntax) transformedNode;
+            else
+            {
+                return (ExpressionSyntax) this.Visit( node );
+            }
         }
 
         protected ExpressionSyntax Transform( SyntaxKind kind ) => this.MetaSyntaxFactory.Kind( kind );
@@ -149,9 +154,11 @@ namespace Caravela.Framework.Impl.Templating
             return this.MetaSyntaxFactory.BracketedArgumentList( this.Transform( list.Arguments ) );
         }
 
-        protected ExpressionSyntax Transform( ArgumentListSyntax list ) => this.MetaSyntaxFactory.ArgumentList( this.Transform( list.Arguments ) );
+        protected ExpressionSyntax Transform( ArgumentListSyntax? list )
+            => list == null ? LiteralExpression( SyntaxKind.NullLiteralExpression ) : this.MetaSyntaxFactory.ArgumentList( this.Transform( list.Arguments ) );
 
-        protected ExpressionSyntax Transform( ParameterListSyntax list ) => this.MetaSyntaxFactory.ParameterList( this.Transform( list.Parameters ) );
+        protected ExpressionSyntax Transform( ParameterListSyntax? list )
+            => list == null ? LiteralExpression( SyntaxKind.NullLiteralExpression ) : this.MetaSyntaxFactory.ParameterList( this.Transform( list.Parameters ) );
 
         protected ExpressionSyntax Transform( SyntaxTokenList list )
         {

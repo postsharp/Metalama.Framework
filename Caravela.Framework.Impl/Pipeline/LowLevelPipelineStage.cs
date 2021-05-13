@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 this._aspectClassMetadata,
                 aspectInstances,
                 input.PartialCompilation,
-                diagnostics.ReportDiagnostic,
+                diagnostics.Report,
                 resources.Add );
 
             PartialCompilation newCompilation;
@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
             catch ( Exception ex )
             {
-                diagnostics.ReportDiagnostic(
+                diagnostics.Report(
                     GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectClassMetadata.DisplayName, ex.ToDiagnosticString()) ) );
 
                 result = null;

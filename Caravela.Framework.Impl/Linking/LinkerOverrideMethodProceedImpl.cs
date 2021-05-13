@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.Linking
             // TODO: Introduced types?
             if ( this._overriddenDeclaration.ReturnType.Is( typeof(void) ) )
             {
-                return this._syntaxFactory.GetTypeNameSyntax( typeof(__Void) );
+                return this._syntaxFactory.GetTypeSyntax( typeof(__Void) );
             }
 
             // TODO: Introduced types?

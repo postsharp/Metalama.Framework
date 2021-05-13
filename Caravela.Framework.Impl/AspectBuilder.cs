@@ -21,6 +21,8 @@ namespace Caravela.Framework.Impl
         private readonly AdviceFactory _adviceFactory;
         private bool _skipped;
 
+        public IDiagnosticSink Diagnostics => this._diagnosticSink;
+
         public T TargetDeclaration { get; }
 
         ICodeElement IAspectBuilder.TargetDeclaration => this.TargetDeclaration;
@@ -28,6 +30,8 @@ namespace Caravela.Framework.Impl
         public IAdviceFactory AdviceFactory => this._adviceFactory;
 
         public void SkipAspect() => this._skipped = true;
+
+        public IDictionary<string, object?> Tags => this._adviceFactory.Tags;
 
         public AspectBuilder( T targetDeclaration, DiagnosticSink diagnosticSink, IEnumerable<IAdvice> declarativeAdvices, AdviceFactory adviceFactory )
         {
@@ -46,32 +50,14 @@ namespace Caravela.Framework.Impl
                     success,
                     this._diagnosticSink.ToImmutable(),
                     this._declarativeAdvices.ToImmutableArray().AddRange( this._adviceFactory.Advices ),
-                    Array.Empty<IAspectSource>() )
+                    Array.Empty<IAspectSource>(),
+                    this.Tags.ToImmutableDictionary() )
                 : new AspectInstanceResult(
                     success,
                     this._diagnosticSink.ToImmutable(),
                     Array.Empty<IAdvice>(),
-                    Array.Empty<IAspectSource>() );
-        }
-
-        public void ReportDiagnostic( Severity severity, IDiagnosticLocation location, string id, string formatMessage, params object[] args )
-        {
-            this._diagnosticSink.ReportDiagnostic( severity, location, id, formatMessage, args );
-        }
-
-        public void ReportDiagnostic( Severity severity, string id, string formatMessage, params object[] args )
-        {
-            this._diagnosticSink.ReportDiagnostic( severity, id, formatMessage, args );
-        }
-
-        public void SuppressDiagnostic( string id, ICodeElement scope )
-        {
-            this._diagnosticSink.SuppressDiagnostic( id, scope );
-        }
-
-        public void SuppressDiagnostic( string id )
-        {
-            this._diagnosticSink.SuppressDiagnostic( id );
+                    Array.Empty<IAspectSource>(),
+                    ImmutableDictionary<string, object?>.Empty );
         }
     }
 }

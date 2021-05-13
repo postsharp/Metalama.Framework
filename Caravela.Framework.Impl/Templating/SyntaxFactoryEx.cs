@@ -11,8 +11,10 @@ namespace Caravela.Framework.Impl.Templating
     /// </summary>
     internal static class SyntaxFactoryEx
     {
-        public static LiteralExpressionSyntax LiteralExpression( string s )
-            => SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );
+        public static LiteralExpressionSyntax Null => SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression );
+
+        public static LiteralExpressionSyntax LiteralExpression( string? s )
+            => s == null ? Null : SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );
 
         public static LiteralExpressionSyntax LiteralExpression( int i )
             => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( i ) );
@@ -43,5 +45,9 @@ namespace Caravela.Framework.Impl.Templating
 
         public static LiteralExpressionSyntax LiteralExpression( char c )
             => SyntaxFactory.LiteralExpression( SyntaxKind.CharacterLiteralExpression, SyntaxFactory.Literal( c ) );
+
+        public static StatementSyntax EmptyStatement
+            => SyntaxFactory.ExpressionStatement( SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) ) )
+                .WithSemicolonToken( SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
     }
 }

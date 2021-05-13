@@ -1,6 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Tuples.RunTimeTuples4
 {
@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Tuples.RunTimeT
             var namedItems = (a, b);
             Console.WriteLine(namedItems.a);
             
-            return proceed();
+            return meta.Proceed();
         }
     }
 

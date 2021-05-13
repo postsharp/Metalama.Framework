@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -88,7 +89,8 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 if ( methodSymbol != null && this._classifier.IsTemplate( methodSymbol ) )
                 {
-                    _ = TemplateCompiler.TryAnnotate( node, this._context.SemanticModel, true, this, out _ );
+                    TemplateCompiler templateCompiler = new( ServiceProvider.Empty );
+                    _ = templateCompiler.TryAnnotate( node, this._context.SemanticModel, this, out _ );
                 }
                 else
                 {
@@ -136,7 +138,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 // Skip
             }
 
-            void IDiagnosticAdder.ReportDiagnostic( Diagnostic diagnostic )
+            void IDiagnosticAdder.Report( Diagnostic diagnostic )
             {
                 if ( DesignTimeDiagnosticIds.Contains( diagnostic.Id ) )
                 {
@@ -155,7 +157,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 {
                     var scope = this._classifier.GetSymbolDeclarationScope( declaredSymbol );
 
-                    if ( scope != SymbolDeclarationScope.Default )
+                    if ( scope != SymbolDeclarationScope.Both )
                     {
                         var context = new ScopeCookie( this );
                         this._currentDeclarationScope = scope;

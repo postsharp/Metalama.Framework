@@ -11,21 +11,21 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
-    internal class CompileTimeMethodInfo : MethodInfo, IReflectionMockMember
+    internal class CompileTimeMethodInfo : MethodInfo, ICompileTimeReflectionMember
     {
         public ISymbol Symbol { get; }
 
         public ITypeSymbol? DeclaringTypeSymbol { get; }
 
-        public CompileTimeMethodInfo( Method method )
+        private CompileTimeMethodInfo( Method method )
         {
             this.Symbol = method.Symbol;
             this.DeclaringTypeSymbol = FindDeclaringTypeSymbol( method );
         }
 
-        public static CompileTimeMethodInfo Create( IMethod method )
+        public static MethodInfo Create( IMethod method )
         {
-            return new( (method as Method)! );
+            return new CompileTimeMethodInfo( (Method) method );
         }
 
         public static ITypeSymbol? FindDeclaringTypeSymbol( Member method )

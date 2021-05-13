@@ -1,7 +1,7 @@
 ﻿using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.Declarations.CompileTimeVariableDeclarations
 {
@@ -21,15 +21,15 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.Declarati
         {
             var compiletimeClassInstance = new CompileTimeClass();
 
-            int scalar = compileTime(0);
-            int[] array = compileTime(new int[10]);
-            object @object = compileTime("");
-            string @string = compileTime("");
+            int scalar = meta.CompileTime(0);
+            int[] array = meta.CompileTime(new int[10]);
+            object @object = meta.CompileTime("");
+            string @string = meta.CompileTime("");
             Action action = compiletimeClassInstance.CompileTimeMethod;
-            (int, byte) tuple = compileTime((0, (byte)1));
-            Tuple<int, byte> generic = compileTime(new Tuple<int, byte>(2, 3));
+            (int, byte) tuple = meta.CompileTime((0, (byte)1));
+            Tuple<int, byte> generic = meta.CompileTime(new Tuple<int, byte>(2, 3));
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 }

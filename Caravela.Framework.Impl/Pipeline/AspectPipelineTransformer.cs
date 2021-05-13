@@ -19,6 +19,7 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             using CompileTimeAspectPipeline pipeline = new(
                 new BuildOptions( transformerContext.GlobalOptions, transformerContext.Plugins ),
+                new CompileTimeDomain(),
                 new CompilationAssemblyLocator( transformerContext.Compilation ) );
 
             if ( pipeline.TryExecute(

@@ -1,7 +1,7 @@
 #pragma warning disable CS8600, CS8603
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.ReturnStatements.ReturnNull
 {
@@ -11,14 +11,14 @@ namespace Caravela.Framework.Tests.Integration.Templating.ReturnStatements.Retur
         [TestTemplate]
         dynamic Template()
         {
-            var a = target.Parameters[0];
-            var b = target.Parameters[1];
+            var a = meta.Parameters[0];
+            var b = meta.Parameters[1];
             if (a.Value == null || b.Value == null)
             {
                 return null;
             }
 
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
             return result;
         }
     }

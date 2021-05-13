@@ -2,10 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
@@ -16,21 +19,29 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly IMethod _targetMethod;
 
-        public TemplateExpansionLexicalScope LexicalScope { get; }
+        public TemplateLexicalScope LexicalScope { get; }
 
         public TemplateExpansionContext(
             object templateInstance,
             IMethod targetMethod,
             ICompilation compilation,
             IProceedImpl proceedImpl,
-            TemplateExpansionLexicalScope lexicalScope,
-            DiagnosticSink diagnosticSink )
+            TemplateLexicalScope lexicalScope,
+            DiagnosticSink diagnosticSink,
+            SyntaxSerializationService syntaxSerializationService,
+            ISyntaxFactory syntaxFactory,
+            AspectLayerId aspectLayerId,
+            IReadOnlyDictionary<string, object?> properties )
         {
             this.TemplateInstance = templateInstance;
             this._targetMethod = targetMethod;
             this.Compilation = compilation;
             this.ProceedImplementation = proceedImpl;
             this.DiagnosticSink = diagnosticSink;
+            this.SyntaxSerializationService = syntaxSerializationService;
+            this.SyntaxFactory = syntaxFactory;
+            this.AspectLayerId = aspectLayerId;
+            this.Properties = properties;
             this.LexicalScope = lexicalScope;
             Invariant.Assert( diagnosticSink.DefaultScope != null );
             Invariant.Assert( diagnosticSink.DefaultScope!.Equals( targetMethod ) );
@@ -43,6 +54,10 @@ namespace Caravela.Framework.Impl.Templating
         public IProceedImpl ProceedImplementation { get; }
 
         public ICompilation Compilation { get; }
+
+        public SyntaxSerializationService SyntaxSerializationService { get; }
+
+        public ISyntaxFactory SyntaxFactory { get; }
 
         public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
         {
@@ -68,5 +83,9 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public DiagnosticSink DiagnosticSink { get; }
+
+        public AspectLayerId AspectLayerId { get; }
+
+        public IReadOnlyDictionary<string, object?> Properties { get; }
     }
 }

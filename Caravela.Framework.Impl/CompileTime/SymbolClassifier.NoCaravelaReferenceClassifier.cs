@@ -23,9 +23,18 @@ namespace Caravela.Framework.Impl.CompileTime
             public static ISymbolClassifier GetInstance() => _instance ??= new VanillaClassifier();
 
             public SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol )
-                => this._referenceAssemblyLocator.StandardAssemblyNames.Contains( symbol.ContainingAssembly.Name )
-                    ? SymbolDeclarationScope.Default
-                    : SymbolDeclarationScope.RunTimeOnly;
+            {
+                if ( TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
+                {
+                    return scopeFromWellKnown;
+                }
+                else
+                {
+                    return this._referenceAssemblyLocator.StandardAssemblyNames.Contains( symbol.ContainingAssembly.Name )
+                        ? SymbolDeclarationScope.Both
+                        : SymbolDeclarationScope.RunTimeOnly;
+                }
+            }
         }
     }
 }

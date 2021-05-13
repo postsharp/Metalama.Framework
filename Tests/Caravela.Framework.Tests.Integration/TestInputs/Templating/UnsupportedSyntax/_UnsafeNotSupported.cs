@@ -1,5 +1,5 @@
 using System;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
 
@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Unsa
         [TestTemplate]
         dynamic Template()
         {
-            int i = target.Parameters.Count;
+            int i = meta.Parameters.Count;
             unsafe
             {
                 int* p = &i;
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Unsa
 
             Console.WriteLine("Test result = " + i);
 
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
             return result;
         }
     }

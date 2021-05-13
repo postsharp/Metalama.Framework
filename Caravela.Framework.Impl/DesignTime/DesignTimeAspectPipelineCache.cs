@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System;
@@ -19,11 +20,12 @@ namespace Caravela.Framework.Impl.DesignTime
     /// returns produced by <see cref="DesignTimeAspectPipeline"/>. This class is also responsible for invoking
     /// cache invalidation methods as appropriate.
     /// </summary>
-    internal class DesignTimeAspectPipelineCache
+    internal class DesignTimeAspectPipelineCache : IDisposable
     {
         private readonly ConditionalWeakTable<Compilation, object> _sync = new();
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
         private readonly DesignTimeSyntaxTreeResultCache _syntaxTreeResultCache = new();
+        private readonly CompileTimeDomain _domain = new();
         private bool _attachDebuggerRequested;
 
         /// <summary>
@@ -56,7 +58,7 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <param name="buildOptions"></param>
         /// <returns></returns>
         private DesignTimeAspectPipeline GetOrCreatePipeline( BuildOptions buildOptions )
-            => this._pipelinesByProjectId.GetOrAdd( buildOptions.ProjectId, _ => new DesignTimeAspectPipeline( buildOptions ) );
+            => this._pipelinesByProjectId.GetOrAdd( buildOptions.ProjectId, _ => new DesignTimeAspectPipeline( buildOptions, this._domain ) );
 
         /// <summary>
         /// Gets the design-time results for a whole compilation.
@@ -136,5 +138,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             return new DesignTimeResults( resultArrayBuilder.ToImmutable() );
         }
+
+        public void Dispose() => this._domain.Dispose();
     }
 }

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Project;
+using System;
 
 namespace Caravela.Framework.Code
 {
@@ -17,5 +18,12 @@ namespace Caravela.Framework.Code
         /// Gets the kind of type.
         /// </summary>
         TypeKind TypeKind { get; }
+
+        /// <summary>
+        /// Gets a reflection <see cref="Type"/> that represents the current type at run time.
+        /// </summary>
+        /// <returns>A <see cref="Type"/> that can be used only in run-time code.</returns>
+        [return: RunTimeOnly]
+        Type ToType();
     }
 }

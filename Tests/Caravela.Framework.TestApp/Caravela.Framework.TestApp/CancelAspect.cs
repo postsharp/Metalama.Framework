@@ -2,7 +2,6 @@
 using System.Threading;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.TestApp
 {
@@ -15,17 +14,14 @@ namespace Caravela.Framework.TestApp
             System.Console.WriteLine( "Hello, world." );
 
             
-            // error CR0101: This C# language feature is not supported by the template compiler - ParenthesizedLambdaExpression.
-            // var parameter = target.Parameters.LastOrDefault( p => p.Type.Is( typeof( CancellationToken ) ) );
-
-            var parameter = target.Parameters.LastOrDefault( TypeIsCancellationToken );
+             var parameter = meta.Parameters.LastOrDefault( p => p.ParameterType.Is( typeof( CancellationToken ) ) );
 
             if ( parameter != null )
             {
                 parameter.Value.ThrowIfCancellationRequested();
             }
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 }
