@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Caravela.Framework.TestApp.Library\Caravela.Framework.TestApp.Library.csproj" />
+    <PackageReference Include="Caravela.Framework" Version="$(CaravelaVersion)" />
   </ItemGroup>
 
 </Project>

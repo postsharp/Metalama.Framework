@@ -7,19 +7,16 @@
   <PropertyGroup>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DebugCaravelaDesignTime>false</DebugCaravelaDesignTime>
+    <!-- Overwrite from the parent directory -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
-
-
-  <ItemGroup>
-    <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" />
-    <PackageReference Include="Caravela.Framework" Version="$(CaravelaVersion)" />
-  </ItemGroup>
-
+  
   <!-- Internal NuGet reposority source -->
   <PropertyGroup>
     <RestoreAdditionalProjectSources>$(MSBuildThisFileDirectory)..\..\artifacts\bin\$(Configuration)</RestoreAdditionalProjectSources>
   </PropertyGroup>
+
 
 
   <Target Name="ValidateVersion">
