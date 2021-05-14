@@ -24,6 +24,8 @@
     <ProjectReference Include="..\..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" />
     <ProjectReference Include="..\..\Caravela.Framework\Caravela.Framework.csproj" />
     <ProjectReference Include="..\..\Caravela.TestFramework\Caravela.TestFramework.csproj" />
+    <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
+    <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,20 @@
+<Project>
+
+    <!-- Include the package version in metadata. -->
+    <Target Name="AddAssemblyMetadata" BeforeTargets="BeforeBuild" DependsOnTargets="RunResolvePackageDependencies" Condition="">
+        <ItemGroup>
+            <!-- Add all package versions to metadata -->
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+                <_Parameter1>Package:%(PackageDefinitions.Name)</_Parameter1>
+                <_Parameter2>%(PackageDefinitions.Version)</_Parameter2>
+            </AssemblyAttribute>
+            <!-- Add a unique build id -->
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+                <_Parameter1>BuildId</_Parameter1>
+                <_Parameter2>$([System.Guid]::NewGuid())</_Parameter2>
+            </AssemblyAttribute>
+        </ItemGroup>
+
+    </Target>
+
+</Project>

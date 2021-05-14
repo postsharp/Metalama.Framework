@@ -63,7 +63,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
         internal static AspectLinkerInput CreateLinkerInput( string code )
         {
-            var pseudoCompilation = CreateRoslynCompilation( code, ignoreErrors: true );
+            var pseudoCompilation = CreateCSharpCompilation( code, ignoreErrors: true );
             var rewriter = new TestRewriter();
 
             var inputCompilation = pseudoCompilation;
@@ -74,7 +74,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 inputCompilation = inputCompilation.ReplaceSyntaxTree( pseudoSyntaxTree, inputSyntaxTree );
             }
 
-            CheckRoslynDiagnostics( inputCompilation );
+            AssertNoError( inputCompilation );
 
             var initialCompilationModel = CompilationModel.CreateInitialInstance( inputCompilation );
 

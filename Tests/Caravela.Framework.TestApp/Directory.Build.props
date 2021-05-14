@@ -6,46 +6,17 @@
 
   <PropertyGroup>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <DebugCaravelaDesignTime>true</DebugCaravelaDesignTime>
+    <DebugCaravelaDesignTime>false</DebugCaravelaDesignTime>
+    <!-- Overwrite from the parent directory -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
 
-
-
-  <ItemGroup>
-    <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" />
-    <PackageReference Include="Caravela.Framework" Version="$(CaravelaVersion)" />
-
-    <!-- TODO: All the Analyzer references are hacks and must be removed. This must be done in the Caravela.Framework package and not here. -->
-
-    <PackageReference Include="Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight" Version="$(CaravelaCompilerVersion)" GeneratePathProperty="true" ExcludeAssets="all" />
-    <Analyzer Include="$(PkgCaravela_CodeAnalysis_CSharp_Workspaces_Lightweight)\lib\netstandard2.0\Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight.dll" />
-    <PackageReference Include="Caravela.CodeAnalysis.Workspaces.Lightweight.Common" Version="$(CaravelaCompilerVersion)" GeneratePathProperty="true" ExcludeAssets="all" />
-    <Analyzer Include="$(PkgCaravela_CodeAnalysis_Workspaces_Lightweight_Common)\lib\netstandard2.0\Caravela.CodeAnalysis.Workspaces.Lightweight.dll" />
-
-    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="4.7.2" GeneratePathProperty="true" ExcludeAssets="all" />
-    <Analyzer Include="$(PkgSystem_Reflection_MetadataLoadContext)\lib\netstandard2.0\System.Reflection.MetadataLoadContext.dll" />
-
-    <PackageReference Include="K4os.Hash.xxHash" Version="1.0.6"  GeneratePathProperty="true" ExcludeAssets="all" />
-    <Analyzer Include="$(PkgK4os_Hash_xxHash)\lib\netstandard2.0\K4os.Hash.xxHash.dll" />
-
-    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" GeneratePathProperty="true" ExcludeAssets="all"  />
-    <Analyzer Include="$(PkgNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" />
-
-    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" GeneratePathProperty="true" ExcludeAssets="all"  />
-    <Analyzer Include="$(PkgMicrosoft_Bcl_HashCode)\lib\netstandard2.0\Microsoft.Bcl.HashCode.dll" />
-
-
-    
-
-  </ItemGroup>
-
-  <Import Project="..\..\Caravela.Framework.Impl\build\Caravela.Framework.targets" />
-
-
+  
   <!-- Internal NuGet reposority source -->
   <PropertyGroup>
     <RestoreAdditionalProjectSources>$(MSBuildThisFileDirectory)..\..\artifacts\bin\$(Configuration)</RestoreAdditionalProjectSources>
   </PropertyGroup>
+
 
 
   <Target Name="ValidateVersion">

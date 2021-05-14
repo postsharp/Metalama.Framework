@@ -45,6 +45,10 @@ namespace Caravela.Framework.Impl.Pipeline
 
         string ProjectId { get; }
 
+        string? BuildTouchFile { get; }
+
+        string? AssemblyName { get; }
+
         ImmutableArray<object> PlugIns { get; }
     }
 

@@ -16,7 +16,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.Framework.Impl" />
     <InternalsVisibleTo Include="Caravela.TestFramework" />
-    <PackageReference Include="System.Collections.Immutable" Version="1.7.1" />
+    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
   </ItemGroup>
 
   <!-- based on https://stackoverflow.com/a/56018426/41071 -->

@@ -9,7 +9,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
@@ -22,51 +21,59 @@ namespace Caravela.Framework.Impl.DesignTime
     /// </summary>
     internal class DesignTimeAspectPipelineCache : IDisposable
     {
+        private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeSourceGenerator).Assembly.GetName().Name;
+
         private readonly ConditionalWeakTable<Compilation, object> _sync = new();
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
         private readonly DesignTimeSyntaxTreeResultCache _syntaxTreeResultCache = new();
-        private readonly CompileTimeDomain _domain = new();
-        private bool _attachDebuggerRequested;
+        private readonly CompileTimeDomain _domain;
+        private int _pipelineExecutionCount;
 
-        /// <summary>
-        /// Gets the unique instance of this class.
-        /// </summary>
-        public static DesignTimeAspectPipelineCache Instance { get; } = new();
-
-        /// <summary>
-        /// Attaches the debugger to the current process if requested.
-        /// </summary>
-        private void AttachDebugger( BuildOptions buildOptions )
+        public DesignTimeAspectPipelineCache( CompileTimeDomain domain )
         {
-            if ( buildOptions.DesignTimeAttachDebugger && !this._attachDebuggerRequested )
-            {
-                // We try to request to attach the debugger a single time, even if the user refuses or if the debugger gets
-                // detaches. It makes a better debugging experience.
-                this._attachDebuggerRequested = true;
-
-                if ( !Process.GetCurrentProcess().ProcessName.Equals( "devenv", StringComparison.OrdinalIgnoreCase ) &&
-                     !Debugger.IsAttached )
-                {
-                    Debugger.Launch();
-                }
-            }
+            this._domain = domain;
         }
+
+        /// <summary>
+        /// Gets the singleton instance of this class (other instances can be used in tests).
+        /// </summary>
+        public static DesignTimeAspectPipelineCache Instance { get; } = new( new CompileTimeDomain() );
+
+        /// <summary>
+        /// Gets the number of times the pipeline has been executed. Useful for testing purposes.
+        /// </summary>
+        public int PipelineExecutionCount => this._pipelineExecutionCount;
 
         /// <summary>
         /// Gets the pipeline for a given project, and creates it if necessary.
         /// </summary>
         /// <param name="buildOptions"></param>
         /// <returns></returns>
-        private DesignTimeAspectPipeline GetOrCreatePipeline( BuildOptions buildOptions )
-            => this._pipelinesByProjectId.GetOrAdd( buildOptions.ProjectId, _ => new DesignTimeAspectPipeline( buildOptions, this._domain ) );
+        internal DesignTimeAspectPipeline GetOrCreatePipeline( IBuildOptions buildOptions )
+            => this._pipelinesByProjectId.GetOrAdd(
+                buildOptions.ProjectId,
+                _ =>
+                {
+                    var pipeline = new DesignTimeAspectPipeline( buildOptions, this._domain );
+                    pipeline.ExternalBuildStarted += this.OnExternalBuildStarted;
+
+                    return pipeline;
+                } );
+
+        private void OnExternalBuildStarted( object sender, EventArgs e )
+        {
+            // If a build has started, we have to invalidate the whole cache because we have allowed
+            // our cache to become inconsistent when we started to have an outdated pipeline configuration.
+            this._syntaxTreeResultCache.Clear();
+        }
 
         /// <summary>
         /// Gets the design-time results for a whole compilation.
         /// </summary>
         public DesignTimeResults GetDesignTimeResults(
             Compilation compilation,
-            BuildOptions buildOptions,
-            CancellationToken cancellationToken )
+            IBuildOptions buildOptions,
+            CancellationToken cancellationToken = default )
             => this.GetDesignTimeResults( compilation, compilation.SyntaxTrees.ToImmutableArray(), buildOptions, cancellationToken );
 
         /// <summary>
@@ -75,68 +82,91 @@ namespace Caravela.Framework.Impl.DesignTime
         public DesignTimeResults GetDesignTimeResults(
             Compilation compilation,
             IReadOnlyList<SyntaxTree> syntaxTrees,
-            BuildOptions buildOptions,
+            IBuildOptions buildOptions,
             CancellationToken cancellationToken )
         {
-            this.AttachDebugger( buildOptions );
-
             var pipeline = this.GetOrCreatePipeline( buildOptions );
 
-            // Invalidate the cache, if required.
-            foreach ( var syntaxTree in syntaxTrees )
+            // Update the cache.
+            var changes = pipeline.InvalidateCache( compilation );
+
+            if ( pipeline.Status == DesignTimeAspectPipelineStatus.Ready )
             {
-                pipeline.OnSyntaxTreePossiblyChanged( syntaxTree, out var configurationInvalidated );
-
-                if ( configurationInvalidated )
-                {
-                    this._syntaxTreeResultCache.Clear();
-
-                    break;
-                }
-
-                this._syntaxTreeResultCache.OnSyntaxTreePossiblyChanged( syntaxTree );
+                this._syntaxTreeResultCache.UpdateCompilation( changes );
+            }
+            else
+            {
+                // We don't invalidate the syntax tree results cache if the pipeline is broken, so we can serve old (outdated) results
+                // instead of nothing.
             }
 
-            // Computes the set of semantic models that need to be processed.
-            List<SyntaxTree> uncachedSyntaxTrees = new();
-
-            foreach ( var syntaxTree in syntaxTrees )
+            if ( pipeline.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
             {
-                if ( !this._syntaxTreeResultCache.TryGetValue( syntaxTree, out _, true ) )
+                var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilation );
+
+                // Execute the pipeline if required, and update the cache.
+                if ( dirtySyntaxTrees.Count > 0 )
                 {
-                    uncachedSyntaxTrees.Add( syntaxTree );
+                    var lockable = this._sync.GetOrCreateValue( compilation );
+
+                    lock ( lockable )
+                    {
+                        var partialCompilation = PartialCompilation.CreatePartial( compilation, dirtySyntaxTrees );
+
+                        if ( !partialCompilation.IsEmpty )
+                        {
+                            Interlocked.Increment( ref this._pipelineExecutionCount );
+                            var result = pipeline.Execute( partialCompilation );
+
+                            this._syntaxTreeResultCache.Update( compilation, result );
+                        }
+                    }
                 }
             }
-
-            // Execute the pipeline if required, and update the cache.
-            if ( uncachedSyntaxTrees.Count > 0 )
+            else
             {
-                var lockable = this._sync.GetOrCreateValue( compilation );
-
-                lock ( lockable )
-                {
-                    var partialCompilation = PartialCompilation.CreatePartial( compilation, uncachedSyntaxTrees );
-                    var result = pipeline.Execute( partialCompilation );
-
-                    this._syntaxTreeResultCache.Update( compilation, result );
-                }
+                // If we need a build, we only serve results from the cache.
+                DesignTimeLogger.Instance?.Write(
+                    $"DesignTimeAspectPipelineCache.GetDesignTimeResults('{compilation.AssemblyName}'): build required," +
+                    $" returning from cache only. Cache size is {this._syntaxTreeResultCache.Count}" );
             }
 
             // Get the results from the cache. We don't need to check dependencies
             var resultArrayBuilder = ImmutableArray.CreateBuilder<DesignTimeSyntaxTreeResult>( syntaxTrees.Count );
 
+            // Create the result.
             foreach ( var syntaxTree in syntaxTrees )
             {
-                // Get the result from the cache, but there is no need to validate dependencies because we've just dont it an
-                // instant ago and a data race and it is ok if the data race is won by the competing task.
-
-                if ( this._syntaxTreeResultCache.TryGetValue( syntaxTree, out var syntaxTreeResult, false ) )
+                if ( this._syntaxTreeResultCache.TryGetValue( syntaxTree, out var syntaxTreeResult ) )
                 {
                     resultArrayBuilder.Add( syntaxTreeResult );
                 }
             }
 
             return new DesignTimeResults( resultArrayBuilder.ToImmutable() );
+        }
+
+        private List<SyntaxTree> GetDirtySyntaxTrees( Compilation compilation )
+        {
+            // Computes the set of semantic models that need to be processed.
+
+            List<SyntaxTree> uncachedSyntaxTrees = new();
+
+            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            {
+                if ( syntaxTree.FilePath.StartsWith( _sourceGeneratorAssemblyName, StringComparison.Ordinal ) )
+                {
+                    // This is our own generated file. Don't include.
+                    continue;
+                }
+
+                if ( !this._syntaxTreeResultCache.TryGetValue( syntaxTree, out _ ) )
+                {
+                    uncachedSyntaxTrees.Add( syntaxTree );
+                }
+            }
+
+            return uncachedSyntaxTrees;
         }
 
         public void Dispose() => this._domain.Dispose();

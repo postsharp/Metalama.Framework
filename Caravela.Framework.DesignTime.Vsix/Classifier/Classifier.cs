@@ -120,14 +120,13 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
             }
 
             var model = await document.GetSemanticModelAsync( cancellationToken );
-            var root = await document.GetSyntaxRootAsync( cancellationToken );
 
-            if ( model == null || root == null )
+            if ( model == null )
             {
                 return null;
             }
 
-            if ( classificationService.TryGetClassifiedTextSpans( model, root, out var classifier ) )
+            if ( classificationService.TryGetClassifiedTextSpans( model,  out var classifier ) )
             {
                 // Notify that we now have data for these spans.
                 foreach ( var span in this._spansQueue )

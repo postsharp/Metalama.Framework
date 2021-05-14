@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.Templating
                 stackTrace
                     .GetFrames()
                     .Where( f => f.GetFileName() != null )
-                    .Select( f => (Frame: f, File: this._aspectClass.Project.FindSourceFile( f.GetFileName() )) )
+                    .Select( f => (Frame: f, File: this._aspectClass.Project.FindCodeFileFromTransformedPath( f.GetFileName() )) )
                     .FirstOrDefault( i => i.File != null );
 
             if ( frame.File == null )
@@ -127,7 +127,7 @@ namespace Caravela.Framework.Impl.Templating
                 return null;
             }
 
-            var transformedText = SourceText.From( File.ReadAllText( frame.File ) );
+            var transformedText = SourceText.From( File.ReadAllText( frame.File.TransformedPath ) );
 
             // Find the node in the syntax tree.
             var textLines = transformedText.Lines;

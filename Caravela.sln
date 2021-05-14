@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		nuget.config = nuget.config
 		THIRD-PARTY-NOTICES.TXT = THIRD-PARTY-NOTICES.TXT
 		Versions.props = Versions.props
+		Directory.Build.targets = Directory.Build.targets
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.MemoTransformer", "Build\Caravela.MemoTransformer\Caravela.MemoTransformer.csproj", "{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}"
@@ -31,8 +32,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{19660464
 		Build\CopyToPublishDir.proj = Build\CopyToPublishDir.proj
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Impl.Package", "Caravela.Framework.Impl.Package\Caravela.Framework.Impl.Package.csproj", "{D7160654-CDF6-478B-901B-C04C7C9E7B6C}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Obfuscator", "Build\Caravela.Obfuscator\Caravela.Obfuscator.csproj", "{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.DesignTime.Contracts", "Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj", "{2D3EE834-B910-4F2F-8069-F95CE8D0D933}"
@@ -44,6 +43,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.TestFramework", "Caravela.TestFramework\Caravela.TestFramework.csproj", "{1F06E390-058E-4102-8674-9CC112D1A8BA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.AspectWorkbench", "Tests\Caravela.AspectWorkbench\Caravela.AspectWorkbench.csproj", "{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Framework.CompilerAddIn", "Caravela.Framework.CompilerAddIn\Caravela.Framework.CompilerAddIn.csproj", "{089A7C8A-1D13-49BC-A83A-DFBC09941EFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,10 +72,6 @@ Global
 		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D7160654-CDF6-478B-901B-C04C7C9E7B6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D7160654-CDF6-478B-901B-C04C7C9E7B6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D7160654-CDF6-478B-901B-C04C7C9E7B6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D7160654-CDF6-478B-901B-C04C7C9E7B6C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -99,6 +96,10 @@ Global
 		{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{089A7C8A-1D13-49BC-A83A-DFBC09941EFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{089A7C8A-1D13-49BC-A83A-DFBC09941EFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{089A7C8A-1D13-49BC-A83A-DFBC09941EFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{089A7C8A-1D13-49BC-A83A-DFBC09941EFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

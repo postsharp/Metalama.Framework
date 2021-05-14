@@ -108,7 +108,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestIndexerOnString()
         {
             var code = "class Target { public string this[int target] {get{return default;}} }";
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var stringType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(string) );
             var properties = stringType.Properties;
             var property = properties.Single( p => p.Name == "this[]" );
@@ -133,7 +133,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeIndexerWithTarget( string code )
         {
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Parameters.Any( pp => pp.Name == "target" ) );
             var property = (Property) single;
             var actual = this.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString();
@@ -150,7 +150,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeProperty( string code )
         {
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" );
             var property = (Property) single;
             var actual = this.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString();

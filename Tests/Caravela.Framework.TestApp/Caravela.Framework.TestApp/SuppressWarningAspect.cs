@@ -4,23 +4,21 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Caravela.Framework.TestApp
 {
     public class SuppressWarningAttribute : Attribute, IAspect<ICodeElement>
     {
-        private readonly string[] codes;
+        private readonly string[] _codes;
 
         public SuppressWarningAttribute( params string[] codes )
         {
-            this.codes = codes;
+            this._codes = codes;
         }
 
         public void Initialize( IAspectBuilder<ICodeElement> aspectBuilder )
         {
-            foreach ( var code in this.codes )
+            foreach ( var code in this._codes )
             {
                 aspectBuilder.Diagnostics.Suppress( code, aspectBuilder.TargetDeclaration );
             }

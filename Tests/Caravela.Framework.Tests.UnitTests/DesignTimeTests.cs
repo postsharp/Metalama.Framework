@@ -26,7 +26,7 @@ namespace Caravela.Framework.Tests.UnitTests
                 ["Class4.cs"] = "public class Class4 : Class3, Interface3 { }"
             };
 
-            var compilation = CreateRoslynCompilation( code );
+            var compilation = CreateCSharpCompilation( code );
 
             // Tests for Class1.
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Tests.UnitTests
 
             var code = new Dictionary<string, string> { ["Class1.cs"] = "public class Class1 { }", ["Class2.cs"] = "public class Class2 { }" };
 
-            var compilation = CreateRoslynCompilation( code );
+            var compilation = CreateCSharpCompilation( code );
 
             using var buildOptions = new TestBuildOptions();
             using var domain = new UnloadableCompileTimeDomain();
@@ -79,7 +79,7 @@ namespace Caravela.Framework.Tests.UnitTests
                 ["Class2.cs"] = "public class Class2 { [Aspect]  void Method() {} }"
             };
 
-            var compilation = CreateRoslynCompilation( code );
+            var compilation = CreateCSharpCompilation( code );
 
             using var buildOptions = new TestBuildOptions();
             using var domain = new UnloadableCompileTimeDomain();

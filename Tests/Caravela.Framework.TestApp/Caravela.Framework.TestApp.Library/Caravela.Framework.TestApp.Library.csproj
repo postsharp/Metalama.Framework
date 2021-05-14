@@ -5,4 +5,9 @@
     <CaravelaExportAspects>true</CaravelaExportAspects>
   </PropertyGroup>
 
+
+  <ItemGroup>
+    <PackageReference Include="Caravela.Framework" Version="$(CaravelaVersion)" />
+  </ItemGroup>
+
 </Project>

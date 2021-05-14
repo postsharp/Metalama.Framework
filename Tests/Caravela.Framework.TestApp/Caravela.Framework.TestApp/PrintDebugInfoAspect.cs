@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.TestApp.Aspects;
@@ -10,10 +13,9 @@ namespace Caravela.Framework.TestApp
     {
         public override void Initialize( IAspectBuilder<IMethod> aspectBuilder )
         {
-         //   Debugger.Launch();
             base.Initialize( aspectBuilder );
 
-            aspectBuilder.Diagnostics.Report( Diagnostics.Severity.Warning, "MY000", "Hello, {0} v5.", aspectBuilder.TargetDeclaration );
+            aspectBuilder.Diagnostics.Report( Diagnostics.Severity.Warning, "MY000", "Hello, {0} v22.", aspectBuilder.TargetDeclaration );
         }
         public override dynamic OverrideMethod()
         {

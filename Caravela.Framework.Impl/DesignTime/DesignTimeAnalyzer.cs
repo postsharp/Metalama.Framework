@@ -8,8 +8,11 @@ using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
+
+#pragma warning disable RS1026 // Enable concurrent execution
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -17,7 +20,7 @@ namespace Caravela.Framework.Impl.DesignTime
     /// Our implementation of <see cref="DiagnosticAnalyzer"/>. It reports all diagnostics that we produce.
     /// </summary>
     [DiagnosticAnalyzer( LanguageNames.CSharp )]
-    public partial class DesignTimeAnalyzer : DiagnosticAnalyzer
+    public class DesignTimeAnalyzer : DiagnosticAnalyzer
     {
         private static readonly ImmutableArray<DiagnosticDescriptor> _supportedDiagnosticDescriptors;
 
@@ -48,37 +51,66 @@ namespace Caravela.Framework.Impl.DesignTime
                 return;
             }
 
-            context.EnableConcurrentExecution();
             context.ConfigureGeneratedCodeAnalysis( GeneratedCodeAnalysisFlags.ReportDiagnostics );
 
             // Semantic model analysis is used for frequent and "short loop" analysis, principally of the templates themselves.
             context.RegisterSemanticModelAction( this.AnalyzeSemanticModel );
+
+            context.RegisterCompilationAction( this.AnalyzeCompilation );
+        }
+
+        private void AnalyzeCompilation( CompilationAnalysisContext context )
+        {
+            DesignTimeLogger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}') started." );
+
+            try
+            {
+                var buildOptions = new BuildOptions( context.Options.AnalyzerConfigOptionsProvider );
+
+                // Execute the pipeline.
+                var syntaxTreeResults = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
+                    context.Compilation,
+                    context.Compilation.SyntaxTrees.ToList(),
+                    buildOptions,
+                    context.CancellationToken );
+
+                // Report diagnostics from the pipeline.
+                foreach ( var result in syntaxTreeResults.SyntaxTreeResults )
+                {
+                    DesignTimeLogger.Instance?.Write(
+                        $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}'): {result.Diagnostics.Length} diagnostics reported on '{result.SyntaxTree.FilePath}'." );
+
+                    DesignTimeDiagnosticHelper.ReportDiagnostics(
+                        result.Diagnostics,
+                        result.SyntaxTree,
+                        context.ReportDiagnostic,
+                        true );
+                }
+            }
+            catch ( Exception e )
+            {
+                DesignTimeLogger.Instance?.Write( e.ToString() );
+            }
         }
 
         private void AnalyzeSemanticModel( SemanticModelAnalysisContext context )
         {
-            // Execute the analysis that are not performed in the pipeline.
-            Visitor visitor = new( context );
-            visitor.Visit( context.SemanticModel.SyntaxTree.GetRoot() );
-
-            // Execute the pipeline.
-            var syntaxTreeResults = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
-                context.SemanticModel.Compilation,
-                new[] { context.SemanticModel.SyntaxTree },
-                new BuildOptions( context.Options.AnalyzerConfigOptionsProvider ),
-                context.CancellationToken );
-
-            // Report diagnostics from the pipeline.
-            var result = syntaxTreeResults.SyntaxTreeResults.SingleOrDefault(
-                r => r != null && r.SyntaxTree.FilePath == context.SemanticModel.SyntaxTree.FilePath );
-
-            if ( result != null )
+            try
             {
-                DesignTimeDiagnosticHelper.ReportDiagnostics(
-                    result.Diagnostics,
-                    context.SemanticModel.SyntaxTree,
-                    context.ReportDiagnostic,
-                    true );
+                // Execute the analysis that are not performed in the pipeline.
+                var buildOptions = new BuildOptions( context.Options.AnalyzerConfigOptionsProvider );
+
+                DesignTimeLogger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{context.SemanticModel.SyntaxTree.FilePath}')" );
+
+                DesignTimeDebugger.AttachDebugger( buildOptions );
+
+                // Additional validations that run out of the pipeline.
+                DesignTimeAnalyzerAdditionalVisitor visitor = new( context, buildOptions );
+                visitor.Visit( context.SemanticModel.SyntaxTree.GetRoot() );
+            }
+            catch ( Exception e )
+            {
+                DesignTimeLogger.Instance?.Write( e.ToString() );
             }
         }
     }

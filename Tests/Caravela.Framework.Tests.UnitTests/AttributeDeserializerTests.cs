@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.UnitTests
         private static object? GetDeserializedProperty( string property, string value, string? dependentCode = null )
         {
             var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestAttribute( {property} = {value} )]";
-            var compilation = CreateCompilation( code, dependentCode );
+            var compilation = CreateCompilationModel( code, dependentCode );
             AttributeDeserializer deserializer = new( new SystemTypeResolver() );
             var attribute = compilation.Attributes.Single();
             DiagnosticList diagnosticList = new();
@@ -104,7 +104,7 @@ namespace Caravela.Framework.Tests.UnitTests
             static object Deserialize( string args )
             {
                 var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestParamsAttribute( {args} )]";
-                var compilation = CreateCompilation( code );
+                var compilation = CreateCompilationModel( code );
                 AttributeDeserializer deserializer = new( new SystemTypeResolver() );
                 var attribute = compilation.Attributes.Single();
 

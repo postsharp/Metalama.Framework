@@ -113,7 +113,7 @@ namespace Caravela.Framework.Impl
                 "The aspect '{0}' cannot add attribute '{1}' to member '{2}' because no compatible constructor exists for given types.",
                 _category,
                 Error );
-        
+
         public static readonly StrongDiagnosticDescriptor<string>
             InvalidCachedManifestFile = new(
                 "CR0028",

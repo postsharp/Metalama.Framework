@@ -10,11 +10,13 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
+    /// <summary>
+    /// The implementation of <see cref="IClassificationService"/>.
+    /// </summary>
     internal class ClassificationService : IClassificationService
     {
         public bool TryGetClassifiedTextSpans(
             SemanticModel semanticModel,
-            SyntaxNode root,
             [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans )
         {
             // TODO: if the root is not "our", return false.
