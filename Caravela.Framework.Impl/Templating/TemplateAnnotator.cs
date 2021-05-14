@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.DesignTime.Contracts;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
@@ -61,14 +62,14 @@ namespace Caravela.Framework.Impl.Templating
         /// <param name="targetNode">Node on which the diagnostic should be reported.</param>
         /// <param name="arguments">Arguments of the formatting string.</param>
         /// <typeparam name="T"></typeparam>
-        private void ReportDiagnostic<T>( StrongDiagnosticDescriptor<T> descriptor, SyntaxNodeOrToken targetNode, T arguments )
+        private void ReportDiagnostic<T>( DiagnosticDefinition<T> descriptor, SyntaxNodeOrToken targetNode, T arguments )
         {
             var location = this._semanticAnnotationMap.GetLocation( targetNode );
 
             this.ReportDiagnostic( descriptor, location, arguments );
         }
 
-        private void ReportDiagnostic<T>( StrongDiagnosticDescriptor<T> descriptor, Location? location, T arguments )
+        private void ReportDiagnostic<T>( DiagnosticDefinition<T> descriptor, Location? location, T arguments )
         {
             var diagnostic = descriptor.CreateDiagnostic( location, arguments );
             this._diagnosticAdder.Report( diagnostic );

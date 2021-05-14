@@ -12,12 +12,12 @@ namespace Caravela.Framework.Impl.DesignTime
         /// No change in the compile-time status.
         /// </summary>
         None,
-        
+
         /// <summary>
         /// The syntax tree is newly compile-time.
         /// </summary>
         NewlyCompileTime,
-        
+
         /// <summary>
         /// The syntax tree is no longer compile-time.
         /// </summary>

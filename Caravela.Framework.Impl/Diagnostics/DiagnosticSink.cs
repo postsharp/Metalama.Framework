@@ -4,11 +4,11 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using RoslynDiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
@@ -18,13 +18,15 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// </summary>
     public partial class DiagnosticSink : IDiagnosticSink, IDiagnosticAdder
     {
+        private readonly DiagnosticManifest? _diagnosticManifest;
         private ImmutableArray<Diagnostic>.Builder? _diagnostics;
         private ImmutableArray<ScopedSuppression>.Builder? _suppressions;
 
         public ICodeElement? DefaultScope { get; private set; }
 
-        public DiagnosticSink( ICodeElement? defaultScope = null )
+        internal DiagnosticSink( CompileTimeProject? compileTimeProject, ICodeElement? defaultScope = null )
         {
+            this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
             this.DefaultScope = defaultScope;
         }
 
@@ -47,8 +49,6 @@ namespace Caravela.Framework.Impl.Diagnostics
             this._suppressions.Add( suppression );
         }
 
-        public void Suppress( string id, ICodeElement scope ) => this.Suppress( new ScopedSuppression( id, scope ) );
-
         public void Suppress( IEnumerable<ScopedSuppression> suppressions )
         {
             foreach ( var suppression in suppressions )
@@ -56,24 +56,6 @@ namespace Caravela.Framework.Impl.Diagnostics
                 this.Suppress( suppression );
             }
         }
-
-        public void Suppress( string id )
-        {
-            if ( this.DefaultScope != null )
-            {
-                this.Suppress( new ScopedSuppression( id, this.DefaultScope ) );
-            }
-        }
-
-        private static RoslynDiagnosticSeverity MapSeverity( Severity severity )
-            => severity switch
-            {
-                Severity.Error => RoslynDiagnosticSeverity.Error,
-                Severity.Hidden => RoslynDiagnosticSeverity.Hidden,
-                Severity.Info => RoslynDiagnosticSeverity.Info,
-                Severity.Warning => RoslynDiagnosticSeverity.Warning,
-                _ => throw new AssertionFailedException()
-            };
 
         public IDisposable WithDefaultScope( ICodeElement scope )
         {
@@ -83,46 +65,54 @@ namespace Caravela.Framework.Impl.Diagnostics
             return new RestoreLocationCookie( this, oldScope );
         }
 
-        public void Report( Severity severity, IDiagnosticLocation location, string id, string formatMessage, params object[] args )
-        {
-            var roslynLocation = ((DiagnosticLocation) location).Location ?? this.DefaultScope?.GetDiagnosticLocation();
-            var roslynSeverity = MapSeverity( severity );
-            var warningLevel = severity == Severity.Error ? 0 : 1;
-
-            var diagnostic = Diagnostic.Create(
-                id,
-                "Caravela.User",
-                new NonLocalizedString( formatMessage, args ),
-                roslynSeverity,
-                roslynSeverity,
-                true,
-                warningLevel,
-                false,
-                location: roslynLocation );
-
-            this.Report( diagnostic );
-
-            if ( severity == Severity.Error )
-            {
-                this.ErrorCount++;
-            }
-        }
-
-        public void Report( Severity severity, string id, string formatMessage, params object[] args )
-        {
-            if ( this.DefaultScope == null )
-            {
-                throw new InvalidOperationException( "Cannot report a diagnostic when the default scope has not been defined." );
-            }
-
-            this.Report( severity, this.DefaultScope, id, formatMessage, args );
-        }
-
         public ImmutableDiagnosticList ToImmutable()
             => new(
                 this._diagnostics?.ToImmutable() ?? ImmutableArray<Diagnostic>.Empty,
                 this._suppressions?.ToImmutable() ?? ImmutableArray<ScopedSuppression>.Empty );
 
         public override string ToString() => $"Diagnostics={this._diagnostics?.Count ?? 0}, Suppressions={this._suppressions?.Count ?? 0}";
+
+        private Location? GetLocation( IDiagnosticLocation? location )
+            => ((DiagnosticLocation?) location)?.Location ?? this.DefaultScope?.GetDiagnosticLocation();
+
+        private void ValidateUserReport( IDiagnosticDefinition definition )
+        {
+            if ( this._diagnosticManifest != null && !this._diagnosticManifest.DefinesDiagnostic( definition.Id ) )
+            {
+                throw new InvalidOperationException(
+                    $"The aspect cannot report the diagnostic {definition.Id} because the DiagnosticDefinition is not declared as a static field or property of the aspect class." );
+            }
+        }
+
+        private void ValidateUserSuppression( SuppressionDefinition definition )
+        {
+            if ( this._diagnosticManifest != null && !this._diagnosticManifest.DefinesSuppression( definition.SuppressedDiagnosticId ) )
+            {
+                throw new InvalidOperationException(
+                    $"The aspect cannot suppress the diagnostic {definition.SuppressedDiagnosticId} because the SuppressionDefinition is not declared as a static field or property of the aspect class." );
+            }
+        }
+
+        public void Report( IDiagnosticLocation? location, DiagnosticDefinition definition, params object[] args )
+        {
+            this.ValidateUserReport( definition );
+            this.Report( definition.CreateDiagnostic( this.GetLocation( location ) ) );
+        }
+
+        public void Report<T>( IDiagnosticLocation? location, DiagnosticDefinition<T> definition, T arguments )
+        {
+            this.ValidateUserReport( definition );
+            this.Report( definition.CreateDiagnostic( this.GetLocation( location ), arguments ) );
+        }
+
+        public void Suppress( ICodeElement? scope, SuppressionDefinition definition )
+        {
+            this.ValidateUserSuppression( definition );
+
+            if ( this.DefaultScope != null )
+            {
+                this.Suppress( new ScopedSuppression( definition, scope ?? this.DefaultScope ) );
+            }
+        }
     }
 }

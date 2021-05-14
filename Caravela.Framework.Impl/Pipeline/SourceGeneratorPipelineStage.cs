@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
@@ -23,15 +24,16 @@ namespace Caravela.Framework.Impl.Pipeline
     internal class SourceGeneratorPipelineStage : HighLevelPipelineStage
     {
         public SourceGeneratorPipelineStage(
+            CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             IAspectPipelineProperties properties )
-            : base( aspectLayers, properties ) { }
+            : base( compileTimeProject, aspectLayers, properties ) { }
 
         /// <inheritdoc/>
         protected override PipelineStageResult GenerateCode( PipelineStageResult input, IPipelineStepsResult pipelineStepResult )
         {
             var transformations = pipelineStepResult.Compilation.GetAllObservableTransformations();
-            DiagnosticSink diagnostics = new();
+            DiagnosticSink diagnostics = new( this.CompileTimeProject );
             var syntaxFactory = ReflectionMapper.GetInstance( input.PartialCompilation.Compilation );
 
             var additionalSyntaxTrees = new List<IntroducedSyntaxTree>();

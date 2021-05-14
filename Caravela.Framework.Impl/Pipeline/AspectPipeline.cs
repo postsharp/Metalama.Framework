@@ -155,7 +155,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var stages = aspectLayers
                 .GroupAdjacent( x => GetGroupingKey( x.AspectClass.AspectDriver ) )
-                .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), loader ) )
+                .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), loader, compileTimeProject! ) )
                 .ToImmutableArray();
 
             configuration = new PipelineConfiguration( stages, aspectTypes, sortedAspectLayers, compileTimeProject, loader );
@@ -226,16 +226,19 @@ namespace Caravela.Framework.Impl.Pipeline
         /// Creates an instance of <see cref="HighLevelPipelineStage"/>.
         /// </summary>
         /// <param name="parts"></param>
+        /// <param name="compileTimeProject"></param>
         /// <param name="compileTimeProjectLoader"></param>
         /// <returns></returns>
         private protected abstract HighLevelPipelineStage CreateStage(
             IReadOnlyList<OrderedAspectLayer> parts,
+            CompileTimeProject compileTimeProject,
             CompileTimeProjectLoader compileTimeProjectLoader );
 
         private PipelineStage CreateStage(
             object groupKey,
             IReadOnlyList<OrderedAspectLayer> parts,
-            CompileTimeProjectLoader compileTimeProjectLoader )
+            CompileTimeProjectLoader compileTimeProjectLoader,
+            CompileTimeProject compileTimeProject )
         {
             switch ( groupKey )
             {
@@ -247,7 +250,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 case nameof(AspectDriver):
 
-                    return this.CreateStage( parts, compileTimeProjectLoader );
+                    return this.CreateStage( parts, (CompileTimeProject) compileTimeProject, compileTimeProjectLoader );
 
                 default:
 

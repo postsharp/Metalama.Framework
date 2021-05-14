@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
@@ -23,7 +24,7 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private readonly SkipListIndexedDictionary<PipelineStepId, PipelineStep> _steps;
         private readonly PipelineStepIdComparer _comparer;
-        private readonly DiagnosticSink _diagnostics = new();
+        private readonly DiagnosticSink _diagnostics;
         private readonly List<INonObservableTransformation> _nonObservableTransformations = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
         private PipelineStep? _currentStep;
@@ -41,8 +42,10 @@ namespace Caravela.Framework.Impl.Pipeline
         public PipelineStepsState(
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             CompilationModel inputCompilation,
+            CompileTimeProject compileTimeProject,
             IReadOnlyList<IAspectSource> inputAspectSources )
         {
+            this._diagnostics = new DiagnosticSink( compileTimeProject );
             this.Compilation = inputCompilation;
 
             // Create an empty collection of steps.

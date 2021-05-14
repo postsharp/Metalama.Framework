@@ -4,7 +4,7 @@
 internal class TargetClass
 {
 #pragma warning disable CS0219
-    [SuppressWarning("CS0219")]
+    [SuppressWarning]
     private void M2(string m)
     {
         this.__M2__Caravela_Framework_Tests_Integration_Aspects_Suppressions_IntroduceMethod_SuppressWarningAttribute(m);

@@ -34,7 +34,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <remarks>
         /// Note that reporting an error using
-        /// <see cref="IDiagnosticSink.Report(Caravela.Framework.Diagnostics.Severity,Caravela.Framework.Diagnostics.IDiagnosticLocation,string,string,object[])"/>
+        /// <see cref="IDiagnosticSink.Report"/>
         /// automatically causes the aspect to be skipped, but, additionally, provided children aspects are ignored.
         /// </remarks>
         void SkipAspect();

@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using System;
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Tests.UnitTests
             Assert.Equal( expected, actual );
         }
 
-        internal static void ThrowsWithDiagnostic( IStrongDiagnosticDescriptor diagnosticDescriptor, Action testCode )
+        internal static void ThrowsWithDiagnostic( IDiagnosticDefinition diagnosticDefinition, Action testCode )
         {
             try
             {
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Tests.UnitTests
             }
             catch ( InvalidUserCodeException e )
             {
-                Assert.Contains( e.Diagnostics, d => d.Id == diagnosticDescriptor.Id );
+                Assert.Contains( e.Diagnostics, d => d.Id == diagnosticDefinition.Id );
             }
         }
     }

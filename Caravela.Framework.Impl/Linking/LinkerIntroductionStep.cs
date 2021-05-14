@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public override LinkerIntroductionStepOutput Execute( AspectLinkerInput input )
         {
-            var diagnostics = new DiagnosticSink();
+            var diagnostics = new DiagnosticSink( input.CompileTimeProject );
             var nameProvider = new LinkerIntroductionNameProvider();
             var lexicalScopeHelper = new LexicalScopeFactory( input.CompilationModel );
             var introducedMemberCollection = new IntroducedMemberCollection();

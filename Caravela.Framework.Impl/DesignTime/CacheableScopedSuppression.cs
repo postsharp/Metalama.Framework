@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
@@ -13,9 +14,9 @@ namespace Caravela.Framework.Impl.DesignTime
     internal readonly struct CacheableScopedSuppression
     {
         /// <summary>
-        /// Gets the diagnostic identifier.
+        /// Gets the suppression definition.
         /// </summary>
-        public string Id { get; }
+        public SuppressionDefinition Definition { get; }
 
         /// <summary>
         /// Gets the symbol identifier.
@@ -28,10 +29,10 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <param name="suppression"></param>
         public CacheableScopedSuppression( in ScopedSuppression suppression )
         {
-            this.Id = suppression.Id;
+            this.Definition = suppression.Definition;
             this.SymbolId = suppression.CodeElement.GetSymbol()?.GetDocumentationCommentId() ?? throw new AssertionFailedException();
         }
 
-        public override string ToString() => $"{this.Id} in {this.SymbolId}";
+        public override string ToString() => $"{this.Definition.SuppressedDiagnosticId} in {this.SymbolId}";
     }
 }

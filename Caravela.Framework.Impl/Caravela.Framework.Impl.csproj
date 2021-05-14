@@ -16,6 +16,10 @@
     <None Remove="CodeModel\Before\**" />
 
     <None Remove="Serialization\Reflection\**" />
+
+    <Compile Remove="build\**" />
+
+    <None Remove="build\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -59,10 +63,7 @@
   <ItemGroup>
     <EmbeddedResource Remove="CodeModel\Before\**" />
     <EmbeddedResource Remove="Serialization\Reflection\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="build" />
+    <EmbeddedResource Remove="build\**" />
   </ItemGroup>
 
   <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">

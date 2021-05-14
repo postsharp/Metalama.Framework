@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl
                 return CreateResultForError( diagnostic );
             }
 
-            var diagnosticSink = new DiagnosticSink( codeElement );
+            var diagnosticSink = new DiagnosticSink( aspect.AspectClass.Project, codeElement );
 
             using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
             {

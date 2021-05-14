@@ -30,12 +30,13 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             CompilerServiceProvider.Initialize();
 
-            _supportedDiagnosticDescriptors = DiagnosticDescriptorHelper
-                .GetDiagnosticDescriptors(
+            _supportedDiagnosticDescriptors = DiagnosticDefinitionHelper
+                .GetDiagnosticDefinitions(
                     typeof(TemplatingDiagnosticDescriptors),
                     typeof(DesignTimeDiagnosticDescriptors),
                     typeof(GeneralDiagnosticDescriptors),
                     typeof(SerializationDiagnosticDescriptors) )
+                .Select( d => d.ToRoslynDescriptor() )
                 .ToImmutableArray();
 
             DesignTimeDiagnosticIds = _supportedDiagnosticDescriptors.Select( x => x.Id ).ToImmutableHashSet();
@@ -85,6 +86,21 @@ namespace Caravela.Framework.Impl.DesignTime
                         result.SyntaxTree,
                         context.ReportDiagnostic,
                         true );
+                    
+                    // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
+                    foreach ( var suppression in result.Suppressions.Where( s=> !DesignTimeDiagnosticSuppressor.IsSuppressionSupported( s.Definition.SuppressedDiagnosticId ) ) ) 
+                    {
+                        foreach ( var symbol in DocumentationCommentId.GetSymbolsForDeclarationId( suppression.SymbolId, context.Compilation ) )
+                        {
+                            var location = symbol.GetDiagnosticLocation();
+
+                            if ( location is not null )
+                            {
+                                context.ReportDiagnostic(
+                                    DesignTimeDiagnosticDescriptors.UnregisteredSuppression.CreateDiagnostic( location, (Id: suppression.Definition.SuppressedDiagnosticId, symbol) ) );
+                            }
+                        }
+                    }
                 }
             }
             catch ( Exception e )

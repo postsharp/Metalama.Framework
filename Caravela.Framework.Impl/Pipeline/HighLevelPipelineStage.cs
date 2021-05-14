@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using System.Collections.Generic;
@@ -16,12 +17,16 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal abstract class HighLevelPipelineStage : PipelineStage
     {
+        protected CompileTimeProject CompileTimeProject { get; }
+
         private readonly IReadOnlyList<OrderedAspectLayer> _aspectLayers;
 
         protected HighLevelPipelineStage(
+            CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             IAspectPipelineProperties properties ) : base( properties )
         {
+            this.CompileTimeProject = compileTimeProject;
             this._aspectLayers = aspectLayers;
         }
 
@@ -33,6 +38,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var pipelineStepsState = new PipelineStepsState(
                 this._aspectLayers,
                 compilation,
+                this.CompileTimeProject,
                 input.AspectSources );
 
             pipelineStepsState.Execute();

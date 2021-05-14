@@ -1,7 +1,7 @@
 // Warning CS0219 on `x`: `The variable 'x' is assigned but its value is never used`
 
 [TestOutput]
-[SuppressWarning("CS0219")]
+[SuppressWarning]
 internal class TargetClass
 {
     // CS0219 expected 
@@ -17,4 +17,3 @@ internal class TargetClass
     }
 #pragma warning restore CS0219
 }
-

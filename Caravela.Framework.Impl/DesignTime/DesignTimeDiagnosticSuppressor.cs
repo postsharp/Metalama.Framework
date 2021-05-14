@@ -3,6 +3,7 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -31,6 +32,8 @@ namespace Caravela.Framework.Impl.DesignTime
                         id => new KeyValuePair<string, SuppressionDescriptor>(
                             id,
                             new SuppressionDescriptor( "Caravela." + id, id, "Caravela" ) ) ) );
+
+        public static bool IsSuppressionSupported( string id ) => _supportedSuppressionsDictionary.ContainsKey( id );
 
         public override void ReportSuppressions( SuppressionAnalysisContext context )
         {
@@ -97,7 +100,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 // Report suppressions.
                 if ( !syntaxTreeResult.Suppressions.IsDefaultOrEmpty )
                 {
-                    var designTimeSuppressions = syntaxTreeResult.Suppressions.Where( s => _supportedSuppressions.Contains( s.Id ) );
+                    var designTimeSuppressions = syntaxTreeResult.Suppressions.Where( s => _supportedSuppressions.Contains( s.Definition.SuppressedDiagnosticId ) );
 
                     var groupedSuppressions = ImmutableMultiValueDictionary<string, CacheableScopedSuppression>.Create(
                         designTimeSuppressions,
@@ -124,10 +127,10 @@ namespace Caravela.Framework.Impl.DesignTime
 
                         var symbolId = symbol.GetDocumentationCommentId().AssertNotNull();
 
-                        if ( groupedSuppressions[symbolId].Any( s => string.Equals( s.Id, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
+                        foreach ( var suppression in groupedSuppressions[symbolId].Where( s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
                         {
                             suppressionsCount++;
-                            reportSuppression( Suppression.Create( _supportedSuppressionsDictionary[diagnostic.Id], diagnostic ) );
+                            reportSuppression( Suppression.Create( suppression.Definition.ToRoslynDescriptor(), diagnostic ) );
                         }
                     }
                 }

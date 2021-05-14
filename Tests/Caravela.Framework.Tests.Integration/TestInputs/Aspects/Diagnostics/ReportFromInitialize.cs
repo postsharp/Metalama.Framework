@@ -3,18 +3,24 @@
 using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromInitialize
 {
     public class ErrorAttribute : OverrideMethodAspect
     {
+        private static readonly DiagnosticDefinition _error = new( "MY001", Severity.Error, "Error" );
+        private static readonly DiagnosticDefinition _warning = new( "MY002", Severity.Warning, "Warning" );
+        private static readonly DiagnosticDefinition _info = new( "MY003", Severity.Info,"Info" );
+        private static readonly DiagnosticDefinition _hidden = new( "MY004", Severity.Hidden,"Hidden" );
+
         public override void Initialize(IAspectBuilder<IMethod> aspectBuilder)
         {
-            aspectBuilder.Diagnostics.Report(Caravela.Framework.Diagnostics.Severity.Error, "MY001", "Error");
-            aspectBuilder.Diagnostics.Report(Caravela.Framework.Diagnostics.Severity.Warning, "MY002", "Warning");
-            aspectBuilder.Diagnostics.Report(Caravela.Framework.Diagnostics.Severity.Info, "MY003", "Info");
-            aspectBuilder.Diagnostics.Report(Caravela.Framework.Diagnostics.Severity.Hidden, "MY004", "Hidden");
+            aspectBuilder.Diagnostics.Report( _error );
+            aspectBuilder.Diagnostics.Report( _warning );
+            aspectBuilder.Diagnostics.Report( _info );
+            aspectBuilder.Diagnostics.Report(  _hidden );
         }
 
         public override dynamic? OverrideMethod()

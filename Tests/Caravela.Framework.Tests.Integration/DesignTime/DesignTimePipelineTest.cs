@@ -79,7 +79,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             foreach ( var suppression in syntaxTreeResult.Suppressions )
             {
-                stringBuilder.AppendLine( $"   {suppression.Id} on {suppression.SymbolId}" );
+                stringBuilder.AppendLine( $"   {suppression.Definition.SuppressedDiagnosticId} on {suppression.SymbolId}" );
             }
 
             // Introductions
@@ -148,15 +148,16 @@ F1.cs:
             var aspectCode = @"
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using  Caravela.Framework.Diagnostics;
+using Caravela.Framework.Diagnostics;
 
 class MyAspect : System.Attribute, IAspect<IMethod>
 {
+   private static readonly DiagnosticDefinition<int> _description = new(""MY001"", Severity.Warning, ""My Message $version$,{0}"" );
    public int Version;
 
    public void Initialize( IAspectBuilder<IMethod> aspectBuilder )
    {
-        aspectBuilder.Diagnostics.Report( Severity.Warning, ""MY001"", ""My Message $version$,{0}"", Version );
+        aspectBuilder.Diagnostics.Report( _description, this.Version );
    }
 }
 ";
@@ -285,7 +286,7 @@ Target.cs:
             var compileTimeAspectPipeline = new CompileTimeAspectPipeline( buildOptions, domain );
             DiagnosticList compileDiagnostics = new();
             Assert.True( compileTimeAspectPipeline.TryExecute( compileDiagnostics, compilation5, out _, out _ ) );
-            
+
             // Simulate an external build event. This is normally triggered by the build touch file.
             pipeline.OnExternalBuildStarted();
 

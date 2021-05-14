@@ -76,7 +76,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private IEnumerable<string> GetSuppressions( ICodeElement codeElement ) => this._diagnosticSuppressions[codeElement].Select( s => s.Id );
+            private IEnumerable<string> GetSuppressions( ICodeElement codeElement ) => this._diagnosticSuppressions[codeElement].Select( s => s.Definition.SuppressedDiagnosticId );
 
             /// <summary>
             /// Adds suppression to a node. This is done both by adding <c>#pragma warning</c> trivia
@@ -92,8 +92,10 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var transformedNode = node;
 
-                if ( !this._activeSuppressions.IsEmpty )
+                if ( !this._activeSuppressions.IsEmpty && node is not BaseTypeDeclarationSyntax )
                 {
+                    // TODO: We are probably processing classes incorrectly.
+
                     // Since we're adding suppressions, we need to visit each `#pragma warning` of the added node to update them.
                     transformedNode = (T) this.Visit( transformedNode )!;
                 }

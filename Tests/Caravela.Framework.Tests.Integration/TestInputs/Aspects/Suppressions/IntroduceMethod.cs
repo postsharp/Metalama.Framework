@@ -10,17 +10,13 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 using Caravela.Framework.Advices;
+using Caravela.Framework.Diagnostics;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.OverrideMethod
 {
     public class SuppressWarningAttribute : Attribute, IAspect<INamedType>
     {
-        private string code;
-        
-        public SuppressWarningAttribute( string code )
-        {
-            this.code = code;
-        }
+        private static readonly SuppressionDefinition _suppression1 = new("MySup1", "CS0219" );
         
         [IntroduceMethodTemplateAttribute]
         public void Introduced()
@@ -32,12 +28,12 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.OverrideMeth
         public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
         {
             var introduced = aspectBuilder.AdviceFactory.IntroduceMethod( aspectBuilder.TargetDeclaration, nameof(Introduced));
-            aspectBuilder.Diagnostics.Suppress( this.code, introduced.Builder );
+            aspectBuilder.Diagnostics.Suppress( introduced.Builder, _suppression1 );
         }
     }
     
     [TestOutput]
-    [SuppressWarning("CS0219")]
+    [SuppressWarning]
     internal class TargetClass
     {
         

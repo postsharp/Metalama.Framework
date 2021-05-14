@@ -13,35 +13,26 @@ namespace Caravela.Framework.Diagnostics
     public interface IDiagnosticSink
     {
         /// <summary>
-        /// Reports a diagnostic by specifying its location.
+        /// Reports a parameterless diagnostic by specifying its location.
         /// </summary>
-        /// <param name="severity"></param>
         /// <param name="location">The code location to which the diagnostic should be written.</param>
-        /// <param name="id"></param>
-        /// <param name="formatMessage"></param>
-        /// <param name="args">Arguments of the formatting string.</param>
-        void Report( Severity severity, IDiagnosticLocation location, string id, string formatMessage, params object[] args );
+        /// <param name="definition"></param>
+        /// <param name="args"></param>
+        void Report( IDiagnosticLocation? location, DiagnosticDefinition definition, params object[] args );
 
         /// <summary>
-        /// Reports a diagnostic and uses the location of the current target.
+        /// Reports a parametric diagnostic by specifying its location.
         /// </summary>
-        /// <param name="severity"></param>
-        /// <param name="id"></param>
-        /// <param name="formatMessage"></param>
-        /// <param name="args">Arguments of the formatting string.</param>
-        void Report( Severity severity, string id, string formatMessage, params object[] args );
+        /// <param name="location">The code location to which the diagnostic should be written.</param>
+        /// <param name="definition"></param>
+        /// <param name="arguments"></param>
+        void Report<T>( IDiagnosticLocation? location, DiagnosticDefinition<T> definition, T arguments );
 
         /// <summary>
         /// Suppresses a diagnostic by specifying the element of code in which the suppression must be effective.
         /// </summary>
-        /// <param name="id">The id of the identifier to suppress.</param>
         /// <param name="scope">The code element in which the diagnostic must be suppressed.</param>
-        void Suppress( string id, ICodeElement scope );
-
-        /// <summary>
-        /// Suppresses a diagnostic in the current target declaration.
-        /// </summary>
-        /// <param name="id"></param>
-        void Suppress( string id );
+        /// <param name="definition"></param>
+        void Suppress( ICodeElement? scope, SuppressionDefinition definition );
     }
 }

@@ -76,7 +76,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 }
             }
         }
-        
+
         internal void OnExternalBuildStarted()
         {
             this.Reset();
@@ -160,7 +160,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 return compilationChange;
             }
-            
+
             void OnCompileTimeChange()
             {
                 if ( this.Status == DesignTimeAspectPipelineStatus.Ready )
@@ -295,8 +295,9 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <inheritdoc/>
         private protected override HighLevelPipelineStage CreateStage(
             IReadOnlyList<OrderedAspectLayer> parts,
+            CompileTimeProject compileTimeProject,
             CompileTimeProjectLoader compileTimeProjectLoader )
-            => new SourceGeneratorPipelineStage( parts, this );
+            => new SourceGeneratorPipelineStage( compileTimeProject, parts, this );
 
         protected override void Dispose( bool disposing )
         {
