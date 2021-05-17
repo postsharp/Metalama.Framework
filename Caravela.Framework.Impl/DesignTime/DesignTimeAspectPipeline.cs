@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.DesignTime.UserDiagnostics;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
@@ -281,13 +282,17 @@ namespace Caravela.Framework.Impl.DesignTime
 
             var success = TryExecuteCore( compilation, diagnosticList, configuration, out var pipelineResult );
 
-            return new DesignTimeAspectPipelineResult(
+            var result = new DesignTimeAspectPipelineResult(
                 success,
                 compilation.SyntaxTrees,
                 pipelineResult?.AdditionalSyntaxTrees ?? Array.Empty<IntroducedSyntaxTree>(),
                 new ImmutableDiagnosticList(
                     diagnosticList.ToImmutableArray(),
                     pipelineResult?.Diagnostics.DiagnosticSuppressions ) );
+
+            UserDiagnosticRegistrationService.GetInstance().RegisterDescriptors( result );
+
+            return result;
         }
 
         public override bool CanTransformCompilation => false;

@@ -1,48 +1,50 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.DesignTime.UserDiagnostics;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
-    internal static class DesignTimeDiagnosticDefinitions
+    internal class DesignTimeDiagnosticDefinitions
     {
-        public static ImmutableArray<DiagnosticDescriptor> SupportedDiagnosticDescriptors { get; }
+        private static DesignTimeDiagnosticDefinitions? _instance;
 
-        public static ImmutableHashSet<string> SupportedDiagnosticIds { get; }
+        public ImmutableDictionary<string, DiagnosticDescriptor> SupportedDiagnosticDescriptors { get; }
 
-        static DesignTimeDiagnosticDefinitions()
+        public ImmutableDictionary<string, SuppressionDescriptor> SupportedSuppressionDescriptors { get; }
+
+        public static DesignTimeDiagnosticDefinitions GetInstance()
+            => LazyInitializer.EnsureInitialized( ref _instance, () => new DesignTimeDiagnosticDefinitions() )!;
+
+        public static ImmutableDictionary<string, DiagnosticDescriptor> StandardDiagnosticDescriptors { get; } = DiagnosticDefinitionHelper
+            .GetDiagnosticDefinitions(
+                typeof(TemplatingDiagnosticDescriptors),
+                typeof(DesignTimeDiagnosticDescriptors),
+                typeof(GeneralDiagnosticDescriptors),
+                typeof(SerializationDiagnosticDescriptors) )
+            .Select( d => d.ToRoslynDescriptor() )
+            .ToImmutableDictionary( d => d.Id, d => d, StringComparer.CurrentCultureIgnoreCase );
+
+        private DesignTimeDiagnosticDefinitions()
         {
             CompilerServiceProvider.Initialize();
+            var supportedDescriptors = UserDiagnosticRegistrationService.GetInstance().GetSupportedDescriptors();
 
-            SupportedDiagnosticDescriptors = DiagnosticDefinitionHelper
-                .GetDiagnosticDefinitions(
-                    typeof(TemplatingDiagnosticDescriptors),
-                    typeof(DesignTimeDiagnosticDescriptors),
-                    typeof(GeneralDiagnosticDescriptors),
-                    typeof(SerializationDiagnosticDescriptors) )
-                .Select( d => d.ToRoslynDescriptor() )
-                .ToImmutableArray();
+            this.SupportedDiagnosticDescriptors =
+                StandardDiagnosticDescriptors.Values
+                    .Concat( supportedDescriptors.Diagnostics )
+                    .ToImmutableDictionary( d => d.Id, d => d, StringComparer.OrdinalIgnoreCase );
 
-            SupportedDiagnosticIds = SupportedDiagnosticDescriptors.Select( x => x.Id ).ToImmutableHashSet();
+            this.SupportedSuppressionDescriptors =
+                supportedDescriptors.Suppressions.ToImmutableDictionary( d => d.SuppressedDiagnosticId, d => d, StringComparer.OrdinalIgnoreCase );
         }
-
-        private static readonly string[] _supportedSuppressions = { "CS1998", "IDE0051" };
-
-        // TODO: This is a temporary hack to statically declare suppressions supported in the sample app.
-
-        public static ImmutableDictionary<string, SuppressionDescriptor> SupportedSuppressionDescriptors { get; } = _supportedSuppressions.Select(
-                id => new KeyValuePair<string, SuppressionDescriptor>(
-                    "Caravela." + id,
-                    new SuppressionDescriptor( "Caravela." + id, id, "Caravela" ) ) )
-            .ToImmutableDictionary();
-
-        public static bool IsSuppressionSupported( string id ) => SupportedSuppressionDescriptors.ContainsKey( id );
     }
 }

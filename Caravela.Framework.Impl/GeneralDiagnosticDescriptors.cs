@@ -78,29 +78,29 @@ namespace Caravela.Framework.Impl
                 "The template method does not have the expected custom attribute." );
 
         public static readonly DiagnosticDefinition<(INamedType AspectType, string MethodName)> AspectMustHaveExactlyOneTemplateMethod = new(
-            "CR0024", _category, "The type '{0}' must have exactly one method named '{1}'.", Error,
+            "CR0025", _category, "The type '{0}' must have exactly one method named '{1}'.", Error,
             "The aspect type must have exactly one method of a given name otherwise it cannot be used as a dynamic advice." );
 
         public static readonly DiagnosticDefinition<(INamedTypeSymbol AspectType, string ExceptionType, Exception Exception)> ExceptionInUserCode = new(
-            "CR0025", _category, "The aspect '{0}' has thrown an exception of the '{1}': {2}", Error, "The aspect has thrown an exception." );
+            "CR0026", _category, "The aspect '{0}' has thrown an exception of the '{1}': {2}", Error, "The aspect has thrown an exception." );
 
         public static readonly DiagnosticDefinition<AssemblyIdentity> CannotFindCompileTimeAssembly = new(
-            "CR0026", _category, "The assembly '{0}' required at compile-time cannot be found.", Error,
+            "CR0027", _category, "The assembly '{0}' required at compile-time cannot be found.", Error,
             "Cannot find an assembly required by the compile-time assembly." );
 
         public static readonly DiagnosticDefinition<(string AspectType, ICodeElementBuilder MemberBuilder, INamedType AttributeType)>
             CompatibleAttributeConstructorDoesNotExist = new(
-                "CR0027", _category, "The aspect '{0}' cannot add attribute '{1}' to member '{2}' because no compatible constructor exists for given types.",
+                "CR0028", _category, "The aspect '{0}' cannot add attribute '{1}' to member '{2}' because no compatible constructor exists for given types.",
                 Error, "Compatible attribute constructor does not exist." );
 
         public static readonly DiagnosticDefinition<string>
             InvalidCachedManifestFile = new(
-                "CR0028", _category, "The cache file '{0}' was corrupted. It has been deleted. Please restart the compilation.", Error,
+                "CR0029", _category, "The cache file '{0}' was corrupted. It has been deleted. Please restart the compilation.", Error,
                 "The compile-time project manifest file is corrupted." );
 
         public static readonly DiagnosticDefinition<string>
             InvalidCompileTimeProjectResource = new(
-                "CR0029", _category, "The compile-time project in assembly '{0}' is corrupted.", Error,
+                "CR0030", _category, "The compile-time project in assembly '{0}' is corrupted.", Error,
                 "The compile-time project resource file was corrupted." );
     }
 }

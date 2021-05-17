@@ -286,7 +286,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 EmitResult emitResult;
 
-                using ( var peStream = File.Create( outputInfo.Pe ) ) 
+                using ( var peStream = File.Create( outputInfo.Pe ) )
                 using ( var pdbStream = File.Create( outputInfo.Pdb ) )
                 {
                     emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions );

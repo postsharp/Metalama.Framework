@@ -40,7 +40,8 @@ namespace Caravela.Framework.Impl.DesignTime
                 = new(
                     "CR0302",
                     "A Caravela user warning.",
-                    "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID.",
+                    "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID. "
+                    + "Please restart your IDE.",
                     _category,
                     Warning );
 
@@ -49,23 +50,25 @@ namespace Caravela.Framework.Impl.DesignTime
                 = new(
                     "CR0303",
                     "A Caravela user info.",
-                    "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID.",
+                    "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID. "
+                    + " Please restart your IDE.",
                     _category,
                     Info );
 
         internal static readonly DiagnosticDefinition<(string Id, string Message)>
             UserHidden
                 = new(
-                    "CR0303",
+                    "CR0304",
                     "A Caravela hidden message.",
-                    "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID.",
+                    "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID." 
+                    + " Please restart your IDE.",
                     _category,
                     Hidden );
 
         internal static readonly DiagnosticDefinition<ISymbol>
             CompileTimeTypeNeedsRebuild
                 = new(
-                    "CR0304",
+                    "CR0305",
                     "The compile-time type needs rebuild.",
                     "The compile-time type '{0}' has been modified since the last build. Caravela will stop analyzing this solution until the next build. "
                     + "To resume analysis, finish the work on all compile-time logic, and build the project (even if the run-time code still has issues).",
@@ -75,19 +78,19 @@ namespace Caravela.Framework.Impl.DesignTime
         internal static readonly DiagnosticDefinition<(string Id, ISymbol Symbol)>
             UnregisteredSuppression
                 = new(
-                    "CR0305",
+                    "CR0306",
                     "An aspect tried to suppress an unregistered diagnostic.",
-                    "An aspect tried to suppress the diagnostic {0} on '{1}', but this diagnostic ID has not been configured for " 
-                    + "suppression in the user profile.",
+                    "An aspect tried to suppress the diagnostic {0} on '{1}', but this diagnostic ID has not been configured for "
+                    + "suppression in the user profile. Please restart your IDE.",
                     _category,
                     Warning );
 
         internal static readonly DiagnosticDefinition<INamedType>
             TypeNotPartial
                 = new(
-                    "CR0306",
+                    "CR0307",
                     "The type must be made partial.",
-                    "Aspects add members to '{0}' but it is not marked as 'partial'. Make the type 'partial' to make it possible to " 
+                    "Aspects add members to '{0}' but it is not marked as 'partial'. Make the type 'partial' to make it possible to "
                     + "referenced aspect-generated artefacts from source code.",
                     _category,
                     Warning );

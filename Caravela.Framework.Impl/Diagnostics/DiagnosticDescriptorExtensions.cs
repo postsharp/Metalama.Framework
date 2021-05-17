@@ -13,9 +13,6 @@ namespace Caravela.Framework.Impl.Diagnostics
         public static DiagnosticDescriptor ToRoslynDescriptor( this IDiagnosticDefinition definition )
             => new( definition.Id, definition.Title, definition.MessageFormat, definition.Category, definition.Severity.ToRoslynSeverity(), true );
 
-        public static SuppressionDescriptor ToRoslynDescriptor( this SuppressionDefinition definition )
-            => new( definition.Id, definition.SuppressedDiagnosticId, "Suppressed by Caravela" );
-
         /// <summary>
         /// Creates an <see cref="InvalidUserCodeException"/> instance based on the current descriptor and given arguments.
         /// The diagnostic location is taken from <see cref="DiagnosticContext"/>. This method must be called in user-called code

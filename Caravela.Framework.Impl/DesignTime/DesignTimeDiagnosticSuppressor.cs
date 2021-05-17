@@ -20,6 +20,8 @@ namespace Caravela.Framework.Impl.DesignTime
     /// </summary>
     public class DesignTimeDiagnosticSuppressor : DiagnosticSuppressor
     {
+        private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
+
         public override void ReportSuppressions( SuppressionAnalysisContext context )
         {
             if ( CaravelaCompilerInfo.IsActive ||
@@ -41,7 +43,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 DesignTimeDebugger.AttachDebugger( buildOptions );
 
-                ReportSuppressions(
+                this.ReportSuppressions(
                     compilation,
                     syntaxTrees,
                     context.ReportedDiagnostics,
@@ -58,7 +60,7 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <summary>
         /// A testable overload of <see cref="ReportSuppressions(SuppressionAnalysisContext)"/>.
         /// </summary>
-        private static void ReportSuppressions(
+        private void ReportSuppressions(
             Compilation compilation,
             IReadOnlyList<SyntaxTree> syntaxTrees,
             ImmutableArray<Diagnostic> reportedDiagnostics,
@@ -86,7 +88,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 if ( !syntaxTreeResult.Suppressions.IsDefaultOrEmpty )
                 {
                     var designTimeSuppressions = syntaxTreeResult.Suppressions.Where(
-                        s => DesignTimeDiagnosticDefinitions.IsSuppressionSupported( s.Definition.SuppressedDiagnosticId ) );
+                        s => this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) );
 
                     var groupedSuppressions = ImmutableMultiValueDictionary<string, CacheableScopedSuppression>.Create(
                         designTimeSuppressions,
@@ -118,8 +120,8 @@ namespace Caravela.Framework.Impl.DesignTime
                         {
                             suppressionsCount++;
 
-                            if ( DesignTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.TryGetValue(
-                                suppression.Definition.Id,
+                            if ( this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.TryGetValue(
+                                suppression.Definition.SuppressedDiagnosticId,
                                 out var suppressionDescriptor ) )
                             {
                                 reportSuppression( Suppression.Create( suppressionDescriptor, diagnostic ) );
@@ -138,6 +140,6 @@ namespace Caravela.Framework.Impl.DesignTime
         }
 
         public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions
-            => DesignTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.Values.ToImmutableArray();
+            => this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.Values.ToImmutableArray();
     }
 }

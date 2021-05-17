@@ -10,13 +10,8 @@ namespace Caravela.Framework.Diagnostics
     /// defined as static fields or properties of an aspect classes. Suppressions are instantiated with <see cref="IDiagnosticSink.Suppress"/>.
     /// </summary>
     [CompileTimeOnly]
-    public sealed class SuppressionDefinition
+    public sealed class SuppressionDefinition : ISuppressionDefinition
     {
-        /// <summary>
-        /// Gets the identifier of the suppression (not to be confused with <see cref="SuppressedDiagnosticId"/>).
-        /// </summary>
-        internal string Id { get; }
-        
         /// <summary>
         /// Gets the ID of the diagnostic to be suppressed (e.g. <c>CS0169</c>).
         /// </summary>
@@ -28,7 +23,6 @@ namespace Caravela.Framework.Diagnostics
         /// <param name="suppressedDiagnosticId">The ID of the diagnostic to be suppressed (e.g. <c>CS0169</c>).</param>
         public SuppressionDefinition( string suppressedDiagnosticId )
         {
-            this.Id = "Caravela." + suppressedDiagnosticId;
             this.SuppressedDiagnosticId = suppressedDiagnosticId;
         }
     }

@@ -19,7 +19,10 @@ namespace Caravela.Framework.Impl.DesignTime
     /// </summary>
     public class DesignTimeAnalyzer : DiagnosticAnalyzer
     {
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => DesignTimeDiagnosticDefinitions.SupportedDiagnosticDescriptors;
+        private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
+
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
+            => this._designTimeDiagnosticDefinitions.SupportedDiagnosticDescriptors.Values.ToImmutableArray();
 
         public override void Initialize( AnalysisContext context )
         {
@@ -65,7 +68,8 @@ namespace Caravela.Framework.Impl.DesignTime
                         true );
 
                     // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
-                    foreach ( var suppression in result.Suppressions.Where( s => !DesignTimeDiagnosticDefinitions.IsSuppressionSupported( s.Definition.Id ) ) )
+                    foreach ( var suppression in result.Suppressions.Where(
+                        s => !this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
                     {
                         foreach ( var symbol in DocumentationCommentId.GetSymbolsForDeclarationId( suppression.SymbolId, context.Compilation ) )
                         {

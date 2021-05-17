@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 Diagnostic designTimeDiagnostic;
 
-                if ( !wrapUnknownDiagnostics || DesignTimeDiagnosticDefinitions.SupportedDiagnosticIds.Contains( diagnostic.Id ) )
+                if ( !wrapUnknownDiagnostics || DesignTimeDiagnosticDefinitions.GetInstance().SupportedDiagnosticDescriptors.ContainsKey( diagnostic.Id ) )
                 {
                     designTimeDiagnostic = diagnostic;
                 }
