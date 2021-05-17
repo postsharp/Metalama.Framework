@@ -12,8 +12,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// <summary>
     /// The main compile-time entry point of Caravela. An implementation of Caravela.Compiler's <see cref="ISourceTransformer"/>.
     /// </summary>
-    [Transformer]
-    internal sealed class AspectPipelineTransformer : ISourceTransformer
+    internal sealed class SourceTransformer : ISourceTransformer
     {
         public Compilation Execute( TransformerContext transformerContext )
         {

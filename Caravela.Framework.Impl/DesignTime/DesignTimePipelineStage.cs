@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,14 +17,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Caravela.Framework.Impl.DesignTime
 {
     /// <summary>
-    /// An implementation of <see cref="SourceGeneratorPipelineStage"/> called from source generators.
+    /// An implementation of <see cref="DesignTimePipelineStage"/> called from source generators.
     /// </summary>
-    internal class SourceGeneratorPipelineStage : HighLevelPipelineStage
+    internal class DesignTimePipelineStage : HighLevelPipelineStage
     {
-        public SourceGeneratorPipelineStage(
+        public DesignTimePipelineStage(
             CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             IAspectPipelineProperties properties )
@@ -48,14 +49,16 @@ namespace Caravela.Framework.Impl.Pipeline
                     continue;
                 }
 
-                /*
                 if ( !declaringType.IsPartial )
                 {
                     // If the type is not marked as partial, we can emit a diagnostic and a code fix, but not a partial class itself.
-                    // TODO: emit diagnostic.
+                    diagnostics.Report(
+                        DesignTimeDiagnosticDescriptors.TypeNotPartial.CreateDiagnostic( declaringType.GetDiagnosticLocation(), declaringType ) );
+
                     continue;
                 }
-                */
+
+                // TODO: support struct, record.
 
                 // Create a class.
                 var classDeclaration = SyntaxFactory.ClassDeclaration(
@@ -117,7 +120,7 @@ namespace Caravela.Framework.Impl.Pipeline
             return new PipelineStageResult(
                 input.PartialCompilation,
                 input.AspectLayers,
-                input.Diagnostics.Concat( pipelineStepResult.Diagnostics ),
+                input.Diagnostics.Concat( pipelineStepResult.Diagnostics ).Concat( diagnostics.ToImmutable() ),
                 Array.Empty<ResourceDescription>(),
                 input.AspectSources.Concat( pipelineStepResult.ExternalAspectSources ),
                 input.AdditionalSyntaxTrees.Concat( additionalSyntaxTrees ) );

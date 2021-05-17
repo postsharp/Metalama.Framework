@@ -297,7 +297,7 @@ namespace Caravela.Framework.Impl.DesignTime
             IReadOnlyList<OrderedAspectLayer> parts,
             CompileTimeProject compileTimeProject,
             CompileTimeProjectLoader compileTimeProjectLoader )
-            => new SourceGeneratorPipelineStage( compileTimeProject, parts, this );
+            => new DesignTimePipelineStage( compileTimeProject, parts, this );
 
         protected override void Dispose( bool disposing )
         {

@@ -3,7 +3,6 @@
 
 namespace Caravela.Framework.Diagnostics
 {
-
     /// <summary>
     /// Defines a diagnostic with a strongly-typed set of parameters that are typically specified by using a named tuple for generic parameter
     /// <typeparamref name="T"/>. For diagnostics that accept a single parameter, <typeparamref name="T"/> must be set to the type of this parameter. Diagnostics must be
@@ -14,7 +13,7 @@ namespace Caravela.Framework.Diagnostics
     public sealed class DiagnosticDefinition<T> : IDiagnosticDefinition
     {
         // Constructor used by internal code.
-        internal DiagnosticDefinition( string id, string title, string messageFormat, Severity severity, string category )
+        internal DiagnosticDefinition( string id, string category, string messageFormat, Severity severity, string title )
             : this( id, severity, messageFormat, title, category ) { }
 
         // Constructor used by internal code.

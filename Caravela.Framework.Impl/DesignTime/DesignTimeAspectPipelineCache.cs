@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.DesignTime
     /// </summary>
     internal class DesignTimeAspectPipelineCache : IDisposable
     {
-        private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeSourceGenerator).Assembly.GetName().Name;
+        private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineCache).Assembly.GetName().Name;
 
         private readonly ConditionalWeakTable<Compilation, object> _sync = new();
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();

@@ -15,7 +15,7 @@ namespace Caravela.Framework.Diagnostics
         /// <summary>
         /// Gets the identifier of the suppression (not to be confused with <see cref="SuppressedDiagnosticId"/>).
         /// </summary>
-        public string Id { get; }
+        internal string Id { get; }
         
         /// <summary>
         /// Gets the ID of the diagnostic to be suppressed (e.g. <c>CS0169</c>).
@@ -23,21 +23,13 @@ namespace Caravela.Framework.Diagnostics
         public string SuppressedDiagnosticId { get; }
 
         /// <summary>
-        /// Gets an optional justification.
-        /// </summary>
-        public string? Justification { get; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="SuppressionDefinition"/> class.
         /// </summary>
-        /// <param name="id">The identifier of the suppression itself (not to be confused with <paramref name="suppressedDiagnosticId"/>).</param>
         /// <param name="suppressedDiagnosticId">The ID of the diagnostic to be suppressed (e.g. <c>CS0169</c>).</param>
-        /// <param name="justification">An optional justification.</param>
-        public SuppressionDefinition( string id, string suppressedDiagnosticId, string? justification = null )
+        public SuppressionDefinition( string suppressedDiagnosticId )
         {
-            this.Id = id;
+            this.Id = "Caravela." + suppressedDiagnosticId;
             this.SuppressedDiagnosticId = suppressedDiagnosticId;
-            this.Justification = justification;
         }
     }
 }

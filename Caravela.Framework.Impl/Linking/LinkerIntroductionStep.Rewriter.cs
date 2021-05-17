@@ -76,7 +76,8 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private IEnumerable<string> GetSuppressions( ICodeElement codeElement ) => this._diagnosticSuppressions[codeElement].Select( s => s.Definition.SuppressedDiagnosticId );
+            private IEnumerable<string> GetSuppressions( ICodeElement codeElement )
+                => this._diagnosticSuppressions[codeElement].Select( s => s.Definition.SuppressedDiagnosticId );
 
             /// <summary>
             /// Adds suppression to a node. This is done both by adding <c>#pragma warning</c> trivia

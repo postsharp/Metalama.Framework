@@ -22,17 +22,15 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <param name="wrapUnknownDiagnostics">Determines whether unknown diagnostics should be wrapped into known diagnostics.</param>
         public static void ReportDiagnostics(
             IEnumerable<Diagnostic> diagnostics,
-            SyntaxTree newSyntaxTree,
+            Compilation compilation,
             Action<Diagnostic> reportDiagnostic,
             bool wrapUnknownDiagnostics )
         {
-            var selectedDiagnostics = diagnostics.Where( d => d.Location.SourceTree?.FilePath == newSyntaxTree.FilePath );
-
-            foreach ( var diagnostic in selectedDiagnostics )
+            foreach ( var diagnostic in diagnostics )
             {
                 Diagnostic designTimeDiagnostic;
 
-                if ( !wrapUnknownDiagnostics || DesignTimeAnalyzer.DesignTimeDiagnosticIds.Contains( diagnostic.Id ) )
+                if ( !wrapUnknownDiagnostics || DesignTimeDiagnosticDefinitions.SupportedDiagnosticIds.Contains( diagnostic.Id ) )
                 {
                     designTimeDiagnostic = diagnostic;
                 }
@@ -51,16 +49,22 @@ namespace Caravela.Framework.Impl.DesignTime
                     designTimeDiagnostic = descriptor.CreateDiagnostic( diagnostic.Location, (diagnostic.Id, diagnostic.GetMessage()) );
                 }
 
-                var originalSourceTree = designTimeDiagnostic.Location.SourceTree;
+                var reportSourceTree = designTimeDiagnostic.Location.SourceTree;
 
-                if ( originalSourceTree == null || originalSourceTree == newSyntaxTree )
+                if ( reportSourceTree == null || compilation.ContainsSyntaxTree( reportSourceTree ) )
                 {
                     reportDiagnostic( designTimeDiagnostic );
                 }
                 else
                 {
+                    // Find the new syntax tree in the compilation.
+
+                    // TODO: Optimize the indexation of the syntax trees of a compilation. We're doing that many times in many methods and we
+                    // could have a weak dictionary mapping a compilation to an index of syntax trees.
+                    var newSyntaxTree = compilation.SyntaxTrees.Single( t => t.FilePath == reportSourceTree.FilePath );
+
                     // Find the node in the new syntax tree corresponding to the node in the old syntax tree.
-                    var oldNode = originalSourceTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
+                    var oldNode = reportSourceTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
 
                     if ( !TryFindOldNodeInNewTree( oldNode, newSyntaxTree, out var newNode ) )
                     {

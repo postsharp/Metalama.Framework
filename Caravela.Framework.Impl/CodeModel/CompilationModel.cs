@@ -10,7 +10,7 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
+using Microsoft.CodeAnalysis.Editing;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -110,7 +110,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._allMemberAttributesByType = prototype._allMemberAttributesByType.AddRange( allAttributes, a => a.AttributeType );
         }
 
-        internal CSharpSyntaxGenerator SyntaxGenerator { get; } = new();
+        internal SyntaxGenerator SyntaxGenerator { get; } = LanguageServiceFactory.CSharpSyntaxGenerator;
 
         public int Revision { get; }
 

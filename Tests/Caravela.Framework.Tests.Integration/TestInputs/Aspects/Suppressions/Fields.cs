@@ -15,8 +15,8 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.Fields
 {
     public class SuppressWarningAttribute : Attribute, IAspect<IField>
     {
-        private static readonly SuppressionDefinition _suppression1 = new("MySup1", "CS0169" );
-        private static readonly SuppressionDefinition _suppression2 = new("MySup2", "CS0649" );
+        private static readonly SuppressionDefinition _suppression1 = new( "CS0169" );
+        private static readonly SuppressionDefinition _suppression2 = new( "CS0649" );
         
         public SuppressWarningAttribute()
         {

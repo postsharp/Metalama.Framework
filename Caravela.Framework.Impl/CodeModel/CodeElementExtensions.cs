@@ -9,7 +9,6 @@ using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using System;
@@ -207,7 +206,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     throw GeneralDiagnosticDescriptors.CannotProvideInstanceForStaticMember.CreateException( codeElement );
                 }
 
-                return (ExpressionSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( codeElement.DeclaringType!.GetSymbol() );
+                return (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( codeElement.DeclaringType!.GetSymbol() );
             }
 
             if ( instance == null )

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -16,10 +17,20 @@ namespace Caravela.Framework.Impl.DesignTime
 
         private DesignTimeLogger()
         {
+            // TODO: Move to Microsoft.Extensions.Logging.
+
             var pid = Process.GetCurrentProcess().Id;
 
+            var directory = Path.Combine( Path.GetTempPath(), "Caravela", "Logs" );
+
+            RetryHelper.Retry(
+                () =>
+                {
+                    if ( !Directory.Exists( directory ) ) { Directory.CreateDirectory( directory ); }
+                } );
+
             this._textWriter = File.CreateText(
-                Path.Combine( Path.GetTempPath(), $"Caravela.Framework.DesignTime.{Process.GetCurrentProcess().ProcessName}.{pid}.log" ) );
+                Path.Combine( directory, $"Caravela.Framework.DesignTime.{Process.GetCurrentProcess().ProcessName}.{pid}.log" ) );
 
             this.Write( $"Process={Process.GetCurrentProcess().ProcessName}, CommandLine={Environment.CommandLine}." );
         }

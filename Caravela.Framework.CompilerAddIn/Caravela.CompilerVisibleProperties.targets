@@ -5,7 +5,8 @@
     <!-- Exports the properties to the compiler -->
     <ItemGroup>
         <CompilerVisibleProperty Include="DebugCaravela" />
-        <CompilerVisibleProperty Include="DebugCaravelaDesignTime" />
+        <CompilerVisibleProperty Include="DebugCaravelaAnalyzer" />
+        <CompilerVisibleProperty Include="DebugCaravelaIde" />
         <CompilerVisibleProperty Include="CaravelaCrashReportDirectory" />
         <CompilerVisibleProperty Include="CaravelaCompileTimeProjectDirectory" />
         <CompilerVisibleProperty Include="CaravelaProjectId" />

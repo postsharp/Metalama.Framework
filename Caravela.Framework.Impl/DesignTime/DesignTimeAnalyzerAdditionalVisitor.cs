@@ -154,7 +154,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
         void IDiagnosticAdder.Report( Diagnostic diagnostic )
         {
-            if ( DesignTimeAnalyzer.DesignTimeDiagnosticIds.Contains( diagnostic.Id ) )
+            if ( DesignTimeDiagnosticDefinitions.SupportedDiagnosticIds.Contains( diagnostic.Id ) )
             {
                 this._reportDiagnostic( diagnostic );
             }

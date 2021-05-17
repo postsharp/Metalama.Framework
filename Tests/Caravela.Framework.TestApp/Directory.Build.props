@@ -6,7 +6,8 @@
 
   <PropertyGroup>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <DebugCaravelaDesignTime>false</DebugCaravelaDesignTime>
+    <DebugCaravelaAnalyzer>false</DebugCaravelaAnalyzer>
+	 <DebugCaravelaIde>false</DebugCaravelaIde>
     <!-- Overwrite from the parent directory -->
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>

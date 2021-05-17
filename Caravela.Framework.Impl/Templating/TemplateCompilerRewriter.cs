@@ -1140,7 +1140,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                 {
-                    return this.Visit( CSharpSyntaxGenerator.Instance.NameExpression( namespaceOrType ) )!;
+                    return this.Visit( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( namespaceOrType ) )!;
                 }
                 else if ( symbol != null && symbol.IsStatic && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
                 {
@@ -1153,7 +1153,7 @@ namespace Caravela.Framework.Impl.Templating
                             // We have an access to a field or method with a "using static", or a non-qualified static member access.
                             return this.MetaSyntaxFactory.MemberAccessExpression(
                                 this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
-                                (ExpressionSyntax) this.Visit( CSharpSyntaxGenerator.Instance.NameExpression( symbol.ContainingType ) )!,
+                                (ExpressionSyntax) this.Visit( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( symbol.ContainingType ) )!,
                                 this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
                     }
                 }
@@ -1176,7 +1176,7 @@ namespace Caravela.Framework.Impl.Templating
             switch ( symbol )
             {
                 case INamespaceOrTypeSymbol namespaceOrType:
-                    var nameExpression = CSharpSyntaxGenerator.Instance.NameExpression( namespaceOrType );
+                    var nameExpression = LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( namespaceOrType );
 
                     transformedNode = this.GetTransformationKind( node ) == TransformationKind.Transform
                         ? this.Transform( nameExpression )

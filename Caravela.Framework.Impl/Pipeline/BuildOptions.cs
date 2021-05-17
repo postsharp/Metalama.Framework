@@ -29,9 +29,11 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public BuildOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null ) : this( new OptionsAdapter( options ), plugIns ) { }
 
-        public bool CompileTimeAttachDebugger => this.GetBooleanOption( "DebugCaravela" );
+        public bool DebugCompilerProcess => this.GetBooleanOption( "DebugCaravela" );
 
-        public bool DesignTimeAttachDebugger => this.GetBooleanOption( "DebugCaravelaDesignTime" );
+        public bool DebugAnalyzerProcess => this.GetBooleanOption( "DebugCaravelaAnalyzer" );
+
+        public bool DebugIdeProcess => this.GetBooleanOption( "DebugCaravelaIde" );
 
         public bool MapPdbToTransformedCode => this.GetBooleanOption( "CaravelaDebugTransformedCode" );
 

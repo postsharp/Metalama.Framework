@@ -4,8 +4,6 @@
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Serialization;
-using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
@@ -19,30 +17,9 @@ namespace Caravela.Framework.Impl.DesignTime
     /// <summary>
     /// Our implementation of <see cref="DiagnosticAnalyzer"/>. It reports all diagnostics that we produce.
     /// </summary>
-    [DiagnosticAnalyzer( LanguageNames.CSharp )]
     public class DesignTimeAnalyzer : DiagnosticAnalyzer
     {
-        private static readonly ImmutableArray<DiagnosticDescriptor> _supportedDiagnosticDescriptors;
-
-        public static ImmutableHashSet<string> DesignTimeDiagnosticIds { get; }
-
-        static DesignTimeAnalyzer()
-        {
-            CompilerServiceProvider.Initialize();
-
-            _supportedDiagnosticDescriptors = DiagnosticDefinitionHelper
-                .GetDiagnosticDefinitions(
-                    typeof(TemplatingDiagnosticDescriptors),
-                    typeof(DesignTimeDiagnosticDescriptors),
-                    typeof(GeneralDiagnosticDescriptors),
-                    typeof(SerializationDiagnosticDescriptors) )
-                .Select( d => d.ToRoslynDescriptor() )
-                .ToImmutableArray();
-
-            DesignTimeDiagnosticIds = _supportedDiagnosticDescriptors.Select( x => x.Id ).ToImmutableHashSet();
-        }
-
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => _supportedDiagnosticDescriptors;
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => DesignTimeDiagnosticDefinitions.SupportedDiagnosticDescriptors;
 
         public override void Initialize( AnalysisContext context )
         {
@@ -83,12 +60,12 @@ namespace Caravela.Framework.Impl.DesignTime
 
                     DesignTimeDiagnosticHelper.ReportDiagnostics(
                         result.Diagnostics,
-                        result.SyntaxTree,
+                        context.Compilation,
                         context.ReportDiagnostic,
                         true );
-                    
+
                     // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
-                    foreach ( var suppression in result.Suppressions.Where( s=> !DesignTimeDiagnosticSuppressor.IsSuppressionSupported( s.Definition.SuppressedDiagnosticId ) ) ) 
+                    foreach ( var suppression in result.Suppressions.Where( s => !DesignTimeDiagnosticDefinitions.IsSuppressionSupported( s.Definition.Id ) ) )
                     {
                         foreach ( var symbol in DocumentationCommentId.GetSymbolsForDeclarationId( suppression.SymbolId, context.Compilation ) )
                         {
@@ -97,7 +74,9 @@ namespace Caravela.Framework.Impl.DesignTime
                             if ( location is not null )
                             {
                                 context.ReportDiagnostic(
-                                    DesignTimeDiagnosticDescriptors.UnregisteredSuppression.CreateDiagnostic( location, (Id: suppression.Definition.SuppressedDiagnosticId, symbol) ) );
+                                    DesignTimeDiagnosticDescriptors.UnregisteredSuppression.CreateDiagnostic(
+                                        location,
+                                        (Id: suppression.Definition.SuppressedDiagnosticId, symbol) ) );
                             }
                         }
                     }

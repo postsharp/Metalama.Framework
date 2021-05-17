@@ -34,7 +34,9 @@ namespace Caravela.Framework.Impl.CompileTime
             this.DiagnosticDescriptions = items.SelectMany( i => i.DiagnosticDescriptions ).ToImmutableArray();
             this.SuppressionDescriptions = items.SelectMany( i => i.SuppressionDescriptions ).ToImmutableArray();
             this._definedDiagnostics = this.DiagnosticDescriptions.Select( d => d.Id ).ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
-            this._definedSuppressions = this.SuppressionDescriptions.Select( d => d.SuppressedDiagnosticId ).ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
+
+            this._definedSuppressions = this.SuppressionDescriptions.Select( d => d.SuppressedDiagnosticId )
+                .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
         }
 
         public bool DefinesDiagnostic( string id ) => this._definedDiagnostics.Contains( id );

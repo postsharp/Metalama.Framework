@@ -8,10 +8,10 @@ using Caravela.Framework.TestApp.Aspects;
 
 namespace Caravela.Framework.TestApp
 {
-    [IntroduceSomeMethodAspect("Foo", "Bar")]
-    internal partial class Program
+    [IntroduceSomeMethodAspect("Foo", "Bar")] 
+    internal class Program 
     {
-        [SuppressWarning("CS1998", "IDE0051")]
+        [SuppressWarning]
         private static async Task MethodAsync()
         {
             
@@ -23,8 +23,8 @@ namespace Caravela.Framework.TestApp
 
             int x = 0;
 
-            Foo();
-            new Program().SomeOtherIntroducedMethod();
+           // Foo();
+       //     new Program().SomeOtherIntroducedMethod();
 
            // IMethod m = null;
             // m.Base.Invoke( null );

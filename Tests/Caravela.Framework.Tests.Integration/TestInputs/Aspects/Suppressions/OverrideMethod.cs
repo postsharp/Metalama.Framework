@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMet
 {
     public class SuppressWarningAttribute : Attribute, IAspect<IMethod>
     {
-        private static readonly SuppressionDefinition _suppression = new("MySup1",  "CS0219" );
+        private static readonly SuppressionDefinition _suppression = new( "CS0219" );
         
         public SuppressWarningAttribute()
         {

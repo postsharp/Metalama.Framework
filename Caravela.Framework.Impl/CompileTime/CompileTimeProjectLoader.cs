@@ -307,7 +307,7 @@ namespace Caravela.Framework.Impl.CompileTime
         }
 
         private bool TryDeserializeCompileTimeProject(
-            AssemblyIdentity assemblyIdentity,
+            AssemblyIdentity runTimeAssemblyIdentity,
             Stream resourceStream,
             IDiagnosticAdder diagnosticAdder,
             [NotNullWhen( true )] out CompileTimeProject? project )
@@ -320,7 +320,7 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( !CompileTimeProjectManifest.TryDeserialize( manifestEntry.Open(), out var manifest ) )
             {
                 diagnosticAdder.Report(
-                    GeneralDiagnosticDescriptors.InvalidCompileTimeProjectResource.CreateDiagnostic( Location.None, assemblyIdentity.ToString() ) );
+                    GeneralDiagnosticDescriptors.InvalidCompileTimeProjectResource.CreateDiagnostic( Location.None, runTimeAssemblyIdentity.ToString() ) );
 
                 project = null;
 
@@ -363,8 +363,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
             // Deserialize the project.
             if ( !this._builder.TryCompileDeserializedProject(
-                assemblyIdentity.Name,
+                runTimeAssemblyIdentity.Name,
                 syntaxTrees,
+                manifest.SourceHash,
                 referenceProjects,
                 diagnosticAdder,
                 out var assemblyPath,
@@ -381,7 +382,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             project = CompileTimeProject.Create(
                 this._domain,
-                assemblyIdentity,
+                runTimeAssemblyIdentity,
                 new AssemblyIdentity( compileTimeAssemblyName ),
                 referenceProjects,
                 manifest,

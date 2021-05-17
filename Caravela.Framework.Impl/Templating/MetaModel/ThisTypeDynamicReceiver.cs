@@ -2,10 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public RuntimeExpression CreateMemberAccessExpression( string member )
             => new( SyntaxFactory.MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            (ExpressionSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( this._type.GetSymbol() ),
+                            (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this._type.GetSymbol() ),
                             SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
                         .AddLinkerAnnotation( this._linkerAnnotation ) );
     }

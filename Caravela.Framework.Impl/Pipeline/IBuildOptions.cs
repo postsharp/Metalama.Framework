@@ -15,12 +15,14 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Gets a value indicating whether the debugger should be attached to the process at compile time.
         /// </summary>
-        bool CompileTimeAttachDebugger { get; }
+        bool DebugCompilerProcess { get; }
 
         /// <summary>
         /// Gets a value indicating whether the debugger should be attached to the process at design time.
         /// </summary>
-        bool DesignTimeAttachDebugger { get; }
+        bool DebugAnalyzerProcess { get; }
+
+        public bool DebugIdeProcess { get; }
 
         /// <summary>
         /// Gets a value indicating whether the produced PDB file should map to transformed code. When <c>false</c>, it will

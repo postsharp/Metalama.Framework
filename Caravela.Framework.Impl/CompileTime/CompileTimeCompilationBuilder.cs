@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this._domain = domain;
         }
 
-        private static ulong ComputeSourceHash( IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log )
+        private static ulong ComputeSourceHash( IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log = null )
         {
             log?.AppendLine( nameof(ComputeSourceHash) );
             XXH64 h = new();
@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private static ulong ComputeProjectHash(
             IEnumerable<CompileTimeProject> referencedProjects,
             ulong sourceHash,
-            StringBuilder? log )
+            StringBuilder? log = null )
         {
             log?.AppendLine( nameof(ComputeProjectHash) );
 
@@ -172,7 +172,7 @@ namespace Caravela.Framework.Impl.CompileTime
             string runTimeAssemblyName,
             IEnumerable<CompileTimeProject> referencedProjects,
             ulong sourceHash,
-            StringBuilder? log )
+            StringBuilder? log = null )
         {
             var projectHash = ComputeProjectHash( referencedProjects, sourceHash, log );
 
@@ -227,8 +227,6 @@ namespace Caravela.Framework.Impl.CompileTime
             var outputInfo = this.GetOutputPaths( compileTimeCompilation.AssemblyName! );
 
             var sourceFilesList = new List<CompileTimeFile>();
-
-            DeleteOutputFiles();
 
             try
             {
@@ -286,10 +284,13 @@ namespace Caravela.Framework.Impl.CompileTime
                     mutex.ReleaseMutex();
                 }
 
-                using var peStream = File.Create( outputInfo.Pe );
-                using var pdbStream = File.Create( outputInfo.Pdb );
+                EmitResult emitResult;
 
-                var emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions );
+                using ( var peStream = File.Create( outputInfo.Pe ) ) 
+                using ( var pdbStream = File.Create( outputInfo.Pdb ) )
+                {
+                    emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions );
+                }
 
                 diagnosticSink.ReportDiagnostics( emitResult.Diagnostics.Where( d => d.Severity >= DiagnosticSeverity.Error ) );
 
@@ -311,19 +312,23 @@ namespace Caravela.Framework.Impl.CompileTime
 
             void DeleteOutputFiles()
             {
-                try
-                {
-                    if ( File.Exists( outputInfo.Pe ) )
+                RetryHelper.Retry(
+                    () =>
                     {
-                        File.Delete( outputInfo.Pe );
-                    }
+                        if ( File.Exists( outputInfo.Pe ) )
+                        {
+                            File.Delete( outputInfo.Pe );
+                        }
+                    } );
 
-                    if ( File.Exists( outputInfo.Pdb ) )
+                RetryHelper.Retry(
+                    () =>
                     {
-                        File.Delete( outputInfo.Pdb );
-                    }
-                }
-                catch ( IOException ) { }
+                        if ( File.Exists( outputInfo.Pdb ) )
+                        {
+                            File.Delete( outputInfo.Pdb );
+                        }
+                    } );
             }
         }
 
@@ -575,22 +580,35 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Tries to compile (to a binary image) a project given its manifest and syntax trees. 
         /// </summary>
         public bool TryCompileDeserializedProject(
-            string assemblyName,
+            string runTimeAssemblyName,
             IReadOnlyList<SyntaxTree> syntaxTrees,
+            ulong syntaxTreeHash,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             IDiagnosticAdder diagnosticAdder,
             out string assemblyPath,
             out string sourceDirectory )
         {
-            var outputInfo = this.GetOutputPaths( assemblyName );
+            var compileTimeAssemblyName = GetCompileTimeAssemblyName( runTimeAssemblyName, referencedProjects, syntaxTreeHash );
 
-            var compilation = this.CreateEmptyCompileTimeCompilation( assemblyName, referencedProjects )
+            var outputInfo = this.GetOutputPaths( compileTimeAssemblyName );
+
+            var compilation = this.CreateEmptyCompileTimeCompilation( compileTimeAssemblyName, referencedProjects )
                 .AddSyntaxTrees( syntaxTrees );
 
             assemblyPath = outputInfo.Pe;
             sourceDirectory = outputInfo.Directory;
 
-            return this.TryEmit( compilation, diagnosticAdder, null, out _ );
+            if ( File.Exists( outputInfo.Pe ) )
+            {
+                // If the file already exists, given that it has a strong hash, it means that the assembly has already been 
+                // emitted and it does not need to be done a second time.
+
+                return true;
+            }
+            else
+            {
+                return this.TryEmit( compilation, diagnosticAdder, null, out _ );
+            }
         }
     }
 }

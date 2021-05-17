@@ -8,14 +8,13 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-
     internal static class DiagnosticDescriptorExtensions
     {
         public static DiagnosticDescriptor ToRoslynDescriptor( this IDiagnosticDefinition definition )
             => new( definition.Id, definition.Title, definition.MessageFormat, definition.Category, definition.Severity.ToRoslynSeverity(), true );
 
         public static SuppressionDescriptor ToRoslynDescriptor( this SuppressionDefinition definition )
-            => new( definition.Id, definition.SuppressedDiagnosticId, definition.Justification ?? "" );
+            => new( definition.Id, definition.SuppressedDiagnosticId, "Suppressed by Caravela" );
 
         /// <summary>
         /// Creates an <see cref="InvalidUserCodeException"/> instance based on the current descriptor and given arguments.
@@ -60,7 +59,7 @@ namespace Caravela.Framework.Impl.Diagnostics
                 argumentArray = new object[] { arguments };
             }
 
-            return definition.CreateDiagnostic( location, argumentArray, additionalLocations );
+            return definition.CreateDiagnosticImpl( location, argumentArray, additionalLocations );
         }
 
         public static Diagnostic CreateDiagnostic(
@@ -68,17 +67,14 @@ namespace Caravela.Framework.Impl.Diagnostics
             Location? location,
             object[]? arguments = null,
             IEnumerable<Location>? additionalLocations = null )
-        {
-            return definition.CreateDiagnostic( location, arguments, additionalLocations );
-        }
+            => definition.CreateDiagnosticImpl( location, arguments, additionalLocations );
 
-        private static Diagnostic CreateDiagnostic(
+        private static Diagnostic CreateDiagnosticImpl(
             this IDiagnosticDefinition definition,
             Location? location,
-            object[] arguments,
+            object[]? arguments,
             IEnumerable<Location>? additionalLocations )
-        {
-            return Diagnostic.Create(
+            => Diagnostic.Create(
                 definition.Id,
                 definition.Category,
                 new NonLocalizedString( definition.MessageFormat, arguments ),
@@ -88,6 +84,5 @@ namespace Caravela.Framework.Impl.Diagnostics
                 definition.Severity == Severity.Error ? 0 : 1,
                 location: location,
                 additionalLocations: additionalLocations );
-        }
     }
 }

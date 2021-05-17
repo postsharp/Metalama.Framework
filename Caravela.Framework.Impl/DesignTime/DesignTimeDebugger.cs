@@ -20,7 +20,12 @@ namespace Caravela.Framework.Impl.DesignTime
         /// </summary>
         public static void AttachDebugger( IBuildOptions buildOptions )
         {
-            if ( buildOptions.DesignTimeAttachDebugger && !_attachDebuggerRequested )
+            var mustAttachDebugger =
+                Process.GetCurrentProcess().ProcessName.Equals( "devenv", StringComparison.OrdinalIgnoreCase )
+                    ? buildOptions.DebugIdeProcess
+                    : buildOptions.DebugAnalyzerProcess;
+
+            if ( mustAttachDebugger && !_attachDebuggerRequested )
             {
                 lock ( _sync )
                 {
@@ -30,8 +35,7 @@ namespace Caravela.Framework.Impl.DesignTime
                         // detaches. It makes a better debugging experience.
                         _attachDebuggerRequested = true;
 
-                        if ( !Process.GetCurrentProcess().ProcessName.Equals( "devenv", StringComparison.OrdinalIgnoreCase ) &&
-                             !Debugger.IsAttached )
+                        if ( !Debugger.IsAttached )
                         {
                             Debugger.Launch();
                         }

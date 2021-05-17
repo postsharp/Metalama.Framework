@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -350,7 +350,7 @@ namespace Caravela.Framework.Impl.Linking
                         if ( originalSymbol.IsStatic )
                         {
                             return memberAccess.Update(
-                                (ExpressionSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( methodSymbol.ContainingType ),
+                                (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( methodSymbol.ContainingType ),
                                 memberAccess.OperatorToken,
                                 IdentifierName( methodSymbol.Name ) );
                         }
@@ -381,7 +381,7 @@ namespace Caravela.Framework.Impl.Linking
                         // TODO: Do this properly.
                         return MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            (ExpressionSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( methodSymbol.ContainingType ),
+                            (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( methodSymbol.ContainingType ),
                             IdentifierName( methodSymbol.Name ) );
                     }
                     else

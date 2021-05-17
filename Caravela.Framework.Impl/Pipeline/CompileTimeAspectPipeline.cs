@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Pipeline
             domain,
             assemblyLocator )
         {
-            if ( this.BuildOptions.CompileTimeAttachDebugger )
+            if ( this.BuildOptions.DebugCompilerProcess )
             {
                 if ( !Debugger.IsAttached )
                 {

@@ -15,11 +15,14 @@ namespace Caravela.Framework.Impl.Utilities
     /// </summary>
     internal class AssemblyMetadataReader
     {
+        private readonly Assembly _assembly;
         private readonly Dictionary<string, string> _metadata = new( StringComparer.OrdinalIgnoreCase );
         private static readonly ConditionalWeakTable<Assembly, AssemblyMetadataReader> _instances = new();
 
         private AssemblyMetadataReader( Assembly assembly )
         {
+            this._assembly = assembly;
+
             foreach ( var attribute in assembly.GetCustomAttributes( typeof(AssemblyMetadataAttribute) ).Cast<AssemblyMetadataAttribute>() )
             {
                 this._metadata.Add( attribute.Key, attribute.Value );
@@ -49,7 +52,8 @@ namespace Caravela.Framework.Impl.Utilities
         public string GetPackageVersion( string packageName )
             => this._metadata.TryGetValue( "Package:" + packageName, out var version )
                 ? version
-                : throw new AssertionFailedException( $"The AssemblyMetadataAttribute for package {packageName} is not defined." );
+                : throw new AssertionFailedException(
+                    $"The AssemblyMetadataAttribute for package '{packageName}' is not defined in assembly '{this._assembly.GetName()}'." );
 
         /// <summary>
         /// Gets the unique BuildId for this assembly.
@@ -57,11 +61,13 @@ namespace Caravela.Framework.Impl.Utilities
         public string BuildId
             => this._metadata.TryGetValue( "BuildId", out var value )
                 ? value
-                : throw new AssertionFailedException( "The AssemblyMetadataAttribute BuildId was not defined." );
+                : throw new AssertionFailedException( $"The AssemblyMetadataAttribute 'BuildId' was not defined in assembly '{this._assembly.GetName()}'." );
 
         /// <summary>
         /// Gets the unique BuildId for the main assembly.
         /// </summary>
-        public static string MainBuildId => GetInstance( typeof(AssemblyMetadataReader).Assembly ).BuildId;
+        public static string MainBuildId => MainInstance.BuildId;
+
+        public static AssemblyMetadataReader MainInstance => GetInstance( typeof(AssemblyMetadataReader).Assembly );
     }
 }

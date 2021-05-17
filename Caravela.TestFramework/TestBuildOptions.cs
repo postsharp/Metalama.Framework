@@ -16,9 +16,11 @@ namespace Caravela.TestFramework
             Directory.CreateDirectory( this.CacheDirectory );
         }
 
-        public bool CompileTimeAttachDebugger => false;
+        public bool DebugCompilerProcess => false;
 
-        public bool DesignTimeAttachDebugger => false;
+        public bool DebugAnalyzerProcess => false;
+
+        public bool DebugIdeProcess => false;
 
         public virtual bool MapPdbToTransformedCode => false;
 

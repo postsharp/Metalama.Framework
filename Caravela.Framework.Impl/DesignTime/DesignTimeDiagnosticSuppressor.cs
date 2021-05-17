@@ -3,7 +3,6 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,22 +18,8 @@ namespace Caravela.Framework.Impl.DesignTime
     /// <summary>
     /// Our implementation of <see cref="DiagnosticSuppressor"/>.
     /// </summary>
-    [DiagnosticAnalyzer( LanguageNames.CSharp )]
     public class DesignTimeDiagnosticSuppressor : DiagnosticSuppressor
     {
-        private static readonly string[] _vs = { "CS1998", "IDE0051" };
-        private static readonly string[] _supportedSuppressions = _vs;
-
-        private static readonly ImmutableDictionary<string, SuppressionDescriptor> _supportedSuppressionsDictionary
-            = ImmutableDictionary.Create<string, SuppressionDescriptor>( StringComparer.OrdinalIgnoreCase )
-                .AddRange(
-                    _supportedSuppressions.Select(
-                        id => new KeyValuePair<string, SuppressionDescriptor>(
-                            id,
-                            new SuppressionDescriptor( "Caravela." + id, id, "Caravela" ) ) ) );
-
-        public static bool IsSuppressionSupported( string id ) => _supportedSuppressionsDictionary.ContainsKey( id );
-
         public override void ReportSuppressions( SuppressionAnalysisContext context )
         {
             if ( CaravelaCompilerInfo.IsActive ||
@@ -100,7 +85,8 @@ namespace Caravela.Framework.Impl.DesignTime
                 // Report suppressions.
                 if ( !syntaxTreeResult.Suppressions.IsDefaultOrEmpty )
                 {
-                    var designTimeSuppressions = syntaxTreeResult.Suppressions.Where( s => _supportedSuppressions.Contains( s.Definition.SuppressedDiagnosticId ) );
+                    var designTimeSuppressions = syntaxTreeResult.Suppressions.Where(
+                        s => DesignTimeDiagnosticDefinitions.IsSuppressionSupported( s.Definition.SuppressedDiagnosticId ) );
 
                     var groupedSuppressions = ImmutableMultiValueDictionary<string, CacheableScopedSuppression>.Create(
                         designTimeSuppressions,
@@ -127,10 +113,21 @@ namespace Caravela.Framework.Impl.DesignTime
 
                         var symbolId = symbol.GetDocumentationCommentId().AssertNotNull();
 
-                        foreach ( var suppression in groupedSuppressions[symbolId].Where( s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
+                        foreach ( var suppression in groupedSuppressions[symbolId]
+                            .Where( s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
                         {
                             suppressionsCount++;
-                            reportSuppression( Suppression.Create( suppression.Definition.ToRoslynDescriptor(), diagnostic ) );
+
+                            if ( DesignTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.TryGetValue(
+                                suppression.Definition.Id,
+                                out var suppressionDescriptor ) )
+                            {
+                                reportSuppression( Suppression.Create( suppressionDescriptor, diagnostic ) );
+                            }
+                            else
+                            {
+                                // We can't report a warning here, but DesignTimeAnalyzer should.
+                            }
                         }
                     }
                 }
@@ -140,6 +137,7 @@ namespace Caravela.Framework.Impl.DesignTime
             }
         }
 
-        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions => _supportedSuppressionsDictionary.Values.ToImmutableArray();
+        public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions
+            => DesignTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.Values.ToImmutableArray();
     }
 }

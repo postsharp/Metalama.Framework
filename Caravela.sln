@@ -12,11 +12,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		Directories.props = Directories.props
 		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
 		LICENSE.md = LICENSE.md
 		nuget.config = nuget.config
 		THIRD-PARTY-NOTICES.TXT = THIRD-PARTY-NOTICES.TXT
 		Versions.props = Versions.props
-		Directory.Build.targets = Directory.Build.targets
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.MemoTransformer", "Build\Caravela.MemoTransformer\Caravela.MemoTransformer.csproj", "{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}"
@@ -44,7 +44,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.TestFramework", "C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.AspectWorkbench", "Tests\Caravela.AspectWorkbench\Caravela.AspectWorkbench.csproj", "{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Framework.CompilerAddIn", "Caravela.Framework.CompilerAddIn\Caravela.Framework.CompilerAddIn.csproj", "{089A7C8A-1D13-49BC-A83A-DFBC09941EFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.CompilerAddIn", "Caravela.Framework.CompilerAddIn\Caravela.Framework.CompilerAddIn.csproj", "{089A7C8A-1D13-49BC-A83A-DFBC09941EFE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FA9772A5-51D5-4374-8DD3-E7CC1B3F138B} = {FA9772A5-51D5-4374-8DD3-E7CC1B3F138B}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

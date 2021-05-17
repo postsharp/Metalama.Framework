@@ -19,7 +19,7 @@ namespace Caravela.Framework.Diagnostics
         /// <param name="scope">The target declaration of the diagnostic (typically an <see cref="ICodeElement"/>). If null, the location of the current target is used. </param>
         /// <param name="definition">A <see cref="DiagnosticDefinition"/>, which must be defined in a static field or property of an aspect class.</param>
         /// <param name="args">Arguments of the formatting string.</param>
-        public static void Report( this IDiagnosticSink diagnosticSink, IDiagnosticScope? scope, DiagnosticDefinition definition, params object[] args)
+        public static void Report( this IDiagnosticSink diagnosticSink, IDiagnosticScope? scope, DiagnosticDefinition definition, params object[] args )
             => diagnosticSink.Report( scope?.DiagnosticLocation, definition, args );
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using static Caravela.Framework.Diagnostics.Severity;
@@ -70,13 +71,24 @@ namespace Caravela.Framework.Impl.DesignTime
                     + "To resume analysis, finish the work on all compile-time logic, and build the project (even if the run-time code still has issues).",
                     _category,
                     Error );
-        
+
         internal static readonly DiagnosticDefinition<(string Id, ISymbol Symbol)>
             UnregisteredSuppression
                 = new(
                     "CR0305",
                     "An aspect tried to suppress an unregistered diagnostic.",
-                    "An aspect tried to suppress the diagnostic {0} on '{1}', but this diagnostic ID has not been configured for suppression in the user profile.",
+                    "An aspect tried to suppress the diagnostic {0} on '{1}', but this diagnostic ID has not been configured for " 
+                    + "suppression in the user profile.",
+                    _category,
+                    Warning );
+
+        internal static readonly DiagnosticDefinition<INamedType>
+            TypeNotPartial
+                = new(
+                    "CR0306",
+                    "The type must be made partial.",
+                    "Aspects add members to '{0}' but it is not marked as 'partial'. Make the type 'partial' to make it possible to " 
+                    + "referenced aspect-generated artefacts from source code.",
                     _category,
                     Warning );
     }
