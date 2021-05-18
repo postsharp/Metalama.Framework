@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 = new(
                     "CR0304",
                     "A Caravela hidden message.",
-                    "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID." 
+                    "{0}: {1} The diagnostic {0} was not defined in the user profile and has been replaced by a generic diagnostic ID."
                     + " Please restart your IDE.",
                     _category,
                     Hidden );

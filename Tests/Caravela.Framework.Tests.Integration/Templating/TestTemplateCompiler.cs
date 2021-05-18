@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Tests.Integration.Templating
 {
@@ -92,6 +93,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                         node,
                         this._parent._semanticModel,
                         this._parent._diagnosticAdder,
+                        CancellationToken.None,
                         out var annotatedNode,
                         out var transformedNode ) )
                     {

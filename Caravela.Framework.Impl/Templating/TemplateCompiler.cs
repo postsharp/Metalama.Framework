@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -29,6 +30,7 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
             IDiagnosticAdder diagnostics,
+            CancellationToken cancellationToken,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot )
         {
             SyntaxNode currentSyntaxRoot;
@@ -71,10 +73,11 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
             IDiagnosticAdder diagnostics,
+            CancellationToken cancellationToken,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot,
             [NotNullWhen( true )] out SyntaxNode? transformedSyntaxRoot )
         {
-            if ( !this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out annotatedSyntaxRoot ) )
+            if ( !this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, cancellationToken, out annotatedSyntaxRoot ) )
             {
                 transformedSyntaxRoot = null;
 
@@ -86,7 +89,8 @@ namespace Caravela.Framework.Impl.Templating
                 compileTimeCompilation,
                 this._semanticAnnotationMap,
                 diagnostics,
-                this._serviceProvider );
+                this._serviceProvider,
+                cancellationToken );
 
             transformedSyntaxRoot = templateCompilerRewriter.Visit( annotatedSyntaxRoot );
 

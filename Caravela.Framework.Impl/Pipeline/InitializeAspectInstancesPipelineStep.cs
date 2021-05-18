@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -21,11 +22,11 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public void AddAspectInstance( AspectInstance aspectInstance ) => this._aspectInstances.Add( aspectInstance );
 
-        public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState )
+        public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState, CancellationToken cancellationToken )
         {
             var aspectDriver = (AspectDriver) this.AspectLayer.AspectClass.AspectDriver;
 
-            var aspectInstanceResults = this._aspectInstances.Select( ai => aspectDriver.ExecuteAspect( ai ) ).ToImmutableArray();
+            var aspectInstanceResults = this._aspectInstances.Select( ai => aspectDriver.ExecuteAspect( ai, cancellationToken ) ).ToImmutableArray();
             var success = aspectInstanceResults.All( ar => ar.Success );
             var reportedDiagnostics = aspectInstanceResults.SelectMany( air => air.Diagnostics.ReportedDiagnostics );
             var diagnosticSuppressions = aspectInstanceResults.SelectMany( air => air.Diagnostics.DiagnosticSuppressions );
@@ -39,7 +40,7 @@ namespace Caravela.Framework.Impl.Pipeline
             // It's not clear if we should continue at that time. An error here may result in more errors later.
             _ = success;
 
-            return base.Execute( compilation, pipelineStepsState );
+            return base.Execute( compilation, pipelineStepsState, cancellationToken );
         }
     }
 }

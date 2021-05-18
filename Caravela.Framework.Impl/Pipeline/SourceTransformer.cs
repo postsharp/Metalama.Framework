@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -24,6 +25,7 @@ namespace Caravela.Framework.Impl.Pipeline
             if ( pipeline.TryExecute(
                 new DiagnosticAdder( transformerContext.ReportDiagnostic ),
                 transformerContext.Compilation,
+                CancellationToken.None,
                 out var compilation,
                 out var additionalResources ) )
             {

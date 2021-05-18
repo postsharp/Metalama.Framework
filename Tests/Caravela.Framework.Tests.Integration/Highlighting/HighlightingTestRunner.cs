@@ -10,6 +10,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 // ReSharper disable StringLiteralTypo
@@ -40,6 +41,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
                 templateSyntaxRoot,
                 templateSemanticModel,
                 diagnostics,
+                CancellationToken.None,
                 out var annotatedTemplateSyntax );
 
             if ( !templateCompilerSuccess )

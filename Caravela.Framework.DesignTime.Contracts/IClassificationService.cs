@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Caravela.Framework.DesignTime.Contracts
 {
@@ -20,9 +21,11 @@ namespace Caravela.Framework.DesignTime.Contracts
         /// </summary>
         /// <param name="model">The <see cref="SemanticModel"/> of the <see cref="SyntaxTree"/>.</param>
         /// <param name="classifiedTextSpans">At output, a collection of <see cref="ClassifiedTextSpan"/>.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         bool TryGetClassifiedTextSpans(
             SemanticModel model,
-            [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans );
+            [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans,
+            CancellationToken cancellationToken );
     }
 }

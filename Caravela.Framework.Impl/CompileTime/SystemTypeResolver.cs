@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -13,7 +14,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal class SystemTypeResolver : ICompileTimeTypeResolver
     {
-        public Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock )
+        public Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock, CancellationToken cancellationToken )
         {
             Type? ReturnNullOrMock()
             {

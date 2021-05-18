@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -30,11 +31,14 @@ namespace Caravela.Framework.Impl.CodeModel
         public IEnumerable<AspectInstance> GetAspectInstances(
             CompilationModel compilation,
             AspectClassMetadata aspectClassMetadata,
-            IDiagnosticAdder diagnosticAdder )
+            IDiagnosticAdder diagnosticAdder,
+            CancellationToken cancellationToken )
             => compilation.GetAllAttributesOfType( compilation.Factory.GetTypeByReflectionName( aspectClassMetadata.FullName ) )
                 .Select(
                     attribute =>
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
+
                         if ( this._loader.AttributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out var attributeInstance ) )
                         {
                             return aspectClassMetadata.CreateAspectInstance( (IAspect) attributeInstance, attribute.ContainingElement.AssertNotNull() );

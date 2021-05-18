@@ -14,12 +14,13 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
     /// <summary>
     /// This class is responsible to cache and load compile-time projects. The caller must first call
-    /// the <see cref="TryGetCompileTimeProject(Compilation, System.Collections.Generic.IReadOnlyList{Microsoft.CodeAnalysis.SyntaxTree}?, IDiagnosticAdder, bool, out CompileTimeProject?)"/> for each project with which the loader will be used.
+    /// the <see cref="TryGetCompileTimeProject(Microsoft.CodeAnalysis.Compilation,System.Collections.Generic.IReadOnlyList{Microsoft.CodeAnalysis.SyntaxTree}?,Caravela.Framework.Impl.Diagnostics.IDiagnosticAdder,bool,System.Threading.CancellationToken,out Caravela.Framework.Impl.CompileTime.CompileTimeProject?)"/> for each project with which the loader will be used.
     /// The generation of compile-time compilations itself is delegated to the <see cref="CompileTimeCompilationBuilder"/>
     /// class.
     /// </summary>
@@ -75,12 +76,13 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         /// <param name="typeSymbol"></param>
         /// <param name="fallbackToMock">Determines whether a <see cref="CompileTimeType"/> must be returned
-        /// when a compile-time does not exist.</param>
+        ///     when a compile-time does not exist.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock )
+        public Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock, CancellationToken cancellationToken = default )
         {
             // Check if the type is a .NET system one.
-            var systemType = this._systemTypeResolver.GetCompileTimeType( typeSymbol, false );
+            var systemType = this._systemTypeResolver.GetCompileTimeType( typeSymbol, false, cancellationToken );
 
             if ( systemType != null )
             {
@@ -91,7 +93,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( typeSymbol is IArrayTypeSymbol arrayType )
             {
-                var elementType = this.GetCompileTimeType( arrayType.ElementType, fallbackToMock );
+                var elementType = this.GetCompileTimeType( arrayType.ElementType, fallbackToMock, cancellationToken );
 
                 if ( arrayType.IsSZArray )
                 {
@@ -103,7 +105,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var assemblySymbol = typeSymbol.ContainingAssembly;
 
-            var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity );
+            var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity, cancellationToken );
 
             var result = compileTimeProject?.GetType( typeSymbol.GetReflectionNameSafe() );
 
@@ -123,7 +125,8 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var typeArguments = CollectTypeArguments( namedTypeSymbol );
 
-                result = result.MakeGenericType( typeArguments.Select( typeSymbol1 => this.GetCompileTimeType( typeSymbol1, fallbackToMock ) ).ToArray() );
+                result = result.MakeGenericType(
+                    typeArguments.Select( typeSymbol1 => this.GetCompileTimeType( typeSymbol1, fallbackToMock, cancellationToken ) ).ToArray() );
             }
 
             return result;
@@ -133,11 +136,11 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Gets the <see cref="CompileTimeProject"/> for a given <see cref="AssemblyIdentity"/>,
         /// or <c>null</c> if it does not exist. 
         /// </summary>
-        public CompileTimeProject? GetCompileTimeProject( AssemblyIdentity runTimeAssemblyIdentity )
+        public CompileTimeProject? GetCompileTimeProject( AssemblyIdentity runTimeAssemblyIdentity, CancellationToken cancellationToken )
         {
             // This method is a smell and should probably not exist.
 
-            _ = this.TryGetCompileTimeProject( runTimeAssemblyIdentity, NullDiagnosticAdder.Instance, false, out var assembly );
+            _ = this.TryGetCompileTimeProject( runTimeAssemblyIdentity, NullDiagnosticAdder.Instance, false, cancellationToken, out var assembly );
 
             return assembly;
         }
@@ -149,6 +152,7 @@ namespace Caravela.Framework.Impl.CompileTime
             AssemblyIdentity runTimeAssemblyIdentity,
             IDiagnosticAdder diagnosticAdder,
             bool cacheOnly,
+            CancellationToken cancellationToken,
             out CompileTimeProject? compileTimeProject )
         {
             if ( this._projects.TryGetValue( runTimeAssemblyIdentity, out compileTimeProject ) )
@@ -171,7 +175,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return false;
                 }
 
-                return this.TryGetCompileTimeProject( metadataReference!, diagnosticAdder, cacheOnly, out compileTimeProject );
+                return this.TryGetCompileTimeProject( metadataReference!, diagnosticAdder, cacheOnly, cancellationToken, out compileTimeProject );
             }
         }
 
@@ -185,6 +189,7 @@ namespace Caravela.Framework.Impl.CompileTime
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             IDiagnosticAdder diagnosticSink,
             bool cacheOnly,
+            CancellationToken cancellationToken,
             out CompileTimeProject? compileTimeProject )
         {
             if ( this._projects.TryGetValue( runTimeCompilation.Assembly.Identity, out compileTimeProject ) )
@@ -196,7 +201,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             foreach ( var reference in runTimeCompilation.References )
             {
-                if ( this.TryGetCompileTimeProject( reference, diagnosticSink, cacheOnly, out var referencedProject ) )
+                if ( this.TryGetCompileTimeProject( reference, diagnosticSink, cacheOnly, cancellationToken, out var referencedProject ) )
                 {
                     if ( referencedProject != null )
                     {
@@ -216,6 +221,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 compileTimeTreesHint,
                 referencedProjects,
                 diagnosticSink,
+                cancellationToken,
                 out compileTimeProject,
                 cacheOnly ) )
             {
@@ -233,15 +239,22 @@ namespace Caravela.Framework.Impl.CompileTime
             MetadataReference reference,
             IDiagnosticAdder diagnosticSink,
             bool cacheOnly,
+            CancellationToken cancellationToken,
             out CompileTimeProject? referencedProject )
         {
             switch ( reference )
             {
                 case PortableExecutableReference { FilePath: { } filePath }:
-                    return this.TryGetCompileTimeProject( filePath!, diagnosticSink, out referencedProject );
+                    return this.TryGetCompileTimeProject( filePath!, diagnosticSink, cancellationToken, out referencedProject );
 
                 case CompilationReference compilationReference:
-                    return this.TryGetCompileTimeProject( compilationReference.Compilation, null, diagnosticSink, cacheOnly, out referencedProject );
+                    return this.TryGetCompileTimeProject(
+                        compilationReference.Compilation,
+                        null,
+                        diagnosticSink,
+                        cacheOnly,
+                        cancellationToken,
+                        out referencedProject );
 
                 default:
                     throw new AssertionFailedException( $"Unexpected reference kind: {reference}." );
@@ -251,6 +264,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private bool TryGetCompileTimeProject(
             string assemblyPath,
             IDiagnosticAdder diagnosticSink,
+            CancellationToken cancellationToken,
             out CompileTimeProject? compileTimeProject )
         {
             var assemblyIdentity = AssemblyName.GetAssemblyName( assemblyPath ).ToAssemblyIdentity();
@@ -296,6 +310,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 assemblyName.ToAssemblyIdentity(),
                 stream,
                 diagnosticSink,
+                cancellationToken,
                 out compileTimeProject ) )
             {
                 return false;
@@ -310,6 +325,7 @@ namespace Caravela.Framework.Impl.CompileTime
             AssemblyIdentity runTimeAssemblyIdentity,
             Stream resourceStream,
             IDiagnosticAdder diagnosticAdder,
+            CancellationToken cancellationToken,
             [NotNullWhen( true )] out CompileTimeProject? project )
         {
             using var archive = new ZipArchive( resourceStream, ZipArchiveMode.Read, true, Encoding.UTF8 );
@@ -347,7 +363,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     var referenceAssemblyIdentity = new AssemblyName( referenceSerializedIdentity ).ToAssemblyIdentity();
 
-                    if ( !this.TryGetCompileTimeProject( referenceAssemblyIdentity, diagnosticAdder, false, out var referenceProject ) )
+                    if ( !this.TryGetCompileTimeProject( referenceAssemblyIdentity, diagnosticAdder, false, cancellationToken, out var referenceProject ) )
                     {
                         project = null;
 
@@ -368,6 +384,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 manifest.SourceHash,
                 referenceProjects,
                 diagnosticAdder,
+                cancellationToken,
                 out var assemblyPath,
                 out var sourceDirectory ) )
             {

@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.DesignTime;
 using Caravela.TestFramework;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests
@@ -60,10 +61,10 @@ namespace Caravela.Framework.Tests.UnitTests
             using var domain = new UnloadableCompileTimeDomain();
             DesignTimeAspectPipeline pipeline = new( buildOptions, domain );
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
-            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree1 ) );
+            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree1 ), CancellationToken.None );
 
             var syntaxTree2 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" );
-            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree2 ) );
+            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree2 ), CancellationToken.None );
         }
 
         [Fact]
@@ -85,10 +86,10 @@ namespace Caravela.Framework.Tests.UnitTests
             using var domain = new UnloadableCompileTimeDomain();
             DesignTimeAspectPipeline pipeline = new( buildOptions, domain );
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
-            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree1 ) );
+            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree1 ), CancellationToken.None );
 
             var syntaxTree2 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" );
-            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree2 ) );
+            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree2 ), CancellationToken.None );
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.DesignTime.UserDiagnostics
         private static UserDiagnosticRegistrationService? _instance;
         private readonly string _settingsFilePath;
         private UserDiagnosticRegistrationFile _registrationFile;
-        
+
         public static UserDiagnosticRegistrationService GetInstance()
             => LazyInitializer.EnsureInitialized( ref _instance, () => new UserDiagnosticRegistrationService() )!;
 

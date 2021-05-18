@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -23,6 +24,7 @@ namespace Caravela.Framework.Impl.CompileTime
             private readonly Compilation _compileTimeCompilation;
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;
+            private readonly CancellationToken _cancellationToken;
 
             public bool Success { get; private set; } = true;
 
@@ -32,12 +34,14 @@ namespace Caravela.Framework.Impl.CompileTime
                 Compilation runTimeCompilation,
                 Compilation compileTimeCompilation,
                 IDiagnosticAdder diagnosticAdder,
-                TemplateCompiler templateCompiler )
+                TemplateCompiler templateCompiler,
+                CancellationToken cancellationToken )
                 : base( runTimeCompilation )
             {
                 this._compileTimeCompilation = compileTimeCompilation;
                 this._diagnosticAdder = diagnosticAdder;
                 this._templateCompiler = templateCompiler;
+                this._cancellationToken = cancellationToken;
             }
 
             // TODO: assembly and module-level attributes?
@@ -54,6 +58,8 @@ namespace Caravela.Framework.Impl.CompileTime
             private T? VisitTypeDeclaration<T>( T node )
                 where T : TypeDeclarationSyntax
             {
+                this._cancellationToken.ThrowIfCancellationRequested();
+
                 switch ( this.GetSymbolDeclarationScope( node ) )
                 {
                     case SymbolDeclarationScope.RunTimeOnly:
@@ -101,6 +107,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             node,
                             this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                             this._diagnosticAdder,
+                            this._cancellationToken,
                             out _,
                             out var transformedNode );
 

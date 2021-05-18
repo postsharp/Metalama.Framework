@@ -15,6 +15,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -97,11 +98,15 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public virtual bool WriteUnhandledExceptionsToFile => true;
 
-        public bool HasCachedCompileTimeProject( Compilation compilation, IDiagnosticAdder diagnosticAdder, IReadOnlyList<SyntaxTree>? compileTimeTreesHint )
+        public bool HasCachedCompileTimeProject(
+            Compilation compilation,
+            IDiagnosticAdder diagnosticAdder,
+            IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
+            CancellationToken cancellationToken )
         {
             var loader = CompileTimeProjectLoader.Create( this._domain, this.ServiceProvider );
 
-            return loader.TryGetCompileTimeProject( compilation, compileTimeTreesHint, diagnosticAdder, true, out _ );
+            return loader.TryGetCompileTimeProject( compilation, compileTimeTreesHint, diagnosticAdder, true, cancellationToken, out _ );
         }
 
         public int PipelineInitializationCount { get; set; }
@@ -110,6 +115,7 @@ namespace Caravela.Framework.Impl.Pipeline
             IDiagnosticAdder diagnosticAdder,
             PartialCompilation compilation,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
+            CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineConfiguration? configuration )
         {
             this.PipelineInitializationCount++;
@@ -120,7 +126,13 @@ namespace Caravela.Framework.Impl.Pipeline
             var loader = CompileTimeProjectLoader.Create( this._domain, this.ServiceProvider );
 
             // Prepare the compile-time assembly.
-            if ( !loader.TryGetCompileTimeProject( roslynCompilation, compileTimeTreesHint, diagnosticAdder, false, out var compileTimeProject ) )
+            if ( !loader.TryGetCompileTimeProject(
+                roslynCompilation,
+                compileTimeTreesHint,
+                diagnosticAdder,
+                false,
+                cancellationToken,
+                out var compileTimeProject ) )
             {
                 configuration = null;
 
@@ -184,6 +196,7 @@ namespace Caravela.Framework.Impl.Pipeline
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
             PipelineConfiguration pipelineConfiguration,
+            CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
             // If there is no aspect in the compilation, don't execute the pipeline.
@@ -202,7 +215,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             foreach ( var stage in pipelineConfiguration.Stages )
             {
-                if ( !stage.TryExecute( pipelineStageResult!, diagnosticAdder, out var newStageResult ) )
+                if ( !stage.TryExecute( pipelineStageResult!, diagnosticAdder, cancellationToken, out var newStageResult ) )
                 {
                     return false;
                 }
@@ -216,6 +229,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             foreach ( var diagnostic in pipelineStageResult.Diagnostics.ReportedDiagnostics )
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 diagnosticAdder.Report( diagnostic );
             }
 

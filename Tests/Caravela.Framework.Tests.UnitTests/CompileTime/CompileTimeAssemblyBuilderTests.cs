@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.CompileTime
@@ -95,7 +96,7 @@ class A : Attribute
 
             var compileTimeDomain = new UnloadableCompileTimeDomain();
             var loader = CompileTimeProjectLoader.Create( compileTimeDomain, serviceProvider );
-            Assert.True( loader.TryGetCompileTimeProject( compilation.RoslynCompilation, null, new DiagnosticList(), false, out _ ) );
+            Assert.True( loader.TryGetCompileTimeProject( compilation.RoslynCompilation, null, new DiagnosticList(), false, CancellationToken.None, out _ ) );
 
             if ( !loader.AttributeDeserializer.TryCreateAttribute( compilation.Attributes.First(), new DiagnosticList(), out var attribute ) )
             {
@@ -134,7 +135,7 @@ class ReferencingClass
             var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
 
             DiagnosticList diagnosticList = new();
-            Assert.True( loader.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, false, out _ ) );
+            Assert.True( loader.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, false, CancellationToken.None, out _ ) );
         }
 
         [Fact]
@@ -194,6 +195,7 @@ class ReferencingClass
                             null,
                             diagnostics,
                             false,
+                            CancellationToken.None,
                             out var compileTimeProject ) );
 
                     var runTimePath = Path.GetTempFileName();
@@ -294,12 +296,12 @@ class B
 
             var loaderV1 = CompileTimeProjectLoader.Create( domain, serviceProvider1 );
             DiagnosticList diagnosticList = new();
-            Assert.True( loaderV1.TryGetCompileTimeProject( compilationB1, null, diagnosticList, false, out var project1 ) );
+            Assert.True( loaderV1.TryGetCompileTimeProject( compilationB1, null, diagnosticList, false, CancellationToken.None, out var project1 ) );
             ExecuteAssertions( project1!, 1 );
 
             using var serviceProvider2 = CreateServiceProvider();
             var loader2 = CompileTimeProjectLoader.Create( domain, serviceProvider2 );
-            Assert.True( loader2.TryGetCompileTimeProject( compilationB2, null, diagnosticList, false, out var project2 ) );
+            Assert.True( loader2.TryGetCompileTimeProject( compilationB2, null, diagnosticList, false, CancellationToken.None, out var project2 ) );
 
             ExecuteAssertions( project2!, 2 );
 
@@ -348,7 +350,7 @@ class C
             using var serviceProvider = CreateServiceProvider();
             var loader = CompileTimeProjectLoader.Create( domain, serviceProvider );
             DiagnosticList diagnosticList = new();
-            Assert.True( loader.TryGetCompileTimeProject( compilation, null, diagnosticList, false, out _ ) );
+            Assert.True( loader.TryGetCompileTimeProject( compilation, null, diagnosticList, false, CancellationToken.None, out _ ) );
         }
 
         [Fact]
@@ -370,13 +372,13 @@ public class ReferencedClass
             DiagnosticList diagnosticList = new();
 
             // Getting from cache should fail.
-            Assert.False( loader.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, true, out _ ) );
+            Assert.False( loader.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, true, CancellationToken.None, out _ ) );
 
             // Building the project should succeed.
-            Assert.True( loader.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, false, out _ ) );
+            Assert.True( loader.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, false, CancellationToken.None, out _ ) );
 
             // After building, getting from cache should succeed.
-            Assert.True( loader.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, true, out _ ) );
+            Assert.True( loader.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, true, CancellationToken.None, out _ ) );
         }
 
         [Fact]
@@ -401,15 +403,15 @@ public class ReferencedClass
             // Getting from cache should fail.
 
             var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
-            Assert.False( loader1.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, true, out _ ) );
+            Assert.False( loader1.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, true, CancellationToken.None, out _ ) );
 
             // Building the project should succeed.
             var loader2 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
-            Assert.True( loader2.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, false, out _ ) );
+            Assert.True( loader2.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, false, CancellationToken.None, out _ ) );
 
             // After building, getting from cache should succeed.
             var loader3 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
-            Assert.True( loader3.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, true, out _ ) );
+            Assert.True( loader3.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, true, CancellationToken.None, out _ ) );
         }
     }
 }

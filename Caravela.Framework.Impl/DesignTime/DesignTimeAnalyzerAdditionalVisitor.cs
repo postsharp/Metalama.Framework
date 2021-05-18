@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -30,21 +31,28 @@ namespace Caravela.Framework.Impl.DesignTime
         private readonly Action<Diagnostic> _reportDiagnostic;
         private SymbolDeclarationScope? _currentDeclarationScope;
         private ISymbol? _currentDeclaration;
+        private readonly CancellationToken _cancellationToken;
 
         public DesignTimeAnalyzerAdditionalVisitor( SemanticModelAnalysisContext context, IBuildOptions buildOptions ) : this(
             context.SemanticModel,
             context.ReportDiagnostic,
             DesignTimeAspectPipelineCache
                 .Instance
-                .GetOrCreatePipeline( buildOptions ) ) { }
+                .GetOrCreatePipeline( buildOptions ),
+            context.CancellationToken ) { }
 
-        public DesignTimeAnalyzerAdditionalVisitor( SemanticModel semanticModel, Action<Diagnostic> reportDiagnostic, DesignTimeAspectPipeline pipeline )
+        public DesignTimeAnalyzerAdditionalVisitor(
+            SemanticModel semanticModel,
+            Action<Diagnostic> reportDiagnostic,
+            DesignTimeAspectPipeline pipeline,
+            CancellationToken cancellationToken )
         {
             this._semanticModel = semanticModel;
             this._reportDiagnostic = reportDiagnostic;
             this._classifier = SymbolClassifier.GetInstance( semanticModel.Compilation );
 
             this._isCompileTimeTreeOutdated = pipeline.IsCompileTimeSyntaxTreeOutdated( semanticModel.SyntaxTree.FilePath );
+            this._cancellationToken = cancellationToken;
         }
 
         public override void Visit( SyntaxNode? node )
@@ -53,6 +61,8 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 return;
             }
+
+            this._cancellationToken.ThrowIfCancellationRequested();
 
             // We want children to be processed before parents, so that errors are reported on parent (declaring) symbols.
             // This allows to reduce redundant messages.
@@ -104,7 +114,7 @@ namespace Caravela.Framework.Impl.DesignTime
             if ( methodSymbol != null && this._classifier.IsTemplate( methodSymbol ) )
             {
                 TemplateCompiler templateCompiler = new( ServiceProvider.Empty );
-                _ = templateCompiler.TryAnnotate( node, this._semanticModel, this, out _ );
+                _ = templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _ );
             }
             else
             {

@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -17,7 +18,8 @@ namespace Caravela.Framework.Impl.DesignTime
     {
         public bool TryGetClassifiedTextSpans(
             SemanticModel semanticModel,
-            [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans )
+            [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans,
+            CancellationToken cancellationToken )
         {
             // TODO: if the root is not "our", return false.
 
@@ -25,7 +27,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             var templateCompiler = new TemplateCompiler( ServiceProvider.Empty );
 
-            _ = templateCompiler.TryAnnotate( semanticModel.SyntaxTree.GetRoot(), semanticModel, diagnostics, out var annotatedSyntaxRoot );
+            _ = templateCompiler.TryAnnotate( semanticModel.SyntaxTree.GetRoot(), semanticModel, diagnostics, cancellationToken, out var annotatedSyntaxRoot );
 
             if ( annotatedSyntaxRoot != null )
             {

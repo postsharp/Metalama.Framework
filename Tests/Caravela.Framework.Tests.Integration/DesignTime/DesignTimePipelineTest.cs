@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -249,7 +250,9 @@ Target.cs:
 
             // There must be an error on the aspect.
             List<Diagnostic> diagnostics4 = new();
-            new DesignTimeAnalyzerAdditionalVisitor( compilation4.GetSemanticModel( aspect4 ), diagnostics4.Add, pipeline ).Visit( aspect4.GetRoot() );
+
+            new DesignTimeAnalyzerAdditionalVisitor( compilation4.GetSemanticModel( aspect4 ), diagnostics4.Add, pipeline, CancellationToken.None ).Visit(
+                aspect4.GetRoot() );
 
             Assert.Contains(
                 diagnostics4,
@@ -275,7 +278,9 @@ Target.cs:
             Assert.Equal( 1, pipeline.PipelineInitializationCount );
 
             List<Diagnostic> diagnostics5 = new();
-            new DesignTimeAnalyzerAdditionalVisitor( compilation5.GetSemanticModel( aspect5 ), diagnostics5.Add, pipeline ).Visit( aspect5.GetRoot() );
+
+            new DesignTimeAnalyzerAdditionalVisitor( compilation5.GetSemanticModel( aspect5 ), diagnostics5.Add, pipeline, CancellationToken.None ).Visit(
+                aspect5.GetRoot() );
 
             Assert.Contains(
                 diagnostics5,
@@ -285,7 +290,7 @@ Target.cs:
             using UnloadableCompileTimeDomain domain = new();
             var compileTimeAspectPipeline = new CompileTimeAspectPipeline( buildOptions, domain );
             DiagnosticList compileDiagnostics = new();
-            Assert.True( compileTimeAspectPipeline.TryExecute( compileDiagnostics, compilation5, out _, out _ ) );
+            Assert.True( compileTimeAspectPipeline.TryExecute( compileDiagnostics, compilation5, CancellationToken.None, out _, out _ ) );
 
             // Simulate an external build event. This is normally triggered by the build touch file.
             pipeline.OnExternalBuildStarted();
@@ -300,7 +305,9 @@ Target.cs:
             Assert.False( pipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
 
             List<Diagnostic> diagnostics6 = new();
-            new DesignTimeAnalyzerAdditionalVisitor( compilation5.GetSemanticModel( aspect5 ), diagnostics6.Add, pipeline ).Visit( aspect5.GetRoot() );
+
+            new DesignTimeAnalyzerAdditionalVisitor( compilation5.GetSemanticModel( aspect5 ), diagnostics6.Add, pipeline, CancellationToken.None ).Visit(
+                aspect5.GetRoot() );
 
             Assert.DoesNotContain(
                 diagnostics6,

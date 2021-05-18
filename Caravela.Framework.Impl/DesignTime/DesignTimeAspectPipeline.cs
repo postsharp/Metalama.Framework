@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -201,6 +202,7 @@ namespace Caravela.Framework.Impl.DesignTime
         private bool TryGetConfiguration(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
+            CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineConfiguration? configuration )
         {
             lock ( this._configureSync )
@@ -215,6 +217,7 @@ namespace Caravela.Framework.Impl.DesignTime
                         diagnosticAdder,
                         compilation,
                         compileTimeTrees,
+                        cancellationToken,
                         out configuration ) )
                     {
                         // A failure here means an error or a cache miss.
@@ -258,7 +261,7 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <summary>
         /// Executes the pipeline.
         /// </summary>
-        public DesignTimeAspectPipelineResult Execute( PartialCompilation compilation )
+        public DesignTimeAspectPipelineResult Execute( PartialCompilation compilation, CancellationToken cancellationToken )
         {
             DiagnosticList diagnosticList = new();
 
@@ -271,7 +274,7 @@ namespace Caravela.Framework.Impl.DesignTime
             // but some tests don't. Redundant calls to UpdateCompilation have no adverse side effect.
             this.InvalidateCache( compilation.Compilation );
 
-            if ( !this.TryGetConfiguration( compilation, diagnosticList, out var configuration ) )
+            if ( !this.TryGetConfiguration( compilation, diagnosticList, cancellationToken, out var configuration ) )
             {
                 return new DesignTimeAspectPipelineResult(
                     false,
@@ -280,7 +283,7 @@ namespace Caravela.Framework.Impl.DesignTime
                     new ImmutableDiagnosticList( diagnosticList ) );
             }
 
-            var success = TryExecuteCore( compilation, diagnosticList, configuration, out var pipelineResult );
+            var success = TryExecuteCore( compilation, diagnosticList, configuration, cancellationToken, out var pipelineResult );
 
             var result = new DesignTimeAspectPipelineResult(
                 success,

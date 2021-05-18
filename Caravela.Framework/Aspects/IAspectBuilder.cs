@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Caravela.Framework.Aspects
 {
@@ -44,6 +45,8 @@ namespace Caravela.Framework.Aspects
         /// visible in <see cref="meta.Tags"/>.
         /// </summary>
         IDictionary<string, object?> Tags { get; }
+
+        CancellationToken CancellationToken { get; }
     }
 
     /// <summary>

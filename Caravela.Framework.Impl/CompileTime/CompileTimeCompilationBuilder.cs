@@ -19,6 +19,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -95,6 +96,7 @@ namespace Caravela.Framework.Impl.CompileTime
             IEnumerable<CompileTimeProject> referencedProjects,
             ulong hash,
             IDiagnosticAdder diagnosticSink,
+            CancellationToken cancellationToken,
             out Compilation? compileTimeCompilation,
             out ILocationAnnotationMap? locationAnnotationMap,
             out Dictionary<string, SyntaxTree>? syntaxTreeMap )
@@ -119,7 +121,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 runTimeCompilation,
                 compileTimeCompilation,
                 diagnosticSink,
-                templateCompiler );
+                templateCompiler,
+                cancellationToken );
 
             // Creates the new syntax trees. Store them in a dictionary mapping the transformed trees to the source trees.
             var syntaxTrees = treesWithCompileTimeCode.Select(
@@ -222,6 +225,7 @@ namespace Caravela.Framework.Impl.CompileTime
             Compilation compileTimeCompilation,
             IDiagnosticAdder diagnosticSink,
             IReadOnlyDictionary<string, SyntaxTree>? syntaxTreeMap,
+            CancellationToken cancellationToken,
             [NotNullWhen( true )] out IReadOnlyList<CompileTimeFile>? codeFiles )
         {
             var outputInfo = this.GetOutputPaths( compileTimeCompilation.AssemblyName! );
@@ -332,7 +336,10 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
-        private static IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees( Compilation runTimeCompilation, IReadOnlyList<SyntaxTree>? compileTimeTreesHint )
+        private static IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees(
+            Compilation runTimeCompilation,
+            IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
+            CancellationToken cancellationToken )
         {
             List<SyntaxTree> compileTimeTrees = new();
             var classifier = SymbolClassifier.GetInstance( runTimeCompilation );
@@ -341,7 +348,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             foreach ( var tree in trees )
             {
-                FindCompileTimeCodeVisitor visitor = new( runTimeCompilation.GetSemanticModel( tree, true ), classifier );
+                FindCompileTimeCodeVisitor visitor = new( runTimeCompilation.GetSemanticModel( tree, true ), classifier, cancellationToken );
                 visitor.Visit( tree.GetRoot() );
 
                 if ( visitor.HasCompileTimeCode )
@@ -361,14 +368,16 @@ namespace Caravela.Framework.Impl.CompileTime
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             IDiagnosticAdder diagnosticSink,
+            CancellationToken cancellationToken,
             out CompileTimeProject? project,
             bool cacheOnly )
             => this.TryGetCompileTimeProject(
                 runTimeCompilation,
-                GetCompileTimeSyntaxTrees( runTimeCompilation, compileTimeTreesHint ),
+                GetCompileTimeSyntaxTrees( runTimeCompilation, compileTimeTreesHint, cancellationToken ),
                 referencedProjects,
                 diagnosticSink,
                 cacheOnly,
+                cancellationToken,
                 out project );
 
         private bool TryGetCompileTimeProjectFromCache(
@@ -430,6 +439,7 @@ namespace Caravela.Framework.Impl.CompileTime
             IReadOnlyList<CompileTimeProject> referencedProjects,
             IDiagnosticAdder diagnosticSink,
             bool cacheOnly,
+            CancellationToken cancellationToken,
             out CompileTimeProject? project )
         {
             StringBuilder hashLog = new();
@@ -461,6 +471,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     referencedProjects,
                     projectHash,
                     diagnosticSink,
+                    cancellationToken,
                     out var compileTimeCompilation,
                     out var locationAnnotationMap,
                     out var syntaxTreeMap ) )
@@ -491,7 +502,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    if ( !this.TryEmit( compileTimeCompilation, diagnosticSink, syntaxTreeMap, out var sourceFiles ) )
+                    if ( !this.TryEmit( compileTimeCompilation, diagnosticSink, syntaxTreeMap, cancellationToken, out var sourceFiles ) )
                     {
                         project = null;
 
@@ -585,6 +596,7 @@ namespace Caravela.Framework.Impl.CompileTime
             ulong syntaxTreeHash,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             IDiagnosticAdder diagnosticAdder,
+            CancellationToken cancellationToken,
             out string assemblyPath,
             out string sourceDirectory )
         {
@@ -607,7 +619,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
             else
             {
-                return this.TryEmit( compilation, diagnosticAdder, null, out _ );
+                return this.TryEmit( compilation, diagnosticAdder, null, cancellationToken, out _ );
             }
         }
     }

@@ -116,7 +116,7 @@ namespace Caravela.Framework.Impl.DesignTime
                         if ( !partialCompilation.IsEmpty )
                         {
                             Interlocked.Increment( ref this._pipelineExecutionCount );
-                            var result = pipeline.Execute( partialCompilation );
+                            var result = pipeline.Execute( partialCompilation, cancellationToken );
 
                             this._syntaxTreeResultCache.Update( compilation, result );
                         }

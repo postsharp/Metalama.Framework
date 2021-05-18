@@ -10,6 +10,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading;
 
 namespace Caravela.Framework.Impl
 {
@@ -33,12 +34,20 @@ namespace Caravela.Framework.Impl
 
         public IDictionary<string, object?> Tags => this._adviceFactory.Tags;
 
-        public AspectBuilder( T targetDeclaration, DiagnosticSink diagnosticSink, IEnumerable<IAdvice> declarativeAdvices, AdviceFactory adviceFactory )
+        public CancellationToken CancellationToken { get; }
+
+        public AspectBuilder(
+            T targetDeclaration,
+            DiagnosticSink diagnosticSink,
+            IEnumerable<IAdvice> declarativeAdvices,
+            AdviceFactory adviceFactory,
+            CancellationToken cancellationToken )
         {
             this.TargetDeclaration = targetDeclaration;
             this._declarativeAdvices = declarativeAdvices.ToImmutableArray();
             this._diagnosticSink = diagnosticSink;
             this._adviceFactory = adviceFactory;
+            this.CancellationToken = cancellationToken;
         }
 
         internal AspectInstanceResult ToResult()

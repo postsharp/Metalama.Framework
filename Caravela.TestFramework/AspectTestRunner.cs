@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Caravela.TestFramework
@@ -29,7 +30,7 @@ namespace Caravela.TestFramework
 
             var pipeline = new CompileTimeAspectPipeline( buildOptions, domain );
 
-            if ( pipeline.TryExecute( testResult, testResult.InitialCompilation, out var resultCompilation, out _ ) )
+            if ( pipeline.TryExecute( testResult, testResult.InitialCompilation, CancellationToken.None, out var resultCompilation, out _ ) )
             {
                 testResult.ResultCompilation = resultCompilation;
                 var syntaxRoot = resultCompilation.SyntaxTrees.Single().GetRoot();

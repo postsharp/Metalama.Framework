@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -31,7 +32,10 @@ namespace Caravela.Framework.Impl.DesignTime
             : base( compileTimeProject, aspectLayers, properties ) { }
 
         /// <inheritdoc/>
-        protected override PipelineStageResult GenerateCode( PipelineStageResult input, IPipelineStepsResult pipelineStepResult )
+        protected override PipelineStageResult GenerateCode(
+            PipelineStageResult input,
+            IPipelineStepsResult pipelineStepResult,
+            CancellationToken cancellationToken )
         {
             var transformations = pipelineStepResult.Compilation.GetAllObservableTransformations();
             DiagnosticSink diagnostics = new( this.CompileTimeProject );
@@ -43,6 +47,8 @@ namespace Caravela.Framework.Impl.DesignTime
 
             foreach ( var transformationGroup in transformations )
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 if ( transformationGroup.DeclaringElement is not INamedType declaringType )
                 {
                     // We only support introductions to types.

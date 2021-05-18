@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Linking;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -27,7 +28,10 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         /// <inheritdoc/>
-        protected override PipelineStageResult GenerateCode( PipelineStageResult input, IPipelineStepsResult pipelineStepResult )
+        protected override PipelineStageResult GenerateCode(
+            PipelineStageResult input,
+            IPipelineStepsResult pipelineStepResult,
+            CancellationToken cancellationToken )
         {
             var linker = new AspectLinker(
                 this.PipelineProperties.ServiceProvider,

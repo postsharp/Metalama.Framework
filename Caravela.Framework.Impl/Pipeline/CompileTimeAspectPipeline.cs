@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -34,6 +35,7 @@ namespace Caravela.Framework.Impl.Pipeline
         public bool TryExecute(
             IDiagnosticAdder diagnosticAdder,
             Compilation compilation,
+            CancellationToken cancellationToken,
             [NotNullWhen( true )] out Compilation? outputCompilation,
             [NotNullWhen( true )] out IReadOnlyList<ResourceDescription>? additionalResources )
         {
@@ -41,7 +43,7 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
-                if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, out var configuration ) )
+                if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )
                 {
                     outputCompilation = null;
                     additionalResources = null;
@@ -49,7 +51,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     return false;
                 }
 
-                if ( !TryExecuteCore( partialCompilation, diagnosticAdder, configuration, out var result ) )
+                if ( !TryExecuteCore( partialCompilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
                 {
                     outputCompilation = null;
                     additionalResources = null;

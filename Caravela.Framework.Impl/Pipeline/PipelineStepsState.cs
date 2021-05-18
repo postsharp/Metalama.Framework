@@ -11,6 +11,7 @@ using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -68,14 +69,16 @@ namespace Caravela.Framework.Impl.Pipeline
             this.AddAspectSources( inputAspectSources );
         }
 
-        public void Execute()
+        public void Execute( CancellationToken cancellationToken )
         {
             using var enumerator = this._steps.GetEnumerator();
 
             while ( enumerator.MoveNext() )
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 this._currentStep = enumerator.Current.Value;
-                this.Compilation = this._currentStep!.Execute( this.Compilation, this );
+                this.Compilation = this._currentStep!.Execute( this.Compilation, this, cancellationToken );
             }
         }
 

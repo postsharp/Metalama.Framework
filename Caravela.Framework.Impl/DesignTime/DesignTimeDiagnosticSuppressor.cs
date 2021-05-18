@@ -84,6 +84,8 @@ namespace Caravela.Framework.Impl.DesignTime
                     continue;
                 }
 
+                cancellationToken.ThrowIfCancellationRequested();
+
                 // Report suppressions.
                 if ( !syntaxTreeResult.Suppressions.IsDefaultOrEmpty )
                 {

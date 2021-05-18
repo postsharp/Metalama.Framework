@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
@@ -28,6 +29,7 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
+        private readonly CancellationToken _cancellationToken;
         private readonly SerializableTypes _serializableTypes;
         private readonly TemplateMetaSyntaxFactoryImpl _templateMetaSyntaxFactory;
         private readonly TemplateMemberClassifier _templateMemberClassifier;
@@ -39,10 +41,12 @@ namespace Caravela.Framework.Impl.Templating
             Compilation compileTimeCompilation,
             SemanticAnnotationMap semanticAnnotationMap,
             IDiagnosticAdder diagnosticAdder,
-            IServiceProvider serviceProvider ) : base( compileTimeCompilation )
+            IServiceProvider serviceProvider,
+            CancellationToken cancellationToken ) : base( compileTimeCompilation )
         {
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
+            this._cancellationToken = cancellationToken;
             var syntaxSerializationService = serviceProvider.GetService<SyntaxSerializationService>();
             this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( compileTimeCompilation ) );
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
@@ -159,6 +163,8 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? Visit( SyntaxNode? node )
         {
+            this._cancellationToken.ThrowIfCancellationRequested();
+
             // Captures the root symbol.
             if ( this._rootTemplateSymbol == null )
             {

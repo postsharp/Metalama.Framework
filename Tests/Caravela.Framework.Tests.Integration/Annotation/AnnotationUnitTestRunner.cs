@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -41,6 +42,7 @@ namespace Caravela.Framework.Tests.Integration.Annotation
                 templateSyntaxRoot,
                 templateSemanticModel,
                 diagnostics,
+                CancellationToken.None,
                 out var annotatedTemplateSyntax );
 
             if ( !templateCompilerSuccess )
