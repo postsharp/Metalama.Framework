@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -39,7 +40,7 @@ namespace Caravela.Framework.Impl.DesignTime.UserDiagnostics
 
             this._settingsFilePath = Path.Combine( settingsDirectory, "userDiagnostics.json" );
 
-            this._registrationFile = UserDiagnosticRegistrationFile.Read( this._settingsFilePath );
+            this._registrationFile = UserDiagnosticRegistrationFile.ReadFile( this._settingsFilePath );
         }
 
         private void RefreshRegistrationFile()
@@ -48,7 +49,7 @@ namespace Caravela.Framework.Impl.DesignTime.UserDiagnostics
             {
                 if ( File.GetLastWriteTime( this._settingsFilePath ) > this._registrationFile.Timestamp )
                 {
-                    this._registrationFile = UserDiagnosticRegistrationFile.Read( this._settingsFilePath );
+                    this._registrationFile = UserDiagnosticRegistrationFile.ReadFile( this._settingsFilePath );
                 }
             }
             else

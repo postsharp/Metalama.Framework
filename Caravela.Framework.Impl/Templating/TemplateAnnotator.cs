@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -41,13 +42,14 @@ namespace Caravela.Framework.Impl.Templating
         public TemplateAnnotator(
             CSharpCompilation compilation,
             SemanticAnnotationMap semanticAnnotationMap,
-            IDiagnosticAdder diagnosticAdder )
+            IDiagnosticAdder diagnosticAdder,
+            IServiceProvider serviceProvider)
         {
-            this._symbolScopeClassifier = SymbolClassifier.GetInstance( compilation );
+            this._symbolScopeClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
 
-            this._templateMemberClassifier = new TemplateMemberClassifier( compilation, semanticAnnotationMap );
+            this._templateMemberClassifier = new TemplateMemberClassifier( compilation, semanticAnnotationMap, serviceProvider );
 
             // add default values of scope
             this._currentScopeContext = ScopeContext.Default;

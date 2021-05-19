@@ -3,6 +3,7 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -39,7 +40,7 @@ namespace Caravela.Framework.Impl.DesignTime
                     .WhereNotNull()
                     .ToList();
 
-                var buildOptions = new BuildOptions( context.Options.AnalyzerConfigOptionsProvider );
+                var buildOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
 
                 DesignTimeDebugger.AttachDebugger( buildOptions );
 
@@ -65,7 +66,7 @@ namespace Caravela.Framework.Impl.DesignTime
             IReadOnlyList<SyntaxTree> syntaxTrees,
             ImmutableArray<Diagnostic> reportedDiagnostics,
             Action<Suppression> reportSuppression,
-            BuildOptions options,
+            ProjectOptions options,
             CancellationToken cancellationToken )
         {
             // Execute the pipeline.

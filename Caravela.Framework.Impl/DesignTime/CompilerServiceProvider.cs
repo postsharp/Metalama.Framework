@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.DesignTime.Contracts;
+using Caravela.Framework.Impl.Pipeline;
 using System;
 
 namespace Caravela.Framework.Impl.DesignTime
@@ -11,14 +12,15 @@ namespace Caravela.Framework.Impl.DesignTime
     /// </summary>
     internal class CompilerServiceProvider : ICompilerServiceProvider
     {
-        public static readonly CompilerServiceProvider Instance = new();
+        private static readonly CompilerServiceProvider _instance = new();
+        private ServiceProvider _serviceProvider;
 
         static CompilerServiceProvider()
         {
-            DesignTimeEntryPointManager.Instance.RegisterServiceProvider( Instance );
+            DesignTimeEntryPointManager.Instance.RegisterServiceProvider( _instance );
         }
 
-        public CompilerServiceProvider()
+        private CompilerServiceProvider()
         {
             this.Version = this.GetType().Assembly.GetName().Version;
         }
@@ -26,14 +28,14 @@ namespace Caravela.Framework.Impl.DesignTime
         public static void Initialize()
         {
             // Make sure the type is initialized.
-            _ = Instance.GetType();
+            _ = _instance.GetType();
         }
 
         public Version Version { get; }
 
         public T? GetCompilerService<T>()
             where T : class, ICompilerService
-            => typeof(T) == typeof(IClassificationService) ? (T) (object) new ClassificationService() : null;
+            => typeof(T) == typeof(IClassificationService) ? (T) (object) new ClassificationService(this._serviceProvider) : null;
 
         event Action<ICompilerServiceProvider>? ICompilerServiceProvider.Unloaded
         {

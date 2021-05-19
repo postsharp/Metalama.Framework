@@ -19,15 +19,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
 {
     public class CompileTimeAssemblyBuilderTests : TestBase
     {
-        private static ServiceProvider CreateServiceProvider()
-        {
-            ServiceProvider serviceProvider = new();
-            serviceProvider.AddService<IBuildOptions>( new TestBuildOptions() );
-            serviceProvider.AddService( ReferenceAssemblyLocator.GetInstance() );
-
-            return serviceProvider;
-        }
-
+     
         [Fact]
         public void RemoveInvalidUsingRewriterTest()
         {
@@ -89,13 +81,13 @@ class A : Attribute
     public override string ToString() => $""A({constructorArguments}, P={P})"";
 }";
 
-            using var serviceProvider = CreateServiceProvider();
+            using var isolatedTest = this.WithIsolatedTest();
 
             var roslynCompilation = CreateCSharpCompilation( code );
             var compilation = CompilationModel.CreateInitialInstance( roslynCompilation );
 
             var compileTimeDomain = new UnloadableCompileTimeDomain();
-            var loader = CompileTimeProjectLoader.Create( compileTimeDomain, serviceProvider );
+            var loader = CompileTimeProjectLoader.Create( compileTimeDomain, isolatedTest.ServiceProvider );
             Assert.True( loader.TryGetCompileTimeProject( compilation.RoslynCompilation, null, new DiagnosticList(), false, CancellationToken.None, out _ ) );
 
             if ( !loader.AttributeDeserializer.TryCreateAttribute( compilation.Attributes.First(), new DiagnosticList(), out var attribute ) )
@@ -131,8 +123,8 @@ class ReferencingClass
 
             var roslynCompilation = CreateCSharpCompilation( referencingCode, referencedCode );
 
-            using var serviceProvider = CreateServiceProvider();
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
+            using var isolatedTest = this.WithIsolatedTest();
+            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
 
             DiagnosticList diagnosticList = new();
             Assert.True( loader.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, false, CancellationToken.None, out _ ) );
@@ -176,15 +168,15 @@ class ReferencingClass
 
             try
             {
-                using var serviceProvider = CreateServiceProvider();
+                using var isolatedTest = this.WithIsolatedTest();
                 var testAssemblyLocator = new TestAssemblyLocator();
-                serviceProvider.AddService<IAssemblyLocator>( testAssemblyLocator );
+                isolatedTest.ServiceProvider.AddService<IAssemblyLocator>( testAssemblyLocator );
 
                 PortableExecutableReference CompileProject( string code, params MetadataReference[] references )
                 {
                     // For this test, we need a different loader every time, because we simulate a series command-line calls,
                     // one for each project.
-                    var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
+                    var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
 
                     var compilation = CreateCSharpCompilation( code, additionalReferences: references );
                     DiagnosticList diagnostics = new();
@@ -292,15 +284,15 @@ class B
                 name: "test_B_" + guid );
 
             using var domain = new UnloadableCompileTimeDomain();
-            using var serviceProvider1 = CreateServiceProvider();
+            using var isolatedTest1 = this.WithIsolatedTest();
 
-            var loaderV1 = CompileTimeProjectLoader.Create( domain, serviceProvider1 );
+            var loaderV1 = CompileTimeProjectLoader.Create( domain, isolatedTest1.ServiceProvider );
             DiagnosticList diagnosticList = new();
             Assert.True( loaderV1.TryGetCompileTimeProject( compilationB1, null, diagnosticList, false, CancellationToken.None, out var project1 ) );
             ExecuteAssertions( project1!, 1 );
 
-            using var serviceProvider2 = CreateServiceProvider();
-            var loader2 = CompileTimeProjectLoader.Create( domain, serviceProvider2 );
+            using var isolatedTest2 = this.WithIsolatedTest();
+            var loader2 = CompileTimeProjectLoader.Create( domain, isolatedTest2.ServiceProvider );
             Assert.True( loader2.TryGetCompileTimeProject( compilationB2, null, diagnosticList, false, CancellationToken.None, out var project2 ) );
 
             ExecuteAssertions( project2!, 2 );
@@ -347,8 +339,8 @@ class C
 
             var domain = new CompileTimeDomain();
             var compilation = CreateCSharpCompilation( code, ignoreErrors: true );
-            using var serviceProvider = CreateServiceProvider();
-            var loader = CompileTimeProjectLoader.Create( domain, serviceProvider );
+            using var isolatedTest = this.WithIsolatedTest();
+            var loader = CompileTimeProjectLoader.Create( domain, isolatedTest.ServiceProvider );
             DiagnosticList diagnosticList = new();
             Assert.True( loader.TryGetCompileTimeProject( compilation, null, diagnosticList, false, CancellationToken.None, out _ ) );
         }
@@ -366,8 +358,8 @@ public class ReferencedClass
 
             var roslynCompilation = CreateCSharpCompilation( code );
 
-            var serviceProvider = CreateServiceProvider();
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
+            using var isolatedTest = this.WithIsolatedTest();
+            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
 
             DiagnosticList diagnosticList = new();
 
@@ -396,21 +388,21 @@ public class ReferencedClass
 
             DiagnosticList diagnosticList = new();
 
-            // We create a single ServiceProvider because we need to share the filesystem cache, and there is one per ServiceProvider
+            // We create a single isolatedTest.ServiceProvider because we need to share the filesystem cache, and there is one per isolatedTest.ServiceProvider
             // in test projects.
-            using var serviceProvider = CreateServiceProvider();
+            using var isolatedTest = this.WithIsolatedTest();
 
             // Getting from cache should fail.
 
-            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
+            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
             Assert.False( loader1.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, true, CancellationToken.None, out _ ) );
 
             // Building the project should succeed.
-            var loader2 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
+            var loader2 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
             Assert.True( loader2.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, false, CancellationToken.None, out _ ) );
 
             // After building, getting from cache should succeed.
-            var loader3 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
+            var loader3 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
             Assert.True( loader3.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, true, CancellationToken.None, out _ ) );
         }
     }

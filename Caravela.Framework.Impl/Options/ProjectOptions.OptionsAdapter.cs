@@ -3,14 +3,14 @@
 
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Caravela.Framework.Impl.Options
 {
-    public partial class BuildOptions
+    public partial class ProjectOptions
     {
         /// <summary>
-        /// An implementation of <see cref="IBuildOptions"/> that reads the values from <see cref="AnalyzerConfigOptions"/>.
+        /// An implementation of <see cref="IProjectOptions"/> that reads the values from <see cref="AnalyzerConfigOptions"/>.
         /// </summary>
-        private class OptionsAdapter : IBuildOptionsSource
+        private class OptionsAdapter : IProjectOptionsSource
         {
             private readonly AnalyzerConfigOptions _options;
 

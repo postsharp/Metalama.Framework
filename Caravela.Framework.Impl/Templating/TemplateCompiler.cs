@@ -19,9 +19,9 @@ namespace Caravela.Framework.Impl.Templating
         private readonly IServiceProvider _serviceProvider;
         private readonly SemanticAnnotationMap _semanticAnnotationMap = new();
 
-        public TemplateCompiler( IServiceProvider? serviceProvider = null )
+        public TemplateCompiler( IServiceProvider serviceProvider  )
         {
-            this._serviceProvider = serviceProvider ?? ServiceProvider.Empty;
+            this._serviceProvider = serviceProvider;
         }
 
         public ILocationAnnotationMap LocationAnnotationMap => this._semanticAnnotationMap;
@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Templating
             annotatedSyntaxRoot = currentSyntaxRoot;
 
             // Annotate the syntax tree with info about build- and run-time nodes,
-            var annotatorRewriter = new TemplateAnnotator( (CSharpCompilation) semanticModel.Compilation, this._semanticAnnotationMap, diagnostics );
+            var annotatorRewriter = new TemplateAnnotator( (CSharpCompilation) semanticModel.Compilation, this._semanticAnnotationMap, diagnostics,this._serviceProvider );
             annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot )!;
 
             // Stop if we have any error.

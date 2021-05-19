@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
@@ -32,13 +33,14 @@ namespace Caravela.Framework.Impl.DesignTime
         private SymbolDeclarationScope? _currentDeclarationScope;
         private ISymbol? _currentDeclaration;
         private readonly CancellationToken _cancellationToken;
+        private readonly ServiceProvider _serviceProvider;
 
-        public DesignTimeAnalyzerAdditionalVisitor( SemanticModelAnalysisContext context, IBuildOptions buildOptions ) : this(
+        public DesignTimeAnalyzerAdditionalVisitor( SemanticModelAnalysisContext context, IProjectOptions projectOptions ) : this(
             context.SemanticModel,
             context.ReportDiagnostic,
             DesignTimeAspectPipelineCache
                 .Instance
-                .GetOrCreatePipeline( buildOptions ),
+                .GetOrCreatePipeline( projectOptions ),
             context.CancellationToken ) { }
 
         public DesignTimeAnalyzerAdditionalVisitor(
@@ -49,7 +51,8 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             this._semanticModel = semanticModel;
             this._reportDiagnostic = reportDiagnostic;
-            this._classifier = SymbolClassifier.GetInstance( semanticModel.Compilation );
+            this._serviceProvider = pipeline.ServiceProvider;
+            this._classifier = this._serviceProvider.GetService<SymbolClassificationService>().GetClassifier( semanticModel.Compilation );
 
             this._isCompileTimeTreeOutdated = pipeline.IsCompileTimeSyntaxTreeOutdated( semanticModel.SyntaxTree.FilePath );
             this._cancellationToken = cancellationToken;
@@ -113,7 +116,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             if ( methodSymbol != null && this._classifier.IsTemplate( methodSymbol ) )
             {
-                TemplateCompiler templateCompiler = new( ServiceProvider.Empty );
+                TemplateCompiler templateCompiler = new( this._serviceProvider );
                 _ = templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _ );
             }
             else

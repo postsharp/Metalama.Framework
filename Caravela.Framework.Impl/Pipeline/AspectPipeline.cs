@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
@@ -24,26 +25,19 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public abstract partial class AspectPipeline : IDisposable, IAspectPipelineProperties
     {
-        public IBuildOptions BuildOptions { get; }
+        public IProjectOptions ProjectOptions { get; }
 
         private readonly CompileTimeDomain _domain;
 
-        protected ServiceProvider ServiceProvider { get; } = new();
+        public ServiceProvider ServiceProvider { get; }
 
         IServiceProvider IAspectPipelineProperties.ServiceProvider => this.ServiceProvider;
 
-        protected AspectPipeline( IBuildOptions buildOptions, CompileTimeDomain domain, IAssemblyLocator? assemblyLocator = null )
+        protected AspectPipeline( IProjectOptions projectOptions,  CompileTimeDomain domain, IDirectoryOptions? directoryOptions = null, IAssemblyLocator? assemblyLocator = null )
         {
             this._domain = domain;
-            this.BuildOptions = buildOptions;
-            this.ServiceProvider.AddService( buildOptions );
-            this.ServiceProvider.AddService( ReferenceAssemblyLocator.GetInstance() );
-            this.ServiceProvider.AddService( new SyntaxSerializationService() );
-
-            if ( assemblyLocator != null )
-            {
-                this.ServiceProvider.AddService( assemblyLocator );
-            }
+            this.ProjectOptions = projectOptions;
+            this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( directoryOptions, assemblyLocator );
         }
 
         /// <summary>
@@ -66,7 +60,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     if ( this.WriteUnhandledExceptionsToFile )
                     {
                         var guid = Guid.NewGuid();
-                        var crashReportDirectory = this.BuildOptions.GetCrashReportDirectoryOrDefault();
+                        var crashReportDirectory = this.ServiceProvider.GetService<IDirectoryOptions>().CrashReportDirectory;
 
                         if ( string.IsNullOrWhiteSpace( crashReportDirectory ) )
                         {
@@ -140,7 +134,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             // Create aspect types.
-            var driverFactory = new AspectDriverFactory( compilation.Compilation, this.BuildOptions.PlugIns );
+            var driverFactory = new AspectDriverFactory( compilation.Compilation, this.ProjectOptions.PlugIns );
             var aspectTypeFactory = new AspectClassMetadataFactory( driverFactory );
 
             var aspectTypes = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();

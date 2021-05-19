@@ -114,12 +114,12 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
         [Fact]
         public void NoCompileTimeCode()
         {
-            using TestBuildOptions testBuildOptions = new();
+            using TestProjectOptions testProjectOptions = new();
             var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "F1.cs", "public class X {}" } } );
             using DesignTimeAspectPipelineCache cache = new( new UnloadableCompileTimeDomain() );
 
             // First execution of the pipeline.
-            var results = cache.GetDesignTimeResults( compilation, testBuildOptions );
+            var results = cache.GetDesignTimeResults( compilation, testProjectOptions );
             var dumpedResults = DumpResults( results );
             this.Logger.WriteLine( dumpedResults );
 
@@ -135,7 +135,7 @@ F1.cs:
             Assert.Equal( 1, cache.PipelineExecutionCount );
 
             // Second execution. The result should be the same, and the number of executions should not change.
-            var results2 = cache.GetDesignTimeResults( compilation, testBuildOptions );
+            var results2 = cache.GetDesignTimeResults( compilation, testProjectOptions );
             var dumpedResults2 = DumpResults( results2 );
             Assert.Equal( expectedResult.Trim(), dumpedResults2 );
             Assert.Equal( 1, cache.PipelineExecutionCount );
@@ -184,7 +184,7 @@ Target.cs:
 0 introductions(s):
 ";
 
-            using TestBuildOptions buildOptions = new();
+            using TestProjectOptions projectOptions = new();
 
             var compilation = CreateCSharpCompilation(
                 new Dictionary<string, string>()
@@ -194,17 +194,17 @@ Target.cs:
                 assemblyName );
 
             using DesignTimeAspectPipelineCache cache = new( new UnloadableCompileTimeDomain() );
-            var pipeline = cache.GetOrCreatePipeline( buildOptions );
+            var pipeline = cache.GetOrCreatePipeline( projectOptions );
 
             // First execution of the pipeline.
-            var results = cache.GetDesignTimeResults( compilation, buildOptions );
+            var results = cache.GetDesignTimeResults( compilation, projectOptions );
             var dumpedResults = DumpResults( results );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
             Assert.Equal( 1, cache.PipelineExecutionCount );
 
             // Second execution. The result should be the same, and the number of executions should not change.
-            var results2 = cache.GetDesignTimeResults( compilation, buildOptions );
+            var results2 = cache.GetDesignTimeResults( compilation, projectOptions );
             var dumpedResults2 = DumpResults( results2 );
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
             Assert.Equal( 1, cache.PipelineExecutionCount );
@@ -217,7 +217,7 @@ Target.cs:
                 },
                 assemblyName );
 
-            var results3 = cache.GetDesignTimeResults( compilation3, buildOptions );
+            var results3 = cache.GetDesignTimeResults( compilation3, projectOptions );
             var dumpedResults3 = DumpResults( results3 );
 
             this.Logger.WriteLine( dumpedResults3 );
@@ -237,7 +237,7 @@ Target.cs:
 
             var aspect4 = compilation4.SyntaxTrees.Single( t => t.FilePath == "Aspect.cs" );
 
-            var results4 = cache.GetDesignTimeResults( compilation4, buildOptions );
+            var results4 = cache.GetDesignTimeResults( compilation4, projectOptions );
 
             Assert.Equal( DesignTimeAspectPipelineStatus.NeedsExternalBuild, pipeline.Status );
             Assert.True( pipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
@@ -270,7 +270,7 @@ Target.cs:
 
             Assert.Equal( DesignTimeAspectPipelineStatus.NeedsExternalBuild, pipeline.Status );
 
-            var results5 = cache.GetDesignTimeResults( compilation5, buildOptions );
+            var results5 = cache.GetDesignTimeResults( compilation5, projectOptions );
             var dumpedResults5 = DumpResults( results5 );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults5 );
@@ -288,7 +288,7 @@ Target.cs:
 
             // Build the project from the compile-time pipeline.
             using UnloadableCompileTimeDomain domain = new();
-            var compileTimeAspectPipeline = new CompileTimeAspectPipeline( buildOptions, domain );
+            var compileTimeAspectPipeline = new CompileTimeAspectPipeline( projectOptions, domain );
             DiagnosticList compileDiagnostics = new();
             Assert.True( compileTimeAspectPipeline.TryExecute( compileDiagnostics, compilation5, CancellationToken.None, out _, out _ ) );
 
@@ -296,7 +296,7 @@ Target.cs:
             pipeline.OnExternalBuildStarted();
 
             // A new evaluation of the design-time pipeline should now give the new results.
-            var results6 = cache.GetDesignTimeResults( compilation5, buildOptions );
+            var results6 = cache.GetDesignTimeResults( compilation5, projectOptions );
             var dumpedResults6 = DumpResults( results6 );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "3" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults6 );

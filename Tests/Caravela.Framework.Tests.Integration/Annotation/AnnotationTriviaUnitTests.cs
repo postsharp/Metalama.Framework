@@ -16,6 +16,6 @@ namespace Caravela.Framework.Tests.Integration.Annotation
         [FromDirectory( @"Formatting" )]
         public Task All( string testName ) => this.GetTestResultAsync( testName );
 
-        protected override TestRunnerBase CreateTestRunner() => new AnnotationUnitTestRunner( this.ProjectDirectory );
+        protected override TestRunnerBase CreateTestRunner() => new AnnotationUnitTestRunner( this.ServiceProvider, this.ProjectDirectory );
     }
 }

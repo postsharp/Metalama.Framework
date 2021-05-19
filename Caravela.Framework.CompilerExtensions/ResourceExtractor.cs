@@ -4,13 +4,14 @@
 using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading;
 
 namespace Caravela.Framework.Impl
 {
-    public static class ModuleInitializer
+    public static class ResourceExtractor
     {
         private static readonly object _initializeLock = new();
         private static readonly Dictionary<string, Assembly> _embeddedAssemblies = new( StringComparer.OrdinalIgnoreCase );
@@ -25,14 +26,14 @@ namespace Caravela.Framework.Impl
                 {
                     if ( !_initialized )
                     {
-                        var currentAassembly = Assembly.GetCallingAssembly();
+                        var currentAssembly = Assembly.GetCallingAssembly();
 
                         AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
 
-                        _snapshotDirectory = Path.Combine( Path.GetTempPath(), "Caravela", AssemblyMetadataReader.MainBuildId, "EmbeddedResources" );
+                        _snapshotDirectory = TempPathHelper.GetTempPath( "EmbeddedResources" );
 
                         // Extract embedded assemblies to a temp directory.
-                        ExtractEmbeddedAssemblies( currentAassembly );
+                        ExtractEmbeddedAssemblies( currentAssembly );
 
                         // Load assemblies from the temp directory.
                         foreach ( var file in Directory.GetFiles( _snapshotDirectory, "*.dll" ) )
@@ -53,14 +54,14 @@ namespace Caravela.Framework.Impl
             return Activator.CreateInstance( type );
         }
 
-        private static void ExtractEmbeddedAssemblies( Assembly currentAassembly )
+        private static void ExtractEmbeddedAssemblies( Assembly currentAssembly )
         {
             // Extract managed resources to a snapshot directory.
 
             if ( !Directory.Exists( _snapshotDirectory ) )
             {
                 // We cannot use MutexHelper because of dependencies on an embedded assembly.
-                using var extractMutex = new Mutex( false, "Global\\Caravela_Extract_" + AssemblyMetadataReader.MainBuildId );
+                using var extractMutex = new Mutex( false, "Global\\Caravela_Extract_" + AssemblyMetadataReader.MainVersionId );
                 extractMutex.WaitOne();
 
                 try
@@ -69,21 +70,24 @@ namespace Caravela.Framework.Impl
                     {
                         Directory.CreateDirectory( _snapshotDirectory );
 
-                        foreach ( var resourceName in currentAassembly.GetManifestResourceNames() )
+                        foreach ( var resourceName in currentAssembly.GetManifestResourceNames() )
                         {
                             if ( resourceName.EndsWith( ".dll", StringComparison.OrdinalIgnoreCase ) )
                             {
-                                // Remove the namespace prefix from the resource name.
-                                var fileName = resourceName.Substring( "Caravela.Framework.Impl.Resources.".Length );
-
+                                
                                 // Extract the file to disk.
-                                using var stream = currentAassembly.GetManifestResourceStream( resourceName )!;
-                                var file = Path.Combine( _snapshotDirectory, fileName );
+                                using var stream = currentAssembly.GetManifestResourceStream( resourceName )!;
+                                var file = Path.Combine( _snapshotDirectory, resourceName );
 
                                 using ( var outputStream = File.Create( file ) )
                                 {
                                     stream.CopyTo( outputStream );
                                 }
+                                
+                                // Rename the assembly to the match the assembly name.
+                                AssemblyName assemblyName = AssemblyName.GetAssemblyName( file );
+                                var renamedFile = Path.Combine( _snapshotDirectory, assemblyName.Name + ".dll" );
+                                RetryHelper.Retry( () => File.Move( file, renamedFile ) );
                             }
                         }
                     }

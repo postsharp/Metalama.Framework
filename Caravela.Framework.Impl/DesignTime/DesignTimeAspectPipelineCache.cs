@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System;
@@ -47,14 +48,14 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <summary>
         /// Gets the pipeline for a given project, and creates it if necessary.
         /// </summary>
-        /// <param name="buildOptions"></param>
+        /// <param name="projectOptions"></param>
         /// <returns></returns>
-        internal DesignTimeAspectPipeline GetOrCreatePipeline( IBuildOptions buildOptions )
+        internal DesignTimeAspectPipeline GetOrCreatePipeline( IProjectOptions projectOptions )
             => this._pipelinesByProjectId.GetOrAdd(
-                buildOptions.ProjectId,
+                projectOptions.ProjectId,
                 _ =>
                 {
-                    var pipeline = new DesignTimeAspectPipeline( buildOptions, this._domain );
+                    var pipeline = new DesignTimeAspectPipeline( projectOptions, this._domain );
                     pipeline.ExternalBuildStarted += this.OnExternalBuildStarted;
 
                     return pipeline;
@@ -72,9 +73,9 @@ namespace Caravela.Framework.Impl.DesignTime
         /// </summary>
         public DesignTimeResults GetDesignTimeResults(
             Compilation compilation,
-            IBuildOptions buildOptions,
+            IProjectOptions projectOptions,
             CancellationToken cancellationToken = default )
-            => this.GetDesignTimeResults( compilation, compilation.SyntaxTrees.ToImmutableArray(), buildOptions, cancellationToken );
+            => this.GetDesignTimeResults( compilation, compilation.SyntaxTrees.ToImmutableArray(), projectOptions, cancellationToken );
 
         /// <summary>
         /// Gets the design-time results for a set of syntax trees.
@@ -82,10 +83,10 @@ namespace Caravela.Framework.Impl.DesignTime
         public DesignTimeResults GetDesignTimeResults(
             Compilation compilation,
             IReadOnlyList<SyntaxTree> syntaxTrees,
-            IBuildOptions buildOptions,
+            IProjectOptions projectOptions,
             CancellationToken cancellationToken )
         {
-            var pipeline = this.GetOrCreatePipeline( buildOptions );
+            var pipeline = this.GetOrCreatePipeline( projectOptions );
 
             // Update the cache.
             var changes = pipeline.InvalidateCache( compilation );

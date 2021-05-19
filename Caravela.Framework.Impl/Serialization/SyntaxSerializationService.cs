@@ -97,13 +97,16 @@ namespace Caravela.Framework.Impl.Serialization
         /// lists of any element.
         /// </remarks>
         /// <param name="serializer">A new serializer that supports that type.</param>
-        public void RegisterSerializer( ObjectSerializer serializer )
+        private void RegisterSerializer( ObjectSerializer serializer )
         {
             _ = this._serializerByInputType.TryAdd( serializer.InputType, serializer );
 
             foreach ( var inputType in serializer.AllSupportedTypes )
             {
-                this._supportedContractTypes.TryAdd( inputType, inputType );
+                if ( inputType.IsPublic )
+                {
+                    this._supportedContractTypes.TryAdd( inputType, inputType );
+                }
             }
         }
 

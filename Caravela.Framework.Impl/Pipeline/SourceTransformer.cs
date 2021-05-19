@@ -5,6 +5,7 @@ using Caravela.Compiler;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Options;
 using Microsoft.CodeAnalysis;
 using System.Threading;
 
@@ -18,8 +19,9 @@ namespace Caravela.Framework.Impl.Pipeline
         public Compilation Execute( TransformerContext transformerContext )
         {
             using CompileTimeAspectPipeline pipeline = new(
-                new BuildOptions( transformerContext.GlobalOptions, transformerContext.Plugins ),
+                new ProjectOptions( transformerContext.GlobalOptions, transformerContext.Plugins ),
                 new CompileTimeDomain(),
+                null,
                 new CompilationAssemblyLocator( transformerContext.Compilation ) );
 
             if ( pipeline.TryExecute(

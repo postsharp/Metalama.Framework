@@ -4,22 +4,21 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal partial class CompileTimeCompilationBuilder
-    {
         /// <summary>
         /// A base <see cref="CSharpSyntaxRewriter"/> that stores the <see cref="RunTimeCompilation"/> and the <see cref="SymbolClassifier"/>.
         /// </summary>
-        private abstract class Rewriter : CSharpSyntaxRewriter
+        internal abstract class CompileTimeBaseRewriter : CSharpSyntaxRewriter
         {
             public ISymbolClassifier SymbolClassifier { get; }
 
-            protected Rewriter( Compilation runTimeCompilation )
+            protected CompileTimeBaseRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
             {
-                this.SymbolClassifier = CompileTime.SymbolClassifier.GetInstance( runTimeCompilation );
+                this.SymbolClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
                 this.RunTimeCompilation = runTimeCompilation;
             }
 
@@ -54,5 +53,5 @@ namespace Caravela.Framework.Impl.CompileTime
                 return this.SymbolClassifier.GetSymbolDeclarationScope( symbol );
             }
         }
-    }
+ 
 }

@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
         [FromDirectory( @"Formatting" )]
         public Task All( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
 
-        protected override TestRunnerBase CreateTestRunner() => new HighlightingTestRunner( this.ProjectDirectory );
+        protected override TestRunnerBase CreateTestRunner() => new HighlightingTestRunner( this.ServiceProvider, this.ProjectDirectory );
 
         protected async Task AssertHighlightedSourceEqualAsync( string relativeTestPath )
         {

@@ -3,6 +3,8 @@
 
 using Caravela.AspectWorkbench.CodeEditor;
 using Caravela.AspectWorkbench.ViewModels;
+using Caravela.Framework.Impl.Pipeline;
+using Caravela.TestFramework;
 using Microsoft.Win32;
 using PostSharp;
 using RoslynPad.Editor;
@@ -23,13 +25,14 @@ namespace Caravela.AspectWorkbench.Views
         private const string _fileDialogueFilter = "C# Files (*.cs)|*.cs";
 
         private readonly MainViewModel _viewModel;
+        private ServiceProvider _serviceProvider = ServiceProviderFactory.GetServiceProvider( new TestProjectOptions() );
 
         public MainWindow()
         {
             this.InitializeComponent();
             this.InitializeRoslynEditors();
 
-            var newViewModel = new MainViewModel();
+            var newViewModel = new MainViewModel(this._serviceProvider);
             this._viewModel = newViewModel;
             this.DataContext = newViewModel;
             Post.Cast<MainViewModel, INotifyPropertyChanged>( newViewModel ).PropertyChanged += this.ViewModel_PropertyChanged;

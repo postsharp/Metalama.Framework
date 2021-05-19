@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -19,9 +21,11 @@ namespace Caravela.TestFramework
     /// This is useful to write only one test method per category of tests.
     /// </para>
     /// </remarks>
-    public abstract class UnitTestBase
+    public abstract class UnitTestBase : IDisposable
     {
         protected ITestOutputHelper Logger { get; }
+        
+        public ServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Gets the root directory path of the current test project.
@@ -44,6 +48,7 @@ namespace Caravela.TestFramework
             this.Logger = logger;
             this.ProjectDirectory = TestEnvironment.GetProjectDirectory( this.GetType().Assembly );
             this.TestInputsDirectory = TestEnvironment.GetTestInputsDirectory( this.GetType().Assembly );
+            this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( new TestProjectOptions() );
         }
 
         protected void WriteDiagnostic( Diagnostic diagnostic )
@@ -140,6 +145,11 @@ namespace Caravela.TestFramework
             }
 
             Assert.Equal( expectedTransformedSourceText, actualTransformedSourceText );
+        }
+
+        public void Dispose()
+        {
+            this.ServiceProvider.Dispose();
         }
     }
 }

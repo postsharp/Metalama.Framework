@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -18,7 +19,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Rewrites a run-time syntax tree into a compile-time syntax tree. Calls <see cref="TemplateCompiler"/> on templates,
         /// and removes run-time-only sub trees.
         /// </summary>
-        private sealed class ProduceCompileTimeCodeRewriter : Rewriter
+        private sealed class ProduceCompileTimeCodeCompileTimeBaseRewriter : CompileTimeBaseRewriter
         {
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "hasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
@@ -30,13 +31,14 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public bool FoundCompileTimeCode { get; private set; }
 
-            public ProduceCompileTimeCodeRewriter(
+            public ProduceCompileTimeCodeCompileTimeBaseRewriter(
                 Compilation runTimeCompilation,
                 Compilation compileTimeCompilation,
                 IDiagnosticAdder diagnosticAdder,
                 TemplateCompiler templateCompiler,
-                CancellationToken cancellationToken )
-                : base( runTimeCompilation )
+                CancellationToken cancellationToken,
+                IServiceProvider serviceProvider )
+                : base( runTimeCompilation, serviceProvider )
             {
                 this._compileTimeCompilation = compileTimeCompilation;
                 this._diagnosticAdder = diagnosticAdder;

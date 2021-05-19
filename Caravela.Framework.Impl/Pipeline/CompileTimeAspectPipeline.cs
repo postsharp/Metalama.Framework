@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Options;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,12 +19,13 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public class CompileTimeAspectPipeline : AspectPipeline
     {
-        public CompileTimeAspectPipeline( IBuildOptions buildOptions, CompileTimeDomain domain, IAssemblyLocator? assemblyLocator = null ) : base(
-            buildOptions,
+        public CompileTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain, IDirectoryOptions? directoryOptions = null, IAssemblyLocator? assemblyLocator = null ) : base(
+            projectOptions,
             domain,
+            directoryOptions,
             assemblyLocator )
         {
-            if ( this.BuildOptions.DebugCompilerProcess )
+            if ( this.ProjectOptions.DebugCompilerProcess )
             {
                 if ( !Debugger.IsAttached )
                 {
@@ -73,7 +75,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     additionalResourcesBuilder.Add( configuration.CompileTimeProject!.ToResource() );
                 }
 
-                outputCompilation = CompileTimeCompilationBuilder.PrepareRunTimeAssembly( result.PartialCompilation.Compilation );
+                outputCompilation = RunTimeAssemblyRewriter.Rewrite( result.PartialCompilation.Compilation, ServiceProvider );
                 additionalResources = additionalResourcesBuilder;
 
                 return true;

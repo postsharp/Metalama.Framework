@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using System;
 using System.Diagnostics;
@@ -18,12 +19,17 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <summary>
         /// Attaches the debugger to the current process if requested.
         /// </summary>
-        public static void AttachDebugger( IBuildOptions buildOptions )
+        public static void AttachDebugger( IDebuggingOptions projectOptions )
         {
+            var processName = Process.GetCurrentProcess().ProcessName;
+
             var mustAttachDebugger =
-                Process.GetCurrentProcess().ProcessName.Equals( "devenv", StringComparison.OrdinalIgnoreCase )
-                    ? buildOptions.DebugIdeProcess
-                    : buildOptions.DebugAnalyzerProcess;
+                processName.ToLowerInvariant() switch
+                {
+                    "devenv" => projectOptions.DebugIdeProcess,
+                    "servicehub.roslyncodeanalysisservice" => projectOptions.DebugAnalyzerProcess,
+                    _ => false
+                };
 
             if ( mustAttachDebugger && !_attachDebuggerRequested )
             {

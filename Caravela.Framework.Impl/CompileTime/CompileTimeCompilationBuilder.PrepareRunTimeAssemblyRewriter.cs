@@ -5,24 +5,30 @@ using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal partial class CompileTimeCompilationBuilder
-    {
         /// <summary>
         /// Rewrites a run-time syntax tree so that the implementation of compile-time-only methods is replaced
         /// by a <c>throw new NotSupportedException()</c>.
         /// </summary>
-        private class PrepareRunTimeAssemblyRewriter : Rewriter
+        internal class RunTimeAssemblyRewriter : CompileTimeBaseRewriter
         {
             private readonly INamedTypeSymbol? _aspectDriverSymbol;
 
-            public PrepareRunTimeAssemblyRewriter( Compilation runTimeCompilation )
-                : base( runTimeCompilation )
+            private RunTimeAssemblyRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
+                : base( runTimeCompilation, serviceProvider )
             {
                 this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName );
+            }
+
+            public static Compilation Rewrite( Compilation runTimeCompilation, IServiceProvider serviceProvider )
+            {
+                var rewriter = new RunTimeAssemblyRewriter( runTimeCompilation, serviceProvider );
+
+                return rewriter.VisitTrees( runTimeCompilation );
             }
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
@@ -50,5 +56,5 @@ namespace Caravela.Framework.Impl.CompileTime
                 return node;
             }
         }
-    }
+ 
 }

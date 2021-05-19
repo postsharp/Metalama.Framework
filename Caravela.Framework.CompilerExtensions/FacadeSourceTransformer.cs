@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl
 
         public FacadeSourceTransformer()
         {
-            this._impl = (ISourceTransformer) ModuleInitializer.GetImplementationType( "Caravela.Framework.Impl.Pipeline.SourceTransformer" );
+            this._impl = (ISourceTransformer) ResourceExtractor.GetImplementationType( "Caravela.Framework.Impl.Pipeline.SourceTransformer" );
         }
 
         public Compilation Execute( TransformerContext transformerContext ) => this._impl.Execute( transformerContext );

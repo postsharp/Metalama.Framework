@@ -53,13 +53,6 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
     public partial class LinkerTestBase : TestBase
     {
-        protected ServiceProvider ServiceProvider { get; }
-
-        public LinkerTestBase()
-        {
-            this.ServiceProvider = new ServiceProvider();
-            this.ServiceProvider.AddService( new SyntaxSerializationService() );
-        }
 
         internal static AspectLinkerInput CreateLinkerInput( string code )
         {

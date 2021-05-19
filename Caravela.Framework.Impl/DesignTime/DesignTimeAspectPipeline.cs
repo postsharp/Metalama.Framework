@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.DesignTime.UserDiagnostics;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
@@ -37,13 +38,13 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public DesignTimeAspectPipelineStatus Status { get; private set; }
 
-        public DesignTimeAspectPipeline( IBuildOptions buildOptions, CompileTimeDomain domain ) : base( buildOptions, domain )
+        public DesignTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain ) : base( projectOptions, domain )
         {
-            if ( buildOptions.BuildTouchFile != null )
+            if ( projectOptions.BuildTouchFile != null )
             {
                 this._fileSystemWatcher = new FileSystemWatcher(
-                    Path.GetDirectoryName( buildOptions.BuildTouchFile ),
-                    "*" + Path.GetExtension( buildOptions.BuildTouchFile ) ) { IncludeSubdirectories = true };
+                    Path.GetDirectoryName( projectOptions.BuildTouchFile ),
+                    "*" + Path.GetExtension( projectOptions.BuildTouchFile ) ) { IncludeSubdirectories = true };
 
                 this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
                 this._fileSystemWatcher.EnableRaisingEvents = true;
@@ -54,11 +55,11 @@ namespace Caravela.Framework.Impl.DesignTime
 
         private void OnOutputDirectoryChanged( object sender, FileSystemEventArgs e )
         {
-            if ( e.FullPath == this.BuildOptions.BuildTouchFile &&
+            if ( e.FullPath == this.ProjectOptions.BuildTouchFile &&
                  this.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild )
             {
                 // There was an external build. Touch the files to re-run the analyzer.
-                DesignTimeLogger.Instance?.Write( $"Detected an external build for project '{this.BuildOptions.AssemblyName}'." );
+                DesignTimeLogger.Instance?.Write( $"Detected an external build for project '{this.ProjectOptions.AssemblyName}'." );
 
                 var hasRelevantChange = false;
 
@@ -172,11 +173,11 @@ namespace Caravela.Framework.Impl.DesignTime
 
                     this.Status = DesignTimeAspectPipelineStatus.NeedsExternalBuild;
 
-                    if ( this.BuildOptions.BuildTouchFile != null && File.Exists( this.BuildOptions.BuildTouchFile ) )
+                    if ( this.ProjectOptions.BuildTouchFile != null && File.Exists( this.ProjectOptions.BuildTouchFile ) )
                     {
-                        using var mutex = MutexHelper.CreateGlobalMutex( this.BuildOptions.BuildTouchFile );
+                        using var mutex = MutexHelper.CreateGlobalMutex( this.ProjectOptions.BuildTouchFile );
                         mutex.WaitOne();
-                        File.Delete( this.BuildOptions.BuildTouchFile );
+                        File.Delete( this.ProjectOptions.BuildTouchFile );
                         mutex.ReleaseMutex();
                     }
                 }
@@ -190,7 +191,7 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             lock ( this._configureSync )
             {
-                DesignTimeLogger.Instance?.Write( $"DesignTimeAspectPipeline.Reset('{this.BuildOptions.AssemblyName}')." );
+                DesignTimeLogger.Instance?.Write( $"DesignTimeAspectPipeline.Reset('{this.ProjectOptions.AssemblyName}')." );
 
                 this._lastKnownConfiguration = null;
                 this.Status = DesignTimeAspectPipelineStatus.Default;

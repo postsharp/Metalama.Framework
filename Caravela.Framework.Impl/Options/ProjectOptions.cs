@@ -5,29 +5,28 @@ using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Immutable;
-using System.IO;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Caravela.Framework.Impl.Options
 {
     /// <summary>
-    /// Default implementation of <see cref="IBuildOptions"/>, based on a <see cref="IBuildOptionsSource"/>
+    /// Default implementation of <see cref="IProjectOptions"/>, based on a <see cref="IProjectOptionsSource"/>
     /// reading options passed by MSBuild.
     /// </summary>
-    public partial class BuildOptions : IBuildOptions
+    public partial class ProjectOptions : IProjectOptions, IDebuggingOptions
     {
         private readonly string _defaultProjectId = Guid.NewGuid().ToString();
-        private readonly IBuildOptionsSource _source;
+        private readonly IProjectOptionsSource _source;
 
-        public BuildOptions( IBuildOptionsSource source, ImmutableArray<object>? plugIns )
+        public ProjectOptions( IProjectOptionsSource source, ImmutableArray<object>? plugIns )
         {
             this._source = source;
             this.PlugIns = plugIns ?? ImmutableArray<object>.Empty;
         }
 
-        public BuildOptions( AnalyzerConfigOptionsProvider options, ImmutableArray<object>? plugIns = null ) :
+        public ProjectOptions( AnalyzerConfigOptionsProvider options, ImmutableArray<object>? plugIns = null ) :
             this( new OptionsAdapter( options ), plugIns ) { }
 
-        public BuildOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null ) : this( new OptionsAdapter( options ), plugIns ) { }
+        public ProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null ) : this( new OptionsAdapter( options ), plugIns ) { }
 
         public bool DebugCompilerProcess => this.GetBooleanOption( "DebugCaravela" );
 
@@ -42,7 +41,7 @@ namespace Caravela.Framework.Impl.Pipeline
         public string? CrashReportDirectory => this.GetStringOption( "CaravelaCrashReportDirectory" );
 
         public string CacheDirectory
-            => this.GetStringOption( "CaravelaCacheDirectory" ) ?? Path.Combine( Path.GetTempPath(), "Caravela", "Cache", AssemblyMetadataReader.MainBuildId );
+            => this.GetStringOption( "CaravelaCacheDirectory" ) ?? TempPathHelper.GetTempPath( "Cache" );
 
         public string ProjectId => this.GetStringOption( "CaravelaProjectId" ) ?? this._defaultProjectId;
 

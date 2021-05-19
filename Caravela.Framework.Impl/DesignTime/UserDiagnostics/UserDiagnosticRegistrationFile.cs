@@ -23,16 +23,22 @@ namespace Caravela.Framework.Impl.DesignTime.UserDiagnostics
 
         public void Write( string file )
         {
+            var textWriter = new StringWriter();
+            this.Write( textWriter );
+            RetryHelper.Retry( () => File.WriteAllText( file, textWriter.ToString() ) );
+        }
+
+        public void Write( TextWriter textWriter )
+        {
             var serializer = JsonSerializer.Create();
             serializer.Formatting = Formatting.Indented;
-            var textWriter = new StringWriter();
+
             serializer.Serialize( textWriter, this );
 
-            RetryHelper.Retry( () => File.WriteAllText( file, textWriter.ToString() ) );
             this.Timestamp = DateTime.UtcNow;
         }
 
-        public static UserDiagnosticRegistrationFile Read( string file )
+        public static UserDiagnosticRegistrationFile ReadFile( string file )
         {
             if ( !File.Exists( file ) )
             {
@@ -43,12 +49,10 @@ namespace Caravela.Framework.Impl.DesignTime.UserDiagnostics
             try
             {
                 var json = File.ReadAllText( file );
-                JsonSerializer serializer = JsonSerializer.Create();
-
+                
                 var timestamp = File.GetLastWriteTimeUtc( file );
 
-                var obj = serializer.Deserialize<UserDiagnosticRegistrationFile>( new JsonTextReader( new StringReader( json ) ) )
-                          ?? new UserDiagnosticRegistrationFile();
+                var obj = ReadContent( json );
 
                 obj.Timestamp = timestamp;
 
@@ -59,6 +63,14 @@ namespace Caravela.Framework.Impl.DesignTime.UserDiagnostics
                 // Return an empty file.
                 return new UserDiagnosticRegistrationFile();
             }
+        }
+
+        public static UserDiagnosticRegistrationFile ReadContent( string json )
+        {
+            JsonSerializer serializer = JsonSerializer.Create();
+
+            return serializer.Deserialize<UserDiagnosticRegistrationFile>( new JsonTextReader( new StringReader( json ) ) )
+                   ?? new UserDiagnosticRegistrationFile();
         }
     }
 }

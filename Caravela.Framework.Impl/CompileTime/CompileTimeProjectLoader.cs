@@ -27,6 +27,7 @@ namespace Caravela.Framework.Impl.CompileTime
     internal sealed class CompileTimeProjectLoader : ICompileTimeTypeResolver
     {
         private readonly CompileTimeDomain _domain;
+        private readonly IServiceProvider _serviceProvider;
         private readonly CompileTimeCompilationBuilder _builder;
         private readonly IAssemblyLocator? _runTimeAssemblyLocator;
         private readonly SystemTypeResolver _systemTypeResolver = new();
@@ -39,6 +40,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private CompileTimeProjectLoader( CompileTimeDomain domain, IServiceProvider serviceProvider )
         {
             this._domain = domain;
+            this._serviceProvider = serviceProvider;
             this._builder = new CompileTimeCompilationBuilder( serviceProvider, domain );
             this._runTimeAssemblyLocator = serviceProvider.GetOptionalService<IAssemblyLocator>();
 
@@ -270,7 +272,7 @@ namespace Caravela.Framework.Impl.CompileTime
             var assemblyIdentity = AssemblyName.GetAssemblyName( assemblyPath ).ToAssemblyIdentity();
 
             // If the assembly is a standard one, there is no need to analyze.
-            if ( ReferenceAssemblyLocator.GetInstance().StandardAssemblyNames.Contains( assemblyIdentity.Name ) )
+            if ( this._serviceProvider.GetService<ReferenceAssemblyLocator>().StandardAssemblyNames.Contains( assemblyIdentity.Name ) )
             {
                 compileTimeProject = null;
 

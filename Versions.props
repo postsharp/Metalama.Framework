@@ -15,12 +15,14 @@
          TeamCity is responsible for setting the VersionSuffix property -->
     <PropertyGroup Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">
         <CaravelaVersion Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">$(MainVersion)-build-$(VersionSuffix)</CaravelaVersion>
+        <AssemblyVersion>$(MainVersion).$(VersionSuffix)</AssemblyVersion>
     </PropertyGroup>
 
     <!-- For local builds, the LocalBuildId property must be defined before calling `dotnet pack` -->
     <PropertyGroup Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'==''">
         <LocalBuildId Condition="'$(LocalBuildId)'==''">LocalBuildIdUndefined</LocalBuildId>
         <CaravelaVersion Condition="'$(Configuration)'=='Debug' AND '$(LocalBuildIdUndefined)'==''">$(MainVersion)-dev-$(USERNAME)-$(LocalBuildId)</CaravelaVersion>
+        <AssemblyVersion>$(MainVersion)$([System.DateTime]::Now.ToString('MMdd.HHmm'))</AssemblyVersion>
     </PropertyGroup>
 
     <!-- Version of dependencies -->
@@ -43,7 +45,7 @@
 
 
     <Target Name="PrintVersion">
-        <Message Text="CaravelaVersion=$(CaravelaVersion)" />
+        <Message Text="CaravelaVersion=$(CaravelaVersion);AssemblyVersion=$(AssemblyVersion)" />
     </Target>
 
     <!-- Emits an error if `dotnet pack` is called in a local debug build, but Run CreateLocalPackages.ps1 has not been called. -->

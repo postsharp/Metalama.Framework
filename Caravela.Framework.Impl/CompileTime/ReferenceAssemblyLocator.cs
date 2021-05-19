@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Sdk;
 using System;
@@ -19,19 +20,10 @@ namespace Caravela.Framework.Impl.CompileTime
     public class ReferenceAssemblyLocator
     {
         private readonly string _projectText;
+        private readonly string _cacheDirectory;
 
-        private readonly string _projectHash;
-
-        private static ReferenceAssemblyLocator? _instance;
-
-        public static ReferenceAssemblyLocator GetInstance()
-        {
-            // We don't initialize the instance from the static constructor because the constructor is non-trivial
-            // and can fail, and it is difficult to debug an exception that occurs in a static constructor.
-            _instance ??= new ReferenceAssemblyLocator();
-
-            return _instance;
-        }
+        
+        
 
         /// <summary>
         /// Gets the name (without path and extension) of Caravela assemblies.
@@ -61,8 +53,10 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public ImmutableArray<string> StandardAssemblyPaths { get; }
 
-        private ReferenceAssemblyLocator()
+        public ReferenceAssemblyLocator( IServiceProvider serviceProvider )
         {
+            this._cacheDirectory = serviceProvider.GetService<IDirectoryOptions>().AssemblyLocatorCacheDirectory;
+        
             var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
 
             this._projectText =
@@ -80,8 +74,7 @@ namespace Caravela.Framework.Impl.CompileTime
   </Target>
 </Project>";
 
-            this._projectHash = HashUtilities.HashString( this._projectText );
-
+            
             this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
 
             this.SystemAssemblyNames = this.SystemAssemblyPaths
@@ -98,14 +91,24 @@ namespace Caravela.Framework.Impl.CompileTime
             var caravelaPaths = AppDomain.CurrentDomain.GetAssemblies()
                 .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
                 .Select( a => a.Location )
-                .Where( path => this.CaravelaAssemblyNames.Contains( Path.GetFileNameWithoutExtension( path ) ) );
+                .Where( path => this.CaravelaAssemblyNames.Contains( Path.GetFileNameWithoutExtension( path ) ) )
+                .ToList();
+            
+            // Assert that we found everything we need, because debugging is difficult when this step goes wrong.
+            foreach ( var assemblyName in this.CaravelaAssemblyNames )
+            {
+                if ( !caravelaPaths.Any( a => a.EndsWith( assemblyName + ".dll", StringComparison.OrdinalIgnoreCase ) ) )
+                {
+                    throw new AssertionFailedException( $"Cannot find {assemblyName}." );
+                }
+            }
 
             this.StandardAssemblyPaths = this.SystemAssemblyPaths.Concat( caravelaPaths ).ToImmutableArray();
         }
 
         private IEnumerable<string> GetSystemAssemblyPaths()
         {
-            var tempProjectDirectory = Path.Combine( Path.GetTempPath(), "Caravela", this._projectHash, "TempProject" );
+            var tempProjectDirectory = Path.Combine( this._cacheDirectory, nameof(ReferenceAssemblyLocator) );
 
             using var mutex = MutexHelper.CreateGlobalMutex( tempProjectDirectory );
             mutex.WaitOne();

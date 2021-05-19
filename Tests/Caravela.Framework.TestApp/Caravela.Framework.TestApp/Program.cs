@@ -8,8 +8,8 @@ using Caravela.Framework.TestApp.Aspects;
 
 namespace Caravela.Framework.TestApp
 {
-    [IntroduceSomeMethodAspect("Foo", "Bar")] 
-    internal class Program 
+    [IntroduceSomeMethodAspect("Foo", "Bar")]
+    internal class Program
     {
         [SuppressWarning]
         private static async Task MethodAsync()

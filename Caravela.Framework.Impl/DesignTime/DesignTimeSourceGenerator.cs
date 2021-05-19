@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -28,7 +29,7 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 DesignTimeLogger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}')." );
 
-                var buildOptions = new BuildOptions( context.AnalyzerConfigOptions );
+                var buildOptions = new ProjectOptions( context.AnalyzerConfigOptions );
 
                 DesignTimeDebugger.AttachDebugger( buildOptions );
 

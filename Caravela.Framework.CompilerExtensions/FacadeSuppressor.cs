@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl
 
         public FacadeSuppressor()
         {
-            this._impl = (DiagnosticSuppressor) ModuleInitializer.GetImplementationType( "Caravela.Framework.Impl.DesignTime.DesignTimeDiagnosticSuppressor" );
+            this._impl = (DiagnosticSuppressor) ResourceExtractor.GetImplementationType( "Caravela.Framework.Impl.DesignTime.DesignTimeDiagnosticSuppressor" );
         }
 
         public override void ReportSuppressions( SuppressionAnalysisContext context ) => this._impl.ReportSuppressions( context );

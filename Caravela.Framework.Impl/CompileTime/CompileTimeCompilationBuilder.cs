@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.Mapping;
@@ -31,15 +32,15 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly IServiceProvider _serviceProvider;
         private readonly CompileTimeDomain _domain;
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
-        private readonly IBuildOptions _buildOptions;
+        private readonly IDirectoryOptions _directoryOptions;
 
-        private static readonly string _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).BuildId;
+        private static readonly string _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).VersionId;
 
         public const string ResourceName = "Caravela.CompileTimeAssembly";
 
         public CompileTimeCompilationBuilder( IServiceProvider serviceProvider, CompileTimeDomain domain )
         {
-            this._buildOptions = serviceProvider.GetService<IBuildOptions>();
+            this._directoryOptions = serviceProvider.GetService<IDirectoryOptions>();
             this._serviceProvider = serviceProvider;
             this._domain = domain;
         }
@@ -117,12 +118,13 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var templateCompiler = new TemplateCompiler( this._serviceProvider );
 
-            var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
+            var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeCompileTimeBaseRewriter(
                 runTimeCompilation,
                 compileTimeCompilation,
                 diagnosticSink,
                 templateCompiler,
-                cancellationToken );
+                cancellationToken,
+                this._serviceProvider);
 
             // Creates the new syntax trees. Store them in a dictionary mapping the transformed trees to the source trees.
             var syntaxTrees = treesWithCompileTimeCode.Select(
@@ -336,13 +338,13 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
-        private static IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees(
+        private IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees(
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             CancellationToken cancellationToken )
         {
             List<SyntaxTree> compileTimeTrees = new();
-            var classifier = SymbolClassifier.GetInstance( runTimeCompilation );
+            var classifier = this._serviceProvider.GetService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
 
             var trees = compileTimeTreesHint ?? runTimeCompilation.SyntaxTrees;
 
@@ -573,7 +575,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private OutputPaths GetOutputPaths( string compileTimeAssemblyName )
         {
-            var directory = Path.Combine( this._buildOptions.CacheDirectory, "CompileTimeAssemblies", compileTimeAssemblyName );
+            var directory = this._directoryOptions.CompileTimeProjectCacheDirectory;
             var pe = Path.Combine( directory, compileTimeAssemblyName + ".dll" );
             var pdb = Path.ChangeExtension( pe, ".pdb" );
             var manifest = Path.ChangeExtension( pe, ".manifest" );
@@ -581,12 +583,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return new OutputPaths( directory, pe, pdb, manifest );
         }
 
-        /// <summary>
-        /// Prepares run-time assembly by making compile-time only methods throw <see cref="NotSupportedException"/>.
-        /// </summary>
-        public static Compilation PrepareRunTimeAssembly( Compilation compilation )
-            => new PrepareRunTimeAssemblyRewriter( compilation ).VisitTrees( compilation );
-
+   
         /// <summary>
         /// Tries to compile (to a binary image) a project given its manifest and syntax trees. 
         /// </summary>

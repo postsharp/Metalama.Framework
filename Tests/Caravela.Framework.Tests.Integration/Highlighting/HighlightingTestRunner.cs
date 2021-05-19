@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
 {
     internal class HighlightingTestRunner : TestRunnerBase
     {
-        public HighlightingTestRunner( string projectDirectory ) : base( projectDirectory ) { }
+        public HighlightingTestRunner( IServiceProvider serviceProvider, string projectDirectory ) : base( serviceProvider,  projectDirectory ) { }
 
         public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
 
             DiagnosticList diagnostics = new();
 
-            var templateCompiler = new TemplateCompiler();
+            var templateCompiler = new TemplateCompiler(ServiceProvider);
 
             var templateCompilerSuccess = templateCompiler.TryAnnotate(
                 templateSyntaxRoot,

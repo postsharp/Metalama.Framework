@@ -1,19 +1,21 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Options;
 using System;
 using System.Collections.Immutable;
 using System.IO;
 
 namespace Caravela.TestFramework
 {
-    public class TestBuildOptions : IBuildOptions, IDisposable
+    public class TestProjectOptions : DefaultDirectoryOptions, IProjectOptions, IDisposable
     {
-        public TestBuildOptions()
+        public TestProjectOptions()
         {
-            this.CacheDirectory = Path.Combine( Path.GetTempPath(), "Caravela", Guid.NewGuid().ToString() );
-            Directory.CreateDirectory( this.CacheDirectory );
+            var directory = Path.Combine( Path.GetTempPath(), "Caravela.TestFramework", Guid.NewGuid().ToString() );
+            this.CompileTimeProjectCacheDirectory = directory;
+
+            Directory.CreateDirectory( directory );
         }
 
         public bool DebugCompilerProcess => false;
@@ -22,13 +24,7 @@ namespace Caravela.TestFramework
 
         public bool DebugIdeProcess => false;
 
-        public virtual bool MapPdbToTransformedCode => false;
-
-        public virtual string? CompileTimeProjectDirectory => Environment.CurrentDirectory;
-
-        public virtual string? CrashReportDirectory => null;
-
-        public string CacheDirectory { get; }
+        public override string CompileTimeProjectCacheDirectory { get; }
 
         public string ProjectId => "test";
 
@@ -40,7 +36,10 @@ namespace Caravela.TestFramework
 
         public void Dispose()
         {
-            Directory.Delete( this.CacheDirectory, true );
+            if ( Directory.Exists( this.CompileTimeProjectCacheDirectory ) )
+            {
+                Directory.Delete( this.CompileTimeProjectCacheDirectory, true );
+            }
         }
     }
 }

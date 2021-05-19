@@ -9,6 +9,7 @@ $random = "$random1$random2"
 
 $props = "<Project><PropertyGroup><LocalBuildId>$random</LocalBuildId></PropertyGroup></Project>"
 
+del "artifacts\bin\Debug\*.nupkg"
 
 if ( Test-Path LocalBuildId.props ) {
     Remove-Item LocalBuildId.props

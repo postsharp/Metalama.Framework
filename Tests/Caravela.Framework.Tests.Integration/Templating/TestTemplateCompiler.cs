@@ -10,6 +10,7 @@ using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -23,12 +24,10 @@ namespace Caravela.Framework.Tests.Integration.Templating
         private readonly IDiagnosticAdder _diagnosticAdder;
         private readonly TemplateCompiler _templateCompiler;
 
-        public TestTemplateCompiler( SemanticModel semanticModel, IDiagnosticAdder diagnosticAdder )
+        public TestTemplateCompiler( SemanticModel semanticModel, IDiagnosticAdder diagnosticAdder, IServiceProvider serviceProvider )
         {
             this._semanticModel = semanticModel;
             this._diagnosticAdder = diagnosticAdder;
-            ServiceProvider serviceProvider = new();
-            serviceProvider.AddService( new SyntaxSerializationService() );
             this._templateCompiler = new TemplateCompiler( serviceProvider );
         }
 

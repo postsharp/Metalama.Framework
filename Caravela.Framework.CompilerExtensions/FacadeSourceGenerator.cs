@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl
 
         public FacadeSourceGenerator()
         {
-            this._impl = (ISourceGenerator) ModuleInitializer.GetImplementationType( "Caravela.Framework.Impl.DesignTime.DesignTimeSourceGenerator" );
+            this._impl = (ISourceGenerator) ResourceExtractor.GetImplementationType( "Caravela.Framework.Impl.DesignTime.DesignTimeSourceGenerator" );
         }
 
         void ISourceGenerator.Execute( GeneratorExecutionContext context ) => this._impl.Execute( context );

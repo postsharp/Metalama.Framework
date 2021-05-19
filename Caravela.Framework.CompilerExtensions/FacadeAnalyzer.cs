@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl
 
         public FacadeAnalyzer()
         {
-            this._impl = (DiagnosticAnalyzer) ModuleInitializer.GetImplementationType( "Caravela.Framework.Impl.DesignTime.DesignTimeAnalyzer" );
+            this._impl = (DiagnosticAnalyzer) ResourceExtractor.GetImplementationType( "Caravela.Framework.Impl.DesignTime.DesignTimeAnalyzer" );
         }
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => this._impl.SupportedDiagnostics;

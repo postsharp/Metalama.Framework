@@ -3,6 +3,7 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -46,7 +47,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             try
             {
-                var buildOptions = new BuildOptions( context.Options.AnalyzerConfigOptionsProvider );
+                var buildOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
 
                 // Execute the pipeline.
                 var syntaxTreeResults = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
@@ -97,7 +98,7 @@ namespace Caravela.Framework.Impl.DesignTime
             try
             {
                 // Execute the analysis that are not performed in the pipeline.
-                var buildOptions = new BuildOptions( context.Options.AnalyzerConfigOptionsProvider );
+                var buildOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
 
                 DesignTimeLogger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{context.SemanticModel.SyntaxTree.FilePath}')" );
 

@@ -1,0 +1,1 @@
+﻿ gcim win32_process | where { $_.Name -eq "dotnet.exe" } | where { $_.commandline -like "*VBCSCompiler.dll*" } | foreach { Stop-Process -ID $_.ProcessId }

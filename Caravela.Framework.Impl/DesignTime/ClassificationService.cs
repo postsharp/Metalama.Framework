@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
@@ -16,6 +17,12 @@ namespace Caravela.Framework.Impl.DesignTime
     /// </summary>
     internal class ClassificationService : IClassificationService
     {
+        private IServiceProvider _serviceProvider;
+
+        public ClassificationService( IServiceProvider serviceProvider ) {
+            this._serviceProvider = serviceProvider;
+        }
+
         public bool TryGetClassifiedTextSpans(
             SemanticModel semanticModel,
             [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans,
@@ -25,7 +32,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             var diagnostics = new DiagnosticList();
 
-            var templateCompiler = new TemplateCompiler( ServiceProvider.Empty );
+            var templateCompiler = new TemplateCompiler( this._serviceProvider );
 
             _ = templateCompiler.TryAnnotate( semanticModel.SyntaxTree.GetRoot(), semanticModel, diagnostics, cancellationToken, out var annotatedSyntaxRoot );
 

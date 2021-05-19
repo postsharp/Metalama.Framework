@@ -58,15 +58,12 @@ namespace Caravela.Framework.Impl.Utilities
         /// <summary>
         /// Gets the unique BuildId for this assembly.
         /// </summary>
-        public string BuildId
-            => this._metadata.TryGetValue( "BuildId", out var value )
-                ? value
-                : throw new AssertionFailedException( $"The AssemblyMetadataAttribute 'BuildId' was not defined in assembly '{this._assembly.GetName()}'." );
+        public string VersionId => this._assembly.ManifestModule.ModuleVersionId.ToString();
 
         /// <summary>
         /// Gets the unique BuildId for the main assembly.
         /// </summary>
-        public static string MainBuildId => MainInstance.BuildId;
+        public static string MainVersionId => MainInstance.VersionId;
 
         public static AssemblyMetadataReader MainInstance => GetInstance( typeof(AssemblyMetadataReader).Assembly );
     }

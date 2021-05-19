@@ -9,12 +9,18 @@ namespace Caravela.Framework.Impl.Pipeline
     public class ServiceProvider : IServiceProvider, IDisposable
     {
         private readonly Dictionary<Type, object> _services = new();
-
-        public static IServiceProvider Empty { get; } = new EmptyProvider();
-
+        private bool _frozen;
+        
         public void AddService<T>( T service )
             where T : notnull
-            => this._services.Add( typeof(T), service );
+        {
+            if ( this._frozen )
+            {
+                throw new InvalidOperationException();
+            }
+
+            this._services.Add( typeof(T), service );
+        }
 
         public object? GetService( Type serviceType )
         {
@@ -23,10 +29,14 @@ namespace Caravela.Framework.Impl.Pipeline
             return instance;
         }
 
-        private class EmptyProvider : IServiceProvider
+        public ServiceProvider() { }
+
+        public ServiceProvider( ServiceProvider? prototype )
         {
-            public object GetService( Type serviceType ) => null!;
+            this._services = new Dictionary<Type, object>( prototype._services );
         }
+
+        public void Freeze() => this._frozen = true;
 
         public void Dispose()
         {

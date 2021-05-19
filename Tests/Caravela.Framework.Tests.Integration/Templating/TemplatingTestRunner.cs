@@ -39,13 +39,13 @@ namespace Caravela.Framework.Tests.Integration.Templating
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
         /// </summary>
-        public TemplatingTestRunner( string? projectDirectory = null ) : this( projectDirectory, Array.Empty<CSharpSyntaxVisitor>() ) { }
+        public TemplatingTestRunner( IServiceProvider serviceProvider,string? projectDirectory = null ) : this(  serviceProvider, projectDirectory, Array.Empty<CSharpSyntaxVisitor>() ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
         /// </summary>
         /// <param name="testAnalyzers">A list of analyzers to invoke on the test source.</param>
-        public TemplatingTestRunner( string? projectDirectory, IEnumerable<CSharpSyntaxVisitor> testAnalyzers ) : base( projectDirectory )
+        public TemplatingTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<CSharpSyntaxVisitor> testAnalyzers ) : base( serviceProvider, projectDirectory )
         {
             this._testAnalyzers = testAnalyzers;
         }
@@ -79,7 +79,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 testResult.Project.MetadataReferences,
                 (CSharpCompilationOptions) testResult.Project.CompilationOptions! );
 
-            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult );
+            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult, this.ServiceProvider );
 
             var templateCompilerSuccess = templateCompiler.TryCompile(
                 compileTimeCompilation,

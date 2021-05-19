@@ -3,13 +3,13 @@
 
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Caravela.Framework.Impl.Options
 {
     /// <summary>
     /// Gives access to configuration options (typically values pulled from MSBuild). The
     /// typical implementation wraps a <see cref="AnalyzerConfigOptions"/>, but other implementations can be used for testing.
     /// </summary>
-    public interface IBuildOptionsSource
+    public interface IProjectOptionsSource
     {
         /// <summary>
         /// Gets a configuration value.
