@@ -24,8 +24,6 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         private class PropertyGetInliningRewriter : InliningRewriterBase
         {
-            private new IPropertySymbol ContextMember => (IPropertySymbol) base.ContextMember;
-
             private IMethodSymbol ContextAccessor => this.ContextBodyMethod;
 
             public PropertyGetInliningRewriter(

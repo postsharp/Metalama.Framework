@@ -330,15 +330,16 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                         break;
 
-                    case PropertyDeclarationSyntax property:
+                    // TODO: All cases for properties.
+                    case PropertyDeclarationSyntax { AccessorList: not null } property when property.AccessorList!.Accessors.All( a => a.Body != null ):
                         overrideSyntax =
                             property
                                 .WithAttributeLists( List( newAttributeLists ) )
                                 .WithAccessorList(
                                     AccessorList(
                                         List(
-                                            property.AccessorList.Accessors.Select(
-                                                a => a.WithBody( (BlockSyntax) methodBodyRewriter.VisitBlock( a.Body ).AssertNotNull() ) ) ) ) );
+                                            property.AccessorList!.Accessors.Select(
+                                                a => a.WithBody( (BlockSyntax) methodBodyRewriter.VisitBlock( a.Body! ).AssertNotNull() ) ) ) ) );
 
                         break;
 

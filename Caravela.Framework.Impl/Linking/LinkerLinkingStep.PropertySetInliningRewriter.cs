@@ -24,8 +24,6 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         private class PropertySetInliningRewriter : InliningRewriterBase
         {
-            private new IPropertySymbol ContextMember => (IPropertySymbol) base.ContextMember;
-
             private IMethodSymbol ContextAccessor => this.ContextBodyMethod;
 
             public PropertySetInliningRewriter(
@@ -166,8 +164,8 @@ namespace Caravela.Framework.Impl.Linking
             /// Replaces call target for non-inlineable methods.
             /// </summary>
             /// <param name="originalSymbol">Original symbol targeted by the call.</param>
-            /// <param name="expression">Call expression.</param>
-            /// <param name="methodSymbol"></param>
+            /// <param name="memberAccess">Call expression.</param>
+            /// <param name="targetSymbol">Target symbol.</param>
             /// <returns></returns>
             private static ExpressionSyntax ReplaceInstancePropertyAccess(
                 IPropertySymbol originalSymbol,

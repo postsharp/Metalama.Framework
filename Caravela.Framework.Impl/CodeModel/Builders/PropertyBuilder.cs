@@ -178,7 +178,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 // Modifiers for property.
                 var tokens = new List<SyntaxToken>();
 
-                this.Accessibility.GetTokens( tokens );
+                this.Accessibility.AddTokens( tokens );
 
                 if ( this.IsAbstract )
                 {
@@ -195,7 +195,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     tokens.Add( Token( SyntaxKind.OverrideKeyword ) );
                 }
 
-                this.RefKind.GetReturnValueTokens( tokens );
+                this.RefKind.AddReturnValueTokens( tokens );
 
                 return TokenList( tokens );
             }
@@ -224,7 +224,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
                 if ( this.Getter!.Accessibility != this.Accessibility )
                 {
-                    this.Getter.Accessibility.GetTokens( tokens );
+                    this.Getter.Accessibility.AddTokens( tokens );
                 }
 
                 // TODO: Attributes.
@@ -245,7 +245,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
                 if ( this.Setter!.Accessibility != this.Accessibility )
                 {
-                    this.Setter.Accessibility.GetTokens( tokens );
+                    this.Setter.Accessibility.AddTokens( tokens );
                 }
 
                 return

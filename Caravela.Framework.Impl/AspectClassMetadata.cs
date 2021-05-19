@@ -14,7 +14,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
 
 namespace Caravela.Framework.Impl
 {
@@ -135,9 +134,10 @@ namespace Caravela.Framework.Impl
             return true;
         }
 
-        public TemplateDriver GetTemplateDriver( ICodeElement sourceTemplate )
+        public TemplateDriver GetTemplateDriver( IMethod sourceTemplate )
         {
-            var id = sourceTemplate.GetSymbol().AssertNotNull().GetDocumentationCommentId()!;
+            var templateSymbol = sourceTemplate.GetSymbol().AssertNotNull();
+            var id = templateSymbol.GetDocumentationCommentId()!;
 
             if ( this._templateDrivers.TryGetValue( id, out var templateDriver ) )
             {
@@ -146,31 +146,9 @@ namespace Caravela.Framework.Impl
 
             var aspectType = this.Project.GetType( this.FullName ).AssertNotNull();
 
-            MethodInfo? compiledTemplateMethodInfo;
+            var templateName = TemplateNameHelper.GetCompiledTemplateName( templateSymbol );
 
-            switch ( sourceTemplate )
-            {
-                case IMethod method when method.ContainingElement is IProperty property && property.Getter == method:
-                    var getterTemplateName = TemplateNameHelper.GetCompiledPropertyGetTemplateName( property.Name );
-                    compiledTemplateMethodInfo = aspectType.GetMethod( getterTemplateName );
-
-                    break;
-
-                case IMethod method when method.ContainingElement is IProperty property && property.Setter == method:
-                    var setterTemplateName = TemplateNameHelper.GetCompiledPropertySetTemplateName( property.Name );
-                    compiledTemplateMethodInfo = aspectType.GetMethod( setterTemplateName );
-
-                    break;
-
-                case IMethod method when method.ContainingElement is not IProperty:
-                    var methodTemplateName = TemplateNameHelper.GetCompiledTemplateName( method.Name );
-                    compiledTemplateMethodInfo = aspectType.GetMethod( methodTemplateName );
-
-                    break;
-
-                default:
-                    throw new NotImplementedException();
-            }
+            var compiledTemplateMethodInfo = aspectType.GetMethod( templateName );
 
             if ( compiledTemplateMethodInfo == null )
             {

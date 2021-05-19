@@ -4,7 +4,7 @@
 namespace Caravela.Framework.DesignTime.Contracts
 {
     // The type identifier cannot be modified even during refactoring.
-    
+
     /// <summary>
     /// An enumeration of classifications of <see cref="TextSpanClassification"/>, which typically
     /// map to different colors in the view layer.

@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     /// <summary>
     /// This class is responsible to cache and load compile-time projects. The caller must first call
-    /// the <see cref="TryGetCompileTimeProject(Compilation, IReadOnlyList{SyntaxTree}?, IDiagnosticAdder, bool, out CompileTimeProject?)"/> for each project with which the loader will be used.
+    /// the <see cref="TryGetCompileTimeProject(Compilation, System.Collections.Generic.IReadOnlyList{Microsoft.CodeAnalysis.SyntaxTree}?, IDiagnosticAdder, bool, out CompileTimeProject?)"/> for each project with which the loader will be used.
     /// The generation of compile-time compilations itself is delegated to the <see cref="CompileTimeCompilationBuilder"/>
     /// class.
     /// </summary>

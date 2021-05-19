@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal static class BuilderHelpers
     {
-        public static void GetTokens( this Accessibility accessibility, List<SyntaxToken> tokenList )
+        public static void AddTokens( this Accessibility accessibility, List<SyntaxToken> tokenList )
         {
             switch ( accessibility )
             {
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             }
         }
 
-        public static void GetReturnValueTokens( this RefKind refKind, List<SyntaxToken> tokenList )
+        public static void AddReturnValueTokens( this RefKind refKind, List<SyntaxToken> tokenList )
         {
             switch ( refKind )
             {
@@ -81,7 +81,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             }
         }
 
-        public static void GetParameterTokens( this RefKind refKind, List<SyntaxToken> tokenList )
+        public static void AddParameterTokens( this RefKind refKind, List<SyntaxToken> tokenList )
         {
             switch ( refKind )
             {

@@ -83,19 +83,19 @@ namespace Caravela.Framework.Impl.CompileTime
                 return true;
             }
 
-            // Look at the overriden method.
-            if ( symbol is IMethodSymbol { OverriddenMethod: { } overriddenMethod } )
+            switch ( symbol )
             {
-                return this.IsTemplate( overriddenMethod! );
-            }
+                case IMethodSymbol { OverriddenMethod: { } overriddenMethod }:
+                    // Look at the overriden method.
+                    return this.IsTemplate( overriddenMethod! );
 
-            // Look at the overridden property.
-            if ( symbol is IPropertySymbol { OverriddenProperty: { } overriddenProperty } )
-            {
-                return this.IsTemplate( overriddenProperty! );
-            }
+                case IPropertySymbol { OverriddenProperty: { } overriddenProperty }:
+                    // Look at the overridden property.
+                    return this.IsTemplate( overriddenProperty! );
 
-            return false;
+                default:
+                    return false;
+            }
         }
 
         private SymbolDeclarationScope? GetAttributeScope( AttributeData attribute )

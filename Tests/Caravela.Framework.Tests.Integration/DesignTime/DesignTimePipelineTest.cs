@@ -285,7 +285,7 @@ Target.cs:
             var compileTimeAspectPipeline = new CompileTimeAspectPipeline( buildOptions, domain );
             DiagnosticList compileDiagnostics = new();
             Assert.True( compileTimeAspectPipeline.TryExecute( compileDiagnostics, compilation5, out _, out _ ) );
-            
+
             // Simulate an external build event. This is normally triggered by the build touch file.
             pipeline.OnExternalBuildStarted();
 

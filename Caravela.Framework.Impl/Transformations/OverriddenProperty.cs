@@ -68,20 +68,6 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 var propertyName = context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration );
 
-                string? compiledGetTemplateName;
-                string? compiledSetTemplateName;
-
-                if ( this.TemplateProperty != null )
-                {
-                    compiledGetTemplateName = TemplateNameHelper.GetCompiledPropertyGetTemplateName( this.TemplateProperty.Name );
-                    compiledSetTemplateName = TemplateNameHelper.GetCompiledPropertySetTemplateName( this.TemplateProperty.Name );
-                }
-                else
-                {
-                    compiledGetTemplateName = this.GetTemplateMethod != null ? TemplateNameHelper.GetCompiledTemplateName( this.GetTemplateMethod.Name ) : null;
-                    compiledSetTemplateName = this.SetTemplateMethod != null ? TemplateNameHelper.GetCompiledTemplateName( this.SetTemplateMethod.Name ) : null;
-                }
-
                 var getTemplateMethod = this.TemplateProperty != null ? this.TemplateProperty.Getter : this.GetTemplateMethod;
                 var setTemplateMethod = this.TemplateProperty != null ? this.TemplateProperty.Setter : this.SetTemplateMethod;
 

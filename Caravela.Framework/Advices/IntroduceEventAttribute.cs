@@ -9,5 +9,5 @@ namespace Caravela.Framework.Advices
     /// Custom attribute that marks the target method as a template for <see cref="IOverrideMethodAdvice"/> and results in creation of the advice.
     /// </summary>
     [AttributeUsage( AttributeTargets.Event, Inherited = true )]
-    public class IntroduceEventAttribute : IntroduceEventTemplateAttribute, IAdviceAttribute<IIntroduceMethodAdvice> { }
+    public class IntroduceEventAttribute : IntroduceEventTemplateAttribute, IAdviceAttribute<IIntroduceEventAdvice> { }
 }

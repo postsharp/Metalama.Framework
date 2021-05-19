@@ -61,7 +61,8 @@ namespace Caravela.Framework.Impl.Advices
             {
                 if ( throwIfMissing )
                 {
-                    throw GeneralDiagnosticDescriptors.TemplateMemberMissesAttribute.CreateException( (method, expectedAttributeTypeSymbol, adviceName) );
+                    throw GeneralDiagnosticDescriptors.TemplateMemberMissesAttribute.CreateException(
+                        (CodeElementKind.Method, method, expectedAttributeTypeSymbol, adviceName) );
                 }
                 else
                 {
@@ -96,7 +97,8 @@ namespace Caravela.Framework.Impl.Advices
             {
                 if ( throwIfMissing )
                 {
-                    throw GeneralDiagnosticDescriptors.TemplateMemberMissesAttribute.CreateException( (property, expectedAttributeTypeSymbol, adviceName) );
+                    throw GeneralDiagnosticDescriptors.TemplateMemberMissesAttribute.CreateException(
+                        (CodeElementKind.Property, property, expectedAttributeTypeSymbol, adviceName) );
                 }
                 else
                 {

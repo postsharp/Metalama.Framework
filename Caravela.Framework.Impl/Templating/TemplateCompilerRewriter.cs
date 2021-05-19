@@ -291,7 +291,7 @@ namespace Caravela.Framework.Impl.Templating
             }
             else if ( this._templateMemberClassifier.IsImplicitValueParameter( node ) )
             {
-                // In property setter templates, the 'value' token has a special meaning. We keep the original name.
+                // In property setter and event accessor templates, the 'value' token has a special meaning. We keep the original name.
                 return base.TransformIdentifierName( node );
             }
 

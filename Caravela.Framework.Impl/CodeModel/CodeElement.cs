@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -30,18 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel
         CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
 
         [Memo]
-        public virtual ICodeElement? ContainingElement
-            => this.Symbol switch
-            {
-                IMethodSymbol method when
-                    method.MethodKind == MethodKind.PropertyGet
-                    || method.MethodKind == MethodKind.PropertySet
-                    || method.MethodKind == MethodKind.EventAdd
-                    || method.MethodKind == MethodKind.EventRemove
-                    || method.MethodKind == MethodKind.EventRaise
-                    => this.Compilation.Factory.GetCodeElement( method.AssociatedSymbol.AssertNotNull() ),
-                _ => this.Compilation.Factory.GetCodeElement( this.Symbol.ContainingSymbol )
-            };
+        public virtual ICodeElement? ContainingElement => this.Compilation.Factory.GetCodeElement( this.Symbol.ContainingSymbol );
 
         [Memo]
         public virtual IAttributeList Attributes

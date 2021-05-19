@@ -77,11 +77,11 @@ namespace Caravela.Framework.Impl
             _category,
             Error );
 
-        public static readonly StrongDiagnosticDescriptor<(ISymbol Member, ITypeSymbol AttributeType, string AdviceMethod )>
+        public static readonly StrongDiagnosticDescriptor<(CodeElementKind ElementKind, ISymbol Symbol, ITypeSymbol AttributeType, string AdviceMethod )>
             TemplateMemberMissesAttribute = new(
                 "CR0024",
-                "The template method does not have the expected custom attribute.",
-                "The template member '{0}' must be annotated with the custom attribute [{1}] otherwise it cannot be used with the dynamic advice '{2}'.",
+                "The template member does not have the expected custom attribute.",
+                "The template {0} '{1}' must be annotated with the custom attribute [{2}] otherwise it cannot be used with the dynamic advice '{3}'.",
                 _category,
                 Error );
 

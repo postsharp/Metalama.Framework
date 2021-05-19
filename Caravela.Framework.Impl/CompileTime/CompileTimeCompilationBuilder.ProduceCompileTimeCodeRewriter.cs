@@ -108,7 +108,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     var success =
                         this._templateCompiler.TryCompile(
-                            TemplateNameHelper.GetCompiledTemplateName( methodSymbol.Name ),
+                            TemplateNameHelper.GetCompiledTemplateName( methodSymbol ),
                             this._compileTimeCompilation,
                             node,
                             this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
@@ -134,7 +134,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             private IEnumerable<MemberDeclarationSyntax> VisitBasePropertyDeclaration( BasePropertyDeclarationSyntax node )
             {
-                var propertySymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
+                var propertySymbol = (IPropertySymbol) this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
                 if ( propertySymbol != null && this.SymbolClassifier.IsTemplate( propertySymbol ) )
                 {
@@ -165,7 +165,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             {
                                 success = success &&
                                           this._templateCompiler.TryCompile(
-                                              TemplateNameHelper.GetCompiledPropertyGetTemplateName( propertySymbol.Name ),
+                                              TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
                                               this._compileTimeCompilation,
                                               getAccessor,
                                               this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
@@ -178,7 +178,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             {
                                 success = success &&
                                           this._templateCompiler.TryCompile(
-                                              TemplateNameHelper.GetCompiledPropertySetTemplateName( propertySymbol.Name ),
+                                              TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
                                               this._compileTimeCompilation,
                                               setAccessor,
                                               this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
@@ -193,7 +193,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                 // TODO: Does this preserve trivias in expression body?
                                 success = success &&
                                           this._templateCompiler.TryCompile(
-                                              TemplateNameHelper.GetCompiledPropertyGetTemplateName( propertySymbol.Name ),
+                                              TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
                                               this._compileTimeCompilation,
                                               AccessorDeclaration(
                                                   SyntaxKind.GetAccessorDeclaration,
