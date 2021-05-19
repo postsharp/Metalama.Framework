@@ -47,45 +47,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             try
             {
-                var buildOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
-
-                // Execute the pipeline.
-                var syntaxTreeResults = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
-                    context.Compilation,
-                    context.Compilation.SyntaxTrees.ToList(),
-                    buildOptions,
-                    context.CancellationToken );
-
-                // Report diagnostics from the pipeline.
-                foreach ( var result in syntaxTreeResults.SyntaxTreeResults )
-                {
-                    DesignTimeLogger.Instance?.Write(
-                        $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}'): {result.Diagnostics.Length} diagnostics reported on '{result.SyntaxTree.FilePath}'." );
-
-                    DesignTimeDiagnosticHelper.ReportDiagnostics(
-                        result.Diagnostics,
-                        context.Compilation,
-                        context.ReportDiagnostic,
-                        true );
-
-                    // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
-                    foreach ( var suppression in result.Suppressions.Where(
-                        s => !this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
-                    {
-                        foreach ( var symbol in DocumentationCommentId.GetSymbolsForDeclarationId( suppression.SymbolId, context.Compilation ) )
-                        {
-                            var location = symbol.GetDiagnosticLocation();
-
-                            if ( location is not null )
-                            {
-                                context.ReportDiagnostic(
-                                    DesignTimeDiagnosticDescriptors.UnregisteredSuppression.CreateDiagnostic(
-                                        location,
-                                        (Id: suppression.Definition.SuppressedDiagnosticId, symbol) ) );
-                            }
-                        }
-                    }
-                }
+              
             }
             catch ( Exception e )
             {
@@ -103,6 +65,48 @@ namespace Caravela.Framework.Impl.DesignTime
                 DesignTimeLogger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{context.SemanticModel.SyntaxTree.FilePath}')" );
 
                 DesignTimeDebugger.AttachDebugger( buildOptions );
+                
+                  
+                // Execute the pipeline.
+                var compilation = context.SemanticModel.Compilation;
+
+                var syntaxTreeResults = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
+                    compilation,
+                    new[]{ context.SemanticModel.SyntaxTree },
+                    buildOptions,
+                    context.CancellationToken );
+
+                // Report diagnostics from the pipeline.
+                foreach ( var result in syntaxTreeResults.SyntaxTreeResults )
+                {
+                    DesignTimeLogger.Instance?.Write(
+                        $"DesignTimeAnalyzer.AnalyzeSemanticModel('{context.SemanticModel.SyntaxTree.FilePath}'): {result.Diagnostics.Length} diagnostics reported on '{result.SyntaxTree.FilePath}'." );
+
+                    DesignTimeDiagnosticHelper.ReportDiagnostics(
+                        result.Diagnostics,
+                        compilation,
+                        context.ReportDiagnostic,
+                        true );
+
+                    // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
+                    foreach ( var suppression in result.Suppressions.Where(
+                        s => !this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
+                    {
+                        foreach ( var symbol in DocumentationCommentId.GetSymbolsForDeclarationId( suppression.SymbolId, compilation ) )
+                        {
+                            var location = symbol.GetDiagnosticLocation();
+
+                            if ( location is not null )
+                            {
+                                context.ReportDiagnostic(
+                                    DesignTimeDiagnosticDescriptors.UnregisteredSuppression.CreateDiagnostic(
+                                        location,
+                                        (Id: suppression.Definition.SuppressedDiagnosticId, symbol) ) );
+                            }
+                        }
+                    }
+                }
+                
 
                 // Additional validations that run out of the pipeline.
                 DesignTimeAnalyzerAdditionalVisitor visitor = new( context, buildOptions );

@@ -7,6 +7,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -52,7 +53,7 @@ namespace Caravela.Framework.Impl.Advices
 
             if ( !method.SelectRecursive( m => m.OverriddenMethod, includeThis: true )
                 .SelectMany( m => m.GetAttributes() )
-                .Any( a => a.AttributeClass?.Equals( expectedAttributeTypeSymbol, SymbolEqualityComparer.Default ) ?? false ) )
+                .Any( a => StructuralSymbolComparer.Default.Equals( a.AttributeClass,  expectedAttributeTypeSymbol  )  ) )
             {
                 throw GeneralDiagnosticDescriptors.TemplateMethodMissesAttribute.CreateException( (method, expectedAttributeTypeSymbol, adviceName) );
             }
