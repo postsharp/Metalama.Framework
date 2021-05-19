@@ -54,22 +54,22 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IFieldOrPropertyInvocation IFieldOrProperty.Base => throw new NotImplementedException();
 
-        public dynamic GetIndexerValue( dynamic instance, params dynamic[] args )
+        public dynamic GetIndexerValue( dynamic? instance, params dynamic[] args )
         {
             throw new NotImplementedException();
         }
 
-        public dynamic GetValue( dynamic instance )
+        public dynamic GetValue( dynamic? instance )
         {
             throw new NotImplementedException();
         }
 
-        public dynamic SetIndexerValue( dynamic instance, dynamic value, params dynamic[] args )
+        public dynamic SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args )
         {
             throw new NotImplementedException();
         }
 
-        public dynamic SetValue( dynamic instance, dynamic value )
+        public dynamic SetValue( dynamic? instance, dynamic value )
         {
             throw new NotImplementedException();
         }

@@ -43,7 +43,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes[0];
 
             var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo" );
@@ -86,7 +86,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes[0];
 
             var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", 0 );
@@ -127,7 +127,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
             var objectType = compilation.Factory.GetTypeByReflectionType( typeof(object) );
@@ -183,7 +183,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
@@ -239,7 +239,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes[0];
 
             var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", 0, Array.Empty<IType>() );
@@ -270,7 +270,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes[0];
 
             var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", isStatic: false );
@@ -331,7 +331,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
             var objectType = compilation.Factory.GetTypeByReflectionType( typeof(object) );
@@ -391,7 +391,7 @@ class C : B
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var typeA = compilation.DeclaredTypes[0];
             var typeB = compilation.DeclaredTypes[1];
             var typeC = compilation.DeclaredTypes[2];

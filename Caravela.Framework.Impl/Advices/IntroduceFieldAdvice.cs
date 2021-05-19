@@ -11,9 +11,11 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class IntroduceFieldAdvice : IntroduceMemberAdvice, IIntroduceFieldAdvice
+    internal class IntroduceFieldAdvice : IntroduceMemberAdvice<FieldBuilder>, IIntroduceFieldAdvice
     {
-        public IFieldBuilder Builder { get; }
+        public IFieldBuilder Builder => this.MemberBuilder;
+
+        protected override FieldBuilder MemberBuilder { get; set; }
 
         public new INamedType TargetDeclaration => base.TargetDeclaration!;
 
@@ -27,7 +29,7 @@ namespace Caravela.Framework.Impl.Advices
             IReadOnlyDictionary<string, object?> tags )
             : base( aspect, targetDeclaration, null, scope, conflictBehavior, tags, linkerOptions )
         {
-            this.Builder = new FieldBuilder( this, this.TargetDeclaration, name, linkerOptions );
+            this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, name, linkerOptions );
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )

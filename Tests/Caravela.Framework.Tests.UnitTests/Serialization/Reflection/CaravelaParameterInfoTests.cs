@@ -161,7 +161,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeIndexerParameter( string code )
         {
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var targetType = compilation.DeclaredTypes.Single( t => t.Name == "Target" );
             var single = targetType.Properties.Single( m => m.Name == "this[]" ).Parameters.First( p => p.Name == "target" );
             var parameter = (Parameter) single;
@@ -175,7 +175,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeParameter( string code )
         {
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" )
                 .Methods.Single( m => m.Name == "Method" )
@@ -192,7 +192,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeReturnParameter( string code )
         {
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" ).ReturnParameter!;
             var p = (MethodReturnParameter) single;
 
@@ -204,7 +204,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         private string SerializeReturnParameterOfProperty( string code )
         {
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( m => m.Name == "Property" ).Getter!.ReturnParameter!;
             var p = (MethodReturnParameter) single;
 

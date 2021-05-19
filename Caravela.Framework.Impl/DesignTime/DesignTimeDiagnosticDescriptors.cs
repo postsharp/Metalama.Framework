@@ -4,6 +4,8 @@
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 
+#pragma warning disable SA1118
+
 namespace Caravela.Framework.Impl.DesignTime
 {
     internal static class DesignTimeDiagnosticDescriptors
@@ -57,5 +59,15 @@ namespace Caravela.Framework.Impl.DesignTime
                     "{0}: {1}",
                     _category,
                     DiagnosticSeverity.Hidden );
+
+        internal static readonly StrongDiagnosticDescriptor<ISymbol>
+            CompileTimeTypeNeedsRebuild
+                = new(
+                    "CR0304",
+                    "The compile-time type needs rebuild.",
+                    "The compile-time type '{0}' has been modified since the last build. Caravela will stop analyzing this solution until the next build. "
+                    + "To resume analysis, finish the work on all compile-time logic, and build the project (even if the run-time code still has issues).",
+                    _category,
+                    DiagnosticSeverity.Error );
     }
 }

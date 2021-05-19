@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Gets the list of aspect types (identified by their fully qualified reflection name) of the aspects
         /// declared in the current project.
         /// </summary>
-        public IReadOnlyList<string> AspectTypes => this.AssertNotEmpty()._manifest!.AspectTypes;
+        public IReadOnlyList<string> AspectTypes => this._manifest?.AspectTypes ?? Array.Empty<string>();
 
         /// <summary>
         /// Gets the list of compile-time projects referenced by the current project.
@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <summary>
         /// Gets the list of transformed code files in the current project. 
         /// </summary>
-        public IReadOnlyList<string>? CodeFiles { get; }
+        public IReadOnlyList<CompileTimeFile> CodeFiles => this._manifest?.Files ?? Array.Empty<CompileTimeFile>();
 
         /// <summary>
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.
@@ -70,7 +70,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <summary>
         /// Gets the unique hash of the project, computed from the source code.
         /// </summary>
-        public ulong Hash => this.AssertNotEmpty()._manifest!.SourceHash;
+        public ulong Hash => this._manifest?.SourceHash ?? 0;
 
         /// <summary>
         /// Gets a value indicating whether the current project is empty, i.e. does not contain any source code. Note that
@@ -108,7 +108,6 @@ namespace Caravela.Framework.Impl.CompileTime
             IReadOnlyList<CompileTimeProject> references,
             CompileTimeProjectManifest? manifest,
             string? compiledAssemblyPath,
-            IReadOnlyList<string>? codeFiles,
             Func<string, TextMap?>? getLocationMap,
             string? directory )
         {
@@ -120,7 +119,6 @@ namespace Caravela.Framework.Impl.CompileTime
             this.RunTimeIdentity = runTimeIdentity;
             this.CompileTimeIdentity = compileTimeIdentity;
             this.References = references;
-            this.CodeFiles = codeFiles;
         }
 
         /// <summary>
@@ -134,9 +132,8 @@ namespace Caravela.Framework.Impl.CompileTime
             CompileTimeProjectManifest manifest,
             string? compiledAssemblyPath,
             string sourceDirectory,
-            IReadOnlyList<string> sourceFiles,
             Func<string, TextMap?> getLocationMap )
-            => new( domain, runTimeIdentity, compileTimeIdentity, references, manifest, compiledAssemblyPath, sourceFiles, getLocationMap, sourceDirectory );
+            => new( domain, runTimeIdentity, compileTimeIdentity, references, manifest, compiledAssemblyPath, getLocationMap, sourceDirectory );
 
         /// <summary>
         /// Creates a <see cref="CompileTimeProject"/> that does not include any source code.
@@ -146,7 +143,7 @@ namespace Caravela.Framework.Impl.CompileTime
             AssemblyIdentity runTimeIdentity,
             AssemblyIdentity compileTimeIdentity,
             IReadOnlyList<CompileTimeProject>? references = null )
-            => new( domain, runTimeIdentity, compileTimeIdentity, references ?? Array.Empty<CompileTimeProject>(), null, null, null, null, null );
+            => new( domain, runTimeIdentity, compileTimeIdentity, references ?? Array.Empty<CompileTimeProject>(), null, null, null, null );
 
         /// <summary>
         /// Serializes the current project (its manifest and source code) into a stream that can be embedded as a managed resource.
@@ -161,9 +158,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 foreach ( var sourceFile in this.CodeFiles! )
                 {
-                    var sourceText = File.ReadAllText( Path.Combine( this.Directory, sourceFile ) );
+                    var sourceText = File.ReadAllText( Path.Combine( this.Directory, sourceFile.TransformedPath ) );
 
-                    var entry = archive.CreateEntry( sourceFile, CompressionLevel.Optimal );
+                    var entry = archive.CreateEntry( sourceFile.TransformedPath, CompressionLevel.Optimal );
                     using var entryWriter = new StreamWriter( entry.Open() );
                     entryWriter.Write( sourceText );
                 }
@@ -199,10 +196,9 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <returns></returns>
         public Type? GetType( string reflectionName ) => this.IsEmpty ? null : this.Assembly!.GetType( reflectionName, false );
 
-        public string? FindSourceFile( string name )
-            => this.CodeFiles.Where( t => name.EndsWith( t, StringComparison.OrdinalIgnoreCase ) )
-                .OrderByDescending( t => t.Length )
-                .Select( t => Path.Combine( this.Directory, t ) )
+        public CompileTimeFile? FindCodeFileFromTransformedPath( string transformedCodePath )
+            => this.CodeFiles.Where( t => transformedCodePath.EndsWith( t.TransformedPath, StringComparison.OrdinalIgnoreCase ) )
+                .OrderByDescending( t => t.TransformedPath.Length )
                 .FirstOrDefault();
 
         private void LoadAssembly()

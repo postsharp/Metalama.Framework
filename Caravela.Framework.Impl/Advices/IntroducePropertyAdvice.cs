@@ -15,16 +15,12 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class IntroducePropertyAdvice : IntroduceMemberAdvice, IIntroducePropertyAdvice
+    internal class IntroducePropertyAdvice : IntroduceMemberAdvice<PropertyBuilder>, IIntroducePropertyAdvice
     {
         private readonly IMethod? _getTemplateMethod;
         private readonly IMethod? _setTemplateMethod;
 
-        public new PropertyBuilder MemberBuilder
-        {
-            get => (PropertyBuilder) base.MemberBuilder;
-            set => base.MemberBuilder = value;
-        }
+        protected override PropertyBuilder MemberBuilder { get; set; }
 
         public new IProperty? TemplateMember => (IProperty?) base.TemplateMember;
 

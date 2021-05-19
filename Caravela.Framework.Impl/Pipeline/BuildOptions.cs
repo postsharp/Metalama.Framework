@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Immutable;
@@ -40,9 +40,13 @@ namespace Caravela.Framework.Impl.Pipeline
         public string? CrashReportDirectory => this.GetStringOption( "CaravelaCrashReportDirectory" );
 
         public string CacheDirectory
-            => this.GetStringOption( "CaravelaCacheDirectory" ) ?? Path.Combine( Path.GetTempPath(), "Caravela", "Cache", PackageVersions.BuildId.ToString() );
+            => this.GetStringOption( "CaravelaCacheDirectory" ) ?? Path.Combine( Path.GetTempPath(), "Caravela", "Cache", AssemblyMetadataReader.MainBuildId );
 
         public string ProjectId => this.GetStringOption( "CaravelaProjectId" ) ?? this._defaultProjectId;
+
+        public string? BuildTouchFile => this.GetStringOption( "CaravelaBuildTouchFile" );
+
+        public string? AssemblyName => this.GetStringOption( "AssemblyName" );
 
         public ImmutableArray<object> PlugIns { get; }
 

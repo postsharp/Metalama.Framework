@@ -25,10 +25,6 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         private class MethodInliningRewriter : InliningRewriterBase
         {
-            private static readonly string _inlineableBlockAnnotationId = "AspectLinkerInlineableBlock";
-
-            private readonly IMethodSymbol _contextMethod;
-
             private new IMethodSymbol ContextMember => (IMethodSymbol) base.ContextMember;
 
             public MethodInliningRewriter(
@@ -60,7 +56,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 // If the body is inlineable, inline it.
                 var resolvedSymbol = (IMethodSymbol) this.AnalysisRegistry.ResolveSymbolReference(
-                    this._contextMethod,
+                    this.ContextMember,
                     calleeSymbol,
                     annotation.AssertNotNull() );
 
@@ -97,7 +93,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 // We are on an assignment of a method return value to a variable.
                 var resolvedSymbol = (IMethodSymbol) this.AnalysisRegistry.ResolveSymbolReference(
-                    this._contextMethod,
+                    this.ContextMember,
                     calleeSymbol,
                     annotation.AssertNotNull() );
 
@@ -137,7 +133,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 // We are on an assignment of a method return value to a variable.
                 var resolvedSymbol = (IMethodSymbol) this.AnalysisRegistry.ResolveSymbolReference(
-                    this._contextMethod,
+                    this.ContextMember,
                     calleeSymbol,
                     annotation.AssertNotNull() );
 

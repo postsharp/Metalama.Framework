@@ -30,6 +30,10 @@ namespace Caravela.TestFramework
 
         public string ProjectId => "test";
 
+        public string? BuildTouchFile => null;
+
+        public string? AssemblyName => null;
+
         public ImmutableArray<object> PlugIns => ImmutableArray<object>.Empty;
 
         public void Dispose()

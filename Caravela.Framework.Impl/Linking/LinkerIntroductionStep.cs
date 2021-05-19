@@ -122,7 +122,7 @@ namespace Caravela.Framework.Impl.Linking
                     // TODO: this should be moved to a Formatting linker step.
                     newRoot = newRoot.NormalizeWhitespace();
 
-                    string text = newRoot.ToFullString();
+                    var text = newRoot.ToFullString();
 
                     // TODO: Add an annotation to modified syntax roots so that they can be differentiated from unmodified ones and skipped by the next visitors.
                     var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );

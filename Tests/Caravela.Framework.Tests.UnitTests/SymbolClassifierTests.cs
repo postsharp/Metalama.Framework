@@ -35,7 +35,7 @@ class C : IAspect
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes.OfName( "C" ).Single();
             AssertScope( type, SymbolDeclarationScope.Both );
             AssertScope( type.Fields.OfName( "F" ).Single(), SymbolDeclarationScope.Both );
@@ -61,7 +61,7 @@ class D : System.IDisposable
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes.OfName( "C" ).Single();
             AssertScope( type, SymbolDeclarationScope.RunTimeOnly );
             AssertScope( type.Fields.OfName( "F" ).Single(), SymbolDeclarationScope.RunTimeOnly );
@@ -81,7 +81,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes.OfName( "C" ).Single();
             AssertScope( type, SymbolDeclarationScope.Both );
         }
@@ -100,7 +100,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes.OfName( "C" ).Single();
             AssertScope( type, SymbolDeclarationScope.CompileTimeOnly );
             AssertScope( type.Fields.OfName( "F" ).Single(), SymbolDeclarationScope.CompileTimeOnly );
@@ -121,7 +121,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             AssertScope( compilation.DeclaredTypes.OfName( "C" ).Single(), SymbolDeclarationScope.Both );
         }
     }

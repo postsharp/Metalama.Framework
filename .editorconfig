@@ -540,9 +540,6 @@ dotnet_diagnostic.IDE1005.severity = warning
 # IDE1006: Naming Styles
 dotnet_diagnostic.IDE1006.severity = warning
 
-# Expression value is not used
-dotnet_diagnostic.IDE0058.severity = suggestion
-
 # SA1602: Enumeration items should be documented
 dotnet_diagnostic.SA1602.severity = suggestion
 

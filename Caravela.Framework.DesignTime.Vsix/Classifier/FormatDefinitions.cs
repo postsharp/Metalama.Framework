@@ -2,9 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System.ComponentModel.Composition;
+using System.Windows;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
+
+#pragma warning disable CS0649
 
 namespace Caravela.Framework.DesignTime.Vsix.Classifier
 {
@@ -16,6 +19,7 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
         public const string TemplateKeywordName = "Caravela/TemplateKeyword";
         public const string CompileTimeVariableName = "Caravela/CompileTimeVariable";
         private const double _backgroundOpacity = 0.3;
+        private static readonly Color _background = Colors.LightSteelBlue;
 
 #pragma warning disable SA1401 // Fields should be private
 
@@ -45,7 +49,7 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
         private sealed class CompileTimeFormatDefinition : FormatDefinition
         {
             public CompileTimeFormatDefinition()
-                : base( $"Compile-Time Code", background: Colors.LightSteelBlue, backgroundOpacity: _backgroundOpacity )
+                : base( $"Compile-Time Code", background: _background, backgroundOpacity: _backgroundOpacity )
             {
             }
         }
@@ -58,7 +62,7 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
         private sealed class CompileTimeVariableFormatDefinition : FormatDefinition
         {
             public CompileTimeVariableFormatDefinition()
-                : base( $"Compile-Time Variable", background: Colors.LightSteelBlue, backgroundOpacity: _backgroundOpacity, isItalic: true )
+                : base( $"Compile-Time Variable", background: _background, backgroundOpacity: _backgroundOpacity, isItalic: true )
             {
             }
         }
@@ -71,7 +75,7 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
         private sealed class DynamicFormatDefinition : FormatDefinition
         {
             public DynamicFormatDefinition()
-                : base( $"Dynamic", background: Colors.LightSteelBlue, backgroundOpacity: _backgroundOpacity, foreground: Colors.Green )
+                : base( $"Dynamic", background: _background, backgroundOpacity: _backgroundOpacity, decorations: System.Windows.TextDecorations.Underline )
             {
             }
         }
@@ -80,11 +84,11 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
         [Name( TemplateKeywordName )]
         [UserVisible( true )]
         [ClassificationType( ClassificationTypeNames = TemplateKeywordName )]
-        [Order( Before = Priority.High )]
+        [Order( Before = DefaultOrderings.Highest, After = DefaultOrderings.Highest )]
         private sealed class TemplateKeywordFormatDefinition : FormatDefinition
         {
             public TemplateKeywordFormatDefinition()
-                : base( $"Template keyword", background: Colors.LightSteelBlue, backgroundOpacity: _backgroundOpacity, foreground: Colors.Fuchsia )
+                : base( $"Template keyword", background: _background, backgroundOpacity: _backgroundOpacity, foreground: Colors.Fuchsia, isBold: true )
             {
             }
         }
@@ -92,19 +96,19 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
         private abstract class FormatDefinition : ClassificationFormatDefinition
         {
 
-            protected FormatDefinition( string displayName,  Color? background = null, double? backgroundOpacity = null, Color? foreground = null, bool? isItalic = false ) : base()
+            protected FormatDefinition( string displayName,  Color? background = null, double? backgroundOpacity = null, Color? foreground = null, bool? isItalic = false, TextDecorationCollection? decorations = null, bool? isBold = null ) : base()
             {
                 // Foreground color and font weight is overwritten for method names and I didn't find an order/priority that would prevent that.
                 // Specifically, color/font for static symbols is overwritten.
 
                 if ( foreground != null )
                 {
-                    this.ForegroundCustomizable = true;
                     this.ForegroundColor = foreground;
-                    this.ForegroundBrush = new SolidColorBrush( foreground.Value );
                 }
 
                 this.IsItalic = isItalic;
+                this.IsBold = isBold;
+                this.TextDecorations = decorations;
 
                 this.DisplayName = displayName;
                 this.BackgroundColor = background;

@@ -12,13 +12,9 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice, IIntroduceMethodAdvice
+    internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<MethodBuilder>, IIntroduceMethodAdvice
     {
-        public new MethodBuilder MemberBuilder
-        {
-            get => (MethodBuilder) base.MemberBuilder;
-            set => base.MemberBuilder = value;
-        }
+        protected override MethodBuilder MemberBuilder { get; set; }
 
         public new IMethod TemplateMember => (IMethod) base.TemplateMember.AssertNotNull();
 

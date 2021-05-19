@@ -145,7 +145,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             throw new NotSupportedException( "Cannot directly add parameters to accessors." );
         }
 
-        public dynamic Invoke( dynamic instance, params dynamic[] args )
+        public dynamic Invoke( dynamic? instance, params dynamic[] args )
         {
             throw new NotImplementedException();
         }

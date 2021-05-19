@@ -261,50 +261,6 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
-            private static MethodDeclarationSyntax RewriteAccessorToMethod(
-                AccessorDeclarationSyntax node,
-                string templateMethodName,
-                TypeSyntax methodGroupReturnType,
-                SeparatedSyntaxList<ParameterSyntax>? methodGroupParameters )
-            {
-                if ( UsesValueKeyword( node.Keyword ) )
-                {
-                    return
-                        MethodDeclaration(
-                                PredefinedType( Token( SyntaxKind.VoidKeyword ) ),
-                                templateMethodName )
-                            .WithParameterList(
-                                methodGroupParameters != null
-                                    ? ParameterList(
-                                        methodGroupParameters.Value.Add(
-                                            Parameter( List<AttributeListSyntax>(), TokenList(), methodGroupReturnType, Identifier( "value" ), null ) ) )
-                                    : ParameterList(
-                                        SingletonSeparatedList(
-                                            Parameter( List<AttributeListSyntax>(), TokenList(), methodGroupReturnType, Identifier( "value" ), null ) ) ) )
-                            .WithExpressionBody( node.ExpressionBody )
-                            .WithBody( node.Body )
-                            .WithSemicolonToken( node.SemicolonToken )
-                            .NormalizeWhitespace();
-                }
-                else
-                {
-                    return
-                        MethodDeclaration(
-                                methodGroupReturnType,
-                                templateMethodName )
-                            .WithParameterList( methodGroupParameters != null ? ParameterList( methodGroupParameters.Value ) : ParameterList() )
-                            .WithExpressionBody( node.ExpressionBody )
-                            .WithBody( node.Body )
-                            .WithSemicolonToken( node.SemicolonToken )
-                            .NormalizeWhitespace();
-                }
-
-                static bool UsesValueKeyword( SyntaxToken keyword )
-                {
-                    return keyword.Kind() != SyntaxKind.GetAccessorDeclaration;
-                }
-            }
-
             // TODO: top-level statements?
         }
     }

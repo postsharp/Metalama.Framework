@@ -23,20 +23,20 @@ namespace Caravela.Framework.Tests.UnitTests
         /// </summary>
         private const bool _doCodeExecutionTests = false;
 
-        public static CSharpCompilation CreateRoslynCompilation(
+        public static CSharpCompilation CreateCSharpCompilation(
             string code,
             string? dependentCode = null,
             bool ignoreErrors = false,
             IEnumerable<MetadataReference>? additionalReferences = null,
             string? name = null )
-            => CreateRoslynCompilation(
+            => CreateCSharpCompilation(
                 new Dictionary<string, string> { { Guid.NewGuid() + ".cs", code } },
                 dependentCode,
                 ignoreErrors,
                 additionalReferences,
                 name );
 
-        public static CSharpCompilation CreateRoslynCompilation(
+        public static CSharpCompilation CreateCSharpCompilation(
             IReadOnlyDictionary<string, string> code,
             string? dependentCode = null,
             bool ignoreErrors = false,
@@ -79,13 +79,13 @@ namespace Caravela.Framework.Tests.UnitTests
 
             if ( !ignoreErrors )
             {
-                CheckRoslynDiagnostics( mainRoslynCompilation );
+                AssertNoError( mainRoslynCompilation );
             }
 
             return mainRoslynCompilation;
         }
 
-        public static void CheckRoslynDiagnostics( CSharpCompilation mainRoslynCompilation )
+        protected static void AssertNoError( CSharpCompilation mainRoslynCompilation )
         {
             var diagnostics = mainRoslynCompilation.GetDiagnostics();
 
@@ -97,9 +97,9 @@ namespace Caravela.Framework.Tests.UnitTests
             }
         }
 
-        internal static CompilationModel CreateCompilation( string code, string? dependentCode = null )
+        internal static CompilationModel CreateCompilationModel( string code, string? dependentCode = null )
         {
-            var roslynCompilation = CreateRoslynCompilation( code, dependentCode );
+            var roslynCompilation = CreateCSharpCompilation( code, dependentCode );
 
             return CompilationModel.CreateInitialInstance( roslynCompilation );
         }

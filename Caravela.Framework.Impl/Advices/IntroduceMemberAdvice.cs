@@ -5,30 +5,32 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal abstract class IntroduceMemberAdvice : Advice
+    internal abstract class IntroduceMemberAdvice<TBuilder> : Advice
+        where TBuilder : MemberBuilder
     {
         public IntroductionScope Scope { get; }
 
         public ConflictBehavior ConflictBehavior { get; }
 
         // Null is for types.
-        public new INamedType? TargetDeclaration => (INamedType) base.TargetDeclaration;
+        public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
         public AspectLinkerOptions? LinkerOptions { get; }
 
-        protected IMemberBuilder MemberBuilder { get; set; }
+        protected abstract TBuilder MemberBuilder { get; set; }
 
         protected IMember? TemplateMember { get; }
 
         public IntroduceMemberAdvice(
             AspectInstance aspect,
-            INamedType? targetDeclaration,
+            INamedType targetDeclaration,
             IMember? templateMember,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
