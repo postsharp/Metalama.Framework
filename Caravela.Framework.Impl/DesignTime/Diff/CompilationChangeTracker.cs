@@ -8,12 +8,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Caravela.Framework.Impl.DesignTime.Diff
 {
     /// <summary>
     /// Computes the changes between the last <see cref="Compilation"/> and a new one.
     /// </summary>
-    internal class CompilationDiffer
+    internal class CompilationChangeTracker
     {
         private Dictionary<string, (SyntaxTree Tree, bool HasCompileTimeCode)>? _lastTrees;
 
@@ -27,11 +27,11 @@ namespace Caravela.Framework.Impl.DesignTime
         /// Updates the <see cref="LastCompilation"/> property and returns the set of changes between the
         /// old value of <see cref="LastCompilation"/> and the newly provided <see cref="Compilation"/>.
         /// </summary>
-        public CompilationChanges Update( Compilation newCompilation )
+        public CompilationChange Update( Compilation newCompilation )
         {
             if ( newCompilation == this.LastCompilation )
             {
-                return CompilationChanges.Empty;
+                return CompilationChange.Empty;
             }
 
             lock ( this )
@@ -110,7 +110,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 this._lastTrees = newTrees;
                 this.LastCompilation = newCompilation;
 
-                return new CompilationChanges( syntaxTreeChanges.ToImmutable(), hasCompileTimeChange );
+                return new CompilationChange( syntaxTreeChanges.ToImmutable(), hasCompileTimeChange );
             }
         }
 
@@ -247,7 +247,7 @@ namespace Caravela.Framework.Impl.DesignTime
         }
 
         /// <summary>
-        /// Resets the current <see cref="CompilationDiffer"/> to its initial empty state.
+        /// Resets the current <see cref="CompilationChangeTracker"/> to its initial empty state.
         /// </summary>
         public void Reset()
         {

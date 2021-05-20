@@ -17,25 +17,25 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly ImmutableHashSet<string> _definedDiagnostics;
         private readonly ImmutableHashSet<string> _definedSuppressions;
 
-        public ImmutableArray<IDiagnosticDefinition> DiagnosticDescriptions { get; }
+        public ImmutableArray<IDiagnosticDefinition> DiagnosticDefinitions { get; }
 
-        public ImmutableArray<SuppressionDefinition> SuppressionDescriptions { get; }
+        public ImmutableArray<SuppressionDefinition> SuppressionDefinitions { get; }
 
         public DiagnosticManifest( ImmutableArray<IDiagnosticDefinition> diagnosticDescriptions, ImmutableArray<SuppressionDefinition> suppressionDescriptions )
         {
-            this.DiagnosticDescriptions = diagnosticDescriptions;
-            this.SuppressionDescriptions = suppressionDescriptions;
+            this.DiagnosticDefinitions = diagnosticDescriptions;
+            this.SuppressionDefinitions = suppressionDescriptions;
             this._definedDiagnostics = diagnosticDescriptions.Select( d => d.Id ).ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
             this._definedSuppressions = suppressionDescriptions.Select( d => d.SuppressedDiagnosticId ).ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
         }
 
         public DiagnosticManifest( IReadOnlyCollection<DiagnosticManifest> items )
         {
-            this.DiagnosticDescriptions = items.SelectMany( i => i.DiagnosticDescriptions ).ToImmutableArray();
-            this.SuppressionDescriptions = items.SelectMany( i => i.SuppressionDescriptions ).ToImmutableArray();
-            this._definedDiagnostics = this.DiagnosticDescriptions.Select( d => d.Id ).ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
+            this.DiagnosticDefinitions = items.SelectMany( i => i.DiagnosticDefinitions ).ToImmutableArray();
+            this.SuppressionDefinitions = items.SelectMany( i => i.SuppressionDefinitions ).ToImmutableArray();
+            this._definedDiagnostics = this.DiagnosticDefinitions.Select( d => d.Id ).ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
-            this._definedSuppressions = this.SuppressionDescriptions.Select( d => d.SuppressedDiagnosticId )
+            this._definedSuppressions = this.SuppressionDefinitions.Select( d => d.SuppressedDiagnosticId )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
         }
 

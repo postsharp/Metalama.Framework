@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
@@ -16,8 +17,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Caravela.Framework.Impl.DesignTime.Expand
 {
+    /// <summary>
+    /// An implementation of the <see cref="AspectPipeline"/> that applies an aspect to source code in the interactive process.
+    /// </summary>
     internal class ExpandAspectAspectPipeline : AspectPipeline
     {
         private readonly InteractiveAspectSource _source;
@@ -56,7 +60,7 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             var pipelineConfiguration = designTimePipelineConfiguration.WithStages( s => MapPipelineStage( designTimePipelineConfiguration, s ) );
 
-            if ( !this.TryExecuteCore( compilation, NullDiagnosticAdder.Instance, pipelineConfiguration, cancellationToken, out var result ) )
+            if ( !this.TryExecute( compilation, NullDiagnosticAdder.Instance, pipelineConfiguration, cancellationToken, out var result ) )
             {
                 outputCompilation = null;
 
@@ -71,7 +75,7 @@ namespace Caravela.Framework.Impl.DesignTime
         private static PipelineStage MapPipelineStage( AspectPipelineConfiguration configuration, PipelineStage stage )
             => stage switch
             {
-                DesignTimePipelineStage => new CompileTimePipelineStage(
+                SourceGeneratorPipelineStage => new CompileTimePipelineStage(
                     configuration.CompileTimeProject!,
                     configuration.Layers,
                     stage.PipelineProperties ),

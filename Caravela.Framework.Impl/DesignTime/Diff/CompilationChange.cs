@@ -4,12 +4,12 @@
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Caravela.Framework.Impl.DesignTime.Diff
 {
     /// <summary>
     /// Represents changes between two instances of the <see cref="Compilation"/> class.
     /// </summary>
-    internal sealed class CompilationChanges
+    internal sealed class CompilationChange
     {
         /// <summary>
         /// Gets the set of syntax tree changes.
@@ -22,22 +22,22 @@ namespace Caravela.Framework.Impl.DesignTime
         public bool HasCompileTimeCodeChange { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CompilationChanges"/> class.
+        /// Initializes a new instance of the <see cref="CompilationChange"/> class.
         /// </summary>
-        public CompilationChanges( ImmutableArray<SyntaxTreeChange> syntaxTreeChanges, bool hasCompileTimeCodeChange )
+        public CompilationChange( ImmutableArray<SyntaxTreeChange> syntaxTreeChanges, bool hasCompileTimeCodeChange )
         {
             this.SyntaxTreeChanges = syntaxTreeChanges;
             this.HasCompileTimeCodeChange = hasCompileTimeCodeChange;
         }
 
-        private CompilationChanges()
+        private CompilationChange()
         {
             this.SyntaxTreeChanges = ImmutableArray<SyntaxTreeChange>.Empty;
         }
 
         /// <summary>
-        /// Gets a <see cref="CompilationChanges"/> that represents the absence of any change.
+        /// Gets a <see cref="CompilationChange"/> that represents the absence of any change.
         /// </summary>
-        public static CompilationChanges Empty { get; } = new();
+        public static CompilationChange Empty { get; } = new();
     }
 }

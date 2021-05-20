@@ -144,7 +144,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             if ( !emitResult.Success )
             {
-                testResult.ReportDiagnostics( emitResult.Diagnostics );
+                testResult.Report( emitResult.Diagnostics );
                 testResult.SetFailed( "The final template compilation failed." );
 
                 return testResult;
@@ -170,7 +170,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult, out var output );
 
-                testResult.ReportDiagnostics( expansionContext.DiagnosticSink.ToImmutable().ReportedDiagnostics );
+                testResult.Report( expansionContext.DiagnosticSink.ToImmutable().ReportedDiagnostics );
 
                 if ( !expandSuccessful )
                 {
@@ -204,7 +204,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             var targetCaravelaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! )!;
             var targetMethod = targetCaravelaType.Methods.Single( m => m.Name == "Method" );
 
-            var diagnostics = new DiagnosticSink( null, targetMethod );
+            var diagnostics = new UserDiagnosticSink( null, targetMethod );
 
             var roslynTargetType = roslynCompilation.Assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
 

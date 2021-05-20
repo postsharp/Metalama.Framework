@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Linking
     internal class LinkerIntroductionStepOutput
     {
         public LinkerIntroductionStepOutput(
-            ImmutableDiagnosticList diagnostics,
+            ImmutableUserDiagnosticList diagnostics,
             PartialCompilation intermediateCompilation,
             LinkerIntroductionRegistry introductionRegistry,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers )
@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Gets the diagnostic sink.
         /// </summary>
-        public ImmutableDiagnosticList Diagnostics { get; }
+        public ImmutableUserDiagnosticList Diagnostics { get; }
 
         /// <summary>
         /// Gets the intermediate compilation.

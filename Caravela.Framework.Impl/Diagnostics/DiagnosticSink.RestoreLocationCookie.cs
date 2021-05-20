@@ -6,14 +6,14 @@ using System;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-    public partial class DiagnosticSink
+    public partial class UserDiagnosticSink
     {
         private class RestoreLocationCookie : IDisposable
         {
-            private readonly DiagnosticSink _parent;
+            private readonly UserDiagnosticSink _parent;
             private readonly ICodeElement? _scope;
 
-            public RestoreLocationCookie( DiagnosticSink parent, ICodeElement? scope )
+            public RestoreLocationCookie( UserDiagnosticSink parent, ICodeElement? scope )
             {
                 this._parent = parent;
                 this._scope = scope;

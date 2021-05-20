@@ -287,7 +287,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
                 }
 
-                diagnosticSink.ReportDiagnostics( emitResult.Diagnostics.Where( d => d.Severity >= DiagnosticSeverity.Error ) );
+                diagnosticSink.Report( emitResult.Diagnostics.Where( d => d.Severity >= DiagnosticSeverity.Error ) );
 
                 if ( !emitResult.Success )
                 {

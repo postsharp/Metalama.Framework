@@ -46,7 +46,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
 
             if ( !templateCompilerSuccess )
             {
-                result.ReportDiagnostics( diagnostics );
+                result.Report( diagnostics );
                 result.SetFailed( "TemplateCompiler.TryAnnotate failed." );
 
                 return result;

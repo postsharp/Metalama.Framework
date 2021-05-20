@@ -18,14 +18,14 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Caravela.Framework.Impl.DesignTime.Pipeline
 {
     /// <summary>
-    /// An implementation of <see cref="DesignTimePipelineStage"/> called from source generators.
+    /// An implementation of <see cref="SourceGeneratorPipelineStage"/> called from source generators.
     /// </summary>
-    internal class DesignTimePipelineStage : HighLevelPipelineStage
+    internal class SourceGeneratorPipelineStage : HighLevelPipelineStage
     {
-        public DesignTimePipelineStage(
+        public SourceGeneratorPipelineStage(
             CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             IAspectPipelineProperties properties )
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.DesignTime
             CancellationToken cancellationToken )
         {
             var transformations = pipelineStepResult.Compilation.GetAllObservableTransformations();
-            DiagnosticSink diagnostics = new( this.CompileTimeProject );
+            UserDiagnosticSink diagnostics = new( this.CompileTimeProject );
             var syntaxFactory = ReflectionMapper.GetInstance( input.PartialCompilation.Compilation );
 
             var additionalSyntaxTrees = new List<IntroducedSyntaxTree>();

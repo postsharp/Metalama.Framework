@@ -4,7 +4,9 @@
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.DesignTime.UserDiagnostics;
+using Caravela.Framework.Impl.DesignTime.Diagnostics;
+using Caravela.Framework.Impl.DesignTime.Diff;
+using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
@@ -18,7 +20,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Caravela.Framework.Impl.DesignTime.Pipeline
 {
     /// <summary>
     /// The design-time implementation of <see cref="AspectPipeline"/>.
@@ -31,7 +33,7 @@ namespace Caravela.Framework.Impl.DesignTime
         private readonly ConcurrentDictionary<string, SyntaxTree?> _compileTimeSyntaxTrees = new();
 
         private readonly object _configureSync = new();
-        private readonly CompilationDiffer _compilationDiffer = new();
+        private readonly CompilationChangeTracker _compilationChangeTracker = new();
         private readonly FileSystemWatcher? _fileSystemWatcher;
 
         private AspectPipelineConfiguration? _lastKnownConfiguration;
@@ -93,7 +95,7 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             List<SyntaxTree> trees = new( this._compileTimeSyntaxTrees.Count );
 
-            if ( this._compilationDiffer.LastCompilation == null )
+            if ( this._compilationChangeTracker.LastCompilation == null )
             {
                 lock ( this._configureSync )
                 {
@@ -128,11 +130,11 @@ namespace Caravela.Framework.Impl.DesignTime
         /// Invalidates the cache given a new <see cref="Compilation"/> and returns the set of changes between
         /// the previous compilation and the new one.
         /// </summary>
-        public CompilationChanges InvalidateCache( Compilation newCompilation )
+        public CompilationChange InvalidateCache( Compilation newCompilation )
         {
             lock ( this._configureSync )
             {
-                var compilationChange = this._compilationDiffer.Update( newCompilation );
+                var compilationChange = this._compilationChangeTracker.Update( newCompilation );
 
                 if ( compilationChange.HasCompileTimeCodeChange )
                 {
@@ -196,7 +198,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 this._lastKnownConfiguration = null;
                 this.Status = DesignTimeAspectPipelineStatus.Default;
-                this._compilationDiffer.Reset();
+                this._compilationChangeTracker.Reset();
                 this._compileTimeSyntaxTrees.Clear();
             }
         }
@@ -282,16 +284,16 @@ namespace Caravela.Framework.Impl.DesignTime
                     false,
                     compilation.SyntaxTrees,
                     ImmutableArray<IntroducedSyntaxTree>.Empty,
-                    new ImmutableDiagnosticList( diagnosticList ) );
+                    new ImmutableUserDiagnosticList( diagnosticList ) );
             }
 
-            var success = this.TryExecuteCore( compilation, diagnosticList, configuration, cancellationToken, out var pipelineResult );
+            var success = this.TryExecute( compilation, diagnosticList, configuration, cancellationToken, out var pipelineResult );
 
             var result = new DesignTimeAspectPipelineResult(
                 success,
                 compilation.SyntaxTrees,
                 pipelineResult?.AdditionalSyntaxTrees ?? Array.Empty<IntroducedSyntaxTree>(),
-                new ImmutableDiagnosticList(
+                new ImmutableUserDiagnosticList(
                     diagnosticList.ToImmutableArray(),
                     pipelineResult?.Diagnostics.DiagnosticSuppressions ) );
 
@@ -307,7 +309,7 @@ namespace Caravela.Framework.Impl.DesignTime
             IReadOnlyList<OrderedAspectLayer> parts,
             CompileTimeProject compileTimeProject,
             CompileTimeProjectLoader compileTimeProjectLoader )
-            => new DesignTimePipelineStage( compileTimeProject, parts, this );
+            => new SourceGeneratorPipelineStage( compileTimeProject, parts, this );
 
         protected override void Dispose( bool disposing )
         {

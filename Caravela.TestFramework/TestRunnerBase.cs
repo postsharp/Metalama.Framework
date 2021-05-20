@@ -62,7 +62,7 @@ namespace Caravela.TestFramework
 
                 if ( errors.Any() )
                 {
-                    testResult.ReportDiagnostics( errors );
+                    testResult.Report( errors );
                     testResult.SetFailed( "The initial compilation failed." );
 
                     return testResult;

@@ -6,7 +6,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Caravela.Framework.Impl.DesignTime.Pipeline
 {
     /// <summary>
     /// A compilation-independent version of <see cref="ScopedSuppression"/>, which stores the symbol id instead of the <see cref="ISymbol"/> itself.

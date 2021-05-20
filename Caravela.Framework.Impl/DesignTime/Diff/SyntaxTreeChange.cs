@@ -3,7 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Caravela.Framework.Impl.DesignTime.Diff
 {
     /// <summary>
     /// Represents a change between two versions of a <see cref="SyntaxTree"/>.

@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// Implements the user-level <see cref="IDiagnosticSink"/> interface
     /// and maps user-level diagnostics into Roslyn <see cref="Diagnostic"/>.
     /// </summary>
-    public partial class DiagnosticSink : IDiagnosticSink, IDiagnosticAdder
+    public partial class UserDiagnosticSink : IDiagnosticSink, IDiagnosticAdder
     {
         private readonly DiagnosticManifest? _diagnosticManifest;
         private ImmutableArray<Diagnostic>.Builder? _diagnostics;
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public ICodeElement? DefaultScope { get; private set; }
 
-        internal DiagnosticSink( CompileTimeProject? compileTimeProject, ICodeElement? defaultScope = null )
+        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, ICodeElement? defaultScope = null )
         {
             this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
             this.DefaultScope = defaultScope;
@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             return new RestoreLocationCookie( this, oldScope );
         }
 
-        public ImmutableDiagnosticList ToImmutable()
+        public ImmutableUserDiagnosticList ToImmutable()
             => new(
                 this._diagnostics?.ToImmutable() ?? ImmutableArray<Diagnostic>.Empty,
                 this._suppressions?.ToImmutable() ?? ImmutableArray<ScopedSuppression>.Empty );

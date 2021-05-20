@@ -13,7 +13,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -43,70 +42,7 @@ namespace Caravela.Framework.Impl.Pipeline
             this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( directoryOptions, assemblyLocator );
         }
 
-        /// <summary>
-        /// Handles an exception thrown in the pipeline.
-        /// </summary>
-        /// <param name="exception"></param>
-        protected void HandleException( Exception exception, IDiagnosticAdder diagnosticAdder )
-        {
-            switch ( exception )
-            {
-                case InvalidUserCodeException diagnosticsException:
-                    foreach ( var diagnostic in diagnosticsException.Diagnostics )
-                    {
-                        diagnosticAdder.Report( diagnostic );
-                    }
-
-                    break;
-
-                default:
-                    if ( this.WriteUnhandledExceptionsToFile )
-                    {
-                        var guid = Guid.NewGuid();
-                        var crashReportDirectory = this.ServiceProvider.GetService<IDirectoryOptions>().CrashReportDirectory;
-
-                        if ( string.IsNullOrWhiteSpace( crashReportDirectory ) )
-                        {
-                            crashReportDirectory = Path.GetTempPath();
-                        }
-
-                        if ( !Directory.Exists( crashReportDirectory ) )
-                        {
-                            Directory.CreateDirectory( crashReportDirectory );
-                        }
-
-                        var path = Path.Combine( crashReportDirectory, $"caravela-{exception.GetType().Name}-{guid}.txt" );
-
-                        try
-                        {
-                            File.WriteAllText( path, exception.ToString() );
-                        }
-                        catch ( IOException ) { }
-
-                        Console.WriteLine( exception.ToString() );
-
-                        diagnosticAdder.Report(
-                            GeneralDiagnosticDescriptors.UncaughtException.CreateDiagnostic( null, (exception.ToDiagnosticString(), path) ) );
-                    }
-
-                    break;
-            }
-        }
-
-        public virtual bool WriteUnhandledExceptionsToFile => true;
-
-        public bool HasCachedCompileTimeProject(
-            Compilation compilation,
-            IDiagnosticAdder diagnosticAdder,
-            IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
-            CancellationToken cancellationToken )
-        {
-            var loader = CompileTimeProjectLoader.Create( this._domain, this.ServiceProvider );
-
-            return loader.TryGetCompileTimeProject( compilation, compileTimeTreesHint, diagnosticAdder, true, cancellationToken, out _ );
-        }
-
-        public int PipelineInitializationCount { get; set; }
+        internal int PipelineInitializationCount { get; set; }
 
         private protected bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
@@ -194,7 +130,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="PipelineStageResult"/>.
         /// </summary>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
-        private protected bool TryExecuteCore(
+        private protected bool TryExecute(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
             AspectPipelineConfiguration pipelineConfiguration,

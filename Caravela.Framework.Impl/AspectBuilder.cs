@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl
     internal class AspectBuilder<T> : IAspectBuilder<T>
         where T : class, ICodeElement
     {
-        private readonly DiagnosticSink _diagnosticSink;
+        private readonly UserDiagnosticSink _diagnosticSink;
         private readonly IImmutableList<IAdvice> _declarativeAdvices;
         private readonly AdviceFactory _adviceFactory;
         private bool _skipped;
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl
 
         public AspectBuilder(
             T targetDeclaration,
-            DiagnosticSink diagnosticSink,
+            UserDiagnosticSink diagnosticSink,
             IEnumerable<IAdvice> declarativeAdvices,
             AdviceFactory adviceFactory,
             CancellationToken cancellationToken )

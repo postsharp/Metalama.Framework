@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl
             static AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
                 => new(
                     false,
-                    new ImmutableDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
+                    new ImmutableUserDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<IAdvice>.Empty,
                     ImmutableArray<IAspectSource>.Empty,
                     ImmutableDictionary<string, object?>.Empty );
@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl
                 return CreateResultForError( diagnostic );
             }
 
-            var diagnosticSink = new DiagnosticSink( aspect.AspectClass.Project, codeElement );
+            var diagnosticSink = new UserDiagnosticSink( aspect.AspectClass.Project, codeElement );
 
             using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
             {
@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl
                     return
                         new AspectInstanceResult(
                             false,
-                            new ImmutableDiagnosticList( e.Diagnostics, ImmutableArray<ScopedSuppression>.Empty ),
+                            new ImmutableUserDiagnosticList( e.Diagnostics, ImmutableArray<ScopedSuppression>.Empty ),
                             ImmutableArray<IAdvice>.Empty,
                             ImmutableArray<IAspectSource>.Empty,
                             ImmutableDictionary<string, object?>.Empty );

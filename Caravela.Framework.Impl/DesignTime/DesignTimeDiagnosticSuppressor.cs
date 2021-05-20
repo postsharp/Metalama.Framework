@@ -3,6 +3,9 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.DesignTime.Diagnostics;
+using Caravela.Framework.Impl.DesignTime.Pipeline;
+using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Options;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -72,7 +75,7 @@ namespace Caravela.Framework.Impl.DesignTime
             CancellationToken cancellationToken )
         {
             // Execute the pipeline.
-            var results = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
+            var results = DesignTimeAspectPipelineCache.Instance.GetSyntaxTreeResults(
                 compilation,
                 syntaxTrees,
                 options,
@@ -80,7 +83,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             var suppressionsCount = 0;
 
-            foreach ( var syntaxTreeResult in results.SyntaxTreeResults )
+            foreach ( var syntaxTreeResult in results )
             {
                 if ( syntaxTreeResult == null )
                 {

@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.Advices
                     diagnosticList.Where( d => d.Severity == DiagnosticSeverity.Error ).ToImmutableArray() );
             }
 
-            this._diagnosticAdder.ReportDiagnostics( diagnosticList );
+            this._diagnosticAdder.Report( diagnosticList );
 
             return advice;
         }
@@ -112,7 +112,7 @@ namespace Caravela.Framework.Impl.Advices
                     diagnosticList.Where( d => d.Severity == DiagnosticSeverity.Error ).ToImmutableArray() );
             }
 
-            this._diagnosticAdder.ReportDiagnostics( diagnosticList );
+            this._diagnosticAdder.Report( diagnosticList );
 
             return advice;
         }

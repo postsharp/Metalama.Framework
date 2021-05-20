@@ -4,7 +4,7 @@
 using Caravela.Framework.Impl.Options;
 using System.Diagnostics;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Caravela.Framework.Impl.DesignTime.Utilities
 {
     /// <summary>
     /// Exposes the <see cref="AttachDebugger"/> method.

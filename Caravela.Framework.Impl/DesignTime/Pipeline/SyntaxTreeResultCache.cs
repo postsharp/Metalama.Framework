@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.DesignTime.Diff;
+using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
@@ -10,24 +12,24 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Caravela.Framework.Impl.DesignTime.Pipeline
 {
     /// <summary>
     /// Caches the pipeline results for each syntax tree.
     /// </summary>
-    internal sealed class DesignTimeSyntaxTreeResultCache
+    internal sealed class SyntaxTreeResultCache
     {
         /// <summary>
         /// Maps the syntax tree name to the pipeline result for this syntax tree.
         /// </summary>
-        private readonly ConcurrentDictionary<string, DesignTimeSyntaxTreeResult> _syntaxTreeCache = new();
+        private readonly ConcurrentDictionary<string, SyntaxTreeResult> _syntaxTreeCache = new();
 
         public int Count => this._syntaxTreeCache.Count;
 
         /// <summary>
         /// Updates cache with a <see cref="DesignTimeAspectPipelineResult"/> that includes results for several syntax trees.
         /// </summary>
-        public void Update( Compilation compilation, DesignTimeAspectPipelineResult results )
+        public void SetResults( Compilation compilation, DesignTimeAspectPipelineResult results )
         {
             var resultsByTree = SplitResultsByTree( compilation, results );
 
@@ -39,15 +41,15 @@ namespace Caravela.Framework.Impl.DesignTime
 
         /// <summary>
         /// Splits a <see cref="DesignTimeAspectPipelineResult"/>, which includes data for several syntax trees, into
-        /// a list of <see cref="DesignTimeSyntaxTreeResult"/> which each have information related to a single syntax tree.
+        /// a list of <see cref="SyntaxTreeResult"/> which each have information related to a single syntax tree.
         /// </summary>
         /// <param name="results"></param>
         /// <returns></returns>
-        private static IEnumerable<DesignTimeSyntaxTreeResult> SplitResultsByTree( Compilation compilation, DesignTimeAspectPipelineResult results )
+        private static IEnumerable<SyntaxTreeResult> SplitResultsByTree( Compilation compilation, DesignTimeAspectPipelineResult results )
         {
             var resultsByTree = results
                 .InputSyntaxTrees
-                .ToDictionary( r => r.FilePath, syntaxTree => new DesignTimeSyntaxTreeResultBuilder( syntaxTree ) );
+                .ToDictionary( r => r.FilePath, syntaxTree => new SyntaxTreeResultBuilder( syntaxTree ) );
 
             // Split diagnostic by syntax tree.
             foreach ( var diagnostic in results.Diagnostics.ReportedDiagnostics )
@@ -115,14 +117,14 @@ namespace Caravela.Framework.Impl.DesignTime
             return resultsByTree.Select( b => b.Value.ToImmutable( compilation ) );
         }
 
-        public bool TryGetValue( SyntaxTree syntaxTree, [NotNullWhen( true )] out DesignTimeSyntaxTreeResult? result )
+        public bool TryGetResult( SyntaxTree syntaxTree, [NotNullWhen( true )] out SyntaxTreeResult? result )
         {
             return this._syntaxTreeCache.TryGetValue( syntaxTree.FilePath, out result );
         }
 
-        public void UpdateCompilation( CompilationChanges compilationChanges )
+        public void InvalidateCache( CompilationChange compilationChange )
         {
-            foreach ( var change in compilationChanges.SyntaxTreeChanges )
+            foreach ( var change in compilationChange.SyntaxTreeChanges )
             {
                 switch ( change.SyntaxTreeChangeKind )
                 {

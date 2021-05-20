@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 
-namespace Caravela.Framework.Impl.DesignTime.UserDiagnostics
+namespace Caravela.Framework.Impl.DesignTime.Diagnostics
 {
     /// <summary>
     /// Represents a JSON-serializable user diagnostic for <see cref="UserDiagnosticRegistrationFile"/>.

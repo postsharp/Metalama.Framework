@@ -4,7 +4,7 @@
 using System.Diagnostics;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Caravela.Framework.Impl.DesignTime.Utilities
 {
     internal static class CancellationTokenExtensions
     {

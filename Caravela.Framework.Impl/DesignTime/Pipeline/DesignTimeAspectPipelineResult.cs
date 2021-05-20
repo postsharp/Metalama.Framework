@@ -6,10 +6,10 @@ using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Caravela.Framework.Impl.DesignTime.Pipeline
 {
     /// <summary>
-    /// Results produced by <see cref="Caravela.Framework.Impl.DesignTime.DesignTimeAspectPipeline"/>.
+    /// Results produced by <see cref="Caravela.Framework.Impl.DesignTime.Pipeline.DesignTimeAspectPipeline"/>.
     /// </summary>
     /// <param name="Success">Determines whether the pipeline was successful.</param>
     /// <param name="InputSyntaxTrees">The syntax trees for which the pipeline was executed.</param>
@@ -19,5 +19,5 @@ namespace Caravela.Framework.Impl.DesignTime
         bool Success,
         IReadOnlyCollection<SyntaxTree> InputSyntaxTrees,
         IReadOnlyList<IntroducedSyntaxTree> IntroducedSyntaxTrees,
-        ImmutableDiagnosticList Diagnostics );
+        ImmutableUserDiagnosticList Diagnostics );
 }

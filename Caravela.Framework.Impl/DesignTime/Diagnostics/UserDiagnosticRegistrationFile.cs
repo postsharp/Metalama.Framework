@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Caravela.Framework.Impl.DesignTime.UserDiagnostics
+namespace Caravela.Framework.Impl.DesignTime.Diagnostics
 {
     /// <summary>
     /// A JSON-serializable file that contains user-defined diagnostic and suppression descriptors.

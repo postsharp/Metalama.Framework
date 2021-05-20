@@ -3,7 +3,7 @@
 
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.DesignTime.Helpers
+namespace Caravela.Framework.Impl.DesignTime.Expand
 {
     public class AttributeDescription
     {

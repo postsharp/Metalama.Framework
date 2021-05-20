@@ -7,12 +7,12 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Caravela.Framework.Impl.DesignTime.Pipeline
 {
     /// <summary>
-    /// Builds a <see cref="DesignTimeSyntaxTreeResult"/>.
+    /// Builds a <see cref="SyntaxTreeResult"/>.
     /// </summary>
-    internal sealed class DesignTimeSyntaxTreeResultBuilder
+    internal sealed class SyntaxTreeResultBuilder
     {
         private readonly SyntaxTree _syntaxTree;
 
@@ -22,12 +22,12 @@ namespace Caravela.Framework.Impl.DesignTime
         public ImmutableArray<IntroducedSyntaxTree>.Builder? Introductions;
 #pragma warning restore SA1401 // Fields should be private
 
-        public DesignTimeSyntaxTreeResultBuilder( SyntaxTree syntaxTree )
+        public SyntaxTreeResultBuilder( SyntaxTree syntaxTree )
         {
             this._syntaxTree = syntaxTree;
         }
 
-        public DesignTimeSyntaxTreeResult ToImmutable( Compilation compilation )
+        public SyntaxTreeResult ToImmutable( Compilation compilation )
         {
             // Compute the default dependency graph.
             var semanticModel = compilation.GetSemanticModel( this._syntaxTree );
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 .Distinct()
                 .ToImmutableArray();
 
-            return new DesignTimeSyntaxTreeResult(
+            return new SyntaxTreeResult(
                 this._syntaxTree,
                 this.Diagnostics?.ToImmutable(),
                 this.Suppressions?.ToImmutable(),

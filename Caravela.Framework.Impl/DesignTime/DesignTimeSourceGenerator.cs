@@ -2,11 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
+using Caravela.Framework.Impl.DesignTime.Pipeline;
+using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Options;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
-using System.Diagnostics;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -27,8 +28,6 @@ namespace Caravela.Framework.Impl.DesignTime
 
             try
             {
-                Debugger.Launch();
-                
                 DesignTimeLogger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}')." );
 
                 var buildOptions = new ProjectOptions( context.AnalyzerConfigOptions );
@@ -36,7 +35,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 DesignTimeDebugger.AttachDebugger( buildOptions );
 
                 // Execute the pipeline.
-                var results = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
+                var results = DesignTimeAspectPipelineCache.Instance.GetSyntaxTreeResults(
                     compilation,
                     buildOptions,
                     context.CancellationToken );
@@ -44,7 +43,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 // Add introduced syntax trees.
                 var sourcesCount = 0;
 
-                foreach ( var syntaxTreeResult in results.SyntaxTreeResults )
+                foreach ( var syntaxTreeResult in results )
                 {
                     if ( syntaxTreeResult != null )
                     {

@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Caravela.Framework.Impl.DesignTime.Utilities
 {
     internal class DesignTimeLogger
     {

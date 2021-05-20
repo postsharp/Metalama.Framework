@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private readonly SkipListIndexedDictionary<PipelineStepId, PipelineStep> _steps;
         private readonly PipelineStepIdComparer _comparer;
-        private readonly DiagnosticSink _diagnostics;
+        private readonly UserDiagnosticSink _diagnostics;
         private readonly List<INonObservableTransformation> _nonObservableTransformations = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
         private PipelineStep? _currentStep;
@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
 
-        public ImmutableDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
+        public ImmutableUserDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
 
         public IDiagnosticAdder DiagnosticAdder => this._diagnostics;
 
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Pipeline
             CompileTimeProject compileTimeProject,
             IReadOnlyList<IAspectSource> inputAspectSources )
         {
-            this._diagnostics = new DiagnosticSink( compileTimeProject );
+            this._diagnostics = new UserDiagnosticSink( compileTimeProject );
             this.Compilation = inputCompilation;
 
             // Create an empty collection of steps.
@@ -202,7 +202,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public void AddDiagnostics( IEnumerable<Diagnostic> diagnostics, IEnumerable<ScopedSuppression> suppressions )
         {
-            this._diagnostics.ReportDiagnostics( diagnostics );
+            this._diagnostics.Report( diagnostics );
             this._diagnostics.Suppress( suppressions );
         }
 

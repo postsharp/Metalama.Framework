@@ -62,7 +62,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             }
             catch ( InvalidUserCodeException e )
             {
-                this._diagnosticAdder.ReportDiagnostics( e.Diagnostics );
+                this._diagnosticAdder.Report( e.Diagnostics );
                 annotatedNode = null;
                 transformedNode = null;
 

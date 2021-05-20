@@ -3,6 +3,8 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.DesignTime.Expand;
+using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Microsoft.CodeAnalysis;
@@ -14,7 +16,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Caravela.Framework.Impl.DesignTime.Pipeline
 {
     /// <summary>
     /// Caches the <see cref="DesignTimeAspectPipeline"/> (so they can be reused between projects) and the
@@ -27,7 +29,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
         private readonly ConditionalWeakTable<Compilation, object> _sync = new();
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
-        private readonly DesignTimeSyntaxTreeResultCache _syntaxTreeResultCache = new();
+        private readonly SyntaxTreeResultCache _syntaxTreeResultCache = new();
         private readonly CompileTimeDomain _domain;
         private int _pipelineExecutionCount;
 
@@ -92,16 +94,16 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <summary>
         /// Gets the design-time results for a whole compilation.
         /// </summary>
-        public DesignTimeResults GetDesignTimeResults(
+        public ImmutableArray<SyntaxTreeResult> GetSyntaxTreeResults(
             Compilation compilation,
             IProjectOptions projectOptions,
             CancellationToken cancellationToken = default )
-            => this.GetDesignTimeResults( compilation, compilation.SyntaxTrees.ToImmutableArray(), projectOptions, cancellationToken );
+            => this.GetSyntaxTreeResults( compilation, compilation.SyntaxTrees.ToImmutableArray(), projectOptions, cancellationToken );
 
         /// <summary>
         /// Gets the design-time results for a set of syntax trees.
         /// </summary>
-        public DesignTimeResults GetDesignTimeResults(
+        public ImmutableArray<SyntaxTreeResult> GetSyntaxTreeResults(
             Compilation compilation,
             IReadOnlyList<SyntaxTree> syntaxTrees,
             IProjectOptions projectOptions,
@@ -114,7 +116,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             if ( pipeline.Status == DesignTimeAspectPipelineStatus.Ready )
             {
-                this._syntaxTreeResultCache.UpdateCompilation( changes );
+                this._syntaxTreeResultCache.InvalidateCache( changes );
             }
             else
             {
@@ -140,7 +142,7 @@ namespace Caravela.Framework.Impl.DesignTime
                             Interlocked.Increment( ref this._pipelineExecutionCount );
                             var result = pipeline.Execute( partialCompilation, cancellationToken );
 
-                            this._syntaxTreeResultCache.Update( compilation, result );
+                            this._syntaxTreeResultCache.SetResults( compilation, result );
                         }
                     }
                 }
@@ -154,18 +156,18 @@ namespace Caravela.Framework.Impl.DesignTime
             }
 
             // Get the results from the cache. We don't need to check dependencies
-            var resultArrayBuilder = ImmutableArray.CreateBuilder<DesignTimeSyntaxTreeResult>( syntaxTrees.Count );
+            var resultArrayBuilder = ImmutableArray.CreateBuilder<SyntaxTreeResult>( syntaxTrees.Count );
 
             // Create the result.
             foreach ( var syntaxTree in syntaxTrees )
             {
-                if ( this._syntaxTreeResultCache.TryGetValue( syntaxTree, out var syntaxTreeResult ) )
+                if ( this._syntaxTreeResultCache.TryGetResult( syntaxTree, out var syntaxTreeResult ) )
                 {
                     resultArrayBuilder.Add( syntaxTreeResult );
                 }
             }
 
-            return new DesignTimeResults( resultArrayBuilder.ToImmutable() );
+            return resultArrayBuilder.ToImmutable();
         }
 
         private List<SyntaxTree> GetDirtySyntaxTrees( Compilation compilation )
@@ -182,7 +184,7 @@ namespace Caravela.Framework.Impl.DesignTime
                     continue;
                 }
 
-                if ( !this._syntaxTreeResultCache.TryGetValue( syntaxTree, out _ ) )
+                if ( !this._syntaxTreeResultCache.TryGetResult( syntaxTree, out _ ) )
                 {
                     uncachedSyntaxTrees.Add( syntaxTree );
                 }

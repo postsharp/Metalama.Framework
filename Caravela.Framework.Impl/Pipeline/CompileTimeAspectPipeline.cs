@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     return false;
                 }
 
-                if ( !this.TryExecuteCore( partialCompilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
+                if ( !this.TryExecute( partialCompilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
                 {
                     outputCompilation = null;
                     additionalResources = null;

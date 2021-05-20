@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -10,7 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.DesignTime.UserDiagnostics
+namespace Caravela.Framework.Impl.DesignTime.Diagnostics
 {
     /// <summary>
     /// Allows to register user diagnostics and suppressions for storage in the user profile, and read this file.

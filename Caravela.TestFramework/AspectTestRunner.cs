@@ -38,7 +38,7 @@ namespace Caravela.TestFramework
 
                 if ( testInput.Options.IncludeFinalDiagnostics )
                 {
-                    testResult.ReportDiagnostics( resultCompilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
+                    testResult.Report( resultCompilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
                 }
 
                 testResult.SetTransformedTarget( syntaxRoot );

@@ -2,6 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
+using Caravela.Framework.Impl.DesignTime.Diagnostics;
+using Caravela.Framework.Impl.DesignTime.Pipeline;
+using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Microsoft.CodeAnalysis;
@@ -67,14 +70,14 @@ namespace Caravela.Framework.Impl.DesignTime
                 // Execute the pipeline.
                 var compilation = context.SemanticModel.Compilation;
 
-                var syntaxTreeResults = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
+                var syntaxTreeResults = DesignTimeAspectPipelineCache.Instance.GetSyntaxTreeResults(
                     compilation,
                     new[] { context.SemanticModel.SyntaxTree },
                     buildOptions,
                     context.CancellationToken );
 
                 // Report diagnostics from the pipeline.
-                foreach ( var result in syntaxTreeResults.SyntaxTreeResults )
+                foreach ( var result in syntaxTreeResults )
                 {
                     DesignTimeLogger.Instance?.Write(
                         $"DesignTimeAnalyzer.AnalyzeSemanticModel('{context.SemanticModel.SyntaxTree.FilePath}'): {result.Diagnostics.Length} diagnostics reported on '{result.SyntaxTree.FilePath}'." );

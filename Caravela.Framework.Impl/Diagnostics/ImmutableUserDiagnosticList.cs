@@ -7,28 +7,28 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-    public readonly struct ImmutableDiagnosticList
+    public readonly struct ImmutableUserDiagnosticList
     {
-        public static ImmutableDiagnosticList Empty { get; } = new( ImmutableArray<Diagnostic>.Empty, ImmutableArray<ScopedSuppression>.Empty );
+        public static ImmutableUserDiagnosticList Empty { get; } = new( ImmutableArray<Diagnostic>.Empty, ImmutableArray<ScopedSuppression>.Empty );
 
         public ImmutableArray<Diagnostic> ReportedDiagnostics { get; }
 
         public ImmutableArray<ScopedSuppression> DiagnosticSuppressions { get; }
 
-        public ImmutableDiagnosticList( ImmutableArray<Diagnostic>? diagnostics, ImmutableArray<ScopedSuppression>? suppressions )
+        public ImmutableUserDiagnosticList( ImmutableArray<Diagnostic>? diagnostics, ImmutableArray<ScopedSuppression>? suppressions )
         {
             this.ReportedDiagnostics = diagnostics ?? ImmutableArray<Diagnostic>.Empty;
             this.DiagnosticSuppressions = suppressions ?? ImmutableArray<ScopedSuppression>.Empty;
         }
 
-        internal ImmutableDiagnosticList( DiagnosticList diagnosticList ) : this( diagnosticList.ToImmutableArray(), null ) { }
+        internal ImmutableUserDiagnosticList( DiagnosticList diagnosticList ) : this( diagnosticList.ToImmutableArray(), null ) { }
 
-        public ImmutableDiagnosticList Concat( in ImmutableDiagnosticList other )
+        public ImmutableUserDiagnosticList Concat( in ImmutableUserDiagnosticList other )
             => new(
                 this.ReportedDiagnostics.AddRange( other.ReportedDiagnostics ),
                 this.DiagnosticSuppressions.AddRange( other.DiagnosticSuppressions ) );
 
-        public ImmutableDiagnosticList Concat( in IEnumerable<Diagnostic> other )
+        public ImmutableUserDiagnosticList Concat( in IEnumerable<Diagnostic> other )
             => new(
                 this.ReportedDiagnostics.AddRange( other ),
                 this.DiagnosticSuppressions );
