@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.Options;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Diagnostics;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -26,6 +27,8 @@ namespace Caravela.Framework.Impl.DesignTime
 
             try
             {
+                Debugger.Launch();
+                
                 DesignTimeLogger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}')." );
 
                 var buildOptions = new ProjectOptions( context.AnalyzerConfigOptions );

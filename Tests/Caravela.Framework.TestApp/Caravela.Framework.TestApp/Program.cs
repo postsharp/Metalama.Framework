@@ -9,7 +9,7 @@ using Caravela.Framework.TestApp.Aspects;
 namespace Caravela.Framework.TestApp
 {
     [IntroduceSomeMethodAspect("Foo", "Bar")]
-    internal class Program
+    internal partial class Program
     {
         [SuppressWarning]
         private static async Task MethodAsync()

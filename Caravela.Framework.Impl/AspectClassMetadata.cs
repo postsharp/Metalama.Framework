@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
@@ -76,7 +77,7 @@ namespace Caravela.Framework.Impl
             CompileTimeProject project )
         {
             this.FullName = aspectTypeSymbol.GetReflectionNameSafe();
-            this.DisplayName = RemoveSuffix( aspectTypeSymbol.Name, "Attribute" );
+            this.DisplayName = aspectTypeSymbol.Name.TrimEnd( "Attribute" );
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.BaseClass = baseClass;
             this.Project = project;
@@ -101,9 +102,6 @@ namespace Caravela.Framework.Impl
                 this._prototypeAspectInstance = null!;
                 this.Project = null!;
             }
-
-            static string RemoveSuffix( string s, string suffix )
-                => s.EndsWith( suffix, StringComparison.Ordinal ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
         }
 
         /// <summary>

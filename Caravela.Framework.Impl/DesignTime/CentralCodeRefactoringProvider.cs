@@ -1,7 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.DesignTime.Helpers;
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeRefactorings;
@@ -64,7 +66,7 @@ namespace Caravela.Framework.Impl.DesignTime
             foreach ( var aspect in eligibleAspects )
             {
                 addAspectAttributeActions.Add(
-                    CodeAction.Create( aspect.DisplayName, _ => Task.FromResult( context.Document ) ) );
+                    CodeAction.Create( aspect.DisplayName, ct => AddAspectAttribute( aspect, symbol, context.Document, ct ) ) );
 
                 if ( aspect.CanExpandToSource )
                 {
@@ -84,6 +86,19 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 context.RegisterRefactoring( CodeAction.Create( "Expand aspect", expandAspectActions.ToImmutable(), false ) );
             }
+        }
+
+        private static Task<Solution> AddAspectAttribute(
+            AspectClassMetadata aspect,
+            ISymbol targetSymbol,
+            Document targetDocument,
+            CancellationToken cancellationToken )
+        {
+            var attributeDescription = new AttributeDescription(
+                aspect.AspectType.Name.TrimEnd( "Attribute" ),
+                imports: ImmutableList.Create( aspect.AspectType.Namespace ) );
+
+            return CSharpAttributeHelper.AddAttributeAsync( targetDocument, targetSymbol, attributeDescription, cancellationToken ).AsTask();
         }
 
         private static Task<Solution> ExpandAspectToCode(
