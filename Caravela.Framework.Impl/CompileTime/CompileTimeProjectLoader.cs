@@ -223,9 +223,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 compileTimeTreesHint,
                 referencedProjects,
                 diagnosticSink,
+                cacheOnly,
                 cancellationToken,
-                out compileTimeProject,
-                cacheOnly ) )
+                out compileTimeProject ) )
             {
                 compileTimeProject = null;
 
@@ -397,7 +397,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             // Compute the new hash.
             var compileTimeAssemblyName =
-                CompileTimeCompilationBuilder.GetCompileTimeAssemblyName( manifest.AssemblyName, referenceProjects, manifest.SourceHash, null );
+                CompileTimeCompilationBuilder.GetCompileTimeAssemblyName( manifest.AssemblyName, referenceProjects, manifest.SourceHash );
 
             project = CompileTimeProject.Create(
                 this._domain,

@@ -3,8 +3,6 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;

@@ -15,7 +15,9 @@ namespace Caravela.Framework.Tests.UnitTests
     {
         private void AssertScope( ICodeElement codeElement, SymbolDeclarationScope expectedScope )
         {
-            var classifier =  this.ServiceProvider.GetService<SymbolClassificationService>().GetClassifier( ((CodeElement) codeElement).Compilation.RoslynCompilation );
+            var classifier = this.ServiceProvider.GetService<SymbolClassificationService>()
+                .GetClassifier( ((CodeElement) codeElement).Compilation.RoslynCompilation );
+
             var actualScope = classifier.GetSymbolDeclarationScope( codeElement.GetSymbol()! );
             Assert.Equal( expectedScope, actualScope );
         }

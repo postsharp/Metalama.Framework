@@ -1,7 +1,6 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.TestFramework;
 
 

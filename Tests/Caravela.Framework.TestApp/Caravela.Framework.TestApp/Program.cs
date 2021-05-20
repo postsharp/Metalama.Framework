@@ -85,13 +85,22 @@ namespace Caravela.Framework.TestApp
         }
 
         [CancelAspect]
-        private static void Cancellable0() { }
+        private static void Cancellable0() 
+        {
+            Console.WriteLine("Hello, Cancellable0.");
+        }
 
         [CancelAspect]
-        private static void Cancellable1( CancellationToken ct ) { }
+        private static void Cancellable1( CancellationToken ct )
+        {
+            Console.WriteLine("Hello, Cancellable1.");
+        }
 
         [CancelAspect]
-        private static void Cancellable2( CancellationToken ct1, CancellationToken ct2 ) { }
+        private static void Cancellable2( CancellationToken ct1, CancellationToken ct2 )
+        {
+            Console.WriteLine("Hello, Cancellable2.");
+        }
     }
 
     

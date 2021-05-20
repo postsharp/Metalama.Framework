@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.DesignTime
         /// In this case, the method computes the new location of the syntax tree. Diagnostics of unknown types are wrapped into well-known diagnostics.
         /// </summary>
         /// <param name="diagnostics">List of diagnostics to be reported.</param>
-        /// <param name="newSyntaxTree">The current version of the syntax tree, on which diagnostics have to be reported.</param>
+        /// <param name="compilation">The compilation in which diagnostics must be reported.</param>
         /// <param name="reportDiagnostic">The delegate to call to report a diagnostic.</param>
         /// <param name="wrapUnknownDiagnostics">Determines whether unknown diagnostics should be wrapped into known diagnostics.</param>
         public static void ReportDiagnostics(

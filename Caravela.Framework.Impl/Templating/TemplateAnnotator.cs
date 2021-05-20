@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.Templating
             CSharpCompilation compilation,
             SemanticAnnotationMap semanticAnnotationMap,
             IDiagnosticAdder diagnosticAdder,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider )
         {
             this._symbolScopeClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
             this._semanticAnnotationMap = semanticAnnotationMap;

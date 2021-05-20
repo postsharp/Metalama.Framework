@@ -36,8 +36,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 Compilation compileTimeCompilation,
                 IDiagnosticAdder diagnosticAdder,
                 TemplateCompiler templateCompiler,
-                CancellationToken cancellationToken,
-                IServiceProvider serviceProvider )
+                IServiceProvider serviceProvider,
+                CancellationToken cancellationToken )
                 : base( runTimeCompilation, serviceProvider )
             {
                 this._compileTimeCompilation = compileTimeCompilation;

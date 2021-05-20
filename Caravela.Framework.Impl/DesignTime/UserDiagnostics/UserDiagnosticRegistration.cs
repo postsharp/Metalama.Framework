@@ -11,7 +11,6 @@ namespace Caravela.Framework.Impl.DesignTime.UserDiagnostics
     /// </summary>
     internal class UserDiagnosticRegistration
     {
-
         [JsonConstructor]
         public UserDiagnosticRegistration( string id, DiagnosticSeverity severity, string category, string title )
         {
@@ -29,28 +28,22 @@ namespace Caravela.Framework.Impl.DesignTime.UserDiagnostics
             this.Title = "A Caravela user diagnostic.";
         }
 
-        public DiagnosticDescriptor DiagnosticDescriptor() => new( this.Id, this.Title, this.MessageFormat, this.Category, this.Severity, true );
+        public DiagnosticDescriptor DiagnosticDescriptor() => new( this.Id, this.Title, "", this.Category, this.Severity, true );
 
         /// <summary>
         /// Gets the severity of the diagnostic.
         /// </summary>
-        public DiagnosticSeverity Severity { get;  }
+        public DiagnosticSeverity Severity { get; }
 
         /// <summary>
         /// Gets an unique identifier for the diagnostic (e.g. <c>MY001</c>).
         /// </summary>
-        public string Id { get;  }
-
-        /// <summary>
-        /// Gets the formatting string of the diagnostic message.
-        /// </summary>
-        [JsonIgnore]
-        public string MessageFormat => "";
+        public string Id { get; }
 
         /// <summary>
         /// Gets the category of the diagnostic (e.g. your product name).
         /// </summary>
-        public string Category { get;  }
+        public string Category { get; }
 
         /// <summary>
         /// Gets a short title describing the diagnostic. This title is typically described in the solution explorer of the IDE

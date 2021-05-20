@@ -6,7 +6,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using MoreLinq;
@@ -23,7 +22,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// <summary>
     /// The base class for the main process of Caravela.
     /// </summary>
-    public abstract partial class AspectPipeline : IDisposable, IAspectPipelineProperties
+    public abstract class AspectPipeline : IDisposable, IAspectPipelineProperties
     {
         public IProjectOptions ProjectOptions { get; }
 
@@ -33,7 +32,11 @@ namespace Caravela.Framework.Impl.Pipeline
 
         IServiceProvider IAspectPipelineProperties.ServiceProvider => this.ServiceProvider;
 
-        protected AspectPipeline( IProjectOptions projectOptions,  CompileTimeDomain domain, IDirectoryOptions? directoryOptions = null, IAssemblyLocator? assemblyLocator = null )
+        protected AspectPipeline(
+            IProjectOptions projectOptions,
+            CompileTimeDomain domain,
+            IDirectoryOptions? directoryOptions = null,
+            IAssemblyLocator? assemblyLocator = null )
         {
             this._domain = domain;
             this.ProjectOptions = projectOptions;
@@ -110,7 +113,7 @@ namespace Caravela.Framework.Impl.Pipeline
             PartialCompilation compilation,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out PipelineConfiguration? configuration )
+            [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
         {
             this.PipelineInitializationCount++;
 
@@ -164,7 +167,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), loader, compileTimeProject! ) )
                 .ToImmutableArray();
 
-            configuration = new PipelineConfiguration( stages, aspectTypes, sortedAspectLayers, compileTimeProject, loader );
+            configuration = new AspectPipelineConfiguration( stages, aspectTypes, sortedAspectLayers, compileTimeProject, loader );
 
             return true;
 
@@ -182,14 +185,19 @@ namespace Caravela.Framework.Impl.Pipeline
                 };
         }
 
+        private protected virtual IReadOnlyList<IAspectSource> CreateAspectSources( AspectPipelineConfiguration configuration )
+        {
+            return new[] { new CompilationAspectSource( configuration.AspectClasses, configuration.CompileTimeProjectLoader ) };
+        }
+
         /// <summary>
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="PipelineStageResult"/>.
         /// </summary>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
-        private protected static bool TryExecuteCore(
+        private protected bool TryExecuteCore(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
-            PipelineConfiguration pipelineConfiguration,
+            AspectPipelineConfiguration pipelineConfiguration,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
@@ -201,11 +209,9 @@ namespace Caravela.Framework.Impl.Pipeline
                 return true;
             }
 
-            var aspectSource = new CompilationAspectSource(
-                pipelineConfiguration.AspectClasses,
-                pipelineConfiguration.CompileTimeProjectLoader );
+            var aspectSources = this.CreateAspectSources( pipelineConfiguration );
 
-            pipelineStageResult = new PipelineStageResult( compilation, pipelineConfiguration.Layers, aspectSources: new[] { aspectSource } );
+            pipelineStageResult = new PipelineStageResult( compilation, pipelineConfiguration.Layers, aspectSources: aspectSources );
 
             foreach ( var stage in pipelineConfiguration.Stages )
             {
@@ -258,7 +264,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 case nameof(AspectDriver):
 
-                    return this.CreateStage( parts, (CompileTimeProject) compileTimeProject, compileTimeProjectLoader );
+                    return this.CreateStage( parts, compileTimeProject, compileTimeProjectLoader );
 
                 default:
 

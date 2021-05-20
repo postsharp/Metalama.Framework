@@ -30,10 +30,10 @@ namespace Caravela.Framework.Impl.DesignTime
         private readonly bool _isCompileTimeTreeOutdated;
         private readonly SemanticModel _semanticModel;
         private readonly Action<Diagnostic> _reportDiagnostic;
-        private SymbolDeclarationScope? _currentDeclarationScope;
-        private ISymbol? _currentDeclaration;
         private readonly CancellationToken _cancellationToken;
         private readonly ServiceProvider _serviceProvider;
+        private SymbolDeclarationScope? _currentDeclarationScope;
+        private ISymbol? _currentDeclaration;
 
         public DesignTimeAnalyzerAdditionalVisitor( SemanticModelAnalysisContext context, IProjectOptions projectOptions ) : this(
             context.SemanticModel,

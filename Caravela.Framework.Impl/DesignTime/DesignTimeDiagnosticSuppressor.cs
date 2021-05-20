@@ -4,7 +4,6 @@
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -13,6 +12,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+
+#pragma warning disable RS1001 // Missing diagnostic analyzer attribute.
+#pragma warning disable RS1022 // Remove access to our implementation types.
 
 namespace Caravela.Framework.Impl.DesignTime
 {

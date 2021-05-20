@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Advices
 
             if ( !method.SelectRecursive( m => m.OverriddenMethod, includeThis: true )
                 .SelectMany( m => m.GetAttributes() )
-                .Any( a => StructuralSymbolComparer.Default.Equals( a.AttributeClass,  expectedAttributeTypeSymbol  )  ) )
+                .Any( a => a.AttributeClass != null && StructuralSymbolComparer.Default.Equals( a.AttributeClass, expectedAttributeTypeSymbol ) ) )
             {
                 throw GeneralDiagnosticDescriptors.TemplateMethodMissesAttribute.CreateException( (method, expectedAttributeTypeSymbol, adviceName) );
             }

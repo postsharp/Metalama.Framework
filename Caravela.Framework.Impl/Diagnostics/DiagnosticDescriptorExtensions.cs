@@ -30,10 +30,6 @@ namespace Caravela.Framework.Impl.Diagnostics
         /// <summary>
         /// Instantiates a <see cref="Diagnostic"/> based on the current descriptor and given arguments.
         /// </summary>
-        /// <param name="location"></param>
-        /// <param name="arguments"></param>
-        /// <param name="additionalLocations"></param>
-        /// <returns></returns>
         public static Diagnostic CreateDiagnostic<T>(
             this DiagnosticDefinition<T> definition,
             Location? location,

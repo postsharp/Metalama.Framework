@@ -1,16 +1,10 @@
 [TestOutput]
 internal class TargetClass
 {
-    public TargetClass(int x)
-    {
-    }
+    public TargetClass(int x) { }
 
     public int Field;
-    public int Property
-    {
-        get;
-        set;
-    }
+    public int Property { get; set; }
 
     [Override]
     public void TargetMethod_Void(int x)
@@ -27,10 +21,8 @@ internal class TargetClass
         var constructorParameter = global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle("M:Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass.#ctor(System.Int32)")).GetParameters()[0];
         return;
     }
-
     public int TargetMethod_Int(int x)
     {
         return 0;
     }
 }
-

@@ -9,53 +9,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal partial class SymbolClassificationService
-    {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly object _addSync = new();
-        private readonly ConditionalWeakTable<Compilation, ISymbolClassifier> _instances = new();
-        private VanillaClassifier _vanillaClassifier;
-        public SymbolClassificationService( IServiceProvider serviceProvider )
-        {
-            this._serviceProvider = serviceProvider;
-            this._vanillaClassifier = new VanillaClassifier( serviceProvider );
-        }
-
-        /// <summary>
-        /// Gets an implementation of <see cref="ISymbolClassifier"/> for a given <see cref="Compilation"/>.
-        /// </summary>
-        public ISymbolClassifier GetClassifier( Compilation compilation )
-        {
-            // ReSharper disable once InconsistentlySynchronizedField
-            if ( !this._instances.TryGetValue( compilation, out var value ) )
-            {
-                lock ( this._addSync )
-                {
-                    if ( !this._instances.TryGetValue( compilation, out value ) )
-                    {
-                        var hasCaravelaReference = compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ) != null;
-                        value = hasCaravelaReference ? new SymbolClassifier( compilation, this._serviceProvider ) : this._vanillaClassifier;
-                        this._instances.Add( compilation, value );
-                    }
-                }
-            }
-
-            return value;
-        }
-        
-    }
-    
     /// <summary>
     /// The main implementation of <see cref="ISymbolClassifier"/>.
     /// </summary>
-    internal sealed partial class SymbolClassifier : ISymbolClassifier
+    internal sealed class SymbolClassifier : ISymbolClassifier
     {
-        
         /// <summary>
         /// List of well-known types, for which the scope is overriden (i.e. this list takes precedence over any other rule).
         /// 'MembersOnly' means that the rule applies to the members of the type, but not to the type itself.
@@ -86,8 +48,6 @@ namespace Caravela.Framework.Impl.CompileTime
             this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
             this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
         }
-
-     
 
         public bool IsTemplate( ISymbol symbol )
         {

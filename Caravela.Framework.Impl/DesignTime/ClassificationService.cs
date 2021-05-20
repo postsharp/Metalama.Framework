@@ -3,7 +3,6 @@
 
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System;
@@ -17,9 +16,10 @@ namespace Caravela.Framework.Impl.DesignTime
     /// </summary>
     internal class ClassificationService : IClassificationService
     {
-        private IServiceProvider _serviceProvider;
+        private readonly IServiceProvider _serviceProvider;
 
-        public ClassificationService( IServiceProvider serviceProvider ) {
+        public ClassificationService( IServiceProvider serviceProvider )
+        {
             this._serviceProvider = serviceProvider;
         }
 

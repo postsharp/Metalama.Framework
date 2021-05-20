@@ -4,12 +4,12 @@
 [SuppressWarning]
 internal class TargetClass
 {
+
     // CS0219 expected 
     private void M1(string m)
     {
         int x = 0;
     }
-
 #pragma warning disable CS0219
     public void Introduced()
     {

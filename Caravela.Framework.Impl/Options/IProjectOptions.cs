@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System.Collections.Immutable;
-using System.IO;
 
 namespace Caravela.Framework.Impl.Options
 {
@@ -20,7 +19,4 @@ namespace Caravela.Framework.Impl.Options
 
         ImmutableArray<object> PlugIns { get; }
     }
-
-    
-  
 }

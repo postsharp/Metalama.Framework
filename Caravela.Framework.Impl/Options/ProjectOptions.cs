@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Options
     /// Default implementation of <see cref="IProjectOptions"/>, based on a <see cref="IProjectOptionsSource"/>
     /// reading options passed by MSBuild.
     /// </summary>
-    public partial class ProjectOptions : IProjectOptions, IDebuggingOptions
+    public partial class ProjectOptions : IProjectOptions
     {
         private readonly string _defaultProjectId = Guid.NewGuid().ToString();
         private readonly IProjectOptionsSource _source;
@@ -40,8 +40,7 @@ namespace Caravela.Framework.Impl.Options
 
         public string? CrashReportDirectory => this.GetStringOption( "CaravelaCrashReportDirectory" );
 
-        public string CacheDirectory
-            => this.GetStringOption( "CaravelaCacheDirectory" ) ?? TempPathHelper.GetTempPath( "Cache" );
+        public string CacheDirectory => this.GetStringOption( "CaravelaCacheDirectory" ) ?? TempPathHelper.GetTempPath( "Cache" );
 
         public string ProjectId => this.GetStringOption( "CaravelaProjectId" ) ?? this._defaultProjectId;
 

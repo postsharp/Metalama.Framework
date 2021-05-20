@@ -3,7 +3,6 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;

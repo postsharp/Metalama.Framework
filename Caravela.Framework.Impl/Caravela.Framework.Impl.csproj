@@ -40,6 +40,7 @@
     <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
+    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
     <ProjectReference Include="..\Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj" />
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
     <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" />

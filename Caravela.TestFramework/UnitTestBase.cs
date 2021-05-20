@@ -24,7 +24,7 @@ namespace Caravela.TestFramework
     public abstract class UnitTestBase : IDisposable
     {
         protected ITestOutputHelper Logger { get; }
-        
+
         public ServiceProvider ServiceProvider { get; }
 
         /// <summary>

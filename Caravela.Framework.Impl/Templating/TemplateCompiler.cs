@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -19,7 +18,7 @@ namespace Caravela.Framework.Impl.Templating
         private readonly IServiceProvider _serviceProvider;
         private readonly SemanticAnnotationMap _semanticAnnotationMap = new();
 
-        public TemplateCompiler( IServiceProvider serviceProvider  )
+        public TemplateCompiler( IServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }
@@ -56,7 +55,12 @@ namespace Caravela.Framework.Impl.Templating
             annotatedSyntaxRoot = currentSyntaxRoot;
 
             // Annotate the syntax tree with info about build- and run-time nodes,
-            var annotatorRewriter = new TemplateAnnotator( (CSharpCompilation) semanticModel.Compilation, this._semanticAnnotationMap, diagnostics,this._serviceProvider );
+            var annotatorRewriter = new TemplateAnnotator(
+                (CSharpCompilation) semanticModel.Compilation,
+                this._semanticAnnotationMap,
+                diagnostics,
+                this._serviceProvider );
+
             annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot )!;
 
             // Stop if we have any error.

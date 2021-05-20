@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Sdk;
@@ -21,9 +22,6 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         private readonly string _projectText;
         private readonly string _cacheDirectory;
-
-        
-        
 
         /// <summary>
         /// Gets the name (without path and extension) of Caravela assemblies.
@@ -56,7 +54,7 @@ namespace Caravela.Framework.Impl.CompileTime
         public ReferenceAssemblyLocator( IServiceProvider serviceProvider )
         {
             this._cacheDirectory = serviceProvider.GetService<IDirectoryOptions>().AssemblyLocatorCacheDirectory;
-        
+
             var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
 
             this._projectText =
@@ -74,7 +72,6 @@ namespace Caravela.Framework.Impl.CompileTime
   </Target>
 </Project>";
 
-            
             this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
 
             this.SystemAssemblyNames = this.SystemAssemblyPaths
@@ -85,15 +82,17 @@ namespace Caravela.Framework.Impl.CompileTime
                 .Concat( this.SystemAssemblyPaths )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
-            // the SDK assembly might not be loaded at this point, so make sure it is
+            // Make sure all necessary assemblies are loaded in the current AppDomain.
             _ = new AspectWeaverAttribute( null! );
+            _ = meta.CompileTime<object>( null );
 
+            // Get assembly paths from the current AppDomain
             var caravelaPaths = AppDomain.CurrentDomain.GetAssemblies()
                 .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
                 .Select( a => a.Location )
                 .Where( path => this.CaravelaAssemblyNames.Contains( Path.GetFileNameWithoutExtension( path ) ) )
                 .ToList();
-            
+
             // Assert that we found everything we need, because debugging is difficult when this step goes wrong.
             foreach ( var assemblyName in this.CaravelaAssemblyNames )
             {
@@ -110,53 +109,44 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             var tempProjectDirectory = Path.Combine( this._cacheDirectory, nameof(ReferenceAssemblyLocator) );
 
-            using var mutex = MutexHelper.CreateGlobalMutex( tempProjectDirectory );
-            mutex.WaitOne();
+            using var mutex = MutexHelper.WithGlobalLock( tempProjectDirectory );
+            var referenceAssemblyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
 
-            try
+            if ( File.Exists( referenceAssemblyListFile ) )
             {
-                var referenceAssemblyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
+                var referenceAssemblies = File.ReadAllLines( referenceAssemblyListFile );
 
-                if ( File.Exists( referenceAssemblyListFile ) )
+                if ( referenceAssemblies.All( File.Exists ) )
                 {
-                    var referenceAssemblies = File.ReadAllLines( referenceAssemblyListFile );
-
-                    if ( referenceAssemblies.All( File.Exists ) )
-                    {
-                        return referenceAssemblies;
-                    }
+                    return referenceAssemblies;
                 }
-
-                Directory.CreateDirectory( tempProjectDirectory );
-
-                File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), this._projectText );
-
-                var psi = new ProcessStartInfo( "dotnet", "build -t:WriteReferenceAssemblies" )
-                {
-                    WorkingDirectory = tempProjectDirectory, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true
-                };
-
-                var process = Process.Start( psi ).AssertNotNull();
-
-                var lines = new List<string>();
-                process.OutputDataReceived += ( _, e ) => lines.Add( e.Data );
-
-                process.BeginOutputReadLine();
-                process.WaitForExit();
-
-                if ( process.ExitCode != 0 )
-                {
-                    throw new InvalidOperationException(
-                        "Error while building temporary project to locate reference assemblies:" + Environment.NewLine
-                                                                                                 + string.Join( Environment.NewLine, lines ) );
-                }
-
-                return File.ReadAllLines( referenceAssemblyListFile );
             }
-            finally
+
+            Directory.CreateDirectory( tempProjectDirectory );
+
+            File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), this._projectText );
+
+            var psi = new ProcessStartInfo( "dotnet", "build -t:WriteReferenceAssemblies" )
             {
-                mutex.ReleaseMutex();
+                WorkingDirectory = tempProjectDirectory, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true
+            };
+
+            var process = Process.Start( psi ).AssertNotNull();
+
+            var lines = new List<string>();
+            process.OutputDataReceived += ( _, e ) => lines.Add( e.Data );
+
+            process.BeginOutputReadLine();
+            process.WaitForExit();
+
+            if ( process.ExitCode != 0 )
+            {
+                throw new InvalidOperationException(
+                    "Error while building temporary project to locate reference assemblies:" + Environment.NewLine
+                                                                                             + string.Join( Environment.NewLine, lines ) );
             }
+
+            return File.ReadAllLines( referenceAssemblyListFile );
         }
     }
 }

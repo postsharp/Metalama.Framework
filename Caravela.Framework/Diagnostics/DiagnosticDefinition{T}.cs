@@ -3,6 +3,8 @@
 
 namespace Caravela.Framework.Diagnostics
 {
+    // ReSharper disable once UnusedTypeParameter
+
     /// <summary>
     /// Defines a diagnostic with a strongly-typed set of parameters that are typically specified by using a named tuple for generic parameter
     /// <typeparamref name="T"/>. For diagnostics that accept a single parameter, <typeparamref name="T"/> must be set to the type of this parameter. Diagnostics must be

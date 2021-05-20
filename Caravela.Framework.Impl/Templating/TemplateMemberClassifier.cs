@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Templating
         public TemplateMemberClassifier(
             Compilation compilation,
             SemanticAnnotationMap semanticAnnotationMap,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider )
         {
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._symbolClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );

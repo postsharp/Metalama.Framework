@@ -8,8 +8,7 @@ namespace Caravela.Framework.Impl.Utilities
 {
     internal static class TempPathHelper
     {
-        public static string GetTempPath(string purpose, Guid? guid = null ) 
-            => Path.Combine( Path.GetTempPath(), "Caravela", purpose, AssemblyMetadataReader.MainVersionId, guid?.ToString() ?? "");
-
+        public static string GetTempPath( string purpose, Guid? guid = null )
+            => Path.Combine( Path.GetTempPath(), "Caravela", purpose, AssemblyMetadataReader.MainVersionId, guid?.ToString() ?? "" );
     }
 }

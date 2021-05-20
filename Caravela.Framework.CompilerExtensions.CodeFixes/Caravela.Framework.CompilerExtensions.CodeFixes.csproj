@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Caravela.Framework.CompilerAddIn\Caravela.Framework.CompilerAddIn.csproj" />
+      <ProjectReference Include="..\Caravela.Framework.CompilerExtensions\Caravela.Framework.CompilerExtensions.csproj" />
     </ItemGroup>
 
 </Project>

@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -77,35 +76,26 @@ namespace Caravela.Framework.Impl.DesignTime.UserDiagnostics
 
             if ( missing.Diagnostics.Count > 0 || missing.Suppressions.Count > 0 )
             {
-                using ( var mutex = MutexHelper.CreateGlobalMutex( this._settingsFilePath ) )
+                using ( MutexHelper.WithGlobalLock( this._settingsFilePath ) )
                 {
-                    mutex.WaitOne();
+                    this.RefreshRegistrationFile();
 
-                    try
+                    if ( timestamp != this._registrationFile.Timestamp )
                     {
-                        this.RefreshRegistrationFile();
-
-                        if ( timestamp != this._registrationFile.Timestamp )
-                        {
-                            missing = this.GetMissingDiagnostics( pipelineResult );
-                        }
-
-                        foreach ( var diagnostic in missing.Diagnostics )
-                        {
-                            this._registrationFile.Diagnostics.Add( diagnostic.Id, new UserDiagnosticRegistration( diagnostic ) );
-                        }
-
-                        foreach ( var suppression in missing.Suppressions )
-                        {
-                            this._registrationFile.Suppressions.Add( suppression );
-                        }
-
-                        this._registrationFile.Write( this._settingsFilePath );
+                        missing = this.GetMissingDiagnostics( pipelineResult );
                     }
-                    finally
+
+                    foreach ( var diagnostic in missing.Diagnostics )
                     {
-                        mutex.ReleaseMutex();
+                        this._registrationFile.Diagnostics.Add( diagnostic.Id, new UserDiagnosticRegistration( diagnostic ) );
                     }
+
+                    foreach ( var suppression in missing.Suppressions )
+                    {
+                        this._registrationFile.Suppressions.Add( suppression );
+                    }
+
+                    this._registrationFile.Write( this._settingsFilePath );
                 }
             }
         }

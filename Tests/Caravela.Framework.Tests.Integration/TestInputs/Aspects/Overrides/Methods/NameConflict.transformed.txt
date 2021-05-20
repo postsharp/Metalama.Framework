@@ -9,7 +9,6 @@ internal class TargetClass
         int i = 42;
         return 42;
     }
-
     [InnerOverride]
     public int TargetMethod_ConflictWithTarget()
     {
@@ -17,7 +16,6 @@ internal class TargetClass
         int i = 0;
         return 42;
     }
-
     [InnerOverride]
     [OuterOverride]
     public int TargetMethod_MultipleConflicts()

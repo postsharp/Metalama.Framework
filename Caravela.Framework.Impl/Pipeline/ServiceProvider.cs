@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private readonly Dictionary<Type, object> _services = new();
         private bool _frozen;
-        
+
         public void AddService<T>( T service )
             where T : notnull
         {
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public ServiceProvider() { }
 
-        public ServiceProvider( ServiceProvider? prototype )
+        public ServiceProvider( ServiceProvider prototype )
         {
             this._services = new Dictionary<Type, object>( prototype._services );
         }

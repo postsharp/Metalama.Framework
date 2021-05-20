@@ -15,6 +15,8 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl
 {
@@ -26,7 +28,11 @@ namespace Caravela.Framework.Impl
         private readonly Dictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
 
         private readonly IAspectDriver? _aspectDriver;
+
+        private readonly IAspect _prototypeAspectInstance;
         private IReadOnlyList<AspectLayer>? _layers;
+
+        public Type AspectType { get; }
 
         /// <inheritdoc />
         public string FullName { get; }
@@ -56,6 +62,8 @@ namespace Caravela.Framework.Impl
         /// <inheritdoc />
         public bool IsAbstract { get; }
 
+        public bool CanExpandToSource { get; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectClassMetadata"/> class.
         /// </summary>
@@ -68,12 +76,34 @@ namespace Caravela.Framework.Impl
             CompileTimeProject project )
         {
             this.FullName = aspectTypeSymbol.GetReflectionNameSafe();
-            this.DisplayName = aspectTypeSymbol.Name;
+            this.DisplayName = RemoveSuffix( aspectTypeSymbol.Name, "Attribute" );
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.BaseClass = baseClass;
             this.Project = project;
             this._aspectDriver = aspectDriver;
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
+
+            if ( this.Project != null! )
+            {
+                this.AspectType = this.Project.GetType( this.FullName )!;
+
+                this._prototypeAspectInstance =
+                    (IAspect) FormatterServices.GetUninitializedObject( this.AspectType ).AssertNotNull();
+
+                // TODO: We may have a custom attribute to enable that feature.
+                this.CanExpandToSource = this.AspectType.GetConstructor( Type.EmptyTypes ) != null;
+            }
+            else
+            {
+                // CompileTimeProject may be null in tests. These lines makes the analyzer happy.
+
+                this.AspectType = null!;
+                this._prototypeAspectInstance = null!;
+                this.Project = null!;
+            }
+
+            static string RemoveSuffix( string s, string suffix )
+                => s.EndsWith( suffix, StringComparison.Ordinal ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
         }
 
         /// <summary>
@@ -144,15 +174,13 @@ namespace Caravela.Framework.Impl
                 return templateDriver;
             }
 
-            var aspectType = this.Project.GetType( this.FullName ).AssertNotNull();
-
             MethodInfo? compiledTemplateMethodInfo;
 
             switch ( sourceTemplate )
             {
                 case IMethod method:
                     var methodName = method.Name + TemplateCompiler.TemplateMethodSuffix;
-                    compiledTemplateMethodInfo = aspectType.GetMethod( methodName );
+                    compiledTemplateMethodInfo = this.AspectType.GetMethod( methodName );
 
                     break;
 
@@ -170,5 +198,55 @@ namespace Caravela.Framework.Impl
 
             return templateDriver;
         }
+
+        private static bool IsMethod( MethodKind methodKind )
+            => methodKind switch
+            {
+                MethodKind.Constructor => false,
+                MethodKind.StaticConstructor => false,
+                MethodKind.AnonymousFunction => false,
+                _ => true
+            };
+
+        private static bool IsConstructor( MethodKind methodKind )
+            => methodKind switch
+            {
+                MethodKind.Constructor => true,
+                MethodKind.StaticConstructor => true,
+                _ => false
+            };
+
+        public bool IsEligible( ISymbol symbol )
+            => symbol switch
+            {
+                IMethodSymbol method => this._prototypeAspectInstance is IAspect<ICodeElement> ||
+                                        this._prototypeAspectInstance is IAspect<IMember> ||
+                                        this._prototypeAspectInstance is IAspect<IMethodBase> ||
+                                        (this._prototypeAspectInstance is IAspect<IMethod> && IsMethod( method.MethodKind )) ||
+                                        (this._prototypeAspectInstance is IAspect<IConstructor> && IsConstructor( method.MethodKind )),
+
+                IPropertySymbol => this._prototypeAspectInstance is IAspect<ICodeElement> ||
+                                   this._prototypeAspectInstance is IAspect<IMember> ||
+                                   this._prototypeAspectInstance is IAspect<IFieldOrProperty> ||
+                                   this._prototypeAspectInstance is IAspect<IProperty>,
+
+                IFieldSymbol => this._prototypeAspectInstance is IAspect<ICodeElement> ||
+                                this._prototypeAspectInstance is IAspect<IMember> ||
+                                this._prototypeAspectInstance is IAspect<IFieldOrProperty> ||
+                                this._prototypeAspectInstance is IAspect<IField>,
+
+                IEventSymbol => this._prototypeAspectInstance is IAspect<ICodeElement> ||
+                                this._prototypeAspectInstance is IAspect<IMember> ||
+                                this._prototypeAspectInstance is IAspect<IEvent>,
+
+                INamedTypeSymbol => this._prototypeAspectInstance is IAspect<ICodeElement> ||
+                                    this._prototypeAspectInstance is IAspect<IMember> ||
+                                    this._prototypeAspectInstance is IAspect<INamedType>,
+
+                _ => false
+
+                // TODO: parameters (using markers)
+                // TODO: call IsEligible on the prototype
+            };
     }
 }

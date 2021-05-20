@@ -119,7 +119,7 @@ namespace Caravela.Framework.Impl.Linking
                 if ( oldRoot != newRoot )
                 {
                     // Improve readability of intermediate compilation in debug builds.
-                    newRoot = newRoot.NormalizeWhitespace();
+                    //  newRoot = newRoot.NormalizeWhitespace();
 
                     var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 

@@ -4,13 +4,15 @@
 using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.CompilerExtensions
 {
+    /// <summary>
+    /// Extract dependency assemblies packed as managed resources and provides instances of classes implemented by these dependencies.
+    /// </summary>
     public static class ResourceExtractor
     {
         private static readonly object _initializeLock = new();
@@ -18,7 +20,10 @@ namespace Caravela.Framework.Impl
         private static string? _snapshotDirectory;
         private static volatile bool _initialized;
 
-        public static object GetImplementationType( string name )
+        /// <summary>
+        /// Creates an instance of a type of the <c>Caravela.Framework.Impl</c> assembly.
+        /// </summary>
+        public static object CreateInstance( string name )
         {
             if ( !_initialized )
             {
@@ -74,7 +79,6 @@ namespace Caravela.Framework.Impl
                         {
                             if ( resourceName.EndsWith( ".dll", StringComparison.OrdinalIgnoreCase ) )
                             {
-                                
                                 // Extract the file to disk.
                                 using var stream = currentAssembly.GetManifestResourceStream( resourceName )!;
                                 var file = Path.Combine( _snapshotDirectory, resourceName );
@@ -85,7 +89,7 @@ namespace Caravela.Framework.Impl
                                 }
                                 
                                 // Rename the assembly to the match the assembly name.
-                                AssemblyName assemblyName = AssemblyName.GetAssemblyName( file );
+                                var assemblyName = AssemblyName.GetAssemblyName( file );
                                 var renamedFile = Path.Combine( _snapshotDirectory, assemblyName.Name + ".dll" );
                                 RetryHelper.Retry( () => File.Move( file, renamedFile ) );
                             }

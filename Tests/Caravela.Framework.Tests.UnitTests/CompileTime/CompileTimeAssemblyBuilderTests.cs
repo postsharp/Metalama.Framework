@@ -5,7 +5,6 @@ using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using System;
@@ -19,7 +18,6 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
 {
     public class CompileTimeAssemblyBuilderTests : TestBase
     {
-     
         [Fact]
         public void RemoveInvalidUsingRewriterTest()
         {

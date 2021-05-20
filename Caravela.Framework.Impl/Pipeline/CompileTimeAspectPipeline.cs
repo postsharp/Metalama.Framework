@@ -19,7 +19,11 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public class CompileTimeAspectPipeline : AspectPipeline
     {
-        public CompileTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain, IDirectoryOptions? directoryOptions = null, IAssemblyLocator? assemblyLocator = null ) : base(
+        public CompileTimeAspectPipeline(
+            IProjectOptions projectOptions,
+            CompileTimeDomain domain,
+            IDirectoryOptions? directoryOptions = null,
+            IAssemblyLocator? assemblyLocator = null ) : base(
             projectOptions,
             domain,
             directoryOptions,
@@ -53,7 +57,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     return false;
                 }
 
-                if ( !TryExecuteCore( partialCompilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
+                if ( !this.TryExecuteCore( partialCompilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
                 {
                     outputCompilation = null;
                     additionalResources = null;
@@ -75,7 +79,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     additionalResourcesBuilder.Add( configuration.CompileTimeProject!.ToResource() );
                 }
 
-                outputCompilation = RunTimeAssemblyRewriter.Rewrite( result.PartialCompilation.Compilation, ServiceProvider );
+                outputCompilation = RunTimeAssemblyRewriter.Rewrite( result.PartialCompilation.Compilation, this.ServiceProvider );
                 additionalResources = additionalResourcesBuilder;
 
                 return true;

@@ -104,14 +104,11 @@ namespace Caravela.Framework.Tests.UnitTests
             file.Suppressions.Add( "MY001" );
 
             StringWriter stringWriter = new();
-            file.Write(stringWriter  );
+            file.Write( stringWriter );
             var roundtrip = UserDiagnosticRegistrationFile.ReadContent( stringWriter.ToString() );
-
 
             Assert.Contains( "MY001", roundtrip.Suppressions );
             Assert.Contains( "MY001", roundtrip.Diagnostics.Keys );
-
-
         }
     }
 }

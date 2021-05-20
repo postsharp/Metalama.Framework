@@ -9,7 +9,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
 using System.Composition;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,16 +18,13 @@ namespace Caravela.Framework.CompilerExtensions
     [Shared]
     public class FacadeCodeFixProvider : CodeFixProvider
     {
-        public FacadeCodeFixProvider()
-        {
-            Debugger.Launch();
-        }
-        
         public override Task RegisterCodeFixesAsync( CodeFixContext context )
         {
-
             context.RegisterCodeFix(
-                CodeAction.Create( "Mark type as partial", cancellationToken => GetFixedDocument( context.Document, context.Span, cancellationToken ), "MakePartial"  ),
+                CodeAction.Create(
+                    "Mark type as partial",
+                    cancellationToken => GetFixedDocument( context.Document, context.Span, cancellationToken ),
+                    "MakePartial" ),
                 context.Diagnostics );
 
             return Task.CompletedTask;

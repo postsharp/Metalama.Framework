@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.DesignTime.UserDiagnostics
             try
             {
                 var json = File.ReadAllText( file );
-                
+
                 var timestamp = File.GetLastWriteTimeUtc( file );
 
                 var obj = ReadContent( json );
@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.DesignTime.UserDiagnostics
 
         public static UserDiagnosticRegistrationFile ReadContent( string json )
         {
-            JsonSerializer serializer = JsonSerializer.Create();
+            var serializer = JsonSerializer.Create();
 
             return serializer.Deserialize<UserDiagnosticRegistrationFile>( new JsonTextReader( new StringReader( json ) ) )
                    ?? new UserDiagnosticRegistrationFile();

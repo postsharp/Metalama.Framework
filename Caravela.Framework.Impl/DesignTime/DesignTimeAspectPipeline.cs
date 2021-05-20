@@ -34,9 +34,12 @@ namespace Caravela.Framework.Impl.DesignTime
         private readonly CompilationDiffer _compilationDiffer = new();
         private readonly FileSystemWatcher? _fileSystemWatcher;
 
-        private PipelineConfiguration? _lastKnownConfiguration;
+        private AspectPipelineConfiguration? _lastKnownConfiguration;
 
         public DesignTimeAspectPipelineStatus Status { get; private set; }
+
+        // It's ok if we return an obsolete project in this case.
+        public IReadOnlyList<AspectClassMetadata>? AspectClasses => this._lastKnownConfiguration?.AspectClasses;
 
         public DesignTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain ) : base( projectOptions, domain )
         {
@@ -175,10 +178,8 @@ namespace Caravela.Framework.Impl.DesignTime
 
                     if ( this.ProjectOptions.BuildTouchFile != null && File.Exists( this.ProjectOptions.BuildTouchFile ) )
                     {
-                        using var mutex = MutexHelper.CreateGlobalMutex( this.ProjectOptions.BuildTouchFile );
-                        mutex.WaitOne();
+                        using var mutex = MutexHelper.WithGlobalLock( this.ProjectOptions.BuildTouchFile );
                         File.Delete( this.ProjectOptions.BuildTouchFile );
-                        mutex.ReleaseMutex();
                     }
                 }
             }
@@ -200,11 +201,11 @@ namespace Caravela.Framework.Impl.DesignTime
             }
         }
 
-        private bool TryGetConfiguration(
+        internal bool TryGetConfiguration(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out PipelineConfiguration? configuration )
+            [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
         {
             lock ( this._configureSync )
             {
@@ -284,7 +285,7 @@ namespace Caravela.Framework.Impl.DesignTime
                     new ImmutableDiagnosticList( diagnosticList ) );
             }
 
-            var success = TryExecuteCore( compilation, diagnosticList, configuration, cancellationToken, out var pipelineResult );
+            var success = this.TryExecuteCore( compilation, diagnosticList, configuration, cancellationToken, out var pipelineResult );
 
             var result = new DesignTimeAspectPipelineResult(
                 success,

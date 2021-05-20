@@ -21,8 +21,9 @@ namespace Caravela.AspectWorkbench.ViewModels
     [NotifyPropertyChanged]
     public class MainViewModel
     {
+        private readonly IServiceProvider _serviceProvider;
         private TemplateTest? _currentTest;
-
+        
         public string Title => this.CurrentPath == null ? "Aspect Workbench" : $"Aspect Workbench - {this.CurrentPath}";
 
         public string? TestText { get; set; }
@@ -43,9 +44,8 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         private string? CurrentPath { get; set; }
 
-        private IServiceProvider _serviceProvider;
-
-        public MainViewModel( IServiceProvider serviceProvider ) {
+        public MainViewModel( IServiceProvider serviceProvider )
+        {
             this._serviceProvider = serviceProvider;
         }
 
@@ -61,7 +61,10 @@ namespace Caravela.AspectWorkbench.ViewModels
                 this.ErrorsDocument = new FlowDocument();
                 this.TransformedTargetDocument = null;
 
-                TestRunnerBase testRunner = this.TestText.Contains( "[TestTemplate]" ) ? new TemplatingTestRunner(this._serviceProvider) : new AspectTestRunner(this._serviceProvider);
+                TestRunnerBase testRunner = this.TestText.Contains( "[TestTemplate]" )
+                    ? new TemplatingTestRunner( this._serviceProvider )
+                    : new AspectTestRunner( this._serviceProvider );
+
                 var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject() );
 
                 var testInput = new TestInput( "interactive", this.TestText );

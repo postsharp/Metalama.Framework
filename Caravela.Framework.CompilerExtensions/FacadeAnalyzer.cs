@@ -8,11 +8,8 @@ using System.Collections.Immutable;
 #pragma warning disable RS1026 // Enable concurrent execution
 #pragma warning disable RS1025 // Configure generated code analysis
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.CompilerExtensions
 {
-    /// <summary>
-    /// Our implementation of <see cref="DiagnosticAnalyzer"/>. It reports all diagnostics that we produce.
-    /// </summary>
     [DiagnosticAnalyzer( LanguageNames.CSharp )]
     public class FacadeAnalyzer : DiagnosticAnalyzer
     {
@@ -20,7 +17,7 @@ namespace Caravela.Framework.Impl
 
         public FacadeAnalyzer()
         {
-            this._impl = (DiagnosticAnalyzer) ResourceExtractor.GetImplementationType( "Caravela.Framework.Impl.DesignTime.DesignTimeAnalyzer" );
+            this._impl = (DiagnosticAnalyzer) ResourceExtractor.CreateInstance( "Caravela.Framework.Impl.DesignTime.DesignTimeAnalyzer" );
         }
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => this._impl.SupportedDiagnostics;

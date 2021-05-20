@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
@@ -26,13 +25,13 @@ namespace Caravela.Framework.Tests.UnitTests
         /// </summary>
         private const bool _doCodeExecutionTests = false;
 
-        private TestProjectOptions _projectOptions = new TestProjectOptions();
+        private TestProjectOptions _projectOptions = new();
+
         protected ServiceProvider ServiceProvider { get; private set; }
 
         protected TestBase()
         {
             this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this._projectOptions );
-
         }
 
         public static CSharpCompilation CreateCSharpCompilation(
@@ -159,16 +158,15 @@ class Expression
             this.ServiceProvider.Dispose();
         }
 
-        protected IsolatedTest WithIsolatedTest() => new IsolatedTest( this );
-
+        protected IsolatedTest WithIsolatedTest() => new( this );
 
         protected class IsolatedTest : IDisposable
         {
-            private TestBase _parent;
+            private readonly TestBase _parent;
             private readonly ServiceProvider _oldServiceProvider;
             private readonly TestProjectOptions _oldProjectOptions;
 
-            public TestProjectOptions ProjectOptions { get; } = new TestProjectOptions();
+            public TestProjectOptions ProjectOptions { get; } = new();
 
             public ServiceProvider ServiceProvider { get; }
 
@@ -186,7 +184,6 @@ class Expression
                 this.ServiceProvider.Dispose();
                 this._parent.ServiceProvider = this._oldServiceProvider;
                 this._parent._projectOptions = this._oldProjectOptions;
-
             }
         }
     }

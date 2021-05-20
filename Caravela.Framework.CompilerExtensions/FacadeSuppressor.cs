@@ -5,11 +5,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.CompilerExtensions
 {
-    /// <summary>
-    /// Our implementation of <see cref="DiagnosticSuppressor"/>.
-    /// </summary>
     [DiagnosticAnalyzer( LanguageNames.CSharp )]
     public class FacadeSuppressor : DiagnosticSuppressor
     {
@@ -17,7 +14,7 @@ namespace Caravela.Framework.Impl
 
         public FacadeSuppressor()
         {
-            this._impl = (DiagnosticSuppressor) ResourceExtractor.GetImplementationType( "Caravela.Framework.Impl.DesignTime.DesignTimeDiagnosticSuppressor" );
+            this._impl = (DiagnosticSuppressor) ResourceExtractor.CreateInstance( "Caravela.Framework.Impl.DesignTime.DesignTimeDiagnosticSuppressor" );
         }
 
         public override void ReportSuppressions( SuppressionAnalysisContext context ) => this._impl.ReportSuppressions( context );

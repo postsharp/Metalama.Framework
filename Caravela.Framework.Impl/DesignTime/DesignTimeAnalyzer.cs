@@ -4,7 +4,6 @@
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
@@ -12,6 +11,8 @@ using System.Collections.Immutable;
 using System.Linq;
 
 #pragma warning disable RS1026 // Enable concurrent execution
+#pragma warning disable RS1001 // Missing diagnostic analyzer attribute.
+#pragma warning disable RS1022 // Remove access to our implementation types 
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -45,10 +46,7 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             DesignTimeLogger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}') started." );
 
-            try
-            {
-              
-            }
+            try { }
             catch ( Exception e )
             {
                 DesignTimeLogger.Instance?.Write( e.ToString() );
@@ -65,14 +63,13 @@ namespace Caravela.Framework.Impl.DesignTime
                 DesignTimeLogger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{context.SemanticModel.SyntaxTree.FilePath}')" );
 
                 DesignTimeDebugger.AttachDebugger( buildOptions );
-                
-                  
+
                 // Execute the pipeline.
                 var compilation = context.SemanticModel.Compilation;
 
                 var syntaxTreeResults = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
                     compilation,
-                    new[]{ context.SemanticModel.SyntaxTree },
+                    new[] { context.SemanticModel.SyntaxTree },
                     buildOptions,
                     context.CancellationToken );
 
@@ -106,7 +103,6 @@ namespace Caravela.Framework.Impl.DesignTime
                         }
                     }
                 }
-                
 
                 // Additional validations that run out of the pipeline.
                 DesignTimeAnalyzerAdditionalVisitor visitor = new( context, buildOptions );

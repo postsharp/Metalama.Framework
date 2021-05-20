@@ -13,24 +13,23 @@ using System.Threading.Tasks;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
-    public class DesignTimeCodeFixProvider : CodeFixProvider
+    public class CentralCodeFixProvider : CodeFixProvider
     {
+        private const string _makePartialKey = "Caravela.MakePartial";
+
         public override Task RegisterCodeFixesAsync( CodeFixContext context )
         {
             DesignTimeLogger.Instance?.Write( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync" );
 
             context.RegisterCodeFix(
-                CodeAction.Create( "Make partial", cancellationToken => GetFixedDocument( context.Document, context.Span, cancellationToken ) ),
+                CodeAction.Create( "Make partial", cancellationToken => GetFixedDocument( context.Document, context.Span, cancellationToken.IgnoreIfDebugging() ), _makePartialKey ),
                 context.Diagnostics );
 
             return Task.CompletedTask;
         }
 
-        public sealed override FixAllProvider GetFixAllProvider()
-        {
-            // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/FixAllProvider.md for more information on Fix All Providers
-            return WellKnownFixAllProviders.BatchFixer;
-        }
+        // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/FixAllProvider.md for more information on Fix All Providers
+        public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
         private static async Task<Document> GetFixedDocument( Document document, TextSpan span, CancellationToken cancellationToken )
         {

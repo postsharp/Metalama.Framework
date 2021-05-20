@@ -13,8 +13,7 @@ namespace Caravela.Framework.Impl.DesignTime
     internal class CompilerServiceProvider : ICompilerServiceProvider
     {
         private static readonly CompilerServiceProvider _instance = new();
-        private ServiceProvider _serviceProvider;
-
+        
         static CompilerServiceProvider()
         {
             DesignTimeEntryPointManager.Instance.RegisterServiceProvider( _instance );
@@ -35,7 +34,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public T? GetCompilerService<T>()
             where T : class, ICompilerService
-            => typeof(T) == typeof(IClassificationService) ? (T) (object) new ClassificationService(this._serviceProvider) : null;
+            => typeof(T) == typeof(IClassificationService) ? (T) (object) new ClassificationService( ServiceProviderFactory.Shared ) : null;
 
         event Action<ICompilerServiceProvider>? ICompilerServiceProvider.Unloaded
         {

@@ -3,13 +3,14 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
@@ -66,6 +67,26 @@ namespace Caravela.Framework.Impl.DesignTime
             // If a build has started, we have to invalidate the whole cache because we have allowed
             // our cache to become inconsistent when we started to have an outdated pipeline configuration.
             this._syntaxTreeResultCache.Clear();
+        }
+
+        public IEnumerable<AspectClassMetadata> GetEligibleAspects( ISymbol symbol, IProjectOptions projectOptions, CancellationToken cancellationToken )
+        {
+            var pipeline = this.GetOrCreatePipeline( projectOptions );
+
+            var classes = pipeline.AspectClasses;
+
+            if ( classes != null )
+            {
+                foreach ( var aspectClass in classes )
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    if ( aspectClass.IsEligible( symbol ) )
+                    {
+                        yield return aspectClass;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -168,6 +189,37 @@ namespace Caravela.Framework.Impl.DesignTime
             }
 
             return uncachedSyntaxTrees;
+        }
+
+        public bool TryApplyAspectToCode(
+            IProjectOptions projectOptions,
+            AspectClassMetadata aspectClass,
+            Compilation inputCompilation,
+            ISymbol targetSymbol,
+            CancellationToken cancellationToken,
+            [NotNullWhen( true )] out Compilation? outputCompilation )
+        {
+            var designTimePipeline = this.GetOrCreatePipeline( projectOptions );
+
+            // TODO: use partial compilation (it does not seem to work).
+            var partialCompilation = PartialCompilation.CreateComplete( inputCompilation );
+
+            if ( !designTimePipeline.TryGetConfiguration( partialCompilation, NullDiagnosticAdder.Instance, cancellationToken, out var configuration ) )
+            {
+                outputCompilation = null;
+
+                return false;
+            }
+
+            return ExpandAspectAspectPipeline.TryExecute(
+                projectOptions,
+                this._domain,
+                configuration,
+                aspectClass,
+                partialCompilation,
+                targetSymbol,
+                cancellationToken,
+                out outputCompilation );
         }
 
         public void Dispose() => this._domain.Dispose();

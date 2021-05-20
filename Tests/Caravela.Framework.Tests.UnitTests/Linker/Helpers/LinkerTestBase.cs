@@ -7,8 +7,6 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Transformations;
 using FakeItEasy;
 using Microsoft.CodeAnalysis;
@@ -53,7 +51,6 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
     public partial class LinkerTestBase : TestBase
     {
-
         internal static AspectLinkerInput CreateLinkerInput( string code )
         {
             var pseudoCompilation = CreateCSharpCompilation( code, ignoreErrors: true );

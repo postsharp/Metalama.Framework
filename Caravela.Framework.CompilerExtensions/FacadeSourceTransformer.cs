@@ -4,11 +4,8 @@
 using Caravela.Compiler;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.CompilerExtensions
 {
-    /// <summary>
-    /// The main compile-time entry point of Caravela. An implementation of Caravela.Compiler's <see cref="ISourceTransformer"/>.
-    /// </summary>
     [Transformer]
     internal sealed class FacadeSourceTransformer : ISourceTransformer
     {
@@ -16,7 +13,7 @@ namespace Caravela.Framework.Impl
 
         public FacadeSourceTransformer()
         {
-            this._impl = (ISourceTransformer) ResourceExtractor.GetImplementationType( "Caravela.Framework.Impl.Pipeline.SourceTransformer" );
+            this._impl = (ISourceTransformer) ResourceExtractor.CreateInstance( "Caravela.Framework.Impl.Pipeline.SourceTransformer" );
         }
 
         public Compilation Execute( TransformerContext transformerContext ) => this._impl.Execute( transformerContext );
