@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.DesignTime.Expand;
+using Caravela.Framework.Impl.DesignTime.Refactoring;
 using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
@@ -213,7 +213,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 return false;
             }
 
-            return ExpandAspectAspectPipeline.TryExecute(
+            return ApplyToSourceCodeAspectPipeline.TryExecute(
                 projectOptions,
                 this._domain,
                 configuration,

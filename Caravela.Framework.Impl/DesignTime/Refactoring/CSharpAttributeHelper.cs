@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Caravela.Framework.Impl.DesignTime.Expand
+namespace Caravela.Framework.Impl.DesignTime.Refactoring
 {
     internal static class CSharpAttributeHelper
     {

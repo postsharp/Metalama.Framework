@@ -17,16 +17,16 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.DesignTime.Expand
+namespace Caravela.Framework.Impl.DesignTime.Refactoring
 {
     /// <summary>
     /// An implementation of the <see cref="AspectPipeline"/> that applies an aspect to source code in the interactive process.
     /// </summary>
-    internal class ExpandAspectAspectPipeline : AspectPipeline
+    internal class ApplyToSourceCodeAspectPipeline : AspectPipeline
     {
         private readonly InteractiveAspectSource _source;
 
-        private ExpandAspectAspectPipeline(
+        private ApplyToSourceCodeAspectPipeline(
             IProjectOptions projectOptions,
             CompileTimeDomain domain,
             AspectClassMetadata aspectClass,
@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.DesignTime.Expand
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out Compilation? outputCompilation )
         {
-            ExpandAspectAspectPipeline pipeline = new( projectOptions, domain, aspectClass, targetSymbol );
+            ApplyToSourceCodeAspectPipeline pipeline = new( projectOptions, domain, aspectClass, targetSymbol );
 
             return pipeline.TryExecute( configuration, inputCompilation, cancellationToken, out outputCompilation );
         }
