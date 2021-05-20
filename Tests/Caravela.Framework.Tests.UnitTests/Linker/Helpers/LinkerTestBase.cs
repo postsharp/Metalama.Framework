@@ -10,6 +10,7 @@ using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities;
 using FakeItEasy;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -143,6 +144,13 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 }
             }
 
+            var nameObliviousSignatureComparer =
+                new StructuralSymbolComparer(
+                    StructuralSymbolComparerOptions.GenericArguments
+                    | StructuralSymbolComparerOptions.GenericParameterCount
+                    | StructuralSymbolComparerOptions.ParameterModifiers
+                    | StructuralSymbolComparerOptions.ParameterTypes );
+
             // Update transformations to reflect the input compilation.
             foreach ( var transformation in rewriter.ObservableTransformations.Cast<object>().Concat( rewriter.NonObservableTransformations ) )
             {
@@ -159,15 +167,11 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     var symbolHelperNode = nodeIdToSyntaxNode[symbolHelperNodeId];
 
                     var containingSymbol = (ITypeSymbol) syntaxNodeToSymbol[containingNode];
-                    var symbolHelperSymbol = (IMethodSymbol) syntaxNodeToSymbol[symbolHelperNode];
+                    var symbolHelperSymbol = syntaxNodeToSymbol[symbolHelperNode];
 
                     var overridenMemberSymbol = containingSymbol.GetMembers()
-                        .Where(
-                            x =>
-                                x.Name == overriddenElementName
-                                && x is IMethodSymbol methodSymbol
-                                && methodSymbol.Parameters.Select( p => p.Type )
-                                    .SequenceEqual( symbolHelperSymbol.Parameters.Select( p => p.Type ) ) )
+                        .Where( x => StringComparer.Ordinal.Equals( x.Name, overriddenElementName ) )
+                        .Where( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) )
                         .Single();
 
                     var overridenMember = symbolToCodeElement[overridenMemberSymbol];

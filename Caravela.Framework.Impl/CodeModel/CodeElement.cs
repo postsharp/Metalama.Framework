@@ -58,8 +58,16 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var syntaxReference = this.Symbol.DeclaringSyntaxReferences[0];
             var semanticModel = this.Compilation.RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
-            var methodBodyNode = ((MethodDeclarationSyntax) syntaxReference.GetSyntax()).Body;
-            var lookupPosition = methodBodyNode != null ? methodBodyNode.Span.Start : syntaxReference.Span.Start;
+
+            var bodyNode =
+                syntaxReference.GetSyntax() switch
+                {
+                    MethodDeclarationSyntax methodDeclaration => methodDeclaration.Body,
+                    PropertyDeclarationSyntax _ => null,
+                    _ => throw new AssertionFailedException()
+                };
+
+            var lookupPosition = bodyNode != null ? bodyNode.Span.Start : syntaxReference.Span.Start;
 
             return semanticModel.LookupSymbols( lookupPosition );
         }

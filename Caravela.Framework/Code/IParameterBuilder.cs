@@ -16,5 +16,10 @@ namespace Caravela.Framework.Code
         /// Gets or sets the parameter type.
         /// </summary>
         new IType ParameterType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the parameter ref kind.
+        /// </summary>
+        new RefKind RefKind { get; set; }
     }
 }

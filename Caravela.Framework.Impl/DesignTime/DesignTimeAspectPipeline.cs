@@ -76,7 +76,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 }
             }
         }
-        
+
         internal void OnExternalBuildStarted()
         {
             this.Reset();
@@ -160,7 +160,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 return compilationChange;
             }
-            
+
             void OnCompileTimeChange()
             {
                 if ( this.Status == DesignTimeAspectPipelineStatus.Ready )

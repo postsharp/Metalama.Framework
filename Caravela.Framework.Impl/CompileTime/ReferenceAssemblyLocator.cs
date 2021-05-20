@@ -81,7 +81,7 @@ namespace Caravela.Framework.Impl.CompileTime
 </Project>";
 
             this._projectHash = HashUtilities.HashString( this._projectText );
-            
+
             this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
 
             this.SystemAssemblyNames = this.SystemAssemblyPaths

@@ -87,19 +87,41 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     return newNode;
                 }
 
-                // Non-pseudo methods become the next insert positions.
+                // Non-pseudo nodes become the next insert positions.
                 node = AssignNodeId( node );
                 this._currentInsertPosition = node;
 
                 return node;
             }
 
-            private static bool HasPseudoAttribute( MethodDeclarationSyntax node )
+            public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+            {
+                if ( HasPseudoAttribute( node ) )
+                {
+                    var newNode = this.ProcessPseudoAttributeNode( node, out var isPseudoMember );
+
+                    if ( !isPseudoMember )
+                    {
+                        newNode = AssignNodeId( newNode.AssertNotNull() );
+                        this._currentInsertPosition = (MemberDeclarationSyntax) newNode.AssertNotNull();
+                    }
+
+                    return newNode;
+                }
+
+                // Non-pseudo nodes become the next insert positions.
+                node = AssignNodeId( node );
+                this._currentInsertPosition = node;
+
+                return node;
+            }
+
+            private static bool HasPseudoAttribute( MemberDeclarationSyntax node )
             {
                 return node.AttributeLists.SelectMany( x => x.Attributes ).Any( x => x.Name.ToString().StartsWith( "Pseudo" ) );
             }
 
-            private SyntaxNode? ProcessPseudoAttributeNode( MethodDeclarationSyntax node, out bool isPseudoMember )
+            private SyntaxNode? ProcessPseudoAttributeNode( MemberDeclarationSyntax node, out bool isPseudoMember )
             {
                 var newAttributeLists = new List<AttributeListSyntax>();
                 AttributeSyntax? pseudoIntroductionAttribute = null;
@@ -190,8 +212,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 return node.WithAttributeLists( List( newAttributeLists ) );
             }
 
-            private MethodDeclarationSyntax ProcessPseudoIntroduction(
-                MethodDeclarationSyntax node,
+            private MemberDeclarationSyntax ProcessPseudoIntroduction(
+                MemberDeclarationSyntax node,
                 List<AttributeListSyntax> newAttributeLists,
                 AttributeSyntax attribute,
                 bool forceNotInlineable )
@@ -212,11 +234,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                 this._owner.AddAspectLayer( aspectName.AssertNotNull(), layerName );
 
-                var symbolHelperDeclaration =
-                    AssignNodeId(
-                        MarkTemporary(
-                            node.WithAttributeLists( List<AttributeListSyntax>() )
-                                .WithIdentifier( Identifier( node.Identifier.ValueText + "__SymbolHelper" ) ) ) );
+                var symbolHelperDeclaration = GetSymbolHelperDeclaration( node );
 
                 var introductionSyntax = node.WithAttributeLists( List( newAttributeLists ) );
 
@@ -251,7 +269,14 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
                     .Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
 
-                A.CallTo( () => ((ITestTransformation) transformation).IntroducedElementName ).Returns( node.Identifier.ValueText );
+                var introducedElementName = node switch
+                {
+                    MethodDeclarationSyntax method => method.Identifier.ValueText,
+                    PropertyDeclarationSyntax property => property.Identifier.ValueText,
+                    _ => throw new NotSupportedException()
+                };
+
+                A.CallTo( () => ((ITestTransformation) transformation).IntroducedElementName ).Returns( introducedElementName );
                 A.CallTo( () => ((ITestTransformation) transformation).SymbolHelperNodeId ).Returns( GetNodeId( symbolHelperDeclaration ) );
 
                 this._observableTransformations.Add( (IObservableTransformation) transformation );
@@ -259,8 +284,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 return symbolHelperDeclaration;
             }
 
-            private MethodDeclarationSyntax ProcessPseudoOverride(
-                MethodDeclarationSyntax node,
+            private MemberDeclarationSyntax ProcessPseudoOverride(
+                MemberDeclarationSyntax node,
                 List<AttributeListSyntax> newAttributeLists,
                 AttributeSyntax attribute,
                 bool forceNotInlineable )
@@ -291,23 +316,38 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         .Implements<ITestTransformation>() );
 
                 var methodBodyRewriter = new TestMethodBodyRewriter( aspectName, layerName );
-                var rewrittenMethodBody = methodBodyRewriter.VisitBlock( node.Body.AssertNotNull() );
+                MemberDeclarationSyntax overrideSyntax;
 
-                var overrideSyntax = node.WithAttributeLists( List( newAttributeLists ) ).WithBody( (BlockSyntax) rewrittenMethodBody.AssertNotNull() );
+                switch ( node )
+                {
+                    case MethodDeclarationSyntax method:
+                        var rewrittenMethodBody = methodBodyRewriter.VisitBlock( method.Body.AssertNotNull() );
 
-                var symbolHelperDeclaration =
-                    AssignNodeId(
-                        MarkTemporary(
-                            node.WithAttributeLists( List<AttributeListSyntax>() )
-                                .WithIdentifier( Identifier( node.Identifier.ValueText + "__SymbolHelper" ) )
-                                .WithBody(
-                                    node.ReturnType.ToString() == "void"
-                                        ? Block()
-                                        : Block(
-                                            ReturnStatement(
-                                                LiteralExpression(
-                                                    SyntaxKind.DefaultLiteralExpression,
-                                                    Token( SyntaxKind.DefaultKeyword ) ) ) ) ) ) );
+                        overrideSyntax =
+                            method
+                                .WithAttributeLists( List( newAttributeLists ) )
+                                .WithBody( (BlockSyntax) rewrittenMethodBody.AssertNotNull() );
+
+                        break;
+
+                    // TODO: All cases for properties.
+                    case PropertyDeclarationSyntax { AccessorList: not null } property when property.AccessorList!.Accessors.All( a => a.Body != null ):
+                        overrideSyntax =
+                            property
+                                .WithAttributeLists( List( newAttributeLists ) )
+                                .WithAccessorList(
+                                    AccessorList(
+                                        List(
+                                            property.AccessorList!.Accessors.Select(
+                                                a => a.WithBody( (BlockSyntax) methodBodyRewriter.VisitBlock( a.Body! ).AssertNotNull() ) ) ) ) );
+
+                        break;
+
+                    default:
+                        throw new NotSupportedException();
+                }
+
+                var symbolHelperDeclaration = GetSymbolHelperDeclaration( node );
 
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Override" );
@@ -320,7 +360,12 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                                 transformation,
                                 overrideSyntax,
                                 new AspectLayerId( aspectName.AssertNotNull(), layerName ),
-                                IntroducedMemberSemantic.MethodOverride,
+                                node switch
+                                {
+                                    MethodDeclarationSyntax _ => IntroducedMemberSemantic.MethodOverride,
+                                    PropertyDeclarationSyntax _ => IntroducedMemberSemantic.PropertyOverride,
+                                    _ => throw new NotSupportedException()
+                                },
                                 AspectLinkerOptions.Create( forceNotInlineable ),
                                 null )
                         } );
@@ -336,6 +381,72 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 this._nonObservableTransformations.Add( (INonObservableTransformation) transformation );
 
                 return symbolHelperDeclaration;
+            }
+
+            private static MemberDeclarationSyntax GetSymbolHelperDeclaration( MemberDeclarationSyntax node )
+            {
+                return (MemberDeclarationSyntax) AssignNodeId(
+                    MarkTemporary(
+                        node switch
+                        {
+                            MethodDeclarationSyntax method => GetSymbolHelperMethod( method ),
+                            PropertyDeclarationSyntax property => GetSymbolHelperProperty( property ),
+                            _ => throw new NotSupportedException()
+                        } ) );
+            }
+
+            private static SyntaxNode GetSymbolHelperMethod( MethodDeclarationSyntax method )
+            {
+                return method
+                    .WithAttributeLists( List<AttributeListSyntax>() )
+                    .WithIdentifier( Identifier( method.Identifier.ValueText + "__SymbolHelper" ) )
+                    .WithBody(
+                        method.ReturnType.ToString() == "void"
+                            ? Block()
+                            : Block(
+                                ReturnStatement(
+                                    LiteralExpression(
+                                        SyntaxKind.DefaultLiteralExpression,
+                                        Token( SyntaxKind.DefaultKeyword ) ) ) ) );
+            }
+
+            private static SyntaxNode GetSymbolHelperProperty( PropertyDeclarationSyntax property )
+            {
+                if ( property.AccessorList != null )
+                {
+                    return property
+                        .WithAttributeLists( List<AttributeListSyntax>() )
+                        .WithIdentifier( Identifier( property.Identifier.ValueText + "__SymbolHelper" ) )
+                        .WithInitializer( null )
+                        .WithAccessorList(
+                            AccessorList(
+                                List(
+                                    property.AccessorList.Accessors.Select(
+                                        a => a switch
+                                        {
+                                            _ when a.Kind() == SyntaxKind.GetAccessorDeclaration =>
+                                                a.WithBody(
+                                                    Block(
+                                                        ReturnStatement(
+                                                            LiteralExpression(
+                                                                SyntaxKind.DefaultLiteralExpression,
+                                                                Token( SyntaxKind.DefaultKeyword ) ) ) ) ),
+                                            _ when a.Kind() == SyntaxKind.SetAccessorDeclaration =>
+                                                a.WithBody( Block() ),
+                                            _ => throw new NotSupportedException()
+                                        } ) ) ) );
+                }
+                else
+                {
+                    return property
+                        .WithAttributeLists( List<AttributeListSyntax>() )
+                        .WithIdentifier( Identifier( property.Identifier.ValueText + "__SymbolHelper" ) )
+                        .WithExpressionBody(
+                            ArrowExpressionClause(
+                                LiteralExpression(
+                                    SyntaxKind.DefaultLiteralExpression,
+                                    Token( SyntaxKind.DefaultKeyword ) ) ) );
+                }
             }
         }
     }

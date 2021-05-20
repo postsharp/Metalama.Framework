@@ -67,6 +67,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public bool TryCompile(
+            string templateName,
             Compilation compileTimeCompilation,
             SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
@@ -83,6 +84,7 @@ namespace Caravela.Framework.Impl.Templating
 
             // Compile the syntax tree.
             var templateCompilerRewriter = new TemplateCompilerRewriter(
+                templateName,
                 compileTimeCompilation,
                 this._semanticAnnotationMap,
                 diagnostics,

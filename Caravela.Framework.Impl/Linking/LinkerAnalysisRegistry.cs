@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -36,11 +37,11 @@ namespace Caravela.Framework.Impl.Linking
         }
 
         /// <summary>
-        /// Determines whether the method symbol represents override target.
+        /// Determines whether the symbol represents override target.
         /// </summary>
         /// <param name="symbol">Method symbol.</param>
         /// <returns><c>True</c> if the method is override target, otherwise <c>false</c>.</returns>
-        public bool IsOverrideTarget( IMethodSymbol symbol )
+        public bool IsOverrideTarget( ISymbol symbol )
         {
             return this._introductionRegistry.GetOverridesForSymbol( symbol ).Count > 0;
         }
@@ -50,8 +51,15 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         /// <param name="symbol">Method symbol.</param>
         /// <returns><c>True</c> if the method body can be inlined, otherwise <c>false</c>.</returns>
-        public bool IsBodyInlineable( IMethodSymbol symbol )
+        public bool IsInlineable( ISymbol symbol )
         {
+            // TODO: Inlineability also depends on parameters passed. 
+            //       Method/indexer is inlineable if only if:
+            //           * Call's argument expressions match parameter names of the caller.
+            //           * Parameter names of the caller match parameter names of the callee.
+            //           * Caller and callee signatures are equal.
+            //       This is satisfied for all proceed().
+
             if ( this.IsOverrideTarget( symbol ) )
             {
                 if ( symbol.GetAttributes()
@@ -61,17 +69,11 @@ namespace Caravela.Framework.Impl.Linking
                             && attributeData.NamedArguments
                                 .Any( x => x.Key == nameof(AspectLinkerOptionsAttribute.ForceNotInlineable) && (bool?) x.Value.Value == true ) ) )
                 {
-                    // Inlining is explicitly disabled for the method.
+                    // Inlining is explicitly disabled for the declaration.
                     return false;
                 }
 
-                if ( !this._symbolVersionReferenceCounts.TryGetValue( new SymbolVersion( symbol, null ), out var counter ) )
-                {
-                    // Method is not referenced in multiple places.
-                    return true;
-                }
-
-                return counter <= 1;
+                return this.HasSingleReference( symbol, null );
             }
             else if ( this.IsOverride( symbol ) )
             {
@@ -87,13 +89,7 @@ namespace Caravela.Framework.Impl.Linking
                     return false;
                 }
 
-                if ( !this._symbolVersionReferenceCounts.TryGetValue( new SymbolVersion( symbol, introducedMember.AspectLayerId ), out var counter ) )
-                {
-                    // This is the last override.
-                    return true;
-                }
-
-                return counter <= 1;
+                return this.HasSingleReference( symbol, introducedMember.AspectLayerId );
             }
             else
             {
@@ -103,12 +99,43 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
+        private bool HasSingleReference( ISymbol symbol, AspectLayerId? aspectLayerId )
+        {
+            switch ( symbol )
+            {
+                case IMethodSymbol { AssociatedSymbol: null } methodSymbol:
+                    return this.HasSingleReference( symbol, aspectLayerId, LinkerAnnotationTargetKind.Self );
+
+                case IPropertySymbol propertySymbol:
+                    return this.HasSingleReference( propertySymbol, aspectLayerId, LinkerAnnotationTargetKind.PropertyGetAccessor )
+                           && this.HasSingleReference( propertySymbol, aspectLayerId, LinkerAnnotationTargetKind.PropertySetAccessor );
+
+                case IEventSymbol eventSymbol:
+                    return this.HasSingleReference( eventSymbol, aspectLayerId, LinkerAnnotationTargetKind.EventAddAccessor )
+                           && this.HasSingleReference( eventSymbol, aspectLayerId, LinkerAnnotationTargetKind.EventRemoveAccessor );
+
+                default:
+                    throw new NotSupportedException( $"{symbol}" );
+            }
+        }
+
+        private bool HasSingleReference( ISymbol symbol, AspectLayerId? aspectLayerId, LinkerAnnotationTargetKind targetKind )
+        {
+            if ( !this._symbolVersionReferenceCounts.TryGetValue( new SymbolVersion( symbol, aspectLayerId, targetKind ), out var counter ) )
+            {
+                // Method is not referenced in multiple places.
+                return true;
+            }
+
+            return counter <= 1;
+        }
+
         /// <summary>
         /// Determines whether the symbol represents an override method.
         /// </summary>
-        /// <param name="symbol">Method symbol.</param>
+        /// <param name="symbol">Symbol.</param>
         /// <returns></returns>
-        public bool IsOverride( IMethodSymbol symbol )
+        public bool IsOverride( ISymbol symbol )
         {
             var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
 
@@ -117,7 +144,8 @@ namespace Caravela.Framework.Impl.Linking
                 return false;
             }
 
-            return introducedMember.Semantic == IntroducedMemberSemantic.MethodOverride;
+            return introducedMember.Semantic == IntroducedMemberSemantic.MethodOverride
+                   || introducedMember.Semantic == IntroducedMemberSemantic.PropertyOverride;
         }
 
         /// <summary>
@@ -125,7 +153,7 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         /// <param name="symbol">Method symbol.</param>
         /// <returns>Symbol.</returns>
-        public ISymbol GetLastOverride( IMethodSymbol symbol )
+        public ISymbol GetLastOverride( ISymbol symbol )
         {
             var overrides = this._introductionRegistry.GetOverridesForSymbol( symbol );
             var lastOverride = overrides.LastOrDefault();
@@ -145,10 +173,10 @@ namespace Caravela.Framework.Impl.Linking
         /// <param name="referencedSymbol">Symbol of the reference method (usually the original declaration).</param>
         /// <param name="referenceAnnotation">Annotation on the referencing node.</param>
         /// <returns>Symbol of the introduced declaration visible to the context method (previous aspect layer that transformed this declaration).</returns>
-        public ISymbol ResolveSymbolReference( IMethodSymbol contextSymbol, ISymbol referencedSymbol, LinkerAnnotation referenceAnnotation )
+        public ISymbol ResolveSymbolReference( ISymbol contextSymbol, ISymbol referencedSymbol, LinkerAnnotation referenceAnnotation )
         {
             // TODO: Other things than methods.
-            var overrides = this._introductionRegistry.GetOverridesForSymbol( (IMethodSymbol) referencedSymbol );
+            var overrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
             var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (o.AspectLayerId, Index: i) ).ToReadOnlyList();
             var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceAnnotation.AspectLayer ).Index;
 
@@ -175,6 +203,19 @@ namespace Caravela.Framework.Impl.Linking
                         return hiddenSymbol;
                     }
                 }
+                else if ( referencedSymbol is IPropertySymbol propertySymbol )
+                {
+                    var overridenAccessor = propertySymbol.GetMethod?.OverriddenMethod ?? propertySymbol.SetMethod?.OverriddenMethod;
+
+                    if ( overridenAccessor != null )
+                    {
+                        return overridenAccessor.AssociatedSymbol.AssertNotNull();
+                    }
+                    else if ( TryGetHiddenSymbol( propertySymbol, out var hiddenSymbol ) )
+                    {
+                        return hiddenSymbol;
+                    }
+                }
 
                 return referencedSymbol;
             }
@@ -182,16 +223,16 @@ namespace Caravela.Framework.Impl.Linking
             return this._introductionRegistry.GetSymbolForIntroducedMember( previousLayerOverride );
         }
 
-        private static bool TryGetHiddenSymbol( ISymbol methodSymbol, [NotNullWhen( true )] out ISymbol? hiddenSymbol )
+        private static bool TryGetHiddenSymbol( ISymbol symbol, [NotNullWhen( true )] out ISymbol? hiddenSymbol )
         {
-            var currentType = methodSymbol.ContainingType.BaseType;
+            var currentType = symbol.ContainingType.BaseType;
 
             while ( currentType != null )
             {
                 // TODO: Optimize - lookup by name first instead of equating all members.
                 foreach ( var member in currentType.GetMembers() )
                 {
-                    if ( StructuralSymbolComparer.Signature.Equals( methodSymbol, member ) )
+                    if ( StructuralSymbolComparer.Signature.Equals( symbol, member ) )
                     {
                         hiddenSymbol = (IMethodSymbol) member;
 

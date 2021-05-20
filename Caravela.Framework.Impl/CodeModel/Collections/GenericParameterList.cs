@@ -9,6 +9,10 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 {
     internal class GenericParameterList : CodeElementList<IGenericParameter, CodeElementLink<IGenericParameter>>, IGenericParameterList
     {
+        public static GenericParameterList Empty { get; } = new();
+
+        private GenericParameterList() { }
+
         public GenericParameterList( INamedType containingElement, IEnumerable<CodeElementLink<IGenericParameter>> sourceItems ) : base(
             containingElement,
             sourceItems ) { }

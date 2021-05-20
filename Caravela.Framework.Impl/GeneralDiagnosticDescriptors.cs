@@ -77,18 +77,18 @@ namespace Caravela.Framework.Impl
             _category,
             Error );
 
-        public static readonly StrongDiagnosticDescriptor<(IMethodSymbol Method, ITypeSymbol AttributeType, string AdviceMethod)>
-            TemplateMethodMissesAttribute = new(
+        public static readonly StrongDiagnosticDescriptor<(CodeElementKind ElementKind, ISymbol Symbol, ITypeSymbol AttributeType, string AdviceMethod )>
+            TemplateMemberMissesAttribute = new(
                 "CR0024",
-                "The template method does not have the expected custom attribute.",
-                "The method '{0}' must be annotated with the custom attribute [{1}] otherwise it cannot be used with the dynamic advice '{2}'.",
+                "The template member does not have the expected custom attribute.",
+                "The template {0} '{1}' must be annotated with the custom attribute [{2}] otherwise it cannot be used with the dynamic advice '{3}'.",
                 _category,
                 Error );
 
         public static readonly StrongDiagnosticDescriptor<(INamedType AspectType, string MethodName)> AspectMustHaveExactlyOneTemplateMethod = new(
             "CR0024",
-            "The aspect type must have exactly one method of a given name otherwise it cannot be used as a dynamic advice.",
-            "The type '{0}' must have exactly one method named '{1}'.",
+            "The aspect type must have exactly one member of a given name otherwise it cannot be used as a dynamic advice.",
+            "The type '{0}' must have exactly one member named '{1}'.",
             _category,
             Error );
 

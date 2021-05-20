@@ -145,5 +145,22 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
         }
+
+        internal bool IsImplicitValueParameter( IdentifierNameSyntax node )
+        {
+            if ( node.Identifier.Text == "value" )
+            {
+                var symbol = this._semanticAnnotationMap.GetSymbol( node );
+
+                return
+                    symbol is IParameterSymbol parameter && parameter.ContainingSymbol is IMethodSymbol method
+                                                         && (method.MethodKind == MethodKind.PropertySet || method.MethodKind == MethodKind.EventAdd
+                                                                                                         || method.MethodKind == MethodKind.EventRemove);
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

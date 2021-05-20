@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using System;
 using Attribute = Caravela.Framework.Impl.CodeModel.Attribute;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl
 {
@@ -50,6 +51,19 @@ namespace Caravela.Framework.Impl
             }
 
             throw new ArgumentOutOfRangeException( nameof(attribute), "This is not a source attribute." );
+        }
+
+        public static bool IsAccessor( this IMethod method )
+        {
+            return method.MethodKind switch
+            {
+                MethodKind.PropertyGet => true,
+                MethodKind.PropertySet => true,
+                MethodKind.EventAdd => true,
+                MethodKind.EventRemove => true,
+                MethodKind.EventRaise => true,
+                _ => false
+            };
         }
     }
 }

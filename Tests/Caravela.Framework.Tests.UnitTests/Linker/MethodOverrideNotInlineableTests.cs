@@ -47,12 +47,12 @@ class T
     void Foo()
     {
         Test(""Before"");
-        this.__Foo__OriginalBody();
+        this.__Foo__OriginalImpl();
         Test(""After"");
     }
 
     [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
-    void __Foo__OriginalBody()
+    void __Foo__OriginalImpl()
     {
         Test(""Original"");
     }
@@ -163,7 +163,7 @@ class T
     }
 
     [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
-    void __Foo__OriginalBody()
+    void __Foo__OriginalImpl()
     {
         Test(""Original"");
     }
@@ -171,7 +171,7 @@ class T
     void Foo_Override()
     {
         Test(""Before"");
-        this.__Foo__OriginalBody();
+        this.__Foo__OriginalImpl();
         Test(""After"");
     }
 }
@@ -234,7 +234,7 @@ class T
     }
 
     [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
-    void __Foo__OriginalBody()
+    void __Foo__OriginalImpl()
     {
         Test(""Original"");
     }
@@ -243,7 +243,7 @@ class T
     {
         Test(""Before2"");
         Test(""Before1"");
-        this.__Foo__OriginalBody();
+        this.__Foo__OriginalImpl();
         Test(""After1"");
         Test(""After2"");
     }
@@ -364,13 +364,13 @@ class T
     {
         Test(""Before"");
         int result;
-        result = this.__Foo__OriginalBody();
+        result = this.__Foo__OriginalImpl();
         Test(""After"");
         return result;
     }
 
     [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
-    int __Foo__OriginalBody()
+    int __Foo__OriginalImpl()
     {
         Test(""Original"");
         return 42;

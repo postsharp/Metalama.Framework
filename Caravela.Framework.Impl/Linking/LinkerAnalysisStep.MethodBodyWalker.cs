@@ -17,6 +17,16 @@ namespace Caravela.Framework.Impl.Linking
         {
             public int ReturnStatementCount { get; private set; }
 
+            public override void VisitExpressionStatement( ExpressionStatementSyntax node )
+            {
+                // Skip.
+            }
+
+            public override void VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
+            {
+                // Skip.
+            }
+
             public override void VisitReturnStatement( ReturnStatementSyntax node )
             {
                 this.ReturnStatementCount++;

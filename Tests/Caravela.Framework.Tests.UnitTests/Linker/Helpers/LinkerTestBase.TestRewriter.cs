@@ -43,8 +43,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             return tree.GetRoot().GetAnnotatedNodes( _testNodeIdAnnotationId );
         }
 
-        private static T MarkTemporary<T>( T node )
-            where T : SyntaxNode
+        private static SyntaxNode MarkTemporary( SyntaxNode node )
         {
             return node.WithAdditionalAnnotations( new SyntaxAnnotation( _testTemporaryNodeAnnotationId, "temporary" ) );
         }

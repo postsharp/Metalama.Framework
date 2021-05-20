@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
@@ -36,28 +37,76 @@ namespace Caravela.Framework.Impl.Advices
             this._diagnosticAdder = diagnosticAdder;
         }
 
-        private IMethod GetTemplateMethod( string methodName, Type expectedAttributeType, string adviceName )
+        private IMethod? GetTemplateMethod(
+            string methodName,
+            Type expectedAttributeType,
+            string adviceName,
+            [DoesNotReturnIf( true )] bool throwIfMissing = true )
         {
             // We do the search against the Roslyn compilation because it is cheaper.
 
-            var methods = this._aspectType.GetSymbol().GetMembers( methodName ).OfType<IMethodSymbol>().ToList();
+            var members = this._aspectType.GetSymbol().GetMembers( methodName ).ToList();
             var expectedAttributeTypeSymbol = this._compilation.ReflectionMapper.GetTypeSymbol( expectedAttributeType );
 
-            if ( methods.Count != 1 )
+            if ( members.Count != 1 )
             {
                 throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMethod.CreateException( (this._aspectType, methodName) );
             }
 
-            var method = methods.Single();
+            var method = members.OfType<IMethodSymbol>().Single();
 
             if ( !method.SelectRecursive( m => m.OverriddenMethod, includeThis: true )
                 .SelectMany( m => m.GetAttributes() )
                 .Any( a => a.AttributeClass?.Equals( expectedAttributeTypeSymbol, SymbolEqualityComparer.Default ) ?? false ) )
             {
-                throw GeneralDiagnosticDescriptors.TemplateMethodMissesAttribute.CreateException( (method, expectedAttributeTypeSymbol, adviceName) );
+                if ( throwIfMissing )
+                {
+                    throw GeneralDiagnosticDescriptors.TemplateMemberMissesAttribute.CreateException(
+                        (CodeElementKind.Method, method, expectedAttributeTypeSymbol, adviceName) );
+                }
+                else
+                {
+                    return null;
+                }
             }
 
             return this._compilation.Factory.GetMethod( method );
+        }
+
+        private IProperty? GetTemplateProperty(
+            string propertyName,
+            Type expectedAttributeType,
+            string adviceName,
+            [DoesNotReturnIf( true )] bool throwIfMissing = true )
+        {
+            // We do the search against the Roslyn compilation because it is cheaper.
+
+            var members = this._aspectType.GetSymbol().GetMembers( propertyName ).ToList();
+            var expectedAttributeTypeSymbol = this._compilation.ReflectionMapper.GetTypeSymbol( expectedAttributeType );
+
+            if ( members.Count != 1 )
+            {
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMethod.CreateException( (this._aspectType, propertyName) );
+            }
+
+            var property = members.OfType<IPropertySymbol>().Single();
+
+            if ( !property.SelectRecursive( m => m.OverriddenProperty, includeThis: true )
+                .SelectMany( m => m.GetAttributes() )
+                .Any( a => a.AttributeClass?.Equals( expectedAttributeTypeSymbol, SymbolEqualityComparer.Default ) ?? false ) )
+            {
+                if ( throwIfMissing )
+                {
+                    throw GeneralDiagnosticDescriptors.TemplateMemberMissesAttribute.CreateException(
+                        (CodeElementKind.Property, property, expectedAttributeTypeSymbol, adviceName) );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            return this._compilation.Factory.GetProperty( property );
         }
 
         public IOverrideMethodAdvice OverrideMethod( IMethod targetMethod, string defaultTemplate, AspectLinkerOptions? aspectLinkerOptions = null )
@@ -114,6 +163,170 @@ namespace Caravela.Framework.Impl.Advices
             this._diagnosticAdder.ReportDiagnostics( diagnosticList );
 
             return advice;
+        }
+
+        public IOverrideFieldOrPropertyAdvice OverrideFieldOrProperty(
+            IFieldOrProperty targetDeclaration,
+            string defaultTemplate,
+            AspectLinkerOptions? aspectLinkerOptions = null )
+        {
+            // Set template represents both set and init accessors.
+            var diagnosticList = new DiagnosticList();
+
+            var templateProperty = this.GetTemplateProperty(
+                defaultTemplate,
+                typeof(OverrideFieldOrPropertyTemplateAttribute),
+                nameof(this.OverrideFieldOrProperty) );
+
+            var advice = new OverrideFieldOrPropertyAdvice(
+                this._aspect,
+                targetDeclaration,
+                templateProperty,
+                null,
+                null,
+                this.Tags.ToImmutableDictionary(),
+                aspectLinkerOptions );
+
+            advice.Initialize( diagnosticList );
+            this._advices.Add( advice );
+
+            return advice;
+        }
+
+        public IOverrideFieldOrPropertyAdvice OverrideFieldOrPropertyAccessors(
+            IFieldOrProperty targetDeclaration,
+            string? defaultGetTemplate,
+            string? setTemplate,
+            AspectLinkerOptions? aspectLinkerOptions = null )
+        {
+            // Set template represents both set and init accessors.
+            var diagnosticList = new DiagnosticList();
+
+            var getTemplateMethod = this.GetTemplateMethod(
+                defaultGetTemplate,
+                typeof(OverrideFieldOrPropertyGetTemplateAttribute),
+                nameof(this.OverrideFieldOrPropertyAccessors) );
+
+            var setTemplateMethod = this.GetTemplateMethod(
+                setTemplate,
+                typeof(OverrideFieldOrPropertySetTemplateAttribute),
+                nameof(this.OverrideFieldOrPropertyAccessors) );
+
+            var advice = new OverrideFieldOrPropertyAdvice(
+                this._aspect,
+                targetDeclaration,
+                null,
+                getTemplateMethod,
+                setTemplateMethod,
+                this.Tags.ToImmutableDictionary(),
+                aspectLinkerOptions );
+
+            advice.Initialize( diagnosticList );
+            this._advices.Add( advice );
+
+            return advice;
+        }
+
+        public IIntroduceFieldAdvice IntroduceField(
+            INamedType targetType,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null )
+        {
+            throw new NotImplementedException();
+        }
+
+        public IIntroducePropertyAdvice IntroduceProperty(
+            INamedType targetType,
+            string? defaultTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null )
+        {
+            var diagnosticList = new DiagnosticList();
+
+            var templateProperty = this.GetTemplateProperty(
+                defaultTemplate,
+                typeof(IntroducePropertyTemplateAttribute),
+                nameof(this.IntroduceProperty) );
+
+            var advice = new IntroducePropertyAdvice(
+                this._aspect,
+                targetType,
+                templateProperty,
+                null,
+                null,
+                null,
+                scope,
+                conflictBehavior,
+                this.Tags.ToImmutableDictionary(),
+                aspectLinkerOptions );
+
+            advice.Initialize( diagnosticList );
+            this._advices.Add( advice );
+
+            return advice;
+        }
+
+        public IIntroducePropertyAdvice IntroduceProperty(
+            INamedType targetType,
+            string name,
+            string? defaultGetTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null )
+        {
+            var diagnosticList = new DiagnosticList();
+
+            var getTemplateMethod = this.GetTemplateMethod(
+                defaultGetTemplate,
+                typeof(IntroducePropertyGetTemplateAttribute),
+                nameof(this.OverrideFieldOrPropertyAccessors) );
+
+            var setTemplateMethod = this.GetTemplateMethod(
+                setTemplate,
+                typeof(IntroducePropertySetTemplateAttribute),
+                nameof(this.OverrideFieldOrPropertyAccessors) );
+
+            var advice = new IntroducePropertyAdvice(
+                this._aspect,
+                targetType,
+                null,
+                name,
+                getTemplateMethod,
+                setTemplateMethod,
+                scope,
+                conflictBehavior,
+                this.Tags.ToImmutableDictionary(),
+                aspectLinkerOptions );
+
+            advice.Initialize( diagnosticList );
+            this._advices.Add( advice );
+
+            return advice;
+        }
+
+        public IOverrideEventAdvice OverrideEventAccessors(
+            IEvent targetDeclaration,
+            string? addTemplate,
+            string? removeTemplate,
+            string? invokeTemplate,
+            AspectLinkerOptions? aspectLinkerOptions = null )
+        {
+            throw new NotImplementedException();
+        }
+
+        public IIntroducePropertyAdvice IntroduceEvent(
+            INamedType targetType,
+            string? addTemplate,
+            string? removeTemplate,
+            string? invokeTemplate = null,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null )
+        {
+            throw new NotImplementedException();
         }
 
         public IAdviceFactory ForLayer( string layerName ) => throw new NotImplementedException();
