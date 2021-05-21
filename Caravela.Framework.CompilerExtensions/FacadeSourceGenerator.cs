@@ -5,6 +5,8 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.CompilerExtensions
 {
+    // ReSharper disable UnusedType.Global
+    
     [Generator]
     public class FacadeSourceGenerator : ISourceGenerator
     {

@@ -16,6 +16,8 @@ using System.Threading.Tasks;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
+    // ReSharper disable UnusedType.Global
+    
     public class CentralCodeRefactoringProvider : CodeRefactoringProvider
     {
         public override async Task ComputeRefactoringsAsync( CodeRefactoringContext context )
@@ -54,7 +56,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             var buildOptions = new ProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
 
-            DesignTimeDebugger.AttachDebugger( buildOptions );
+            DebuggingHelper.AttachDebugger( buildOptions );
 
             // TODO: Make sure we are on a background thread.
 

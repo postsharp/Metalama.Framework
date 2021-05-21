@@ -1,1 +1,2 @@
-﻿ gcim win32_process | where { $_.Name -eq "dotnet.exe" } | where { $_.commandline -like "*VBCSCompiler.dll*" } | foreach { Stop-Process -ID $_.ProcessId }
+﻿echo "Killing processes"
+gcim win32_process | where { $_.Name -eq "dotnet.exe" } | where { $_.commandline -like "*VBCSCompiler.dll*" -or $_.CommandLine -like '*MSBuild.dll*' } | foreach { Stop-Process -ID $_.ProcessId }

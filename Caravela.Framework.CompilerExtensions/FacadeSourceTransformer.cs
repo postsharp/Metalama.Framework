@@ -6,8 +6,10 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.CompilerExtensions
 {
+    // ReSharper disable UnusedType.Global
+    
     [Transformer]
-    internal sealed class FacadeSourceTransformer : ISourceTransformer
+    public sealed class FacadeSourceTransformer : ISourceTransformer
     {
         private readonly ISourceTransformer _impl;
 
@@ -16,6 +18,6 @@ namespace Caravela.Framework.CompilerExtensions
             this._impl = (ISourceTransformer) ResourceExtractor.CreateInstance( "Caravela.Framework.Impl.Pipeline.SourceTransformer" );
         }
 
-        public Compilation Execute( TransformerContext transformerContext ) => this._impl.Execute( transformerContext );
+        public Compilation Execute( TransformerContext context ) => this._impl.Execute( context );
     }
 }

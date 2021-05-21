@@ -17,5 +17,5 @@ if ( Test-Path LocalBuildId.props ) {
 
 New-Item LocalBuildId.props -Value $props | Out-Null
 
-
 & dotnet pack
+& "$PSScriptRoot\kill.ps1"

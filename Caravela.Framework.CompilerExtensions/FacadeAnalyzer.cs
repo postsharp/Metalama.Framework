@@ -10,6 +10,8 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.CompilerExtensions
 {
+    // ReSharper disable UnusedType.Global
+    
     [DiagnosticAnalyzer( LanguageNames.CSharp )]
     public class FacadeAnalyzer : DiagnosticAnalyzer
     {

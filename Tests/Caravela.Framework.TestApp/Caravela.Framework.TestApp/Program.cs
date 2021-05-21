@@ -23,7 +23,7 @@ namespace Caravela.Framework.TestApp
 
             int x = 0;
 
-           // Foo();
+            Foo();
        //     new Program().SomeOtherIntroducedMethod();
 
            // IMethod m = null;

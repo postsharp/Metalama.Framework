@@ -579,7 +579,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private OutputPaths GetOutputPaths( string compileTimeAssemblyName )
         {
-            var directory = this._directoryOptions.CompileTimeProjectCacheDirectory;
+            var directory = Path.Combine( this._directoryOptions.CompileTimeProjectCacheDirectory, compileTimeAssemblyName );
             var pe = Path.Combine( directory, compileTimeAssemblyName + ".dll" );
             var pdb = Path.ChangeExtension( pe, ".pdb" );
             var manifest = Path.ChangeExtension( pe, ".manifest" );

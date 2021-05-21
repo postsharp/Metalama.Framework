@@ -16,9 +16,10 @@ namespace Caravela.Framework.CompilerExtensions
     public static class ResourceExtractor
     {
         private static readonly object _initializeLock = new();
-        private static readonly Dictionary<string, Assembly> _embeddedAssemblies = new( StringComparer.OrdinalIgnoreCase );
+        private static readonly Dictionary<string, (AssemblyName AssemblyName, string Path)> _embeddedAssemblies = new( StringComparer.OrdinalIgnoreCase );
         private static string? _snapshotDirectory;
         private static volatile bool _initialized;
+        private static Assembly? _caravelaImplementationAssembly;
 
         /// <summary>
         /// Creates an instance of a type of the <c>Caravela.Framework.Impl</c> assembly.
@@ -32,7 +33,7 @@ namespace Caravela.Framework.CompilerExtensions
                     if ( !_initialized )
                     {
                         var currentAssembly = Assembly.GetCallingAssembly();
-
+                        
                         AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
 
                         _snapshotDirectory = TempPathHelper.GetTempPath( "EmbeddedResources" );
@@ -44,17 +45,17 @@ namespace Caravela.Framework.CompilerExtensions
                         foreach ( var file in Directory.GetFiles( _snapshotDirectory, "*.dll" ) )
                         {
                             var assemblyName = RetryHelper.Retry( () => AssemblyName.GetAssemblyName( file ) );
-                            var assembly = RetryHelper.Retry( () => Assembly.LoadFile( file ) );
-                            _embeddedAssemblies[assemblyName.Name] = assembly;
+                            _embeddedAssemblies[assemblyName.Name] = (assemblyName, file);
                         }
+                        
+                        _caravelaImplementationAssembly = Assembly.Load( _embeddedAssemblies["Caravela.Framework.Impl"].AssemblyName );
 
                         _initialized = true;
                     }
                 }
             }
 
-            var implementationAssembly = _embeddedAssemblies["Caravela.Framework.Impl"];
-            var type = implementationAssembly.GetType( name, true );
+            var type = _caravelaImplementationAssembly!.GetType( name, true );
 
             return Activator.CreateInstance( type );
         }
@@ -108,9 +109,9 @@ namespace Caravela.Framework.CompilerExtensions
             var requestedAssemblyName = new AssemblyName( args.Name );
 
             if ( _embeddedAssemblies.TryGetValue( requestedAssemblyName.Name, out var assembly )
-                 && AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, assembly.GetName() ) )
+                 && AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, assembly.AssemblyName ) )
             {
-                return assembly;
+                return Assembly.LoadFile( assembly.Path );
             }
 
             return null;

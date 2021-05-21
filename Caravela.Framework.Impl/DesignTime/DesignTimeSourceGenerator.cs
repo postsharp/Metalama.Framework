@@ -5,6 +5,7 @@ using Caravela.Compiler;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -32,7 +33,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 var buildOptions = new ProjectOptions( context.AnalyzerConfigOptions );
 
-                DesignTimeDebugger.AttachDebugger( buildOptions );
+                DebuggingHelper.AttachDebugger( buildOptions );
 
                 // Execute the pipeline.
                 var results = DesignTimeAspectPipelineCache.Instance.GetSyntaxTreeResults(

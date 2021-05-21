@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 
 namespace Caravela.Framework.CompilerExtensions
 {
+    // ReSharper disable UnusedType.Global
+    
     [ExportCodeFixProvider( LanguageNames.CSharp, Name = nameof(FacadeCodeFixProvider) )]
     [Shared]
     public class FacadeCodeFixProvider : CodeFixProvider

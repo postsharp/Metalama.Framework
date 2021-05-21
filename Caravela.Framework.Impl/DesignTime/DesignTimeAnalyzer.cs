@@ -7,11 +7,14 @@ using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+
+// ReSharper disable UnusedType.Global
 
 #pragma warning disable RS1026 // Enable concurrent execution
 #pragma warning disable RS1001 // Missing diagnostic analyzer attribute.
@@ -35,6 +38,10 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 // This analyzer should work only at design time.
                 return;
+            }
+            else
+            {
+                DebuggingHelper.RequireCaravelaCompiler();
             }
 
             context.ConfigureGeneratedCodeAnalysis( GeneratedCodeAnalysisFlags.ReportDiagnostics );
@@ -65,7 +72,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 DesignTimeLogger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{context.SemanticModel.SyntaxTree.FilePath}')" );
 
-                DesignTimeDebugger.AttachDebugger( buildOptions );
+                DebuggingHelper.AttachDebugger( buildOptions );
 
                 // Execute the pipeline.
                 var compilation = context.SemanticModel.Compilation;

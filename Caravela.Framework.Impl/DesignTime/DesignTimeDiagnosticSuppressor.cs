@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.DesignTime.Diagnostics;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -21,6 +22,8 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
+    // ReSharper disable UnusedType.Global
+
     /// <summary>
     /// Our implementation of <see cref="DiagnosticSuppressor"/>.
     /// </summary>
@@ -47,7 +50,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 var buildOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
 
-                DesignTimeDebugger.AttachDebugger( buildOptions );
+                DebuggingHelper.AttachDebugger( buildOptions );
 
                 this.ReportSuppressions(
                     compilation,

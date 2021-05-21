@@ -3,11 +3,17 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         
-        		<!-- Packaging -->
-        		<PackageId>Caravela.Framework</PackageId>
-        		<PackageDescription>PostSharp project "Caravela". A tool for aspect-oriented programming (AOP) using templates written in pure C#.</PackageDescription>
-        		<IncludeBuildOutput>false</IncludeBuildOutput>
-        		<TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
+        <!-- Packaging -->
+        <PackageId>Caravela.Framework</PackageId>
+        <PackageDescription>PostSharp project "Caravela". A tool for aspect-oriented programming (AOP) using templates written in pure C#.</PackageDescription>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
+        
+        <!-- Disable a warning saying that we have nothing under the lib folder. -->
+        <NoWarn>NU5128</NoWarn>
+        
+        <!-- Disable the customization done by Caravela.Compiler.Sdk -->
+        <CaravelaCompilerDisablePackCustomization>True</CaravelaCompilerDisablePackCustomization>
     </PropertyGroup>
 
     <ItemGroup>
@@ -22,15 +28,15 @@
     </ItemGroup>
     
     <ItemGroup>
-    	<!-- The dependency to the public assembly is a public one. This dependency needs to be repeated even if it is added
-               transitively by Caravela.Framework.Impl because we add Caravela.Framework.Impl privately-->
     		<ProjectReference Include="..\Caravela.Framework.CompilerExtensions.CodeFixes\Caravela.Framework.CompilerExtensions.CodeFixes.csproj" PrivateAssets="all" />
     		<ProjectReference Include="..\Caravela.Framework.CompilerExtensions\Caravela.Framework.CompilerExtensions.csproj" PrivateAssets="all" />
-    		<ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
     		
-    
-    		<PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
-    		<PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" />
+            <!-- Adding PrivateAssets="none" here below is important otherwise PrivateAssets="all" will be transitively inherited from the ProjectReference above -->
+
+    		<ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" PrivateAssets="none" />
+    		
+    		<PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" PrivateAssets="none" />
+    		<PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="none" />
 </ItemGroup>
     
     
