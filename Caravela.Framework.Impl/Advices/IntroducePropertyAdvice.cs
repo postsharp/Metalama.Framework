@@ -37,9 +37,9 @@ namespace Caravela.Framework.Impl.Advices
             IMethod? setTemplateMethod,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
-            IReadOnlyDictionary<string, object?> tags,
-            AspectLinkerOptions? linkerOptions )
-            : base( aspect, targetDeclaration, templateProperty, scope, conflictBehavior, tags, linkerOptions )
+            AspectLinkerOptions? linkerOptions,
+            IReadOnlyDictionary<string, object?> tags )
+            : base( aspect, targetDeclaration, templateProperty, scope, conflictBehavior, linkerOptions, tags )
         {
             this._getTemplateMethod = getTemplateMethod;
             this._setTemplateMethod = setTemplateMethod;
@@ -59,9 +59,9 @@ namespace Caravela.Framework.Impl.Advices
                 linkerOptions );
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( diagnosticAdder );
+            base.Initialize( declarativeAdvices, diagnosticAdder );
 
             // TODO: The rest (unify with methods?).
 

@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.ReflectionMocks;
+using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -190,7 +191,15 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public IReadOnlyList<INamedType> ImplementedInterfaces
-            => this.TypeSymbol.AllInterfaces.Select( this.Compilation.Factory.GetNamedType ).ToImmutableArray();
+            => // TODO: Correct order after concat and distinct?            
+            (this.BaseType?.ImplementedInterfaces ?? Enumerable.Empty<INamedType>())
+            .Concat(
+                this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
+                .Concat( this.Compilation.GetObservableTransformationsOnElement( this )
+                         .OfType<IntroducedInterface>()
+                         .Select( i => i.InterfaceType ) ) ) 
+            .Distinct() // Remove duplicates (reimplementations of earlier interface by aspect).
+            .ToImmutableArray();
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
@@ -200,5 +209,76 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool Equals( IType other ) => this.Compilation.InvariantComparer.Equals( this, other );
 
         public override string ToString() => this.TypeSymbol.ToString();
+
+        public bool IsSubclassOf( INamedType type )
+        {
+            // TODO: enum.IsSubclassOf(int) == true etc.
+            if (type.TypeKind == TypeKind.Class)
+            {
+                INamedType? currentType = this;
+                while ( currentType != null )
+                {
+                    if (this.Compilation.InvariantComparer.Equals(currentType, type))
+                    {
+                        return true;
+                    }
+
+                    currentType = currentType.BaseType;
+                }
+
+                return false;
+            }
+            else if (type.TypeKind == TypeKind.Interface)
+            {
+                return this.ImplementedInterfaces.SingleOrDefault( i => this.Compilation.InvariantComparer.Equals( i, type ) ) != null;
+            }            
+            else
+            {
+                return this.Compilation.InvariantComparer.Equals(this, type);
+            }
+        }
+
+        public IMember? FindImplementationForInterfaceMember( IMember interfaceMember )
+        {
+            // TODO: Type introductions.
+            var symbolInterfaceMemberImplementationSymbol = this.TypeSymbol.FindImplementationForInterfaceMember( interfaceMember.GetSymbol().AssertNotNull() );
+            var symbolInterfaceMemberImplementation =
+                symbolInterfaceMemberImplementationSymbol != null
+                ? (IMember) this.Compilation.Factory.GetCodeElement( symbolInterfaceMemberImplementationSymbol )
+                : null;
+
+            // Introduced implementation can be implementing the interface member in a subtype.
+            INamedType currentType = this;
+
+            while (currentType != null)
+            {
+                var introducedInterface = 
+                    this.Compilation.GetObservableTransformationsOnElement( currentType )
+                    .OfType<IntroducedInterface>()
+                    .Where(i => this.Compilation.InvariantComparer.Equals(i.InterfaceType, interfaceMember.DeclaringType))
+                    .SingleOrDefault();
+
+                if (introducedInterface != null)
+                {
+                    // TODO: Generics.
+                    if (!introducedInterface.MemberMap.TryGetValue(interfaceMember, out var interfaceMemberImplementation))
+                    {
+                        throw new AssertionFailedException();
+                    }
+
+                    // Which is later in inheritance?
+                    if ( symbolInterfaceMemberImplementation == null || currentType.IsSubclassOf( symbolInterfaceMemberImplementation.DeclaringType ) )
+                    {
+                        return interfaceMemberImplementation;
+                    }
+                    else
+                    {
+                        return symbolInterfaceMemberImplementation;
+                    }
+                }
+            }
+
+            return symbolInterfaceMemberImplementation;
+        }
     }
 }

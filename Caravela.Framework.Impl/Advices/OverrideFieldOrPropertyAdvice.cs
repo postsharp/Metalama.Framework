@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl
             this.LinkerOptions = aspectLinkerOptions;
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
+        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder ) { }
 
         public override AdviceResult ToResult( ICompilation compilation )
         {

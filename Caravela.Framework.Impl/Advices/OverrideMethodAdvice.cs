@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Advices
             this.LinkerOptions = linkerOptions;
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
+        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder ) { }
 
         public override AdviceResult ToResult( ICompilation compilation )
         {

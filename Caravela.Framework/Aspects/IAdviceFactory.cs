@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Aspects
 {
@@ -82,6 +83,21 @@ namespace Caravela.Framework.Aspects
             string? removeTemplate,
             string? invokeTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null );
+
+        IIntroduceInterfaceAdvice IntroduceInterface(
+            INamedType targetType,
+            INamedType interfaceType,
+            bool explicitImplementation = true,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null );
+
+        IIntroduceInterfaceAdvice IntroduceInterface(
+            INamedType targetType,
+            INamedType interfaceType,
+            IReadOnlyDictionary<IMember, IMember> memberMap,
+            bool explicitImplementation = true,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AspectLinkerOptions? aspectLinkerOptions = null );
 

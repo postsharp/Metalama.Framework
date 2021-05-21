@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal static class AdviceAttributeFactory
     {
-        public static IAdvice CreateAdvice<T>(
+        public static Advice CreateAdvice<T>(
             this AttributeData attribute,
             AspectInstance aspect,
             IDiagnosticAdder diagnosticAdder,
@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl.Advices
                             aspectLinkerOptions,
                             ImmutableDictionary<string, object?>.Empty );
 
-                        advice.Initialize( diagnosticAdder );
+                        advice.Initialize( null, diagnosticAdder );
 
                         if ( TryGetNamedArgument<string>( nameof(IntroduceMethodAttribute.Name), out var name ) )
                         {
@@ -114,10 +114,10 @@ namespace Caravela.Framework.Impl.Advices
                             null,
                             scope,
                             conflictBehavior,
-                            ImmutableDictionary<string, object?>.Empty,
-                            aspectLinkerOptions );
+                            aspectLinkerOptions,
+                            ImmutableDictionary<string, object?>.Empty );
 
-                        advice.Initialize( diagnosticAdder );
+                        advice.Initialize( null, diagnosticAdder );
 
                         if ( TryGetNamedArgument<string>( nameof(IntroduceMethodAttribute.Name), out var name ) )
                         {

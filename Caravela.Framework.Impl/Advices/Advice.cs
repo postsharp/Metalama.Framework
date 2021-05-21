@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.Advices
             this.AspectLayerId = new AspectLayerId( this.Aspect.AspectClass, this.LayerName );
         }
 
-        public abstract void Initialize( IDiagnosticAdder diagnosticAdder );
+        public abstract void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder );
 
         public abstract AdviceResult ToResult( ICompilation compilation );
     }

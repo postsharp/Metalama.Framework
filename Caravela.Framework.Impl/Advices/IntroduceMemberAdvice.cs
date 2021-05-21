@@ -34,8 +34,8 @@ namespace Caravela.Framework.Impl.Advices
             IMember? templateMember,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
-            IReadOnlyDictionary<string, object?> tags,
-            AspectLinkerOptions? linkerOptions ) : base( aspect, targetDeclaration, tags )
+            AspectLinkerOptions? linkerOptions,
+            IReadOnlyDictionary<string, object?> tags ) : base( aspect, targetDeclaration, tags )
         {
             this.TemplateMember = templateMember;
             this.Scope = scope;
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.Advices
             this.LinkerOptions = linkerOptions;
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
             this.MemberBuilder.Accessibility = this.TemplateMember != null ? this.TemplateMember.Accessibility : Accessibility.Private;
 

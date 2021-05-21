@@ -128,7 +128,30 @@ namespace Caravela.Framework.Impl
 
             return list!;
 #else
-       return items!;
+            return items!;
+#endif
+        }
+
+#if !DEBUG
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+#endif
+        public static IEnumerable<T> AssertDistinct<T>( this IEnumerable<T> items )
+            where T : class
+        {
+#if DEBUG
+            var itemSet = new HashSet<T>();
+
+            foreach (var item in items)
+            {
+                if (!itemSet.Add(item))
+                {
+                    throw new AssertionFailedException("The enumeration must not contain equal elements.");
+                }
+
+                yield return item;
+            }
+#else
+            return items;
 #endif
         }
     }

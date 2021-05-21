@@ -28,7 +28,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool Equals( IType x, IType y ) => SymbolEqualityComparer.Default.Equals( x.GetSymbol(), y.GetSymbol() );
 
+        public bool Equals( INamedType x, INamedType y ) => SymbolEqualityComparer.Default.Equals( x.GetSymbol(), y.GetSymbol() );
+
         public int GetHashCode( IType obj ) => SymbolEqualityComparer.Default.GetHashCode( obj.GetSymbol() );
+
+        public int GetHashCode( INamedType obj ) => SymbolEqualityComparer.Default.GetHashCode( obj.GetSymbol() );
 
         public bool Is( IType left, IType right )
             => this._compilation.HasImplicitConversion( ((ITypeInternal) left).TypeSymbol, ((ITypeInternal) right).TypeSymbol );

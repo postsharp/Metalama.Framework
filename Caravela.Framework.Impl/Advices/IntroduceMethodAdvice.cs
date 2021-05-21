@@ -30,14 +30,14 @@ namespace Caravela.Framework.Impl.Advices
             ConflictBehavior conflictBehavior,
             AspectLinkerOptions? linkerOptions,
             IReadOnlyDictionary<string, object?> tags )
-            : base( aspect, targetDeclaration, templateMethod, scope, conflictBehavior, tags, linkerOptions )
+            : base( aspect, targetDeclaration, templateMethod, scope, conflictBehavior, linkerOptions, tags )
         {
             this.MemberBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Name, this.LinkerOptions );
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( diagnosticAdder );
+            base.Initialize( declarativeAdvices, diagnosticAdder );
 
             this.MemberBuilder.IsAsync = this.TemplateMember.IsAsync;
 

@@ -84,10 +84,11 @@ namespace Caravela.Framework.Impl
             using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
             {
                 var declarativeAdvices =
-                    this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, diagnosticSink, codeElement, x.Attribute, x.Member ) );
+                    this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, diagnosticSink, codeElement, x.Attribute, x.Member ) )
+                    .ToArray();
 
                 var compilationModel = (CompilationModel) codeElement.Compilation;
-                var adviceFactory = new AdviceFactory( compilationModel, diagnosticSink, compilationModel.Factory.GetNamedType( this.AspectType ), aspect );
+                var adviceFactory = new AdviceFactory( compilationModel, diagnosticSink, declarativeAdvices, compilationModel.Factory.GetNamedType( this.AspectType ), aspect );
                 var aspectBuilder = new AspectBuilder<T>( codeElement, diagnosticSink, declarativeAdvices, adviceFactory );
 
                 try
@@ -117,7 +118,7 @@ namespace Caravela.Framework.Impl
             }
         }
 
-        private static IAdvice CreateDeclarativeAdvice<T>(
+        private static Advice CreateDeclarativeAdvice<T>(
             AspectInstance aspect,
             IDiagnosticAdder diagnosticAdder,
             T codeElement,

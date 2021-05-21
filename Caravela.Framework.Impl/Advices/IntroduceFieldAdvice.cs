@@ -27,12 +27,12 @@ namespace Caravela.Framework.Impl.Advices
             ConflictBehavior conflictBehavior,
             AspectLinkerOptions? linkerOptions,
             IReadOnlyDictionary<string, object?> tags )
-            : base( aspect, targetDeclaration, null, scope, conflictBehavior, tags, linkerOptions )
+            : base( aspect, targetDeclaration, null, scope, conflictBehavior, linkerOptions, tags )
         {
             this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, name, linkerOptions );
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
             throw new NotImplementedException();
         }

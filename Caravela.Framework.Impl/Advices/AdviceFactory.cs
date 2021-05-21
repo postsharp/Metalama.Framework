@@ -22,6 +22,7 @@ namespace Caravela.Framework.Impl.Advices
         private readonly INamedType _aspectType;
         private readonly AspectInstance _aspect;
         private readonly IDiagnosticAdder _diagnosticAdder;
+        private readonly IReadOnlyList<Advice> _declarativeAdvices;
 
         private readonly List<IAdvice> _advices = new();
 
@@ -29,12 +30,13 @@ namespace Caravela.Framework.Impl.Advices
 
         public Dictionary<string, object?> Tags { get; } = new( StringComparer.Ordinal );
 
-        public AdviceFactory( CompilationModel compilation, IDiagnosticAdder diagnosticAdder, INamedType aspectType, AspectInstance aspect )
+        public AdviceFactory( CompilationModel compilation, IDiagnosticAdder diagnosticAdder, IReadOnlyList<Advice> declarativeAdvices, INamedType aspectType, AspectInstance aspect )
         {
             this._aspectType = aspectType;
             this._aspect = aspect;
             this._compilation = compilation;
             this._diagnosticAdder = diagnosticAdder;
+            this._declarativeAdvices = declarativeAdvices;
         }
 
         private IMethod? GetTemplateMethod(
@@ -115,7 +117,7 @@ namespace Caravela.Framework.Impl.Advices
             var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof(OverrideMethodTemplateAttribute), nameof(this.OverrideMethod) );
 
             var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, this.Tags.ToImmutableDictionary(), aspectLinkerOptions );
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
             this._advices.Add( advice );
 
             if ( diagnosticList.Any( d => d.Severity == DiagnosticSeverity.Error ) )
@@ -150,7 +152,7 @@ namespace Caravela.Framework.Impl.Advices
                 aspectLinkerOptions,
                 this.Tags.ToImmutableDictionary() );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
             this._advices.Add( advice );
 
             if ( diagnosticList.Any( d => d.Severity == DiagnosticSeverity.Error ) )
@@ -187,7 +189,7 @@ namespace Caravela.Framework.Impl.Advices
                 this.Tags.ToImmutableDictionary(),
                 aspectLinkerOptions );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
             this._advices.Add( advice );
 
             return advice;
@@ -221,7 +223,7 @@ namespace Caravela.Framework.Impl.Advices
                 this.Tags.ToImmutableDictionary(),
                 aspectLinkerOptions );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
             this._advices.Add( advice );
 
             return advice;
@@ -259,10 +261,10 @@ namespace Caravela.Framework.Impl.Advices
                 null,
                 scope,
                 conflictBehavior,
-                this.Tags.ToImmutableDictionary(),
-                aspectLinkerOptions );
+                aspectLinkerOptions,
+                this.Tags.ToImmutableDictionary() );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
             this._advices.Add( advice );
 
             return advice;
@@ -298,10 +300,10 @@ namespace Caravela.Framework.Impl.Advices
                 setTemplateMethod,
                 scope,
                 conflictBehavior,
-                this.Tags.ToImmutableDictionary(),
-                aspectLinkerOptions );
+                aspectLinkerOptions,
+                this.Tags.ToImmutableDictionary() );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
             this._advices.Add( advice );
 
             return advice;
@@ -327,6 +329,27 @@ namespace Caravela.Framework.Impl.Advices
             AspectLinkerOptions? aspectLinkerOptions = null )
         {
             throw new NotImplementedException();
+        }
+
+        public IIntroduceInterfaceAdvice IntroduceInterface(
+            INamedType targetType,
+            INamedType interfaceType,
+            bool explicitImplementation = true,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null )
+        {
+            return new IntroduceInterfaceAdvice( this._aspect, targetType, interfaceType, explicitImplementation, null, conflictBehavior, aspectLinkerOptions, this.Tags.ToImmutableDictionary() );
+        }
+
+        public IIntroduceInterfaceAdvice IntroduceInterface(
+            INamedType targetType,
+            INamedType interfaceType,
+            IReadOnlyDictionary<IMember, IMember> memberMap,
+            bool explicitImplementation = true,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null )
+        {
+            return new IntroduceInterfaceAdvice( this._aspect, targetType, interfaceType, true, memberMap, conflictBehavior, aspectLinkerOptions, this.Tags.ToImmutableDictionary() );
         }
 
         public IAdviceFactory ForLayer( string layerName ) => throw new NotImplementedException();
