@@ -19,9 +19,11 @@ namespace Caravela.Framework.Impl
             new( "CR0001", _category, "Unexpected exception occurred in Caravela: {0} Exception details are in {1}.", Error,
                  "Unexpected exception in Caravela." );
 
-        public static readonly DiagnosticDefinition<(ITypeSymbol AspectType, DeclarationKind DeclarationKind, IDeclaration Declaration, ITypeSymbol InterfaceType)> AspectAppliedToIncorrectDeclaration =
-            new( "CR0003", _category, "Aspect '{0}' cannot be applied to {1} '{2}', because this aspect does not implement the '{3}' interface.", Error,
-                 "Aspect applied to incorrect kind of declaration." );
+        public static readonly
+            DiagnosticDefinition<(ITypeSymbol AspectType, DeclarationKind DeclarationKind, IDeclaration Declaration, ITypeSymbol InterfaceType)>
+            AspectAppliedToIncorrectDeclaration =
+                new( "CR0003", _category, "Aspect '{0}' cannot be applied to {1} '{2}', because this aspect does not implement the '{3}' interface.", Error,
+                     "Aspect applied to incorrect kind of declaration." );
 
         public static readonly DiagnosticDefinition<(INamedTypeSymbol AspectType, string Weavers)> AspectHasMoreThanOneWeaver =
             new( "CR0004", _category, "Aspect '{0}' can have at most one weaver, but it has the following: {1}.", Error, "Aspect has more than one weaver." );

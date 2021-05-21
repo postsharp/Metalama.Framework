@@ -6,7 +6,7 @@ using Caravela.Framework.Impl.CodeModel.References;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
-    internal interface ICompileTimeReflectionObject<out T> 
+    internal interface ICompileTimeReflectionObject<out T>
         where T : ICompilationElement
     {
         IDeclarationRef<T> Target { get; }

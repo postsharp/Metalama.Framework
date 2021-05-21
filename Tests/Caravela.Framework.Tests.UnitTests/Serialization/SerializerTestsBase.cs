@@ -22,15 +22,16 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         {
             // We need a syntax factory for an arbitrary compilation, but at least with standard references.
             // Note that we cannot easily get a reference to Caravela.Compiler.Interfaces this way because we have a reference assembly.
-            
-            this.SyntaxFactory = 
+
+            this.SyntaxFactory =
                 CreateCompilationModel(
-                    "/* No code is necessary, only references */",
-                    additionalReferences: new[]
-                    {
-                        MetadataReference.CreateFromFile( typeof(ICompileTimeReflectionObject<>).Assembly.Location ),
-                        MetadataReference.CreateFromFile( typeof(Queue<>).Assembly.Location )
-                    } ).Factory;
+                        "/* No code is necessary, only references */",
+                        additionalReferences: new[]
+                        {
+                            MetadataReference.CreateFromFile( typeof(ICompileTimeReflectionObject<>).Assembly.Location ),
+                            MetadataReference.CreateFromFile( typeof(Queue<>).Assembly.Location )
+                        } )
+                    .Factory;
 
             this.SerializationService = new SyntaxSerializationService();
         }

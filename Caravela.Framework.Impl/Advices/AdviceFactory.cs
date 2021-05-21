@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 return null;
             }
-            
+
             // We do the search against the Roslyn compilation because it is cheaper.
 
             var members = this._aspectType.GetSymbol().GetMembers( methodName ).ToList();

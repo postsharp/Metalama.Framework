@@ -4,8 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Sdk;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
 using System.Reflection;
@@ -15,7 +13,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
     internal class CompileTimePropertyInfo : PropertyInfo, ICompileTimeReflectionObject<IProperty>
     {
         public IDeclarationRef<IProperty> Target { get; set; }
-        
+
         private CompileTimePropertyInfo( IProperty property )
         {
             this.Target = property.ToRef();
@@ -56,7 +54,5 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         public override bool CanWrite => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override Type PropertyType => throw CompileTimeMocksHelper.CreateNotSupportedException();
-
-        
     }
 }

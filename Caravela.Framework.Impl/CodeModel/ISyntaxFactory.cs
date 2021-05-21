@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -14,7 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel
     internal interface ISyntaxFactory
     {
         Compilation Compilation { get; }
-        
+
         /// <summary>
         /// Gets a fully-qualified <see cref="NameSyntax"/> for a given reflection <see cref="Type"/>.
         /// </summary>
@@ -23,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel
         ITypeSymbol GetTypeSymbol( Type type );
     }
 
-    internal interface ICompilationElementFactory : ISyntaxFactory 
+    internal interface ICompilationElementFactory : ISyntaxFactory
     {
         CompilationModel CompilationModel { get; }
     }

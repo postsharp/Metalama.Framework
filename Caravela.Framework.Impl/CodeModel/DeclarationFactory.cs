@@ -24,8 +24,9 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             this.CompilationModel = compilation;
         }
-        
+
         public CompilationModel CompilationModel { get; }
+
         public SyntaxSerializationService Serializers { get; } = new();
 
         private Compilation RoslynCompilation => this.CompilationModel.RoslynCompilation;
@@ -47,10 +48,14 @@ namespace Caravela.Framework.Impl.CodeModel
                     : this.CompilationModel );
 
         public IType GetIType( ITypeSymbol typeSymbol )
-            => (IType) this._cache.GetOrAdd( typeSymbol.ToRef(), l => CodeModelFactory.CreateIType( (ITypeSymbol) l.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+            => (IType) this._cache.GetOrAdd(
+                typeSymbol.ToRef(),
+                l => CodeModelFactory.CreateIType( (ITypeSymbol) l.GetSymbol( this.Compilation )!, this.CompilationModel ) );
 
         public INamedType GetNamedType( INamedTypeSymbol typeSymbol )
-            => (NamedType) this._cache.GetOrAdd( typeSymbol.ToRef(), s => new NamedType( (INamedTypeSymbol) s.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+            => (NamedType) this._cache.GetOrAdd(
+                typeSymbol.ToRef(),
+                s => new NamedType( (INamedTypeSymbol) s.GetSymbol( this.Compilation )!, this.CompilationModel ) );
 
         public IGenericParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
             => (GenericParameter) this._cache.GetOrAdd(
@@ -58,19 +63,27 @@ namespace Caravela.Framework.Impl.CodeModel
                 tp => new GenericParameter( (ITypeParameterSymbol) tp.GetSymbol( this.Compilation )!, this.CompilationModel ) );
 
         public IMethod GetMethod( IMethodSymbol methodSymbol )
-            => (IMethod) this._cache.GetOrAdd( methodSymbol.ToRef(), ms => new Method( (IMethodSymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+            => (IMethod) this._cache.GetOrAdd(
+                methodSymbol.ToRef(),
+                ms => new Method( (IMethodSymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
 
         public IProperty GetProperty( IPropertySymbol propertySymbol )
-            => (IProperty) this._cache.GetOrAdd( propertySymbol.ToRef(), ms => new Property( (IPropertySymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+            => (IProperty) this._cache.GetOrAdd(
+                propertySymbol.ToRef(),
+                ms => new Property( (IPropertySymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
 
         public IField GetField( IFieldSymbol fieldSymbol )
             => (IField) this._cache.GetOrAdd( fieldSymbol.ToRef(), ms => new Field( (IFieldSymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
 
         public IConstructor GetConstructor( IMethodSymbol methodSymbol )
-            => (IConstructor) this._cache.GetOrAdd( methodSymbol.ToRef(), ms => new Constructor( (IMethodSymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+            => (IConstructor) this._cache.GetOrAdd(
+                methodSymbol.ToRef(),
+                ms => new Constructor( (IMethodSymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
 
         public IParameter GetParameter( IParameterSymbol parameterSymbol )
-            => (IParameter) this._cache.GetOrAdd( parameterSymbol.ToRef(), ms => new Parameter( (IParameterSymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+            => (IParameter) this._cache.GetOrAdd(
+                parameterSymbol.ToRef(),
+                ms => new Parameter( (IParameterSymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
 
         public IEvent GetEvent( IEventSymbol @event )
             => (IEvent) this._cache.GetOrAdd( @event.ToRef(), ms => new Event( (IEventSymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
@@ -183,14 +196,11 @@ namespace Caravela.Framework.Impl.CodeModel
         public IParameter GetReturnParameter( IMethodSymbol methodSymbol ) => this.GetMethod( methodSymbol ).ReturnParameter;
 
         private Compilation Compilation => this.CompilationModel.RoslynCompilation;
-        
+
         Compilation ISyntaxFactory.Compilation => this.CompilationModel.RoslynCompilation;
 
         TypeSyntax ISyntaxFactory.GetTypeSyntax( Type type ) => this.CompilationModel.ReflectionMapper.GetTypeSyntax( type );
 
         ITypeSymbol ISyntaxFactory.GetTypeSymbol( Type type ) => this.CompilationModel.ReflectionMapper.GetTypeSymbol( type );
-
-        
-        
     }
 }

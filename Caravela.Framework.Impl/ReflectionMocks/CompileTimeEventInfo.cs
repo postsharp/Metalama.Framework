@@ -4,8 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Serialization;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Reflection;
 
@@ -13,9 +11,8 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 {
     internal class CompileTimeEventInfo : EventInfo, ICompileTimeReflectionObject<IEvent>
     {
-        
         public IDeclarationRef<IEvent> Target { get; }
-        
+
         public CompileTimeEventInfo( IEvent @event )
         {
             this.Target = @event.ToRef();
@@ -23,7 +20,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public static CompileTimeEventInfo Create( IEvent @event )
         {
-            return new CompileTimeEventInfo( @event );
+            return new( @event );
         }
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
@@ -45,6 +42,5 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         public override MethodInfo GetRemoveMethod( bool nonPublic ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override EventAttributes Attributes => throw CompileTimeMocksHelper.CreateNotSupportedException();
-        
     }
 }

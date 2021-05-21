@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
@@ -65,7 +64,5 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         public override MethodInfo GetBaseDefinition() => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override ICustomAttributeProvider ReturnTypeCustomAttributes => throw CompileTimeMocksHelper.CreateNotSupportedException();
-
-        
     }
 }

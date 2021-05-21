@@ -275,7 +275,9 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 if ( this._currentContext.Scope == SymbolDeclarationScope.CompileTimeOnly && node.IsNameOf() )
                 {
-                    var typeSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.ArgumentList.Arguments[0].Expression ).Symbol;
+                    var typeSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree )
+                        .GetSymbolInfo( node.ArgumentList.Arguments[0].Expression )
+                        .Symbol;
 
                     if ( typeSymbol != null && this.SymbolClassifier.GetSymbolDeclarationScope( typeSymbol ) == SymbolDeclarationScope.RunTimeOnly )
                     {

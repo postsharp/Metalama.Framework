@@ -449,18 +449,17 @@ public class CompileTimeOnlyClass
 ";
 
             var compilation = CreateCSharpCompilation( code );
-            
+
             var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), this.ServiceProvider );
 
-            DiagnosticList diagnosticList = new(); 
+            DiagnosticList diagnosticList = new();
             Assert.True( loader.TryGetCompileTimeProject( compilation, null, diagnosticList, false, CancellationToken.None, out var compileTimeProject ) );
 
             var transformed = File.ReadAllText( compileTimeProject!.CodeFiles[0].TransformedPath );
-            
-            Assert.Equal( expected, transformed );
-            
-            // We are not testing the rewriting of typeof in a template because this is done by the template compiler and covered by template tests.
 
+            Assert.Equal( expected, transformed );
+
+            // We are not testing the rewriting of typeof in a template because this is done by the template compiler and covered by template tests.
         }
     }
 }

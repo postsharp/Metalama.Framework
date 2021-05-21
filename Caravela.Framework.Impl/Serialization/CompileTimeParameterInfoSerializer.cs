@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.Serialization
             }
 
             var retrieveMethodBase = this.Service.CompileTimeMethodInfoSerializer.SerializeMethodBase(
-                method.GetSymbol(),
+                method!.GetSymbol(),
                 syntaxFactory );
 
             return ElementAccessExpression(

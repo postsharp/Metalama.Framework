@@ -567,9 +567,8 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
         {
-
             var transformationKind = this.GetTransformationKind( node );
-            
+
             if ( node.IsNameOf() )
             {
                 // nameof is always transformed into a literal.
@@ -577,14 +576,15 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( transformationKind == TransformationKind.Transform )
                 {
-                    return this.MetaSyntaxFactory.LiteralExpression( this.MetaSyntaxFactory.Kind( SyntaxKind.StringLiteralExpression ), this.MetaSyntaxFactory.Literal( name ) );
+                    return this.MetaSyntaxFactory.LiteralExpression(
+                        this.MetaSyntaxFactory.Kind( SyntaxKind.StringLiteralExpression ),
+                        this.MetaSyntaxFactory.Literal( name ) );
                 }
                 else
                 {
                     return SyntaxFactoryEx.LiteralExpression( name );
                 }
             }
-
 
             if ( transformationKind != TransformationKind.Transform &&
                  node.ArgumentList.Arguments.Any( a => this._templateMemberClassifier.IsDynamicParameter( a ) ) )

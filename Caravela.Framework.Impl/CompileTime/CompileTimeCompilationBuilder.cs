@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 return true;
             }
-            
+
             // Validate the code (some validations are not done by the template compiler).
             foreach ( var syntaxTree in treesWithCompileTimeCode )
             {

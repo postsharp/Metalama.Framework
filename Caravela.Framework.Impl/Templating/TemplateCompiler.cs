@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.Templating
                 annotatedSyntaxRoot = null;
                 transformedSyntaxRoot = null;
                 diagnostics.Report( sourceDiagnostics );
-                
+
                 return false;
             }
 

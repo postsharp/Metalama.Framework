@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
-using Microsoft.CodeAnalysis;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
@@ -18,10 +17,6 @@ namespace Caravela.Framework.Impl.ReflectionMocks
             this.Target = parameter.ToRef();
         }
 
-        public static ParameterInfo Create( IParameter parameter )
-            => new CompileTimeParameterInfo( parameter );
-
-
-        
+        public static ParameterInfo Create( IParameter parameter ) => new CompileTimeParameterInfo( parameter );
     }
 }

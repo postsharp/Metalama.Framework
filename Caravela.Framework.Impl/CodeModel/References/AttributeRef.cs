@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Caravela.Framework.Impl.CodeModel.References
 {
@@ -41,7 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
                 _ => throw new AssertionFailedException()
             };
 
-        public ISymbol GetSymbol( Compilation compilation ) => throw new System.NotSupportedException();
+        public ISymbol GetSymbol( Compilation compilation ) => throw new NotSupportedException();
 
         public override string ToString() => this.Target?.ToString() ?? "null";
     }

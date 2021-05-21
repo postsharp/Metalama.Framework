@@ -59,10 +59,9 @@ namespace Caravela.Framework.Impl.CodeModel.References
         /// <returns></returns>
         public static DeclarationRef<IDeclaration> FromSymbol( ISymbol symbol ) => new( symbol );
 
-        public static DeclarationRef<T> FromDocumentationId<T>( string documentationId ) 
+        public static DeclarationRef<T> FromDocumentationId<T>( string documentationId )
             where T : class, ICompilationElement
             => new( documentationId );
-        
 
         /// <summary>
         /// Creates a <see cref="DeclarationRef{T}"/> from a Roslyn symbol.
@@ -74,8 +73,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
             where T : class, ICompilationElement
             => new( symbol );
 
-        public static DeclarationRef<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol )
-            => new( methodSymbol, DeclarationSpecialKind.ReturnParameter );
+        public static DeclarationRef<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol ) => new( methodSymbol, DeclarationSpecialKind.ReturnParameter );
 
         internal static DeclarationRef<IDeclaration> Compilation() => new( null, DeclarationSpecialKind.Compilation );
     }
@@ -141,11 +139,9 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
                         return symbol;
                     }
-                    break;
 
-                    default:
-                        throw new InvalidOperationException();
-
+                default:
+                    throw new InvalidOperationException();
             }
         }
 
@@ -171,7 +167,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
                             throw new AssertionFailedException( $"Cannot resolve {documentationId} into a symbol." );
                         }
 
-                        return (T) compilation.Factory.GetDeclaration(symbol);
+                        return (T) compilation.Factory.GetDeclaration( symbol );
                     }
 
                 default:

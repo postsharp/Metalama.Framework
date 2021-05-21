@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     internal partial class AccessorBuilder
     {
         // TODO: Move all types into separate files.
-        
+
         private abstract class ParameterBase : DeclarationBuilder, IParameterBuilder
         {
             protected AccessorBuilder Accessor { get; }

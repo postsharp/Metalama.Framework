@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         public Compilation Compilation { get; }
-        
+
         /// <summary>
         /// Gets a <see cref="ReflectionMapper"/> instance for a given <see cref="Compilation"/>.
         /// </summary>
@@ -75,14 +75,12 @@ namespace Caravela.Framework.Impl.CodeModel
             switch ( type )
             {
                 case CompileTimeType compileTimeType:
-                    return (ITypeSymbol) compileTimeType.Target.GetSymbol(this.Compilation);
+                    return (ITypeSymbol) compileTimeType.Target.GetSymbol( this.Compilation );
 
                 default:
                     return this._symbolCache.GetOrAdd( type, this.GetTypeSymbolCore );
             }
         }
-
-        
 
         /// <summary>
         /// Gets a fully-qualified <see cref="NameSyntax"/> for a given reflection <see cref="Type"/>.

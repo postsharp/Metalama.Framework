@@ -14,7 +14,8 @@ namespace Caravela.Framework.Impl.Serialization
         where TInput : TOutput
     {
         /// <inheritdoc />
-        public sealed override ExpressionSyntax Serialize( object obj, ICompilationElementFactory syntaxFactory ) => this.Serialize( (TInput) obj, syntaxFactory );
+        public sealed override ExpressionSyntax Serialize( object obj, ICompilationElementFactory syntaxFactory )
+            => this.Serialize( (TInput) obj, syntaxFactory );
 
         /// <summary>
         /// Serializes an object of a type supported by this object serializer into a Roslyn expression that creates such an object.

@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Linking
         private readonly IMethod _overriddenDeclaration;
         private readonly AspectLayerId _aspectLayerId;
         private readonly LinkerAnnotationOrder _order;
-        
+
         public LinkerOverrideEventProceedImpl(
             AspectLayerId aspectLayerId,
             IMethod overriddenDeclaration,
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.Linking
             this._aspectLayerId = aspectLayerId;
             this._overriddenDeclaration = overriddenDeclaration;
             this._order = order;
-            
+
             // TODO: Use the parameter or remove it.
             _ = syntaxFactory;
         }
@@ -37,7 +37,8 @@ namespace Caravela.Framework.Impl.Linking
         TypeSyntax IProceedImpl.CreateTypeSyntax()
         {
             // TODO: Introduced types?
-            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( (ITypeSymbol) ((NamedType) this.ContainingEvent.EventType).Symbol );
+            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(
+                (ITypeSymbol) ((NamedType) this.ContainingEvent.EventType).Symbol );
         }
 
         StatementSyntax IProceedImpl.CreateAssignStatement( SyntaxToken returnValueLocalName )

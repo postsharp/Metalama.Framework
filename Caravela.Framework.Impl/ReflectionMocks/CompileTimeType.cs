@@ -25,13 +25,13 @@ namespace Caravela.Framework.Impl.ReflectionMocks
             this.Target = typeSymbol;
         }
 
-        public static Type CreateFromDocumentationId( string documentationId, string fullName ) => new CompileTimeType( DeclarationRef.FromDocumentationId<IType>( documentationId ), fullName );
+        public static Type CreateFromDocumentationId( string documentationId, string fullName )
+            => new CompileTimeType( DeclarationRef.FromDocumentationId<IType>( documentationId ), fullName );
 
         internal static Type Create( IType type ) => Create( type.GetSymbol() );
-        
 
         internal static Type Create( ITypeSymbol typeSymbol )
-            =>  new CompileTimeType( DeclarationRef.FromSymbol<IType>( typeSymbol ), typeSymbol.ToDisplayString( ) );
+            => new CompileTimeType( DeclarationRef.FromSymbol<IType>( typeSymbol ), typeSymbol.ToDisplayString() );
 
         public override string Namespace => throw CompileTimeMocksHelper.CreateNotSupportedException();
 

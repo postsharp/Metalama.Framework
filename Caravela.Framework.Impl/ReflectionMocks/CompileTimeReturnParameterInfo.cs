@@ -11,18 +11,15 @@ namespace Caravela.Framework.Impl.ReflectionMocks
     internal class CompileTimeReturnParameterInfo : ParameterInfo, ICompileTimeReflectionObject<IParameter>
     {
         public IDeclarationRef<IParameter> Target { get; }
-        
-        private CompileTimeReturnParameterInfo( IParameter  returnParameter )
+
+        private CompileTimeReturnParameterInfo( IParameter returnParameter )
         {
             this.Target = returnParameter.ToRef();
         }
 
-        public static ParameterInfo Create( IParameter  returnParameter )
+        public static ParameterInfo Create( IParameter returnParameter )
         {
             return new CompileTimeReturnParameterInfo( returnParameter );
         }
-
-        
-        
     }
 }

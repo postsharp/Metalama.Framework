@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
         {
             CompilerServiceProvider.Initialize();
             var userDefinedDescriptors = UserDiagnosticRegistrationService.GetInstance().GetSupportedDescriptors();
-            
+
             // The file may contain system descriptors by mistake. We must remove them otherwise we will have some duplicate key issue.
 
             this.SupportedDiagnosticDescriptors =

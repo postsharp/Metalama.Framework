@@ -24,7 +24,11 @@ namespace Caravela.Framework.Impl.Templating
                 true,
                 cancellationToken );
 
-        internal static bool Validate( Compilation compilation, IDiagnosticAdder diagnosticAdder, IServiceProvider serviceProvider, CancellationToken cancellationToken )
+        internal static bool Validate(
+            Compilation compilation,
+            IDiagnosticAdder diagnosticAdder,
+            IServiceProvider serviceProvider,
+            CancellationToken cancellationToken )
         {
             // Validate run-time code against templating rules.
             var hasError = false;
@@ -33,7 +37,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var semanticModel = compilation.GetSemanticModel( syntaxTree );
 
-                if ( !TemplatingCodeValidator.Validate( semanticModel, diagnosticAdder.Report, serviceProvider, false, false, cancellationToken ) ) 
+                if ( !Validate( semanticModel, diagnosticAdder.Report, serviceProvider, false, false, cancellationToken ) )
                 {
                     hasError = true;
                 }
@@ -55,6 +59,5 @@ namespace Caravela.Framework.Impl.Templating
 
             return !visitor.HasError;
         }
-      
     }
 }

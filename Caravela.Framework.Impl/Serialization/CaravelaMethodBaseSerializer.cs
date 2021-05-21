@@ -22,9 +22,8 @@ namespace Caravela.Framework.Impl.Serialization
         public CaravelaMethodBaseSerializer( SyntaxSerializationService service ) : base( service ) { }
 
         internal ExpressionSyntax SerializeMethodBase( ICompileTimeReflectionObject<IMethodBase> method, ICompilationElementFactory syntaxFactory )
-            => SerializeMethodBase( (IMethodSymbol) method.Target.GetSymbol( syntaxFactory.Compilation ), syntaxFactory );
-            
-        
+            => this.SerializeMethodBase( (IMethodSymbol) method.Target.GetSymbol( syntaxFactory.Compilation ), syntaxFactory );
+
         internal ExpressionSyntax SerializeMethodBase( IMethodSymbol methodSymbol, ICompilationElementFactory syntaxFactory )
         {
             return this.SerializeMethodBase( methodSymbol, methodSymbol.ContainingType, syntaxFactory );

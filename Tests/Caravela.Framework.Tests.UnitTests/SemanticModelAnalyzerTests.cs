@@ -36,7 +36,7 @@ class X { void M() { IMethod m; } }
 
             Assert.Contains( diagnostics, d => d.Id == TemplatingDiagnosticDescriptors.CannotReferenceCompileTimeOnly.Id );
         }
-        
+
         [Fact]
         public void MustImportNamespace()
         {
@@ -57,7 +57,7 @@ class X : Caravela.Framework.Aspects.OverrideMethodAspect {  public override dyn
                 false,
                 false,
                 CancellationToken.None );
-            
+
             Assert.Contains( diagnostics, d => d.Id == TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.Id );
         }
     }

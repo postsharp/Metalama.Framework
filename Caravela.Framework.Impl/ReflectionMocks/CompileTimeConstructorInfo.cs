@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
     internal class CompileTimeConstructorInfo : ConstructorInfo, ICompileTimeReflectionObject<IConstructor>
     {
         public IDeclarationRef<IConstructor> Target { get; }
-        
+
         private CompileTimeConstructorInfo( IConstructor method )
         {
             this.Target = method.ToRef();
@@ -46,7 +46,5 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public override object Invoke( BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture )
             => throw CompileTimeMocksHelper.CreateNotSupportedException();
-
-        
     }
 }

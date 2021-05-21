@@ -108,10 +108,12 @@ namespace Caravela.Framework.Tests.UnitTests
             }
         }
 
-        internal static CompilationModel CreateCompilationModel( string code, string? dependentCode = null,
-                                                                 bool ignoreErrors = false,
-                                                                 IEnumerable<MetadataReference>? additionalReferences = null,
-                                                                 string? name = null )
+        internal static CompilationModel CreateCompilationModel(
+            string code,
+            string? dependentCode = null,
+            bool ignoreErrors = false,
+            IEnumerable<MetadataReference>? additionalReferences = null,
+            string? name = null )
         {
             var roslynCompilation = CreateCSharpCompilation( code, dependentCode, ignoreErrors, additionalReferences, name );
 
