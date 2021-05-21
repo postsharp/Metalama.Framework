@@ -80,7 +80,7 @@ namespace Caravela.Framework.Impl
                 Error );
 
         public static readonly DiagnosticDefinition<(INamedType AspectType, string MethodName)> AspectMustHaveExactlyOneTemplateMethod = new(
-            "CR0024",
+            "CR0025",
             "The aspect type must have exactly one member of a given name otherwise it cannot be used as a dynamic advice.",
             "The type '{0}' must have exactly one member named '{1}'.",
             _category,
