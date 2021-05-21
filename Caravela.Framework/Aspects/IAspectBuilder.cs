@@ -22,7 +22,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets the declaration to which the aspect was added.
         /// </summary>
-        ICodeElement TargetDeclaration { get; }
+        IDeclaration TargetDeclaration { get; }
 
         /// <summary>
         /// Gets an object that exposes methods that allow to create advices.
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Aspects
     /// aspects. This is the strongly-typed variant of the <see cref="IAspectBuilder"/> interface.
     /// </summary>
     public interface IAspectBuilder<out T> : IAspectBuilder
-        where T : ICodeElement
+        where T : IDeclaration
     {
         /// <summary>
         /// Gets the declaration to which the aspect was added.

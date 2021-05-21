@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal partial class AccessorBuilder : CodeElementBuilder, IMethodBuilder
+    internal partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder
     {
         private readonly MemberBuilder _containingElement;
 
@@ -112,9 +112,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public INamedType DeclaringType => this._containingElement.DeclaringType;
 
-        public override ICodeElement? ContainingElement => this._containingElement;
+        public override IDeclaration? ContainingElement => this._containingElement;
 
-        public override CodeElementKind ElementKind => CodeElementKind.Method;
+        public override DeclarationKind ElementKind => DeclarationKind.Method;
 
         IParameter IMethod.ReturnParameter => this.ReturnParameter;
 

@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    internal abstract class MethodBaseList<T> : MemberList<T, MemberLink<T>>
+    internal abstract class MethodBaseList<T> : MemberList<T, MemberRef<T>>
         where T : class, IMethodBase
     {
         // TODO: This should be further extracted into MemberList for (parameterized) property search.
@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         protected MethodBaseList() { }
 
-        protected MethodBaseList( CodeElement? containingElement, IEnumerable<MemberLink<T>> sourceItems ) : base( containingElement, sourceItems ) { }
+        protected MethodBaseList( Declaration? containingElement, IEnumerable<MemberRef<T>> sourceItems ) : base( containingElement, sourceItems ) { }
 
         /// <summary>
         /// Gets the member list for a given type.
@@ -257,7 +257,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             {
                 candidates = ForCompilation( this.SourceItems, compilation );
 
-                static IEnumerable<T> ForCompilation( ImmutableArray<MemberLink<T>> sourceItems, CompilationModel compilation )
+                static IEnumerable<T> ForCompilation( ImmutableArray<MemberRef<T>> sourceItems, CompilationModel compilation )
                 {
                     for ( var i = 0; i < sourceItems.Length; i++ )
                     {

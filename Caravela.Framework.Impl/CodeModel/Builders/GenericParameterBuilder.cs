@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class GenericParameterBuilder : CodeElementBuilder, IGenericParameterBuilder
+    internal sealed class GenericParameterBuilder : DeclarationBuilder, IGenericParameterBuilder
     {
         private readonly IGenericParameter _template;
 
@@ -35,9 +35,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        public override ICodeElement? ContainingElement { get; }
+        public override IDeclaration? ContainingElement { get; }
 
-        public override CodeElementKind ElementKind => CodeElementKind.GenericParameter;
+        public override DeclarationKind ElementKind => DeclarationKind.GenericParameter;
 
         public GenericParameterBuilder( MethodBuilder containingMethod, IGenericParameter template ) : base( containingMethod.ParentAdvice )
         {

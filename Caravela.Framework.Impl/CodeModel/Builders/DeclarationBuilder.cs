@@ -4,7 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
@@ -16,24 +16,24 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     /// <summary>
-    /// Base class implementing <see cref="ICodeElementBuilder"/>. These classes are returned by introduction advices so the user can continue
+    /// Base class implementing <see cref="IDeclarationBuilder"/>. These classes are returned by introduction advices so the user can continue
     /// specifying the introduced code element. They are bound to the <see cref="CompilationModel"/> that created them, but implement
-    /// <see cref="ICodeElementLink{T}"/> so they can resolve, using <see cref="CodeElementFactory"/>, to the consuming <see cref="CompilationModel"/>.
+    /// <see cref="IDeclarationRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
     /// 
     /// </summary>
-    internal abstract class CodeElementBuilder : ICodeElementBuilder, ICodeElementInternal
+    internal abstract class DeclarationBuilder : IDeclarationBuilder, IDeclarationInternal
     {
         internal Advice ParentAdvice { get; }
 
         public CodeOrigin Origin => CodeOrigin.Aspect;
 
-        public abstract ICodeElement? ContainingElement { get; }
+        public abstract IDeclaration? ContainingElement { get; }
 
-        IAttributeList ICodeElement.Attributes => this.Attributes;
+        IAttributeList IDeclaration.Attributes => this.Attributes;
 
         public AttributeBuilderList Attributes { get; } = new();
 
-        public abstract CodeElementKind ElementKind { get; }
+        public abstract DeclarationKind ElementKind { get; }
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsFrozen { get; private set; }
 
-        public CodeElementBuilder( Advice parentAdvice )
+        public DeclarationBuilder( Advice parentAdvice )
         {
             this.ParentAdvice = parentAdvice;
         }
@@ -82,11 +82,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IDiagnosticLocation? DiagnosticLocation => this.ContainingElement?.DiagnosticLocation;
 
-        public CodeElementLink<ICodeElement> ToLink() => CodeElementLink.FromBuilder( this );
+        public DeclarationRef<IDeclaration> ToLink() => DeclarationRef.FromBuilder( this );
 
-        ISymbol? ISdkCodeElement.Symbol => null;
+        ISymbol? ISdkDeclaration.Symbol => null;
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences
-            => ((ICodeElementInternal?) this.ContainingElement)?.DeclaringSyntaxReferences ?? ImmutableArray<SyntaxReference>.Empty;
+            => ((IDeclarationInternal?) this.ContainingElement)?.DeclaringSyntaxReferences ?? ImmutableArray<SyntaxReference>.Empty;
     }
 }

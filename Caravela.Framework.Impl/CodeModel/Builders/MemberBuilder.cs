@@ -14,7 +14,7 @@ using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal abstract class MemberBuilder : CodeElementBuilder, IMemberBuilder, IMemberIntroduction, IObservableTransformation
+    internal abstract class MemberBuilder : DeclarationBuilder, IMemberBuilder, IMemberIntroduction, IObservableTransformation
     {
         public bool IsSealed { get; set; }
 
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsVirtual { get; set; }
 
-        public sealed override ICodeElement ContainingElement => this.DeclaringType;
+        public sealed override IDeclaration ContainingElement => this.DeclaringType;
 
         public MemberBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice )
         {

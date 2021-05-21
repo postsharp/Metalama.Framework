@@ -4,7 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 : ((IProperty) this._containingMember).Type;
 
         [Memo]
-        public IGenericParameterList GenericParameters => new GenericParameterList( this, Enumerable.Empty<CodeElementLink<IGenericParameter>>() );
+        public IGenericParameterList GenericParameters => new GenericParameterList( this, Enumerable.Empty<DeclarationRef<IGenericParameter>>() );
 
         [Memo]
         public IReadOnlyList<IType> GenericArguments => ImmutableList<IType>.Empty;
@@ -96,11 +96,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public CodeOrigin Origin => CodeOrigin.Source;
 
-        public ICodeElement? ContainingElement => this._containingMember;
+        public IDeclaration? ContainingElement => this._containingMember;
 
         public IAttributeList Attributes => AttributeList.Empty;
 
-        public CodeElementKind ElementKind => CodeElementKind.Method;
+        public DeclarationKind ElementKind => DeclarationKind.Method;
 
         public IDiagnosticLocation? DiagnosticLocation => this._containingMember.DiagnosticLocation;
 
@@ -157,11 +157,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public CodeOrigin Origin => CodeOrigin.Source;
 
-            public ICodeElement? ContainingElement => this.DeclaringAccessor;
+            public IDeclaration? ContainingElement => this.DeclaringAccessor;
 
             public IAttributeList Attributes => throw new NotImplementedException();
 
-            public CodeElementKind ElementKind => CodeElementKind.Parameter;
+            public DeclarationKind ElementKind => DeclarationKind.Parameter;
 
             public IDiagnosticLocation? DiagnosticLocation => throw new NotImplementedException();
 

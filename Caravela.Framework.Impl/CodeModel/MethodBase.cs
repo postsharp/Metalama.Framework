@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.CodeModel
         internal IMethodSymbol MethodSymbol { get; }
 
         [Memo]
-        public override ICodeElement? ContainingElement
+        public override IDeclaration? ContainingElement
             => this.Symbol switch
             {
                 IMethodSymbol method when
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     || method.MethodKind == SymbolMethodKind.EventAdd
                     || method.MethodKind == SymbolMethodKind.EventRemove
                     || method.MethodKind == SymbolMethodKind.EventRaise
-                    => this.Compilation.Factory.GetCodeElement( method.AssociatedSymbol.AssertNotNull() ),
+                    => this.Compilation.Factory.GetDeclaration( method.AssociatedSymbol.AssertNotNull() ),
                 _ => base.ContainingElement
             };
 
@@ -49,13 +49,13 @@ namespace Caravela.Framework.Impl.CodeModel
                     .SelectMany( n => n.DescendantNodes( c => c == n || c is not LocalFunctionStatementSyntax ) )
                     .OfType<LocalFunctionStatementSyntax>()
                     .Select( f => (IMethodSymbol) this.Compilation.RoslynCompilation.GetSemanticModel( f.SyntaxTree ).GetDeclaredSymbol( f )! )
-                    .Select( s => new MemberLink<IMethod>( s ) ) );
+                    .Select( s => new MemberRef<IMethod>( s ) ) );
 
         [Memo]
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.MethodSymbol.Parameters.Select( p => CodeElementLink.FromSymbol<IParameter>( p ) ) );
+                this.MethodSymbol.Parameters.Select( p => DeclarationRef.FromSymbol<IParameter>( p ) ) );
 
         MethodKind IMethodBase.MethodKind
             => this.MethodSymbol.MethodKind switch

@@ -35,13 +35,13 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public int Index => this._parameter.Index;
 
-        CodeOrigin ICodeElement.Origin => this._parameter.Origin;
+        CodeOrigin IDeclaration.Origin => this._parameter.Origin;
 
-        public ICodeElement? ContainingElement => this._parameter.ContainingElement;
+        public IDeclaration? ContainingElement => this._parameter.ContainingElement;
 
         public IAttributeList Attributes => this._parameter.Attributes;
 
-        public CodeElementKind ElementKind => this._parameter.ElementKind;
+        public DeclarationKind ElementKind => this._parameter.ElementKind;
 
         public ICompilation Compilation => this._parameter.Compilation;
 
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this._parameter.ToDisplayString( format, context );
 
-        public bool Equals( ICodeElement other ) => throw new NotImplementedException();
+        public bool Equals( IDeclaration other ) => throw new NotImplementedException();
 
         public IDiagnosticLocation? DiagnosticLocation => this._parameter.DiagnosticLocation;
     }

@@ -21,7 +21,7 @@ namespace Caravela.Framework.Advices
         /// <summary>
         /// Gets the element of code to which the current advice has been applied.
         /// </summary>
-        ICodeElement TargetDeclaration { get; }
+        IDeclaration TargetDeclaration { get; }
 
         /// <summary>
         /// Gets the name of the aspect layer to which the advice belongs, or <c>null</c> if it belongs to the default layer.
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Advices
     /// </summary>
     /// <typeparam name="T">Type of code element to which the advice can be added.</typeparam>
     public interface IAdvice<out T> : IAdvice
-        where T : ICodeElement
+        where T : IDeclaration
     {
         /// <summary>
         /// Gets the element of code to which the current advice has been applied.

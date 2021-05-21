@@ -174,7 +174,7 @@ interface I<T>
             CheckParameterData( m2.ReturnParameter!, m2, "int", null, -1 );
             Assert.Equal( 0, m2.Parameters.Count );
 
-            static void CheckParameterData( IParameter parameter, ICodeElement containingElement, string typeName, string? name, int index )
+            static void CheckParameterData( IParameter parameter, IDeclaration containingElement, string typeName, string? name, int index )
             {
                 Assert.Same( containingElement, parameter.ContainingElement );
                 Assert.Equal( typeName, parameter.ParameterType.ToString() );

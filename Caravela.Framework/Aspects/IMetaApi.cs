@@ -23,7 +23,7 @@ namespace Caravela.Framework.Aspects
 
         IFieldOrProperty FieldOrProperty { get; }
 
-        ICodeElement Declaration { get; }
+        IDeclaration Declaration { get; }
 
         IMember Member { get; }
 

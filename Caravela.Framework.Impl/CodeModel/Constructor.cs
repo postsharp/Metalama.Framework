@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        public override CodeElementKind ElementKind => CodeElementKind.Constructor;
+        public override DeclarationKind ElementKind => DeclarationKind.Constructor;
 
         public override bool IsReadOnly => false;
 

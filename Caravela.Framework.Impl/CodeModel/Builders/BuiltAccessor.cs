@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltAccessor : BuiltCodeElement, IMethod, IMemberLink<IMethod>
+    internal class BuiltAccessor : BuiltDeclaration, IMethod, IMemberRef<IMethod>
     {
         private readonly BuiltMember _builtMember;
 
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public AccessorBuilder AccessorBuilder { get; }
 
-        public override CodeElementBuilder Builder => this.AccessorBuilder;
+        public override DeclarationBuilder Builder => this.AccessorBuilder;
 
         public Accessibility Accessibility => this.AccessorBuilder.Accessibility;
 
@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.AccessorBuilder.Parameters.AsBuilderList.Select( CodeElementLink.FromBuilder<IParameter, IParameterBuilder> ) );
+                this.AccessorBuilder.Parameters.AsBuilderList.Select( DeclarationRef.FromBuilder<IParameter, IParameterBuilder> ) );
 
         public MethodKind MethodKind => this.AccessorBuilder.MethodKind;
 
@@ -83,7 +83,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public object? Target => throw new NotImplementedException();
 
-        IMethod ICodeElementLink<IMethod>.GetForCompilation( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
+        IMethod IDeclarationRef<IMethod>.GetForCompilation( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
 
         [return: RunTimeOnly]
         public MethodInfo ToMethodInfo()

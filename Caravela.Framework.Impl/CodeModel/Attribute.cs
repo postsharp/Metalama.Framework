@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly CompilationModel _compilation;
 
-        public Attribute( AttributeData data, CompilationModel compilation, ICodeElement containingElement )
+        public Attribute( AttributeData data, CompilationModel compilation, IDeclaration containingElement )
         {
             this.AttributeData = data;
             this._compilation = compilation;
@@ -27,13 +27,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public AttributeData AttributeData { get; }
 
-        CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
+        CodeOrigin IDeclaration.Origin => CodeOrigin.Source;
 
-        public ICodeElement ContainingElement { get; }
+        public IDeclaration ContainingElement { get; }
 
-        IAttributeList ICodeElement.Attributes => AttributeList.Empty;
+        IAttributeList IDeclaration.Attributes => AttributeList.Empty;
 
-        public CodeElementKind ElementKind => CodeElementKind.Attribute;
+        public DeclarationKind ElementKind => DeclarationKind.Attribute;
 
         public ICompilation Compilation => this.Constructor.Compilation;
 
@@ -67,13 +67,13 @@ namespace Caravela.Framework.Impl.CodeModel
             return new TypedConstant( type, value );
         }
 
-        public bool Equals( ICodeElement other ) => throw new NotImplementedException();
+        public bool Equals( IDeclaration other ) => throw new NotImplementedException();
 
         public override string ToString() => this.AttributeData.ToString();
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
-        ICodeElement? ICodeElement.ContainingElement => this.ContainingElement;
+        IDeclaration? IDeclaration.ContainingElement => this.ContainingElement;
 
         IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation.ToDiagnosticLocation();
 

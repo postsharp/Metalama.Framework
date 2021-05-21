@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public IEnumerable<AspectClassMetadata> AspectTypes => this._aspectSources.Select( a => a.AspectClass ).Distinct();
 
-        public IEnumerable<ICodeElement> GetExclusions( INamedType aspectType ) => Enumerable.Empty<ICodeElement>();
+        public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
 
         public IEnumerable<AspectInstance> GetAspectInstances(
             CompilationModel compilation,

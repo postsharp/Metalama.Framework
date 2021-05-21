@@ -33,6 +33,6 @@ namespace Caravela.Framework.Diagnostics
         /// </summary>
         /// <param name="scope">The code element in which the diagnostic must be suppressed.</param>
         /// <param name="definition"></param>
-        void Suppress( ICodeElement? scope, SuppressionDefinition definition );
+        void Suppress( IDeclaration? scope, SuppressionDefinition definition );
     }
 }

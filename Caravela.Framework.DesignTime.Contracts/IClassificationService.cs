@@ -20,12 +20,12 @@ namespace Caravela.Framework.DesignTime.Contracts
         /// in the editor.
         /// </summary>
         /// <param name="model">The <see cref="SemanticModel"/> of the <see cref="SyntaxTree"/>.</param>
-        /// <param name="classifiedTextSpans">At output, a collection of <see cref="ClassifiedTextSpan"/>.</param>
         /// <param name="cancellationToken"></param>
+        /// <param name="classifiedTextSpans">At output, a collection of <see cref="ClassifiedTextSpan"/>.</param>
         /// <returns></returns>
         bool TryGetClassifiedTextSpans(
             SemanticModel model,
-            [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans,
-            CancellationToken cancellationToken );
+            CancellationToken cancellationToken,
+            [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans );
     }
 }

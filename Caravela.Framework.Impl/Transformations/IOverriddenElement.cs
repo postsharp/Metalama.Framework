@@ -7,6 +7,6 @@ namespace Caravela.Framework.Impl.Transformations
 {
     internal interface IOverriddenElement
     {
-        ICodeElement OverriddenElement { get; }
+        IDeclaration OverriddenElement { get; }
     }
 }

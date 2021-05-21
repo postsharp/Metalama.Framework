@@ -5,35 +5,35 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.CodeModel.Links
+namespace Caravela.Framework.Impl.CodeModel.References
 {
     /// <summary>
-    /// The implementation of <see cref="IMemberLink{T}"/>.
+    /// The implementation of <see cref="IMemberRef{T}"/>.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal readonly struct MemberLink<T> : IMemberLink<T>
+    internal readonly struct MemberRef<T> : IMemberRef<T>
         where T : class, IMember
     {
-        public MemberLink( ISymbol symbol )
+        public MemberRef( ISymbol symbol )
         {
             symbol.AssertValidType<T>();
 
             this.Target = symbol;
         }
 
-        public MemberLink( MemberBuilder builder )
+        public MemberRef( MemberBuilder builder )
         {
             this.Target = builder;
         }
 
-        public MemberLink( in CodeElementLink<ICodeElement> link )
+        public MemberRef( in DeclarationRef<IDeclaration> declarationRef )
         {
-            this.Target = link.Target;
+            this.Target = declarationRef.Target;
         }
 
         public object? Target { get; }
 
-        public T GetForCompilation( CompilationModel compilation ) => CodeElementLink<T>.GetForCompilation( this.Target, compilation );
+        public T GetForCompilation( CompilationModel compilation ) => DeclarationRef<T>.GetForCompilation( this.Target, compilation );
 
         public string Name
             => this.Target switch

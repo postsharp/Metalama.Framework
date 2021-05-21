@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl
 
         internal AspectInstanceResult ExecuteAspect( AspectInstance aspectInstance, CancellationToken cancellationToken )
         {
-            return aspectInstance.CodeElement switch
+            return aspectInstance.Declaration switch
             {
                 ICompilation compilation => this.EvaluateAspect( compilation, aspectInstance, cancellationToken ),
                 INamedType type => this.EvaluateAspect( type, aspectInstance, cancellationToken ),
@@ -54,8 +54,8 @@ namespace Caravela.Framework.Impl
             };
         }
 
-        private AspectInstanceResult EvaluateAspect<T>( T codeElement, AspectInstance aspect, CancellationToken cancellationToken )
-            where T : class, ICodeElement
+        private AspectInstanceResult EvaluateAspect<T>( T declaration, AspectInstance aspect, CancellationToken cancellationToken )
+            where T : class, IAspectTarget
         {
             static AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
                 => new(
@@ -76,22 +76,22 @@ namespace Caravela.Framework.Impl
 
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement.CreateDiagnostic(
-                        codeElement.GetDiagnosticLocation(),
-                        (this.AspectType, codeElement.ElementKind, codeElement, interfaceType) );
+                        declaration.GetDiagnosticLocation(),
+                        (this.AspectType, declaration.ElementKind, declaration, interfaceType) );
 
                 return CreateResultForError( diagnostic );
             }
 
-            var diagnosticSink = new UserDiagnosticSink( aspect.AspectClass.Project, codeElement );
+            var diagnosticSink = new UserDiagnosticSink( aspect.AspectClass.Project, declaration );
 
             using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
             {
                 var declarativeAdvices =
-                    this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, diagnosticSink, codeElement, x.Attribute, x.Member ) );
+                    this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, diagnosticSink, declaration, x.Attribute, x.Member ) );
 
-                var compilationModel = (CompilationModel) codeElement.Compilation;
+                var compilationModel = (CompilationModel) declaration.Compilation;
                 var adviceFactory = new AdviceFactory( compilationModel, diagnosticSink, compilationModel.Factory.GetNamedType( this.AspectType ), aspect );
-                var aspectBuilder = new AspectBuilder<T>( codeElement, diagnosticSink, declarativeAdvices, adviceFactory, cancellationToken );
+                var aspectBuilder = new AspectBuilder<T>( declaration, diagnosticSink, declarativeAdvices, adviceFactory, cancellationToken );
 
                 try
                 {
@@ -110,7 +110,7 @@ namespace Caravela.Framework.Impl
                 catch ( Exception e )
                 {
                     var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
-                        codeElement.GetDiagnosticLocation(),
+                        declaration.GetDiagnosticLocation(),
                         (this.AspectType, e.GetType().Name, e) );
 
                     return CreateResultForError( diagnostic );
@@ -123,14 +123,14 @@ namespace Caravela.Framework.Impl
         private static IAdvice CreateDeclarativeAdvice<T>(
             AspectInstance aspect,
             IDiagnosticAdder diagnosticAdder,
-            T codeElement,
+            T declaration,
             AttributeData attribute,
             ISymbol templateMethod )
-            where T : ICodeElement
+            where T : IDeclaration
             => attribute.CreateAdvice(
                 aspect,
                 diagnosticAdder,
-                codeElement,
-                ((CompilationModel) codeElement.Compilation).Factory.GetCodeElement( templateMethod ) );
+                declaration,
+                ((CompilationModel) declaration.Compilation).Factory.GetDeclaration( templateMethod ) );
     }
 }

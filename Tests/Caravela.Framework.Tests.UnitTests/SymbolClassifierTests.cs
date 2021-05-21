@@ -13,12 +13,12 @@ namespace Caravela.Framework.Tests.UnitTests
 {
     public class SymbolClassifierTests : TestBase
     {
-        private void AssertScope( ICodeElement codeElement, SymbolDeclarationScope expectedScope )
+        private void AssertScope( IDeclaration declaration, SymbolDeclarationScope expectedScope )
         {
             var classifier = this.ServiceProvider.GetService<SymbolClassificationService>()
-                .GetClassifier( ((CodeElement) codeElement).Compilation.RoslynCompilation );
+                .GetClassifier( ((Declaration) declaration).Compilation.RoslynCompilation );
 
-            var actualScope = classifier.GetSymbolDeclarationScope( codeElement.GetSymbol()! );
+            var actualScope = classifier.GetSymbolDeclarationScope( declaration.GetSymbol()! );
             Assert.Equal( expectedScope, actualScope );
         }
 

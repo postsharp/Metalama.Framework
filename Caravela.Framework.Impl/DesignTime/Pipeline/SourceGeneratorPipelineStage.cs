@@ -113,7 +113,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 }
 
                 // Choose the best syntax tree
-                var originalSyntaxTree = ((ICodeElementInternal) declaringType).DeclaringSyntaxReferences.Select( r => r.SyntaxTree )
+                var originalSyntaxTree = ((IDeclarationInternal) declaringType).DeclaringSyntaxReferences.Select( r => r.SyntaxTree )
                     .OrderBy( s => s.FilePath.Length )
                     .First();
 

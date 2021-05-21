@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public Advice Advice { get; }
 
-        ICodeElement IOverriddenElement.OverriddenElement => this.OverriddenDeclaration;
+        IDeclaration IOverriddenElement.OverriddenElement => this.OverriddenDeclaration;
 
         public IMethod OverriddenDeclaration { get; }
 

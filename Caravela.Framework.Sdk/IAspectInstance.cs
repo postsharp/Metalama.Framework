@@ -19,7 +19,7 @@ namespace Caravela.Framework.Sdk
         /// <summary>
         /// Gets the element of code to which the aspect is applied.
         /// </summary>
-        ICodeElement CodeElement { get; }
+        IDeclaration Declaration { get; }
 
         /// <summary>
         /// Gets the aspect type.

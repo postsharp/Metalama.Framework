@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         // TODO: Move all types into separate files.
         
-        private abstract class ParameterBase : CodeElementBuilder, IParameterBuilder
+        private abstract class ParameterBase : DeclarationBuilder, IParameterBuilder
         {
             protected AccessorBuilder Accessor { get; }
 
@@ -40,9 +40,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             public virtual bool IsParams => false;
 
-            public override ICodeElement? ContainingElement => this.Accessor;
+            public override IDeclaration? ContainingElement => this.Accessor;
 
-            public override CodeElementKind ElementKind => CodeElementKind.Parameter;
+            public override DeclarationKind ElementKind => DeclarationKind.Parameter;
 
             public IMember DeclaringMember => (IMember) this.Accessor.ContainingElement.AssertNotNull();
 

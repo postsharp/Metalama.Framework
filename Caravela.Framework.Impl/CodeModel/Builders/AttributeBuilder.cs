@@ -9,9 +9,9 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class AttributeBuilder : CodeElementBuilder, IAttributeBuilder, IObservableTransformation
+    internal class AttributeBuilder : DeclarationBuilder, IAttributeBuilder, IObservableTransformation
     {
-        public AttributeBuilder( CodeElementBuilder containingElement, IConstructor constructor, IReadOnlyList<TypedConstant> constructorArguments ) : base(
+        public AttributeBuilder( DeclarationBuilder containingElement, IConstructor constructor, IReadOnlyList<TypedConstant> constructorArguments ) : base(
             containingElement.ParentAdvice )
         {
             this.ContainingElement = containingElement;
@@ -36,15 +36,15 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => throw new NotImplementedException();
 
-        public override ICodeElement ContainingElement { get; }
+        public override IDeclaration ContainingElement { get; }
 
-        CodeOrigin ICodeElement.Origin => CodeOrigin.Aspect;
+        CodeOrigin IDeclaration.Origin => CodeOrigin.Aspect;
 
-        ICodeElement? ICodeElement.ContainingElement => throw new NotImplementedException();
+        IDeclaration? IDeclaration.ContainingElement => throw new NotImplementedException();
 
-        IAttributeList ICodeElement.Attributes => AttributeList.Empty;
+        IAttributeList IDeclaration.Attributes => AttributeList.Empty;
 
-        public override CodeElementKind ElementKind => CodeElementKind.Attribute;
+        public override DeclarationKind ElementKind => DeclarationKind.Attribute;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 

@@ -7,11 +7,11 @@ using Caravela.Framework.Project;
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Represent an element of code. Implementations of <see cref="ICodeElement"/>
+    /// Represent an element of code. Implementations of <see cref="IDeclaration"/>
     /// are always declarations, never elements of the method body.
     /// </summary>
     [CompileTimeOnly]
-    public interface ICodeElement : IDisplayable, IDiagnosticScope, ICompilationElement
+    public interface IDeclaration : IDisplayable, IDiagnosticScope, ICompilationElement
     {
         /// <summary>
         /// Gets the origin (<see cref="CodeOrigin.Source"/>, <see cref="CodeOrigin.Generator"/> or <see cref="CodeOrigin.Aspect"/>
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Code
         /// types or for methods. If the containing element is a namespace or
         /// a compilation, <c>null</c> is returned.
         /// </summary>
-        ICodeElement? ContainingElement { get; }
+        IDeclaration? ContainingElement { get; }
 
         /// <summary>
         /// Gets the collection of custom attributes on the element of code.
@@ -34,6 +34,6 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the kind of element of code.
         /// </summary>
-        public CodeElementKind ElementKind { get; }
+        public DeclarationKind ElementKind { get; }
     }
 }

@@ -99,10 +99,10 @@ namespace Caravela.Framework.Impl.Advices
             }
         }
 
-        protected static void CopyAttributes( ICodeElement codeElement, ICodeElementBuilder builder )
+        protected static void CopyAttributes( IDeclaration declaration, IDeclarationBuilder builder )
         {
             // TODO: Don't copy all attributes, but how to decide which ones to keep?
-            foreach ( var codeElementAttribute in codeElement.Attributes )
+            foreach ( var codeElementAttribute in declaration.Attributes )
             {
                 var builderAttribute = builder.AddAttribute(
                     codeElementAttribute.Type,

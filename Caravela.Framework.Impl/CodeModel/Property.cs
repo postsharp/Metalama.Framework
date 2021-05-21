@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this._symbol.Parameters.Select( p => new CodeElementLink<IParameter>( p ) ) );
+                this._symbol.Parameters.Select( p => new DeclarationRef<IParameter>( p ) ) );
 
         [Memo]
         public IMethod? Getter => this._symbol.GetMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.GetMethod );
@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.CodeModel
         // TODO: get-only properties
         public IMethod? Setter => this._symbol.SetMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.SetMethod );
 
-        public override CodeElementKind ElementKind => CodeElementKind.Property;
+        public override DeclarationKind ElementKind => DeclarationKind.Property;
 
         public object Value
         {

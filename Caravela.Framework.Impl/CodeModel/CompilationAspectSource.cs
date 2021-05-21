@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IEnumerable<AspectClassMetadata> AspectTypes { get; }
 
         // TODO: implement aspect exclusion based on ExcludeAspectAttribute
-        public IEnumerable<ICodeElement> GetExclusions( INamedType aspectType ) => Enumerable.Empty<ICodeElement>();
+        public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
 
         public IEnumerable<AspectInstance> GetAspectInstances(
             CompilationModel compilation,

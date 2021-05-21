@@ -103,11 +103,11 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             CSharpCompilation inputCompilation,
             CompilationModel initialCompilationModel )
         {
-            var nodeIdToCodeElement = new Dictionary<string, ICodeElement>();
+            var nodeIdToCodeElement = new Dictionary<string, IDeclaration>();
 
             var symbolToCodeElement = initialCompilationModel.GetContainedElements()
-                .Where( x => x is CodeElement )
-                .ToDictionary( x => ((CodeElement) x).Symbol, x => x );
+                .Where( x => x is Declaration )
+                .ToDictionary( x => ((Declaration) x).Symbol, x => x );
 
             var nodeIdToSyntaxNode = new Dictionary<string, SyntaxNode>();
             var syntaxNodeToSymbol = new Dictionary<SyntaxNode, ISymbol>();

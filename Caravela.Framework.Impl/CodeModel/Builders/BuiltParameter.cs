@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltParameter : BuiltCodeElement, IParameter
+    internal class BuiltParameter : BuiltDeclaration, IParameter
     {
         public BuiltParameter( IParameterBuilder builder, CompilationModel compilation ) : base( compilation )
         {
@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IParameterBuilder ParameterBuilder { get; }
 
-        public override CodeElementBuilder Builder => (CodeElementBuilder) this.ParameterBuilder;
+        public override DeclarationBuilder Builder => (DeclarationBuilder) this.ParameterBuilder;
 
         public RefKind RefKind => this.ParameterBuilder.RefKind;
 
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsParams => this.ParameterBuilder.IsParams;
 
         [Memo]
-        public IMember DeclaringMember => this.Compilation.Factory.GetCodeElement( this.ParameterBuilder.DeclaringMember );
+        public IMember DeclaringMember => this.Compilation.Factory.GetDeclaration( this.ParameterBuilder.DeclaringMember );
 
         public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
     }

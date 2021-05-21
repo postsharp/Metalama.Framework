@@ -5,17 +5,17 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.CodeModel.Links
+namespace Caravela.Framework.Impl.CodeModel.References
 {
-    internal readonly struct AttributeLink : IAttributeLink
+    internal readonly struct AttributeRef : IAttributeRef
     {
-        public AttributeLink( AttributeData attributeData, CodeElementLink<ICodeElement> declaringElement )
+        public AttributeRef( AttributeData attributeData, DeclarationRef<IDeclaration> declaringElement )
         {
             this.Target = attributeData;
             this.DeclaringElement = declaringElement;
         }
 
-        public AttributeLink( AttributeBuilder builder )
+        public AttributeRef( AttributeBuilder builder )
         {
             this.Target = builder;
             this.DeclaringElement = builder.ContainingElement.ToLink();
@@ -23,15 +23,15 @@ namespace Caravela.Framework.Impl.CodeModel.Links
 
         public object? Target { get; }
 
-        public CodeElementLink<INamedType> AttributeType
+        public DeclarationRef<INamedType> AttributeType
             => this.Target switch
             {
-                AttributeData attributeData => CodeElementLink.FromSymbol<INamedType>( attributeData.AttributeClass.AssertNotNull() ),
+                AttributeData attributeData => DeclarationRef.FromSymbol<INamedType>( attributeData.AttributeClass.AssertNotNull() ),
                 AttributeBuilder link => link.Constructor.DeclaringType.ToLink(),
                 _ => throw new AssertionFailedException()
             };
 
-        public CodeElementLink<ICodeElement> DeclaringElement { get; }
+        public DeclarationRef<IDeclaration> DeclaringElement { get; }
 
         public IAttribute GetForCompilation( CompilationModel compilation )
             => this.Target switch

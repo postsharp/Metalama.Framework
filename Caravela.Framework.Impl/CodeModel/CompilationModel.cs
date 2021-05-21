@@ -5,7 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
@@ -15,10 +15,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using DeclarationKind = Caravela.Framework.Code.DeclarationKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class CompilationModel : ICompilation, ICodeElementInternal
+    internal class CompilationModel : ICompilation, IDeclarationInternal
     {
         public PartialCompilation PartialCompilation { get; }
 
@@ -41,26 +42,26 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal ReflectionMapper ReflectionMapper { get; }
 
-        private readonly ImmutableMultiValueDictionary<CodeElementLink<ICodeElement>, IObservableTransformation> _transformations;
+        private readonly ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IObservableTransformation> _transformations;
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
-        private readonly ImmutableMultiValueDictionary<CodeElementLink<INamedType>, AttributeLink> _allMemberAttributesByType;
+        private readonly ImmutableMultiValueDictionary<DeclarationRef<INamedType>, AttributeRef> _allMemberAttributesByType;
 
-        private ImmutableDictionary<CodeElementLink<ICodeElement>, int> _depthsCache = ImmutableDictionary.Create<CodeElementLink<ICodeElement>, int>();
+        private ImmutableDictionary<DeclarationRef<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<DeclarationRef<IDeclaration>, int>();
 
-        public CodeElementFactory Factory { get; }
+        public DeclarationFactory Factory { get; }
 
         protected CompilationModel( PartialCompilation partialCompilation )
         {
             this.PartialCompilation = partialCompilation;
             this.ReflectionMapper = ReflectionMapper.GetInstance( this.RoslynCompilation );
-            this.InvariantComparer = new CodeElementEqualityComparer( this.ReflectionMapper, this.RoslynCompilation );
+            this.InvariantComparer = new DeclarationEqualityComparer( this.ReflectionMapper, this.RoslynCompilation );
 
-            this._transformations = ImmutableMultiValueDictionary<CodeElementLink<ICodeElement>, IObservableTransformation>
+            this._transformations = ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IObservableTransformation>
                 .Empty
-                .WithKeyComparer( CodeElementLinkEqualityComparer<CodeElementLink<ICodeElement>>.Instance );
+                .WithKeyComparer( DeclarationRefEqualityComparer<DeclarationRef<IDeclaration>>.Instance );
 
-            this.Factory = new CodeElementFactory( this );
+            this.Factory = new DeclarationFactory( this );
 
             // TODO: Move this to a virtual/lazy method because this should not be done for a partial model.
 
@@ -68,8 +69,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var allAttributes = allCodeElements.SelectMany( c => c.GetAllAttributes() );
 
-            this._allMemberAttributesByType = ImmutableMultiValueDictionary<CodeElementLink<INamedType>, AttributeLink>
-                .Create( allAttributes, a => a.AttributeType, CodeElementLinkEqualityComparer<CodeElementLink<INamedType>>.Instance );
+            this._allMemberAttributesByType = ImmutableMultiValueDictionary<DeclarationRef<INamedType>, AttributeRef>
+                .Create( allAttributes, a => a.AttributeType, DeclarationRefEqualityComparer<DeclarationRef<INamedType>>.Instance );
         }
 
         /// <summary>
@@ -89,18 +90,18 @@ namespace Caravela.Framework.Impl.CodeModel
                 t => t.ContainingElement.ToLink(),
                 t => t );
 
-            this.Factory = new CodeElementFactory( this );
+            this.Factory = new DeclarationFactory( this );
 
             var allNewCodeElements =
                 observableTransformations
-                    .OfType<ICodeElement>()
-                    .SelectManyRecursive( codeElement => codeElement.GetContainedElements() );
+                    .OfType<IDeclaration>()
+                    .SelectManyRecursive( declaration => declaration.GetContainedElements() );
 
             var allAttributes =
                 allNewCodeElements.SelectMany( c => c.Attributes )
                     .Cast<AttributeBuilder>()
                     .Concat( observableTransformations.OfType<AttributeBuilder>() )
-                    .Select( a => new AttributeLink( a ) );
+                    .Select( a => new AttributeRef( a ) );
 
             // TODO: Process IRemoveMember.
 
@@ -119,7 +120,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => new NamedTypeList(
                 this,
                 this.PartialCompilation.Types
-                    .Select( t => new MemberLink<INamedType>( t ) ) );
+                    .Select( t => new MemberRef<INamedType>( t ) ) );
 
         [Memo]
         public IAttributeList Attributes
@@ -128,7 +129,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this.RoslynCompilation.Assembly
                     .GetAttributes()
                     .Union( this.RoslynCompilation.SourceModule.GetAttributes() )
-                    .Select( a => new AttributeLink( a, this.RoslynCompilation.Assembly.ToLink() ) ) );
+                    .Select( a => new AttributeRef( a, this.RoslynCompilation.Assembly.ToLink() ) ) );
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
@@ -139,23 +140,23 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 
-        public ICodeElementComparer InvariantComparer { get; }
+        public IDeclarationComparer InvariantComparer { get; }
 
-        ICodeElement? ICodeElement.ContainingElement => null;
+        IDeclaration? IDeclaration.ContainingElement => null;
 
-        CodeElementKind ICodeElement.ElementKind => CodeElementKind.Compilation;
+        DeclarationKind IDeclaration.ElementKind => DeclarationKind.Compilation;
 
-        public bool Equals( ICodeElement other ) => throw new NotImplementedException();
+        public bool Equals( IDeclaration other ) => throw new NotImplementedException();
 
         ICompilation ICompilationElement.Compilation => this;
 
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
             => this._allMemberAttributesByType[type.ToLink()].Select( a => a.GetForCompilation( this ) );
 
-        internal ImmutableArray<IObservableTransformation> GetObservableTransformationsOnElement( ICodeElement codeElement )
-            => this._transformations[codeElement.ToLink()];
+        internal ImmutableArray<IObservableTransformation> GetObservableTransformationsOnElement( IDeclaration declaration )
+            => this._transformations[declaration.ToLink()];
 
-        internal IEnumerable<(ICodeElement DeclaringElement, IEnumerable<IObservableTransformation> Transformations)> GetAllObservableTransformations()
+        internal IEnumerable<(IDeclaration DeclaringElement, IEnumerable<IObservableTransformation> Transformations)> GetAllObservableTransformations()
         {
             foreach ( var group in this._transformations )
             {
@@ -163,16 +164,16 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        internal int GetDepth( ICodeElement codeElement )
+        internal int GetDepth( IDeclaration declaration )
         {
-            var link = codeElement.ToLink();
+            var link = declaration.ToLink();
 
             if ( this._depthsCache.TryGetValue( link, out var value ) )
             {
                 return value;
             }
 
-            switch ( codeElement )
+            switch ( declaration )
             {
                 case INamedType namedType:
                     return this.GetDepth( namedType );
@@ -186,7 +187,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 default:
                     {
-                        var depth = this.GetDepth( codeElement.ContainingElement! ) + 1;
+                        var depth = this.GetDepth( declaration.ContainingElement! ) + 1;
                         this._depthsCache = this._depthsCache.SetItem( link, depth );
 
                         return depth;
@@ -196,7 +197,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal int GetDepth( INamedType namedType )
         {
-            var link = namedType.ToLink<ICodeElement>();
+            var link = namedType.ToLink<IDeclaration>();
 
             if ( this._depthsCache.TryGetValue( link, out var depth ) )
             {
@@ -222,20 +223,20 @@ namespace Caravela.Framework.Impl.CodeModel
             return depth;
         }
 
-        CodeElementLink<ICodeElement> ICodeElementInternal.ToLink() => CodeElementLink.Compilation();
+        DeclarationRef<IDeclaration> IDeclarationInternal.ToLink() => DeclarationRef.Compilation();
 
-        ImmutableArray<SyntaxReference> ICodeElementInternal.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
+        ImmutableArray<SyntaxReference> IDeclarationInternal.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context )
         {
             throw new NotImplementedException();
         }
 
-        CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
+        CodeOrigin IDeclaration.Origin => CodeOrigin.Source;
 
-        ISymbol? ISdkCodeElement.Symbol => this.RoslynCompilation.Assembly;
+        ISymbol? ISdkDeclaration.Symbol => this.RoslynCompilation.Assembly;
 
-        IAttributeList ICodeElement.Attributes => throw new NotSupportedException();
+        IAttributeList IDeclaration.Attributes => throw new NotSupportedException();
 
         IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => null;
 

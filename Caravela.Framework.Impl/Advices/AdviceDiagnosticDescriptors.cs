@@ -16,21 +16,21 @@ namespace Caravela.Framework.Impl.Advices
 
         private const string _category = "Caravela.Advices";
 
-        public static readonly DiagnosticDefinition<(string AspectType, ICodeElement Member, ICodeElement TargetType, ICodeElement DeclaringType)>
+        public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceMemberAlreadyExists = new(
                 "CRA0001",
                 "Cannot introduce member into a type because it already exists.",
                 "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}'.",
                 Error, _category );
 
-        public static readonly DiagnosticDefinition<(string AspectType, ICodeElement Member, ICodeElement TargetType, ICodeElement DeclaringType)>
+        public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceOverrideOfSealed = new(
                 "CRA0002",
                 "Cannot introduce member into a type because it is sealed in a base class.",
                 "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}' and is sealed.",
                 Error, _category );
 
-        public static readonly DiagnosticDefinition<(string AspectType, ICodeElement Member, ICodeElement TargetType, ICodeElement DeclaringType)>
+        public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceWithDifferentStaticity = new(
                 "CRA0003",
                 "Cannot introduce member into a type because it is sealed in a base class.",
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.Advices
                 "its IsStatic flag is opposite of the introduced member.",
                 Error, _category );
 
-        public static readonly DiagnosticDefinition<(string AspectType, ICodeElement Member, ICodeElement TargetType)>
+        public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType)>
             CannotIntroduceInstanceMemberIntoStaticType = new(
                 "CRA0004",
                 "Cannot introduce instance member into a static type.",

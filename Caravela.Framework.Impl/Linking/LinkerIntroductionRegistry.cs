@@ -23,8 +23,8 @@ namespace Caravela.Framework.Impl.Linking
 
         private readonly Compilation _intermediateCompilation;
         private readonly Dictionary<string, LinkerIntroducedMember> _introducedMemberLookup;
-        private readonly Dictionary<ICodeElement, List<LinkerIntroducedMember>> _overrideMap;
-        private readonly Dictionary<ISymbol, ICodeElement> _overrideTargetsByOriginalSymbolName;
+        private readonly Dictionary<IDeclaration, List<LinkerIntroducedMember>> _overrideMap;
+        private readonly Dictionary<ISymbol, IDeclaration> _overrideTargetsByOriginalSymbolName;
         private readonly Dictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
 
         public LinkerIntroductionRegistry(
@@ -36,8 +36,8 @@ namespace Caravela.Framework.Impl.Linking
             this._intermediateCompilation = intermediateCompilation;
             this._introducedMemberLookup = introducedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
             this._introducedTreeMap = introducedTreeMap;
-            this._overrideMap = new Dictionary<ICodeElement, List<LinkerIntroducedMember>>( finalCompilationModel.InvariantComparer );
-            this._overrideTargetsByOriginalSymbolName = new Dictionary<ISymbol, ICodeElement>( StructuralSymbolComparer.Default );
+            this._overrideMap = new Dictionary<IDeclaration, List<LinkerIntroducedMember>>( finalCompilationModel.InvariantComparer );
+            this._overrideTargetsByOriginalSymbolName = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );
 
             foreach ( var introducedMember in introducedMembers )
             {
@@ -50,9 +50,9 @@ namespace Caravela.Framework.Impl.Linking
 
                     overrideList.Add( introducedMember );
 
-                    if ( overrideTransformation.OverriddenElement is CodeElement codeElement )
+                    if ( overrideTransformation.OverriddenElement is Declaration declaration )
                     {
-                        this._overrideTargetsByOriginalSymbolName[codeElement.Symbol] = codeElement;
+                        this._overrideTargetsByOriginalSymbolName[declaration.Symbol] = declaration;
                     }
                 }
             }
@@ -85,7 +85,7 @@ namespace Caravela.Framework.Impl.Linking
                 // Introduced declaration - we should get ICodeElement from introduced member.
                 var introducedMember = this._introducedMemberLookup[annotation.Data.AssertNotNull()];
 
-                if ( introducedMember.Introduction is ICodeElement introducedElement )
+                if ( introducedMember.Introduction is IDeclaration introducedElement )
                 {
                     if ( this._overrideMap.TryGetValue( introducedElement, out var overrides ) )
                     {

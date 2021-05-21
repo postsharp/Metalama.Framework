@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
@@ -25,19 +25,19 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override IType ParameterType => this.DeclaringMethod.ReturnType;
 
-        public override bool Equals( ICodeElement other )
+        public override bool Equals( IDeclaration other )
             => other is MethodReturnParameter methodReturnParameter &&
                SymbolEqualityComparer.Default.Equals( this.DeclaringMethod.Symbol, methodReturnParameter.DeclaringMethod.Symbol );
 
         public override ISymbol? Symbol => null;
 
-        public override CodeElementLink<ICodeElement> ToLink() => CodeElementLink.ReturnParameter( this.DeclaringMethod.MethodSymbol );
+        public override DeclarationRef<IDeclaration> ToLink() => DeclarationRef.ReturnParameter( this.DeclaringMethod.MethodSymbol );
 
         [Memo]
         public override IAttributeList Attributes
             => new AttributeList(
                 this,
                 this.DeclaringMethod.MethodSymbol.GetReturnTypeAttributes()
-                    .Select( a => new AttributeLink( a, this.ToLink() ) ) );
+                    .Select( a => new AttributeRef( a, this.ToLink() ) ) );
     }
 }

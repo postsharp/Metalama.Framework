@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -10,19 +10,19 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    internal abstract class CodeElementList<TCodeElement, TSource> : IReadOnlyList<TCodeElement>
-        where TCodeElement : class, ICodeElement
-        where TSource : ICodeElementLink<TCodeElement>
+    internal abstract class DeclarationList<TDeclaration, TSource> : IReadOnlyList<TDeclaration>
+        where TDeclaration : class, IDeclaration
+        where TSource : IDeclarationRef<TDeclaration>
     {
-        private volatile TCodeElement?[]? _targetItems;
+        private volatile TDeclaration?[]? _targetItems;
 
-        internal ICodeElement? ContainingElement { get; }
+        internal IDeclaration? ContainingElement { get; }
 
         protected ImmutableArray<TSource> SourceItems { get; }
 
         public CompilationModel Compilation => (CompilationModel) this.ContainingElement.AssertNotNull().Compilation;
 
-        protected CodeElementList( ICodeElement? containingElement, IEnumerable<TSource> sourceItems )
+        protected DeclarationList( IDeclaration? containingElement, IEnumerable<TSource> sourceItems )
         {
             ImmutableArray<TSource>.Builder? builder;
             bool canMoveToImmutable;
@@ -52,14 +52,14 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CodeElementList{TCodeElement, TSource}"/> class representing an empty list.
+        /// Initializes a new instance of the <see cref="DeclarationList{TCodeElement,TSource}"/> class representing an empty list.
         /// </summary>
-        protected CodeElementList()
+        protected DeclarationList()
         {
             this.SourceItems = ImmutableArray<TSource>.Empty;
         }
 
-        public IEnumerator<TCodeElement> GetEnumerator()
+        public IEnumerator<TDeclaration> GetEnumerator()
         {
             for ( var i = 0; i < this.Count; i++ )
             {
@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public int Count => this.SourceItems.Length;
 
-        public TCodeElement this[ int index ]
+        public TDeclaration this[ int index ]
         {
             get
             {
@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
                 if ( targetItems == null )
                 {
-                    _ = Interlocked.CompareExchange( ref this._targetItems, new TCodeElement?[this.SourceItems.Length], null );
+                    _ = Interlocked.CompareExchange( ref this._targetItems, new TDeclaration?[this.SourceItems.Length], null );
                     targetItems = this._targetItems;
                 }
 

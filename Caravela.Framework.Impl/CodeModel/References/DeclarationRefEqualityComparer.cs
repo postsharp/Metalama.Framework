@@ -5,17 +5,17 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace Caravela.Framework.Impl.CodeModel.Links
+namespace Caravela.Framework.Impl.CodeModel.References
 {
     /// <summary>
-    /// An implementation of <see cref="IEqualityComparer{T}"/> that can compare implementations of <see cref="ICodeElementLink"/>.
+    /// An implementation of <see cref="IEqualityComparer{T}"/> that can compare implementations of <see cref="IDeclarationRef"/>.
     /// The comparison is compilation-independent.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal class CodeElementLinkEqualityComparer<T> : IEqualityComparer<T>
-        where T : ICodeElementLink
+    internal class DeclarationRefEqualityComparer<T> : IEqualityComparer<T>
+        where T : IDeclarationRef
     {
-        public static readonly CodeElementLinkEqualityComparer<T> Instance = new();
+        public static readonly DeclarationRefEqualityComparer<T> Instance = new();
 
         private static ISymbol? GetSymbol( T link ) => link.Target as ISymbol;
 

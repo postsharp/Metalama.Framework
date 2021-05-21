@@ -13,14 +13,14 @@ namespace Caravela.Framework.Impl.Diagnostics
     {
         public SuppressionDefinition Definition { get; }
 
-        public ICodeElement CodeElement { get; }
+        public IDeclaration Declaration { get; }
 
-        public ScopedSuppression( SuppressionDefinition definition, ICodeElement codeElement )
+        public ScopedSuppression( SuppressionDefinition definition, IDeclaration declaration )
         {
             this.Definition = definition;
-            this.CodeElement = codeElement;
+            this.Declaration = declaration;
         }
 
-        public override string ToString() => $"{this.Definition} in {this.CodeElement}";
+        public override string ToString() => $"{this.Definition} in {this.Declaration}";
     }
 }

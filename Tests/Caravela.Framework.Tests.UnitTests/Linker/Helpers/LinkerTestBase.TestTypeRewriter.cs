@@ -244,7 +244,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         .Implements<IObservableTransformation>()
                         .Implements<IMemberIntroduction>()
                         .Implements<IMethod>()
-                        .Implements<ICodeElementInternal>()
+                        .Implements<IDeclarationInternal>()
                         .Implements<ITestTransformation>() );
 
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );

@@ -6,7 +6,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Allows to complete the construction of a code element that has been created by an advice.
     /// </summary>
-    public interface ICodeElementBuilder : ICodeElement
+    public interface IDeclarationBuilder : IDeclaration
     {
         bool IsFrozen { get; }
 

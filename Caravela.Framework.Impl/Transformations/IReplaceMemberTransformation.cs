@@ -2,12 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 
 namespace Caravela.Framework.Impl.Transformations
 {
     internal interface IReplaceMemberTransformation : IObservableTransformation
     {
-        MemberLink<IMember> ReplacedMember { get; }
+        MemberRef<IMember> ReplacedMember { get; }
     }
 }

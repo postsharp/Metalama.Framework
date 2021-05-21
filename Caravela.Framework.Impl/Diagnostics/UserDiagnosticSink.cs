@@ -22,9 +22,9 @@ namespace Caravela.Framework.Impl.Diagnostics
         private ImmutableArray<Diagnostic>.Builder? _diagnostics;
         private ImmutableArray<ScopedSuppression>.Builder? _suppressions;
 
-        public ICodeElement? DefaultScope { get; private set; }
+        public IDeclaration? DefaultScope { get; private set; }
 
-        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, ICodeElement? defaultScope = null )
+        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, IDeclaration? defaultScope = null )
         {
             this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
             this.DefaultScope = defaultScope;
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             }
         }
 
-        public IDisposable WithDefaultScope( ICodeElement scope )
+        public IDisposable WithDefaultScope( IDeclaration scope )
         {
             var oldScope = this.DefaultScope;
             this.DefaultScope = scope;
@@ -105,7 +105,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             this.Report( definition.CreateDiagnostic( this.GetLocation( location ), arguments ) );
         }
 
-        public void Suppress( ICodeElement? scope, SuppressionDefinition definition )
+        public void Suppress( IDeclaration? scope, SuppressionDefinition definition )
         {
             this.ValidateUserSuppression( definition );
 

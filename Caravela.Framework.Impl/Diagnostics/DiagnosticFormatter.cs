@@ -38,16 +38,16 @@ namespace Caravela.Framework.Impl.Diagnostics
                         }
                     }
 
-                case CodeElementKind codeElementKind:
+                case DeclarationKind codeElementKind:
                     switch ( codeElementKind )
                     {
-                        case CodeElementKind.GenericParameter:
+                        case DeclarationKind.GenericParameter:
                             return "generic parameter";
 
-                        case CodeElementKind.ManagedResource:
+                        case DeclarationKind.ManagedResource:
                             return "managed resource";
 
-                        case CodeElementKind.ReferencedAssembly:
+                        case DeclarationKind.ReferencedAssembly:
                             return "reference assembly";
 
                         default:

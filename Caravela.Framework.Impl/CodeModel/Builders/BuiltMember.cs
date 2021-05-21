@@ -2,13 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using System;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal abstract class BuiltMember : BuiltCodeElement, IMember, IMemberLink<IMember>
+    internal abstract class BuiltMember : BuiltDeclaration, IMember, IMemberRef<IMember>
     {
         protected BuiltMember( CompilationModel compilation ) : base( compilation ) { }
 
@@ -34,11 +34,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsAsync => this.MemberBuilder.IsAsync;
 
-        public INamedType DeclaringType => this.Compilation.Factory.GetCodeElement( this.MemberBuilder.DeclaringType );
+        public INamedType DeclaringType => this.Compilation.Factory.GetDeclaration( this.MemberBuilder.DeclaringType );
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
-        IMember ICodeElementLink<IMember>.GetForCompilation( CompilationModel compilation ) => (IMember) this.GetForCompilation( compilation );
+        IMember IDeclarationRef<IMember>.GetForCompilation( CompilationModel compilation ) => (IMember) this.GetForCompilation( compilation );
 
         public object? Target => throw new NotImplementedException();
     }

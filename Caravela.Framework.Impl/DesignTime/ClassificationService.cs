@@ -25,8 +25,8 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public bool TryGetClassifiedTextSpans(
             SemanticModel semanticModel,
-            [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans,
-            CancellationToken cancellationToken )
+            CancellationToken cancellationToken,
+            [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans )
         {
             // TODO: if the root is not "our", return false.
 

@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,16 +13,16 @@ using System.Collections.Concurrent;
 namespace Caravela.Framework.Impl.CodeModel
 {
     /// <summary>
-    /// Creates instances of <see cref="ICodeElement"/> for a given <see cref="CompilationModel"/>.
+    /// Creates instances of <see cref="IDeclaration"/> for a given <see cref="CompilationModel"/>.
     /// </summary>
-    internal class CodeElementFactory : ITypeFactory, ISyntaxFactory
+    internal class DeclarationFactory : ITypeFactory, ISyntaxFactory
     {
         private readonly CompilationModel _compilation;
 
-        private readonly ConcurrentDictionary<CodeElementLink<ICodeElement>, object> _cache =
-            new( CodeElementLinkEqualityComparer<CodeElementLink<ICodeElement>>.Instance );
+        private readonly ConcurrentDictionary<DeclarationRef<IDeclaration>, object> _cache =
+            new( DeclarationRefEqualityComparer<DeclarationRef<IDeclaration>>.Instance );
 
-        public CodeElementFactory( CompilationModel compilation )
+        public DeclarationFactory( CompilationModel compilation )
         {
             this._compilation = compilation;
         }
@@ -76,15 +76,15 @@ namespace Caravela.Framework.Impl.CodeModel
         public IEvent GetEvent( IEventSymbol @event )
             => (IEvent) this._cache.GetOrAdd( @event.ToLink(), ms => new Event( (IEventSymbol) ms.Symbol!, this._compilation ) );
 
-        internal ICodeElement GetCodeElement( ISymbol symbol, CodeElementSpecialKind kind = CodeElementSpecialKind.Default )
+        internal IDeclaration GetDeclaration( ISymbol symbol, DeclarationSpecialKind kind = DeclarationSpecialKind.Default )
             => symbol switch
             {
                 INamespaceSymbol => this._compilation,
                 INamedTypeSymbol namedType => this.GetNamedType( namedType ),
                 IMethodSymbol method =>
-                    kind == CodeElementSpecialKind.ReturnParameter
+                    kind == DeclarationSpecialKind.ReturnParameter
                         ? this.GetReturnParameter( method )
-                        : method.GetCodeElementKind() == CodeElementKind.Method
+                        : method.GetDeclarationKind() == DeclarationKind.Method
                             ? this.GetMethod( method )
                             : this.GetConstructor( method ),
                 IPropertySymbol property => this.GetProperty( property ),
@@ -104,30 +104,30 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal IAttribute GetAttribute( AttributeBuilder attributeBuilder )
             => (IAttribute) this._cache.GetOrAdd(
-                CodeElementLink.FromBuilder( attributeBuilder ),
+                DeclarationRef.FromBuilder( attributeBuilder ),
                 l => new BuiltAttribute( (AttributeBuilder) l.Target!, this._compilation ) );
 
         internal IParameter GetParameter( ParameterBuilder parameterBuilder )
             => (IParameter) this._cache.GetOrAdd(
-                CodeElementLink.FromBuilder( parameterBuilder ),
+                DeclarationRef.FromBuilder( parameterBuilder ),
                 l => new BuiltParameter( (ParameterBuilder) l.Target!, this._compilation ) );
 
         internal IGenericParameter GetGenericParameter( GenericParameterBuilder genericParameterBuilder )
             => (IGenericParameter) this._cache.GetOrAdd(
-                CodeElementLink.FromBuilder( genericParameterBuilder ),
+                DeclarationRef.FromBuilder( genericParameterBuilder ),
                 l => new BuiltGenericParameter( (GenericParameterBuilder) l.Target!, this._compilation ) );
 
         internal IMethod GetMethod( MethodBuilder methodBuilder )
             => (IMethod) this._cache.GetOrAdd(
-                CodeElementLink.FromBuilder( methodBuilder ),
+                DeclarationRef.FromBuilder( methodBuilder ),
                 l => new BuiltMethod( (MethodBuilder) l.Target!, this._compilation ) );
 
         internal IProperty GetProperty( PropertyBuilder propertyBuilder )
             => (IProperty) this._cache.GetOrAdd(
-                CodeElementLink.FromBuilder( propertyBuilder ),
+                DeclarationRef.FromBuilder( propertyBuilder ),
                 l => new BuiltProperty( (PropertyBuilder) l.Target!, this._compilation ) );
 
-        internal ICodeElement GetCodeElement( CodeElementBuilder builder )
+        internal IDeclaration GetDeclaration( DeclarationBuilder builder )
             => builder switch
             {
                 MethodBuilder methodBuilder => this.GetMethod( methodBuilder ),
@@ -154,18 +154,18 @@ namespace Caravela.Framework.Impl.CodeModel
             return this.GetIType( ((ITypeInternal) type).TypeSymbol.AssertNotNull() );
         }
 
-        public T GetCodeElement<T>( T codeElement )
-            where T : ICodeElement
+        public T GetDeclaration<T>( T declaration )
+            where T : IDeclaration
         {
-            if ( codeElement.Compilation == this._compilation )
+            if ( declaration.Compilation == this._compilation )
             {
-                return codeElement;
+                return declaration;
             }
-            else if ( codeElement is ICodeElementLink<ICodeElement> link )
+            else if ( declaration is IDeclarationRef<IDeclaration> link )
             {
                 return (T) link.GetForCompilation( this._compilation );
             }
-            else if ( codeElement is NamedType namedType )
+            else if ( declaration is NamedType namedType )
             {
                 // TODO: This would not work after type introductions, but that would require more changes.
                 return (T) this.GetNamedType( (INamedTypeSymbol) namedType.Symbol );
@@ -178,12 +178,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IMethod GetMethod( IMethod method )
         {
-            return this.GetCodeElement( method );
+            return this.GetDeclaration( method );
         }
 
         public IConstructor GetConstructor( IConstructor attributeBuilderConstructor )
         {
-            return this.GetCodeElement( attributeBuilderConstructor );
+            return this.GetDeclaration( attributeBuilderConstructor );
         }
 
         public IParameter GetReturnParameter( IMethodSymbol method )
