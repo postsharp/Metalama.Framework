@@ -7,7 +7,7 @@
     <ProjectGuid>{318AC40B-9A06-48C9-941E-CC6850892196}</ProjectGuid>
     <Nullable>enable</Nullable>
     <RuntimeIdentifiers>win</RuntimeIdentifiers>
-    <TargetVsixContainerName>Caravela.$(CaravelaVersion).vsix</TargetVsixContainerName>
+    <TargetVsixContainerName>Caravela.$(ProductVersion).vsix</TargetVsixContainerName>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>

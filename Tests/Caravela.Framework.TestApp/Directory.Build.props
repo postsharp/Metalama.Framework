@@ -17,10 +17,13 @@
     <RestoreAdditionalProjectSources>$(MSBuildThisFileDirectory)..\..\artifacts\bin\$(Configuration)</RestoreAdditionalProjectSources>
   </PropertyGroup>
 
-
+  <!-- Versions of dependencies -->
+  <PropertyGroup>
+    <CaravelaVersion>$(ProductVersion)</CaravelaVersion>
+  </PropertyGroup>
 
   <Target Name="ValidateVersion">
-    <Error Text="The CaravelaVersion property is not defined. Check that Directory.Build.props have been properly imported." Condition="'$(CaravelaVersion)'==''"/>
+    <Error Text="The ProductVersion property is not defined. Check that Directory.Build.props have been properly imported." Condition="'$(ProductVersion)'==''"/>
   </Target>
 
 </Project>
