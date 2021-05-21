@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -27,7 +28,8 @@ namespace Caravela.Framework.Impl.Pipeline
         public IEnumerable<AspectInstance> GetAspectInstances(
             CompilationModel compilation,
             AspectClassMetadata aspectClassMetadata,
-            IDiagnosticAdder diagnosticAdder )
+            IDiagnosticAdder diagnosticAdder,
+            CancellationToken cancellationToken )
         {
             var aspectTypeSymbol = compilation.RoslynCompilation.GetTypeByMetadataName( aspectClassMetadata.FullName );
 
@@ -35,7 +37,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 .Where( s => s.AspectClass.FullName.Equals( aspectTypeSymbol.GetReflectionName(), StringComparison.Ordinal ) )
                 .Select( a => a.Source )
                 .Distinct()
-                .SelectMany( a => a.GetAspectInstances( compilation, aspectClassMetadata, diagnosticAdder ) );
+                .SelectMany( a => a.GetAspectInstances( compilation, aspectClassMetadata, diagnosticAdder, cancellationToken ) );
         }
 
         public void Add( IAspectSource aspectSource, AspectClassMetadata aspectClassMetadata )

@@ -2,29 +2,29 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal partial class SymbolClassifier
+    internal partial class SymbolClassificationService
     {
         /// <summary>
         /// An implementation of <see cref="ISymbolClassifier"/> for projects that don't have a reference to Caravela.
         /// </summary>
         private class VanillaClassifier : ISymbolClassifier
         {
-            private readonly ReferenceAssemblyLocator _referenceAssemblyLocator = ReferenceAssemblyLocator.GetInstance();
+            private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
-            private static VanillaClassifier? _instance;
+            public VanillaClassifier( IServiceProvider serviceProvider )
+            {
+                this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
+            }
 
             public bool IsTemplate( ISymbol symbol ) => false;
 
-            // We don't instantiate this member in the static constructor because we don't want to initialize ReferenceAssemblyLocator
-            // from a static constructor (see ReferenceAssemblyLocator).
-            public static ISymbolClassifier GetInstance() => _instance ??= new VanillaClassifier();
-
             public SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol )
             {
-                if ( TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
+                if ( SymbolClassifier.TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
                 {
                     return scopeFromWellKnown;
                 }

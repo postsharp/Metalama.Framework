@@ -1,14 +1,19 @@
 ﻿<Project InitialTargets="ValidateVersion">
 
+	<PropertyGroup>
+		<DisableCodeQuality>True</DisableCodeQuality>
+	</PropertyGroup>
+	
   <!-- Imports Directory.Build.props of the upper directory. Use this code in any non-root Directory.Build.* even if the file does not exit. -->
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" Condition="Exists('$([MSBuild]::GetPathOfFileAbove(`Directory.Build.props`, `$(MSBuildThisFileDirectory)../`))')" />
 
 
   <PropertyGroup>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <DebugCaravelaDesignTime>false</DebugCaravelaDesignTime>
+    <DebugCaravelaAnalyzer>true</DebugCaravelaAnalyzer>
+	 <DebugCaravelaIde>true</DebugCaravelaIde>
     <!-- Overwrite from the parent directory -->
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    
   </PropertyGroup>
 
   

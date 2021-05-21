@@ -3,9 +3,11 @@
 
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel.Builders;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Linking;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -14,13 +16,22 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class CompileTimePipelineStage : HighLevelPipelineStage
     {
+        private readonly CompileTimeProject _compileTimeProject;
+
         public CompileTimePipelineStage(
+            CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             IAspectPipelineProperties properties )
-            : base( aspectLayers, properties ) { }
+            : base( compileTimeProject, aspectLayers, properties )
+        {
+            this._compileTimeProject = compileTimeProject;
+        }
 
         /// <inheritdoc/>
-        protected override PipelineStageResult GenerateCode( PipelineStageResult input, IPipelineStepsResult pipelineStepResult )
+        protected override PipelineStageResult GenerateCode(
+            PipelineStageResult input,
+            IPipelineStepsResult pipelineStepResult,
+            CancellationToken cancellationToken )
         {
             var linker = new AspectLinker(
                 this.PipelineProperties.ServiceProvider,
@@ -29,7 +40,8 @@ namespace Caravela.Framework.Impl.Pipeline
                     pipelineStepResult.Compilation,
                     pipelineStepResult.NonObservableTransformations,
                     input.AspectLayers,
-                    input.Diagnostics.DiagnosticSuppressions.Concat( pipelineStepResult.Diagnostics.DiagnosticSuppressions ) ) );
+                    input.Diagnostics.DiagnosticSuppressions.Concat( pipelineStepResult.Diagnostics.DiagnosticSuppressions ),
+                    this._compileTimeProject ) );
 
             var linkerResult = linker.ToResult();
 

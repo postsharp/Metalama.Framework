@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -16,17 +17,21 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             private readonly SemanticModel _semanticModel;
             private readonly ISymbolClassifier _classifier;
+            private readonly CancellationToken _cancellationToken;
 
             public bool HasCompileTimeCode { get; private set; }
 
-            public FindCompileTimeCodeVisitor( SemanticModel semanticModel, ISymbolClassifier classifier )
+            public FindCompileTimeCodeVisitor( SemanticModel semanticModel, ISymbolClassifier classifier, CancellationToken cancellationToken )
             {
                 this._semanticModel = semanticModel;
                 this._classifier = classifier;
+                this._cancellationToken = cancellationToken;
             }
 
             private void VisitTypeDeclaration( SyntaxNode node )
             {
+                this._cancellationToken.ThrowIfCancellationRequested();
+
                 if ( this.HasCompileTimeCode )
                 {
                     // No need to do anything more.

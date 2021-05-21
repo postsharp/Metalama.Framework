@@ -1,5 +1,6 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Diagnostics;
 using Caravela.TestFramework;
 
 
@@ -7,9 +8,11 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromTem
 {
     public class LogAttribute : OverrideMethodAspect
     {
+        private static readonly DiagnosticDefinition _definition = new( "MY001", Severity.Error, "Invalid method." );
+        
         public override dynamic OverrideMethod()
         {
-            meta.Diagnostics.Report(Caravela.Framework.Diagnostics.Severity.Error, "MY001", "Invalid method.");
+            meta.Diagnostics.Report( _definition );
 
             return meta.Proceed();
         }

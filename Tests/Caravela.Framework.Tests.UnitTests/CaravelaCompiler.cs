@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.UnitTests
         public static string CompileAssembly( params string[] sourceFiles )
         {
             // TODO: somehow clean up the directory after the test completes?
-            var dir = Path.Combine( Path.GetTempPath(), "CaravelaTests", Guid.NewGuid().ToString() )!;
+            var dir = TempPathHelper.GetTempPath( "Tests", Guid.NewGuid() );
             Directory.CreateDirectory( dir );
 
             void WriteFile( string name, string text ) => File.WriteAllText( Path.Combine( dir, name ), text );

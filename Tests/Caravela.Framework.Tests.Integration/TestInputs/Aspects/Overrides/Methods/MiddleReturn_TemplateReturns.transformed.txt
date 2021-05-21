@@ -6,6 +6,7 @@ internal class TargetClass
     {
         global::System.Console.WriteLine("Override.");
         Console.WriteLine("Begin target.");
+
         if (x == 0)
         {
             goto __aspect_return_1;
@@ -22,13 +23,14 @@ internal class TargetClass
     {
         global::System.Console.WriteLine("Override.");
         Console.WriteLine("Begin target.");
+
         if (x == 0)
         {
             return 42;
         }
 
         Console.WriteLine("End target.");
+
         return x;
     }
-
 }

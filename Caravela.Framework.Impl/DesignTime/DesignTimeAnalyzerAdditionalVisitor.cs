@@ -2,7 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.DesignTime.Diagnostics;
+using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
@@ -11,6 +14,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -28,23 +32,32 @@ namespace Caravela.Framework.Impl.DesignTime
         private readonly bool _isCompileTimeTreeOutdated;
         private readonly SemanticModel _semanticModel;
         private readonly Action<Diagnostic> _reportDiagnostic;
+        private readonly CancellationToken _cancellationToken;
+        private readonly ServiceProvider _serviceProvider;
         private SymbolDeclarationScope? _currentDeclarationScope;
         private ISymbol? _currentDeclaration;
 
-        public DesignTimeAnalyzerAdditionalVisitor( SemanticModelAnalysisContext context, IBuildOptions buildOptions ) : this(
+        public DesignTimeAnalyzerAdditionalVisitor( SemanticModelAnalysisContext context, IProjectOptions projectOptions ) : this(
             context.SemanticModel,
             context.ReportDiagnostic,
             DesignTimeAspectPipelineCache
                 .Instance
-                .GetOrCreatePipeline( buildOptions ) ) { }
+                .GetOrCreatePipeline( projectOptions ),
+            context.CancellationToken ) { }
 
-        public DesignTimeAnalyzerAdditionalVisitor( SemanticModel semanticModel, Action<Diagnostic> reportDiagnostic, DesignTimeAspectPipeline pipeline )
+        public DesignTimeAnalyzerAdditionalVisitor(
+            SemanticModel semanticModel,
+            Action<Diagnostic> reportDiagnostic,
+            DesignTimeAspectPipeline pipeline,
+            CancellationToken cancellationToken )
         {
             this._semanticModel = semanticModel;
             this._reportDiagnostic = reportDiagnostic;
-            this._classifier = SymbolClassifier.GetInstance( semanticModel.Compilation );
+            this._serviceProvider = pipeline.ServiceProvider;
+            this._classifier = this._serviceProvider.GetService<SymbolClassificationService>().GetClassifier( semanticModel.Compilation );
 
             this._isCompileTimeTreeOutdated = pipeline.IsCompileTimeSyntaxTreeOutdated( semanticModel.SyntaxTree.FilePath );
+            this._cancellationToken = cancellationToken;
         }
 
         public override void Visit( SyntaxNode? node )
@@ -53,6 +66,8 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 return;
             }
+
+            this._cancellationToken.ThrowIfCancellationRequested();
 
             // We want children to be processed before parents, so that errors are reported on parent (declaring) symbols.
             // This allows to reduce redundant messages.
@@ -103,8 +118,8 @@ namespace Caravela.Framework.Impl.DesignTime
 
             if ( methodSymbol != null && this._classifier.IsTemplate( methodSymbol ) )
             {
-                TemplateCompiler templateCompiler = new( ServiceProvider.Empty );
-                _ = templateCompiler.TryAnnotate( node, this._semanticModel, this, out _ );
+                TemplateCompiler templateCompiler = new( this._serviceProvider );
+                _ = templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _ );
             }
             else
             {
@@ -154,7 +169,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
         void IDiagnosticAdder.Report( Diagnostic diagnostic )
         {
-            if ( DesignTimeAnalyzer.DesignTimeDiagnosticIds.Contains( diagnostic.Id ) )
+            if ( DesignTimeDiagnosticDefinitions.GetInstance().SupportedDiagnosticDescriptors.ContainsKey( diagnostic.Id ) )
             {
                 this._reportDiagnostic( diagnostic );
             }

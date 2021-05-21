@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 {
     public static class DiagnosticAdderExtensions
     {
-        public static void ReportDiagnostics( this IDiagnosticAdder adder, IEnumerable<Diagnostic> diagnostics )
+        public static void Report( this IDiagnosticAdder adder, IEnumerable<Diagnostic> diagnostics )
         {
             foreach ( var d in diagnostics )
             {

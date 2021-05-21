@@ -1,0 +1,19 @@
+<Project>
+    <PropertyGroup>
+        <CaravelaCompilerVisiblePropertiesTargetsImported>True</CaravelaCompilerVisiblePropertiesTargetsImported>
+    </PropertyGroup>
+    <!-- Exports the properties to the compiler -->
+    <ItemGroup>
+        <CompilerVisibleProperty Include="DebugCaravela" />
+        <CompilerVisibleProperty Include="DebugCaravelaAnalyzer" />
+        <CompilerVisibleProperty Include="DebugCaravelaIde" />
+        <CompilerVisibleProperty Include="CaravelaCrashReportDirectory" />
+        <CompilerVisibleProperty Include="CaravelaCompileTimeProjectDirectory" />
+        <CompilerVisibleProperty Include="CaravelaProjectId" />
+        <CompilerVisibleProperty Include="CaravelaBuildTouchFile" />
+        <CompilerVisibleProperty Include="AssemblyName" />
+    </ItemGroup>
+
+    <!-- More properties are already exported by Caravela.Compiler and don't need to be exported a second time. -->
+
+</Project>

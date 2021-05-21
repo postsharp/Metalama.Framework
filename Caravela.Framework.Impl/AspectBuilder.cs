@@ -10,13 +10,14 @@ using Caravela.Framework.Impl.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading;
 
 namespace Caravela.Framework.Impl
 {
     internal class AspectBuilder<T> : IAspectBuilder<T>
         where T : class, ICodeElement
     {
-        private readonly DiagnosticSink _diagnosticSink;
+        private readonly UserDiagnosticSink _diagnosticSink;
         private readonly IImmutableList<IAdvice> _declarativeAdvices;
         private readonly AdviceFactory _adviceFactory;
         private bool _skipped;
@@ -33,12 +34,20 @@ namespace Caravela.Framework.Impl
 
         public IDictionary<string, object?> Tags => this._adviceFactory.Tags;
 
-        public AspectBuilder( T targetDeclaration, DiagnosticSink diagnosticSink, IEnumerable<IAdvice> declarativeAdvices, AdviceFactory adviceFactory )
+        public CancellationToken CancellationToken { get; }
+
+        public AspectBuilder(
+            T targetDeclaration,
+            UserDiagnosticSink diagnosticSink,
+            IEnumerable<IAdvice> declarativeAdvices,
+            AdviceFactory adviceFactory,
+            CancellationToken cancellationToken )
         {
             this.TargetDeclaration = targetDeclaration;
             this._declarativeAdvices = declarativeAdvices.ToImmutableArray();
             this._diagnosticSink = diagnosticSink;
             this._adviceFactory = adviceFactory;
+            this.CancellationToken = cancellationToken;
         }
 
         internal AspectInstanceResult ToResult()

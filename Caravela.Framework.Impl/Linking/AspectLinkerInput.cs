@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using System.Collections.Generic;
@@ -36,18 +37,22 @@ namespace Caravela.Framework.Impl.Linking
 
         public IReadOnlyList<ScopedSuppression> DiagnosticSuppressions { get; }
 
+        public CompileTimeProject CompileTimeProject { get; }
+
         public AspectLinkerInput(
             PartialCompilation initialCompilation,
             CompilationModel compilationModel,
             IReadOnlyList<INonObservableTransformation> nonObservableTransformations,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
-            IReadOnlyList<ScopedSuppression> suppressions )
+            IReadOnlyList<ScopedSuppression> suppressions,
+            CompileTimeProject compileTimeProject )
         {
             this.InitialCompilation = initialCompilation;
             this.CompilationModel = compilationModel;
             this.NonObservableTransformations = nonObservableTransformations;
             this.OrderedAspectLayers = orderedAspectLayers;
             this.DiagnosticSuppressions = suppressions;
+            this.CompileTimeProject = compileTimeProject;
         }
     }
 }

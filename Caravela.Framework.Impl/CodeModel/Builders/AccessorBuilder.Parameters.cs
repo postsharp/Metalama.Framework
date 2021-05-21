@@ -10,17 +10,16 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
+        // TODO: Move all types into separate files.
+        
         private abstract class ParameterBase : CodeElementBuilder, IParameterBuilder
         {
-            private readonly AttributeBuilderList _attributeBuilderList;
-
             protected AccessorBuilder Accessor { get; }
 
             public ParameterBase( AccessorBuilder accessor, int index ) : base( accessor.ParentAdvice )
             {
                 this.Accessor = accessor;
                 this.Index = index;
-                this._attributeBuilderList = new AttributeBuilderList();
             }
 
             public virtual TypedConstant DefaultValue
@@ -95,6 +94,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             public override string Name => throw new NotSupportedException( "Cannot get the name of a return parameter." );
         }
+
+        // ReSharper disable once UnusedType.Local
+        // TODO: Use this type and remove the warning waiver.
 
         private class IndexerParameter : ParameterBase
         {

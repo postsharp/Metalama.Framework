@@ -13,10 +13,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
 {
     internal class Program
     {
-        private static string RemoveSuffix( string s, string suffix )
-        {
-            return s.EndsWith( suffix ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
-        }
+        private static string RemoveSuffix( string s, string suffix ) => s.EndsWith( suffix ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
 
         // private static string RemovePrefix( string s, string prefix )
         // {

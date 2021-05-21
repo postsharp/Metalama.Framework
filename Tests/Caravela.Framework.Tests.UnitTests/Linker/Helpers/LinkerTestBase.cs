@@ -7,8 +7,6 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using FakeItEasy;
@@ -54,14 +52,6 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
     public partial class LinkerTestBase : TestBase
     {
-        protected ServiceProvider ServiceProvider { get; }
-
-        public LinkerTestBase()
-        {
-            this.ServiceProvider = new ServiceProvider();
-            this.ServiceProvider.AddService( new SyntaxSerializationService() );
-        }
-
         internal static AspectLinkerInput CreateLinkerInput( string code )
         {
             var pseudoCompilation = CreateCSharpCompilation( code, ignoreErrors: true );
@@ -88,7 +78,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 inputCompilationModel,
                 rewriter.NonObservableTransformations,
                 rewriter.OrderedAspectLayers.Select( ( al, i ) => new OrderedAspectLayer( i, al.AspectName, al.LayerName ) ).ToArray(),
-                ArraySegment<ScopedSuppression>.Empty );
+                ArraySegment<ScopedSuppression>.Empty,
+                null! );
 
             return linkerInput;
         }

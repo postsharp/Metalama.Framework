@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -29,13 +30,17 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         /// <inheritdoc/>
-        public override bool TryExecute( PipelineStageResult input, IDiagnosticAdder diagnostics, [NotNullWhen( true )] out PipelineStageResult? result )
+        public override bool TryExecute(
+            PipelineStageResult input,
+            IDiagnosticAdder diagnostics,
+            CancellationToken cancellationToken,
+            [NotNullWhen( true )] out PipelineStageResult? result )
         {
             // TODO: it is suboptimal to get a CompilationModel here.
             var compilationModel = CompilationModel.CreateInitialInstance( input.PartialCompilation );
 
             var aspectInstances = input.AspectSources
-                .SelectMany( s => s.GetAspectInstances( compilationModel, this._aspectClassMetadata, diagnostics ) )
+                .SelectMany( s => s.GetAspectInstances( compilationModel, this._aspectClassMetadata, diagnostics, cancellationToken ) )
                 .ToImmutableArray<IAspectInstance>();
 
             if ( !aspectInstances.Any() )

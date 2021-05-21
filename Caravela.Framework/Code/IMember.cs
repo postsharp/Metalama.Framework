@@ -11,6 +11,10 @@ namespace Caravela.Framework.Code
     /// </summary>
     public interface IMember : ICodeElement
     {
+        /// <summary>
+        /// Gets the member accessibility (or visibility), i.e. <see cref="Code.Accessibility.Private"/>, <see cref="Code.Accessibility.Protected"/>
+        /// and so on.
+        /// </summary>
         Accessibility Accessibility { get; }
 
         /// <summary>
@@ -69,13 +73,5 @@ namespace Caravela.Framework.Code
         /// <returns>A <see cref="MethodInfo"/> that can be used only in run-time code.</returns>
         [return: RunTimeOnly]
         MemberInfo ToMemberInfo();
-    }
-
-    public enum Writeability
-    {
-        None,
-        ConstructorOnly,
-        InitOnly,
-        All
     }
 }

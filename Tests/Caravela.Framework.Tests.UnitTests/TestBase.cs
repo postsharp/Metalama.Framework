@@ -2,7 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Project;
+using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -14,7 +16,7 @@ using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Tests.UnitTests
 {
-    public class TestBase
+    public class TestBase : IDisposable
     {
         /// <summary>
         /// A value indicating whether tests that test the serialization of reflection objects like <see cref="Type"/> should use "dotnet build" to see if the
@@ -22,6 +24,15 @@ namespace Caravela.Framework.Tests.UnitTests
         /// can easily be produced.
         /// </summary>
         private const bool _doCodeExecutionTests = false;
+
+        private TestProjectOptions _projectOptions = new();
+
+        protected ServiceProvider ServiceProvider { get; private set; }
+
+        protected TestBase()
+        {
+            this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this._projectOptions );
+        }
 
         public static CSharpCompilation CreateCSharpCompilation(
             string code,
@@ -139,6 +150,41 @@ class Expression
                 withResult( t );
             }
 #pragma warning restore CS0162 // Unreachable code detected
+        }
+
+        public void Dispose()
+        {
+            this._projectOptions.Dispose();
+            this.ServiceProvider.Dispose();
+        }
+
+        protected IsolatedTest WithIsolatedTest() => new( this );
+
+        protected class IsolatedTest : IDisposable
+        {
+            private readonly TestBase _parent;
+            private readonly ServiceProvider _oldServiceProvider;
+            private readonly TestProjectOptions _oldProjectOptions;
+
+            public TestProjectOptions ProjectOptions { get; } = new();
+
+            public ServiceProvider ServiceProvider { get; }
+
+            public IsolatedTest( TestBase parent )
+            {
+                this._parent = parent;
+                this._oldServiceProvider = parent.ServiceProvider;
+                this._oldProjectOptions = parent._projectOptions;
+                this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions );
+            }
+
+            public void Dispose()
+            {
+                this.ProjectOptions.Dispose();
+                this.ServiceProvider.Dispose();
+                this._parent.ServiceProvider = this._oldServiceProvider;
+                this._parent._projectOptions = this._oldProjectOptions;
+            }
         }
     }
 }

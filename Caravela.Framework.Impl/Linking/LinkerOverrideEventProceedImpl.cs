@@ -6,7 +6,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Caravela.Framework.Code.MethodKind;
@@ -18,8 +17,7 @@ namespace Caravela.Framework.Impl.Linking
         private readonly IMethod _overriddenDeclaration;
         private readonly AspectLayerId _aspectLayerId;
         private readonly LinkerAnnotationOrder _order;
-        private readonly ISyntaxFactory _syntaxFactory;
-
+        
         public LinkerOverrideEventProceedImpl(
             AspectLayerId aspectLayerId,
             IMethod overriddenDeclaration,
@@ -29,7 +27,9 @@ namespace Caravela.Framework.Impl.Linking
             this._aspectLayerId = aspectLayerId;
             this._overriddenDeclaration = overriddenDeclaration;
             this._order = order;
-            this._syntaxFactory = syntaxFactory;
+            
+            // TODO: Use the parameter or remove it.
+            _ = syntaxFactory;
         }
 
         private IEvent ContainingEvent => (IEvent) this._overriddenDeclaration.ContainingElement.AssertNotNull();
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.Linking
         TypeSyntax IProceedImpl.CreateTypeSyntax()
         {
             // TODO: Introduced types?
-            return (TypeSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( (ITypeSymbol) ((NamedType) this.ContainingEvent.EventType).Symbol );
+            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( (ITypeSymbol) ((NamedType) this.ContainingEvent.EventType).Symbol );
         }
 
         StatementSyntax IProceedImpl.CreateAssignStatement( SyntaxToken returnValueLocalName )

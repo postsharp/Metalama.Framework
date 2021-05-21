@@ -6,6 +6,6 @@ using System;
 
 namespace Caravela.Framework.Advices
 {
-    [AttributeUsage( AttributeTargets.Method, Inherited = true )]
+    [AttributeUsage( AttributeTargets.Method )]
     public class OverrideEventRemoveTemplateAttribute : TemplateAttribute { }
 }

@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public override LinkerIntroductionStepOutput Execute( AspectLinkerInput input )
         {
-            var diagnostics = new DiagnosticSink();
+            var diagnostics = new UserDiagnosticSink( input.CompileTimeProject );
             var nameProvider = new LinkerIntroductionNameProvider();
             var lexicalScopeHelper = new LexicalScopeFactory( input.CompilationModel );
             var introducedMemberCollection = new IntroducedMemberCollection();
@@ -118,12 +118,6 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( oldRoot != newRoot )
                 {
-                    // Improve readability of intermediate compilation in debug builds.
-                    // TODO: this should be moved to a Formatting linker step.
-                    newRoot = newRoot.NormalizeWhitespace();
-
-                    var text = newRoot.ToFullString();
-
                     // TODO: Add an annotation to modified syntax roots so that they can be differentiated from unmodified ones and skipped by the next visitors.
                     var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 

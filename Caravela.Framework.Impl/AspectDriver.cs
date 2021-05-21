@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl
 {
@@ -38,31 +39,33 @@ namespace Caravela.Framework.Impl
                  select (attribute, member)).ToList();
         }
 
-        internal AspectInstanceResult ExecuteAspect( AspectInstance aspectInstance )
+        internal AspectInstanceResult ExecuteAspect( AspectInstance aspectInstance, CancellationToken cancellationToken )
         {
             return aspectInstance.CodeElement switch
             {
-                ICompilation compilation => this.EvaluateAspect( compilation, aspectInstance ),
-                INamedType type => this.EvaluateAspect( type, aspectInstance ),
-                IMethod method => this.EvaluateAspect( method, aspectInstance ),
-                IField field => this.EvaluateAspect( field, aspectInstance ),
-                IProperty property => this.EvaluateAspect( property, aspectInstance ),
-                IConstructor constructor => this.EvaluateAspect( constructor, aspectInstance ),
-                IEvent @event => this.EvaluateAspect( @event, aspectInstance ),
+                ICompilation compilation => this.EvaluateAspect( compilation, aspectInstance, cancellationToken ),
+                INamedType type => this.EvaluateAspect( type, aspectInstance, cancellationToken ),
+                IMethod method => this.EvaluateAspect( method, aspectInstance, cancellationToken ),
+                IField field => this.EvaluateAspect( field, aspectInstance, cancellationToken ),
+                IProperty property => this.EvaluateAspect( property, aspectInstance, cancellationToken ),
+                IConstructor constructor => this.EvaluateAspect( constructor, aspectInstance, cancellationToken ),
+                IEvent @event => this.EvaluateAspect( @event, aspectInstance, cancellationToken ),
                 _ => throw new NotImplementedException()
             };
         }
 
-        private AspectInstanceResult EvaluateAspect<T>( T codeElement, AspectInstance aspect )
+        private AspectInstanceResult EvaluateAspect<T>( T codeElement, AspectInstance aspect, CancellationToken cancellationToken )
             where T : class, ICodeElement
         {
             static AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
                 => new(
                     false,
-                    new ImmutableDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
+                    new ImmutableUserDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<IAdvice>.Empty,
                     ImmutableArray<IAspectSource>.Empty,
                     ImmutableDictionary<string, object?>.Empty );
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             if ( aspect.Aspect is not IAspect<T> aspectOfT )
             {
@@ -79,7 +82,7 @@ namespace Caravela.Framework.Impl
                 return CreateResultForError( diagnostic );
             }
 
-            var diagnosticSink = new DiagnosticSink( codeElement );
+            var diagnosticSink = new UserDiagnosticSink( aspect.AspectClass.Project, codeElement );
 
             using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
             {
@@ -88,7 +91,7 @@ namespace Caravela.Framework.Impl
 
                 var compilationModel = (CompilationModel) codeElement.Compilation;
                 var adviceFactory = new AdviceFactory( compilationModel, diagnosticSink, compilationModel.Factory.GetNamedType( this.AspectType ), aspect );
-                var aspectBuilder = new AspectBuilder<T>( codeElement, diagnosticSink, declarativeAdvices, adviceFactory );
+                var aspectBuilder = new AspectBuilder<T>( codeElement, diagnosticSink, declarativeAdvices, adviceFactory, cancellationToken );
 
                 try
                 {
@@ -99,7 +102,7 @@ namespace Caravela.Framework.Impl
                     return
                         new AspectInstanceResult(
                             false,
-                            new ImmutableDiagnosticList( e.Diagnostics, ImmutableArray<ScopedSuppression>.Empty ),
+                            new ImmutableUserDiagnosticList( e.Diagnostics, ImmutableArray<ScopedSuppression>.Empty ),
                             ImmutableArray<IAdvice>.Empty,
                             ImmutableArray<IAspectSource>.Empty,
                             ImmutableDictionary<string, object?>.Empty );

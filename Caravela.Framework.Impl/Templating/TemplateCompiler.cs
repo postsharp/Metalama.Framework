@@ -2,12 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -18,9 +18,9 @@ namespace Caravela.Framework.Impl.Templating
         private readonly IServiceProvider _serviceProvider;
         private readonly SemanticAnnotationMap _semanticAnnotationMap = new();
 
-        public TemplateCompiler( IServiceProvider? serviceProvider = null )
+        public TemplateCompiler( IServiceProvider serviceProvider )
         {
-            this._serviceProvider = serviceProvider ?? ServiceProvider.Empty;
+            this._serviceProvider = serviceProvider;
         }
 
         public ILocationAnnotationMap LocationAnnotationMap => this._semanticAnnotationMap;
@@ -29,6 +29,7 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
             IDiagnosticAdder diagnostics,
+            CancellationToken cancellationToken,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot )
         {
             SyntaxNode currentSyntaxRoot;
@@ -54,7 +55,12 @@ namespace Caravela.Framework.Impl.Templating
             annotatedSyntaxRoot = currentSyntaxRoot;
 
             // Annotate the syntax tree with info about build- and run-time nodes,
-            var annotatorRewriter = new TemplateAnnotator( (CSharpCompilation) semanticModel.Compilation, this._semanticAnnotationMap, diagnostics );
+            var annotatorRewriter = new TemplateAnnotator(
+                (CSharpCompilation) semanticModel.Compilation,
+                this._semanticAnnotationMap,
+                diagnostics,
+                this._serviceProvider );
+
             annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot )!;
 
             // Stop if we have any error.
@@ -72,10 +78,11 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
             IDiagnosticAdder diagnostics,
+            CancellationToken cancellationToken,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot,
             [NotNullWhen( true )] out SyntaxNode? transformedSyntaxRoot )
         {
-            if ( !this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out annotatedSyntaxRoot ) )
+            if ( !this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, cancellationToken, out annotatedSyntaxRoot ) )
             {
                 transformedSyntaxRoot = null;
 
@@ -88,7 +95,8 @@ namespace Caravela.Framework.Impl.Templating
                 compileTimeCompilation,
                 this._semanticAnnotationMap,
                 diagnostics,
-                this._serviceProvider );
+                this._serviceProvider,
+                cancellationToken );
 
             transformedSyntaxRoot = templateCompilerRewriter.Visit( annotatedSyntaxRoot );
 

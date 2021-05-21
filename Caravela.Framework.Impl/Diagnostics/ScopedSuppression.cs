@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
@@ -10,16 +11,16 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// </summary>
     public readonly struct ScopedSuppression
     {
-        public string Id { get; }
+        public SuppressionDefinition Definition { get; }
 
         public ICodeElement CodeElement { get; }
 
-        public ScopedSuppression( string id, ICodeElement codeElement )
+        public ScopedSuppression( SuppressionDefinition definition, ICodeElement codeElement )
         {
-            this.Id = id;
+            this.Definition = definition;
             this.CodeElement = codeElement;
         }
 
-        public override string ToString() => $"{this.Id} in {this.CodeElement}";
+        public override string ToString() => $"{this.Definition} in {this.CodeElement}";
     }
 }

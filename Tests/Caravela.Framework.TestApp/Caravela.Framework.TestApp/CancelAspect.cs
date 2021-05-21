@@ -14,8 +14,6 @@ namespace Caravela.Framework.TestApp
 
         public override dynamic OverrideMethod()
         {
-            System.Console.WriteLine( "Hello, world." );
-
             
              var parameter = meta.Parameters.LastOrDefault( p => p.ParameterType.Is( typeof( CancellationToken ) ) );
 

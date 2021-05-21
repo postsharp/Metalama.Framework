@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -17,11 +16,8 @@ namespace Caravela.Framework.Impl.CompileTime
     /// <summary>
     /// The main implementation of <see cref="ISymbolClassifier"/>.
     /// </summary>
-    internal sealed partial class SymbolClassifier : ISymbolClassifier
+    internal sealed class SymbolClassifier : ISymbolClassifier
     {
-        private static readonly object _addSync = new();
-        private static readonly ConditionalWeakTable<Compilation, ISymbolClassifier> _instances = new();
-
         /// <summary>
         /// List of well-known types, for which the scope is overriden (i.e. this list takes precedence over any other rule).
         /// 'MembersOnly' means that the rule applies to the members of the type, but not to the type itself.
@@ -44,35 +40,13 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly Dictionary<ISymbol, SymbolDeclarationScope?> _cacheFromAttributes = new( SymbolEqualityComparer.Default );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
-        private SymbolClassifier( Compilation compilation )
+        public SymbolClassifier( Compilation compilation, IServiceProvider serviceProvider )
         {
             this._compilation = compilation;
             this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
             this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeOnlyAttribute).FullName ).AssertNotNull();
             this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
-            this._referenceAssemblyLocator = ReferenceAssemblyLocator.GetInstance();
-        }
-
-        /// <summary>
-        /// Gets an implementation of <see cref="ISymbolClassifier"/> for a given <see cref="Compilation"/>.
-        /// </summary>
-        public static ISymbolClassifier GetInstance( Compilation compilation )
-        {
-            // ReSharper disable once InconsistentlySynchronizedField
-            if ( !_instances.TryGetValue( compilation, out var value ) )
-            {
-                lock ( _addSync )
-                {
-                    if ( !_instances.TryGetValue( compilation, out value ) )
-                    {
-                        var hasCaravelaReference = compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ) != null;
-                        value = hasCaravelaReference ? new SymbolClassifier( compilation ) : VanillaClassifier.GetInstance();
-                        _instances.Add( compilation, value );
-                    }
-                }
-            }
-
-            return value;
+            this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
         }
 
         public bool IsTemplate( ISymbol symbol )
@@ -266,7 +240,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return AddToCache( null );
         }
 
-        private static bool TryGetWellKnownScope( ISymbol symbol, bool isMember, out SymbolDeclarationScope scope )
+        internal static bool TryGetWellKnownScope( ISymbol symbol, bool isMember, out SymbolDeclarationScope scope )
         {
             scope = SymbolDeclarationScope.Unknown;
 

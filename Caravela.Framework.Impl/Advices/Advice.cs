@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Advices
         protected Advice( AspectInstance aspect, ICodeElement targetDeclaration, IReadOnlyDictionary<string, object?> aspectTags )
         {
             this.Aspect = aspect;
-            this.TargetDeclaration = targetDeclaration;
+            this.TargetDeclaration = targetDeclaration.AssertNotNull();
             this.AspectBuilderTags = aspectTags;
             this.AspectLayerId = new AspectLayerId( this.Aspect.AspectClass, this.LayerName );
         }

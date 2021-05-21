@@ -3,10 +3,11 @@
 
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -15,17 +16,25 @@ namespace Caravela.Framework.Impl.DesignTime
     /// </summary>
     internal class ClassificationService : IClassificationService
     {
+        private readonly IServiceProvider _serviceProvider;
+
+        public ClassificationService( IServiceProvider serviceProvider )
+        {
+            this._serviceProvider = serviceProvider;
+        }
+
         public bool TryGetClassifiedTextSpans(
             SemanticModel semanticModel,
-            [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans )
+            [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans,
+            CancellationToken cancellationToken )
         {
             // TODO: if the root is not "our", return false.
 
             var diagnostics = new DiagnosticList();
 
-            var templateCompiler = new TemplateCompiler( ServiceProvider.Empty );
+            var templateCompiler = new TemplateCompiler( this._serviceProvider );
 
-            _ = templateCompiler.TryAnnotate( semanticModel.SyntaxTree.GetRoot(), semanticModel, diagnostics, out var annotatedSyntaxRoot );
+            _ = templateCompiler.TryAnnotate( semanticModel.SyntaxTree.GetRoot(), semanticModel, diagnostics, cancellationToken, out var annotatedSyntaxRoot );
 
             if ( annotatedSyntaxRoot != null )
             {

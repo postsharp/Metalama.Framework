@@ -10,6 +10,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 // ReSharper disable StringLiteralTypo
@@ -18,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
 {
     internal class HighlightingTestRunner : TestRunnerBase
     {
-        public HighlightingTestRunner( string projectDirectory ) : base( projectDirectory ) { }
+        public HighlightingTestRunner( IServiceProvider serviceProvider, string projectDirectory ) : base( serviceProvider, projectDirectory ) { }
 
         public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
@@ -34,17 +35,18 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
 
             DiagnosticList diagnostics = new();
 
-            var templateCompiler = new TemplateCompiler();
+            var templateCompiler = new TemplateCompiler( this.ServiceProvider );
 
             var templateCompilerSuccess = templateCompiler.TryAnnotate(
                 templateSyntaxRoot,
                 templateSemanticModel,
                 diagnostics,
+                CancellationToken.None,
                 out var annotatedTemplateSyntax );
 
             if ( !templateCompilerSuccess )
             {
-                result.ReportDiagnostics( diagnostics );
+                result.Report( diagnostics );
                 result.SetFailed( "TemplateCompiler.TryAnnotate failed." );
 
                 return result;

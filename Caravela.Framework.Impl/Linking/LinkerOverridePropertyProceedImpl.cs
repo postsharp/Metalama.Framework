@@ -6,7 +6,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -19,7 +18,6 @@ namespace Caravela.Framework.Impl.Linking
         private readonly IMethod _overriddenDeclaration;
         private readonly AspectLayerId _aspectLayerId;
         private readonly LinkerAnnotationOrder _order;
-        private readonly ISyntaxFactory _syntaxFactory;
 
         public LinkerOverridePropertyProceedImpl(
             AspectLayerId aspectLayerId,
@@ -30,7 +28,9 @@ namespace Caravela.Framework.Impl.Linking
             this._aspectLayerId = aspectLayerId;
             this._overriddenDeclaration = overriddenDeclaration;
             this._order = order;
-            this._syntaxFactory = syntaxFactory;
+            
+            // TODO: Use the parameter or remove it.
+            _ = syntaxFactory;
         }
 
         private IProperty ContainingProperty => (IProperty) this._overriddenDeclaration.ContainingElement.AssertNotNull();
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.Linking
         TypeSyntax IProceedImpl.CreateTypeSyntax()
         {
             // TODO: Introduced types?
-            return (TypeSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( (ITypeSymbol) ((NamedType) this.ContainingProperty.Type).Symbol );
+            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( (ITypeSymbol) ((NamedType) this.ContainingProperty.Type).Symbol );
         }
 
         StatementSyntax IProceedImpl.CreateAssignStatement( SyntaxToken returnValueLocalName )

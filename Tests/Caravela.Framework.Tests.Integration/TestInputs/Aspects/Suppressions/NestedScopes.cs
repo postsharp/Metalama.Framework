@@ -5,6 +5,7 @@
 using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Caravela.TestFramework;
 using Caravela.Framework.Advices;
 
@@ -12,11 +13,10 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
 {
     public class SuppressWarningAttribute : Attribute, IAspect<IMethod>
     {
-        private string code;
+        private static readonly SuppressionDefinition _suppression = new( "CS0219" );
         
-        public SuppressWarningAttribute( string code )
+        public SuppressWarningAttribute()
         {
-            this.code = code;
         }
         
         [OverrideMethodTemplateAttribute]
@@ -32,14 +32,14 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
         public void Initialize(IAspectBuilder<IMethod> aspectBuilder)
         {
             aspectBuilder.AdviceFactory.OverrideMethod( aspectBuilder.TargetDeclaration, nameof(Override), AspectLinkerOptions.Create(true) );
-            aspectBuilder.Diagnostics.Suppress( this.code, aspectBuilder.TargetDeclaration );
+            aspectBuilder.Diagnostics.Suppress( null, _suppression );
         }
     }
     
     [TestOutput]
     internal class TargetClass
     {
-        [SuppressWarning("CS0219")]
+        [SuppressWarning]
         private void M2( string m ) 
         {
 #pragma warning disable CS0219

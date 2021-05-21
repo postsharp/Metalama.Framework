@@ -2,9 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -113,12 +113,12 @@ namespace Caravela.Framework.Impl.Transformations
 
         public static TypeSyntax GetSyntaxReturnType( this IMethod method )
         {
-            return (TypeSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( method.ReturnType.GetSymbol() );
+            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( method.ReturnType.GetSymbol() );
         }
 
         public static TypeSyntax GetSyntaxReturnType( this IProperty method )
         {
-            return (TypeSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( method.Type.GetSymbol() );
+            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( method.Type.GetSymbol() );
         }
 
         public static TypeParameterListSyntax? GetSyntaxTypeParameterList( this IMethod method )

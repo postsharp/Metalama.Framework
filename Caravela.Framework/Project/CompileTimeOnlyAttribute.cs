@@ -10,6 +10,8 @@ namespace Caravela.Framework.Project
     /// code, therefore not from run-time code. See <see cref="CompileTimeAttribute"/> for declarations
     /// that can be called both from compile- and run-time code.
     /// </summary>
-    [AttributeUsage( AttributeTargets.All )]
+    [AttributeUsage(
+        AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate | AttributeTargets.Interface
+        | AttributeTargets.Assembly )]
     public class CompileTimeOnlyAttribute : Attribute { }
 }

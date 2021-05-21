@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Transformations
 
             // We need either property template or (one or more) accessor templates, but never both.
             Invariant.Assert( templateProperty != null || getTemplateMethod != null || setTemplateMethod != null );
-            Invariant.Assert( !((templateProperty != null) && (getTemplateMethod != null || setTemplateMethod != null)) );
+            Invariant.Assert( !(templateProperty != null && (getTemplateMethod != null || setTemplateMethod != null)) );
 
             this.Advice = advice;
             this.OverriddenDeclaration = overriddenDeclaration;
