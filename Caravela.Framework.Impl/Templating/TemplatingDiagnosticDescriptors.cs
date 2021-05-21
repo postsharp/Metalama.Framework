@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol TemplateSymbol, ICodeElement TargetDeclaration, string ExceptionType, string Exception)>
+        internal static readonly DiagnosticDefinition<(ISymbol TemplateSymbol, IDeclaration TargetDeclaration, string ExceptionType, string Exception)>
             ExceptionInTemplate
                 = new(
                     "CR0112",
@@ -110,7 +110,7 @@ namespace Caravela.Framework.Impl.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol Advice, string Expression, ICodeElement TargetDeclaration, CodeElementKind TargetKind)>
+        internal static readonly DiagnosticDefinition<(ISymbol Advice, string Expression, IDeclaration TargetDeclaration, DeclarationKind TargetKind)>
             CannotUseThisInStaticContext
                 = new(
                     "CR0114",
@@ -119,7 +119,7 @@ namespace Caravela.Framework.Impl.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol Advice, string Expression, ICodeElement TargetDeclaration, CodeElementKind TargetKind,
+        internal static readonly DiagnosticDefinition<(ISymbol Advice, string Expression, IDeclaration TargetDeclaration, DeclarationKind TargetKind,
                 string MissingKind)>
             MemberMemberNotAvailable
                 = new(

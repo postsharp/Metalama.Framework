@@ -11,14 +11,14 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Parameter : CodeElement, IParameter
+    internal class Parameter : Declaration, IParameter
     {
         public IParameterSymbol ParameterSymbol { get; }
 
         [Memo]
-        public Member DeclaringMember => (Member) this.Compilation.Factory.GetCodeElement( this.ParameterSymbol.ContainingSymbol );
+        public Member DeclaringMember => (Member) this.Compilation.Factory.GetDeclaration( this.ParameterSymbol.ContainingSymbol );
 
-        public ParameterInfo ToParameterInfo() => CompileTimeParameterInfo.Create( this.ParameterSymbol, this.ContainingElement );
+        public ParameterInfo ToParameterInfo() => CompileTimeParameterInfo.Create( this.ParameterSymbol, this.ContainingDeclaration );
 
         IMember IParameter.DeclaringMember => this.DeclaringMember;
 
@@ -46,9 +46,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsParams => this.ParameterSymbol.IsParams;
 
-        public override ICodeElement ContainingElement => this.DeclaringMember;
+        public override IDeclaration ContainingDeclaration => this.DeclaringMember;
 
-        public override CodeElementKind ElementKind => CodeElementKind.Parameter;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
         public override ISymbol Symbol => this.ParameterSymbol;
 

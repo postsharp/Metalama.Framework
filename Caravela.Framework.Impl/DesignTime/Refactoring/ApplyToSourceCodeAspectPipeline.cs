@@ -105,7 +105,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
 
             public IEnumerable<AspectClassMetadata> AspectTypes => new[] { this._aspectClass };
 
-            public IEnumerable<ICodeElement> GetExclusions( INamedType aspectType ) => Enumerable.Empty<ICodeElement>();
+            public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
 
             public IEnumerable<AspectInstance> GetAspectInstances(
                 CompilationModel compilation,
@@ -113,7 +113,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
                 IDiagnosticAdder diagnosticAdder,
                 CancellationToken cancellationToken )
             {
-                var targetDeclaration = compilation.Factory.GetCodeElement( this._targetSymbol );
+                var targetDeclaration = compilation.Factory.GetDeclaration( this._targetSymbol );
                 var aspectInstance = (IAspect) Activator.CreateInstance( aspectClassMetadata.AspectType ).AssertNotNull();
 
                 return new[] { aspectClassMetadata.CreateAspectInstance( aspectInstance, targetDeclaration ) };

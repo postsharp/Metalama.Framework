@@ -15,7 +15,7 @@ using System.Threading;
 namespace Caravela.Framework.Impl
 {
     internal class AspectBuilder<T> : IAspectBuilder<T>
-        where T : class, ICodeElement
+        where T : class, IDeclaration
     {
         private readonly UserDiagnosticSink _diagnosticSink;
         private readonly IImmutableList<IAdvice> _declarativeAdvices;
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl
 
         public T TargetDeclaration { get; }
 
-        ICodeElement IAspectBuilder.TargetDeclaration => this.TargetDeclaration;
+        IDeclaration IAspectBuilder.TargetDeclaration => this.TargetDeclaration;
 
         public IAdviceFactory AdviceFactory => this._adviceFactory;
 

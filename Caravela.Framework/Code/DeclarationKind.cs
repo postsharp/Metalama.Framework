@@ -6,13 +6,13 @@ using Caravela.Framework.Project;
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Kinds of a <see cref="ICodeElement"/>.
+    /// Kinds of a <see cref="IDeclaration"/>.
     /// </summary>
     [CompileTimeOnly]
-    public enum CodeElementKind
+    public enum DeclarationKind
     {
         /// <summary>
-        /// Not a valid code element represented by <see cref="ICodeElement"/>.
+        /// Not a valid declaration represented by <see cref="IDeclaration"/>.
         /// </summary>
         None,
 
@@ -74,7 +74,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// A reference assembly, implementing <see cref="IAssembly"/>. Note
         /// that the current assembly is represented by <see cref="ICompilation"/> that inherits <see cref="IAssembly"/>, but the
-        /// <see cref="CodeElementKind"/> for the current compilation is <see cref="Compilation"/> and not <see cref="ReferencedAssembly"/>. 
+        /// <see cref="DeclarationKind"/> for the current compilation is <see cref="Compilation"/> and not <see cref="ReferencedAssembly"/>. 
         /// </summary>
         ReferencedAssembly
     }

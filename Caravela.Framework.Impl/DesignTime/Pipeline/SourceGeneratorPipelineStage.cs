@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if ( transformationGroup.DeclaringElement is not INamedType declaringType )
+                if ( transformationGroup.DeclaringDeclaration is not INamedType declaringType )
                 {
                     // We only support introductions to types.
                     continue;
@@ -113,7 +113,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 }
 
                 // Choose the best syntax tree
-                var originalSyntaxTree = ((ICodeElementInternal) declaringType).DeclaringSyntaxReferences.Select( r => r.SyntaxTree )
+                var originalSyntaxTree = ((IDeclarationInternal) declaringType).DeclaringSyntaxReferences.Select( r => r.SyntaxTree )
                     .OrderBy( s => s.FilePath.Length )
                     .First();
 

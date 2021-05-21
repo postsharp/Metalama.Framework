@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         public CacheableScopedSuppression( in ScopedSuppression suppression )
         {
             this.Definition = suppression.Definition;
-            this.SymbolId = suppression.CodeElement.GetSymbol()?.GetDocumentationCommentId() ?? throw new AssertionFailedException();
+            this.SymbolId = suppression.Declaration.GetSymbol()?.GetDocumentationCommentId() ?? throw new AssertionFailedException();
         }
 
         public override string ToString() => $"{this.Definition.SuppressedDiagnosticId} in {this.SymbolId}";

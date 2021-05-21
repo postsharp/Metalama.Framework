@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel
     internal interface IHasDiagnosticLocation
     {
         /// <summary>
-        /// Gets the Roslyn <see cref="Location"/> of the code element, to emit diagnostics.
+        /// Gets the Roslyn <see cref="Location"/> of the declaration, to emit diagnostics.
         /// </summary>
         Location? DiagnosticLocation { get; }
     }

@@ -4,7 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
@@ -16,41 +16,38 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     /// <summary>
-    /// Base class implementing <see cref="ICodeElementBuilder"/>. These classes are returned by introduction advices so the user can continue
-    /// specifying the introduced code element. They are bound to the <see cref="CompilationModel"/> that created them, but implement
-    /// <see cref="ICodeElementLink{T}"/> so they can resolve, using <see cref="CodeElementFactory"/>, to the consuming <see cref="CompilationModel"/>.
+    /// Base class implementing <see cref="IDeclarationBuilder"/>. These classes are returned by introduction advices so the user can continue
+    /// specifying the introduced declaration. They are bound to the <see cref="CompilationModel"/> that created them, but implement
+    /// <see cref="IDeclarationRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
     /// 
     /// </summary>
-    internal abstract class CodeElementBuilder : ICodeElementBuilder, ICodeElementInternal
+    internal abstract class DeclarationBuilder : IDeclarationBuilder, IDeclarationInternal
     {
         internal Advice ParentAdvice { get; }
 
-        public CodeOrigin Origin => CodeOrigin.Aspect;
+        public DeclarationOrigin Origin => DeclarationOrigin.Aspect;
 
-        public abstract ICodeElement? ContainingElement { get; }
+        public abstract IDeclaration? ContainingDeclaration { get; }
 
-        IAttributeList ICodeElement.Attributes => this.Attributes;
+        IAttributeList IDeclaration.Attributes => this.Attributes;
 
         public AttributeBuilderList Attributes { get; } = new();
 
-        public abstract CodeElementKind ElementKind { get; }
+        public abstract DeclarationKind DeclarationKind { get; }
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        public CompilationModel Compilation => (CompilationModel?) this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
+        public CompilationModel Compilation => (CompilationModel?) this.ContainingDeclaration?.Compilation ?? throw new AssertionFailedException();
 
         public bool IsFrozen { get; private set; }
 
-        public CodeElementBuilder( Advice parentAdvice )
+        public DeclarationBuilder( Advice parentAdvice )
         {
             this.ParentAdvice = parentAdvice;
         }
 
         // TODO: How to implement this?
-        public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        {
-            return "CodeElementBuilder";
-        }
+        public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => nameof(DeclarationBuilder);
 
         public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments )
         {
@@ -80,13 +77,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             this.IsFrozen = true;
         }
 
-        public IDiagnosticLocation? DiagnosticLocation => this.ContainingElement?.DiagnosticLocation;
+        public IDiagnosticLocation? DiagnosticLocation => this.ContainingDeclaration?.DiagnosticLocation;
 
-        public CodeElementLink<ICodeElement> ToLink() => CodeElementLink.FromBuilder( this );
+        public DeclarationRef<IDeclaration> ToRef() => DeclarationRef.FromBuilder( this );
 
-        ISymbol? ISdkCodeElement.Symbol => null;
+        ISymbol? ISdkDeclaration.Symbol => null;
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences
-            => ((ICodeElementInternal?) this.ContainingElement)?.DeclaringSyntaxReferences ?? ImmutableArray<SyntaxReference>.Empty;
+            => ((IDeclarationInternal?) this.ContainingDeclaration)?.DeclaringSyntaxReferences ?? ImmutableArray<SyntaxReference>.Empty;
     }
 }

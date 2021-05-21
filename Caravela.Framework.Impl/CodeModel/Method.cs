@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
@@ -35,9 +35,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public IGenericParameterList GenericParameters
             => new GenericParameterList(
                 this,
-                this.MethodSymbol.TypeParameters.Select( tp => CodeElementLink.FromSymbol<IGenericParameter>( tp ) ) );
+                this.MethodSymbol.TypeParameters.Select( tp => DeclarationRef.FromSymbol<IGenericParameter>( tp ) ) );
 
-        public override CodeElementKind ElementKind => CodeElementKind.Method;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
         [Memo]
         public IReadOnlyList<IType> GenericArguments => this.MethodSymbol.TypeArguments.Select( this.Compilation.Factory.GetIType ).ToImmutableList();

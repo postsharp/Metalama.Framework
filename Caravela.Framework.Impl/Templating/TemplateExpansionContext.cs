@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.Templating
             Invariant.Assert( diagnosticSink.DefaultScope!.Equals( targetMethod ) );
         }
 
-        public ICodeElement TargetDeclaration => this._targetMethod;
+        public IDeclaration TargetDeclaration => this._targetMethod;
 
         public object TemplateInstance { get; }
 

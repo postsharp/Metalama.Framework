@@ -4,7 +4,7 @@
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Allows to add members to an attribute created by <see cref="ICodeElementBuilder.AddAttribute"/>.
+    /// Allows to add members to an attribute created by <see cref="IDeclarationBuilder.AddAttribute"/>.
     /// </summary>
     public interface IAttributeBuilder : IAttribute
     {

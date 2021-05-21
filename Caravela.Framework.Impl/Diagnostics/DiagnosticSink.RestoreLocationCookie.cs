@@ -11,9 +11,9 @@ namespace Caravela.Framework.Impl.Diagnostics
         private class RestoreLocationCookie : IDisposable
         {
             private readonly UserDiagnosticSink _parent;
-            private readonly ICodeElement? _scope;
+            private readonly IDeclaration? _scope;
 
-            public RestoreLocationCookie( UserDiagnosticSink parent, ICodeElement? scope )
+            public RestoreLocationCookie( UserDiagnosticSink parent, IDeclaration? scope )
             {
                 this._parent = parent;
                 this._scope = scope;

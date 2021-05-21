@@ -19,11 +19,9 @@ namespace Caravela.Framework.Impl
             new( "CR0001", _category, "Unexpected exception occurred in Caravela: {0} Exception details are in {1}.", Error,
                  "Unexpected exception in Caravela." );
 
-        public static readonly DiagnosticDefinition<(ITypeSymbol AspectType, CodeElementKind CodeElementKind, ICodeElement CodeElement, ITypeSymbol
-                InterfaceType)>
-            AspectAppliedToIncorrectElement =
-                new( "CR0003", _category, "Aspect '{0}' cannot be applied to {1} '{2}', because this aspect does not implement the '{3}' interface.", Error,
-                     "Aspect applied to incorrect kind of element." );
+        public static readonly DiagnosticDefinition<(ITypeSymbol AspectType, DeclarationKind DeclarationKind, IDeclaration Declaration, ITypeSymbol InterfaceType)> AspectAppliedToIncorrectDeclaration =
+            new( "CR0003", _category, "Aspect '{0}' cannot be applied to {1} '{2}', because this aspect does not implement the '{3}' interface.", Error,
+                 "Aspect applied to incorrect kind of declaration." );
 
         public static readonly DiagnosticDefinition<(INamedTypeSymbol AspectType, string Weavers)> AspectHasMoreThanOneWeaver =
             new( "CR0004", _category, "Aspect '{0}' can have at most one weaver, but it has the following: {1}.", Error, "Aspect has more than one weaver." );
@@ -31,10 +29,10 @@ namespace Caravela.Framework.Impl
         public static readonly DiagnosticDefinition<(string AspectType, string Exception)> ExceptionInWeaver =
             new( "CR0006", _category, "Exception occurred while executing the weaver of aspect '{0}': {1}", Error, "Exception in aspect weaver." );
 
-        public static readonly DiagnosticDefinition<(ICodeElement Member, int ArgumentsCount)> MemberRequiresNArguments =
+        public static readonly DiagnosticDefinition<(IDeclaration Member, int ArgumentsCount)> MemberRequiresNArguments =
             new( "CR0012", _category, "Member '{0}' requires {1} arguments.", Error, "Member requires number of arguments." );
 
-        public static readonly DiagnosticDefinition<(ICodeElement Member, int ArgumentsCount)> MemberRequiresAtLeastNArguments =
+        public static readonly DiagnosticDefinition<(IDeclaration Member, int ArgumentsCount)> MemberRequiresAtLeastNArguments =
             new( "CR0013", _category, "Member '{0}' requires at least {1} arguments.", Error, "Member requires more arguments." );
 
         public static readonly DiagnosticDefinition<IMember> CannotProvideInstanceForStaticMember =
@@ -67,11 +65,11 @@ namespace Caravela.Framework.Impl
             "CR0022", _category, "The aspect '{0}' cannot add a child aspect to of type '{1}' because this aspect type has already been processed.", Error,
             "Cannot add an aspect to a previous step of the compilation pipeline." );
 
-        public static readonly DiagnosticDefinition<(string AspectType, ICodeElement Target)> CannotAddAdviceToPreviousPipelineStep = new(
+        public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Target)> CannotAddAdviceToPreviousPipelineStep = new(
             "CR0023", _category, "The aspect '{0}' cannot add an advice to '{1}' because this declaration has already been processed.", Error,
             "Cannot add an advice to a previous step of the compilation pipeline." );
 
-        public static readonly DiagnosticDefinition<(CodeElementKind ElementKind, ISymbol Symbol, ITypeSymbol AttributeType, string AdviceMethod )>
+        public static readonly DiagnosticDefinition<(DeclarationKind ElementKind, ISymbol Symbol, ITypeSymbol AttributeType, string AdviceMethod )>
             TemplateMemberMissesAttribute = new(
                 "CR0024",
                 "The template member does not have the expected custom attribute.",
@@ -93,7 +91,7 @@ namespace Caravela.Framework.Impl
             "CR0027", _category, "The assembly '{0}' required at compile-time cannot be found.", Error,
             "Cannot find an assembly required by the compile-time assembly." );
 
-        public static readonly DiagnosticDefinition<(string AspectType, ICodeElementBuilder MemberBuilder, INamedType AttributeType)>
+        public static readonly DiagnosticDefinition<(string AspectType, IDeclarationBuilder MemberBuilder, INamedType AttributeType)>
             CompatibleAttributeConstructorDoesNotExist = new(
                 "CR0028", _category, "The aspect '{0}' cannot add attribute '{1}' to member '{2}' because no compatible constructor exists for given types.",
                 Error, "Compatible attribute constructor does not exist." );

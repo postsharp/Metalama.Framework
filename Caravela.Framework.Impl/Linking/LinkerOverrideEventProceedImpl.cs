@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Linking
             _ = syntaxFactory;
         }
 
-        private IEvent ContainingEvent => (IEvent) this._overriddenDeclaration.ContainingElement.AssertNotNull();
+        private IEvent ContainingEvent => (IEvent) this._overriddenDeclaration.ContainingDeclaration.AssertNotNull();
 
         TypeSyntax IProceedImpl.CreateTypeSyntax()
         {
@@ -106,7 +106,7 @@ namespace Caravela.Framework.Impl.Linking
 
         private ExpressionSyntax CreateOriginalEventAccess()
         {
-            var originalEvent = (IEvent) this._overriddenDeclaration.ContainingElement.AssertNotNull();
+            var originalEvent = (IEvent) this._overriddenDeclaration.ContainingDeclaration.AssertNotNull();
 
             // TODO: generics, static methods, consider explicit, modifiers interfaces and other special methods.
 

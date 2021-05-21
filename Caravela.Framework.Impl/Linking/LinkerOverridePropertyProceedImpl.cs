@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Linking
             _ = syntaxFactory;
         }
 
-        private IProperty ContainingProperty => (IProperty) this._overriddenDeclaration.ContainingElement.AssertNotNull();
+        private IProperty ContainingProperty => (IProperty) this._overriddenDeclaration.ContainingDeclaration.AssertNotNull();
 
         TypeSyntax IProceedImpl.CreateTypeSyntax()
         {

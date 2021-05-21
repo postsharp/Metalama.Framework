@@ -104,7 +104,7 @@ namespace Caravela.Framework.Impl.Linking
 
             // Group diagnostic suppressions by target.
             var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
-                s => s.CodeElement,
+                s => s.Declaration,
                 input.CompilationModel.InvariantComparer );
 
             // Process syntax trees one by one.

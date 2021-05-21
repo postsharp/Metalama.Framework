@@ -4,7 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -13,46 +13,46 @@ using System.Linq;
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     /// <summary>
-    /// The base class for the read-only facade of introduced code elements, represented by <see cref="CodeElementBuilder"/>. Facades
+    /// The base class for the read-only facade of introduced declarations, represented by <see cref="DeclarationBuilder"/>. Facades
     /// are consistent with the consuming <see cref="CompilationModel"/>, while builders are consistent with the producing <see cref="CompilationModel"/>. 
     /// </summary>
-    internal abstract class BuiltCodeElement : ICodeElementInternal
+    internal abstract class BuiltDeclaration : IDeclarationInternal
     {
-        protected BuiltCodeElement( CompilationModel compilation )
+        protected BuiltDeclaration( CompilationModel compilation )
         {
             this.Compilation = compilation;
         }
 
         public CompilationModel Compilation { get; }
 
-        public abstract CodeElementBuilder Builder { get; }
+        public abstract DeclarationBuilder Builder { get; }
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Builder.ToDisplayString( format, context );
 
         public IDiagnosticLocation? DiagnosticLocation => this.Builder.DiagnosticLocation;
 
-        CodeOrigin ICodeElement.Origin => CodeOrigin.Aspect;
+        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Aspect;
 
-        public ICodeElement? ContainingElement => this.Builder.ContainingElement;
+        public IDeclaration? ContainingDeclaration => this.Builder.ContainingDeclaration;
 
         [Memo]
         public IAttributeList Attributes
             => new AttributeList(
                 this,
                 this.Builder.Attributes
-                    .Select<AttributeBuilder, AttributeLink>( a => new AttributeLink( a ) ) );
+                    .Select<AttributeBuilder, AttributeRef>( a => new AttributeRef( a ) ) );
 
-        public CodeElementKind ElementKind => this.Builder.ElementKind;
+        public DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        protected ICodeElement GetForCompilation( CompilationModel compilation )
-            => this.Compilation == compilation ? this : compilation.Factory.GetCodeElement( this.Builder );
+        protected IDeclaration GetForCompilation( CompilationModel compilation )
+            => this.Compilation == compilation ? this : compilation.Factory.GetDeclaration( this.Builder );
 
-        ISymbol? ISdkCodeElement.Symbol => null;
+        ISymbol? ISdkDeclaration.Symbol => null;
 
-        public CodeElementLink<ICodeElement> ToLink() => CodeElementLink.FromBuilder( this.Builder );
+        public DeclarationRef<IDeclaration> ToRef() => DeclarationRef.FromBuilder( this.Builder );
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
     }

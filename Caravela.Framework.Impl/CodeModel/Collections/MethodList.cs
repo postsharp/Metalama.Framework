@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using System;
 using System.Collections.Generic;
 
@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         private MethodList() { }
 
-        public MethodList( CodeElement? containingElement, IEnumerable<MemberLink<IMethod>> sourceItems ) : base( containingElement, sourceItems ) { }
+        public MethodList( Declaration? containingDeclaration, IEnumerable<MemberRef<IMethod>> sourceItems ) : base( containingDeclaration, sourceItems ) { }
 
         public IEnumerable<IMethod> OfCompatibleSignature(
             string name,
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             bool declaredOnly = true )
         {
             return this.OfCompatibleSignature(
-                (argumentTypes, this.ContainingElement.AssertNotNull().Compilation),
+                (argumentTypes, this.ContainingDeclaration.AssertNotNull().Compilation),
                 name,
                 genericParameterCount,
                 argumentTypes?.Count,

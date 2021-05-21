@@ -9,7 +9,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a parameter of a method or property.
     /// </summary>
-    public interface IParameter : ICodeElement
+    public interface IParameter : IDeclaration
     {
         /// <summary>
         /// Gets the <c>in</c>, <c>out</c>, <c>ref</c> parameter type modifier.

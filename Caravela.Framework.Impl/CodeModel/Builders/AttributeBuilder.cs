@@ -9,12 +9,12 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class AttributeBuilder : CodeElementBuilder, IAttributeBuilder, IObservableTransformation
+    internal class AttributeBuilder : DeclarationBuilder, IAttributeBuilder, IObservableTransformation
     {
-        public AttributeBuilder( CodeElementBuilder containingElement, IConstructor constructor, IReadOnlyList<TypedConstant> constructorArguments ) : base(
-            containingElement.ParentAdvice )
+        public AttributeBuilder( DeclarationBuilder containingDeclaration, IConstructor constructor, IReadOnlyList<TypedConstant> constructorArguments ) : base(
+            containingDeclaration.ParentAdvice )
         {
-            this.ContainingElement = containingElement;
+            this.ContainingDeclaration = containingDeclaration;
             this.ConstructorArguments = constructorArguments;
             this.Constructor = constructor;
         }
@@ -36,15 +36,15 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => throw new NotImplementedException();
 
-        public override ICodeElement ContainingElement { get; }
+        public override IDeclaration ContainingDeclaration { get; }
 
-        CodeOrigin ICodeElement.Origin => CodeOrigin.Aspect;
+        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Aspect;
 
-        ICodeElement? ICodeElement.ContainingElement => throw new NotImplementedException();
+        IDeclaration? IDeclaration.ContainingDeclaration => throw new NotImplementedException();
 
-        IAttributeList ICodeElement.Attributes => AttributeList.Empty;
+        IAttributeList IDeclaration.Attributes => AttributeList.Empty;
 
-        public override CodeElementKind ElementKind => CodeElementKind.Attribute;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 

@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl
 
         IEnumerable<AspectClassMetadata> AspectTypes { get; }
 
-        IEnumerable<ICodeElement> GetExclusions( INamedType aspectType );
+        IEnumerable<IDeclaration> GetExclusions( INamedType aspectType );
 
         /// <summary>
         /// Returns a set of <see cref="AspectInstance"/> of a given type. This method is called when the given aspect

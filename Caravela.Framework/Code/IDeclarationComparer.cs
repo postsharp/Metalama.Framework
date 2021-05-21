@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
 {
-    public interface ICodeElementComparer : IEqualityComparer<IType>, IEqualityComparer<ICodeElement>
+    public interface IDeclarationComparer : IEqualityComparer<IType>, IEqualityComparer<IDeclaration>
     {
         /// <summary>
         /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,

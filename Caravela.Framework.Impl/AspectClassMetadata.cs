@@ -109,7 +109,7 @@ namespace Caravela.Framework.Impl
         /// <param name="aspect">The instance of the aspect class.</param>
         /// <param name="target">The declaration on which the aspect was applied.</param>
         /// <returns></returns>
-        public AspectInstance CreateAspectInstance( IAspect aspect, ICodeElement target ) => new( aspect, target, this );
+        public AspectInstance CreateAspectInstance( IAspect aspect, IDeclaration target ) => new( aspect, target, this );
 
         /// <summary>
         /// Creates an instance of the <see cref="AspectClassMetadata"/> class.
@@ -206,27 +206,27 @@ namespace Caravela.Framework.Impl
         public bool IsEligible( ISymbol symbol )
             => symbol switch
             {
-                IMethodSymbol method => this._prototypeAspectInstance is IAspect<ICodeElement> ||
+                IMethodSymbol method => this._prototypeAspectInstance is IAspect<IAspectTarget> ||
                                         this._prototypeAspectInstance is IAspect<IMember> ||
                                         this._prototypeAspectInstance is IAspect<IMethodBase> ||
                                         (this._prototypeAspectInstance is IAspect<IMethod> && IsMethod( method.MethodKind )) ||
                                         (this._prototypeAspectInstance is IAspect<IConstructor> && IsConstructor( method.MethodKind )),
 
-                IPropertySymbol => this._prototypeAspectInstance is IAspect<ICodeElement> ||
+                IPropertySymbol => this._prototypeAspectInstance is IAspect<IAspectTarget> ||
                                    this._prototypeAspectInstance is IAspect<IMember> ||
                                    this._prototypeAspectInstance is IAspect<IFieldOrProperty> ||
                                    this._prototypeAspectInstance is IAspect<IProperty>,
 
-                IFieldSymbol => this._prototypeAspectInstance is IAspect<ICodeElement> ||
+                IFieldSymbol => this._prototypeAspectInstance is IAspect<IAspectTarget> ||
                                 this._prototypeAspectInstance is IAspect<IMember> ||
                                 this._prototypeAspectInstance is IAspect<IFieldOrProperty> ||
                                 this._prototypeAspectInstance is IAspect<IField>,
 
-                IEventSymbol => this._prototypeAspectInstance is IAspect<ICodeElement> ||
+                IEventSymbol => this._prototypeAspectInstance is IAspect<IAspectTarget> ||
                                 this._prototypeAspectInstance is IAspect<IMember> ||
                                 this._prototypeAspectInstance is IAspect<IEvent>,
 
-                INamedTypeSymbol => this._prototypeAspectInstance is IAspect<ICodeElement> ||
+                INamedTypeSymbol => this._prototypeAspectInstance is IAspect<IAspectTarget> ||
                                     this._prototypeAspectInstance is IAspect<IMember> ||
                                     this._prototypeAspectInstance is IAspect<INamedType>,
 

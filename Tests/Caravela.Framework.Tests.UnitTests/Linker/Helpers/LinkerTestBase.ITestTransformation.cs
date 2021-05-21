@@ -6,7 +6,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
     public partial class LinkerTestBase
     {
         /// <summary>
-        /// Helper attribute where we store ids of syntax nodes representing code elements which can only be resolved in the processed compilation.
+        /// Helper attribute where we store ids of syntax nodes representing declarations which can only be resolved in the processed compilation.
         /// </summary>
         public interface ITestTransformation
         {
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             /// <summary>
             /// Gets the name of the overridden element. An element with the same signature needs to be found on the same type.
             /// </summary>
-            string? OverriddenElementName { get; }
+            string? OverriddenDeclarationName { get; }
 
             /// <summary>
             /// Gets the name of the introduced element.

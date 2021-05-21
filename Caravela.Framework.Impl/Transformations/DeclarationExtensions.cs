@@ -14,11 +14,11 @@ using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    public static class CodeElementExtensions
+    public static class DeclarationExtensions
     {
-        public static SyntaxTokenList GetSyntaxModifierList( this ICodeElement codeElement )
+        public static SyntaxTokenList GetSyntaxModifierList( this IDeclaration declaration )
         {
-            switch ( codeElement )
+            switch ( declaration )
             {
                 case IMethod accessor when accessor.IsAccessor():
                     return GetAccessorSyntaxModifierList( accessor );
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         private static SyntaxTokenList GetAccessorSyntaxModifierList( IMethod accessor )
         {
-            var methodGroup = (IMember) accessor.ContainingElement!;
+            var methodGroup = (IMember) accessor.ContainingDeclaration!;
 
             // TODO: Unify with ToRoslynAccessibility and some roslyn helper?
             var tokens = new List<SyntaxToken>();

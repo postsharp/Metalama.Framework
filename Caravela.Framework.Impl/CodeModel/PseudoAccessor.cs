@@ -4,7 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 : ((IProperty) this._containingMember).Type;
 
         [Memo]
-        public IGenericParameterList GenericParameters => new GenericParameterList( this, Enumerable.Empty<CodeElementLink<IGenericParameter>>() );
+        public IGenericParameterList GenericParameters => new GenericParameterList( this, Enumerable.Empty<DeclarationRef<IGenericParameter>>() );
 
         [Memo]
         public IReadOnlyList<IType> GenericArguments => ImmutableList<IType>.Empty;
@@ -94,13 +94,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public INamedType DeclaringType => this._containingMember.DeclaringType;
 
-        public CodeOrigin Origin => CodeOrigin.Source;
+        public DeclarationOrigin Origin => DeclarationOrigin.Source;
 
-        public ICodeElement? ContainingElement => this._containingMember;
+        public IDeclaration? ContainingDeclaration => this._containingMember;
 
         public IAttributeList Attributes => AttributeList.Empty;
 
-        public CodeElementKind ElementKind => CodeElementKind.Method;
+        public DeclarationKind DeclarationKind => DeclarationKind.Method;
 
         public IDiagnosticLocation? DiagnosticLocation => this._containingMember.DiagnosticLocation;
 
@@ -137,7 +137,7 @@ namespace Caravela.Framework.Impl.CodeModel
             public IMember DeclaringMember => this.DeclaringAccessor;
 
             public RefKind RefKind
-                => this.DeclaringAccessor.ContainingElement switch
+                => this.DeclaringAccessor.ContainingDeclaration switch
                 {
                     Property property => property.RefKind,
                     Field _ => RefKind.None,
@@ -155,13 +155,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public bool IsParams => false;
 
-            public CodeOrigin Origin => CodeOrigin.Source;
+            public DeclarationOrigin Origin => DeclarationOrigin.Source;
 
-            public ICodeElement? ContainingElement => this.DeclaringAccessor;
+            public IDeclaration? ContainingDeclaration => this.DeclaringAccessor;
 
             public IAttributeList Attributes => throw new NotImplementedException();
 
-            public CodeElementKind ElementKind => CodeElementKind.Parameter;
+            public DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
             public IDiagnosticLocation? DiagnosticLocation => throw new NotImplementedException();
 

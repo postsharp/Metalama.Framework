@@ -83,7 +83,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     }
                 }
 
-                var declaringSyntaxes = ((ICodeElementInternal) suppression.CodeElement).DeclaringSyntaxReferences;
+                var declaringSyntaxes = ((IDeclarationInternal) suppression.Declaration).DeclaringSyntaxReferences;
 
                 switch ( declaringSyntaxes.Length )
                 {

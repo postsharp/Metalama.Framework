@@ -8,7 +8,7 @@ namespace Caravela.Framework.Sdk
 {
     public static class CodeModelExtensions
     {
-        public static ISymbol? GetSymbol( this ICodeElement codeElement ) => ((ISdkCodeElement) codeElement).Symbol;
+        public static ISymbol? GetSymbol( this IDeclaration declaration ) => ((ISdkDeclaration) declaration).Symbol;
 
         public static ITypeSymbol? GetSymbol( this IType type ) => ((ISdkType) type).TypeSymbol;
     }

@@ -2,29 +2,29 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class CodeElementEqualityComparer : ICodeElementComparer
+    internal class DeclarationEqualityComparer : IDeclarationComparer
     {
         private readonly Compilation _compilation;
         private readonly ReflectionMapper _reflectionMapper;
 
-        private readonly CodeElementLinkEqualityComparer<CodeElementLink<ICodeElement>> _innerComparer =
-            CodeElementLinkEqualityComparer<CodeElementLink<ICodeElement>>.Instance;
+        private readonly DeclarationRefEqualityComparer<DeclarationRef<IDeclaration>> _innerComparer =
+            DeclarationRefEqualityComparer<DeclarationRef<IDeclaration>>.Instance;
 
-        public CodeElementEqualityComparer( ReflectionMapper reflectionMapper, Compilation compilation )
+        public DeclarationEqualityComparer( ReflectionMapper reflectionMapper, Compilation compilation )
         {
             this._reflectionMapper = reflectionMapper;
             this._compilation = compilation;
         }
 
-        public bool Equals( ICodeElement x, ICodeElement y ) => this._innerComparer.Equals( x.ToLink(), y.ToLink() );
+        public bool Equals( IDeclaration x, IDeclaration y ) => this._innerComparer.Equals( x.ToRef(), y.ToRef() );
 
-        public int GetHashCode( ICodeElement obj ) => this._innerComparer.GetHashCode( obj.ToLink() );
+        public int GetHashCode( IDeclaration obj ) => this._innerComparer.GetHashCode( obj.ToRef() );
 
         public bool Equals( IType x, IType y ) => SymbolEqualityComparer.Default.Equals( x.GetSymbol(), y.GetSymbol() );
 

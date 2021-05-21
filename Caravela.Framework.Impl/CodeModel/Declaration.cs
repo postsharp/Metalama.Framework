@@ -4,7 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,9 +15,9 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract class CodeElement : ICodeElementInternal, IHasDiagnosticLocation
+    internal abstract class Declaration : IDeclarationInternal, IHasDiagnosticLocation
     {
-        protected CodeElement( CompilationModel compilation )
+        protected Declaration( CompilationModel compilation )
         {
             this.Compilation = compilation;
         }
@@ -26,23 +26,23 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
+        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
 
         [Memo]
-        public virtual ICodeElement? ContainingElement => this.Compilation.Factory.GetCodeElement( this.Symbol.ContainingSymbol );
+        public virtual IDeclaration? ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this.Symbol.ContainingSymbol );
 
         [Memo]
         public virtual IAttributeList Attributes
             => new AttributeList(
                 this,
                 this.Symbol!.GetAttributes()
-                    .Select( a => new AttributeLink( a, CodeElementLink.FromSymbol<ICodeElement>( this.Symbol ) ) ) );
+                    .Select( a => new AttributeRef( a, DeclarationRef.FromSymbol<IDeclaration>( this.Symbol ) ) ) );
 
-        public abstract CodeElementKind ElementKind { get; }
+        public abstract DeclarationKind DeclarationKind { get; }
 
         public abstract ISymbol Symbol { get; }
 
-        public virtual CodeElementLink<ICodeElement> ToLink() => CodeElementLink.FromSymbol( this.Symbol );
+        public virtual DeclarationRef<IDeclaration> ToRef() => DeclarationRef.FromSymbol( this.Symbol );
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Symbol.ToDisplayString( format.ToRoslyn() );
@@ -74,6 +74,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();
 
-        ImmutableArray<SyntaxReference> ICodeElementInternal.DeclaringSyntaxReferences => this.Symbol.DeclaringSyntaxReferences;
+        ImmutableArray<SyntaxReference> IDeclarationInternal.DeclaringSyntaxReferences => this.Symbol.DeclaringSyntaxReferences;
     }
 }

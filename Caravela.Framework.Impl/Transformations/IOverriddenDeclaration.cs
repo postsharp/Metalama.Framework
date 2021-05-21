@@ -5,8 +5,8 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal interface IOverriddenElement
+    internal interface IOverriddenDeclaration
     {
-        ICodeElement OverriddenElement { get; }
+        IDeclaration OverriddenDeclaration { get; }
     }
 }

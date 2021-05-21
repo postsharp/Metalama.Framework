@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Linking
         private partial class Rewriter : CSharpSyntaxRewriter
         {
             private readonly CompilationModel _compilation;
-            private readonly ImmutableMultiValueDictionary<ICodeElement, ScopedSuppression> _diagnosticSuppressions;
+            private readonly ImmutableMultiValueDictionary<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly IntroducedMemberCollection _introducedMemberCollection;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Linking
 
             public Rewriter(
                 IntroducedMemberCollection introducedMemberCollection,
-                ImmutableMultiValueDictionary<ICodeElement, ScopedSuppression> diagnosticSuppressions,
+                ImmutableMultiValueDictionary<IDeclaration, ScopedSuppression> diagnosticSuppressions,
                 CompilationModel compilation )
             {
                 this._diagnosticSuppressions = diagnosticSuppressions;
@@ -65,9 +65,9 @@ namespace Caravela.Framework.Impl.Linking
 
                     if ( declaredSymbol != null )
                     {
-                        var codeElement = this._compilation.Factory.GetCodeElement( declaredSymbol );
+                        var declaration = this._compilation.Factory.GetDeclaration( declaredSymbol );
 
-                        return this.GetSuppressions( codeElement );
+                        return this.GetSuppressions( declaration );
                     }
                     else
                     {
@@ -76,8 +76,8 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private IEnumerable<string> GetSuppressions( ICodeElement codeElement )
-                => this._diagnosticSuppressions[codeElement].Select( s => s.Definition.SuppressedDiagnosticId );
+            private IEnumerable<string> GetSuppressions( IDeclaration declaration )
+                => this._diagnosticSuppressions[declaration].Select( s => s.Definition.SuppressedDiagnosticId );
 
             /// <summary>
             /// Adds suppression to a node. This is done both by adding <c>#pragma warning</c> trivia
@@ -157,9 +157,9 @@ namespace Caravela.Framework.Impl.Linking
 
                         introducedNode = introducedNode.NormalizeWhitespace();
 
-                        if ( introducedMember.CodeElement != null )
+                        if ( introducedMember.Declaration != null )
                         {
-                            using ( var suppressions = this.WithSuppressions( introducedMember.CodeElement ) )
+                            using ( var suppressions = this.WithSuppressions( introducedMember.Declaration ) )
                             {
                                 introducedNode = this.AddSuppression( introducedNode, suppressions.NewSuppressions );
                             }
@@ -209,7 +209,7 @@ namespace Caravela.Framework.Impl.Linking
 
             private SuppressionContext WithSuppressions( SyntaxNode node ) => new( this, this.GetSuppressions( node ) );
 
-            private SuppressionContext WithSuppressions( ICodeElement codeElement ) => new( this, this.GetSuppressions( codeElement ) );
+            private SuppressionContext WithSuppressions( IDeclaration declaration ) => new( this, this.GetSuppressions( declaration ) );
         }
     }
 }

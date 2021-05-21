@@ -4,9 +4,9 @@
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Origins of an element of code.
+    /// Origins of a declaration.
     /// </summary>
-    public enum CodeOrigin
+    public enum DeclarationOrigin
     {
         /// <summary>
         /// Source code.

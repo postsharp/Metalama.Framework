@@ -126,7 +126,7 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
                 return null;
             }
 
-            if ( classificationService.TryGetClassifiedTextSpans( model,  out var classifier ) )
+            if ( classificationService.TryGetClassifiedTextSpans( model, cancellationToken, out var classifier ) )
             {
                 // Notify that we now have data for these spans.
                 foreach ( var span in this._spansQueue )
