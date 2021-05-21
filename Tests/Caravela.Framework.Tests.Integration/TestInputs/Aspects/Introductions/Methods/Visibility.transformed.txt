@@ -32,5 +32,4 @@ internal class TargetClass
         global::System.Console.WriteLine("This is introduced method.");
         return (int)42;
     }
-
 }

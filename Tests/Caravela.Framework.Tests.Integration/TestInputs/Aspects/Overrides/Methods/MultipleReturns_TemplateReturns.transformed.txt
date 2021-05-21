@@ -21,6 +21,7 @@ internal class TargetClass
         ;
         return;
     }
+
     [Override]
     public int TargetMethod_Int_TwoReturns(int x)
     {
@@ -40,5 +41,4 @@ internal class TargetClass
 
         return 0;
     }
-
 }

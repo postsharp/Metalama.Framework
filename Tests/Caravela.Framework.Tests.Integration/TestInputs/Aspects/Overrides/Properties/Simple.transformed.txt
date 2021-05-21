@@ -2,6 +2,7 @@
 internal class TargetClass
 {
     private int _field;
+
     [Override]
     public int Property
     {
@@ -18,5 +19,4 @@ internal class TargetClass
             this._field = value;
         }
     }
-
 }

@@ -23,6 +23,7 @@ internal class TargetClass
         global::System.Console.WriteLine("End override.");
         return;
     }
+
     [Override]
     public int TargetMethod_Int_TwoReturns(int x)
     {
@@ -52,5 +53,4 @@ internal class TargetClass
         global::System.Console.WriteLine("End override.");
         return (int)result;
     }
-
 }

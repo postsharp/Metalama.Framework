@@ -17,6 +17,7 @@ internal class TargetClass
         ;
         return;
     }
+
     [Override]
     public int TargetMethod_Int(int x)
     {
@@ -32,5 +33,4 @@ internal class TargetClass
 
         return x;
     }
-
 }

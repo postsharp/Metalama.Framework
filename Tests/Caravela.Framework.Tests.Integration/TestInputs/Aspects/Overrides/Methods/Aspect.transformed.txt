@@ -40,5 +40,4 @@ internal class TargetClass
         Console.WriteLine("This is the original static method.");
         return;
     }
-
 }
