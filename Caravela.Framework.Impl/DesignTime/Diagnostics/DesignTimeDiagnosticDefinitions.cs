@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
@@ -37,7 +38,8 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
                 typeof(TemplatingDiagnosticDescriptors),
                 typeof(DesignTimeDiagnosticDescriptors),
                 typeof(GeneralDiagnosticDescriptors),
-                typeof(SerializationDiagnosticDescriptors) )
+                typeof(SerializationDiagnosticDescriptors),
+                typeof(AdviceDiagnosticDescriptors) )
             .Select( d => d.ToRoslynDescriptor() )
             .ToImmutableDictionary( d => d.Id, d => d, StringComparer.CurrentCultureIgnoreCase );
 

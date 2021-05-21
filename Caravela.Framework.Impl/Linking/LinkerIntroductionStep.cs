@@ -118,8 +118,6 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( oldRoot != newRoot )
                 {
-                    var text = newRoot.ToFullString();
-
                     // TODO: Add an annotation to modified syntax roots so that they can be differentiated from unmodified ones and skipped by the next visitors.
                     var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 

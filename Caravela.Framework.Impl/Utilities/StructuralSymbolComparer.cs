@@ -186,14 +186,14 @@ namespace Caravela.Framework.Impl.Utilities
                 }
 
                 // TODO: optimize using for loop.
-                foreach ( var (parameterX, parameterY) in Enumerable.Zip( propertyX.Parameters, propertyY.Parameters, ( x, y ) => (x, y) ) )
+                foreach ( var (parameterX, parameterY) in propertyX.Parameters.Zip( propertyY.Parameters, ( x, y ) => (x, y) ) )
                 {
                     if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) && !TypeEquals( parameterX.Type, parameterY.Type ) )
                     {
                         return false;
                     }
 
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) && parameterY.RefKind != parameterY.RefKind )
+                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) && parameterX.RefKind != parameterY.RefKind )
                     {
                         return false;
                     }

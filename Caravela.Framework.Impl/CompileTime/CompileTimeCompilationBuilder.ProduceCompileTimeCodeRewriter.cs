@@ -145,7 +145,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var propertySymbol = (IPropertySymbol) this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
-                if ( propertySymbol != null && this.SymbolClassifier.IsTemplate( propertySymbol ) )
+                if ( this.SymbolClassifier.IsTemplate( propertySymbol ) )
                 {
                     var success = true;
                     SyntaxNode? transformedGetDeclaration = null;
@@ -160,13 +160,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
                             var setAccessor = node.AccessorList.Accessors.SingleOrDefault(
                                 a => a.Kind() == SyntaxKind.SetAccessorDeclaration || a.Kind() == SyntaxKind.InitAccessorDeclaration );
-
-                            var propertyParameters = node switch
-                            {
-                                PropertyDeclarationSyntax property => (SeparatedSyntaxList<ParameterSyntax>?) null,
-                                IndexerDeclarationSyntax indexer => indexer.ParameterList.Parameters,
-                                _ => throw new AssertionFailedException()
-                            };
 
                             // Auto properties don't have bodies and so we don't need templates.
 
@@ -201,7 +194,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             // Expression bodied property.
                             if ( node is PropertyDeclarationSyntax { ExpressionBody: not null } propertyNode )
                             {
-                                // TODO: Does this preserve trivias in expression body?
+                                // TODO: Does this preserve trivia in expression body?
                                 success = success &&
                                           this._templateCompiler.TryCompile(
                                               TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),

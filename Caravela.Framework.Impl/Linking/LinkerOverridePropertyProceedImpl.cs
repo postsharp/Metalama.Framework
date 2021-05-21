@@ -18,7 +18,6 @@ namespace Caravela.Framework.Impl.Linking
         private readonly IMethod _overriddenDeclaration;
         private readonly AspectLayerId _aspectLayerId;
         private readonly LinkerAnnotationOrder _order;
-        private readonly ISyntaxFactory _syntaxFactory;
 
         public LinkerOverridePropertyProceedImpl(
             AspectLayerId aspectLayerId,
@@ -29,7 +28,9 @@ namespace Caravela.Framework.Impl.Linking
             this._aspectLayerId = aspectLayerId;
             this._overriddenDeclaration = overriddenDeclaration;
             this._order = order;
-            this._syntaxFactory = syntaxFactory;
+            
+            // TODO: Use the parameter or remove it.
+            _ = syntaxFactory;
         }
 
         private IProperty ContainingProperty => (IProperty) this._overriddenDeclaration.ContainingElement.AssertNotNull();

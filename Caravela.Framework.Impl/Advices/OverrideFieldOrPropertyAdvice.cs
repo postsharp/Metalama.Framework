@@ -4,13 +4,12 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Advices
 {
     internal class OverrideFieldOrPropertyAdvice : Advice, IOverrideFieldOrPropertyAdvice
     {
@@ -36,7 +35,7 @@ namespace Caravela.Framework.Impl
         {
             // We need either property template or (one or more) accessor templates, but never both.
             Invariant.Assert( templateProperty != null || getTemplateMethod != null || setTemplateMethod != null );
-            Invariant.Assert( !((templateProperty != null) && (getTemplateMethod != null || setTemplateMethod != null)) );
+            Invariant.Assert( !(templateProperty != null && (getTemplateMethod != null || setTemplateMethod != null)) );
 
             this.TemplateProperty = templateProperty;
             this.GetTemplateMethod = getTemplateMethod;

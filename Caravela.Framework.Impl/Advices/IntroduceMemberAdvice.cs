@@ -19,12 +19,11 @@ namespace Caravela.Framework.Impl.Advices
 
         public ConflictBehavior ConflictBehavior { get; }
 
-        // Null is for types.
         public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
         public AspectLinkerOptions? LinkerOptions { get; }
 
-        protected abstract TBuilder MemberBuilder { get; set; }
+        protected TBuilder MemberBuilder { get; init; }
 
         protected IMember? TemplateMember { get; }
 
@@ -41,34 +40,33 @@ namespace Caravela.Framework.Impl.Advices
             this.Scope = scope;
             this.ConflictBehavior = conflictBehavior;
             this.LinkerOptions = linkerOptions;
+            
+            // This is to make the nullability analyzer happy. Derived classes are supposed to set this member in the
+            // constructor. Other designs are more cumbersome.
+            this.MemberBuilder = null!;
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {
-            this.MemberBuilder.Accessibility = this.TemplateMember != null ? this.TemplateMember.Accessibility : Accessibility.Private;
+            this.MemberBuilder.Accessibility = this.TemplateMember?.Accessibility ?? Accessibility.Private;
 
             // Handle the introduction scope.
             switch ( this.Scope )
             {
                 case IntroductionScope.Default:
-                    if ( this.TemplateMember != null && this.TemplateMember.IsStatic )
+                    if ( this.TemplateMember is { IsStatic: true } || this.TargetDeclaration.IsStatic )
                     {
-                        goto case IntroductionScope.Static;
+                        this.MemberBuilder.IsStatic = true;
                     }
                     else
                     {
-                        if ( this.TargetDeclaration != null )
-                        {
-                            goto case IntroductionScope.Target;
-                        }
-                        else
-                        {
-                            goto case IntroductionScope.Instance;
-                        }
+                        this.MemberBuilder.IsStatic = false;
                     }
+                    
+                    break;
 
                 case IntroductionScope.Instance:
-                    if ( this.TargetDeclaration is IType && this.TargetDeclaration.IsStatic )
+                    if ( this.TargetDeclaration.IsStatic )
                     {
                         // Diagnostics are reported to a sink when the advice is declarative, but as an exception when it is programmatic. 
                         diagnosticAdder.Report(
@@ -87,7 +85,7 @@ namespace Caravela.Framework.Impl.Advices
                     break;
 
                 case IntroductionScope.Target:
-                    this.MemberBuilder.IsStatic = this.TargetDeclaration.AssertNotNull().IsStatic;
+                    this.MemberBuilder.IsStatic = this.TargetDeclaration.IsStatic;
 
                     break;
 

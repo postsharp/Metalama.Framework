@@ -6,6 +6,6 @@ using System;
 
 namespace Caravela.Framework.Advices
 {
-    [AttributeUsage( AttributeTargets.Property, Inherited = true )]
+    [AttributeUsage( AttributeTargets.Property )]
     public class OverrideFieldOrPropertyTemplateAttribute : TemplateAttribute { }
 }

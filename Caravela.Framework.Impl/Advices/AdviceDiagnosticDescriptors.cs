@@ -11,6 +11,7 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal static class AdviceDiagnosticDescriptors
     {
+        // TODO: Use the prefix CR and use a different range (see Ranges.md). 
         // Reserved range 0-99
 
         private const string _category = "Caravela.Advices";

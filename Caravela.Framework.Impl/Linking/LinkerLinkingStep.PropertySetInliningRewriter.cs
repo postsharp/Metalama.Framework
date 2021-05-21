@@ -94,7 +94,7 @@ namespace Caravela.Framework.Impl.Linking
                                         _ => ReplaceInstancePropertyAccess( targetPropertySymbol, memberAccessExpression, resolvedSymbol )
                                     } );
 
-                        case IdentifierNameSyntax identifierExpression:
+                        case IdentifierNameSyntax:
                             // Static property.
                             return
                                 node.Update(
@@ -104,10 +104,10 @@ namespace Caravela.Framework.Impl.Linking
                                     {
                                         AssignmentExpressionSyntax innerAssignment =>
                                             innerAssignment.Update(
-                                                ReplaceStaticPropertyAccess( targetPropertySymbol, identifierExpression, resolvedSymbol ),
+                                                ReplaceStaticPropertyAccess( targetPropertySymbol, resolvedSymbol ),
                                                 innerAssignment.OperatorToken,
                                                 innerAssignment.Right.AssertNotNull() ),
-                                        _ => ReplaceStaticPropertyAccess( targetPropertySymbol, identifierExpression, resolvedSymbol )
+                                        _ => ReplaceStaticPropertyAccess( targetPropertySymbol, resolvedSymbol )
                                     } );
 
                         default:
@@ -136,14 +136,14 @@ namespace Caravela.Framework.Impl.Linking
                         { Body: not null } => (BlockSyntax) innerRewriter.VisitBlock( declaration.Body ).AssertNotNull(),
                         { ExpressionBody: not null } =>
                             (BlockSyntax) innerRewriter.Visit( Block( ExpressionStatement( declaration.ExpressionBody.Expression ) ) )
-                                .AssertNotNull(),              // TODO: Preserve trivias.
+                                .AssertNotNull(),              // TODO: Preserve trivia.
                         _ => throw new NotSupportedException() // TODO: Auto-properties.
                     };
 
                 // Mark the block as flattenable (this is the root block so it will not get marked by the inner rewriter).
                 rewrittenBlock = rewrittenBlock.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
 
-                if ( this.AnalysisRegistry.HasSimpleReturnControlFlow( this.ContextAccessor ) || (returnVariableName == null) )
+                if ( this.AnalysisRegistry.HasSimpleReturnControlFlow( this.ContextAccessor ) || returnVariableName == null )
                 {
                     // This method had simple control flow, we can keep the block as-is
                     return rewrittenBlock;
@@ -194,7 +194,6 @@ namespace Caravela.Framework.Impl.Linking
 
             private static ExpressionSyntax ReplaceStaticPropertyAccess(
                 IPropertySymbol originalSymbol,
-                IdentifierNameSyntax identifierExpression,
                 IPropertySymbol targetSymbol )
             {
                 if ( SymbolEqualityComparer.Default.Equals( originalSymbol, targetSymbol ) )

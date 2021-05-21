@@ -39,11 +39,16 @@ namespace Caravela.Framework.Impl.Advices
         }
 
         private IMethod? GetTemplateMethod(
-            string methodName,
+            string? methodName,
             Type expectedAttributeType,
             string adviceName,
             [DoesNotReturnIf( true )] bool throwIfMissing = true )
         {
+            if ( methodName == null )
+            {
+                return null;
+            }
+            
             // We do the search against the Roslyn compilation because it is cheaper.
 
             var members = this._aspectType.GetSymbol().GetMembers( methodName ).ToList();
@@ -239,7 +244,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public IIntroducePropertyAdvice IntroduceProperty(
             INamedType targetType,
-            string? defaultTemplate,
+            string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AspectLinkerOptions? aspectLinkerOptions = null )
