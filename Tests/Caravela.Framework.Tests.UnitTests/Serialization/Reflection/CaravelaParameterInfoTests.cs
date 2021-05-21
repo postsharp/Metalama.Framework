@@ -167,7 +167,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var parameter = (Parameter) single;
 
             var actual =
-                this.Serialize( CompileTimeParameterInfo.Create( parameter.ParameterSymbol, parameter.ContainingElement ) )
+                this.Serialize( CompileTimeParameterInfo.Create( parameter.ParameterSymbol, parameter.ContainingDeclaration ) )
                     .ToString();
 
             return actual;
@@ -184,7 +184,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var parameter = (Parameter) single;
 
             var actual =
-                this.Serialize( CompileTimeParameterInfo.Create( parameter.ParameterSymbol, parameter.ContainingElement ) )
+                this.Serialize( CompileTimeParameterInfo.Create( parameter.ParameterSymbol, parameter.ContainingDeclaration ) )
                     .ToString();
 
             return actual;

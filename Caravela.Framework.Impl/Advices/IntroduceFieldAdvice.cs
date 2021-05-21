@@ -11,11 +11,12 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
+    // ReSharper disable once UnusedType.Global
+    // TODO: Use this type and remove the warning waiver.
+    
     internal class IntroduceFieldAdvice : IntroduceMemberAdvice<FieldBuilder>, IIntroduceFieldAdvice
     {
         public IFieldBuilder Builder => this.MemberBuilder;
-
-        protected override FieldBuilder MemberBuilder { get; set; }
 
         public new INamedType TargetDeclaration => base.TargetDeclaration!;
 

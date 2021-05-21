@@ -87,7 +87,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var e = (single as Event)!;
 
             var actual = this
-                .Serialize( new CompileTimeEventInfo( e.Symbol, (IType) e.ContainingElement! ) )
+                .Serialize( new CompileTimeEventInfo( e.Symbol, (IType) e.ContainingDeclaration! ) )
                 .ToString();
 
             return actual;

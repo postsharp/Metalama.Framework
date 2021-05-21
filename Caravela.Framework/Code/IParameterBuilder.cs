@@ -3,7 +3,7 @@
 
 namespace Caravela.Framework.Code
 {
-    public interface IParameterBuilder : IParameter, ICodeElementBuilder
+    public interface IParameterBuilder : IParameter, IDeclarationBuilder
     {
         /// <remarks>
         /// Gets or sets the default value of the parameter, or  <c>default</c> if the parameter type is a struct and the default

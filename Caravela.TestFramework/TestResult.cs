@@ -86,12 +86,12 @@ namespace Caravela.TestFramework
         public string? TransformedTemplatePath { get; internal set; }
 
         /// <summary>
-        /// Gets the root <see cref="SyntaxNode"/> of the transformed syntax tree of the target code element.
+        /// Gets the root <see cref="SyntaxNode"/> of the transformed syntax tree of the target declaration.
         /// </summary>
         public SyntaxNode? TransformedTargetSyntax { get; private set; }
 
         /// <summary>
-        /// Gets the transformed <see cref="SourceText"/> of the target code element.
+        /// Gets the transformed <see cref="SourceText"/> of the target declaration.
         /// </summary>
         public SourceText? TransformedTargetSourceText { get; private set; }
 

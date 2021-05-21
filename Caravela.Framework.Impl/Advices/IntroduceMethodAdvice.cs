@@ -14,8 +14,6 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<MethodBuilder>, IIntroduceMethodAdvice
     {
-        protected override MethodBuilder MemberBuilder { get; set; }
-
         public new IMethod TemplateMember => (IMethod) base.TemplateMember.AssertNotNull();
 
         public new INamedType TargetDeclaration => base.TargetDeclaration!;

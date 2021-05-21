@@ -10,17 +10,16 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        private abstract class ParameterBase : CodeElementBuilder, IParameterBuilder
+        // TODO: Move all types into separate files.
+        
+        private abstract class ParameterBase : DeclarationBuilder, IParameterBuilder
         {
-            private readonly AttributeBuilderList _attributeBuilderList;
-
             protected AccessorBuilder Accessor { get; }
 
             public ParameterBase( AccessorBuilder accessor, int index ) : base( accessor.ParentAdvice )
             {
                 this.Accessor = accessor;
                 this.Index = index;
-                this._attributeBuilderList = new AttributeBuilderList();
             }
 
             public virtual TypedConstant DefaultValue
@@ -41,11 +40,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             public virtual bool IsParams => false;
 
-            public override ICodeElement? ContainingElement => this.Accessor;
+            public override IDeclaration? ContainingDeclaration => this.Accessor;
 
-            public override CodeElementKind ElementKind => CodeElementKind.Parameter;
+            public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-            public IMember DeclaringMember => (IMember) this.Accessor.ContainingElement.AssertNotNull();
+            public IMember DeclaringMember => (IMember) this.Accessor.ContainingDeclaration.AssertNotNull();
 
             IType IParameter.ParameterType => this.ParameterType;
 
@@ -64,13 +63,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             public override IType ParameterType
             {
-                get => ((PropertyBuilder) this.Accessor._containingElement).Type;
+                get => ((PropertyBuilder) this.Accessor._containingDeclaration).Type;
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );
             }
 
             public override RefKind RefKind
             {
-                get => ((PropertyBuilder) this.Accessor._containingElement).RefKind;
+                get => ((PropertyBuilder) this.Accessor._containingDeclaration).RefKind;
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter reference kind." );
             }
 
@@ -83,18 +82,21 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             public override IType ParameterType
             {
-                get => ((PropertyBuilder) this.Accessor._containingElement).Type;
+                get => ((PropertyBuilder) this.Accessor._containingDeclaration).Type;
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );
             }
 
             public override RefKind RefKind
             {
-                get => ((PropertyBuilder) this.Accessor._containingElement).RefKind;
+                get => ((PropertyBuilder) this.Accessor._containingDeclaration).RefKind;
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter reference kind." );
             }
 
             public override string Name => throw new NotSupportedException( "Cannot get the name of a return parameter." );
         }
+
+        // ReSharper disable once UnusedType.Local
+        // TODO: Use this type and remove the warning waiver.
 
         private class IndexerParameter : ParameterBase
         {
@@ -102,17 +104,17 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             public override IType ParameterType
             {
-                get => ((PropertyBuilder) this.Accessor._containingElement).Parameters[this.Index].ParameterType;
+                get => ((PropertyBuilder) this.Accessor._containingDeclaration).Parameters[this.Index].ParameterType;
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );
             }
 
             public override RefKind RefKind
             {
-                get => ((PropertyBuilder) this.Accessor._containingElement).Parameters[this.Index].RefKind;
+                get => ((PropertyBuilder) this.Accessor._containingDeclaration).Parameters[this.Index].RefKind;
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter reference kind." );
             }
 
-            public override bool IsParams => ((PropertyBuilder) this.Accessor._containingElement).Parameters[this.Index].IsParams;
+            public override bool IsParams => ((PropertyBuilder) this.Accessor._containingDeclaration).Parameters[this.Index].IsParams;
 
             public override string Name => throw new NotSupportedException( "Cannot get the name of a return parameter." );
         }

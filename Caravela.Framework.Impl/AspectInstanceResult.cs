@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl
     {
         public bool Success { get; }
 
-        public ImmutableDiagnosticList Diagnostics { get; }
+        public ImmutableUserDiagnosticList Diagnostics { get; }
 
         public IReadOnlyList<IAdvice> Advices { get; }
 
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl
 
         public AspectInstanceResult(
             bool success,
-            ImmutableDiagnosticList diagnostics,
+            ImmutableUserDiagnosticList diagnostics,
             IReadOnlyList<IAdvice> advices,
             IReadOnlyList<IAspectSource> aspectSources,
             ImmutableDictionary<string, object?> tags )

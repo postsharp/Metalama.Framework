@@ -7,13 +7,12 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Caravela.Framework.Impl.Transformations
 {
     internal class IntroducedInterface : IObservableTransformation, IInterfaceImplementationIntroduction, IMemberIntroduction
     {
-        public ICodeElement ContainingElement => this.TargetType;
+        public IDeclaration ContainingDeclaration => this.TargetType;
 
         public INamedType InterfaceType { get; }
 
@@ -29,7 +28,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
 
-        public IntroducedInterface( IntroduceInterfaceAdvice introduceInterfaceAdvice, INamedType targetType, INamedType interfaceType, bool isExplicit, IReadOnlyDictionary<IMember, IMember>? memberMap )
+        public IntroducedInterface( IntroduceInterfaceAdvice introduceInterfaceAdvice, INamedType targetType, INamedType interfaceType, bool isExplicit, IReadOnlyDictionary<IMember, IMember> memberMap )
         {
             this.IntroduceInterfaceAdvice = introduceInterfaceAdvice;
             this.TargetType = targetType;

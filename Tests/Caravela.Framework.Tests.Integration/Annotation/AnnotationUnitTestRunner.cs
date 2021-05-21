@@ -5,6 +5,8 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -12,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Annotation
 {
     internal class AnnotationUnitTestRunner : TestRunnerBase
     {
-        public AnnotationUnitTestRunner( string projectDirectory ) : base( projectDirectory ) { }
+        public AnnotationUnitTestRunner( IServiceProvider serviceProvider, string projectDirectory ) : base( serviceProvider, projectDirectory ) { }
 
         public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
@@ -35,17 +37,18 @@ namespace Caravela.Framework.Tests.Integration.Annotation
 
             DiagnosticList diagnostics = new();
 
-            TemplateCompiler templateCompiler = new();
+            TemplateCompiler templateCompiler = new( this.ServiceProvider );
 
             var templateCompilerSuccess = templateCompiler.TryAnnotate(
                 templateSyntaxRoot,
                 templateSemanticModel,
                 diagnostics,
+                CancellationToken.None,
                 out var annotatedTemplateSyntax );
 
             if ( !templateCompilerSuccess )
             {
-                result.ReportDiagnostics( diagnostics );
+                result.Report( diagnostics );
                 result.SetFailed( "TemplateCompiler.TryAnnotate failed." );
 
                 return result;

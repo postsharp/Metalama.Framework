@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         private Exception CreateInvalidOperationException( string memberName, string? description = null )
             => TemplatingDiagnosticDescriptors.MemberMemberNotAvailable.CreateException(
-                (this._common.TemplateSymbol, "meta." + memberName, this.Declaration, this.Declaration.ElementKind, description ?? "I" + memberName) );
+                (this._common.TemplateSymbol, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind, description ?? "I" + memberName) );
 
         public IConstructor Constructor => this._methodBase as IConstructor ?? throw this.CreateInvalidOperationException( nameof(this.Constructor) );
 
@@ -34,7 +35,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IFieldOrProperty FieldOrProperty => this._fieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
 
-        public ICodeElement Declaration { get; }
+        public IDeclaration Declaration { get; }
 
         public IMember Member => this.Declaration as IMember ?? throw this.CreateInvalidOperationException( nameof(this.Member) );
 
@@ -55,7 +56,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             => this._type is { IsStatic: false } && this.Declaration is IMember { IsStatic: false }
                 ? new ThisInstanceDynamicReceiver( this.Type, linkerAnnotation )
                 : throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                    (this._common.TemplateSymbol, expressionName, this.Declaration, this.Declaration.ElementKind) );
+                    (this._common.TemplateSymbol, expressionName, this.Declaration, this.Declaration.DeclarationKind) );
 
         public dynamic This => this.GetThisOrBase( "meta.This", new LinkerAnnotation( this._common.AspectLayerId, LinkerAnnotationOrder.Default ) );
 
@@ -71,15 +72,15 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IDiagnosticSink Diagnostics => this._common.Diagnostics;
 
-        private MetaApi( ICodeElement codeElement, MetaApiProperties common )
+        private MetaApi( IDeclaration declaration, MetaApiProperties common )
         {
-            this.Declaration = codeElement;
-            this.Compilation = codeElement.Compilation;
+            this.Declaration = declaration;
+            this.Compilation = declaration.Compilation;
             this._common = common;
         }
 
         public MetaApi( IMethodBase methodBase, MetaApiProperties common ) : this(
-            (ICodeElement) methodBase,
+            (IDeclaration) methodBase,
             common )
         {
             // TODO: if the method is a getter/setter/adder/remover, set the event or property.
@@ -90,7 +91,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         }
 
         public MetaApi( IFieldOrProperty fieldOrProperty, MetaApiProperties common ) : this(
-            (ICodeElement) fieldOrProperty,
+            (IDeclaration) fieldOrProperty,
             common )
         {
             // TODO: if the method is a getter/setter/adder/remover, set the event or property.
@@ -101,7 +102,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             // TODO: indexer parameters
         }
 
-        public MetaApi( IEvent @event, MetaApiProperties common ) : this( (ICodeElement) @event, common )
+        public MetaApi( IEvent @event, MetaApiProperties common ) : this( (IDeclaration) @event, common )
         {
             // TODO: if the method is a getter/setter/adder/remover, set the event or property.
 

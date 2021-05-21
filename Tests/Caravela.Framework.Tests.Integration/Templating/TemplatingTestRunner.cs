@@ -39,13 +39,18 @@ namespace Caravela.Framework.Tests.Integration.Templating
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
         /// </summary>
-        public TemplatingTestRunner( string? projectDirectory = null ) : this( projectDirectory, Array.Empty<CSharpSyntaxVisitor>() ) { }
+        public TemplatingTestRunner( IServiceProvider serviceProvider, string? projectDirectory = null ) : this(
+            serviceProvider,
+            projectDirectory,
+            Array.Empty<CSharpSyntaxVisitor>() ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
         /// </summary>
         /// <param name="testAnalyzers">A list of analyzers to invoke on the test source.</param>
-        public TemplatingTestRunner( string? projectDirectory, IEnumerable<CSharpSyntaxVisitor> testAnalyzers ) : base( projectDirectory )
+        public TemplatingTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<CSharpSyntaxVisitor> testAnalyzers ) : base(
+            serviceProvider,
+            projectDirectory )
         {
             this._testAnalyzers = testAnalyzers;
         }
@@ -79,7 +84,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 testResult.Project.MetadataReferences,
                 (CSharpCompilationOptions) testResult.Project.CompilationOptions! );
 
-            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult );
+            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult, this.ServiceProvider );
 
             var templateCompilerSuccess = templateCompiler.TryCompile(
                 compileTimeCompilation,
@@ -139,7 +144,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             if ( !emitResult.Success )
             {
-                testResult.ReportDiagnostics( emitResult.Diagnostics );
+                testResult.Report( emitResult.Diagnostics );
                 testResult.SetFailed( "The final template compilation failed." );
 
                 return testResult;
@@ -165,7 +170,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult, out var output );
 
-                testResult.ReportDiagnostics( expansionContext.DiagnosticSink.ToImmutable().ReportedDiagnostics );
+                testResult.Report( expansionContext.DiagnosticSink.ToImmutable().ReportedDiagnostics );
 
                 if ( !expandSuccessful )
                 {
@@ -199,7 +204,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             var targetCaravelaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! )!;
             var targetMethod = targetCaravelaType.Methods.Single( m => m.Name == "Method" );
 
-            var diagnostics = new DiagnosticSink( targetMethod );
+            var diagnostics = new UserDiagnosticSink( null, targetMethod );
 
             var roslynTargetType = roslynCompilation.Assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
 
@@ -217,7 +222,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 throw new InvalidOperationException( "The symbol of the target method was not found." );
             }
 
-            var lexicalScope = new TemplateLexicalScope( ((CodeElement) targetMethod).LookupSymbols() );
+            var lexicalScope = new TemplateLexicalScope( ((Declaration) targetMethod).LookupSymbols() );
 
             var syntaxFactory = ReflectionMapper.GetInstance( compilation.RoslynCompilation );
 

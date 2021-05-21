@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -26,7 +27,8 @@ namespace Caravela.Framework.Impl.Pipeline
         /// </summary>
         /// <param name="compilation"></param>
         /// <param name="pipelineStepsState"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public abstract CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState );
+        public abstract CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState, CancellationToken cancellationToken );
     }
 }

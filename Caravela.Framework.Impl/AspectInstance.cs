@@ -8,7 +8,7 @@ using Caravela.Framework.Sdk;
 namespace Caravela.Framework.Impl
 {
     /// <summary>
-    /// Represents an instance of an aspect and its target code element.
+    /// Represents an instance of an aspect and its target declaration.
     /// </summary>
     internal sealed class AspectInstance : IAspectInstance
     {
@@ -18,18 +18,18 @@ namespace Caravela.Framework.Impl
         public IAspect Aspect { get; }
 
         /// <summary>
-        /// Gets the element of code to which the aspect is applied.
+        /// Gets the declaration to which the aspect is applied.
         /// </summary>
-        public ICodeElement CodeElement { get; }
+        public IDeclaration Declaration { get; }
 
         public AspectClassMetadata AspectClass { get; }
 
         IAspectClassMetadata IAspectInstance.AspectClass => this.AspectClass;
 
-        internal AspectInstance( IAspect aspect, ICodeElement codeElement, AspectClassMetadata aspectClassMetadata )
+        internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClassMetadata aspectClassMetadata )
         {
             this.Aspect = aspect;
-            this.CodeElement = codeElement;
+            this.Declaration = declaration;
             this.AspectClass = aspectClassMetadata;
         }
     }

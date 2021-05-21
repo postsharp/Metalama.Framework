@@ -3,15 +3,15 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Tests.Integration.Templating
 {
@@ -22,12 +22,10 @@ namespace Caravela.Framework.Tests.Integration.Templating
         private readonly IDiagnosticAdder _diagnosticAdder;
         private readonly TemplateCompiler _templateCompiler;
 
-        public TestTemplateCompiler( SemanticModel semanticModel, IDiagnosticAdder diagnosticAdder )
+        public TestTemplateCompiler( SemanticModel semanticModel, IDiagnosticAdder diagnosticAdder, IServiceProvider serviceProvider )
         {
             this._semanticModel = semanticModel;
             this._diagnosticAdder = diagnosticAdder;
-            ServiceProvider serviceProvider = new();
-            serviceProvider.AddService( new SyntaxSerializationService() );
             this._templateCompiler = new TemplateCompiler( serviceProvider );
         }
 
@@ -64,7 +62,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             }
             catch ( InvalidUserCodeException e )
             {
-                this._diagnosticAdder.ReportDiagnostics( e.Diagnostics );
+                this._diagnosticAdder.Report( e.Diagnostics );
                 annotatedNode = null;
                 transformedNode = null;
 
@@ -93,6 +91,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                         node,
                         this._parent._semanticModel,
                         this._parent._diagnosticAdder,
+                        CancellationToken.None,
                         out var annotatedNode,
                         out var transformedNode ) )
                     {

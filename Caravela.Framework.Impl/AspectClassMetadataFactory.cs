@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
@@ -44,7 +43,7 @@ namespace Caravela.Framework.Impl
 
             // Gets the aspect types in the current compilation, including aspects types in referenced assemblies.
             var aspectTypeDataDictionary =
-                compileTimeProject.SelectManyRecursive( p => p.References, includeThis: true, throwOnDuplicate: false )
+                compileTimeProject.ClosureProjects
                     .SelectMany( p => p.AspectTypes.Select( t => (Project: p, TypeName: t) ) )
                     .ToDictionary(
                         item => item.TypeName,

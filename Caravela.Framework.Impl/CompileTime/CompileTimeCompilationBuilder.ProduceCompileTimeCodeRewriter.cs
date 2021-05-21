@@ -6,8 +6,10 @@ using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -18,27 +20,31 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Rewrites a run-time syntax tree into a compile-time syntax tree. Calls <see cref="TemplateCompiler"/> on templates,
         /// and removes run-time-only sub trees.
         /// </summary>
-        private sealed class ProduceCompileTimeCodeRewriter : Rewriter
+        private sealed class ProduceCompileTimeCodeCompileTimeBaseRewriter : CompileTimeBaseRewriter
         {
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "hasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;
+            private readonly CancellationToken _cancellationToken;
 
             public bool Success { get; private set; } = true;
 
             public bool FoundCompileTimeCode { get; private set; }
 
-            public ProduceCompileTimeCodeRewriter(
+            public ProduceCompileTimeCodeCompileTimeBaseRewriter(
                 Compilation runTimeCompilation,
                 Compilation compileTimeCompilation,
                 IDiagnosticAdder diagnosticAdder,
-                TemplateCompiler templateCompiler )
-                : base( runTimeCompilation )
+                TemplateCompiler templateCompiler,
+                IServiceProvider serviceProvider,
+                CancellationToken cancellationToken )
+                : base( runTimeCompilation, serviceProvider )
             {
                 this._compileTimeCompilation = compileTimeCompilation;
                 this._diagnosticAdder = diagnosticAdder;
                 this._templateCompiler = templateCompiler;
+                this._cancellationToken = cancellationToken;
             }
 
             // TODO: assembly and module-level attributes?
@@ -55,6 +61,8 @@ namespace Caravela.Framework.Impl.CompileTime
             private T? VisitTypeDeclaration<T>( T node )
                 where T : TypeDeclarationSyntax
             {
+                this._cancellationToken.ThrowIfCancellationRequested();
+
                 switch ( this.GetSymbolDeclarationScope( node ) )
                 {
                     case SymbolDeclarationScope.RunTimeOnly:
@@ -113,6 +121,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             node,
                             this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                             this._diagnosticAdder,
+                            this._cancellationToken,
                             out _,
                             out var transformedNode );
 
@@ -136,7 +145,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var propertySymbol = (IPropertySymbol) this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
-                if ( propertySymbol != null && this.SymbolClassifier.IsTemplate( propertySymbol ) )
+                if ( this.SymbolClassifier.IsTemplate( propertySymbol ) )
                 {
                     var success = true;
                     SyntaxNode? transformedGetDeclaration = null;
@@ -152,13 +161,6 @@ namespace Caravela.Framework.Impl.CompileTime
                             var setAccessor = node.AccessorList.Accessors.SingleOrDefault(
                                 a => a.Kind() == SyntaxKind.SetAccessorDeclaration || a.Kind() == SyntaxKind.InitAccessorDeclaration );
 
-                            var propertyParameters = node switch
-                            {
-                                PropertyDeclarationSyntax property => (SeparatedSyntaxList<ParameterSyntax>?) null,
-                                IndexerDeclarationSyntax indexer => indexer.ParameterList.Parameters,
-                                _ => throw new AssertionFailedException()
-                            };
-
                             // Auto properties don't have bodies and so we don't need templates.
 
                             if ( getAccessor != null && (getAccessor.Body != null || getAccessor.ExpressionBody != null) )
@@ -170,6 +172,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                               getAccessor,
                                               this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                               this._diagnosticAdder,
+                                              this._cancellationToken,
                                               out _,
                                               out transformedGetDeclaration );
                             }
@@ -183,6 +186,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                               setAccessor,
                                               this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                               this._diagnosticAdder,
+                                              this._cancellationToken,
                                               out _,
                                               out transformedSetDeclaration );
                             }
@@ -190,7 +194,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             // Expression bodied property.
                             if ( node is PropertyDeclarationSyntax { ExpressionBody: not null } propertyNode )
                             {
-                                // TODO: Does this preserve trivias in expression body?
+                                // TODO: Does this preserve trivia in expression body?
                                 success = success &&
                                           this._templateCompiler.TryCompile(
                                               TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
@@ -202,6 +206,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                                   propertyNode.ExpressionBody! ),
                                               this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                               this._diagnosticAdder,
+                                              this._cancellationToken,
                                               out _,
                                               out transformedGetDeclaration );
                             }

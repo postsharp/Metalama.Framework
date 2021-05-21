@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltMethod : BuiltMember, IMethod, IMemberLink<IMethod>
+    internal class BuiltMethod : BuiltMember, IMethod, IMemberRef<IMethod>
     {
         public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation )
         {
@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public MethodBuilder MethodBuilder { get; }
 
-        public override CodeElementBuilder Builder => this.MethodBuilder;
+        public override DeclarationBuilder Builder => this.MethodBuilder;
 
         public override MemberBuilder MemberBuilder => this.MethodBuilder;
 
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.MethodBuilder.Parameters.AsBuilderList.Select( CodeElementLink.FromBuilder<IParameter, IParameterBuilder> ) );
+                this.MethodBuilder.Parameters.AsBuilderList.Select( DeclarationRef.FromBuilder<IParameter, IParameterBuilder> ) );
 
         public MethodKind MethodKind => this.MethodBuilder.MethodKind;
 
@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IGenericParameterList GenericParameters
             => new GenericParameterList(
                 this,
-                this.MethodBuilder.GenericParameters.AsBuilderList.Select( CodeElementLink.FromBuilder<IGenericParameter, GenericParameterBuilder> ) );
+                this.MethodBuilder.GenericParameters.AsBuilderList.Select( DeclarationRef.FromBuilder<IGenericParameter, GenericParameterBuilder> ) );
 
         public IReadOnlyList<IType> GenericArguments => throw new NotImplementedException();
 
@@ -64,6 +64,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod? OverriddenMethod => throw new NotImplementedException();
 
-        IMethod ICodeElementLink<IMethod>.GetForCompilation( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
+        IMethod IDeclarationRef<IMethod>.GetForCompilation( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
     }
 }

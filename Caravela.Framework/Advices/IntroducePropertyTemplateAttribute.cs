@@ -8,7 +8,7 @@ namespace Caravela.Framework.Advices
     /// <summary>
     /// Custom attribute that marks the target method as a template for <see cref="IIntroduceMethodAdvice"/>.
     /// </summary>
-    [AttributeUsage( AttributeTargets.Property, Inherited = true )]
+    [AttributeUsage( AttributeTargets.Property )]
     public class IntroducePropertyTemplateAttribute : IntroduceMemberTemplateAttribute
     {
         private bool? _isVirtual;

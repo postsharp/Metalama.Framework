@@ -21,8 +21,8 @@ namespace Caravela.Framework.Impl.Advices
             AspectInstance aspect,
             IDiagnosticAdder diagnosticAdder,
             T declaration,
-            ICodeElement template )
-            where T : ICodeElement
+            IDeclaration template )
+            where T : IDeclaration
         {
             var namedArguments = attribute.NamedArguments.ToDictionary( p => p.Key, p => p.Value );
 

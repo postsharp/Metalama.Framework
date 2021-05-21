@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract class Member : CodeElement, IMember
+    internal abstract class Member : Declaration, IMember
     {
         public bool IsSealed => this.Symbol.IsSealed;
 

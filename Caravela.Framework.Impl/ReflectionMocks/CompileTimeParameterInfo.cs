@@ -11,15 +11,15 @@ namespace Caravela.Framework.Impl.ReflectionMocks
     {
         public IParameterSymbol ParameterSymbol { get; }
 
-        public ICodeElement DeclaringMember { get; }
+        public IDeclaration DeclaringMember { get; }
 
-        private CompileTimeParameterInfo( IParameterSymbol parameterSymbol, ICodeElement declaringMember )
+        private CompileTimeParameterInfo( IParameterSymbol parameterSymbol, IDeclaration declaringMember )
         {
             this.ParameterSymbol = parameterSymbol.AssertNotNull();
             this.DeclaringMember = declaringMember.AssertNotNull();
         }
 
-        public static ParameterInfo Create( IParameterSymbol parameterSymbol, ICodeElement declaringMember )
+        public static ParameterInfo Create( IParameterSymbol parameterSymbol, IDeclaration declaringMember )
             => new CompileTimeParameterInfo( parameterSymbol, declaringMember );
 
         ISymbol ICompileTimeReflectionObject.Symbol => this.ParameterSymbol;

@@ -7,6 +7,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -40,11 +41,16 @@ namespace Caravela.Framework.Impl.Advices
         }
 
         private IMethod? GetTemplateMethod(
-            string methodName,
+            string? methodName,
             Type expectedAttributeType,
             string adviceName,
             [DoesNotReturnIf( true )] bool throwIfMissing = true )
         {
+            if ( methodName == null )
+            {
+                return null;
+            }
+            
             // We do the search against the Roslyn compilation because it is cheaper.
 
             var members = this._aspectType.GetSymbol().GetMembers( methodName ).ToList();
@@ -59,12 +65,12 @@ namespace Caravela.Framework.Impl.Advices
 
             if ( !method.SelectRecursive( m => m.OverriddenMethod, includeThis: true )
                 .SelectMany( m => m.GetAttributes() )
-                .Any( a => a.AttributeClass?.Equals( expectedAttributeTypeSymbol, SymbolEqualityComparer.Default ) ?? false ) )
+                .Any( a => a.AttributeClass != null && StructuralSymbolComparer.Default.Equals( a.AttributeClass, expectedAttributeTypeSymbol ) ) )
             {
                 if ( throwIfMissing )
                 {
                     throw GeneralDiagnosticDescriptors.TemplateMemberMissesAttribute.CreateException(
-                        (CodeElementKind.Method, method, expectedAttributeTypeSymbol, adviceName) );
+                        (DeclarationKind.Method, method, expectedAttributeTypeSymbol, adviceName) );
                 }
                 else
                 {
@@ -100,7 +106,7 @@ namespace Caravela.Framework.Impl.Advices
                 if ( throwIfMissing )
                 {
                     throw GeneralDiagnosticDescriptors.TemplateMemberMissesAttribute.CreateException(
-                        (CodeElementKind.Property, property, expectedAttributeTypeSymbol, adviceName) );
+                        (DeclarationKind.Property, property, expectedAttributeTypeSymbol, adviceName) );
                 }
                 else
                 {
@@ -128,7 +134,7 @@ namespace Caravela.Framework.Impl.Advices
                     diagnosticList.Where( d => d.Severity == DiagnosticSeverity.Error ).ToImmutableArray() );
             }
 
-            this._diagnosticAdder.ReportDiagnostics( diagnosticList );
+            this._diagnosticAdder.Report( diagnosticList );
 
             return advice;
         }
@@ -162,7 +168,7 @@ namespace Caravela.Framework.Impl.Advices
                     diagnosticList.Where( d => d.Severity == DiagnosticSeverity.Error ).ToImmutableArray() );
             }
 
-            this._diagnosticAdder.ReportDiagnostics( diagnosticList );
+            this._diagnosticAdder.Report( diagnosticList );
 
             return advice;
         }
@@ -240,7 +246,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public IIntroducePropertyAdvice IntroduceProperty(
             INamedType targetType,
-            string? defaultTemplate,
+            string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AspectLinkerOptions? aspectLinkerOptions = null )

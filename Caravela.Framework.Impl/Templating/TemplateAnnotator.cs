@@ -2,14 +2,17 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.DesignTime.Contracts;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 #pragma warning disable SA1124 // Don't use regions
@@ -24,6 +27,7 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
+        private readonly CancellationToken _cancellationToken;
         private readonly TemplateMemberClassifier _templateMemberClassifier;
 
         /// <summary>
@@ -40,13 +44,16 @@ namespace Caravela.Framework.Impl.Templating
         public TemplateAnnotator(
             CSharpCompilation compilation,
             SemanticAnnotationMap semanticAnnotationMap,
-            IDiagnosticAdder diagnosticAdder )
+            IDiagnosticAdder diagnosticAdder,
+            IServiceProvider serviceProvider,
+            CancellationToken cancellationToken )
         {
-            this._symbolScopeClassifier = SymbolClassifier.GetInstance( compilation );
+            this._symbolScopeClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
+            this._cancellationToken = cancellationToken;
 
-            this._templateMemberClassifier = new TemplateMemberClassifier( compilation, semanticAnnotationMap );
+            this._templateMemberClassifier = new TemplateMemberClassifier( compilation, semanticAnnotationMap, serviceProvider );
 
             // add default values of scope
             this._currentScopeContext = ScopeContext.Default;
@@ -61,14 +68,14 @@ namespace Caravela.Framework.Impl.Templating
         /// <param name="targetNode">Node on which the diagnostic should be reported.</param>
         /// <param name="arguments">Arguments of the formatting string.</param>
         /// <typeparam name="T"></typeparam>
-        private void ReportDiagnostic<T>( StrongDiagnosticDescriptor<T> descriptor, SyntaxNodeOrToken targetNode, T arguments )
+        private void ReportDiagnostic<T>( DiagnosticDefinition<T> descriptor, SyntaxNodeOrToken targetNode, T arguments )
         {
             var location = this._semanticAnnotationMap.GetLocation( targetNode );
 
             this.ReportDiagnostic( descriptor, location, arguments );
         }
 
-        private void ReportDiagnostic<T>( StrongDiagnosticDescriptor<T> descriptor, Location? location, T arguments )
+        private void ReportDiagnostic<T>( DiagnosticDefinition<T> descriptor, Location? location, T arguments )
         {
             var diagnostic = descriptor.CreateDiagnostic( location, arguments );
             this._diagnosticAdder.Report( diagnostic );
@@ -331,6 +338,8 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return null;
             }
+            
+            this._cancellationToken.ThrowIfCancellationRequested();
 
             // Adds annotations to the children node.
             var transformedNode = base.Visit( node );

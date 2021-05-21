@@ -5,10 +5,13 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -17,12 +20,17 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public class CompileTimeAspectPipeline : AspectPipeline
     {
-        public CompileTimeAspectPipeline( IBuildOptions buildOptions, CompileTimeDomain domain, IAssemblyLocator? assemblyLocator = null ) : base(
-            buildOptions,
+        public CompileTimeAspectPipeline(
+            IProjectOptions projectOptions,
+            CompileTimeDomain domain,
+            IDirectoryOptions? directoryOptions = null,
+            IAssemblyLocator? assemblyLocator = null ) : base(
+            projectOptions,
             domain,
+            directoryOptions,
             assemblyLocator )
         {
-            if ( this.BuildOptions.CompileTimeAttachDebugger )
+            if ( this.ProjectOptions.DebugCompilerProcess )
             {
                 if ( !Debugger.IsAttached )
                 {
@@ -34,14 +42,13 @@ namespace Caravela.Framework.Impl.Pipeline
         public bool TryExecute(
             IDiagnosticAdder diagnosticAdder,
             Compilation compilation,
+            CancellationToken cancellationToken,
             [NotNullWhen( true )] out Compilation? outputCompilation,
             [NotNullWhen( true )] out IReadOnlyList<ResourceDescription>? additionalResources )
         {
             try
             {
-                var partialCompilation = PartialCompilation.CreateComplete( compilation );
-
-                if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, out var configuration ) )
+                if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
                 {
                     outputCompilation = null;
                     additionalResources = null;
@@ -49,7 +56,17 @@ namespace Caravela.Framework.Impl.Pipeline
                     return false;
                 }
 
-                if ( !TryExecuteCore( partialCompilation, diagnosticAdder, configuration, out var result ) )
+                var partialCompilation = PartialCompilation.CreateComplete( compilation );
+
+                if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )
+                {
+                    outputCompilation = null;
+                    additionalResources = null;
+
+                    return false;
+                }
+                
+                if ( !this.TryExecute( partialCompilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
                 {
                     outputCompilation = null;
                     additionalResources = null;
@@ -71,7 +88,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     additionalResourcesBuilder.Add( configuration.CompileTimeProject!.ToResource() );
                 }
 
-                outputCompilation = CompileTimeCompilationBuilder.PrepareRunTimeAssembly( result.PartialCompilation.Compilation );
+                outputCompilation = RunTimeAssemblyRewriter.Rewrite( result.PartialCompilation.Compilation, this.ServiceProvider );
                 additionalResources = additionalResourcesBuilder;
 
                 return true;
@@ -92,8 +109,9 @@ namespace Caravela.Framework.Impl.Pipeline
 
         private protected override HighLevelPipelineStage CreateStage(
             IReadOnlyList<OrderedAspectLayer> parts,
+            CompileTimeProject compileTimeProject,
             CompileTimeProjectLoader compileTimeProjectLoader )
-            => new CompileTimePipelineStage( parts, this );
+            => new CompileTimePipelineStage( compileTimeProject, parts, this );
 
         public override bool CanTransformCompilation => true;
     }

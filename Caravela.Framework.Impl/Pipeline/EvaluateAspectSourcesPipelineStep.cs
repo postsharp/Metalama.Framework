@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -20,10 +21,11 @@ namespace Caravela.Framework.Impl.Pipeline
             new PipelineStepId( aspectLayer.AspectLayerId, -1 ),
             aspectLayer ) { }
 
-        public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState )
+        public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState, CancellationToken cancellationToken )
         {
             pipelineStepsState.AddAspectInstances(
-                this._aspectSources.SelectMany( s => s.GetAspectInstances( compilation, this.AspectLayer.AspectClass, pipelineStepsState ) ) );
+                this._aspectSources.SelectMany(
+                    s => s.GetAspectInstances( compilation, this.AspectLayer.AspectClass, pipelineStepsState, cancellationToken ) ) );
 
             return compilation;
         }

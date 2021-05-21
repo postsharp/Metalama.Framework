@@ -16,7 +16,6 @@ internal class TargetClass
             global::System.Int32 discard;
         }
     }
-
     public global::System.Int32 PropertyFromAccessors
     {
         get
@@ -31,5 +30,4 @@ internal class TargetClass
             global::System.Int32 discard;
         }
     }
-
 }

@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public IServiceProvider ServiceProvider { get; }
 
-        public DiagnosticSink DiagnosticSink { get; }
+        public UserDiagnosticSink DiagnosticSink { get; }
 
         public IntroductionNameProvider IntroductionNameProvider { get; }
 
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Transformations
         public ISyntaxFactory SyntaxFactory { get; }
 
         public MemberIntroductionContext(
-            DiagnosticSink diagnosticSink,
+            UserDiagnosticSink diagnosticSink,
             IntroductionNameProvider introductionNameProvider,
             TemplateLexicalScope lexicalScope,
             ISyntaxFactory syntaxFactory,

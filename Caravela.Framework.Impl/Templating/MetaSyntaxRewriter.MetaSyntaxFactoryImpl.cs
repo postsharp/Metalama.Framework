@@ -4,7 +4,6 @@
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
@@ -24,9 +23,10 @@ namespace Caravela.Framework.Impl.Templating
             public TypeSyntax Type( Type type ) => this._reflectionMapper.GetTypeSyntax( type );
 
 #pragma warning disable CA1822 // Mark members as static
-            public TypeSyntax Type( ITypeSymbol type ) => (TypeSyntax) CSharpSyntaxGenerator.Instance.NameExpression( type );
+            public TypeSyntax Type( ITypeSymbol type ) => (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( type );
 
-            public ExpressionSyntax NamespaceOrType( INamespaceOrTypeSymbol type ) => (ExpressionSyntax) CSharpSyntaxGenerator.Instance.NameExpression( type );
+            public ExpressionSyntax NamespaceOrType( INamespaceOrTypeSymbol type )
+                => (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( type );
 #pragma warning restore CA1822 // Mark members as static
 
             public TypeSyntax GenericType( Type type, params TypeSyntax[] genericParameters )

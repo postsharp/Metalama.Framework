@@ -5,11 +5,13 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -23,7 +25,7 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private readonly SkipListIndexedDictionary<PipelineStepId, PipelineStep> _steps;
         private readonly PipelineStepIdComparer _comparer;
-        private readonly DiagnosticSink _diagnostics = new();
+        private readonly UserDiagnosticSink _diagnostics;
         private readonly List<INonObservableTransformation> _nonObservableTransformations = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
         private PipelineStep? _currentStep;
@@ -32,7 +34,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
 
-        public ImmutableDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
+        public ImmutableUserDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
 
         public IDiagnosticAdder DiagnosticAdder => this._diagnostics;
 
@@ -41,8 +43,10 @@ namespace Caravela.Framework.Impl.Pipeline
         public PipelineStepsState(
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             CompilationModel inputCompilation,
+            CompileTimeProject compileTimeProject,
             IReadOnlyList<IAspectSource> inputAspectSources )
         {
+            this._diagnostics = new UserDiagnosticSink( compileTimeProject );
             this.Compilation = inputCompilation;
 
             // Create an empty collection of steps.
@@ -65,14 +69,16 @@ namespace Caravela.Framework.Impl.Pipeline
             this.AddAspectSources( inputAspectSources );
         }
 
-        public void Execute()
+        public void Execute( CancellationToken cancellationToken )
         {
             using var enumerator = this._steps.GetEnumerator();
 
             while ( enumerator.MoveNext() )
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 this._currentStep = enumerator.Current.Value;
-                this.Compilation = this._currentStep!.Execute( this.Compilation, this );
+                this.Compilation = this._currentStep!.Execute( this.Compilation, this, cancellationToken );
             }
         }
 
@@ -182,7 +188,7 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             foreach ( var aspectInstance in aspectInstances )
             {
-                var depth = this.Compilation.GetDepth( aspectInstance.CodeElement );
+                var depth = this.Compilation.GetDepth( aspectInstance.Declaration );
 
                 if ( !this.TryGetOrAddStep( new AspectLayerId( aspectInstance.AspectClass ), depth, true, out var step ) )
                 {
@@ -196,7 +202,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public void AddDiagnostics( IEnumerable<Diagnostic> diagnostics, IEnumerable<ScopedSuppression> suppressions )
         {
-            this._diagnostics.ReportDiagnostics( diagnostics );
+            this._diagnostics.Report( diagnostics );
             this._diagnostics.Suppress( suppressions );
         }
 

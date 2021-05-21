@@ -8,7 +8,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a generic parameter of a method or type.
     /// </summary>
-    public interface IGenericParameter : ICodeElement, IType
+    public interface IGenericParameter : IDeclaration, IType
     {
         /// <summary>
         /// Gets the generic parameter name.

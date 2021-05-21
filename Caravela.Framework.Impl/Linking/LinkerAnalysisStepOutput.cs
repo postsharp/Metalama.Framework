@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Linking
     internal class LinkerAnalysisStepOutput
     {
         public LinkerAnalysisStepOutput(
-            ImmutableDiagnosticList diagnostics,
+            ImmutableUserDiagnosticList diagnostics,
             PartialCompilation intermediateCompilation,
             LinkerAnalysisRegistry analysisRegistry )
         {
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Gets diagnostic sink.
         /// </summary>
-        public ImmutableDiagnosticList Diagnostics { get; }
+        public ImmutableUserDiagnosticList Diagnostics { get; }
 
         /// <summary>
         /// Gets the intermediate compilation (produced in introduction step).

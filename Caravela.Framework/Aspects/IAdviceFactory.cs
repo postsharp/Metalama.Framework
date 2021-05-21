@@ -44,7 +44,7 @@ namespace Caravela.Framework.Aspects
 
         IOverrideFieldOrPropertyAdvice OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
-            string? defaultGetTemplate,
+            string defaultGetTemplate,
             string? setTemplate,
             AspectLinkerOptions? aspectLinkerOptions = null );
 
@@ -56,7 +56,7 @@ namespace Caravela.Framework.Aspects
 
         IIntroducePropertyAdvice IntroduceProperty(
             INamedType targetType,
-            string? defaultPropertyTemplate,
+            string defaultPropertyTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AspectLinkerOptions? aspectLinkerOptions = null );
@@ -64,7 +64,7 @@ namespace Caravela.Framework.Aspects
         IIntroducePropertyAdvice IntroduceProperty(
             INamedType targetType,
             string name,
-            string? defaultGetTemplate,
+            string defaultGetTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
@@ -79,8 +79,8 @@ namespace Caravela.Framework.Aspects
 
         IIntroducePropertyAdvice IntroduceEvent(
             INamedType targetType,
-            string? addTemplate,
-            string? removeTemplate,
+            string addTemplate,
+            string removeTemplate,
             string? invokeTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,

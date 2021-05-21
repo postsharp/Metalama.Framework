@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
@@ -38,20 +39,20 @@ namespace Caravela.Framework.Impl.Diagnostics
                         }
                     }
 
-                case CodeElementKind codeElementKind:
-                    switch ( codeElementKind )
+                case DeclarationKind declarationKind:
+                    switch ( declarationKind )
                     {
-                        case CodeElementKind.GenericParameter:
+                        case DeclarationKind.GenericParameter:
                             return "generic parameter";
 
-                        case CodeElementKind.ManagedResource:
+                        case DeclarationKind.ManagedResource:
                             return "managed resource";
 
-                        case CodeElementKind.ReferencedAssembly:
+                        case DeclarationKind.ReferencedAssembly:
                             return "reference assembly";
 
                         default:
-                            return codeElementKind.ToString().ToLowerInvariant();
+                            return declarationKind.ToString().ToLowerInvariant();
                     }
 
                 case ISymbol symbol:
@@ -59,6 +60,9 @@ namespace Caravela.Framework.Impl.Diagnostics
 
                 case IFormattable formattable:
                     return formattable.ToString( format, CultureInfo.CurrentCulture );
+                
+                case string[] strings:
+                    return string.Join( ", ", strings.Select( s => s == null ? null : "'" + s + "'" ) );
 
                 default:
                     {

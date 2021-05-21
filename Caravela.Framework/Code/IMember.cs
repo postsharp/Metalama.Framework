@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using System.Reflection;
 
@@ -9,8 +10,12 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Base interface for <see cref="IMethod"/>, <see cref="IProperty"/> and <see cref="IEvent"/>, but not <see cref="INamedType"/>.
     /// </summary>
-    public interface IMember : ICodeElement
+    public interface IMember : IAspectTarget
     {
+        /// <summary>
+        /// Gets the member accessibility (or visibility), i.e. <see cref="Code.Accessibility.Private"/>, <see cref="Code.Accessibility.Protected"/>
+        /// and so on.
+        /// </summary>
         Accessibility Accessibility { get; }
 
         /// <summary>
@@ -69,13 +74,5 @@ namespace Caravela.Framework.Code
         /// <returns>A <see cref="MethodInfo"/> that can be used only in run-time code.</returns>
         [return: RunTimeOnly]
         MemberInfo ToMemberInfo();
-    }
-
-    public enum Writeability
-    {
-        None,
-        ConstructorOnly,
-        InitOnly,
-        All
     }
 }

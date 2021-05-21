@@ -103,7 +103,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             switch ( symbol )
             {
-                case IMethodSymbol { AssociatedSymbol: null } methodSymbol:
+                case IMethodSymbol { AssociatedSymbol: null }:
                     return this.HasSingleReference( symbol, aspectLayerId, LinkerAnnotationTargetKind.Self );
 
                 case IPropertySymbol propertySymbol:

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -96,13 +97,16 @@ namespace Caravela.Framework.Impl.Serialization
         /// lists of any element.
         /// </remarks>
         /// <param name="serializer">A new serializer that supports that type.</param>
-        public void RegisterSerializer( ObjectSerializer serializer )
+        private void RegisterSerializer( ObjectSerializer serializer )
         {
             _ = this._serializerByInputType.TryAdd( serializer.InputType, serializer );
 
             foreach ( var inputType in serializer.AllSupportedTypes )
             {
-                this._supportedContractTypes.TryAdd( inputType, inputType );
+                if ( inputType.IsPublic )
+                {
+                    this._supportedContractTypes.TryAdd( inputType, inputType );
+                }
             }
         }
 

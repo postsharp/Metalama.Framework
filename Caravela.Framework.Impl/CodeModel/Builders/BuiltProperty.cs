@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Project;
 using System;
 using System.Linq;
@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltProperty : BuiltMember, IProperty, IMemberLink<IProperty>
+    internal class BuiltProperty : BuiltMember, IProperty, IMemberRef<IProperty>
     {
         public BuiltProperty( PropertyBuilder builder, CompilationModel compilation ) : base( compilation )
         {
@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public PropertyBuilder PropertyBuilder { get; }
 
-        public override CodeElementBuilder Builder => this.PropertyBuilder;
+        public override DeclarationBuilder Builder => this.PropertyBuilder;
 
         public override MemberBuilder MemberBuilder => this.PropertyBuilder;
 
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.PropertyBuilder.Parameters.AsBuilderList.Select( CodeElementLink.FromBuilder<IParameter, IParameterBuilder> ) );
+                this.PropertyBuilder.Parameters.AsBuilderList.Select( DeclarationRef.FromBuilder<IParameter, IParameterBuilder> ) );
 
         public RefKind RefKind => this.PropertyBuilder.RefKind;
 
@@ -86,6 +86,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             throw new NotImplementedException();
         }
 
-        IProperty ICodeElementLink<IProperty>.GetForCompilation( CompilationModel compilation ) => (IProperty) this.GetForCompilation( compilation );
+        IProperty IDeclarationRef<IProperty>.GetForCompilation( CompilationModel compilation ) => (IProperty) this.GetForCompilation( compilation );
     }
 }

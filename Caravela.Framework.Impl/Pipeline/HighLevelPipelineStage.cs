@@ -3,10 +3,12 @@
 
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -16,28 +18,37 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal abstract class HighLevelPipelineStage : PipelineStage
     {
+        protected CompileTimeProject CompileTimeProject { get; }
+
         private readonly IReadOnlyList<OrderedAspectLayer> _aspectLayers;
 
         protected HighLevelPipelineStage(
+            CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             IAspectPipelineProperties properties ) : base( properties )
         {
+            this.CompileTimeProject = compileTimeProject;
             this._aspectLayers = aspectLayers;
         }
 
         /// <inheritdoc/>
-        public override bool TryExecute( PipelineStageResult input, IDiagnosticAdder diagnostics, [NotNullWhen( true )] out PipelineStageResult? result )
+        public override bool TryExecute(
+            PipelineStageResult input,
+            IDiagnosticAdder diagnostics,
+            CancellationToken cancellationToken,
+            [NotNullWhen( true )] out PipelineStageResult? result )
         {
             var compilation = CompilationModel.CreateInitialInstance( input.PartialCompilation );
 
             var pipelineStepsState = new PipelineStepsState(
                 this._aspectLayers,
                 compilation,
+                this.CompileTimeProject,
                 input.AspectSources );
 
-            pipelineStepsState.Execute();
+            pipelineStepsState.Execute( cancellationToken );
 
-            result = this.GenerateCode( input, pipelineStepsState );
+            result = this.GenerateCode( input, pipelineStepsState, cancellationToken );
 
             return true;
         }
@@ -48,7 +59,11 @@ namespace Caravela.Framework.Impl.Pipeline
         /// </summary>
         /// <param name="input"></param>
         /// <param name="pipelineStepResult"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected abstract PipelineStageResult GenerateCode( PipelineStageResult input, IPipelineStepsResult pipelineStepResult );
+        protected abstract PipelineStageResult GenerateCode(
+            PipelineStageResult input,
+            IPipelineStepsResult pipelineStepResult,
+            CancellationToken cancellationToken );
     }
 }

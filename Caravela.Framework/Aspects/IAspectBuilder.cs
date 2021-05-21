@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Caravela.Framework.Aspects
 {
@@ -21,7 +22,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets the declaration to which the aspect was added.
         /// </summary>
-        ICodeElement TargetDeclaration { get; }
+        IDeclaration TargetDeclaration { get; }
 
         /// <summary>
         /// Gets an object that exposes methods that allow to create advices.
@@ -34,7 +35,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <remarks>
         /// Note that reporting an error using
-        /// <see cref="IDiagnosticSink.Report(Caravela.Framework.Diagnostics.Severity,Caravela.Framework.Diagnostics.IDiagnosticLocation,string,string,object[])"/>
+        /// <see cref="IDiagnosticSink.Report"/>
         /// automatically causes the aspect to be skipped, but, additionally, provided children aspects are ignored.
         /// </remarks>
         void SkipAspect();
@@ -44,6 +45,8 @@ namespace Caravela.Framework.Aspects
         /// visible in <see cref="meta.Tags"/>.
         /// </summary>
         IDictionary<string, object?> Tags { get; }
+
+        CancellationToken CancellationToken { get; }
     }
 
     /// <summary>
@@ -51,7 +54,7 @@ namespace Caravela.Framework.Aspects
     /// aspects. This is the strongly-typed variant of the <see cref="IAspectBuilder"/> interface.
     /// </summary>
     public interface IAspectBuilder<out T> : IAspectBuilder
-        where T : ICodeElement
+        where T : IDeclaration
     {
         /// <summary>
         /// Gets the declaration to which the aspect was added.

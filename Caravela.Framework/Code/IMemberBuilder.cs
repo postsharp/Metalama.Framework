@@ -6,7 +6,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Allows to complete the construction of a member that has been created by an advice.
     /// </summary>
-    public interface IMemberBuilder : IMember, ICodeElementBuilder
+    public interface IMemberBuilder : IMember, IDeclarationBuilder
     {
         /// <summary>
         /// Gets or sets the accessibility of the member.

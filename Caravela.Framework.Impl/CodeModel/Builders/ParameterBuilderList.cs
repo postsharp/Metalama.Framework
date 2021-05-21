@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class ParameterBuilderList : List<IParameterBuilder>, IParameterList
     {
-        public ParameterBuilderList() : base() { }
+        public ParameterBuilderList() { }
 
         public ParameterBuilderList( IEnumerable<IParameterBuilder> parameterBuilders ) : base( parameterBuilders ) { }
 

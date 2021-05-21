@@ -73,17 +73,17 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var transformedExpression = this.Visit( node.Expression );
 
-                if ( transformedExpression == null )
+                if ( transformedExpression == null! )
                 {
                     return null;
                 }
-                else if ( transformedExpression is not ExpressionSyntax )
+                else if ( transformedExpression is not ExpressionSyntax syntax )
                 {
                     return transformedExpression;
                 }
                 else
                 {
-                    return node.Update( (ExpressionSyntax) transformedExpression, node.SemicolonToken );
+                    return node.Update( syntax, node.SemicolonToken );
                 }
             }
 

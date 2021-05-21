@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Advices
 
         IAspect IAdvice.Aspect => this.Aspect.Aspect;
 
-        public ICodeElement TargetDeclaration { get; }
+        public IDeclaration TargetDeclaration { get; }
 
         public AspectLayerId AspectLayerId { get; }
 
@@ -26,10 +26,10 @@ namespace Caravela.Framework.Impl.Advices
         /// </summary>
         public IReadOnlyDictionary<string, object?> AspectBuilderTags { get; }
 
-        protected Advice( AspectInstance aspect, ICodeElement targetDeclaration, IReadOnlyDictionary<string, object?> aspectTags )
+        protected Advice( AspectInstance aspect, IDeclaration targetDeclaration, IReadOnlyDictionary<string, object?> aspectTags )
         {
             this.Aspect = aspect;
-            this.TargetDeclaration = targetDeclaration;
+            this.TargetDeclaration = targetDeclaration.AssertNotNull();
             this.AspectBuilderTags = aspectTags;
             this.AspectLayerId = new AspectLayerId( this.Aspect.AspectClass, this.LayerName );
         }

@@ -4,7 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
@@ -60,10 +60,10 @@ namespace Caravela.Framework.Impl.CodeModel
                 this.TypeSymbol.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
         public bool IsOpenGeneric
-            => this.GenericArguments.Any( ga => ga is IGenericParameter ) || (this.ContainingElement as INamedType)?.IsOpenGeneric == true;
+            => this.GenericArguments.Any( ga => ga is IGenericParameter ) || (this.ContainingDeclaration as INamedType)?.IsOpenGeneric == true;
 
         [Memo]
-        public INamedTypeList NestedTypes => new NamedTypeList( this, this.TypeSymbol.GetTypeMembers().Select( t => new MemberLink<INamedType>( t ) ) );
+        public INamedTypeList NestedTypes => new NamedTypeList( this, this.TypeSymbol.GetTypeMembers().Select( t => new MemberRef<INamedType>( t ) ) );
 
         [Memo]
         public IPropertyList Properties
@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select(
                         m => m switch
                         {
-                            IPropertySymbol p => new MemberLink<IProperty>( p ),
+                            IPropertySymbol p => new MemberRef<IProperty>( p ),
                             _ => default
                         } ) );
 
@@ -84,7 +84,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select(
                         m => m switch
                         {
-                            IFieldSymbol p => new MemberLink<IField>( p ),
+                            IFieldSymbol p => new MemberRef<IField>( p ),
                             _ => default
                         } ) );
 
@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this.TypeSymbol
                     .GetMembers()
                     .OfType<IEventSymbol>()
-                    .Select( e => new MemberLink<IEvent>( e ) ) );
+                    .Select( e => new MemberRef<IEvent>( e ) ) );
 
         [Memo]
         public IMethodList Methods
@@ -116,11 +116,11 @@ namespace Caravela.Framework.Impl.CodeModel
                             && m.MethodKind != MethodKind.EventAdd
                             && m.MethodKind != MethodKind.EventRemove
                             && m.MethodKind != MethodKind.EventRaise )
-                    .Select( m => new MemberLink<IMethod>( m ) )
+                    .Select( m => new MemberRef<IMethod>( m ) )
                     .Concat(
                         this.Compilation.GetObservableTransformationsOnElement( this )
                             .OfType<MethodBuilder>()
-                            .Select( m => new MemberLink<IMethod>( m ) ) ) );
+                            .Select( m => new MemberRef<IMethod>( m ) ) ) );
 
         [Memo]
         public IConstructorList Constructors
@@ -130,7 +130,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     .GetMembers()
                     .OfType<IMethodSymbol>()
                     .Where( m => m.MethodKind == MethodKind.Constructor )
-                    .Select( m => new MemberLink<IConstructor>( m ) ) );
+                    .Select( m => new MemberRef<IConstructor>( m ) ) );
 
         [Memo]
         public IConstructor? StaticConstructor
@@ -161,7 +161,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => new GenericParameterList(
                 this,
                 this.TypeSymbol.TypeParameters
-                    .Select( CodeElementLink.FromSymbol<IGenericParameter> ) );
+                    .Select( DeclarationRef.FromSymbol<IGenericParameter> ) );
 
         [Memo]
         public string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();
@@ -176,7 +176,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly );
 
         [Memo]
-        public override ICodeElement? ContainingElement
+        public override IDeclaration? ContainingDeclaration
             => this.TypeSymbol.ContainingSymbol switch
             {
                 INamespaceSymbol => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly ),
@@ -184,7 +184,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => throw new NotImplementedException()
             };
 
-        public override CodeElementKind ElementKind => CodeElementKind.Type;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Type;
 
         [Memo]
         public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.Factory.GetNamedType( this.TypeSymbol.BaseType );
@@ -244,7 +244,7 @@ namespace Caravela.Framework.Impl.CodeModel
             var symbolInterfaceMemberImplementationSymbol = this.TypeSymbol.FindImplementationForInterfaceMember( interfaceMember.GetSymbol().AssertNotNull() );
             var symbolInterfaceMemberImplementation =
                 symbolInterfaceMemberImplementationSymbol != null
-                ? (IMember) this.Compilation.Factory.GetCodeElement( symbolInterfaceMemberImplementationSymbol )
+                ? (IMember) this.Compilation.Factory.GetDeclaration( symbolInterfaceMemberImplementationSymbol )
                 : null;
 
             // Introduced implementation can be implementing the interface member in a subtype.

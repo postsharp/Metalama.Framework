@@ -20,8 +20,6 @@ namespace Caravela.Framework.Impl.Advices
         private readonly IMethod? _getTemplateMethod;
         private readonly IMethod? _setTemplateMethod;
 
-        protected override PropertyBuilder MemberBuilder { get; set; }
-
         public new IProperty? TemplateMember => (IProperty?) base.TemplateMember;
 
         public new INamedType TargetDeclaration => base.TargetDeclaration!;
