@@ -137,5 +137,36 @@ namespace Caravela.Framework.Impl.Templating
                     "The variable '{0}' is compile-time Info.",
                     _category,
                     Info );
+
+        internal static readonly DiagnosticDefinition<(ISymbol DeclaringSymbol, ISymbol ReferencedSymbol)>
+            CannotReferenceCompileTimeOnly
+                = new(
+                    "CR0117",
+                    "Cannot reference a compile-time-only declaration in a non-compile-time-only declaration.",
+                    "Cannot reference '{1}' in '{0}' because '{1}' is compile-time-only but '{0}' is not. " +
+                    "Consider adding [CompileTimeOnly] to '{0}', or do not use '{1}' in '{0}'.'",
+                    _category,
+                    Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol>
+            CompileTimeTypeNeedsRebuild
+                = new(
+                    "CR0118",
+                    "The compile-time type needs rebuild.",
+                    "The compile-time type '{0}' has been modified since the last build. Caravela will stop analyzing this solution until the "
+                    + "next build and you may get errors related to the absence of generated source. "
+                    + "To resume analysis, finish the work on all compile-time logic, then build the project (even if the run-time code still has issues).",
+                    _category,
+                    Error );
+
+        internal static readonly DiagnosticDefinition<(ISymbol Declaration, string[] Namespaces)>
+            CompileTimeCodeNeedsNamespaceImport
+                = new(
+                    "CR0119",
+                    "The declaration contains compile-time code but it does not import the proper namespaces.",
+                    "The compile-time declaration '{0}' contains compile-time code but it does not explicitly import any of the following namespaces: {1}. "
+                    + "This may cause an inconsistent design-time experience. Import one of these namespaces explicitly.",
+                    _category,
+                    Error );
     }
 }

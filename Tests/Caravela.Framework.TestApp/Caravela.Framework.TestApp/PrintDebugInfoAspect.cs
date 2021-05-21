@@ -7,7 +7,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.TestApp.Aspects;
 
-
 namespace Caravela.Framework.TestApp
 {
     internal class PrintDebugInfoAspect : OverrideMethodAspect
@@ -22,7 +21,7 @@ namespace Caravela.Framework.TestApp
         public override dynamic OverrideMethod()
         {
             Console.WriteLine( DebugInfo.GetInfo() );
-            return meta.Proceed();
+            return Caravela.Framework.Aspects.meta.Proceed();
         }
     }
 }

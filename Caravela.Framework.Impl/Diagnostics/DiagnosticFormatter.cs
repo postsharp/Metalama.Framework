@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
@@ -59,6 +60,9 @@ namespace Caravela.Framework.Impl.Diagnostics
 
                 case IFormattable formattable:
                     return formattable.ToString( format, CultureInfo.CurrentCulture );
+                
+                case string[] strings:
+                    return string.Join( ", ", strings.Select( s => s == null ? null : "'" + s + "'" ) );
 
                 default:
                     {

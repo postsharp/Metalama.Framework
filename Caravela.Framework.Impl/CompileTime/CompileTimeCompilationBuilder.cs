@@ -111,6 +111,13 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 return true;
             }
+            
+            // Validate the code (some validations are not done by the template compiler).
+            foreach ( var syntaxTree in treesWithCompileTimeCode )
+            {
+                var semanticModel = runTimeCompilation.GetSemanticModel( syntaxTree );
+                TemplatingCodeValidator.Validate( semanticModel, diagnosticSink.Report, this._serviceProvider, false, false, cancellationToken );
+            }
 
             var assemblyName = GetCompileTimeAssemblyName( runTimeCompilation.AssemblyName!, hash );
             compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( assemblyName, referencedProjects );

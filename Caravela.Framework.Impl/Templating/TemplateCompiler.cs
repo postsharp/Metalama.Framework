@@ -59,7 +59,8 @@ namespace Caravela.Framework.Impl.Templating
                 (CSharpCompilation) semanticModel.Compilation,
                 this._semanticAnnotationMap,
                 diagnostics,
-                this._serviceProvider );
+                this._serviceProvider,
+                cancellationToken );
 
             annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot )!;
 
@@ -86,6 +87,18 @@ namespace Caravela.Framework.Impl.Templating
             {
                 transformedSyntaxRoot = null;
 
+                return false;
+            }
+
+            var sourceDiagnostics = semanticModel.GetDiagnostics( sourceSyntaxRoot.Span, cancellationToken );
+
+            if ( sourceDiagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+            {
+                // Don't continue with errors in source code (note however that we do the annotation with errors because of real-time syntax highlighting).
+                annotatedSyntaxRoot = null;
+                transformedSyntaxRoot = null;
+                diagnostics.Report( sourceDiagnostics );
+                
                 return false;
             }
 

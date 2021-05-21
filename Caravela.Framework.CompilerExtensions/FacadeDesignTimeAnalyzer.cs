@@ -13,11 +13,11 @@ namespace Caravela.Framework.CompilerExtensions
     // ReSharper disable UnusedType.Global
 
     [DiagnosticAnalyzer( LanguageNames.CSharp )]
-    public class FacadeAnalyzer : DiagnosticAnalyzer
+    public class FacadeDesignTimeAnalyzer : DiagnosticAnalyzer
     {
         private readonly DiagnosticAnalyzer _impl;
 
-        public FacadeAnalyzer()
+        public FacadeDesignTimeAnalyzer()
         {
             this._impl = (DiagnosticAnalyzer) ResourceExtractor.CreateInstance( "Caravela.Framework.Impl.DesignTime.DesignTimeAnalyzer" );
         }

@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.Utilities
                 throw new AssertionFailedException( "Caravela is running in the vanilla C# compiler instead of the customized one." );
             }
         }
-
+  
         /// <summary>
         /// Attaches the debugger to the current process if requested.
         /// </summary>

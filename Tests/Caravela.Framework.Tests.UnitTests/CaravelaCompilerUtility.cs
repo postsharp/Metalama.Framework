@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests
 {
-    internal class CaravelaCompiler
+    internal static class CaravelaCompilerUtility
     {
         public static string CompileAssembly( params string[] sourceFiles )
         {
@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests
 
             void WriteFile( string name, string text ) => File.WriteAllText( Path.Combine( dir, name ), text );
 
-            var metadataReader = AssemblyMetadataReader.GetInstance( typeof(CaravelaCompiler).Assembly );
+            var metadataReader = AssemblyMetadataReader.GetInstance( typeof(CaravelaCompilerUtility).Assembly );
 
             var csproj = $@"
 <Project Sdk='Microsoft.NET.Sdk'>

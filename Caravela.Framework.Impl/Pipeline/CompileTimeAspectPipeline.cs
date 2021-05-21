@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -47,6 +48,14 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             try
             {
+                if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
+                {
+                    outputCompilation = null;
+                    additionalResources = null;
+
+                    return false;
+                }
+
                 var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
                 if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )
@@ -56,7 +65,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                     return false;
                 }
-
+                
                 if ( !this.TryExecute( partialCompilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
                 {
                     outputCompilation = null;
