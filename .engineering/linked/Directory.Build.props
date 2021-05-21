@@ -1,28 +1,14 @@
 <Project>
 
-    <Import Project="Versions.props" />
-    <Import Project="Directories.props" />
+    <Import Project=".engineering-local\Versions.props" />
+    <Import Project=".engineering\referenced\Engineering.Versions.props" />
+    <Import Project=".engineering\referenced\Engineering.Directories.props" />
+    <Import Project=".engineering-local\Packaging.props" />
+    <Import Project=".engineering-local\Repo.Build.props" />
 
     <PropertyGroup>
         <ContinuousIntegrationBuild Condition="'$(TEAMCITY_VERSION)'!=''">true</ContinuousIntegrationBuild>
     </PropertyGroup>
-
-    <!-- Properties of NuGet packages-->
-    <PropertyGroup>
-        <Authors>PostSharp Technologies</Authors>
-        <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
-        <PackageTags>PostSharp Caravela AOP</PackageTags>
-        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-        <PackageIcon>PostSharpIcon.png</PackageIcon>
-        <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-    </PropertyGroup>
-
-    <!-- Additional content of NuGet packages -->
-    <ItemGroup>
-        <None Include="$(MSBuildThisFileDirectory)PostSharpIcon.png" Visible="false" Pack="true" PackagePath="" />
-        <None Include="$(MSBuildThisFileDirectory)LICENSE.md" Visible="false" Pack="true" PackagePath="" />
-        <None Include="$(MSBuildThisFileDirectory)THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
-    </ItemGroup>
 
     <!-- C# Compiler options-->
     <PropertyGroup>
@@ -68,15 +54,16 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All" />
+        
         <!-- Beta version fixes issue with record parameter names -->
-        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.333"
-                          Condition="'$(EnforceCodeStyleInBuild)'=='True'" PrivateAssets="All" />
-        <Content Include="$(MSBuildThisFileDirectory)\stylecop.json" Condition="'$(EnforceCodeStyleInBuild)'=='True'"
+        <PackageReference Include="StyleCop.Analyzers"
+                          Version="1.2.0-beta.333"
+                          Condition="'$(EnforceCodeStyleInBuild)'=='True'"
+                          PrivateAssets="All" />
+
+        <Content Include="$(MSBuildThisFileDirectory)\.engineering\referenced\stylecop.json"
+                 Condition="'$(EnforceCodeStyleInBuild)'=='True'"
                  Pack="false" />
     </ItemGroup>
-
-
-    <!-- Imports a script that exports a few MSBuild properties to the compiler. We try to import and not to copy to avoid duplication. -->
-    <Import Project="Caravela.Framework.CompilerAddIn\Caravela.CompilerVisibleProperties.targets" />
 
 </Project>

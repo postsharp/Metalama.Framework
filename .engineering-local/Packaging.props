@@ -1,0 +1,20 @@
+<Project>
+
+    <!-- Properties of NuGet packages-->
+    <PropertyGroup>
+        <Authors>PostSharp Technologies</Authors>
+        <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
+        <PackageTags>PostSharp Caravela AOP</PackageTags>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+        <PackageIcon>PostSharpIcon.png</PackageIcon>
+        <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    </PropertyGroup>
+
+    <!-- Additional content of NuGet packages -->
+    <ItemGroup>
+        <None Include="$(MSBuildThisFileDirectory)PostSharpIcon.png" Visible="false" Pack="true" PackagePath="" />
+        <None Include="$(MSBuildThisFileDirectory)LICENSE.md" Visible="false" Pack="true" PackagePath="" />
+        <None Include="$(MSBuildThisFileDirectory)THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
+    </ItemGroup>
+
+</Project>

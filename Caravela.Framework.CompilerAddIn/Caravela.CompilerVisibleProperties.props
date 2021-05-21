@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <CaravelaCompilerVisiblePropertiesTargetsImported>True</CaravelaCompilerVisiblePropertiesTargetsImported>
+        <CaravelaCompilerVisiblePropertiesProjectImported>True</CaravelaCompilerVisiblePropertiesProjectImported>
     </PropertyGroup>
     <!-- Exports the properties to the compiler -->
     <ItemGroup>

@@ -2,13 +2,6 @@
 
     <Import Project="LocalBuildId.props" Condition="Exists('LocalBuildId.props')" />
 
-    <!-- The version of the product produced by this repository. -->
-    <PropertyGroup>
-        <ProductMainVersion>0.1.4</ProductMainVersion>
-        <!-- Empty for RTM. -->
-        <ProductMaturity>preview</ProductMaturity>
-    </PropertyGroup>
-
     <!-- The version for the release build is set manually. -->
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
         <ProductVersion Condition="'$(Configuration)'=='Release' AND '$(ProductMaturity)'!=''">$(ProductMainVersion)-$(ProductMaturity)</ProductVersion>
@@ -26,24 +19,9 @@
         <ProductVersion Condition="'$(Configuration)'=='Debug' AND '$(LocalBuildIdUndefined)'==''">$(ProductMainVersion)-dev-$(USERNAME)-$(LocalBuildId)</ProductVersion>
     </PropertyGroup>
 
-    <!-- Version of dependencies -->
     <PropertyGroup>
-
-        <RoslynVersion>3.8.0</RoslynVersion>
-        <CaravelaCompilerVersion>3.8.7-preview</CaravelaCompilerVersion>
-        <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
-        <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
-        <SystemCollectionsImmutableVersion>1.7.1</SystemCollectionsImmutableVersion>
-        <MicrosoftBclHashCodeVersion>1.1.1</MicrosoftBclHashCodeVersion>
-        <SystemReflectionMetadataLoadContextVersion>4.7.2</SystemReflectionMetadataLoadContextVersion>
-
-        <!-- this cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
-        <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
-
         <Version>$(ProductVersion)</Version>
-
     </PropertyGroup>
-
 
     <Target Name="PrintVersion">
         <Message Text="ProductVersion=$(ProductVersion)" />

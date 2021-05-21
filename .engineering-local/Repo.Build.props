@@ -1,0 +1,7 @@
+<Project>
+    <!-- Repository-specific properties. -->
+
+    <!-- Imports a script that exports a few MSBuild properties to the compiler. We try to import and not to copy to avoid duplication. -->
+    <Import Project="Caravela.Framework.CompilerAddIn\Caravela.CompilerVisibleProperties.props" />
+
+</Project>

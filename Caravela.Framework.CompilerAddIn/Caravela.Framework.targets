@@ -9,8 +9,8 @@
         <CaravelaProjectId>$(AssemblyName)_$(Configuration)_$(TargetFramework)</CaravelaProjectId>
     </PropertyGroup>
 
-    <Import Project="Caravela.CompilerVisibleProperties.targets"
-            Condition="'$(CaravelaCompilerVisiblePropertiesTargetsImported)'==''" />
+    <Import Project="Caravela.CompilerVisibleProperties.props"
+            Condition="'$(CaravelaCompilerVisiblePropertiesProjectImported)'==''" />
 
     <Target Name="ExportCaravelaFrameworkProperties" BeforeTargets="PrepareForBuild">
         <Error Text="The IntermediateOutputPath property is not defined." Condition="'$(IntermediateOutputPath)'==''" />

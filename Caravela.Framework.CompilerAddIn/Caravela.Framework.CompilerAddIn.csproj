@@ -31,7 +31,7 @@
     
     <PackageReference Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" PrivateAssets="all" GeneratePathProperty="true" />
     <None Include="$(PkgSystem_Reflection_MetadataLoadContext)\lib\netstandard2.0\System.Reflection.MetadataLoadContext.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    <None Update="Caravela.CompilerVisibleProperties.targets">
+    <None Update="Caravela.CompilerVisibleProperties.props">
       <Pack>true</Pack>
       <PackagePath>build</PackagePath>
     </None>
