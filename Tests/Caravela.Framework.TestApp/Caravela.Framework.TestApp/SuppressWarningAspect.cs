@@ -8,7 +8,7 @@ using System;
 
 namespace Caravela.Framework.TestApp
 {
-    public class SuppressWarningAttribute : Attribute, IAspect<ICodeElement>
+    public class SuppressWarningAttribute : Attribute, IAspect<IAspectTarget>
     {
         static SuppressionDefinition _mySuppression1 = new(  "CS1998" );
         static SuppressionDefinition _mySuppression2 = new(  "IDE0051" );
@@ -18,7 +18,7 @@ namespace Caravela.Framework.TestApp
             
         }
 
-        public void Initialize( IAspectBuilder<ICodeElement> aspectBuilder )
+        public void Initialize( IAspectBuilder<IAspectTarget> aspectBuilder )
         {
                 aspectBuilder.Diagnostics.Suppress( _mySuppression1 );
             aspectBuilder.Diagnostics.Suppress( _mySuppression2 );
