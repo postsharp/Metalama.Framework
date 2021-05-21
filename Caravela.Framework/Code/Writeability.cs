@@ -4,7 +4,7 @@
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Enumerates the differant abilities of a field or property to be written (set).
+    /// Enumerates the different abilities of a field or property to be written (set).
     /// </summary>
     public enum Writeability
     {
