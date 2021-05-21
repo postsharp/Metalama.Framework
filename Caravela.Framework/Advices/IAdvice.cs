@@ -19,7 +19,7 @@ namespace Caravela.Framework.Advices
         IAspect Aspect { get; }
 
         /// <summary>
-        /// Gets the element of code to which the current advice has been applied.
+        /// Gets the declaration to which the current advice has been applied.
         /// </summary>
         IDeclaration TargetDeclaration { get; }
 
@@ -34,12 +34,12 @@ namespace Caravela.Framework.Advices
     /// The base interface for all advices with a strongly-typed <see cref="TargetDeclaration"/>.
     /// Instances of <see cref="IAdvice{T}"/> can be instantiated thanks to the <see cref="IAdviceFactory"/> interface.
     /// </summary>
-    /// <typeparam name="T">Type of code element to which the advice can be added.</typeparam>
+    /// <typeparam name="T">Type of declaration to which the advice can be added.</typeparam>
     public interface IAdvice<out T> : IAdvice
         where T : IDeclaration
     {
         /// <summary>
-        /// Gets the element of code to which the current advice has been applied.
+        /// Gets the declaration to which the current advice has been applied.
         /// </summary>
         new T TargetDeclaration { get; }
     }

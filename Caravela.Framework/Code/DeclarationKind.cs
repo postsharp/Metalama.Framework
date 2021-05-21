@@ -12,7 +12,7 @@ namespace Caravela.Framework.Code
     public enum DeclarationKind
     {
         /// <summary>
-        /// Not a valid code element represented by <see cref="IDeclaration"/>.
+        /// Not a valid declaration represented by <see cref="IDeclaration"/>.
         /// </summary>
         None,
 

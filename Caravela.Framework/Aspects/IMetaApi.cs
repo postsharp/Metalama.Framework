@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace Caravela.Framework.Aspects
 {
     /// <summary>
-    /// Exposes information about the element of code to which a template was applied.
+    /// Exposes information about the declaration to which a template was applied.
     /// This interface is exposed by the <see cref="meta"/> static type.
     /// </summary>
     [CompileTimeOnly]

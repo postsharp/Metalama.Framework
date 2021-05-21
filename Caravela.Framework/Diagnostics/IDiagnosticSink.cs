@@ -29,9 +29,9 @@ namespace Caravela.Framework.Diagnostics
         void Report<T>( IDiagnosticLocation? location, DiagnosticDefinition<T> definition, T arguments );
 
         /// <summary>
-        /// Suppresses a diagnostic by specifying the element of code in which the suppression must be effective.
+        /// Suppresses a diagnostic by specifying the declaration in which the suppression must be effective.
         /// </summary>
-        /// <param name="scope">The code element in which the diagnostic must be suppressed.</param>
+        /// <param name="scope">The declaration in which the diagnostic must be suppressed.</param>
         /// <param name="definition"></param>
         void Suppress( IDeclaration? scope, SuppressionDefinition definition );
     }

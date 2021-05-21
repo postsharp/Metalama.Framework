@@ -18,14 +18,14 @@ namespace Caravela.Framework.Impl.CodeModel.References
     }
 
     /// <summary>
-    /// Represents a link that can be resolved to an element of code by <see cref="GetForCompilation"/>.
+    /// Represents a link that can be resolved to a declaration by <see cref="GetForCompilation"/>.
     /// </summary>
     /// <typeparam name="T">The type of the target object of the link.</typeparam>
     internal interface IDeclarationRef<out T> : IDeclarationRef
         where T : IDeclaration
     {
         /// <summary>
-        /// Gets the target code element for a given <see cref="CompilationModel"/>.
+        /// Gets the target declaration for a given <see cref="CompilationModel"/>.
         /// </summary>
         /// <param name="compilation"></param>
         /// <returns></returns>

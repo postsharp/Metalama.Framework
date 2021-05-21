@@ -7,7 +7,7 @@ using Caravela.Framework.Project;
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Represent an element of code. Implementations of <see cref="IDeclaration"/>
+    /// Represent a declaration. Implementations of <see cref="IDeclaration"/>
     /// are always declarations, never elements of the method body.
     /// </summary>
     [CompileTimeOnly]
@@ -15,24 +15,24 @@ namespace Caravela.Framework.Code
     {
         /// <summary>
         /// Gets the origin (<see cref="CodeOrigin.Source"/>, <see cref="CodeOrigin.Generator"/> or <see cref="CodeOrigin.Aspect"/>
-        /// of the current code element.
+        /// of the current declaration.
         /// </summary>
         CodeOrigin Origin { get; }
 
         /// <summary>
-        /// Gets the containing element of code, such as a <see cref="INamedType"/> for nested
+        /// Gets the containing declaration, such as a <see cref="INamedType"/> for nested
         /// types or for methods. If the containing element is a namespace or
         /// a compilation, <c>null</c> is returned.
         /// </summary>
         IDeclaration? ContainingElement { get; }
 
         /// <summary>
-        /// Gets the collection of custom attributes on the element of code.
+        /// Gets the collection of custom attributes on the declaration.
         /// </summary>
         IAttributeList Attributes { get; }
 
         /// <summary>
-        /// Gets the kind of element of code.
+        /// Gets the kind of declaration.
         /// </summary>
         public DeclarationKind ElementKind { get; }
     }

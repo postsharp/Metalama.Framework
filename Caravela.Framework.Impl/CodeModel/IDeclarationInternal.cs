@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel
         DeclarationRef<IDeclaration> ToLink();
 
         /// <summary>
-        /// Gets the <see cref="SyntaxReference"/> syntaxes that declare the current code element.
+        /// Gets the <see cref="SyntaxReference"/> syntaxes that declare the current declaration.
         /// In case of a member introduction, this returns the syntax references of the type.
         /// In case of a type introduction, this returns an empty list.
         /// </summary>

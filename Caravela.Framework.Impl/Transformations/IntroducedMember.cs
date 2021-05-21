@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Transformations
         public AspectLinkerOptions? LinkerOptions { get; }
 
         /// <summary>
-        /// Gets the code element (overriden or introduced) that corresponds to the current <see cref="IntroducedMember"/>.
+        /// Gets the declaration (overriden or introduced) that corresponds to the current <see cref="IntroducedMember"/>.
         /// This is used to associate diagnostic suppressions to the introduced member. If <c>null</c>, diagnostics
         /// are not suppressed from the introduced member.
         /// </summary>

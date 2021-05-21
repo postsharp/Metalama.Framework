@@ -188,7 +188,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                     A.CallTo( () => ((IMemberIntroduction) observableTransformation).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
 
-                    // TODO: This should be a deep copy of code elements to have a correct parent.
+                    // TODO: This should be a deep copy of declarations to have a correct parent.
                     A.CallTo( () => ((IMethod) observableTransformation).LocalFunctions ).Returns( symbolHelperElement.LocalFunctions );
                     A.CallTo( () => ((IMethod) observableTransformation).Parameters ).Returns( symbolHelperElement.Parameters );
                     A.CallTo( () => ((IMethod) observableTransformation).GenericParameters ).Returns( symbolHelperElement.GenericParameters );

@@ -13,7 +13,7 @@ using System.Linq;
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     /// <summary>
-    /// The base class for the read-only facade of introduced code elements, represented by <see cref="DeclarationBuilder"/>. Facades
+    /// The base class for the read-only facade of introduced declarations, represented by <see cref="DeclarationBuilder"/>. Facades
     /// are consistent with the consuming <see cref="CompilationModel"/>, while builders are consistent with the producing <see cref="CompilationModel"/>. 
     /// </summary>
     internal abstract class BuiltDeclaration : IDeclarationInternal

@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public static bool IsVisible( this ISymbol m ) => !m.IsImplicitlyDeclared || (m.Kind == SymbolKind.Method && m.MetadataName == ".ctor");
 
         /// <summary>
-        /// Select all code elements recursively contained in a given code element (i.e. all children of the tree).
+        /// Select all declarations recursively contained in a given declaration (i.e. all children of the tree).
         /// </summary>
         /// <param name="declaration"></param>
         /// <returns></returns>
@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 } );
 
         /// <summary>
-        /// Select all code elements recursively contained in a given code element (i.e. all children of the tree).
+        /// Select all declarations recursively contained in a given declaration (i.e. all children of the tree).
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>

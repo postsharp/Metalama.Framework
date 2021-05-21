@@ -6,7 +6,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
     public partial class LinkerTestBase
     {
         /// <summary>
-        /// Helper attribute where we store ids of syntax nodes representing code elements which can only be resolved in the processed compilation.
+        /// Helper attribute where we store ids of syntax nodes representing declarations which can only be resolved in the processed compilation.
         /// </summary>
         public interface ITestTransformation
         {
