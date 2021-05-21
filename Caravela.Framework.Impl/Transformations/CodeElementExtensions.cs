@@ -118,7 +118,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public static TypeSyntax GetSyntaxReturnType( this IProperty method )
         {
-            return (TypeSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( method.Type.GetSymbol() );
+            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( method.Type.GetSymbol() );
         }
 
         public static TypeParameterListSyntax? GetSyntaxTypeParameterList( this IMethod method )

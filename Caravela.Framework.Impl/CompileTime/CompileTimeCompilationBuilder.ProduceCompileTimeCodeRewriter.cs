@@ -179,6 +179,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                               getAccessor,
                                               this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                               this._diagnosticAdder,
+                                              this._cancellationToken,
                                               out _,
                                               out transformedGetDeclaration );
                             }
@@ -192,6 +193,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                               setAccessor,
                                               this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                               this._diagnosticAdder,
+                                              this._cancellationToken,
                                               out _,
                                               out transformedSetDeclaration );
                             }
@@ -211,6 +213,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                                   propertyNode.ExpressionBody! ),
                                               this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                               this._diagnosticAdder,
+                                              this._cancellationToken,
                                               out _,
                                               out transformedGetDeclaration );
                             }

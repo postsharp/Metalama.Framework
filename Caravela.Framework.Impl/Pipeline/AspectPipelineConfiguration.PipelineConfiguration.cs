@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Pipeline
         CompileTimeProjectLoader CompileTimeProjectLoader )
     {
         public AspectPipelineConfiguration WithStages( Func<PipelineStage, PipelineStage> stageMapper )
-            => new AspectPipelineConfiguration(
+            => new(
                 this.Stages.Select( s => stageMapper( s ) ).ToImmutableArray(),
                 this.AspectClasses,
                 this.Layers,

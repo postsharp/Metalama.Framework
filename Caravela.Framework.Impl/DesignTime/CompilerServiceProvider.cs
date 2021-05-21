@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.DesignTime
     internal class CompilerServiceProvider : ICompilerServiceProvider
     {
         private static readonly CompilerServiceProvider _instance = new();
-        
+
         static CompilerServiceProvider()
         {
             DesignTimeEntryPointManager.Instance.RegisterServiceProvider( _instance );

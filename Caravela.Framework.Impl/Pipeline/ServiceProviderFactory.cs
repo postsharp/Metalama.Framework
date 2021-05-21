@@ -28,7 +28,8 @@ namespace Caravela.Framework.Impl.Pipeline
             return serviceProvider;
         }
 
-        public static ServiceProvider Shared => LazyInitializer.EnsureInitialized( ref _sharedInstance, () => CreateBasicServices( DefaultDirectoryOptions.Instance, true ) )!;
+        public static ServiceProvider Shared
+            => LazyInitializer.EnsureInitialized( ref _sharedInstance, () => CreateBasicServices( DefaultDirectoryOptions.Instance, true ) )!;
 
         public static ServiceProvider GetServiceProvider( IDirectoryOptions? directoryOptions = null, IAssemblyLocator? assemblyLocator = null )
         {

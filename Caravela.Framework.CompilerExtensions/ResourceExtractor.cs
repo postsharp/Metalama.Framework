@@ -33,7 +33,7 @@ namespace Caravela.Framework.CompilerExtensions
                     if ( !_initialized )
                     {
                         var currentAssembly = Assembly.GetCallingAssembly();
-                        
+
                         AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
 
                         _snapshotDirectory = TempPathHelper.GetTempPath( "EmbeddedResources" );
@@ -47,7 +47,7 @@ namespace Caravela.Framework.CompilerExtensions
                             var assemblyName = RetryHelper.Retry( () => AssemblyName.GetAssemblyName( file ) );
                             _embeddedAssemblies[assemblyName.Name] = (assemblyName, file);
                         }
-                        
+
                         _caravelaImplementationAssembly = Assembly.Load( _embeddedAssemblies["Caravela.Framework.Impl"].AssemblyName );
 
                         _initialized = true;
@@ -88,7 +88,7 @@ namespace Caravela.Framework.CompilerExtensions
                                 {
                                     stream.CopyTo( outputStream );
                                 }
-                                
+
                                 // Rename the assembly to the match the assembly name.
                                 var assemblyName = AssemblyName.GetAssemblyName( file );
                                 var renamedFile = Path.Combine( _snapshotDirectory, assemblyName.Name + ".dll" );

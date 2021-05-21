@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace Caravela.Framework.Impl.DesignTime
 {
     // ReSharper disable UnusedType.Global
-    
+
     public class CentralCodeFixProvider : CodeFixProvider
     {
         private const string _makePartialKey = "Caravela.MakePartial";
@@ -25,7 +25,10 @@ namespace Caravela.Framework.Impl.DesignTime
             DesignTimeLogger.Instance?.Write( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync" );
 
             context.RegisterCodeFix(
-                CodeAction.Create( "Make partial", cancellationToken => GetFixedDocument( context.Document, context.Span, cancellationToken.IgnoreIfDebugging() ), _makePartialKey ),
+                CodeAction.Create(
+                    "Make partial",
+                    cancellationToken => GetFixedDocument( context.Document, context.Span, cancellationToken.IgnoreIfDebugging() ),
+                    _makePartialKey ),
                 context.Diagnostics );
 
             return Task.CompletedTask;

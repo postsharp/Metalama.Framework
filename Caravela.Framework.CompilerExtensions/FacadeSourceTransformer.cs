@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 namespace Caravela.Framework.CompilerExtensions
 {
     // ReSharper disable UnusedType.Global
-    
+
     [Transformer]
     public sealed class FacadeSourceTransformer : ISourceTransformer
     {

@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
                 {
                     return null;
                 }
-                
+
                 newRoot = oldRoot.ReplaceNode( oldNode, newNode );
             }
             else
@@ -253,7 +253,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
                 // Error.
                 return document.Project.Solution;
             }
-            
+
             newRoot = Formatter.Format( newRoot, Formatter.Annotation, currentSolution.Workspace );
 
             var newSolution = currentSolution.WithDocumentSyntaxRoot( document.Id, newRoot );
@@ -276,8 +276,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
 
             IDictionary<string, string> properties = attribute.Properties;
 
-            var arguments = attribute.Arguments.Concat(
-                    properties.Select( keyValue => $"{keyValue.Key}={keyValue.Value}" ) )
+            var arguments = attribute.Arguments.Concat( properties.Select( keyValue => $"{keyValue.Key}={keyValue.Value}" ) )
                 .ToArray();
 
             if ( arguments.Any() )

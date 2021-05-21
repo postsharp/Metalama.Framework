@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Caravela.Framework.Impl.DesignTime
 {
     // ReSharper disable UnusedType.Global
-    
+
     public class CentralCodeRefactoringProvider : CodeRefactoringProvider
     {
         public override async Task ComputeRefactoringsAsync( CodeRefactoringContext context )
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.DesignTime
             }
 
             var cancellationToken = context.CancellationToken.IgnoreIfDebugging();
-            
+
             var syntaxTree = await context.Document.GetSyntaxTreeAsync( cancellationToken );
 
             if ( syntaxTree == null )
@@ -69,8 +69,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             foreach ( var aspect in eligibleAspects )
             {
-                addAspectAttributeActions.Add(
-                    CodeAction.Create( aspect.DisplayName, ct => AddAspectAttribute( aspect, symbol, context.Document, ct ) ) );
+                addAspectAttributeActions.Add( CodeAction.Create( aspect.DisplayName, ct => AddAspectAttribute( aspect, symbol, context.Document, ct ) ) );
 
                 if ( aspect.CanExpandToSource )
                 {

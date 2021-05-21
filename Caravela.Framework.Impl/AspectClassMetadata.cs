@@ -173,23 +173,7 @@ namespace Caravela.Framework.Impl
                 return templateDriver;
             }
 
-            
-            MethodInfo? compiledTemplateMethodInfo;
-
-            switch ( sourceTemplate )
-            {
-                case IMethod method:
-                    var methodName = TemplateNameHelper.GetCompiledTemplateName( templateSymbol );
-                    compiledTemplateMethodInfo = this.AspectType.GetMethod( methodName );
-
-                    break;
-                
-                
-                default:
-                    throw new NotImplementedException();
-
-            }
-
+            var templateName = TemplateNameHelper.GetCompiledTemplateName( templateSymbol );
             var compiledTemplateMethodInfo = this.AspectType.GetMethod( templateName );
 
             if ( compiledTemplateMethodInfo == null )

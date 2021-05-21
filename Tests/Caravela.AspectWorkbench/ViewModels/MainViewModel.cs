@@ -23,7 +23,7 @@ namespace Caravela.AspectWorkbench.ViewModels
     {
         private readonly IServiceProvider _serviceProvider;
         private TemplateTest? _currentTest;
-        
+
         public string Title => this.CurrentPath == null ? "Aspect Workbench" : $"Aspect Workbench - {this.CurrentPath}";
 
         public string? TestText { get; set; }

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Caravela.Framework.CompilerExtensions
 {
     // ReSharper disable UnusedType.Global
-    
+
     [ExportCodeRefactoringProvider( LanguageNames.CSharp, Name = nameof(FacadeCodeRefactoringProvider) )]
     [Shared]
     public class FacadeCodeRefactoringProvider : CodeRefactoringProvider
@@ -18,7 +18,7 @@ namespace Caravela.Framework.CompilerExtensions
 
         public FacadeCodeRefactoringProvider()
         {
-            this._impl = (CodeRefactoringProvider) ResourceExtractor.CreateInstance( "Caravela.Framework.Impl.DesignTime.CentralCodeRefactoringProvider" );     
+            this._impl = (CodeRefactoringProvider) ResourceExtractor.CreateInstance( "Caravela.Framework.Impl.DesignTime.CentralCodeRefactoringProvider" );
         }
 
         public override Task ComputeRefactoringsAsync( CodeRefactoringContext context ) => this._impl.ComputeRefactoringsAsync( context );

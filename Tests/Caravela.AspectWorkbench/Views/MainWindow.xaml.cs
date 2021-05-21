@@ -26,7 +26,7 @@ namespace Caravela.AspectWorkbench.Views
 
         private readonly ServiceProvider _serviceProvider = ServiceProviderFactory.GetServiceProvider( new TestProjectOptions() );
         private readonly MainViewModel _viewModel;
-        
+
         public MainWindow()
         {
             this.InitializeComponent();
