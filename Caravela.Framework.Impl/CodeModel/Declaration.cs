@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel
         CodeOrigin IDeclaration.Origin => CodeOrigin.Source;
 
         [Memo]
-        public virtual IDeclaration? ContainingElement => this.Compilation.Factory.GetDeclaration( this.Symbol.ContainingSymbol );
+        public virtual IDeclaration? ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this.Symbol.ContainingSymbol );
 
         [Memo]
         public virtual IAttributeList Attributes
@@ -38,11 +38,11 @@ namespace Caravela.Framework.Impl.CodeModel
                 this.Symbol!.GetAttributes()
                     .Select( a => new AttributeRef( a, DeclarationRef.FromSymbol<IDeclaration>( this.Symbol ) ) ) );
 
-        public abstract DeclarationKind ElementKind { get; }
+        public abstract DeclarationKind DeclarationKind { get; }
 
         public abstract ISymbol Symbol { get; }
 
-        public virtual DeclarationRef<IDeclaration> ToLink() => DeclarationRef.FromSymbol( this.Symbol );
+        public virtual DeclarationRef<IDeclaration> ToRef() => DeclarationRef.FromSymbol( this.Symbol );
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Symbol.ToDisplayString( format.ToRoslyn() );

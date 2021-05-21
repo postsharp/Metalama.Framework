@@ -11,10 +11,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class AttributeBuilder : DeclarationBuilder, IAttributeBuilder, IObservableTransformation
     {
-        public AttributeBuilder( DeclarationBuilder containingElement, IConstructor constructor, IReadOnlyList<TypedConstant> constructorArguments ) : base(
-            containingElement.ParentAdvice )
+        public AttributeBuilder( DeclarationBuilder containingDeclaration, IConstructor constructor, IReadOnlyList<TypedConstant> constructorArguments ) : base(
+            containingDeclaration.ParentAdvice )
         {
-            this.ContainingElement = containingElement;
+            this.ContainingDeclaration = containingDeclaration;
             this.ConstructorArguments = constructorArguments;
             this.Constructor = constructor;
         }
@@ -36,15 +36,15 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => throw new NotImplementedException();
 
-        public override IDeclaration ContainingElement { get; }
+        public override IDeclaration ContainingDeclaration { get; }
 
         CodeOrigin IDeclaration.Origin => CodeOrigin.Aspect;
 
-        IDeclaration? IDeclaration.ContainingElement => throw new NotImplementedException();
+        IDeclaration? IDeclaration.ContainingDeclaration => throw new NotImplementedException();
 
         IAttributeList IDeclaration.Attributes => AttributeList.Empty;
 
-        public override DeclarationKind ElementKind => DeclarationKind.Attribute;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 

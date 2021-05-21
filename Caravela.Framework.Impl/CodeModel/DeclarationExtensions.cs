@@ -100,15 +100,15 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => symbol.GetAttributes().ToAttributeLinks( symbol )
             };
 
-        public static DeclarationRef<IDeclaration> ToLink( this ISymbol symbol ) => DeclarationRef.FromSymbol( symbol );
+        public static DeclarationRef<IDeclaration> ToRef( this ISymbol symbol ) => DeclarationRef.FromSymbol( symbol );
 
-        public static DeclarationRef<T> ToLink<T>( this T declaration )
+        public static DeclarationRef<T> ToRef<T>( this T declaration )
             where T : class, IDeclaration
-            => ((IDeclarationInternal) declaration).ToLink().Cast<T>();
+            => ((IDeclarationInternal) declaration).ToRef().Cast<T>();
 
         public static MemberRef<T> ToMemberLink<T>( this T member )
             where T : class, IMember
-            => new( ((IDeclarationInternal) member).ToLink() );
+            => new( ((IDeclarationInternal) member).ToRef() );
 
         public static Location? GetDiagnosticLocation( this IDeclaration declaration )
             => declaration switch

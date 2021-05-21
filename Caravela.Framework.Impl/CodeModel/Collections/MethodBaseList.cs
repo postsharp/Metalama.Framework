@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         protected MethodBaseList() { }
 
-        protected MethodBaseList( Declaration? containingElement, IEnumerable<MemberRef<T>> sourceItems ) : base( containingElement, sourceItems ) { }
+        protected MethodBaseList( Declaration? containingDeclaration, IEnumerable<MemberRef<T>> sourceItems ) : base( containingDeclaration, sourceItems ) { }
 
         /// <summary>
         /// Gets the member list for a given type.
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         {
             var compilation = this.Compilation;
 
-            if ( declaredOnly || this.ContainingElement is not NamedType namedType || namedType.BaseType == null )
+            if ( declaredOnly || this.ContainingDeclaration is not NamedType namedType || namedType.BaseType == null )
             {
                 foreach ( var candidate in GetCandidates( this, payload, name, genericParameterCount, argumentCount, argumentGetter, isStatic, compilation ) )
                 {
@@ -156,7 +156,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         {
             var compilation = this.Compilation;
 
-            if ( declaredOnly || this.ContainingElement is not NamedType namedType || namedType.BaseType == null )
+            if ( declaredOnly || this.ContainingDeclaration is not NamedType namedType || namedType.BaseType == null )
             {
                 return Get( this, payload, name, genericParameterCount, parameterCount, parameterGetter, isStatic, compilation );
             }

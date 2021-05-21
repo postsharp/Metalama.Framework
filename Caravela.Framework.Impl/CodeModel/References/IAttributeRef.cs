@@ -14,6 +14,6 @@ namespace Caravela.Framework.Impl.CodeModel.References
         // Intentionally using the struct and not the interface to avoid memory allocation.
         DeclarationRef<INamedType> AttributeType { get; }
 
-        DeclarationRef<IDeclaration> DeclaringElement { get; }
+        DeclarationRef<IDeclaration> DeclaringDeclaration { get; }
     }
 }

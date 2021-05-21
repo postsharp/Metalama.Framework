@@ -47,13 +47,13 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool HasNonNullableValueTypeConstraint => this._typeSymbol.HasValueTypeConstraint;
 
         [Memo]
-        public override IDeclaration ContainingElement => this.Compilation.Factory.GetDeclaration( this._typeSymbol.ContainingSymbol );
+        public override IDeclaration ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this._typeSymbol.ContainingSymbol );
 
-        public override DeclarationKind ElementKind => DeclarationKind.GenericParameter;
+        public override DeclarationKind DeclarationKind => DeclarationKind.GenericParameter;
 
         public override ISymbol Symbol => this._typeSymbol;
 
-        DeclarationKind IDeclaration.ElementKind => DeclarationKind.GenericParameter;
+        DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.GenericParameter;
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 

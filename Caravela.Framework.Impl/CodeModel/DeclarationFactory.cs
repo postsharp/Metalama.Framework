@@ -42,39 +42,39 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
             => (IAssembly) this._cache.GetOrAdd(
-                assemblySymbol.ToLink(),
+                assemblySymbol.ToRef(),
                 l => !SymbolEqualityComparer.Default.Equals( l.Symbol, this._compilation.RoslynCompilation.Assembly )
                     ? new ReferencedAssembly( (IAssemblySymbol) l.Symbol!, this._compilation )
                     : this._compilation );
 
         public IType GetIType( ITypeSymbol typeSymbol )
-            => (IType) this._cache.GetOrAdd( typeSymbol.ToLink(), l => CodeModelFactory.CreateIType( (ITypeSymbol) l.Symbol!, this._compilation ) );
+            => (IType) this._cache.GetOrAdd( typeSymbol.ToRef(), l => CodeModelFactory.CreateIType( (ITypeSymbol) l.Symbol!, this._compilation ) );
 
         public INamedType GetNamedType( INamedTypeSymbol typeSymbol )
-            => (NamedType) this._cache.GetOrAdd( typeSymbol.ToLink(), s => new NamedType( (INamedTypeSymbol) s.Symbol!, this._compilation ) );
+            => (NamedType) this._cache.GetOrAdd( typeSymbol.ToRef(), s => new NamedType( (INamedTypeSymbol) s.Symbol!, this._compilation ) );
 
         public IGenericParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
             => (GenericParameter) this._cache.GetOrAdd(
-                typeParameterSymbol.ToLink(),
+                typeParameterSymbol.ToRef(),
                 tp => new GenericParameter( (ITypeParameterSymbol) tp.Symbol!, this._compilation ) );
 
         public IMethod GetMethod( IMethodSymbol methodSymbol )
-            => (IMethod) this._cache.GetOrAdd( methodSymbol.ToLink(), ms => new Method( (IMethodSymbol) ms.Symbol!, this._compilation ) );
+            => (IMethod) this._cache.GetOrAdd( methodSymbol.ToRef(), ms => new Method( (IMethodSymbol) ms.Symbol!, this._compilation ) );
 
         public IProperty GetProperty( IPropertySymbol propertySymbol )
-            => (IProperty) this._cache.GetOrAdd( propertySymbol.ToLink(), ms => new Property( (IPropertySymbol) ms.Symbol!, this._compilation ) );
+            => (IProperty) this._cache.GetOrAdd( propertySymbol.ToRef(), ms => new Property( (IPropertySymbol) ms.Symbol!, this._compilation ) );
 
         public IField GetField( IFieldSymbol fieldSymbol )
-            => (IField) this._cache.GetOrAdd( fieldSymbol.ToLink(), ms => new Field( (IFieldSymbol) ms.Symbol!, this._compilation ) );
+            => (IField) this._cache.GetOrAdd( fieldSymbol.ToRef(), ms => new Field( (IFieldSymbol) ms.Symbol!, this._compilation ) );
 
         public IConstructor GetConstructor( IMethodSymbol methodSymbol )
-            => (IConstructor) this._cache.GetOrAdd( methodSymbol.ToLink(), ms => new Constructor( (IMethodSymbol) ms.Symbol!, this._compilation ) );
+            => (IConstructor) this._cache.GetOrAdd( methodSymbol.ToRef(), ms => new Constructor( (IMethodSymbol) ms.Symbol!, this._compilation ) );
 
         public IParameter GetParameter( IParameterSymbol parameterSymbol )
-            => (IParameter) this._cache.GetOrAdd( parameterSymbol.ToLink(), ms => new Parameter( (IParameterSymbol) ms.Symbol!, this._compilation ) );
+            => (IParameter) this._cache.GetOrAdd( parameterSymbol.ToRef(), ms => new Parameter( (IParameterSymbol) ms.Symbol!, this._compilation ) );
 
         public IEvent GetEvent( IEventSymbol @event )
-            => (IEvent) this._cache.GetOrAdd( @event.ToLink(), ms => new Event( (IEventSymbol) ms.Symbol!, this._compilation ) );
+            => (IEvent) this._cache.GetOrAdd( @event.ToRef(), ms => new Event( (IEventSymbol) ms.Symbol!, this._compilation ) );
 
         internal IDeclaration GetDeclaration( ISymbol symbol, DeclarationSpecialKind kind = DeclarationSpecialKind.Default )
             => symbol switch
@@ -161,9 +161,9 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 return declaration;
             }
-            else if ( declaration is IDeclarationRef<IDeclaration> link )
+            else if ( declaration is IDeclarationRef<IDeclaration> reference )
             {
-                return (T) link.GetForCompilation( this._compilation );
+                return (T) reference.GetForCompilation( this._compilation );
             }
             else if ( declaration is NamedType namedType )
             {

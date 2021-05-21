@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly IFieldSymbol _symbol;
 
-        public override DeclarationKind ElementKind => DeclarationKind.Field;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
         public override ISymbol Symbol => this._symbol;
 

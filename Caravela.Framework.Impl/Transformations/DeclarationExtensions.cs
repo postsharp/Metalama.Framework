@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         private static SyntaxTokenList GetAccessorSyntaxModifierList( IMethod accessor )
         {
-            var methodGroup = (IMember) accessor.ContainingElement!;
+            var methodGroup = (IMember) accessor.ContainingDeclaration!;
 
             // TODO: Unify with ToRoslynAccessibility and some roslyn helper?
             var tokens = new List<SyntaxToken>();

@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         public override MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
 
-        public override DeclarationKind ElementKind => throw new NotImplementedException();
+        public override DeclarationKind DeclarationKind => throw new NotImplementedException();
 
         public IType Type { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 

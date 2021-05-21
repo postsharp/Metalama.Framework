@@ -16,11 +16,11 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal class OverriddenMethod : INonObservableTransformation, IMemberIntroduction, IOverriddenElement
+    internal class OverriddenMethod : INonObservableTransformation, IMemberIntroduction, IOverriddenDeclaration
     {
         public Advice Advice { get; }
 
-        IDeclaration IOverriddenElement.OverriddenElement => this.OverriddenDeclaration;
+        IDeclaration IOverriddenDeclaration.OverriddenDeclaration => this.OverriddenDeclaration;
 
         public IMethod OverriddenDeclaration { get; }
 

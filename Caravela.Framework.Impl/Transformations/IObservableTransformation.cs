@@ -10,6 +10,6 @@ namespace Caravela.Framework.Impl.Transformations
     /// </summary>
     internal interface IObservableTransformation : ITransformation
     {
-        IDeclaration ContainingElement { get; }
+        IDeclaration ContainingDeclaration { get; }
     }
 }

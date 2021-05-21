@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal interface IDeclarationInternal : ISdkDeclaration
     {
-        DeclarationRef<IDeclaration> ToLink();
+        DeclarationRef<IDeclaration> ToRef();
 
         /// <summary>
         /// Gets the <see cref="SyntaxReference"/> syntaxes that declare the current declaration.

@@ -9,16 +9,16 @@ namespace Caravela.Framework.Impl.CodeModel.References
 {
     internal readonly struct AttributeRef : IAttributeRef
     {
-        public AttributeRef( AttributeData attributeData, DeclarationRef<IDeclaration> declaringElement )
+        public AttributeRef( AttributeData attributeData, DeclarationRef<IDeclaration> declaringDeclaration )
         {
             this.Target = attributeData;
-            this.DeclaringElement = declaringElement;
+            this.DeclaringDeclaration = declaringDeclaration;
         }
 
         public AttributeRef( AttributeBuilder builder )
         {
             this.Target = builder;
-            this.DeclaringElement = builder.ContainingElement.ToLink();
+            this.DeclaringDeclaration = builder.ContainingDeclaration.ToRef();
         }
 
         public object? Target { get; }
@@ -27,16 +27,16 @@ namespace Caravela.Framework.Impl.CodeModel.References
             => this.Target switch
             {
                 AttributeData attributeData => DeclarationRef.FromSymbol<INamedType>( attributeData.AttributeClass.AssertNotNull() ),
-                AttributeBuilder link => link.Constructor.DeclaringType.ToLink(),
+                AttributeBuilder reference => reference.Constructor.DeclaringType.ToRef(),
                 _ => throw new AssertionFailedException()
             };
 
-        public DeclarationRef<IDeclaration> DeclaringElement { get; }
+        public DeclarationRef<IDeclaration> DeclaringDeclaration { get; }
 
         public IAttribute GetForCompilation( CompilationModel compilation )
             => this.Target switch
             {
-                AttributeData attributeData => new Attribute( attributeData, compilation, this.DeclaringElement.GetForCompilation( compilation ) ),
+                AttributeData attributeData => new Attribute( attributeData, compilation, this.DeclaringDeclaration.GetForCompilation( compilation ) ),
                 AttributeBuilder builder => new BuiltAttribute( builder, compilation ),
                 _ => throw new AssertionFailedException()
             };

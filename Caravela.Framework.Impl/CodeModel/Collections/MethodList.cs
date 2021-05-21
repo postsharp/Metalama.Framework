@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         private MethodList() { }
 
-        public MethodList( Declaration? containingElement, IEnumerable<MemberRef<IMethod>> sourceItems ) : base( containingElement, sourceItems ) { }
+        public MethodList( Declaration? containingDeclaration, IEnumerable<MemberRef<IMethod>> sourceItems ) : base( containingDeclaration, sourceItems ) { }
 
         public IEnumerable<IMethod> OfCompatibleSignature(
             string name,
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             bool declaredOnly = true )
         {
             return this.OfCompatibleSignature(
-                (argumentTypes, this.ContainingElement.AssertNotNull().Compilation),
+                (argumentTypes, this.ContainingDeclaration.AssertNotNull().Compilation),
                 name,
                 genericParameterCount,
                 argumentTypes?.Count,

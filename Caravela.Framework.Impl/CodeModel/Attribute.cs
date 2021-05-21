@@ -18,22 +18,22 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly CompilationModel _compilation;
 
-        public Attribute( AttributeData data, CompilationModel compilation, IDeclaration containingElement )
+        public Attribute( AttributeData data, CompilationModel compilation, IDeclaration containingDeclaration )
         {
             this.AttributeData = data;
             this._compilation = compilation;
-            this.ContainingElement = containingElement;
+            this.ContainingDeclaration = containingDeclaration;
         }
 
         public AttributeData AttributeData { get; }
 
         CodeOrigin IDeclaration.Origin => CodeOrigin.Source;
 
-        public IDeclaration ContainingElement { get; }
+        public IDeclaration ContainingDeclaration { get; }
 
         IAttributeList IDeclaration.Attributes => AttributeList.Empty;
 
-        public DeclarationKind ElementKind => DeclarationKind.Attribute;
+        public DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 
         public ICompilation Compilation => this.Constructor.Compilation;
 
@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
-        IDeclaration? IDeclaration.ContainingElement => this.ContainingElement;
+        IDeclaration? IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
         IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation.ToDiagnosticLocation();
 

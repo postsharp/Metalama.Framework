@@ -35,13 +35,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        public override IDeclaration? ContainingElement { get; }
+        public override IDeclaration? ContainingDeclaration { get; }
 
-        public override DeclarationKind ElementKind => DeclarationKind.GenericParameter;
+        public override DeclarationKind DeclarationKind => DeclarationKind.GenericParameter;
 
         public GenericParameterBuilder( MethodBuilder containingMethod, IGenericParameter template ) : base( containingMethod.ParentAdvice )
         {
-            this.ContainingElement = containingMethod;
+            this.ContainingDeclaration = containingMethod;
             this._template = template;
         }
 

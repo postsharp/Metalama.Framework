@@ -9,9 +9,9 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 {
     internal class ParameterList : DeclarationList<IParameter, DeclarationRef<IParameter>>, IParameterList
     {
-        public ParameterList( IMethodBase containingElement, IEnumerable<DeclarationRef<IParameter>> sourceItems ) : base( containingElement, sourceItems ) { }
+        public ParameterList( IMethodBase containingDeclaration, IEnumerable<DeclarationRef<IParameter>> sourceItems ) : base( containingDeclaration, sourceItems ) { }
 
-        public ParameterList( IProperty containingElement, IEnumerable<DeclarationRef<IParameter>> sourceItems ) : base( containingElement, sourceItems ) { }
+        public ParameterList( IProperty containingDeclaration, IEnumerable<DeclarationRef<IParameter>> sourceItems ) : base( containingDeclaration, sourceItems ) { }
 
         private ParameterList() { }
 

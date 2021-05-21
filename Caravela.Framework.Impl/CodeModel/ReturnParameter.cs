@@ -36,13 +36,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         CodeOrigin IDeclaration.Origin => CodeOrigin.Source;
 
-        public IDeclaration? ContainingElement => this.DeclaringMember;
+        public IDeclaration? ContainingDeclaration => this.DeclaringMember;
 
         public abstract IAttributeList Attributes { get; }
 
-        public DeclarationKind ElementKind => DeclarationKind.Parameter;
+        public DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-        public ICompilation Compilation => this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
+        public ICompilation Compilation => this.ContainingDeclaration?.Compilation ?? throw new AssertionFailedException();
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract ISymbol? Symbol { get; }
 
-        public abstract DeclarationRef<IDeclaration> ToLink();
+        public abstract DeclarationRef<IDeclaration> ToRef();
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ((IDeclarationInternal) this.DeclaringMember).DeclaringSyntaxReferences;
     }

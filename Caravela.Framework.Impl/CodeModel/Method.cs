@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this,
                 this.MethodSymbol.TypeParameters.Select( tp => DeclarationRef.FromSymbol<IGenericParameter>( tp ) ) );
 
-        public override DeclarationKind ElementKind => DeclarationKind.Method;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
         [Memo]
         public IReadOnlyList<IType> GenericArguments => this.MethodSymbol.TypeArguments.Select( this.Compilation.Factory.GetIType ).ToImmutableList();

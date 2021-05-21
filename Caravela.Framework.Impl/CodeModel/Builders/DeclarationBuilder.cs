@@ -27,17 +27,17 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public CodeOrigin Origin => CodeOrigin.Aspect;
 
-        public abstract IDeclaration? ContainingElement { get; }
+        public abstract IDeclaration? ContainingDeclaration { get; }
 
         IAttributeList IDeclaration.Attributes => this.Attributes;
 
         public AttributeBuilderList Attributes { get; } = new();
 
-        public abstract DeclarationKind ElementKind { get; }
+        public abstract DeclarationKind DeclarationKind { get; }
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        public CompilationModel Compilation => (CompilationModel?) this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
+        public CompilationModel Compilation => (CompilationModel?) this.ContainingDeclaration?.Compilation ?? throw new AssertionFailedException();
 
         public bool IsFrozen { get; private set; }
 
@@ -47,10 +47,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         // TODO: How to implement this?
-        public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        {
-            return "CodeElementBuilder";
-        }
+        public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => nameof(DeclarationBuilder);
 
         public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments )
         {
@@ -80,13 +77,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             this.IsFrozen = true;
         }
 
-        public IDiagnosticLocation? DiagnosticLocation => this.ContainingElement?.DiagnosticLocation;
+        public IDiagnosticLocation? DiagnosticLocation => this.ContainingDeclaration?.DiagnosticLocation;
 
-        public DeclarationRef<IDeclaration> ToLink() => DeclarationRef.FromBuilder( this );
+        public DeclarationRef<IDeclaration> ToRef() => DeclarationRef.FromBuilder( this );
 
         ISymbol? ISdkDeclaration.Symbol => null;
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences
-            => ((IDeclarationInternal?) this.ContainingElement)?.DeclaringSyntaxReferences ?? ImmutableArray<SyntaxReference>.Empty;
+            => ((IDeclarationInternal?) this.ContainingDeclaration)?.DeclaringSyntaxReferences ?? ImmutableArray<SyntaxReference>.Empty;
     }
 }

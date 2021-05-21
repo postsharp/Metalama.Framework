@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.CodeModel
         // TODO: get-only properties
         public IMethod? Setter => this._symbol.SetMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.SetMethod );
 
-        public override DeclarationKind ElementKind => DeclarationKind.Property;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 
         public object Value
         {

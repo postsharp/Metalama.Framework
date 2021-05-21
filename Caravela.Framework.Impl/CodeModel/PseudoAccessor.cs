@@ -96,11 +96,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public CodeOrigin Origin => CodeOrigin.Source;
 
-        public IDeclaration? ContainingElement => this._containingMember;
+        public IDeclaration? ContainingDeclaration => this._containingMember;
 
         public IAttributeList Attributes => AttributeList.Empty;
 
-        public DeclarationKind ElementKind => DeclarationKind.Method;
+        public DeclarationKind DeclarationKind => DeclarationKind.Method;
 
         public IDiagnosticLocation? DiagnosticLocation => this._containingMember.DiagnosticLocation;
 
@@ -137,7 +137,7 @@ namespace Caravela.Framework.Impl.CodeModel
             public IMember DeclaringMember => this.DeclaringAccessor;
 
             public RefKind RefKind
-                => this.DeclaringAccessor.ContainingElement switch
+                => this.DeclaringAccessor.ContainingDeclaration switch
                 {
                     Property property => property.RefKind,
                     Field _ => RefKind.None,
@@ -157,11 +157,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public CodeOrigin Origin => CodeOrigin.Source;
 
-            public IDeclaration? ContainingElement => this.DeclaringAccessor;
+            public IDeclaration? ContainingDeclaration => this.DeclaringAccessor;
 
             public IAttributeList Attributes => throw new NotImplementedException();
 
-            public DeclarationKind ElementKind => DeclarationKind.Parameter;
+            public DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
             public IDiagnosticLocation? DiagnosticLocation => throw new NotImplementedException();
 

@@ -24,7 +24,7 @@ namespace Caravela.Framework.Code
         /// types or for methods. If the containing element is a namespace or
         /// a compilation, <c>null</c> is returned.
         /// </summary>
-        IDeclaration? ContainingElement { get; }
+        IDeclaration? ContainingDeclaration { get; }
 
         /// <summary>
         /// Gets the collection of custom attributes on the declaration.
@@ -34,6 +34,6 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the kind of declaration.
         /// </summary>
-        public DeclarationKind ElementKind { get; }
+        public DeclarationKind DeclarationKind { get; }
     }
 }

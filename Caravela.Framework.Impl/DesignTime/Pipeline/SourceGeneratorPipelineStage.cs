@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if ( transformationGroup.DeclaringElement is not INamedType declaringType )
+                if ( transformationGroup.DeclaringDeclaration is not INamedType declaringType )
                 {
                     // We only support introductions to types.
                     continue;

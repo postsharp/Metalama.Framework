@@ -37,11 +37,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         CodeOrigin IDeclaration.Origin => this._parameter.Origin;
 
-        public IDeclaration? ContainingElement => this._parameter.ContainingElement;
+        public IDeclaration? ContainingDeclaration => this._parameter.ContainingDeclaration;
 
         public IAttributeList Attributes => this._parameter.Attributes;
 
-        public DeclarationKind ElementKind => this._parameter.ElementKind;
+        public DeclarationKind DeclarationKind => this._parameter.DeclarationKind;
 
         public ICompilation Compilation => this._parameter.Compilation;
 

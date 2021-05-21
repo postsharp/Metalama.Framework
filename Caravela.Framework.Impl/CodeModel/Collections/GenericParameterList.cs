@@ -13,12 +13,12 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         private GenericParameterList() { }
 
-        public GenericParameterList( INamedType containingElement, IEnumerable<DeclarationRef<IGenericParameter>> sourceItems ) : base(
-            containingElement,
+        public GenericParameterList( INamedType containingDeclaration, IEnumerable<DeclarationRef<IGenericParameter>> sourceItems ) : base(
+            containingDeclaration,
             sourceItems ) { }
 
-        public GenericParameterList( IMethod containingElement, IEnumerable<DeclarationRef<IGenericParameter>> sourceItems ) : base(
-            containingElement,
+        public GenericParameterList( IMethod containingDeclaration, IEnumerable<DeclarationRef<IGenericParameter>> sourceItems ) : base(
+            containingDeclaration,
             sourceItems ) { }
     }
 }

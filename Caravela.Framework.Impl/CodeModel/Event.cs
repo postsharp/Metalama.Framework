@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public EventInfo ToEventInfo() => new CompileTimeEventInfo( this._symbol, this.DeclaringType );
 
-        public override DeclarationKind ElementKind => DeclarationKind.Event;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 
         public override bool IsReadOnly => false;
 

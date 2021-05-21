@@ -30,14 +30,14 @@ namespace Caravela.Framework.Impl.CodeModel
         public static CompilationModel CreateInitialInstance( Compilation compilation, SyntaxTree syntaxTree )
             => new( PartialCompilation.CreatePartial( compilation, syntaxTree ) );
 
-        internal static CompilationModel CreateRevisedInstance( CompilationModel prototype, IReadOnlyList<IObservableTransformation> introducedElements )
+        internal static CompilationModel CreateRevisedInstance( CompilationModel prototype, IReadOnlyList<IObservableTransformation> introducedDeclarations )
         {
-            if ( !introducedElements.Any() )
+            if ( !introducedDeclarations.Any() )
             {
                 return prototype;
             }
 
-            return new CompilationModel( prototype, introducedElements );
+            return new CompilationModel( prototype, introducedDeclarations );
         }
 
         internal ReflectionMapper ReflectionMapper { get; }
@@ -65,9 +65,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
             // TODO: Move this to a virtual/lazy method because this should not be done for a partial model.
 
-            var allCodeElements = this.PartialCompilation.Types.SelectManyRecursive<ISymbol>( s => s.GetContainedSymbols(), includeFirstLevel: true );
+            var allDeclarations = this.PartialCompilation.Types.SelectManyRecursive<ISymbol>( s => s.GetContainedSymbols(), includeFirstLevel: true );
 
-            var allAttributes = allCodeElements.SelectMany( c => c.GetAllAttributes() );
+            var allAttributes = allDeclarations.SelectMany( c => c.GetAllAttributes() );
 
             this._allMemberAttributesByType = ImmutableMultiValueDictionary<DeclarationRef<INamedType>, AttributeRef>
                 .Create( allAttributes, a => a.AttributeType, DeclarationRefEqualityComparer<DeclarationRef<INamedType>>.Instance );
@@ -87,18 +87,18 @@ namespace Caravela.Framework.Impl.CodeModel
 
             this._transformations = prototype._transformations.AddRange(
                 observableTransformations,
-                t => t.ContainingElement.ToLink(),
+                t => t.ContainingDeclaration.ToRef(),
                 t => t );
 
             this.Factory = new DeclarationFactory( this );
 
-            var allNewCodeElements =
+            var allNewDeclarations =
                 observableTransformations
                     .OfType<IDeclaration>()
                     .SelectManyRecursive( declaration => declaration.GetContainedElements() );
 
             var allAttributes =
-                allNewCodeElements.SelectMany( c => c.Attributes )
+                allNewDeclarations.SelectMany( c => c.Attributes )
                     .Cast<AttributeBuilder>()
                     .Concat( observableTransformations.OfType<AttributeBuilder>() )
                     .Select( a => new AttributeRef( a ) );
@@ -129,7 +129,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this.RoslynCompilation.Assembly
                     .GetAttributes()
                     .Union( this.RoslynCompilation.SourceModule.GetAttributes() )
-                    .Select( a => new AttributeRef( a, this.RoslynCompilation.Assembly.ToLink() ) ) );
+                    .Select( a => new AttributeRef( a, this.RoslynCompilation.Assembly.ToRef() ) ) );
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
@@ -142,21 +142,21 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IDeclarationComparer InvariantComparer { get; }
 
-        IDeclaration? IDeclaration.ContainingElement => null;
+        IDeclaration? IDeclaration.ContainingDeclaration => null;
 
-        DeclarationKind IDeclaration.ElementKind => DeclarationKind.Compilation;
+        DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.Compilation;
 
         public bool Equals( IDeclaration other ) => throw new NotImplementedException();
 
         ICompilation ICompilationElement.Compilation => this;
 
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
-            => this._allMemberAttributesByType[type.ToLink()].Select( a => a.GetForCompilation( this ) );
+            => this._allMemberAttributesByType[type.ToRef()].Select( a => a.GetForCompilation( this ) );
 
         internal ImmutableArray<IObservableTransformation> GetObservableTransformationsOnElement( IDeclaration declaration )
-            => this._transformations[declaration.ToLink()];
+            => this._transformations[declaration.ToRef()];
 
-        internal IEnumerable<(IDeclaration DeclaringElement, IEnumerable<IObservableTransformation> Transformations)> GetAllObservableTransformations()
+        internal IEnumerable<(IDeclaration DeclaringDeclaration, IEnumerable<IObservableTransformation> Transformations)> GetAllObservableTransformations()
         {
             foreach ( var group in this._transformations )
             {
@@ -166,9 +166,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal int GetDepth( IDeclaration declaration )
         {
-            var link = declaration.ToLink();
+            var reference = declaration.ToRef();
 
-            if ( this._depthsCache.TryGetValue( link, out var value ) )
+            if ( this._depthsCache.TryGetValue( reference, out var value ) )
             {
                 return value;
             }
@@ -187,8 +187,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 default:
                     {
-                        var depth = this.GetDepth( declaration.ContainingElement! ) + 1;
-                        this._depthsCache = this._depthsCache.SetItem( link, depth );
+                        var depth = this.GetDepth( declaration.ContainingDeclaration! ) + 1;
+                        this._depthsCache = this._depthsCache.SetItem( reference, depth );
 
                         return depth;
                     }
@@ -197,14 +197,14 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal int GetDepth( INamedType namedType )
         {
-            var link = namedType.ToLink<IDeclaration>();
+            var reference = namedType.ToRef<IDeclaration>();
 
-            if ( this._depthsCache.TryGetValue( link, out var depth ) )
+            if ( this._depthsCache.TryGetValue( reference, out var depth ) )
             {
                 return depth;
             }
 
-            depth = this.GetDepth( namedType.ContainingElement! );
+            depth = this.GetDepth( namedType.ContainingDeclaration! );
 
             if ( namedType.BaseType != null )
             {
@@ -218,12 +218,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
             depth++;
 
-            this._depthsCache = this._depthsCache.SetItem( link, depth );
+            this._depthsCache = this._depthsCache.SetItem( reference, depth );
 
             return depth;
         }
 
-        DeclarationRef<IDeclaration> IDeclarationInternal.ToLink() => DeclarationRef.Compilation();
+        DeclarationRef<IDeclaration> IDeclarationInternal.ToRef() => DeclarationRef.Compilation();
 
         ImmutableArray<SyntaxReference> IDeclarationInternal.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 

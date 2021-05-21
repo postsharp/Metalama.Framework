@@ -31,13 +31,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override ISymbol? Symbol => null;
 
-        public override DeclarationRef<IDeclaration> ToLink() => DeclarationRef.ReturnParameter( this.DeclaringMethod.MethodSymbol );
+        public override DeclarationRef<IDeclaration> ToRef() => DeclarationRef.ReturnParameter( this.DeclaringMethod.MethodSymbol );
 
         [Memo]
         public override IAttributeList Attributes
             => new AttributeList(
                 this,
                 this.DeclaringMethod.MethodSymbol.GetReturnTypeAttributes()
-                    .Select( a => new AttributeRef( a, this.ToLink() ) ) );
+                    .Select( a => new AttributeRef( a, this.ToRef() ) ) );
     }
 }

@@ -41,16 +41,16 @@ namespace Caravela.Framework.Impl.Linking
 
             foreach ( var introducedMember in introducedMembers )
             {
-                if ( introducedMember.Introduction is IOverriddenElement overrideTransformation )
+                if ( introducedMember.Introduction is IOverriddenDeclaration overrideTransformation )
                 {
-                    if ( !this._overrideMap.TryGetValue( overrideTransformation.OverriddenElement, out var overrideList ) )
+                    if ( !this._overrideMap.TryGetValue( overrideTransformation.OverriddenDeclaration, out var overrideList ) )
                     {
-                        this._overrideMap[overrideTransformation.OverriddenElement] = overrideList = new List<LinkerIntroducedMember>();
+                        this._overrideMap[overrideTransformation.OverriddenDeclaration] = overrideList = new List<LinkerIntroducedMember>();
                     }
 
                     overrideList.Add( introducedMember );
 
-                    if ( overrideTransformation.OverriddenElement is Declaration declaration )
+                    if ( overrideTransformation.OverriddenDeclaration is Declaration declaration )
                     {
                         this._overrideTargetsByOriginalSymbolName[declaration.Symbol] = declaration;
                     }

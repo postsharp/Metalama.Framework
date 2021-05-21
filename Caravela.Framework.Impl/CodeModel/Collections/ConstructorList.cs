@@ -10,12 +10,12 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 {
     internal class ConstructorList : MethodBaseList<IConstructor>, IConstructorList
     {
-        public ConstructorList( Declaration? containingElement, IEnumerable<MemberRef<IConstructor>> sourceItems ) : base( containingElement, sourceItems ) { }
+        public ConstructorList( Declaration? containingDeclaration, IEnumerable<MemberRef<IConstructor>> sourceItems ) : base( containingDeclaration, sourceItems ) { }
 
         public IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<Type?>? argumentTypes )
         {
             return this.OfCompatibleSignature(
-                (argumentTypes, this.ContainingElement.AssertNotNull().Compilation),
+                (argumentTypes, this.ContainingDeclaration.AssertNotNull().Compilation),
                 null,
                 0,
                 argumentTypes?.Count,

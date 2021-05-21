@@ -121,8 +121,8 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public T GetForCompilation( CompilationModel compilation ) => GetForCompilation( this.Target, compilation, this._kind );
 
-        internal static T GetForCompilation( object? link, CompilationModel compilation, DeclarationSpecialKind kind = DeclarationSpecialKind.Default )
-            => link switch
+        internal static T GetForCompilation( object? reference, CompilationModel compilation, DeclarationSpecialKind kind = DeclarationSpecialKind.Default )
+            => reference switch
             {
                 null => kind == DeclarationSpecialKind.Compilation ? (T) (object) compilation : throw new AssertionFailedException(),
                 ISymbol symbol => (T) compilation.Factory.GetDeclaration( symbol.AssertValidType<T>(), kind ),

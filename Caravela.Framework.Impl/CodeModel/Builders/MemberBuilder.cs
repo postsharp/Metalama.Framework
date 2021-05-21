@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsVirtual { get; set; }
 
-        public sealed override IDeclaration ContainingElement => this.DeclaringType;
+        public sealed override IDeclaration ContainingDeclaration => this.DeclaringType;
 
         public MemberBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice )
         {

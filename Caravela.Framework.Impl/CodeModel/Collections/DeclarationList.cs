@@ -16,13 +16,13 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
     {
         private volatile TDeclaration?[]? _targetItems;
 
-        internal IDeclaration? ContainingElement { get; }
+        internal IDeclaration? ContainingDeclaration { get; }
 
         protected ImmutableArray<TSource> SourceItems { get; }
 
-        public CompilationModel Compilation => (CompilationModel) this.ContainingElement.AssertNotNull().Compilation;
+        public CompilationModel Compilation => (CompilationModel) this.ContainingDeclaration.AssertNotNull().Compilation;
 
-        protected DeclarationList( IDeclaration? containingElement, IEnumerable<TSource> sourceItems )
+        protected DeclarationList( IDeclaration? containingDeclaration, IEnumerable<TSource> sourceItems )
         {
             ImmutableArray<TSource>.Builder? builder;
             bool canMoveToImmutable;
@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             }
 
             this.SourceItems = canMoveToImmutable ? builder.MoveToImmutable() : builder.ToImmutable();
-            this.ContainingElement = containingElement;
+            this.ContainingDeclaration = containingDeclaration;
         }
 
         /// <summary>

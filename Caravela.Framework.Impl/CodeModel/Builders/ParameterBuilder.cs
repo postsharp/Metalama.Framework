@@ -32,9 +32,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsParams { get; set; }
 
-        public override IDeclaration? ContainingElement => this.DeclaringMember;
+        public override IDeclaration? ContainingDeclaration => this.DeclaringMember;
 
-        public override DeclarationKind ElementKind => DeclarationKind.Parameter;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
         public IMember DeclaringMember { get; }
 

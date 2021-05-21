@@ -9,8 +9,8 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 {
     internal class NamedTypeList : MemberList<INamedType, MemberRef<INamedType>>, INamedTypeList
     {
-        public NamedTypeList( INamedType containingElement, IEnumerable<MemberRef<INamedType>> sourceItems ) : base( containingElement, sourceItems ) { }
+        public NamedTypeList( INamedType containingDeclaration, IEnumerable<MemberRef<INamedType>> sourceItems ) : base( containingDeclaration, sourceItems ) { }
 
-        public NamedTypeList( ICompilation containingElement, IEnumerable<MemberRef<INamedType>> sourceItems ) : base( containingElement, sourceItems ) { }
+        public NamedTypeList( ICompilation containingDeclaration, IEnumerable<MemberRef<INamedType>> sourceItems ) : base( containingDeclaration, sourceItems ) { }
     }
 }

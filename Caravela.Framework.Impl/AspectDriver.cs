@@ -75,9 +75,9 @@ namespace Caravela.Framework.Impl
                 var interfaceType = this._compilation.GetTypeByReflectionType( typeof(IAspect<T>) ).AssertNotNull();
 
                 var diagnostic =
-                    GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement.CreateDiagnostic(
+                    GeneralDiagnosticDescriptors.AspectAppliedToIncorrectDeclaration.CreateDiagnostic(
                         declaration.GetDiagnosticLocation(),
-                        (this.AspectType, declaration.ElementKind, declaration, interfaceType) );
+                        (this.AspectType, declaration.DeclarationKind, declaration, interfaceType) );
 
                 return CreateResultForError( diagnostic );
             }

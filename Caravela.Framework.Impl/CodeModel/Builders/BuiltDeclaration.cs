@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         CodeOrigin IDeclaration.Origin => CodeOrigin.Aspect;
 
-        public IDeclaration? ContainingElement => this.Builder.ContainingElement;
+        public IDeclaration? ContainingDeclaration => this.Builder.ContainingDeclaration;
 
         [Memo]
         public IAttributeList Attributes
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 this.Builder.Attributes
                     .Select<AttributeBuilder, AttributeRef>( a => new AttributeRef( a ) ) );
 
-        public DeclarationKind ElementKind => this.Builder.ElementKind;
+        public DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         ISymbol? ISdkDeclaration.Symbol => null;
 
-        public DeclarationRef<IDeclaration> ToLink() => DeclarationRef.FromBuilder( this.Builder );
+        public DeclarationRef<IDeclaration> ToRef() => DeclarationRef.FromBuilder( this.Builder );
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
     }

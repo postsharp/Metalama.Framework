@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Utilities
     {
         public static readonly StructuralSymbolComparer Default =
             new(
-                StructuralSymbolComparerOptions.ContainingElement |
+                StructuralSymbolComparerOptions.ContainingDeclaration |
                 StructuralSymbolComparerOptions.Name |
                 StructuralSymbolComparerOptions.GenericParameterCount |
                 StructuralSymbolComparerOptions.ParameterTypes |
@@ -91,8 +91,8 @@ namespace Caravela.Framework.Impl.Utilities
                     throw new NotImplementedException( $"{x.Kind}" );
             }
 
-            if ( this._options.HasFlag( StructuralSymbolComparerOptions.ContainingElement )
-                 && !ContainingElementEquals( x.ContainingSymbol, y.ContainingSymbol ) )
+            if ( this._options.HasFlag( StructuralSymbolComparerOptions.ContainingDeclaration )
+                 && !ContainingDeclarationEquals( x.ContainingSymbol, y.ContainingSymbol ) )
             {
                 return false;
             }
@@ -239,7 +239,7 @@ namespace Caravela.Framework.Impl.Utilities
             }
         }
 
-        private static bool ContainingElementEquals( ISymbol x, ISymbol y )
+        private static bool ContainingDeclarationEquals( ISymbol x, ISymbol y )
         {
             var currentX = x;
             var currentY = y;
@@ -418,7 +418,7 @@ namespace Caravela.Framework.Impl.Utilities
                     throw new NotImplementedException( $"{symbol.Kind}" );
             }
 
-            if ( options.HasFlag( StructuralSymbolComparerOptions.ContainingElement ) )
+            if ( options.HasFlag( StructuralSymbolComparerOptions.ContainingDeclaration ) )
             {
                 var current = symbol.ContainingSymbol;
 
@@ -474,7 +474,7 @@ namespace Caravela.Framework.Impl.Utilities
     internal enum StructuralSymbolComparerOptions
     {
         ContainingAssembly = 1 << 0,
-        ContainingElement = 1 << 1,
+        ContainingDeclaration = 1 << 1,
         Name = 1 << 2,
         GenericParameterCount = 1 << 3,
         GenericArguments = 1 << 4,

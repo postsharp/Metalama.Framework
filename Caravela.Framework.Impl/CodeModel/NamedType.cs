@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this.TypeSymbol.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
         public bool IsOpenGeneric
-            => this.GenericArguments.Any( ga => ga is IGenericParameter ) || (this.ContainingElement as INamedType)?.IsOpenGeneric == true;
+            => this.GenericArguments.Any( ga => ga is IGenericParameter ) || (this.ContainingDeclaration as INamedType)?.IsOpenGeneric == true;
 
         [Memo]
         public INamedTypeList NestedTypes => new NamedTypeList( this, this.TypeSymbol.GetTypeMembers().Select( t => new MemberRef<INamedType>( t ) ) );
@@ -175,7 +175,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly );
 
         [Memo]
-        public override IDeclaration? ContainingElement
+        public override IDeclaration? ContainingDeclaration
             => this.TypeSymbol.ContainingSymbol switch
             {
                 INamespaceSymbol => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly ),
@@ -183,7 +183,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => throw new NotImplementedException()
             };
 
-        public override DeclarationKind ElementKind => DeclarationKind.Type;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Type;
 
         [Memo]
         public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.Factory.GetNamedType( this.TypeSymbol.BaseType );

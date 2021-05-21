@@ -296,7 +296,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         "PseudoOverride should have 2 or 3 arguments - overridden declaration name, aspect name and optionally layer name." );
                 }
 
-                var overriddenElementName = attribute.ArgumentList.Arguments[0].ToString();
+                var overriddenDeclarationName = attribute.ArgumentList.Arguments[0].ToString();
                 var aspectName = attribute.ArgumentList.Arguments[1].ToString();
 
                 string? layerName = null;
@@ -312,7 +312,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     o => o
                         .Implements<INonObservableTransformation>()
                         .Implements<IMemberIntroduction>()
-                        .Implements<IOverriddenElement>()
+                        .Implements<IOverriddenDeclaration>()
                         .Implements<ITestTransformation>() );
 
                 var methodBodyRewriter = new TestMethodBodyRewriter( aspectName, layerName );
@@ -375,7 +375,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
                     .Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
 
-                A.CallTo( () => ((ITestTransformation) transformation).OverriddenElementName ).Returns( overriddenElementName );
+                A.CallTo( () => ((ITestTransformation) transformation).OverriddenDeclarationName ).Returns( overriddenDeclarationName );
                 A.CallTo( () => ((ITestTransformation) transformation).SymbolHelperNodeId ).Returns( GetNodeId( symbolHelperDeclaration ) );
 
                 this._nonObservableTransformations.Add( (INonObservableTransformation) transformation );

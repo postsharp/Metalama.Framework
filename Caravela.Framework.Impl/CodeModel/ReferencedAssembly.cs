@@ -13,11 +13,11 @@ namespace Caravela.Framework.Impl.CodeModel
             this.AssemblySymbol = assemblySymbol;
         }
 
-        public override IDeclaration? ContainingElement => this.Compilation;
+        public override IDeclaration? ContainingDeclaration => this.Compilation;
 
         public IAssemblySymbol AssemblySymbol { get; }
 
-        public override DeclarationKind ElementKind => DeclarationKind.ReferencedAssembly;
+        public override DeclarationKind DeclarationKind => DeclarationKind.ReferencedAssembly;
 
         public override ISymbol Symbol => this.AssemblySymbol;
 

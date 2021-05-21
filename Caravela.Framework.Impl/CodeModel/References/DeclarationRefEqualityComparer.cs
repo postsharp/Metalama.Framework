@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
     {
         public static readonly DeclarationRefEqualityComparer<T> Instance = new();
 
-        private static ISymbol? GetSymbol( T link ) => link.Target as ISymbol;
+        private static ISymbol? GetSymbol( T reference ) => reference.Target as ISymbol;
 
         public bool Equals( T x, T y )
         {

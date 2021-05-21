@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         private PropertyInvocation Invocation => new( this );
 
-        public override DeclarationKind ElementKind => DeclarationKind.Field;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
         public override ISymbol Symbol => this._symbol;
 
@@ -84,6 +84,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         MemberRef<IMember> IReplaceMemberTransformation.ReplacedMember => new( this._symbol );
 
-        IDeclaration IObservableTransformation.ContainingElement => this.ContainingElement.AssertNotNull();
+        IDeclaration IObservableTransformation.ContainingDeclaration => this.ContainingDeclaration.AssertNotNull();
     }
 }

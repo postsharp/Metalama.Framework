@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override MemberDeclarationSyntax InsertPositionNode
             => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
 
-        public override DeclarationKind ElementKind => throw new NotImplementedException();
+        public override DeclarationKind DeclarationKind => throw new NotImplementedException();
 
         public bool IsIndexer => this.Name == "Items";
 

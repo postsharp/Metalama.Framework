@@ -12,21 +12,21 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder
     {
-        private readonly MemberBuilder _containingElement;
+        private readonly MemberBuilder _containingDeclaration;
 
         private Accessibility? _accessibility;
 
-        public AccessorBuilder( MemberBuilder containingElement, MethodKind methodKind )
-            : base( containingElement.ParentAdvice )
+        public AccessorBuilder( MemberBuilder containingDeclaration, MethodKind methodKind )
+            : base( containingDeclaration.ParentAdvice )
         {
-            this._containingElement = containingElement;
+            this._containingDeclaration = containingDeclaration;
             this._accessibility = null;
             this.MethodKind = methodKind;
         }
 
         [Memo]
         public IParameterBuilder ReturnParameter
-            => (this.ContainingElement, this.MethodKind) switch
+            => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
                 (PropertyBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this, -1 ),
                 (PropertyBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this, -1 ),
@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         IParameterList IMethodBase.Parameters => this.Parameters;
 
         public ParameterBuilderList Parameters
-            => (this._containingElement, this.MethodKind) switch
+            => (this._containingDeclaration, this.MethodKind) switch
             {
                 // TODO: Indexer parameters (need to have special IParameterList implementation that would mirror adding parameters to the indexer property).
                 // TODO: Events.
@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public Accessibility Accessibility
         {
-            get => this._accessibility ?? this._containingElement.Accessibility;
+            get => this._accessibility ?? this._containingDeclaration.Accessibility;
 
             // TODO: Changing accessibility of all accessors at the same time should be prohibited or should change the visibility of the method group.
             // TODO: Throw if the set accessibility does not restrict the property/event accessibility.
@@ -85,36 +85,36 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             get
                 => this.MethodKind switch
                 {
-                    MethodKind.PropertyGet => $"get_{this._containingElement.Name}",
-                    MethodKind.PropertySet => $"set_{this._containingElement.Name}",
-                    MethodKind.EventAdd => $"add_{this._containingElement.Name}",
-                    MethodKind.EventRemove => $"remove_{this._containingElement.Name}",
+                    MethodKind.PropertyGet => $"get_{this._containingDeclaration.Name}",
+                    MethodKind.PropertySet => $"set_{this._containingDeclaration.Name}",
+                    MethodKind.EventAdd => $"add_{this._containingDeclaration.Name}",
+                    MethodKind.EventRemove => $"remove_{this._containingDeclaration.Name}",
                     _ => throw new AssertionFailedException()
                 };
             set => throw new NotSupportedException();
         }
 
-        public bool IsStatic { get => this._containingElement.IsStatic; set => throw new NotSupportedException(); }
+        public bool IsStatic { get => this._containingDeclaration.IsStatic; set => throw new NotSupportedException(); }
 
-        public bool IsVirtual { get => this._containingElement.IsVirtual; set => throw new NotSupportedException(); }
+        public bool IsVirtual { get => this._containingDeclaration.IsVirtual; set => throw new NotSupportedException(); }
 
-        public bool IsSealed { get => this._containingElement.IsSealed; set => throw new NotSupportedException(); }
+        public bool IsSealed { get => this._containingDeclaration.IsSealed; set => throw new NotSupportedException(); }
 
-        public bool IsAbstract => this._containingElement.IsAbstract;
+        public bool IsAbstract => this._containingDeclaration.IsAbstract;
 
         public bool IsReadOnly => false;
 
-        public bool IsOverride => this._containingElement.IsOverride;
+        public bool IsOverride => this._containingDeclaration.IsOverride;
 
-        public bool IsNew => this._containingElement.IsNew;
+        public bool IsNew => this._containingDeclaration.IsNew;
 
         public bool IsAsync => false;
 
-        public INamedType DeclaringType => this._containingElement.DeclaringType;
+        public INamedType DeclaringType => this._containingDeclaration.DeclaringType;
 
-        public override IDeclaration? ContainingElement => this._containingElement;
+        public override IDeclaration? ContainingDeclaration => this._containingDeclaration;
 
-        public override DeclarationKind ElementKind => DeclarationKind.Method;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
         IParameter IMethod.ReturnParameter => this.ReturnParameter;
 

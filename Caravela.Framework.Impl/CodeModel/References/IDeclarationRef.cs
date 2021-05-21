@@ -12,15 +12,15 @@ namespace Caravela.Framework.Impl.CodeModel.References
     internal interface IDeclarationRef
     {
         /// <summary>
-        /// Gets the target object (typically a symbol or a <see cref="DeclarationBuilder"/>) pointed at by the link.
+        /// Gets the target object (typically a symbol or a <see cref="DeclarationBuilder"/>) pointed at by the reference.
         /// </summary>
         object? Target { get; }
     }
 
     /// <summary>
-    /// Represents a link that can be resolved to a declaration by <see cref="GetForCompilation"/>.
+    /// Represents a reference to a declaration that can be resolved using <see cref="GetForCompilation"/>.
     /// </summary>
-    /// <typeparam name="T">The type of the target object of the link.</typeparam>
+    /// <typeparam name="T">The type of the target object of the declaration.</typeparam>
     internal interface IDeclarationRef<out T> : IDeclarationRef
         where T : IDeclaration
     {

@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.CodeModel
         internal IMethodSymbol MethodSymbol { get; }
 
         [Memo]
-        public override IDeclaration? ContainingElement
+        public override IDeclaration? ContainingDeclaration
             => this.Symbol switch
             {
                 IMethodSymbol method when
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     || method.MethodKind == SymbolMethodKind.EventRemove
                     || method.MethodKind == SymbolMethodKind.EventRaise
                     => this.Compilation.Factory.GetDeclaration( method.AssociatedSymbol.AssertNotNull() ),
-                _ => base.ContainingElement
+                _ => base.ContainingDeclaration
             };
 
         public MethodBase( IMethodSymbol symbol, CompilationModel compilation ) : base( compilation )

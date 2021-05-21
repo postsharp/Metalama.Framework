@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public Member DeclaringMember => (Member) this.Compilation.Factory.GetDeclaration( this.ParameterSymbol.ContainingSymbol );
 
-        public ParameterInfo ToParameterInfo() => CompileTimeParameterInfo.Create( this.ParameterSymbol, this.ContainingElement );
+        public ParameterInfo ToParameterInfo() => CompileTimeParameterInfo.Create( this.ParameterSymbol, this.ContainingDeclaration );
 
         IMember IParameter.DeclaringMember => this.DeclaringMember;
 
@@ -46,9 +46,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsParams => this.ParameterSymbol.IsParams;
 
-        public override IDeclaration ContainingElement => this.DeclaringMember;
+        public override IDeclaration ContainingDeclaration => this.DeclaringMember;
 
-        public override DeclarationKind ElementKind => DeclarationKind.Parameter;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
         public override ISymbol Symbol => this.ParameterSymbol;
 

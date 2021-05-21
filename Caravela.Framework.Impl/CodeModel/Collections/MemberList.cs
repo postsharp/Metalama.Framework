@@ -7,18 +7,18 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    internal abstract class MemberList<TCodeElement, TSource> : DeclarationList<TCodeElement, TSource>, IMemberList<TCodeElement>
-        where TCodeElement : class, IMember
-        where TSource : IMemberRef<TCodeElement>
+    internal abstract class MemberList<TMember, TSource> : DeclarationList<TMember, TSource>, IMemberList<TMember>
+        where TMember : class, IMember
+        where TSource : IMemberRef<TMember>
     {
-        protected MemberList( IDeclaration? containingElement, IEnumerable<TSource> sourceItems ) : base( containingElement, sourceItems ) { }
+        protected MemberList( IDeclaration? containingDeclaration, IEnumerable<TSource> sourceItems ) : base( containingDeclaration, sourceItems ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MemberList{TCodeElement, TSource}"/> class that represents an empty list.
         /// </summary>
         protected MemberList() { }
 
-        public IEnumerable<TCodeElement> OfName( string name )
+        public IEnumerable<TMember> OfName( string name )
         {
             for ( var i = 0; i < this.Count; i++ )
             {

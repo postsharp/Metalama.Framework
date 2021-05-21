@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
                         if ( this._loader.AttributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out var attributeInstance ) )
                         {
-                            return aspectClassMetadata.CreateAspectInstance( (IAspect) attributeInstance, attribute.ContainingElement.AssertNotNull() );
+                            return aspectClassMetadata.CreateAspectInstance( (IAspect) attributeInstance, attribute.ContainingDeclaration.AssertNotNull() );
                         }
                         else
                         {

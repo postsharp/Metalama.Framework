@@ -48,11 +48,11 @@ namespace Caravela.Framework.Impl.Linking
 
             switch ( introduction )
             {
-                case IOverriddenElement overriddenElement:
+                case IOverriddenDeclaration overriddenDeclaration:
                     {
-                        // When we have an IOverriddenElement, we know which symbol will be overwritten, so we take its lexical scope.
+                        // When we have an IOverriddenDeclaration, we know which symbol will be overwritten, so we take its lexical scope.
                         // All overrides of these same symbol will share the same scope.
-                        return this.GetLexicalScope( overriddenElement.OverriddenElement );
+                        return this.GetLexicalScope( overriddenDeclaration.OverriddenDeclaration );
                     }
 
                 case IDeclaration declaration:

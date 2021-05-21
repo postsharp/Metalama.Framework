@@ -23,7 +23,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             /// <summary>
             /// Gets the name of the overridden element. An element with the same signature needs to be found on the same type.
             /// </summary>
-            string? OverriddenElementName { get; }
+            string? OverriddenDeclarationName { get; }
 
             /// <summary>
             /// Gets the name of the introduced element.

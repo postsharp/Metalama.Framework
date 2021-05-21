@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         private Exception CreateInvalidOperationException( string memberName, string? description = null )
             => TemplatingDiagnosticDescriptors.MemberMemberNotAvailable.CreateException(
-                (this._common.TemplateSymbol, "meta." + memberName, this.Declaration, this.Declaration.ElementKind, description ?? "I" + memberName) );
+                (this._common.TemplateSymbol, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind, description ?? "I" + memberName) );
 
         public IConstructor Constructor => this._methodBase as IConstructor ?? throw this.CreateInvalidOperationException( nameof(this.Constructor) );
 
@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             => this._type is { IsStatic: false } && this.Declaration is IMember { IsStatic: false }
                 ? new ThisInstanceDynamicReceiver( this.Type, linkerAnnotation )
                 : throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                    (this._common.TemplateSymbol, expressionName, this.Declaration, this.Declaration.ElementKind) );
+                    (this._common.TemplateSymbol, expressionName, this.Declaration, this.Declaration.DeclarationKind) );
 
         public dynamic This => this.GetThisOrBase( "meta.This", new LinkerAnnotation( this._common.AspectLayerId, LinkerAnnotationOrder.Default ) );
 

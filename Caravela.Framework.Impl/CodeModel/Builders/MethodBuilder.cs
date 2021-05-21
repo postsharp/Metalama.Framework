@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IMethodInvocation IMethod.Base => throw new NotImplementedException();
 
-        public override DeclarationKind ElementKind => DeclarationKind.Method;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
         public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, AspectLinkerOptions? linkerOptions )
             : base( parentAdvice, targetType, name )
