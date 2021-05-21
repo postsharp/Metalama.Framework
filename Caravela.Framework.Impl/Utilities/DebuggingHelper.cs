@@ -36,15 +36,7 @@ namespace Caravela.Framework.Impl.Utilities
                 throw new AssertionFailedException( "Caravela is running in the vanilla C# compiler instead of the customized one." );
             }
         }
-        
-        public static void RequireDesignTime()
-        {
-            if ( CaravelaCompilerInfo.IsActive )
-            {
-                throw new AssertionFailedException( "This component must not be used at design time." );
-            }
-        }
-
+  
         /// <summary>
         /// Attaches the debugger to the current process if requested.
         /// </summary>
