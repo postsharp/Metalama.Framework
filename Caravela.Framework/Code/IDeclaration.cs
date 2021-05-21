@@ -7,17 +7,16 @@ using Caravela.Framework.Project;
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Represent a declaration. Implementations of <see cref="IDeclaration"/>
-    /// are always declarations, never elements of the method body.
+    /// Represent a declaration.
     /// </summary>
     [CompileTimeOnly]
     public interface IDeclaration : IDisplayable, IDiagnosticScope, ICompilationElement
     {
         /// <summary>
-        /// Gets the origin (<see cref="CodeOrigin.Source"/>, <see cref="CodeOrigin.Generator"/> or <see cref="CodeOrigin.Aspect"/>
+        /// Gets the origin (<see cref="DeclarationOrigin.Source"/>, <see cref="DeclarationOrigin.Generator"/> or <see cref="DeclarationOrigin.Aspect"/>
         /// of the current declaration.
         /// </summary>
-        CodeOrigin Origin { get; }
+        DeclarationOrigin Origin { get; }
 
         /// <summary>
         /// Gets the containing declaration, such as a <see cref="INamedType"/> for nested

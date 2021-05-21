@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public AttributeData AttributeData { get; }
 
-        CodeOrigin IDeclaration.Origin => CodeOrigin.Source;
+        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
 
         public IDeclaration ContainingDeclaration { get; }
 

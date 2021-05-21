@@ -232,7 +232,7 @@ namespace Caravela.Framework.Impl.CodeModel
             throw new NotImplementedException();
         }
 
-        CodeOrigin IDeclaration.Origin => CodeOrigin.Source;
+        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
 
         ISymbol? ISdkDeclaration.Symbol => this.RoslynCompilation.Assembly;
 

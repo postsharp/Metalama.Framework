@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         internal Advice ParentAdvice { get; }
 
-        public CodeOrigin Origin => CodeOrigin.Aspect;
+        public DeclarationOrigin Origin => DeclarationOrigin.Aspect;
 
         public abstract IDeclaration? ContainingDeclaration { get; }
 

@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IDiagnosticLocation? DiagnosticLocation => this.Builder.DiagnosticLocation;
 
-        CodeOrigin IDeclaration.Origin => CodeOrigin.Aspect;
+        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Aspect;
 
         public IDeclaration? ContainingDeclaration => this.Builder.ContainingDeclaration;
 

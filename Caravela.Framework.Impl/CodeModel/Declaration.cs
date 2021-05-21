@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        CodeOrigin IDeclaration.Origin => CodeOrigin.Source;
+        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
 
         [Memo]
         public virtual IDeclaration? ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this.Symbol.ContainingSymbol );

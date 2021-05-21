@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override IDeclaration ContainingDeclaration { get; }
 
-        CodeOrigin IDeclaration.Origin => CodeOrigin.Aspect;
+        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Aspect;
 
         IDeclaration? IDeclaration.ContainingDeclaration => throw new NotImplementedException();
 

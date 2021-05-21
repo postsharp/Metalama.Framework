@@ -6,7 +6,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Origins of a declaration.
     /// </summary>
-    public enum CodeOrigin
+    public enum DeclarationOrigin
     {
         /// <summary>
         /// Source code.

@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public ParameterInfo ToParameterInfo() => CompileTimeReturnParameterInfo.Create( this );
 
-        CodeOrigin IDeclaration.Origin => CodeOrigin.Source;
+        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
 
         public IDeclaration? ContainingDeclaration => this.DeclaringMember;
 

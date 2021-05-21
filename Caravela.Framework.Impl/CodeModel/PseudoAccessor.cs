@@ -94,7 +94,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public INamedType DeclaringType => this._containingMember.DeclaringType;
 
-        public CodeOrigin Origin => CodeOrigin.Source;
+        public DeclarationOrigin Origin => DeclarationOrigin.Source;
 
         public IDeclaration? ContainingDeclaration => this._containingMember;
 
@@ -155,7 +155,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public bool IsParams => false;
 
-            public CodeOrigin Origin => CodeOrigin.Source;
+            public DeclarationOrigin Origin => DeclarationOrigin.Source;
 
             public IDeclaration? ContainingDeclaration => this.DeclaringAccessor;
 

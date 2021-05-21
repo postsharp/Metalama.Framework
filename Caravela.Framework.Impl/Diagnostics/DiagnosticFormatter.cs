@@ -38,8 +38,8 @@ namespace Caravela.Framework.Impl.Diagnostics
                         }
                     }
 
-                case DeclarationKind codeElementKind:
-                    switch ( codeElementKind )
+                case DeclarationKind declarationKind:
+                    switch ( declarationKind )
                     {
                         case DeclarationKind.GenericParameter:
                             return "generic parameter";
@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.Diagnostics
                             return "reference assembly";
 
                         default:
-                            return codeElementKind.ToString().ToLowerInvariant();
+                            return declarationKind.ToString().ToLowerInvariant();
                     }
 
                 case ISymbol symbol:

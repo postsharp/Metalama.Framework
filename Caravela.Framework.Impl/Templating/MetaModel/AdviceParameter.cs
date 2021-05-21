@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public int Index => this._parameter.Index;
 
-        CodeOrigin IDeclaration.Origin => this._parameter.Origin;
+        DeclarationOrigin IDeclaration.Origin => this._parameter.Origin;
 
         public IDeclaration? ContainingDeclaration => this._parameter.ContainingDeclaration;
 
