@@ -3,6 +3,7 @@
 
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace Caravela.Framework.Impl.Utilities
 {
@@ -11,5 +12,13 @@ namespace Caravela.Framework.Impl.Utilities
         public static bool IsNameOf( this InvocationExpressionSyntax node )
             => node.Expression.Kind() == SyntaxKind.NameOfKeyword ||
                (node.Expression is IdentifierNameSyntax identifierName && identifierName.Identifier.Text == "nameof");
+
+        public static string GetNameOfValue( this InvocationExpressionSyntax node )
+            => node.ArgumentList.Arguments[0].Expression switch
+            {
+                SimpleNameSyntax simpleName => simpleName.Identifier.Text,
+                QualifiedNameSyntax qualifiedName => qualifiedName.Right.Identifier.Text,
+                _ => throw new NotImplementedException()
+            };
     }
 }

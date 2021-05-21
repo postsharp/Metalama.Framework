@@ -5,7 +5,7 @@ using Caravela.Framework.Project;
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.TypeOf
+namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType
 {
     [CompileTime]
     class Aspect
@@ -13,30 +13,30 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Type
         [TestTemplate]
         dynamic Template()
         {
-            var rt = meta.RunTime(typeof(string));
-            var ct = typeof(string);
+            var rt = meta.RunTime(typeof(MyClass1));
+            var ct = typeof(MyClass1);
             Console.WriteLine("rt=" + rt);
             Console.WriteLine("ct=" + ct);
 
-            if (meta.Parameters[0].ParameterType.Is(typeof(string)))
+            if (meta.Parameters[0].ParameterType.Is(typeof(MyClass1)))
             {
-            
+                Console.WriteLine("Oops");
             }
 
+            Console.WriteLine(typeof(MyClass1));
             Console.WriteLine(typeof(MyClass1).FullName);
 
             return meta.Proceed();
         }
     }
 
-    [CompileTimeOnly]
     public class MyClass1 { }
 
     class TargetCode
     {
-        string Method(string a)
+        string Method(MyClass1 a)
         {
-            return a;
+            return "";
         }
     }
 }

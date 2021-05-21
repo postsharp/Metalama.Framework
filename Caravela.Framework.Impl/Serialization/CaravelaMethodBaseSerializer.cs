@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Serialization
             var documentationId = DocumentationCommentId.CreateDeclarationId( methodSymbol );
             var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Intrinsics.GetRuntimeMethodHandle), documentationId );
 
-            if ( declaringGenericTypeSymbol is INamedType namedtype && namedtype.GenericParameters.Count > 0 )
+            if ( declaringGenericTypeSymbol is INamedTypeSymbol namedType && namedType.IsGenericType )
             {
                 var typeHandle = this.CreateTypeHandleExpression( declaringGenericTypeSymbol, syntaxFactory );
 
