@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Serialization
         /// <param name="obj"></param>
         /// <param name="syntaxFactory"></param>
         /// <returns>An expression that creates such an object.</returns>
-        public abstract ExpressionSyntax Serialize( object obj, ISyntaxFactory syntaxFactory );
+        public abstract ExpressionSyntax Serialize( object obj, ICompilationElementFactory syntaxFactory );
 
         /// <summary>
         /// Throws a <see cref="InvalidUserCodeException"/> if we are in an infinite recursion cycle because of an attempt to serialize <paramref name="obj"/>.

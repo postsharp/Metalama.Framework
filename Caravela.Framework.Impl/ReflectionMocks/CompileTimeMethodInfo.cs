@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
 using System;
@@ -11,21 +12,18 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
-    internal class CompileTimeMethodInfo : MethodInfo, ICompileTimeReflectionMember
+    internal class CompileTimeMethodInfo : MethodInfo, ICompileTimeReflectionObject<IMethod>
     {
-        public ISymbol Symbol { get; }
+        public IDeclarationRef<IMethod> Target { get; set; }
 
-        public ITypeSymbol? DeclaringTypeSymbol { get; }
-
-        private CompileTimeMethodInfo( Method method )
+        private CompileTimeMethodInfo( IMethod method )
         {
-            this.Symbol = method.Symbol;
-            this.DeclaringTypeSymbol = FindDeclaringTypeSymbol( method );
+            this.Target = method.ToRef();
         }
 
         public static MethodInfo Create( IMethod method )
         {
-            return new CompileTimeMethodInfo( (Method) method );
+            return new CompileTimeMethodInfo( method );
         }
 
         public static ITypeSymbol? FindDeclaringTypeSymbol( Member method )
@@ -67,5 +65,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         public override MethodInfo GetBaseDefinition() => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override ICustomAttributeProvider ReturnTypeCustomAttributes => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        
     }
 }

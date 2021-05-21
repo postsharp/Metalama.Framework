@@ -16,7 +16,7 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.CompileTime
 {
-    public class CompileTimeAssemblyBuilderTests : TestBase
+    public class CompileTimeCompilationBuilderTests : TestBase
     {
         [Fact]
         public void RemoveInvalidUsingRewriterTest()
@@ -402,6 +402,65 @@ public class ReferencedClass
             // After building, getting from cache should succeed.
             var loader3 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
             Assert.True( loader3.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, true, CancellationToken.None, out _ ) );
+        }
+
+        [Fact]
+        public void RewriteTypeOf()
+        {
+            var code = @"
+using System;
+using Caravela.Framework.Project;
+
+[CompileTimeOnly]
+public class CompileTimeOnlyClass
+{
+   static Type Type1 = typeof(RunTimeOnlyClass);
+   static Type Type2 = typeof(CompileTimeOnlyClass);
+   static string Name1 = nameof(RunTimeOnlyClass);
+   static string Name2 = nameof(CompileTimeOnlyClass);
+
+   void Method() { var t = typeof(RunTimeOnlyClass); }
+   string Property => nameof(RunTimeOnlyClass);
+}
+
+public class RunTimeOnlyClass
+{
+   static Type Type1 = typeof(RunTimeOnlyClass);
+   static Type Type3 = typeof(CompileTimeOnlyClass);
+
+}
+";
+
+            var expected = @"
+using System;
+using Caravela.Framework.Project;
+
+[CompileTimeOnly]
+public class CompileTimeOnlyClass
+{
+   static Type Type1 = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.CreateFromDocumentationId(""T:RunTimeOnlyClass"",""RunTimeOnlyClass"");
+   static Type Type2 = typeof(CompileTimeOnlyClass);
+   static string Name1 = ""RunTimeOnlyClass"";
+   static string Name2 = nameof(CompileTimeOnlyClass);
+
+   void Method() { var t = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.CreateFromDocumentationId(""T:RunTimeOnlyClass"",""RunTimeOnlyClass""); }
+   string Property => ""RunTimeOnlyClass"";
+}
+";
+
+            var compilation = CreateCSharpCompilation( code );
+            
+            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), this.ServiceProvider );
+
+            DiagnosticList diagnosticList = new(); 
+            Assert.True( loader.TryGetCompileTimeProject( compilation, null, diagnosticList, false, CancellationToken.None, out var compileTimeProject ) );
+
+            var transformed = File.ReadAllText( compileTimeProject!.CodeFiles[0].TransformedPath );
+            
+            Assert.Equal( expected, transformed );
+            
+            // We are not testing the rewriting of typeof in a template because this is done by the template compiler and covered by template tests.
+
         }
     }
 }

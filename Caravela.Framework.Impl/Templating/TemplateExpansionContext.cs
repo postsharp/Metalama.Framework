@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Templating
             TemplateLexicalScope lexicalScope,
             UserDiagnosticSink diagnosticSink,
             SyntaxSerializationService syntaxSerializationService,
-            ISyntaxFactory syntaxFactory,
+            ICompilationElementFactory syntaxFactory,
             AspectLayerId aspectLayerId,
             IReadOnlyDictionary<string, object?> properties )
         {
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public SyntaxSerializationService SyntaxSerializationService { get; }
 
-        public ISyntaxFactory SyntaxFactory { get; }
+        public ICompilationElementFactory SyntaxFactory { get; }
 
         public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
         {

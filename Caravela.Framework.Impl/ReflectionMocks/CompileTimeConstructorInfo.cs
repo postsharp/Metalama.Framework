@@ -3,29 +3,23 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Serialization;
-using Microsoft.CodeAnalysis;
+using Caravela.Framework.Impl.CodeModel.References;
 using System;
 using System.Globalization;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
-    internal class CompileTimeConstructorInfo : ConstructorInfo, ICompileTimeReflectionMember
+    internal class CompileTimeConstructorInfo : ConstructorInfo, ICompileTimeReflectionObject<IConstructor>
     {
-        public ISymbol Symbol { get; }
-
-        public ITypeSymbol? DeclaringTypeSymbol { get; }
-
-        private CompileTimeConstructorInfo( Constructor method )
+        public IDeclarationRef<IConstructor> Target { get; }
+        
+        private CompileTimeConstructorInfo( IConstructor method )
         {
-            this.Symbol = method.Symbol;
-            this.DeclaringTypeSymbol = CompileTimeMethodInfo.FindDeclaringTypeSymbol( method );
+            this.Target = method.ToRef();
         }
 
-        public static ConstructorInfo Create( Constructor method ) => new CompileTimeConstructorInfo( method );
-
-        public static ConstructorInfo Create( IConstructor method ) => Create( (Constructor) method );
+        public static ConstructorInfo Create( IConstructor method ) => new CompileTimeConstructorInfo( method );
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
@@ -52,5 +46,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public override object Invoke( BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture )
             => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        
     }
 }

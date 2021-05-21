@@ -2,7 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -19,19 +21,25 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public CaravelaMethodBaseSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-        internal ExpressionSyntax SerializeMethodBase( ICompileTimeReflectionMember method, ISyntaxFactory syntaxFactory )
-            => this.SerializeMethodBase( (IMethodSymbol) method.Symbol, method.DeclaringTypeSymbol, syntaxFactory );
+        internal ExpressionSyntax SerializeMethodBase( ICompileTimeReflectionObject<IMethodBase> method, ICompilationElementFactory syntaxFactory )
+            => SerializeMethodBase( (IMethodSymbol) method.Target.GetSymbol( syntaxFactory.Compilation ), syntaxFactory );
+            
+        
+        internal ExpressionSyntax SerializeMethodBase( IMethodSymbol methodSymbol, ICompilationElementFactory syntaxFactory )
+        {
+            return this.SerializeMethodBase( methodSymbol, methodSymbol.ContainingType, syntaxFactory );
+        }
 
         internal ExpressionSyntax SerializeMethodBase(
             IMethodSymbol methodSymbol,
             ITypeSymbol? declaringGenericTypeSymbol,
-            ISyntaxFactory syntaxFactory )
+            ICompilationElementFactory syntaxFactory )
         {
             methodSymbol = methodSymbol.OriginalDefinition;
             var documentationId = DocumentationCommentId.CreateDeclarationId( methodSymbol );
             var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Intrinsics.GetRuntimeMethodHandle), documentationId );
 
-            if ( declaringGenericTypeSymbol != null )
+            if ( declaringGenericTypeSymbol is INamedType namedtype && namedtype.GenericParameters.Count > 0 )
             {
                 var typeHandle = this.CreateTypeHandleExpression( declaringGenericTypeSymbol, syntaxFactory );
 
@@ -53,7 +61,7 @@ namespace Caravela.Framework.Impl.Serialization
                 .NormalizeWhitespace();
         }
 
-        private ExpressionSyntax CreateTypeHandleExpression( ITypeSymbol type, ISyntaxFactory syntaxFactory )
+        private ExpressionSyntax CreateTypeHandleExpression( ITypeSymbol type, ICompilationElementFactory syntaxFactory )
         {
             var typeExpression = this.Service.TypeSerializer.SerializeTypeSymbolRecursive( type, syntaxFactory );
 

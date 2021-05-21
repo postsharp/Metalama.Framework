@@ -2,26 +2,26 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
-    internal class CompileTimeParameterInfo : ParameterInfo, ICompileTimeReflectionObject
+    internal class CompileTimeParameterInfo : ParameterInfo, ICompileTimeReflectionObject<IParameter>
     {
-        public IParameterSymbol ParameterSymbol { get; }
+        public IDeclarationRef<IParameter> Target { get; }
 
-        public IDeclaration DeclaringMember { get; }
-
-        private CompileTimeParameterInfo( IParameterSymbol parameterSymbol, IDeclaration declaringMember )
+        private CompileTimeParameterInfo( IParameter parameter )
         {
-            this.ParameterSymbol = parameterSymbol.AssertNotNull();
-            this.DeclaringMember = declaringMember.AssertNotNull();
+            this.Target = parameter.ToRef();
         }
 
-        public static ParameterInfo Create( IParameterSymbol parameterSymbol, IDeclaration declaringMember )
-            => new CompileTimeParameterInfo( parameterSymbol, declaringMember );
+        public static ParameterInfo Create( IParameter parameter )
+            => new CompileTimeParameterInfo( parameter );
 
-        ISymbol ICompileTimeReflectionObject.Symbol => this.ParameterSymbol;
+
+        
     }
 }

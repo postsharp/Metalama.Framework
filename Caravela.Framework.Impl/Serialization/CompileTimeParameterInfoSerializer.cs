@@ -14,21 +14,20 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class CompileTimeParameterInfoSerializer : ObjectSerializer<CompileTimeParameterInfo, ParameterInfo>
     {
-        public override ExpressionSyntax Serialize( CompileTimeParameterInfo obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimeParameterInfo obj, ICompilationElementFactory syntaxFactory )
         {
-            var container = obj.DeclaringMember;
-            var containerAsMember = container as IMember;
-            var method = containerAsMember as IMethodBase;
-            var property = containerAsMember as Property;
-            var ordinal = obj.ParameterSymbol.Ordinal;
+            var parameter = obj.Target.Resolve( syntaxFactory.CompilationModel );
+            var declaringMember = parameter.DeclaringMember;
+            var method = declaringMember as IMethodBase;
+            var ordinal = parameter.Index;
 
-            if ( method == null && property != null )
+            if ( method == null && declaringMember is IProperty property )
             {
                 method = (property.Getter ?? property.Setter)!;
             }
 
             var retrieveMethodBase = this.Service.CompileTimeMethodInfoSerializer.SerializeMethodBase(
-                (ICompileTimeReflectionMember) method!.ToMethodBase(),
+                method.GetSymbol(),
                 syntaxFactory );
 
             return ElementAccessExpression(

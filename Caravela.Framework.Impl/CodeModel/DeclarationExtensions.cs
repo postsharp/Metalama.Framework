@@ -222,7 +222,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             if ( value.IsAssigned )
             {
-                return compilation.Factory.Serializers.Serialize( value.Value, compilation.ReflectionMapper );
+                return compilation.Factory.Serializers.Serialize( value.Value, compilation.Factory );
             }
 
             return null;

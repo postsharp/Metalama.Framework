@@ -224,8 +224,6 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             var lexicalScope = new TemplateLexicalScope( ((Declaration) targetMethod).LookupSymbols() );
 
-            var syntaxFactory = ReflectionMapper.GetInstance( compilation.RoslynCompilation );
-
             return new TemplateExpansionContext(
                 templateInstance,
                 targetMethod,
@@ -234,11 +232,11 @@ namespace Caravela.Framework.Tests.Integration.Templating
                     default,
                     targetMethod,
                     LinkerAnnotationOrder.Default,
-                    syntaxFactory ),
+                    compilation.Factory ),
                 lexicalScope,
                 diagnostics,
                 this._syntaxSerializationService,
-                syntaxFactory,
+                compilation.Factory,
                 default,
                 ImmutableDictionary<string, object?>.Empty );
         }

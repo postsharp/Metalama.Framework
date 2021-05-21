@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class ListSerializer : ObjectSerializer
     {
-        public override ExpressionSyntax Serialize( object obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( object obj, ICompilationElementFactory syntaxFactory )
         {
             var serializedItems = new List<ExpressionSyntax>();
 

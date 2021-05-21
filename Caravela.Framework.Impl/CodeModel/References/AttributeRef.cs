@@ -33,13 +33,15 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public DeclarationRef<IDeclaration> DeclaringDeclaration { get; }
 
-        public IAttribute GetForCompilation( CompilationModel compilation )
+        public IAttribute Resolve( CompilationModel compilation )
             => this.Target switch
             {
-                AttributeData attributeData => new Attribute( attributeData, compilation, this.DeclaringDeclaration.GetForCompilation( compilation ) ),
+                AttributeData attributeData => new Attribute( attributeData, compilation, this.DeclaringDeclaration.Resolve( compilation ) ),
                 AttributeBuilder builder => new BuiltAttribute( builder, compilation ),
                 _ => throw new AssertionFailedException()
             };
+
+        public ISymbol GetSymbol( Compilation compilation ) => throw new System.NotSupportedException();
 
         public override string ToString() => this.Target?.ToString() ?? "null";
     }

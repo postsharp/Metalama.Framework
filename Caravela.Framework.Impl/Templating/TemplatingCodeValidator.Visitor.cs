@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.DesignTime.Diagnostics;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using CSharpExtensions = Microsoft.CodeAnalysis.CSharp.CSharpExtensions;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -83,7 +85,8 @@ namespace Caravela.Framework.Impl.Templating
                 base.Visit( node );
 
                 // If the scope is null (e.g. in a using statement) or compile-time-only, we should not analyze.
-                // Otherwise, we cannot reference a compile-time-only declaration.
+                // Otherwise, we cannot reference a compile-time-only declaration, except in a typeof() or nameof() expression
+                // because these are transformed by the CompileTimeCompilationBuilder.
 
                 if ( this._currentDeclarationScope is SymbolDeclarationScope.RunTimeOnly )
                 {
@@ -91,7 +94,9 @@ namespace Caravela.Framework.Impl.Templating
 
                     var referencedSymbol = symbolInfo.Symbol;
 
-                    if ( referencedSymbol != null && this._classifier.GetSymbolDeclarationScope( referencedSymbol ) == SymbolDeclarationScope.CompileTimeOnly )
+                    if ( referencedSymbol != null && 
+                         this._classifier.GetSymbolDeclarationScope( referencedSymbol ) == SymbolDeclarationScope.CompileTimeOnly && 
+                         !node.AncestorsAndSelf().Any( n => n is TypeOfExpressionSyntax || (n is InvocationExpressionSyntax invocation && invocation.IsNameOf())) )
                     {
                         if ( this._alreadyReportedDiagnostics.Add( referencedSymbol ) &&
                              !(referencedSymbol.ContainingSymbol != null && this._alreadyReportedDiagnostics.Contains( referencedSymbol.ContainingSymbol )) )

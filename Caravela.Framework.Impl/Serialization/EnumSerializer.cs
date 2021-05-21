@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Serialization
     {
         private static readonly Type[] _unsignedTypes = { typeof(ushort), typeof(uint), typeof(ulong), typeof(byte) };
 
-        public override ExpressionSyntax Serialize( object obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( object obj, ICompilationElementFactory syntaxFactory )
         {
             var o = (Enum) obj;
 

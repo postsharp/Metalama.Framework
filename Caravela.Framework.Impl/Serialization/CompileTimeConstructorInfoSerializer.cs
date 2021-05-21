@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class CompileTimeConstructorInfoSerializer : CaravelaMethodBaseSerializer<CompileTimeConstructorInfo, ConstructorInfo>
     {
-        public override ExpressionSyntax Serialize( CompileTimeConstructorInfo obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimeConstructorInfo obj, ICompilationElementFactory syntaxFactory )
             => SyntaxFactory.ParenthesizedExpression(
                 SyntaxFactory.CastExpression(
                     syntaxFactory.GetTypeSyntax( typeof(ConstructorInfo) ),

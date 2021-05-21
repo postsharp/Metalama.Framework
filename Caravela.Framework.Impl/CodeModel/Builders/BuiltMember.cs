@@ -3,8 +3,10 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.References;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Reflection;
+using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -38,7 +40,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
-        IMember IDeclarationRef<IMember>.GetForCompilation( CompilationModel compilation ) => (IMember) this.GetForCompilation( compilation );
+        IMember IDeclarationRef<IMember>.Resolve( CompilationModel compilation ) => (IMember) this.GetForCompilation( compilation );
+
+        ISymbol IDeclarationRef<IMember>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
 
         public object? Target => throw new NotImplementedException();
     }

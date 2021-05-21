@@ -2,8 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
@@ -11,27 +10,34 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
-    internal class CompileTimeType : Type, ICompileTimeReflectionObject
+    // This class must be public because it is referenced from compiled templates.
+    public class CompileTimeType : Type, ICompileTimeReflectionObject<IType>
     {
-        public ITypeSymbol TypeSymbol { get; }
+        private readonly string _fullName;
 
-        private CompileTimeType( ITypeSymbol typeSymbol )
+        internal IDeclarationRef<IType> Target { get; }
+
+        IDeclarationRef<IType> ICompileTimeReflectionObject<IType>.Target => this.Target;
+
+        private CompileTimeType( IDeclarationRef<IType> typeSymbol, string fullName )
         {
-            this.TypeSymbol = typeSymbol;
+            this._fullName = fullName;
+            this.Target = typeSymbol;
         }
 
-        public static Type Create( ITypeSymbol typeSymbol ) => new CompileTimeType( typeSymbol );
+        public static Type CreateFromDocumentationId( string documentationId, string fullName ) => new CompileTimeType( DeclarationRef.FromDocumentationId<IType>( documentationId ), fullName );
 
-        public static Type Create( IType type ) => Create( ((ITypeInternal) type).TypeSymbol.AssertNotNull() );
+        internal static Type Create( IType type ) => Create( type.GetSymbol() );
+        
 
-        public override string Namespace => this.TypeSymbol.ContainingNamespace.GetReflectionNameSafe();
+        internal static Type Create( ITypeSymbol typeSymbol )
+            =>  new CompileTimeType( DeclarationRef.FromSymbol<IType>( typeSymbol ), typeSymbol.ToDisplayString( ) );
 
-        public override string Name => this.TypeSymbol.Name;
+        public override string Namespace => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        public override string FullName
-            => this.TypeSymbol.GetReflectionNameSafe() ?? throw new InvalidOperationException( "Cannot get a reflection name for this type." );
+        public override string Name => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        ISymbol ICompileTimeReflectionObject.Symbol => this.TypeSymbol;
+        public override string FullName => this._fullName;
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 

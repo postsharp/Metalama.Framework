@@ -15,10 +15,12 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class CompileTimeEventInfoSerializer : ObjectSerializer<CompileTimeEventInfo>
     {
-        public override ExpressionSyntax Serialize( CompileTimeEventInfo obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimeEventInfo obj, ICompilationElementFactory syntaxFactory )
         {
-            var eventName = obj.Symbol.Name;
-            var typeCreation = this.Service.Serialize( CompileTimeType.Create( obj.ContainingType ), syntaxFactory );
+            var @event = obj.Target.Resolve( syntaxFactory.CompilationModel );
+            
+            var eventName = @event.Name;
+            var typeCreation = this.Service.Serialize( CompileTimeType.Create( @event.DeclaringType ), syntaxFactory );
 
             return InvocationExpression(
                     MemberAccessExpression(

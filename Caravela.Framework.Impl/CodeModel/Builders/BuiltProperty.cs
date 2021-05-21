@@ -5,9 +5,11 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Project;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 using System.Reflection;
+using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -86,6 +88,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             throw new NotImplementedException();
         }
 
-        IProperty IDeclarationRef<IProperty>.GetForCompilation( CompilationModel compilation ) => (IProperty) this.GetForCompilation( compilation );
+        IProperty IDeclarationRef<IProperty>.Resolve( CompilationModel compilation ) => (IProperty) this.GetForCompilation( compilation );
+
+        ISymbol IDeclarationRef<IProperty>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
     }
 }

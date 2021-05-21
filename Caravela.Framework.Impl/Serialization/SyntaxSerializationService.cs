@@ -223,7 +223,7 @@ namespace Caravela.Framework.Impl.Serialization
         /// <param name="syntaxFactory"></param>
         /// <returns>An expression that would create the object.</returns>
         /// <exception cref="InvalidUserCodeException">When the object cannot be serialized, for example if it's of an unsupported type.</exception>
-        public ExpressionSyntax Serialize<T>( T? o, ISyntaxFactory syntaxFactory )
+        public ExpressionSyntax Serialize<T>( T? o, ICompilationElementFactory syntaxFactory )
         {
             if ( o == null )
             {

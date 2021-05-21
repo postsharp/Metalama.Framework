@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
             };
 
-        public Type ToType() => CompileTimeType.Create( this.TypeSymbol );
+        public Type ToType() => CompileTimeType.Create( this );
 
         public override MemberInfo ToMemberInfo() => this.ToType();
 

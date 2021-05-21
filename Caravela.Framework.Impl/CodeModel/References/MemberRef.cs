@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Caravela.Framework.Impl.CodeModel.References
 {
@@ -33,7 +34,9 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public object? Target { get; }
 
-        public T GetForCompilation( CompilationModel compilation ) => DeclarationRef<T>.GetForCompilation( this.Target, compilation );
+        public T Resolve( CompilationModel compilation ) => DeclarationRef<T>.Resolve( this.Target, compilation );
+
+        public ISymbol GetSymbol( Compilation compilation ) => this.Target as ISymbol ?? throw new InvalidOperationException();
 
         public string Name
             => this.Target switch

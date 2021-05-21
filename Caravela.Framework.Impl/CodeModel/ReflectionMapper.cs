@@ -18,15 +18,16 @@ namespace Caravela.Framework.Impl.CodeModel
     internal class ReflectionMapper : ISyntaxFactory
     {
         private static readonly ConditionalWeakTable<Compilation, ReflectionMapper> _instances = new();
-        private readonly Compilation _compilation;
         private readonly ConcurrentDictionary<Type, ITypeSymbol> _symbolCache = new();
         private readonly ConcurrentDictionary<Type, TypeSyntax> _syntaxCache = new();
 
         private ReflectionMapper( Compilation compilation )
         {
-            this._compilation = compilation;
+            this.Compilation = compilation;
         }
 
+        public Compilation Compilation { get; }
+        
         /// <summary>
         /// Gets a <see cref="ReflectionMapper"/> instance for a given <see cref="Compilation"/>.
         /// </summary>
@@ -54,7 +55,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <param name="metadataName"></param>
         public INamedTypeSymbol GetNamedTypeSymbolByMetadataName( string metadataName )
         {
-            var symbol = this._compilation.GetTypeByMetadataName( metadataName );
+            var symbol = this.Compilation.GetTypeByMetadataName( metadataName );
 
             if ( symbol == null )
             {
@@ -74,12 +75,14 @@ namespace Caravela.Framework.Impl.CodeModel
             switch ( type )
             {
                 case CompileTimeType compileTimeType:
-                    return compileTimeType.TypeSymbol;
+                    return (ITypeSymbol) compileTimeType.Target.GetSymbol(this.Compilation);
 
                 default:
                     return this._symbolCache.GetOrAdd( type, this.GetTypeSymbolCore );
             }
         }
+
+        
 
         /// <summary>
         /// Gets a fully-qualified <see cref="NameSyntax"/> for a given reflection <see cref="Type"/>.
@@ -98,7 +101,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             if ( type is CompileTimeType compileTimeType )
             {
-                return compileTimeType.TypeSymbol;
+                return (ITypeSymbol) compileTimeType.Target.GetSymbol( this.Compilation );
             }
 
             if ( type.IsByRef )
@@ -110,14 +113,14 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 var elementType = this.GetTypeSymbol( type.GetElementType()! );
 
-                return this._compilation.CreateArrayTypeSymbol( elementType, type.GetArrayRank() );
+                return this.Compilation.CreateArrayTypeSymbol( elementType, type.GetArrayRank() );
             }
 
             if ( type.IsPointer )
             {
                 var pointedToType = this.GetTypeSymbol( type.GetElementType()! );
 
-                return this._compilation.CreatePointerTypeSymbol( pointedToType );
+                return this.Compilation.CreatePointerTypeSymbol( pointedToType );
             }
 
             return this.GetNamedTypeSymbol( type, type.GenericTypeArguments );

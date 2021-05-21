@@ -5,10 +5,13 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Project;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Accessibility = Caravela.Framework.Code.Accessibility;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -83,7 +86,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public object? Target => throw new NotImplementedException();
 
-        IMethod IDeclarationRef<IMethod>.GetForCompilation( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
+        IMethod IDeclarationRef<IMethod>.Resolve( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
+
+        ISymbol IDeclarationRef<IMethod>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
 
         [return: RunTimeOnly]
         public MethodInfo ToMethodInfo()

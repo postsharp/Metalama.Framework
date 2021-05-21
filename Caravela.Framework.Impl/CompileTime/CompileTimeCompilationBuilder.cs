@@ -124,7 +124,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var templateCompiler = new TemplateCompiler( this._serviceProvider );
 
-            var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeCompileTimeBaseRewriter(
+            var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
                 runTimeCompilation,
                 compileTimeCompilation,
                 diagnosticSink,

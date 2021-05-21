@@ -164,10 +164,10 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var compilation = CreateCompilationModel( code );
             var targetType = compilation.DeclaredTypes.Single( t => t.Name == "Target" );
             var single = targetType.Properties.Single( m => m.Name == "this[]" ).Parameters.First( p => p.Name == "target" );
-            var parameter = (Parameter) single;
+            var parameter = single;
 
             var actual =
-                this.Serialize( CompileTimeParameterInfo.Create( parameter.ParameterSymbol, parameter.ContainingDeclaration ) )
+                this.Serialize( CompileTimeParameterInfo.Create( parameter ) )
                     .ToString();
 
             return actual;
@@ -184,7 +184,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var parameter = (Parameter) single;
 
             var actual =
-                this.Serialize( CompileTimeParameterInfo.Create( parameter.ParameterSymbol, parameter.ContainingDeclaration ) )
+                this.Serialize( CompileTimeParameterInfo.Create( parameter ) )
                     .ToString();
 
             return actual;

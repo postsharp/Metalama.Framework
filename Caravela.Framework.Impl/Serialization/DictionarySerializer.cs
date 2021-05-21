@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Serialization
         // This method is used so that the C# compiler resolves the generic parameters from 'dynamic'.
         private static object GetDefaultComparer<TK, TV>( Dictionary<TK, TV> dictionary ) => EqualityComparer<TK>.Default;
 
-        public override ExpressionSyntax Serialize( object obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( object obj, ICompilationElementFactory syntaxFactory )
         {
             var dictionaryType = obj.GetType();
             var keyType = dictionaryType.GetGenericArguments()[0];

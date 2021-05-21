@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Caravela.Framework.Impl.CodeModel.References
 {
@@ -19,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public static ISymbol AssertValidType<T>( this ISymbol symbol )
-            where T : IDeclaration
+            where T : ICompilationElement
         {
             Invariant.Implies(
                 typeof(T) == typeof(IConstructor),
@@ -42,29 +43,26 @@ namespace Caravela.Framework.Impl.CodeModel.References
         public static DeclarationRef<TCodeElement> FromBuilder<TCodeElement, TBuilder>( TBuilder builder )
             where TCodeElement : class, IDeclaration
             where TBuilder : IDeclarationBuilder
-        {
-            return new( builder );
-        }
+            => new( builder );
 
         /// <summary>
         /// Creates a <see cref="DeclarationRef{T}"/> from a <see cref="DeclarationBuilder"/>.
         /// </summary>
         /// <param name="builder"></param>
         /// <returns></returns>
-        public static DeclarationRef<IDeclaration> FromBuilder( DeclarationBuilder builder )
-        {
-            return new( builder );
-        }
+        public static DeclarationRef<IDeclaration> FromBuilder( DeclarationBuilder builder ) => new( builder );
 
         /// <summary>
         /// Creates a <see cref="DeclarationRef{T}"/> from a Roslyn symbol.
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public static DeclarationRef<IDeclaration> FromSymbol( ISymbol symbol )
-        {
-            return new( symbol );
-        }
+        public static DeclarationRef<IDeclaration> FromSymbol( ISymbol symbol ) => new( symbol );
+
+        public static DeclarationRef<T> FromDocumentationId<T>( string documentationId ) 
+            where T : class, ICompilationElement
+            => new( documentationId );
+        
 
         /// <summary>
         /// Creates a <see cref="DeclarationRef{T}"/> from a Roslyn symbol.
@@ -73,10 +71,8 @@ namespace Caravela.Framework.Impl.CodeModel.References
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public static DeclarationRef<T> FromSymbol<T>( ISymbol symbol )
-            where T : class, IDeclaration
-        {
-            return new( symbol );
-        }
+            where T : class, ICompilationElement
+            => new( symbol );
 
         public static DeclarationRef<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol )
             => new( methodSymbol, DeclarationSpecialKind.ReturnParameter );
@@ -89,7 +85,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
     /// </summary>
     /// <typeparam name="T"></typeparam>
     internal readonly struct DeclarationRef<T> : IDeclarationRef<T>
-        where T : class, IDeclaration
+        where T : class, ICompilationElement
     {
         private readonly DeclarationSpecialKind _kind;
 
@@ -117,26 +113,76 @@ namespace Caravela.Framework.Impl.CodeModel.References
             this._kind = kind;
         }
 
+        internal DeclarationRef( string documentationId )
+        {
+            this.Target = documentationId;
+            this._kind = DeclarationSpecialKind.Default;
+        }
+
         public object? Target { get; }
 
-        public T GetForCompilation( CompilationModel compilation ) => GetForCompilation( this.Target, compilation, this._kind );
+        public T Resolve( CompilationModel compilation ) => Resolve( this.Target, compilation, this._kind );
 
-        internal static T GetForCompilation( object? reference, CompilationModel compilation, DeclarationSpecialKind kind = DeclarationSpecialKind.Default )
-            => reference switch
+        public ISymbol GetSymbol( Compilation compilation )
+        {
+            switch ( this.Target )
             {
-                null => kind == DeclarationSpecialKind.Compilation ? (T) (object) compilation : throw new AssertionFailedException(),
-                ISymbol symbol => (T) compilation.Factory.GetDeclaration( symbol.AssertValidType<T>(), kind ),
-                DeclarationBuilder builder => (T) compilation.Factory.GetDeclaration( builder ),
+                case ISymbol symbol:
+                    return symbol;
 
-                _ => throw new AssertionFailedException()
-            };
+                case string documentationId:
+                    {
+                        var symbol = DocumentationCommentId.GetFirstSymbolForDeclarationId( documentationId, compilation );
 
-        public ISymbol? Symbol => this.Target as ISymbol;
+                        if ( symbol == null )
+                        {
+                            throw new AssertionFailedException( $"Cannot resolve {documentationId} into a symbol." );
+                        }
+
+                        return symbol;
+                    }
+                    break;
+
+                    default:
+                        throw new InvalidOperationException();
+
+            }
+        }
+
+        internal static T Resolve( object? reference, CompilationModel compilation, DeclarationSpecialKind kind = DeclarationSpecialKind.Default )
+        {
+            switch ( reference )
+            {
+                case null:
+                    return kind == DeclarationSpecialKind.Compilation ? (T) (object) compilation : throw new AssertionFailedException();
+
+                case ISymbol symbol:
+                    return (T) compilation.Factory.GetDeclaration( symbol.AssertValidType<T>(), kind );
+
+                case DeclarationBuilder builder:
+                    return (T) compilation.Factory.GetDeclaration( builder );
+
+                case string documentationId:
+                    {
+                        var symbol = DocumentationCommentId.GetFirstSymbolForDeclarationId( documentationId, compilation.RoslynCompilation );
+
+                        if ( symbol == null )
+                        {
+                            throw new AssertionFailedException( $"Cannot resolve {documentationId} into a symbol." );
+                        }
+
+                        return (T) compilation.Factory.GetDeclaration(symbol);
+                    }
+
+                default:
+                    throw new AssertionFailedException();
+            }
+        }
 
         public override string ToString() => this.Target?.ToString() ?? "null";
 
         public DeclarationRef<TOut> Cast<TOut>()
-            where TOut : class, IDeclaration
+            where TOut : class, ICompilationElement
             => new( this.Target, this._kind );
     }
 }
