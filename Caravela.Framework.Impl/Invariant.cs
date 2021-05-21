@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl
 #if DEBUG
             if ( obj == null )
             {
-                throw new AssertionFailedException( $"The reference to {typeof(T).Name} must no be not null." );
+                throw new AssertionFailedException( $"The reference to {typeof(T).Name} must not be not null." );
             }
 #endif
 
@@ -93,7 +93,7 @@ namespace Caravela.Framework.Impl
 #if DEBUG
             if ( obj == null )
             {
-                throw new AssertionFailedException( $"The reference to {typeof(T).Name} must no be not null." );
+                throw new AssertionFailedException( $"The reference to {typeof(T).Name} must not be not null." );
             }
 #endif
 
@@ -109,7 +109,7 @@ namespace Caravela.Framework.Impl
 #if DEBUG
             if ( items == null )
             {
-                throw new AssertionFailedException( "The enumeration must no be not null." );
+                throw new AssertionFailedException( "The enumeration must not be not null." );
             }
 
             var i = 0;
@@ -120,7 +120,7 @@ namespace Caravela.Framework.Impl
             {
                 if ( item == null )
                 {
-                    throw new AssertionFailedException( $"The {i}-th {typeof(T).Name} must no be not null." );
+                    throw new AssertionFailedException( $"The {i}-th {typeof(T).Name} must not be not null." );
                 }
 
                 i++;

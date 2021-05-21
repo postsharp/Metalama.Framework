@@ -30,7 +30,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
         // TODO: pseudo-accessor
         [Memo]
-        public IMethod? Raiser => this._symbol.RaiseMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );
+        public IMethod? Raiser
+            => this._symbol.RaiseMethod == null
+                ? new PseudoAccessor( this, AccessorSemantic.Raise )
+                : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );
 
         public EventInfo ToEventInfo() => new CompileTimeEventInfo( this._symbol, this.DeclaringType );
 

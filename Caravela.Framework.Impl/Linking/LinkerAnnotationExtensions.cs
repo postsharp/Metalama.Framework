@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Linking
             return annotationValue != null ? LinkerAnnotation.FromString( annotationValue ) : null;
         }
 
-        public static T AddLinkerAnnotation<T>( this T node, LinkerAnnotation annotation )
+        public static T AddLinkerAnnotation<T>( this T node, in LinkerAnnotation annotation )
             where T : SyntaxNode
         {
             return node.WithAdditionalAnnotations( new SyntaxAnnotation( AnnotationKind, annotation.ToString() ) );

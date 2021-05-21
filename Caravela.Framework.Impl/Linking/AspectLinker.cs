@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Linking
             var analysisStepOutput = LinkerAnalysisStep.Instance.Execute( introductionStepOutput );
 
             // Third step. Link, inline and prune intermediate compilation. This results in the final compilation.
-            var linkingStepOutput = LinkerLinkingStep.Execute( analysisStepOutput );
+            var linkingStepOutput = LinkerLinkingStep.Instance.Execute( analysisStepOutput );
 
             // Return the final compilation and all diagnostics from all linking steps.
             return linkingStepOutput;

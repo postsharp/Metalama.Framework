@@ -86,6 +86,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 if ( this._parent.IsTemplate( node ) )
                 {
                     if ( !this._parent._templateCompiler.TryCompile(
+                        TemplateNameHelper.GetCompiledTemplateName( node.Identifier.ValueText ),
                         this._compileTimeCompilation,
                         node,
                         this._parent._semanticModel,

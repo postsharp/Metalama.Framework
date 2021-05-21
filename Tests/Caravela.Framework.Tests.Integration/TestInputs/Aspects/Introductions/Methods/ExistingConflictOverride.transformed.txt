@@ -32,4 +32,5 @@ internal class TargetClass : BaseClass
         global::System.Console.WriteLine("This is introduced method.");
         return default(global::System.Int32);
     }
+
 }

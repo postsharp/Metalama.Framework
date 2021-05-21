@@ -163,28 +163,34 @@ namespace Caravela.Framework.Impl
             return true;
         }
 
-        public TemplateDriver GetTemplateDriver( ICodeElement sourceTemplate )
+        public TemplateDriver GetTemplateDriver( IMethod sourceTemplate )
         {
-            var id = sourceTemplate.GetSymbol().AssertNotNull().GetDocumentationCommentId()!;
+            var templateSymbol = sourceTemplate.GetSymbol().AssertNotNull();
+            var id = templateSymbol.GetDocumentationCommentId()!;
 
             if ( this._templateDrivers.TryGetValue( id, out var templateDriver ) )
             {
                 return templateDriver;
             }
 
+            
             MethodInfo? compiledTemplateMethodInfo;
 
             switch ( sourceTemplate )
             {
                 case IMethod method:
-                    var methodName = method.Name + TemplateCompiler.TemplateMethodSuffix;
+                    var methodName = TemplateNameHelper.GetCompiledTemplateName( templateSymbol );
                     compiledTemplateMethodInfo = this.AspectType.GetMethod( methodName );
 
                     break;
-
+                
+                
                 default:
                     throw new NotImplementedException();
+
             }
+
+            var compiledTemplateMethodInfo = this.AspectType.GetMethod( templateName );
 
             if ( compiledTemplateMethodInfo == null )
             {

@@ -23,15 +23,64 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Creates an advice that introduces a new method or overrides the implementation of the existing one.
         /// </summary>
-        /// <param name="type">The type into which the method is to be introduced.</param>
+        /// <param name="targetType">The type into which the method is to be introduced.</param>
         /// <param name="defaultTemplate">Name of the template method to by used by default.</param>
         /// <param name="scope">Introduction scope.</param>
         /// <param name="conflictBehavior">Conflict behavior.</param>
         /// <param name="aspectLinkerOptions">Aspect linker options.</param>
         /// <returns></returns>
         IIntroduceMethodAdvice IntroduceMethod(
-            INamedType type,
+            INamedType targetType,
             string defaultTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null );
+
+        IOverrideFieldOrPropertyAdvice OverrideFieldOrProperty(
+            IFieldOrProperty targetDeclaration,
+            string defaultTemplate,
+            AspectLinkerOptions? aspectLinkerOptions = null );
+
+        IOverrideFieldOrPropertyAdvice OverrideFieldOrPropertyAccessors(
+            IFieldOrProperty targetDeclaration,
+            string? defaultGetTemplate,
+            string? setTemplate,
+            AspectLinkerOptions? aspectLinkerOptions = null );
+
+        IIntroduceFieldAdvice IntroduceField(
+            INamedType targetType,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null );
+
+        IIntroducePropertyAdvice IntroduceProperty(
+            INamedType targetType,
+            string? defaultPropertyTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null );
+
+        IIntroducePropertyAdvice IntroduceProperty(
+            INamedType targetType,
+            string name,
+            string? defaultGetTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null );
+
+        IOverrideEventAdvice OverrideEventAccessors(
+            IEvent targetDeclaration,
+            string? addTemplate,
+            string? removeTemplate,
+            string? invokeTemplate,
+            AspectLinkerOptions? aspectLinkerOptions = null );
+
+        IIntroducePropertyAdvice IntroduceEvent(
+            INamedType targetType,
+            string? addTemplate,
+            string? removeTemplate,
+            string? invokeTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AspectLinkerOptions? aspectLinkerOptions = null );

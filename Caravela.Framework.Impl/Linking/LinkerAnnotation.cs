@@ -18,6 +18,15 @@ namespace Caravela.Framework.Impl.Linking
         Original
     }
 
+    internal enum LinkerAnnotationTargetKind
+    {
+        Self,
+        PropertyGetAccessor,
+        PropertySetAccessor,
+        EventAddAccessor,
+        EventRemoveAccessor
+    }
+
     /// <summary>
     /// Wrapper of the linker annotation on nodes.
     /// </summary>
@@ -33,26 +42,39 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         public LinkerAnnotationOrder Order { get; }
 
-        public LinkerAnnotation( AspectLayerId aspectLayer, LinkerAnnotationOrder order )
+        /// <summary>
+        /// Gets a value indicating target kind. For example self or property get accessor.
+        /// </summary>
+        public LinkerAnnotationTargetKind TargetKind { get; }
+
+        public LinkerAnnotation(
+            AspectLayerId aspectLayer,
+            LinkerAnnotationOrder order,
+            LinkerAnnotationTargetKind targetKind = LinkerAnnotationTargetKind.Self )
         {
             this.AspectLayer = aspectLayer;
             this.Order = order;
+            this.TargetKind = targetKind;
         }
 
         public static LinkerAnnotation FromString( string str )
         {
             var parts = str.Split( '$' );
 
-            var parseSuccess = Enum.TryParse<LinkerAnnotationOrder>( parts[1], out var order );
+            var parseSuccess1 = Enum.TryParse<LinkerAnnotationOrder>( parts[1], out var order );
 
-            Invariant.Assert( parseSuccess );
+            Invariant.Assert( parseSuccess1 );
 
-            return new LinkerAnnotation( AspectLayerId.FromString( parts[0] ), order );
+            var parseSuccess2 = Enum.TryParse<LinkerAnnotationTargetKind>( parts[2], out var targetKind );
+
+            Invariant.Assert( parseSuccess2 );
+
+            return new LinkerAnnotation( AspectLayerId.FromString( parts[0] ), order, targetKind );
         }
 
         public override string ToString()
         {
-            return $"{this.AspectLayer.FullName}${this.Order}";
+            return $"{this.AspectLayer.FullName}${this.Order}${this.TargetKind}";
         }
     }
 }

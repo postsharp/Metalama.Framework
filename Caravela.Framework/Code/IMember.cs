@@ -70,4 +70,12 @@ namespace Caravela.Framework.Code
         [return: RunTimeOnly]
         MemberInfo ToMemberInfo();
     }
+
+    public enum Writeability
+    {
+        None,
+        ConstructorOnly,
+        InitOnly,
+        All
+    }
 }

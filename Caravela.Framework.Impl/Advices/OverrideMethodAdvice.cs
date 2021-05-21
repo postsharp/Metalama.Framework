@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Advices
             IMethod targetDeclaration,
             IMethod templateMethod,
             IReadOnlyDictionary<string, object?> tags,
-            AspectLinkerOptions? linkerOptions = null ) : base( aspect, targetDeclaration, tags )
+            AspectLinkerOptions? linkerOptions ) : base( aspect, targetDeclaration, tags )
         {
             this.TemplateMethod = templateMethod;
             this.LinkerOptions = linkerOptions;

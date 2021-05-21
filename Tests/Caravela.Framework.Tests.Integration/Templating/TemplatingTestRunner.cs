@@ -230,7 +230,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 templateInstance,
                 targetMethod,
                 compilation,
-                new LinkerOverrideProceedImpl(
+                new LinkerOverrideMethodProceedImpl(
                     default,
                     targetMethod,
                     LinkerAnnotationOrder.Default,

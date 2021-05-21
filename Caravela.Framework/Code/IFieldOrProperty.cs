@@ -32,13 +32,13 @@ namespace Caravela.Framework.Code
         IMethod? Setter { get; }
 
         /// <summary>
-        /// Determines if the method existed before the current aspect was advice
+        /// Determines if the property existed before the current aspect was advice
         /// (<see langword="false" /> if it was introduced by the current aspect).
         /// </summary>
         bool HasBase { get; }
 
         /// <summary>
-        /// Allows invocation of the base method (<see langword="null" /> if the method was introduced by the current aspect).
+        /// Allows invocation of the base property (<see langword="null" /> if the method was introduced by the current aspect).
         /// </summary>
         IFieldOrPropertyInvocation Base { get; }
 

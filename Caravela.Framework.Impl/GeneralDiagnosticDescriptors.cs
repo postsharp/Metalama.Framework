@@ -71,15 +71,20 @@ namespace Caravela.Framework.Impl
             "CR0023", _category, "The aspect '{0}' cannot add an advice to '{1}' because this declaration has already been processed.", Error,
             "Cannot add an advice to a previous step of the compilation pipeline." );
 
-        public static readonly DiagnosticDefinition<(IMethodSymbol Method, ITypeSymbol AttributeType, string AdviceMethod)>
-            TemplateMethodMissesAttribute = new(
-                "CR0024", _category,
-                "The method '{0}' must be annotated with the custom attribute [{1}] otherwise it cannot be used with the dynamic advice '{2}'.", Error,
-                "The template method does not have the expected custom attribute." );
+        public static readonly DiagnosticDefinition<(CodeElementKind ElementKind, ISymbol Symbol, ITypeSymbol AttributeType, string AdviceMethod )>
+            TemplateMemberMissesAttribute = new(
+                "CR0024",
+                "The template member does not have the expected custom attribute.",
+                "The template {0} '{1}' must be annotated with the custom attribute [{2}] otherwise it cannot be used with the dynamic advice '{3}'.",
+                _category,
+                Error );
 
         public static readonly DiagnosticDefinition<(INamedType AspectType, string MethodName)> AspectMustHaveExactlyOneTemplateMethod = new(
-            "CR0025", _category, "The type '{0}' must have exactly one method named '{1}'.", Error,
-            "The aspect type must have exactly one method of a given name otherwise it cannot be used as a dynamic advice." );
+            "CR0024",
+            "The aspect type must have exactly one member of a given name otherwise it cannot be used as a dynamic advice.",
+            "The type '{0}' must have exactly one member named '{1}'.",
+            _category,
+            Error );
 
         public static readonly DiagnosticDefinition<(INamedTypeSymbol AspectType, string ExceptionType, Exception Exception)> ExceptionInUserCode = new(
             "CR0026", _category, "The aspect '{0}' has thrown an exception of the '{1}': {2}", Error, "The aspect has thrown an exception." );

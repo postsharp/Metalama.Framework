@@ -106,7 +106,15 @@ namespace Caravela.Framework.Impl.CodeModel
                 this.TypeSymbol
                     .GetMembers()
                     .OfType<IMethodSymbol>()
-                    .Where( m => m.MethodKind != MethodKind.Constructor && m.MethodKind != MethodKind.StaticConstructor )
+                    .Where(
+                        m =>
+                            m.MethodKind != MethodKind.Constructor
+                            && m.MethodKind != MethodKind.StaticConstructor
+                            && m.MethodKind != MethodKind.PropertyGet
+                            && m.MethodKind != MethodKind.PropertySet
+                            && m.MethodKind != MethodKind.EventAdd
+                            && m.MethodKind != MethodKind.EventRemove
+                            && m.MethodKind != MethodKind.EventRaise )
                     .Select( m => new MemberLink<IMethod>( m ) )
                     .Concat(
                         this.Compilation.GetObservableTransformationsOnElement( this )

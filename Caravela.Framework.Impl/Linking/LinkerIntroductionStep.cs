@@ -118,9 +118,9 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( oldRoot != newRoot )
                 {
-                    // Improve readability of intermediate compilation in debug builds.
-                    //  newRoot = newRoot.NormalizeWhitespace();
+                    var text = newRoot.ToFullString();
 
+                    // TODO: Add an annotation to modified syntax roots so that they can be differentiated from unmodified ones and skipped by the next visitors.
                     var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 
                     syntaxTreeMapping.Add( initialSyntaxTree, intermediateSyntaxTree );

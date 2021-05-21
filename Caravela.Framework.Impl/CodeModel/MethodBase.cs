@@ -10,6 +10,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using MethodKind = Caravela.Framework.Code.MethodKind;
+using SymbolMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -18,6 +19,20 @@ namespace Caravela.Framework.Impl.CodeModel
         public override ISymbol Symbol => this.MethodSymbol;
 
         internal IMethodSymbol MethodSymbol { get; }
+
+        [Memo]
+        public override ICodeElement? ContainingElement
+            => this.Symbol switch
+            {
+                IMethodSymbol method when
+                    method.MethodKind == SymbolMethodKind.PropertyGet
+                    || method.MethodKind == SymbolMethodKind.PropertySet
+                    || method.MethodKind == SymbolMethodKind.EventAdd
+                    || method.MethodKind == SymbolMethodKind.EventRemove
+                    || method.MethodKind == SymbolMethodKind.EventRaise
+                    => this.Compilation.Factory.GetCodeElement( method.AssociatedSymbol.AssertNotNull() ),
+                _ => base.ContainingElement
+            };
 
         public MethodBase( IMethodSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
@@ -45,25 +60,25 @@ namespace Caravela.Framework.Impl.CodeModel
         MethodKind IMethodBase.MethodKind
             => this.MethodSymbol.MethodKind switch
             {
-                Microsoft.CodeAnalysis.MethodKind.Ordinary => MethodKind.Default,
-                Microsoft.CodeAnalysis.MethodKind.Constructor => MethodKind.Constructor,
-                Microsoft.CodeAnalysis.MethodKind.StaticConstructor => MethodKind.StaticConstructor,
-                Microsoft.CodeAnalysis.MethodKind.Destructor => MethodKind.Finalizer,
-                Microsoft.CodeAnalysis.MethodKind.PropertyGet => MethodKind.PropertyGet,
-                Microsoft.CodeAnalysis.MethodKind.PropertySet => MethodKind.PropertySet,
-                Microsoft.CodeAnalysis.MethodKind.EventAdd => MethodKind.EventAdd,
-                Microsoft.CodeAnalysis.MethodKind.EventRemove => MethodKind.EventRemove,
-                Microsoft.CodeAnalysis.MethodKind.EventRaise => MethodKind.EventRaise,
-                Microsoft.CodeAnalysis.MethodKind.ExplicitInterfaceImplementation => MethodKind.ExplicitInterfaceImplementation,
-                Microsoft.CodeAnalysis.MethodKind.Conversion => MethodKind.ConversionOperator,
-                Microsoft.CodeAnalysis.MethodKind.UserDefinedOperator => MethodKind.UserDefinedOperator,
-                Microsoft.CodeAnalysis.MethodKind.LocalFunction => MethodKind.LocalFunction,
-                Microsoft.CodeAnalysis.MethodKind.AnonymousFunction or
-                    Microsoft.CodeAnalysis.MethodKind.BuiltinOperator or
-                    Microsoft.CodeAnalysis.MethodKind.DelegateInvoke or
-                    Microsoft.CodeAnalysis.MethodKind.ReducedExtension or
-                    Microsoft.CodeAnalysis.MethodKind.DeclareMethod or
-                    Microsoft.CodeAnalysis.MethodKind.FunctionPointerSignature => throw new NotSupportedException(),
+                SymbolMethodKind.Ordinary => MethodKind.Default,
+                SymbolMethodKind.Constructor => MethodKind.Constructor,
+                SymbolMethodKind.StaticConstructor => MethodKind.StaticConstructor,
+                SymbolMethodKind.Destructor => MethodKind.Finalizer,
+                SymbolMethodKind.PropertyGet => MethodKind.PropertyGet,
+                SymbolMethodKind.PropertySet => MethodKind.PropertySet,
+                SymbolMethodKind.EventAdd => MethodKind.EventAdd,
+                SymbolMethodKind.EventRemove => MethodKind.EventRemove,
+                SymbolMethodKind.EventRaise => MethodKind.EventRaise,
+                SymbolMethodKind.ExplicitInterfaceImplementation => MethodKind.ExplicitInterfaceImplementation,
+                SymbolMethodKind.Conversion => MethodKind.ConversionOperator,
+                SymbolMethodKind.UserDefinedOperator => MethodKind.UserDefinedOperator,
+                SymbolMethodKind.LocalFunction => MethodKind.LocalFunction,
+                SymbolMethodKind.AnonymousFunction or
+                    SymbolMethodKind.BuiltinOperator or
+                    SymbolMethodKind.DelegateInvoke or
+                    SymbolMethodKind.ReducedExtension or
+                    SymbolMethodKind.DeclareMethod or
+                    SymbolMethodKind.FunctionPointerSignature => throw new NotSupportedException(),
                 _ => throw new InvalidOperationException()
             };
 

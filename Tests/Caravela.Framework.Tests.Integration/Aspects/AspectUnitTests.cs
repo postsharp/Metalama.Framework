@@ -18,11 +18,19 @@ namespace Caravela.Framework.Tests.Integration.Aspects
 
         [Theory]
         [FromDirectory( @"Aspects\Introductions\Methods" )]
-        public Task Introductions( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+        public Task Introductions_Methods( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+
+        [Theory]
+        [FromDirectory( @"Aspects\Introductions\Properties" )]
+        public Task Introductions_Properties( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
         [FromDirectory( @"Aspects\Overrides\Methods" )]
-        public Task Overrides( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+        public Task Overrides_Methods( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+
+        [Theory]
+        [FromDirectory( @"Aspects\Overrides\Properties" )]
+        public Task Overrides_Properties( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
         [FromDirectory( @"Aspects\Samples" )]

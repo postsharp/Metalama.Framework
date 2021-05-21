@@ -26,6 +26,7 @@ namespace Caravela.Framework.Impl.Templating
     /// </summary>
     internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDiagnosticAdder
     {
+        private readonly string _templateName;
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
         private readonly CancellationToken _cancellationToken;
@@ -37,12 +38,14 @@ namespace Caravela.Framework.Impl.Templating
         private ISymbol? _rootTemplateSymbol;
 
         public TemplateCompilerRewriter(
+            string templateName,
             Compilation compileTimeCompilation,
             SemanticAnnotationMap semanticAnnotationMap,
             IDiagnosticAdder diagnosticAdder,
             IServiceProvider serviceProvider,
             CancellationToken cancellationToken ) : base( compileTimeCompilation )
         {
+            this._templateName = templateName;
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
             this._cancellationToken = cancellationToken;
@@ -290,6 +293,11 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // We change all dynamic into var in the template.
                 return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
+            }
+            else if ( this._templateMemberClassifier.IsImplicitValueParameter( node ) )
+            {
+                // In property setter and event accessor templates, the 'value' token has a special meaning. We keep the original name.
+                return base.TransformIdentifierName( node );
             }
 
             // If the identifier is declared withing the template, the expanded name is given by the TemplateExpansionContext and
@@ -655,26 +663,47 @@ namespace Caravela.Framework.Impl.Templating
 
             this.Indent( 3 );
 
-            // Generates a template method.
+            // TODO: templates may support build-time parameters, which must to the compiled template method.
+
+            var body = (BlockSyntax) this.BuildRunTimeBlock( node.Body, false );
+            var result = this.CreateTemplateMethod( node, body );
+
+            this.Unindent( 3 );
+
+            return result;
+        }
+
+        public override SyntaxNode VisitAccessorDeclaration( AccessorDeclarationSyntax node )
+        {
+            if ( node.Body == null )
+            {
+                // Not supported or incomplete syntax.
+                return node;
+            }
+
+            this.Indent( 3 );
 
             // TODO: templates may support build-time parameters, which must to the compiled template method.
 
-            // TODO: also compile templates for properties and so on.
-
             var body = (BlockSyntax) this.BuildRunTimeBlock( node.Body, false );
 
-            var result = MethodDeclaration(
+            var result = this.CreateTemplateMethod( node, body );
+
+            this.Unindent( 3 );
+
+            return result;
+        }
+
+        private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax body )
+        {
+            return MethodDeclaration(
                     this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ),
-                    Identifier( node.Identifier.Text + TemplateCompiler.TemplateMethodSuffix ) )
+                    Identifier( this._templateName ) )
                 .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
                 .NormalizeWhitespace()
                 .WithBody( body )
                 .WithLeadingTrivia( node.GetLeadingTrivia() )
                 .WithTrailingTrivia( LineFeed, LineFeed );
-
-            this.Unindent( 3 );
-
-            return result;
         }
 
         public override SyntaxNode VisitBlock( BlockSyntax node )

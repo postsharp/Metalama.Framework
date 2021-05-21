@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         /// <param name="symbol">Symbol.</param>
         /// <returns>List of introduced members.</returns>
-        public IReadOnlyList<LinkerIntroducedMember> GetOverridesForSymbol( IMethodSymbol symbol )
+        public IReadOnlyList<LinkerIntroducedMember> GetOverridesForSymbol( ISymbol symbol )
         {
             // TODO: Optimize.
             var declaringSyntax = symbol.DeclaringSyntaxReferences.Single().GetSyntax();
@@ -108,7 +108,7 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         /// <param name="symbol">Symbol.</param>
         /// <returns>An introduced member, or <c>null</c> if the declaration represented by this symbol was not introduced.</returns>
-        public LinkerIntroducedMember? GetIntroducedMemberForSymbol( IMethodSymbol symbol )
+        public LinkerIntroducedMember? GetIntroducedMemberForSymbol( ISymbol symbol )
         {
             var declaringSyntax = symbol.DeclaringSyntaxReferences.Single().GetSyntax();
             var annotation = declaringSyntax.GetAnnotations( IntroducedNodeIdAnnotationId ).SingleOrDefault();
@@ -147,10 +147,10 @@ namespace Caravela.Framework.Impl.Linking
         /// Gets all symbols for overridden members.
         /// </summary>
         /// <returns>Enumeration of symbols.</returns>
-        public IEnumerable<IMethodSymbol> GetOverriddenMembers()
+        public IEnumerable<ISymbol> GetOverriddenMembers()
         {
             // TODO: This is not efficient.
-            var overriddenMethods = new List<IMethodSymbol>();
+            var overriddenMembers = new List<ISymbol>();
 
             foreach ( var intermediateSyntaxTree in this._intermediateCompilation.SyntaxTrees )
             {
@@ -162,12 +162,32 @@ namespace Caravela.Framework.Impl.Linking
 
                     if ( methodSymbol != null && this._overrideTargetsByOriginalSymbolName.ContainsKey( methodSymbol ) )
                     {
-                        overriddenMethods.Add( methodSymbol );
+                        overriddenMembers.Add( methodSymbol );
+                    }
+                }
+
+                foreach ( var propertyDeclaration in intermediateSyntaxTree.GetRoot().DescendantNodes().OfType<PropertyDeclarationSyntax>() )
+                {
+                    var propertySymbol = semanticModel.GetDeclaredSymbol( propertyDeclaration );
+
+                    if ( propertySymbol != null && this._overrideTargetsByOriginalSymbolName.ContainsKey( propertySymbol ) )
+                    {
+                        overriddenMembers.Add( propertySymbol );
+                    }
+                }
+
+                foreach ( var eventDeclaration in intermediateSyntaxTree.GetRoot().DescendantNodes().OfType<EventDeclarationSyntax>() )
+                {
+                    var eventSymbol = semanticModel.GetDeclaredSymbol( eventDeclaration );
+
+                    if ( eventSymbol != null && this._overrideTargetsByOriginalSymbolName.ContainsKey( eventSymbol ) )
+                    {
+                        overriddenMembers.Add( eventSymbol );
                     }
                 }
             }
 
-            return overriddenMethods;
+            return overriddenMembers;
         }
     }
 }

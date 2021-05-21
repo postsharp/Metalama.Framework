@@ -82,4 +82,5 @@ internal class TargetClass : DerivedClass
     {
         return default(global::System.Int32);
     }
+
 }

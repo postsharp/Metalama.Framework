@@ -31,21 +31,28 @@ namespace Caravela.Framework.Impl.Linking
     /// <summary>
     /// Linker linking step, which rewrites the intermediate compilation and produces the final compilation. 
     /// </summary>
-    internal static partial class LinkerLinkingStep
+    internal partial class LinkerLinkingStep : AspectLinkerPipelineStep<LinkerAnalysisStepOutput, AspectLinkerResult>
     {
-        public static AspectLinkerResult Execute( LinkerAnalysisStepOutput input )
+        public static LinkerLinkingStep Instance { get; } = new();
+
+        private LinkerLinkingStep() { }
+
+        public override AspectLinkerResult Execute( LinkerAnalysisStepOutput input )
         {
             var finalCompilation = input.IntermediateCompilation.Compilation;
-            var rewriter = new LinkingRewriter( input.IntermediateCompilation.Compilation, input.AnalysisRegistry );
+            var linkingRewriter = new LinkingRewriter( input.IntermediateCompilation.Compilation, input.AnalysisRegistry );
+            var cleanupRewriter = new CleanupRewriter();
 
             List<SyntaxTree> newTrees = new();
 
+            // TODO: visit only modified trees (add an annotation to modified trees)
             foreach ( var syntaxTree in input.IntermediateCompilation.SyntaxTrees )
             {
                 // Run the linking rewriter for this tree.
-                var newRoot = rewriter.Visit( syntaxTree.GetRoot() );
+                var linkedRoot = linkingRewriter.Visit( syntaxTree.GetRoot() );
+                var cleanRoot = cleanupRewriter.Visit( linkedRoot );
 
-                var newSyntaxTree = syntaxTree.WithRootAndOptions( newRoot, syntaxTree.Options );
+                var newSyntaxTree = syntaxTree.WithRootAndOptions( cleanRoot, syntaxTree.Options );
 
                 newTrees.Add( newSyntaxTree );
                 finalCompilation = finalCompilation.ReplaceSyntaxTree( syntaxTree, newSyntaxTree );

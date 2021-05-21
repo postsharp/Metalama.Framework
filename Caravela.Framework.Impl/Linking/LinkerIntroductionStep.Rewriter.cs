@@ -146,6 +146,7 @@ namespace Caravela.Framework.Impl.Linking
                     return this.AddSuppression( node, classSuppressions.NewSuppressions ).WithMembers( List( members ) );
                 }
 
+                // TODO: Try to avoid closure allocation.
                 void AddIntroductionsOnPosition( MemberDeclarationSyntax position )
                 {
                     foreach ( var introducedMember in this._introducedMemberCollection.GetIntroducedMembersOnPosition( position ) )

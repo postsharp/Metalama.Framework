@@ -10,6 +10,6 @@ namespace Caravela.Framework.Impl.Transformations
     /// </summary>
     internal abstract class IntroductionNameProvider
     {
-        internal abstract string GetOverrideName( AspectLayerId aspectLayer, IMethod overriddenDeclaration );
+        internal abstract string GetOverrideName( AspectLayerId aspectLayer, IMember overriddenDeclaration );
     }
 }

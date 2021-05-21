@@ -77,8 +77,10 @@ namespace Caravela.Framework.Impl.Transformations
     {
         Introduction,
         MethodOverride,
+        PropertyOverride,
         GetterOverride,
         SetterOverride,
+        EventOverride,
         AdderOverride,
         RemoverOverride,
         RaiserOverride
