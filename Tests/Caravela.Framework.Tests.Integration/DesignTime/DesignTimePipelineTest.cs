@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.DesignTime;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
@@ -253,12 +253,11 @@ Target.cs:
             // There must be an error on the aspect.
             List<Diagnostic> diagnostics4 = new();
 
-            new DesignTimeAnalyzerAdditionalVisitor( compilation4.GetSemanticModel( aspect4 ), diagnostics4.Add, pipeline, CancellationToken.None ).Visit(
-                aspect4.GetRoot() );
+            TemplatingCodeValidator.Validate( compilation4.GetSemanticModel( aspect4 ), diagnostics4.Add, pipeline, CancellationToken.None );
 
             Assert.Contains(
                 diagnostics4,
-                d => d.Severity == DiagnosticSeverity.Error && d.Id == DesignTimeDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
+                d => d.Severity == DiagnosticSeverity.Error && d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
 
             // Fifth execution, the same scenario as before.
             var compilation5 = CreateCSharpCompilation(
@@ -281,12 +280,11 @@ Target.cs:
 
             List<Diagnostic> diagnostics5 = new();
 
-            new DesignTimeAnalyzerAdditionalVisitor( compilation5.GetSemanticModel( aspect5 ), diagnostics5.Add, pipeline, CancellationToken.None ).Visit(
-                aspect5.GetRoot() );
+            TemplatingCodeValidator.Validate( compilation5.GetSemanticModel( aspect5 ), diagnostics5.Add, pipeline, CancellationToken.None );
 
             Assert.Contains(
                 diagnostics5,
-                d => d.Severity == DiagnosticSeverity.Error && d.Id == DesignTimeDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
+                d => d.Severity == DiagnosticSeverity.Error && d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
 
             // Build the project from the compile-time pipeline.
             using UnloadableCompileTimeDomain domain = new();
@@ -308,12 +306,11 @@ Target.cs:
 
             List<Diagnostic> diagnostics6 = new();
 
-            new DesignTimeAnalyzerAdditionalVisitor( compilation5.GetSemanticModel( aspect5 ), diagnostics6.Add, pipeline, CancellationToken.None ).Visit(
-                aspect5.GetRoot() );
+            TemplatingCodeValidator.Validate( compilation5.GetSemanticModel( aspect5 ), diagnostics6.Add, pipeline, CancellationToken.None );
 
             Assert.DoesNotContain(
                 diagnostics6,
-                d => d.Severity == DiagnosticSeverity.Error && d.Id == DesignTimeDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
+                d => d.Severity == DiagnosticSeverity.Error && d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
         }
     }
 }

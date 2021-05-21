@@ -123,7 +123,7 @@ class Expression
     public static object Execute() => {expression};
 }}";
 
-            var assemblyPath = CaravelaCompiler.CompileAssembly( context, expressionContainer );
+            var assemblyPath = CaravelaCompilerUtility.CompileAssembly( context, expressionContainer );
 
             var assembly = Assembly.LoadFile( assemblyPath );
 

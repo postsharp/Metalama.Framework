@@ -46,15 +46,17 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
         private DesignTimeDiagnosticDefinitions()
         {
             CompilerServiceProvider.Initialize();
-            var supportedDescriptors = UserDiagnosticRegistrationService.GetInstance().GetSupportedDescriptors();
+            var userDefinedDescriptors = UserDiagnosticRegistrationService.GetInstance().GetSupportedDescriptors();
+            
+            // The file may contain system descriptors by mistake. We must remove them otherwise we will have some duplicate key issue.
 
             this.SupportedDiagnosticDescriptors =
                 StandardDiagnosticDescriptors.Values
-                    .Concat( supportedDescriptors.Diagnostics )
+                    .Concat( userDefinedDescriptors.Diagnostics.Where( d => !StandardDiagnosticDescriptors.ContainsKey( d.Id ) ) )
                     .ToImmutableDictionary( d => d.Id, d => d, StringComparer.OrdinalIgnoreCase );
 
             this.SupportedSuppressionDescriptors =
-                supportedDescriptors.Suppressions.ToImmutableDictionary( d => d.SuppressedDiagnosticId, d => d, StringComparer.OrdinalIgnoreCase );
+                userDefinedDescriptors.Suppressions.ToImmutableDictionary( d => d.SuppressedDiagnosticId, d => d, StringComparer.OrdinalIgnoreCase );
         }
     }
 }

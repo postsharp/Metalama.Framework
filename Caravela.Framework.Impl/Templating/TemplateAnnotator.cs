@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 #pragma warning disable SA1124 // Don't use regions
@@ -26,6 +27,7 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
+        private readonly CancellationToken _cancellationToken;
         private readonly TemplateMemberClassifier _templateMemberClassifier;
 
         /// <summary>
@@ -43,11 +45,13 @@ namespace Caravela.Framework.Impl.Templating
             CSharpCompilation compilation,
             SemanticAnnotationMap semanticAnnotationMap,
             IDiagnosticAdder diagnosticAdder,
-            IServiceProvider serviceProvider )
+            IServiceProvider serviceProvider,
+            CancellationToken cancellationToken )
         {
             this._symbolScopeClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
+            this._cancellationToken = cancellationToken;
 
             this._templateMemberClassifier = new TemplateMemberClassifier( compilation, semanticAnnotationMap, serviceProvider );
 
@@ -334,6 +338,8 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return null;
             }
+            
+            this._cancellationToken.ThrowIfCancellationRequested();
 
             // Adds annotations to the children node.
             var transformedNode = base.Visit( node );

@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -113,10 +114,13 @@ namespace Caravela.Framework.Impl.DesignTime
                         }
                     }
                 }
-
-                // Additional validations that run out of the pipeline.
-                DesignTimeAnalyzerAdditionalVisitor visitor = new( context, buildOptions );
-                visitor.Visit( context.SemanticModel.SyntaxTree.GetRoot() );
+                
+                // Perform additional analysis not done by the design-time pipeline.
+                TemplatingCodeValidator.Validate(
+                    context.SemanticModel,
+                    context.ReportDiagnostic,
+                    DesignTimeAspectPipelineCache.Instance.GetOrCreatePipeline( buildOptions ),
+                    context.CancellationToken );
             }
             catch ( Exception e )
             {
