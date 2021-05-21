@@ -3,8 +3,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 #pragma warning disable CS0169
 #pragma warning disable CS0414
