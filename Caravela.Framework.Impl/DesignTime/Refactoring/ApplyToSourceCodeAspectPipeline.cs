@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
         private ApplyToSourceCodeAspectPipeline(
             IProjectOptions projectOptions,
             CompileTimeDomain domain,
-            AspectClassMetadata aspectClass,
+            AspectClass aspectClass,
             ISymbol targetSymbol ) : base( projectOptions, domain )
         {
             this._source = new InteractiveAspectSource( aspectClass, targetSymbol );
@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             IProjectOptions projectOptions,
             CompileTimeDomain domain,
             AspectPipelineConfiguration configuration,
-            AspectClassMetadata aspectClass,
+            AspectClass aspectClass,
             PartialCompilation inputCompilation,
             ISymbol targetSymbol,
             CancellationToken cancellationToken,
@@ -92,10 +92,10 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
 
         private class InteractiveAspectSource : IAspectSource
         {
-            private readonly AspectClassMetadata _aspectClass;
+            private readonly AspectClass _aspectClass;
             private readonly ISymbol _targetSymbol;
 
-            public InteractiveAspectSource( AspectClassMetadata aspectClass, ISymbol targetSymbol )
+            public InteractiveAspectSource( AspectClass aspectClass, ISymbol targetSymbol )
             {
                 this._aspectClass = aspectClass;
                 this._targetSymbol = targetSymbol;
@@ -103,20 +103,20 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
 
             public AspectSourcePriority Priority => AspectSourcePriority.FromAttribute;
 
-            public IEnumerable<AspectClassMetadata> AspectTypes => new[] { this._aspectClass };
+            public IEnumerable<AspectClass> AspectTypes => new[] { this._aspectClass };
 
             public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
 
             public IEnumerable<AspectInstance> GetAspectInstances(
                 CompilationModel compilation,
-                AspectClassMetadata aspectClassMetadata,
+                AspectClass aspectClass,
                 IDiagnosticAdder diagnosticAdder,
                 CancellationToken cancellationToken )
             {
                 var targetDeclaration = compilation.Factory.GetDeclaration( this._targetSymbol );
-                var aspectInstance = (IAspect) Activator.CreateInstance( aspectClassMetadata.AspectType ).AssertNotNull();
+                var aspectInstance = (IAspect) Activator.CreateInstance( aspectClass.AspectType ).AssertNotNull();
 
-                return new[] { aspectClassMetadata.CreateAspectInstance( aspectInstance, targetDeclaration ) };
+                return new[] { aspectClass.CreateAspectInstance( aspectInstance, targetDeclaration ) };
             }
         }
     }

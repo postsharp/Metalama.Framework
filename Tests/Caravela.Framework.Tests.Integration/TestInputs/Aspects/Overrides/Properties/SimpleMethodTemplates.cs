@@ -9,9 +9,9 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     [AttributeUsage(AttributeTargets.Property)]
     public class OverrideAttribute : Attribute, IAspect<IProperty>
     {
-        void IAspect<IProperty>.Initialize(IAspectBuilder<IProperty> aspectBuilder)
+        void IAspect<IProperty>.BuildAspect(IAspectBuilder<IProperty> builder)
         {
-            aspectBuilder.AdviceFactory.OverrideFieldOrPropertyAccessors(aspectBuilder.TargetDeclaration, nameof(GetTemplate), nameof(SetTemplate));
+            builder.AdviceFactory.OverrideFieldOrPropertyAccessors(builder.TargetDeclaration, nameof(GetTemplate), nameof(SetTemplate));
         }
 
         [OverrideFieldOrPropertyGetTemplate]

@@ -8,7 +8,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             //{
             //    var advice = aspectBuilder.AdviceFactory.IntroduceProperty(aspectBuilder.TargetDeclaration, nameof(AutoProperty));
@@ -16,12 +16,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
             //}
 
             {
-                var advice = aspectBuilder.AdviceFactory.IntroduceProperty(aspectBuilder.TargetDeclaration, nameof(Property));
+                var advice = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, nameof(Property));
                 advice.Builder.Accessibility = Accessibility.Public;
             }
 
             {
-                var advice = aspectBuilder.AdviceFactory.IntroduceProperty(aspectBuilder.TargetDeclaration, "PropertyFromAccessors", nameof(GetPropertyTemplate), nameof(SetPropertyTemplate) );
+                var advice = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, "PropertyFromAccessors", nameof(GetPropertyTemplate), nameof(SetPropertyTemplate) );
                 advice.Builder.Accessibility = Accessibility.Public;
             }
 

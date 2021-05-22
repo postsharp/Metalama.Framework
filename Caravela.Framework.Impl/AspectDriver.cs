@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl
 
         internal AspectInstanceResult ExecuteAspect( AspectInstance aspectInstance, CancellationToken cancellationToken )
         {
-            return aspectInstance.Declaration switch
+            return aspectInstance.TargetDeclaration switch
             {
                 ICompilation compilation => this.EvaluateAspect( compilation, aspectInstance, cancellationToken ),
                 INamedType type => this.EvaluateAspect( type, aspectInstance, cancellationToken ),
@@ -95,7 +95,7 @@ namespace Caravela.Framework.Impl
 
                 try
                 {
-                    aspectOfT.Initialize( aspectBuilder );
+                    aspectOfT.BuildAspect( aspectBuilder );
                 }
                 catch ( InvalidUserCodeException e )
                 {

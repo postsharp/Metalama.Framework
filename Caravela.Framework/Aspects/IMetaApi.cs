@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.ArchitectureValidation;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Project;
@@ -13,6 +14,7 @@ namespace Caravela.Framework.Aspects
     /// This interface is exposed by the <see cref="meta"/> static type.
     /// </summary>
     [CompileTimeOnly]
+    [InternalImplement]
     internal interface IMetaApi
     {
         IConstructor Constructor { get; }

@@ -11,11 +11,11 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
 {
     public class FirstAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            foreach (var method in aspectBuilder.TargetDeclaration.Methods)
+            foreach (var method in builder.TargetDeclaration.Methods)
             {
-                aspectBuilder.AdviceFactory.OverrideMethod(method, nameof(OverrideTemplate));
+                builder.AdviceFactory.OverrideMethod(method, nameof(OverrideTemplate));
             }
         }
 
@@ -42,11 +42,11 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
 
     public class SecondAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            foreach (var method in aspectBuilder.TargetDeclaration.Methods)
+            foreach (var method in builder.TargetDeclaration.Methods)
             {
-                aspectBuilder.AdviceFactory.OverrideMethod(method, nameof(OverrideTemplate));
+                builder.AdviceFactory.OverrideMethod(method, nameof(OverrideTemplate));
             }
         }
 
@@ -73,11 +73,11 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
 
     public class ThirdAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            foreach (var method in aspectBuilder.TargetDeclaration.Methods)
+            foreach (var method in builder.TargetDeclaration.Methods)
             {
-                aspectBuilder.AdviceFactory.OverrideMethod(method, nameof(OverrideTemplate));
+                builder.AdviceFactory.OverrideMethod(method, nameof(OverrideTemplate));
             }
         }
 

@@ -10,7 +10,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
 
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
         }
 

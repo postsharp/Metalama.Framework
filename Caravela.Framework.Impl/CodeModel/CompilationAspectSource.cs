@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly CompileTimeProjectLoader _loader;
 
-        public CompilationAspectSource( IReadOnlyList<AspectClassMetadata> aspectTypes, CompileTimeProjectLoader loader )
+        public CompilationAspectSource( IReadOnlyList<AspectClass> aspectTypes, CompileTimeProjectLoader loader )
         {
             this._loader = loader;
             this.AspectTypes = aspectTypes;
@@ -23,17 +23,17 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public AspectSourcePriority Priority => AspectSourcePriority.FromAttribute;
 
-        public IEnumerable<AspectClassMetadata> AspectTypes { get; }
+        public IEnumerable<AspectClass> AspectTypes { get; }
 
         // TODO: implement aspect exclusion based on ExcludeAspectAttribute
         public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
 
         public IEnumerable<AspectInstance> GetAspectInstances(
             CompilationModel compilation,
-            AspectClassMetadata aspectClassMetadata,
+            AspectClass aspectClass,
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken )
-            => compilation.GetAllAttributesOfType( compilation.Factory.GetTypeByReflectionName( aspectClassMetadata.FullName ) )
+            => compilation.GetAllAttributesOfType( compilation.Factory.GetTypeByReflectionName( aspectClass.FullName ) )
                 .Select(
                     attribute =>
                     {
@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
                         if ( this._loader.AttributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out var attributeInstance ) )
                         {
-                            return aspectClassMetadata.CreateAspectInstance( (IAspect) attributeInstance, attribute.ContainingDeclaration.AssertNotNull() );
+                            return aspectClass.CreateAspectInstance( (IAspect) attributeInstance, attribute.ContainingDeclaration.AssertNotNull() );
                         }
                         else
                         {

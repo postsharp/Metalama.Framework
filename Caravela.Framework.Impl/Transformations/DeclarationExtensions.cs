@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.Transformations
 
                     break;
 
-                case Accessibility.ProtectedAndInternal:
+                case Accessibility.PrivateProtected:
                     tokens.Add( Token( SyntaxKind.PrivateKeyword ) );
                     tokens.Add( Token( SyntaxKind.ProtectedKeyword ) );
 
@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.Transformations
 
                     break;
 
-                case Accessibility.ProtectedOrInternal:
+                case Accessibility.ProtectedInternal:
                     tokens.Add( Token( SyntaxKind.ProtectedKeyword ) );
                     tokens.Add( Token( SyntaxKind.InternalKeyword ) );
 

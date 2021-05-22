@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Advices;
+using Caravela.Framework.ArchitectureValidation;
 using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Aspects
@@ -9,6 +10,7 @@ namespace Caravela.Framework.Aspects
     /// <summary>
     /// Exposes all factory methods to create advices.
     /// </summary>
+    [InternalImplement]
     public interface IAdviceFactory
     {
         /// <summary>

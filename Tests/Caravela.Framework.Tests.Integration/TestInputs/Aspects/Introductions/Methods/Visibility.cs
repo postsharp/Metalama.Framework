@@ -8,7 +8,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Visi
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
         }
 
@@ -19,14 +19,14 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Visi
             return 42;
         }
 
-        [IntroduceMethod(Accessibility = Accessibility.ProtectedOrInternal)]
+        [IntroduceMethod(Accessibility = Accessibility.ProtectedInternal)]
         public int ProtectedInternal()
         {
             Console.WriteLine("This is introduced method.");
             return 42;
         }
 
-        [IntroduceMethod(Accessibility = Accessibility.ProtectedAndInternal)]
+        [IntroduceMethod(Accessibility = Accessibility.PrivateProtected)]
         public int PrivateProtected()
         {
             Console.WriteLine("This is introduced method.");

@@ -21,9 +21,9 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.Methods
         private static readonly SuppressionDefinition _suppression1 = new( "CS0219" );
         
         
-        public void Initialize(IAspectBuilder<IMethod> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            aspectBuilder.Diagnostics.Suppress( null, _suppression1 );
+            builder.Diagnostics.Suppress( null, _suppression1 );
         }
     }
     

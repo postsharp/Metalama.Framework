@@ -9,9 +9,9 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programm
 {
     public class OverrideAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            var advice = aspectBuilder.AdviceFactory.OverrideMethod(aspectBuilder.TargetDeclaration.Methods.OfName("TargetMethod").Single(), nameof(Template));
+            var advice = builder.AdviceFactory.OverrideMethod(builder.TargetDeclaration.Methods.OfName("TargetMethod").Single(), nameof(Template));
         }
 
         [OverrideMethodTemplate]

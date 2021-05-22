@@ -29,10 +29,10 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
             return meta.Proceed();
         }
         
-        public void Initialize(IAspectBuilder<IMethod> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            aspectBuilder.AdviceFactory.OverrideMethod( aspectBuilder.TargetDeclaration, nameof(Override), AspectLinkerOptions.Create(true) );
-            aspectBuilder.Diagnostics.Suppress( null, _suppression );
+            builder.AdviceFactory.OverrideMethod( builder.TargetDeclaration, nameof(Override), AspectLinkerOptions.Create(true) );
+            builder.Diagnostics.Suppress( null, _suppression );
         }
     }
     

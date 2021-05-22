@@ -53,10 +53,10 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 Microsoft.CodeAnalysis.Accessibility.NotApplicable => Accessibility.Private,
                 Microsoft.CodeAnalysis.Accessibility.Private => Accessibility.Private,
-                Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal => Accessibility.ProtectedAndInternal,
+                Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal => Accessibility.PrivateProtected,
                 Microsoft.CodeAnalysis.Accessibility.Protected => Accessibility.Protected,
                 Microsoft.CodeAnalysis.Accessibility.Internal => Accessibility.Internal,
-                Microsoft.CodeAnalysis.Accessibility.ProtectedOrInternal => Accessibility.ProtectedOrInternal,
+                Microsoft.CodeAnalysis.Accessibility.ProtectedOrInternal => Accessibility.ProtectedInternal,
                 Microsoft.CodeAnalysis.Accessibility.Public => Accessibility.Public,
                 _ => throw new ArgumentOutOfRangeException()
             };

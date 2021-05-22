@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.DesignTime.Refactoring;
@@ -71,7 +72,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             this._syntaxTreeResultCache.Clear();
         }
 
-        public IEnumerable<AspectClassMetadata> GetEligibleAspects( ISymbol symbol, IProjectOptions projectOptions, CancellationToken cancellationToken )
+        public IEnumerable<AspectClass> GetEligibleAspects( ISymbol symbol, IProjectOptions projectOptions, CancellationToken cancellationToken )
         {
             var pipeline = this.GetOrCreatePipeline( projectOptions );
 
@@ -83,7 +84,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    if ( aspectClass.IsEligible( symbol ) )
+                    if ( aspectClass.IsEligible( symbol, EligibilityValue.EligibleForInheritanceOnly ) )
                     {
                         yield return aspectClass;
                     }
@@ -195,7 +196,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
         public bool TryApplyAspectToCode(
             IProjectOptions projectOptions,
-            AspectClassMetadata aspectClass,
+            AspectClass aspectClass,
             Compilation inputCompilation,
             ISymbol targetSymbol,
             CancellationToken cancellationToken,
