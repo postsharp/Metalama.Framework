@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Project;
 using Caravela.Framework.Validation;
 using System.Collections.Generic;
 using System.Threading;
@@ -16,6 +17,8 @@ namespace Caravela.Framework.Aspects
     [InternalImplement]
     public interface IAspectBuilder : IValidatorAdder
     {
+        IProject Project { get; }
+        
         /// <summary>
         /// Gets the list of markers that have contributed to the current aspect instance to be created.
         /// </summary>
@@ -59,6 +62,7 @@ namespace Caravela.Framework.Aspects
         /// Gets a set of opaque properties that can be set by the aspect <see cref="IAspect{T}.BuildAspect"/> method and are then made
         /// visible in <see cref="meta.Tags"/>.
         /// </summary>
+        // TODO: This is not well-defined. It may be better to expose this on IAdvice.
         IDictionary<string, object?> Tags { get; }
 
         CancellationToken CancellationToken { get; }

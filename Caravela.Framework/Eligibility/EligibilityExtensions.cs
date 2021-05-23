@@ -148,9 +148,9 @@ namespace Caravela.Framework.Eligibility
                 return (true, null);
             }
 
-           
-
-
         }
+        
+        
+     
     }
 }

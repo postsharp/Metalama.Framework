@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Project
+namespace Caravela.Framework.Aspects
 {
     /// <summary>
     /// Attribute that means that the return value of the target method (this attribute must be added to the return value and not to the method itself)

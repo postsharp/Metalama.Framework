@@ -19,7 +19,7 @@ namespace Caravela.Framework.Validation
 
         public void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.RegisterReferenceValidator<INamedType, Validator>( builder.TargetDeclaration, new[] { DeclarationReferenceKind.ImplementsInterface } );
+            builder.AddReferenceValidator<INamedType, Validator>( builder.TargetDeclaration, new[] { DeclarationReferenceKind.ImplementsInterface } );
         }
 
         private class Validator : IDeclarationReferenceValidator<INamedType>

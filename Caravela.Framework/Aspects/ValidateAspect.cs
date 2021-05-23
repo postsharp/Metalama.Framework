@@ -86,7 +86,7 @@ namespace Caravela.Framework.Aspects
             
             foreach ( var marker in meta.Markers )
             {
-                ((ValidateAttribute) marker.Marker).Validate( meta.FieldOrProperty.Name, meta.FieldOrProperty.Value );
+                ((ValidateAttribute) marker.Marker).Validate( meta.FieldOrProperty.Name, meta.FieldOrProperty.GetValue( meta.This ) );
             }
         }
 

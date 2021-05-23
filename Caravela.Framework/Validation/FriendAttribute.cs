@@ -32,7 +32,7 @@ namespace Caravela.Framework.Validation
         {
             var properties = new Dictionary<string, string> { ["FriendTypes"] = string.Join( ";", this._friendTypes.Select( t => t.FullName ) ) };
 
-            builder.RegisterReferenceValidator<IMember, Validator>( builder.TargetDeclaration, new[] { DeclarationReferenceKind.Any }, properties );
+            builder.AddReferenceValidator<IMember, Validator>( builder.TargetDeclaration, new[] { DeclarationReferenceKind.Any }, properties );
         }
 
         private class Validator : IDeclarationReferenceValidator<IMember>

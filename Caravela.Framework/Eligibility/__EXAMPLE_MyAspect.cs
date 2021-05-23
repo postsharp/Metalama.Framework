@@ -3,11 +3,12 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using System;
 
 namespace Caravela.Framework.Eligibility
 {
     // Example of an aspect with complex eligibility rules.
-    public class MyAspect : IAspect<IMethod>
+    public class MyAspect : Attribute, IAspect<IMethod>
     {
         public void BuildAspect( IAspectBuilder<IMethod> builder ) => throw new System.NotImplementedException();
 
