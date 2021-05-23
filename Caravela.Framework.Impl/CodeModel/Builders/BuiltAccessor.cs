@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod? OverriddenMethod => throw new NotImplementedException();
 
-        public INamedType DeclaringType => this._builtMember.DeclaringType;
+        public INamedType? DeclaringType => this._builtMember.DeclaringType;
 
         public object? Target => throw new NotImplementedException();
 

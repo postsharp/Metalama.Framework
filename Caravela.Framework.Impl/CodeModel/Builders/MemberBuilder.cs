@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsAsync { get; set; }
 
-        public INamedType DeclaringType { get; }
+        public INamedType? DeclaringType { get; }
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 

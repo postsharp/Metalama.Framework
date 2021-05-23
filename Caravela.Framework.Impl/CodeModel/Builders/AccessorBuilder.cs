@@ -110,7 +110,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsAsync => false;
 
-        public INamedType DeclaringType => this._containingDeclaration.DeclaringType;
+        public INamedType? DeclaringType => this._containingDeclaration.DeclaringType;
 
         public override IDeclaration? ContainingDeclaration => this._containingDeclaration;
 

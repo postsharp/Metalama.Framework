@@ -41,7 +41,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the namespace of the current type.
         /// </summary>
-        string? Namespace { get; }
+        INamespace? Namespace { get; }
 
         /// <summary>
         /// Gets the name of the type including its namespace.

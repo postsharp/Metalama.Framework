@@ -1,4 +1,4 @@
-using Caravela.Framework.ArchitectureValidation;
+using Caravela.Framework.Validation;
 
 namespace Caravela.Framework.Eligibility
 {

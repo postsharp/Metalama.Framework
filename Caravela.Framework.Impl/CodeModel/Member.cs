@@ -63,6 +63,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public string Name => this.Symbol.Name;
 
-        INamedType IMember.DeclaringType => this.DeclaringType;
+        INamedType? IMember.DeclaringType => this.DeclaringType;
     }
 }

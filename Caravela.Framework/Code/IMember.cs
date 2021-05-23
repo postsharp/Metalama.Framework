@@ -66,7 +66,7 @@ namespace Caravela.Framework.Code
         /// Gets the type containing the current member, or <c>null</c> if the current member is not contained
         /// within a type (which should not happen in C#).
         /// </summary>
-        INamedType DeclaringType { get; }
+        INamedType? DeclaringType { get; }
 
         /// <summary>
         /// Gets a <see cref="MemberInfo"/> that represents the current member at run time.

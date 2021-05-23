@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsAsync => false;
 
-        public INamedType DeclaringType => this._containingMember.DeclaringType;
+        public INamedType? DeclaringType => this._containingMember.DeclaringType;
 
         public DeclarationOrigin Origin => DeclarationOrigin.Source;
 

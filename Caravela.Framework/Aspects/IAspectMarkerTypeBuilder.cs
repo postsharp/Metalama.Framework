@@ -1,5 +1,5 @@
-using Caravela.Framework.ArchitectureValidation;
 using Caravela.Framework.Eligibility;
+using Caravela.Framework.Validation;
 
 namespace Caravela.Framework.Aspects
 {
