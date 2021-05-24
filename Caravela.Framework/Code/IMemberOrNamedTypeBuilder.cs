@@ -6,7 +6,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Allows to complete the construction of a member that has been created by an advice.
     /// </summary>
-    public interface IMemberBuilder : IMember, IDeclarationBuilder
+    public interface IMemberOrNamedTypeBuilder : IMemberOrNamedType, IDeclarationBuilder
     {
         /// <summary>
         /// Gets or sets the accessibility of the member.
@@ -24,13 +24,16 @@ namespace Caravela.Framework.Code
         new bool IsStatic { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the member is <c>virtual</c>.
-        /// </summary>
-        new bool IsVirtual { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the member is <c>sealed</c>.
         /// </summary>
         new bool IsSealed { get; set; }
+    }
+
+    public interface IMemberBuilder : IMemberOrNamedTypeBuilder, IMember
+    {
+        /// <summary>
+        /// Gets or sets a value indicating whether the member is <c>virtual</c>.
+        /// </summary>
+        new bool IsVirtual { get; set; }
     }
 }

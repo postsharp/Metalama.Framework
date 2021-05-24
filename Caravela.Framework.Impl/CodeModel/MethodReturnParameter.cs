@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         public Method DeclaringMethod { get; }
 
-        public override IMember DeclaringMember => this.DeclaringMethod;
+        public override IMemberOrNamedType DeclaringMember => this.DeclaringMethod;
 
         public MethodReturnParameter( Method declaringMethod )
         {

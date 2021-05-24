@@ -1,12 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-namespace Caravela.Framework.Sdk
+using Caravela.Framework.Validation;
+
+namespace Caravela.Framework.Aspects
 {
     /// <summary>
     /// Represents the metadata of an aspect class.
     /// </summary>
-    public interface IAspectClassMetadata
+    [InternalImplement]
+    public interface IAspectClass
     {
         /// <summary>
         /// Gets the fully qualified type of the aspect.

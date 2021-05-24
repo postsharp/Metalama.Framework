@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Code
 {
@@ -76,6 +76,11 @@ namespace Caravela.Framework.Code
         /// that the current assembly is represented by <see cref="ICompilation"/> that inherits <see cref="IAssembly"/>, but the
         /// <see cref="DeclarationKind"/> for the current compilation is <see cref="Compilation"/> and not <see cref="ReferencedAssembly"/>. 
         /// </summary>
-        ReferencedAssembly
+        ReferencedAssembly,
+
+        /// <summary>
+        /// <see cref="INamespace"/>.
+        /// </summary>
+        Namespace
     }
 }

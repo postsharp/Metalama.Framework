@@ -2,7 +2,6 @@ using System;
 
 using Caravela.Framework.Aspects;
 using static System.Math;
-using Caravela.Framework.Project;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion

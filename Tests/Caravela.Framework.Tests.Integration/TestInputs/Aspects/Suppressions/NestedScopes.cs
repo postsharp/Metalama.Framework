@@ -8,6 +8,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.TestFramework;
 using Caravela.Framework.Advices;
+using Caravela.Framework.Eligibility;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
 {
@@ -29,11 +30,13 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
             return meta.Proceed();
         }
         
-        public void Initialize(IAspectBuilder<IMethod> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            aspectBuilder.AdviceFactory.OverrideMethod( aspectBuilder.TargetDeclaration, nameof(Override), AspectLinkerOptions.Create(true) );
-            aspectBuilder.Diagnostics.Suppress( null, _suppression );
+            builder.AdviceFactory.OverrideMethod( builder.TargetDeclaration, nameof(Override), AspectLinkerOptions.Create(true) );
+            builder.Diagnostics.Suppress( null, _suppression );
         }
+
+        public void BuildEligibility(IEligibilityBuilder<IMethod> builder) { }
     }
     
     [TestOutput]

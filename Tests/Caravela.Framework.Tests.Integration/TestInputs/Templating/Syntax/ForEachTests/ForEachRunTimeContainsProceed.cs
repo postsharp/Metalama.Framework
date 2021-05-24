@@ -3,7 +3,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Project;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.ForEachRunTimeContainsProceed

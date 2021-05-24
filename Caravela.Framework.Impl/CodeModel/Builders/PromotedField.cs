@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         public IField ReplacedField { get; }
 
-        MemberRef<IMember> IReplaceMemberTransformation.ReplacedMember => this.ReplacedField.ToMemberLink<IMember>();
+        MemberRef<IMemberOrNamedType> IReplaceMemberTransformation.ReplacedMember => this.ReplacedField.ToMemberLink<IMemberOrNamedType>();
 
         public PromotedField( Advice parentAdvice, IField field, AspectLinkerOptions? linkerOptions )
             : base( parentAdvice, field.DeclaringType, field.Name, true, true, true, false, linkerOptions )

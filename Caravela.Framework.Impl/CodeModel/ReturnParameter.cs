@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsParams => false;
 
-        public abstract IMember DeclaringMember { get; }
+        public abstract IMemberOrNamedType DeclaringMember { get; }
 
         public ParameterInfo ToParameterInfo() => CompileTimeReturnParameterInfo.Create( this );
 

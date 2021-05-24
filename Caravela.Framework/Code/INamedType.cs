@@ -15,7 +15,7 @@ namespace Caravela.Framework.Code
     /// generic type instances have the same number of items in <see cref="GenericParameters"/> and <see cref="GenericArguments"/>.
     /// </para>
     /// </remarks>
-    public interface INamedType : IType, IMember
+    public interface INamedType : IType, IMemberOrNamedType
     {
         /// <summary>
         /// Gets a value indicating whether the type is marked as <c>partial</c> in source code. 
@@ -41,7 +41,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the namespace of the current type.
         /// </summary>
-        string? Namespace { get; }
+        INamespace Namespace { get; }
 
         /// <summary>
         /// Gets the name of the type including its namespace.

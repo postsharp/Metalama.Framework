@@ -1,6 +1,7 @@
 ﻿using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 using System;
 
@@ -9,10 +10,12 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     [AttributeUsage(AttributeTargets.Property)]
     public class OverrideAttribute : Attribute, IAspect<IProperty>
     {
-        void IAspect<IProperty>.Initialize(IAspectBuilder<IProperty> aspectBuilder)
+        void IAspect<IProperty>.BuildAspect(IAspectBuilder<IProperty> builder)
         {
-            aspectBuilder.AdviceFactory.OverrideFieldOrPropertyAccessors(aspectBuilder.TargetDeclaration, nameof(GetTemplate), nameof(SetTemplate));
+            builder.AdviceFactory.OverrideFieldOrPropertyAccessors(builder.TargetDeclaration, nameof(GetTemplate), nameof(SetTemplate));
         }
+
+        public void BuildEligibility(IEligibilityBuilder<IProperty> builder) { }
 
         [OverrideFieldOrPropertyGetTemplate]
         public dynamic GetTemplate()

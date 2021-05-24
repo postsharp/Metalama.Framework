@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Project;
+using Caravela.Framework.Validation;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Aspects
@@ -13,6 +13,7 @@ namespace Caravela.Framework.Aspects
     /// This interface is exposed by the <see cref="meta"/> static type.
     /// </summary>
     [CompileTimeOnly]
+    [InternalImplement]
     internal interface IMetaApi
     {
         IConstructor Constructor { get; }
@@ -25,7 +26,7 @@ namespace Caravela.Framework.Aspects
 
         IDeclaration Declaration { get; }
 
-        IMember Member { get; }
+        IMemberOrNamedType Member { get; }
 
         /// <summary>
         /// Gets the method metadata, or the accessor if this is a template for a field, property or event.

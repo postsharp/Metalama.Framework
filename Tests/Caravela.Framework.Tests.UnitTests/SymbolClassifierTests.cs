@@ -50,7 +50,7 @@ class C : IAspect
         public void DefaultCode()
         {
             var code = @"
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 
 class C 
 {
@@ -77,7 +77,7 @@ class D : System.IDisposable
         public void AssemblyAttribute()
         {
             var code = @"
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 [assembly: CompileTime]
 class C 
 {
@@ -93,7 +93,7 @@ class C
         public void MarkedAsCompileTimeOnly()
         {
             var code = @"
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 
 [CompileTimeOnly]
 class C 
@@ -114,7 +114,7 @@ class C
         public void MarkedAsCompileTime()
         {
             var code = @"
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 
 [CompileTime]
 class C 

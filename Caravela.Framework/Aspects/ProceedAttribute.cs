@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Project
+namespace Caravela.Framework.Aspects
 {
     /// <summary>
     /// Marks the method as having <c>proceed</c> semantics.

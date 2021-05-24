@@ -8,6 +8,6 @@ namespace Caravela.Framework.Impl.Transformations
 {
     internal interface IReplaceMemberTransformation : IObservableTransformation
     {
-        MemberRef<IMember> ReplacedMember { get; }
+        MemberRef<IMemberOrNamedType> ReplacedMember { get; }
     }
 }

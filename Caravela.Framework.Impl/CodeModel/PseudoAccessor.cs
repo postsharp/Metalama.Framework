@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -134,7 +134,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             public PseudoAccessor DeclaringAccessor { get; }
 
-            public IMember DeclaringMember => this.DeclaringAccessor;
+            public IMemberOrNamedType DeclaringMember => this.DeclaringAccessor;
 
             public RefKind RefKind
                 => this.DeclaringAccessor.ContainingDeclaration switch

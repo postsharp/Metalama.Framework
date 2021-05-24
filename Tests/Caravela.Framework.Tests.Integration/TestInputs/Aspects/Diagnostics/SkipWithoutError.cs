@@ -7,11 +7,11 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.SkipWithoutEr
 {
     public class SkippedAttribute : OverrideMethodAspect
     {
-        public override void Initialize(IAspectBuilder<IMethod> aspectBuilder)
+        public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            base.Initialize(aspectBuilder);
+            base.BuildAspect(builder);
 
-            aspectBuilder.SkipAspect();
+            builder.SkipAspect();
         }
 
         public override dynamic? OverrideMethod()

@@ -11,6 +11,7 @@
 using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.Framework.Diagnostics;
 using Caravela.TestFramework;
 
@@ -19,11 +20,12 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.Methods
     public class SuppressWarningAttribute : Attribute, IAspect<IMethod>
     {
         private static readonly SuppressionDefinition _suppression1 = new( "CS0219" );
-        
-        
-        public void Initialize(IAspectBuilder<IMethod> aspectBuilder)
+
+        public void BuildEligibility(IEligibilityBuilder<IMethod> builder) { }
+
+        public void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            aspectBuilder.Diagnostics.Suppress( null, _suppression1 );
+            builder.Diagnostics.Suppress( null, _suppression1 );
         }
     }
     

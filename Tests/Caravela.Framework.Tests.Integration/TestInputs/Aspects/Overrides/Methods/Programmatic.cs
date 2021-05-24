@@ -3,16 +3,19 @@ using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programmatic
 {
     public class OverrideAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            var advice = aspectBuilder.AdviceFactory.OverrideMethod(aspectBuilder.TargetDeclaration.Methods.OfName("TargetMethod").Single(), nameof(Template));
+            var advice = builder.AdviceFactory.OverrideMethod(builder.TargetDeclaration.Methods.OfName("TargetMethod").Single(), nameof(Template));
         }
+
+        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
 
         [OverrideMethodTemplate]
         public dynamic Template()

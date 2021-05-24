@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         public DesignTimeAspectPipelineStatus Status { get; private set; }
 
         // It's ok if we return an obsolete project in this case.
-        public IReadOnlyList<AspectClassMetadata>? AspectClasses => this._lastKnownConfiguration?.AspectClasses;
+        public IReadOnlyList<AspectClass>? AspectClasses => this._lastKnownConfiguration?.AspectClasses;
 
         public DesignTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain ) : base( projectOptions, domain )
         {

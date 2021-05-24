@@ -37,22 +37,22 @@ namespace Caravela.Framework.Impl
         public static readonly DiagnosticDefinition<(IDeclaration Member, int ArgumentsCount)> MemberRequiresAtLeastNArguments =
             new( "CR0013", _category, "Member '{0}' requires at least {1} arguments.", Error, "Member requires more arguments." );
 
-        public static readonly DiagnosticDefinition<IMember> CannotProvideInstanceForStaticMember =
+        public static readonly DiagnosticDefinition<IMemberOrNamedType> CannotProvideInstanceForStaticMember =
             new( "CR0014", _category, "Member {0} is static, but has been used with a non-null instance.", Error,
                  "Cannot provide instance for a static member." );
 
-        public static readonly DiagnosticDefinition<IMember> MustProvideInstanceForInstanceMember =
+        public static readonly DiagnosticDefinition<IMemberOrNamedType> MustProvideInstanceForInstanceMember =
             new( "CR0015", _category, "Member {0} is not static, but has been used with a null instance.", Error,
                  "Has to provide instance for an instance member." );
 
-        public static readonly DiagnosticDefinition<IMember> CannotAccessOpenGenericMember =
+        public static readonly DiagnosticDefinition<IMemberOrNamedType> CannotAccessOpenGenericMember =
             new( "CR0016", _category, "Member {0} Cannot be accessed without specifying generic arguments.", Error, "Cannot access an open generic member." );
 
-        public static readonly DiagnosticDefinition<IMember> CannotProvideInstanceForLocalFunction =
+        public static readonly DiagnosticDefinition<IMemberOrNamedType> CannotProvideInstanceForLocalFunction =
             new( "CR0018", _category, "{0} is a local function, so it Cannot be invoked with a non-null instance.", Error,
                  "Cannot provide instance for a local function." );
 
-        public static readonly DiagnosticDefinition<(string Expression, string ParameterName, IMember Method)> CannotPassExpressionToByRefParameter =
+        public static readonly DiagnosticDefinition<(string Expression, string ParameterName, IMemberOrNamedType Method)> CannotPassExpressionToByRefParameter =
             new( "CR0019", _category, "Cannot pass the expression '{0}' to the '{1}' parameter of method '{2}' because the parameter is 'out' or 'ref'.", Error,
                  "Cannot use an expression in an out or ref parameter." );
 

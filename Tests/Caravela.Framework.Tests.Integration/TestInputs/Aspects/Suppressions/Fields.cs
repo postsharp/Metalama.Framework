@@ -9,6 +9,7 @@ using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.Fields
@@ -21,12 +22,16 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.Fields
         public SuppressWarningAttribute()
         {
         }
-        
-        public void Initialize(IAspectBuilder<IField> aspectBuilder)
+
+        public void BuildEligibility(IEligibilityBuilder<IField> builder) { }
+
+        public void BuildAspect(IAspectBuilder<IField> builder)
         {
-            aspectBuilder.Diagnostics.Suppress( null, _suppression1 );
-            aspectBuilder.Diagnostics.Suppress( null, _suppression2 );
+            builder.Diagnostics.Suppress( null, _suppression1 );
+            builder.Diagnostics.Suppress( null, _suppression2 );
         }
+
+        
     }
 
     [TestOutput]

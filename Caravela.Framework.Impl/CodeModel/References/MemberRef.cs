@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
     /// </summary>
     /// <typeparam name="T"></typeparam>
     internal readonly struct MemberRef<T> : IMemberRef<T>
-        where T : class, IMember
+        where T : class, IMemberOrNamedType
     {
         public MemberRef( ISymbol symbol )
         {
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
             this.Target = symbol;
         }
 
-        public MemberRef( MemberBuilder builder )
+        public MemberRef( MemberOrNamedTypeBuilder builder )
         {
             this.Target = builder;
         }
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
             => this.Target switch
             {
                 ISymbol symbol => symbol.Name,
-                IMemberBuilder builder => builder.Name,
+                IMemberOrNamedTypeBuilder builder => builder.Name,
                 _ => throw new AssertionFailedException()
             };
 

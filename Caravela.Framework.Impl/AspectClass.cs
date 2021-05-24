@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
@@ -23,7 +24,7 @@ namespace Caravela.Framework.Impl
     /// <summary>
     /// Represents the metadata of an aspect class. This class is compilation-independent. 
     /// </summary>
-    internal class AspectClassMetadata : IAspectClassMetadata
+    internal class AspectClass : IAspectClass
     {
         private readonly Dictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
 
@@ -43,7 +44,7 @@ namespace Caravela.Framework.Impl
         /// <summary>
         /// Gets metadata of the base aspect class.
         /// </summary>
-        public AspectClassMetadata? BaseClass { get; }
+        public AspectClass? BaseClass { get; }
 
         public CompileTimeProject Project { get; }
 
@@ -65,13 +66,13 @@ namespace Caravela.Framework.Impl
         public bool CanExpandToSource { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AspectClassMetadata"/> class.
+        /// Initializes a new instance of the <see cref="AspectClass"/> class.
         /// </summary>
         /// <param name="aspectTypeSymbol"></param>
         /// <param name="aspectDriver">Can be null for testing.</param>
-        private AspectClassMetadata(
+        private AspectClass(
             INamedTypeSymbol aspectTypeSymbol,
-            AspectClassMetadata? baseClass,
+            AspectClass? baseClass,
             IAspectDriver? aspectDriver,
             CompileTimeProject project )
         {
@@ -89,6 +90,8 @@ namespace Caravela.Framework.Impl
 
                 this._prototypeAspectInstance =
                     (IAspect) FormatterServices.GetUninitializedObject( this.AspectType ).AssertNotNull();
+
+                // TODO: get all eligibility rules from the prototype instance and combine them into a single rule.
 
                 // TODO: We may have a custom attribute to enable that feature.
                 this.CanExpandToSource = this.AspectType.GetConstructor( Type.EmptyTypes ) != null;
@@ -112,19 +115,19 @@ namespace Caravela.Framework.Impl
         public AspectInstance CreateAspectInstance( IAspect aspect, IDeclaration target ) => new( aspect, target, this );
 
         /// <summary>
-        /// Creates an instance of the <see cref="AspectClassMetadata"/> class.
+        /// Creates an instance of the <see cref="AspectClass"/> class.
         /// </summary>
         public static bool TryCreate(
             INamedTypeSymbol aspectNamedType,
-            AspectClassMetadata? baseAspectType,
+            AspectClass? baseAspectType,
             IAspectDriver? aspectDriver,
             CompileTimeProject compileTimeProject,
             IDiagnosticAdder diagnosticAdder,
-            [NotNullWhen( true )] out AspectClassMetadata? aspectClassMetadata )
+            [NotNullWhen( true )] out AspectClass? aspectClassMetadata )
         {
             var layersBuilder = ImmutableArray.CreateBuilder<AspectLayer>();
 
-            var newAspectType = new AspectClassMetadata( aspectNamedType, baseAspectType, aspectDriver, compileTimeProject );
+            var newAspectType = new AspectClass( aspectNamedType, baseAspectType, aspectDriver, compileTimeProject );
 
             // Add the default part.
             layersBuilder.Add( new AspectLayer( newAspectType, null ) );
@@ -203,31 +206,35 @@ namespace Caravela.Framework.Impl
                 _ => false
             };
 
-        public bool IsEligible( ISymbol symbol )
+        public bool IsEligible( ISymbol symbol, EligibilityValue requiredEligibility )
             => symbol switch
             {
-                IMethodSymbol method => this._prototypeAspectInstance is IAspect<IAspectTarget> ||
-                                        this._prototypeAspectInstance is IAspect<IMember> ||
-                                        this._prototypeAspectInstance is IAspect<IMethodBase> ||
-                                        (this._prototypeAspectInstance is IAspect<IMethod> && IsMethod( method.MethodKind )) ||
-                                        (this._prototypeAspectInstance is IAspect<IConstructor> && IsConstructor( method.MethodKind )),
+                // TODO: Map the symbol to a code model declaration (which requires a CompilationModel), then simply
+                // call our aggregate eligibility rule here.
+
+                IMethodSymbol method =>
+                    this._prototypeAspectInstance is IAspect<IAspectTarget> ||
+                    this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
+                    this._prototypeAspectInstance is IAspect<IMethodBase> ||
+                    (this._prototypeAspectInstance is IAspect<IMethod> && IsMethod( method.MethodKind )) ||
+                    (this._prototypeAspectInstance is IAspect<IConstructor> && IsConstructor( method.MethodKind )),
 
                 IPropertySymbol => this._prototypeAspectInstance is IAspect<IAspectTarget> ||
-                                   this._prototypeAspectInstance is IAspect<IMember> ||
+                                   this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
                                    this._prototypeAspectInstance is IAspect<IFieldOrProperty> ||
                                    this._prototypeAspectInstance is IAspect<IProperty>,
 
                 IFieldSymbol => this._prototypeAspectInstance is IAspect<IAspectTarget> ||
-                                this._prototypeAspectInstance is IAspect<IMember> ||
+                                this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
                                 this._prototypeAspectInstance is IAspect<IFieldOrProperty> ||
                                 this._prototypeAspectInstance is IAspect<IField>,
 
                 IEventSymbol => this._prototypeAspectInstance is IAspect<IAspectTarget> ||
-                                this._prototypeAspectInstance is IAspect<IMember> ||
+                                this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
                                 this._prototypeAspectInstance is IAspect<IEvent>,
 
                 INamedTypeSymbol => this._prototypeAspectInstance is IAspect<IAspectTarget> ||
-                                    this._prototypeAspectInstance is IAspect<IMember> ||
+                                    this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
                                     this._prototypeAspectInstance is IAspect<INamedType>,
 
                 _ => false

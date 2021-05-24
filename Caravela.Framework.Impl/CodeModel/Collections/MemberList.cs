@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
     internal abstract class MemberList<TMember, TSource> : DeclarationList<TMember, TSource>, IMemberList<TMember>
-        where TMember : class, IMember
+        where TMember : class, IMemberOrNamedType
         where TSource : IMemberRef<TMember>
     {
         protected MemberList( IDeclaration? containingDeclaration, IEnumerable<TSource> sourceItems ) : base( containingDeclaration, sourceItems ) { }

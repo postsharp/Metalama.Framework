@@ -5,28 +5,6 @@ using System;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    internal enum LinkerAnnotationOrder
-    {
-        /// <summary>
-        /// Calls the semantic in the state it is after the current aspect has been applied.
-        /// </summary>
-        Default,
-
-        /// <summary>
-        /// Calls the semantic in the original order, before any transformation.
-        /// </summary>
-        Original
-    }
-
-    internal enum LinkerAnnotationTargetKind
-    {
-        Self,
-        PropertyGetAccessor,
-        PropertySetAccessor,
-        EventAddAccessor,
-        EventRemoveAccessor
-    }
-
     /// <summary>
     /// Wrapper of the linker annotation on nodes.
     /// </summary>

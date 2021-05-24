@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using System;
 
 namespace Caravela.Framework.Aspects
@@ -14,9 +15,14 @@ namespace Caravela.Framework.Aspects
     public abstract class OverrideMethodAspect : Attribute, IAspect<IMethod>
     {
         /// <inheritdoc />
-        public virtual void Initialize( IAspectBuilder<IMethod> aspectBuilder )
+        public virtual void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            aspectBuilder.AdviceFactory.OverrideMethod( aspectBuilder.TargetDeclaration, nameof(this.OverrideMethod) );
+            builder.AdviceFactory.OverrideMethod( builder.TargetDeclaration, nameof(this.OverrideMethod) );
+        }
+
+        public virtual void BuildEligibility( IEligibilityBuilder<IMethod> builder )
+        {
+            builder.ExceptForInheritance().MustBeNonAbstract();
         }
 
         /// <summary>

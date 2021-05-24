@@ -2,7 +2,6 @@ using System;
 using System.Text;
 using static System.Math;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Project;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.NameClashWithTargetSymbols

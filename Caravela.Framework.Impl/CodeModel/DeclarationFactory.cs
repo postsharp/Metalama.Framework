@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -39,6 +40,11 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         public IType GetTypeByReflectionType( Type type ) => this.GetIType( this.CompilationModel.ReflectionMapper.GetTypeSymbol( type ) );
+
+        internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )
+            => (INamespace) this._cache.GetOrAdd(
+                namespaceSymbol.ToRef(),
+                l => new Namespace( (INamespaceSymbol) l.GetSymbol( this.Compilation )!, this.CompilationModel ) );
 
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
             => (IAssembly) this._cache.GetOrAdd(
@@ -166,9 +172,15 @@ namespace Caravela.Framework.Impl.CodeModel
             return this.GetIType( ((ITypeInternal) type).TypeSymbol.AssertNotNull() );
         }
 
-        public T GetDeclaration<T>( T declaration )
-            where T : IDeclaration
+        [return: NotNullIfNotNull( "declaration" )]
+        public T? GetDeclaration<T>( T? declaration )
+            where T : class, IDeclaration
         {
+            if ( declaration == null )
+            {
+                return null;
+            }
+
             if ( declaration.Compilation == this.CompilationModel )
             {
                 return declaration;

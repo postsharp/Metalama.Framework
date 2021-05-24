@@ -107,7 +107,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => ((IDeclarationInternal) declaration).ToRef().Cast<T>();
 
         public static MemberRef<T> ToMemberLink<T>( this T member )
-            where T : class, IMember
+            where T : class, IMemberOrNamedType
             => new( ((IDeclarationInternal) member).ToRef() );
 
         public static Location? GetDiagnosticLocation( this IDeclaration declaration )
@@ -251,10 +251,10 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 Microsoft.CodeAnalysis.Accessibility.NotApplicable => Accessibility.Private,
                 Microsoft.CodeAnalysis.Accessibility.Private => Accessibility.Private,
-                Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal => Accessibility.ProtectedAndInternal,
+                Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal => Accessibility.PrivateProtected,
                 Microsoft.CodeAnalysis.Accessibility.Protected => Accessibility.Protected,
                 Microsoft.CodeAnalysis.Accessibility.Internal => Accessibility.Internal,
-                Microsoft.CodeAnalysis.Accessibility.ProtectedOrInternal => Accessibility.ProtectedOrInternal,
+                Microsoft.CodeAnalysis.Accessibility.ProtectedOrInternal => Accessibility.ProtectedInternal,
                 Microsoft.CodeAnalysis.Accessibility.Public => Accessibility.Public,
                 _ => throw new ArgumentOutOfRangeException()
             };
@@ -263,10 +263,10 @@ namespace Caravela.Framework.Impl.CodeModel
             => accessibility switch
             {
                 Accessibility.Private => Microsoft.CodeAnalysis.Accessibility.Private,
-                Accessibility.ProtectedAndInternal => Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal,
+                Accessibility.PrivateProtected => Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal,
                 Accessibility.Protected => Microsoft.CodeAnalysis.Accessibility.Protected,
                 Accessibility.Internal => Microsoft.CodeAnalysis.Accessibility.Internal,
-                Accessibility.ProtectedOrInternal => Microsoft.CodeAnalysis.Accessibility.ProtectedOrInternal,
+                Accessibility.ProtectedInternal => Microsoft.CodeAnalysis.Accessibility.ProtectedOrInternal,
                 Accessibility.Public => Microsoft.CodeAnalysis.Accessibility.Public,
                 _ => throw new ArgumentOutOfRangeException()
             };

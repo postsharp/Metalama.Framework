@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         private static SyntaxTokenList GetAccessorSyntaxModifierList( IMethod accessor )
         {
-            var methodGroup = (IMember) accessor.ContainingDeclaration!;
+            var methodGroup = (IMemberOrNamedType) accessor.ContainingDeclaration!;
 
             // TODO: Unify with ToRoslynAccessibility and some roslyn helper?
             var tokens = new List<SyntaxToken>();
@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.Transformations
             return TokenList( tokens );
         }
 
-        private static void AddAccessibilityTokens( IMember member, List<SyntaxToken> tokens )
+        private static void AddAccessibilityTokens( IMemberOrNamedType member, List<SyntaxToken> tokens )
         {
             switch ( member.Accessibility )
             {
@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.Transformations
 
                     break;
 
-                case Accessibility.ProtectedAndInternal:
+                case Accessibility.PrivateProtected:
                     tokens.Add( Token( SyntaxKind.PrivateKeyword ) );
                     tokens.Add( Token( SyntaxKind.ProtectedKeyword ) );
 
@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.Transformations
 
                     break;
 
-                case Accessibility.ProtectedOrInternal:
+                case Accessibility.ProtectedInternal:
                     tokens.Add( Token( SyntaxKind.ProtectedKeyword ) );
                     tokens.Add( Token( SyntaxKind.InternalKeyword ) );
 

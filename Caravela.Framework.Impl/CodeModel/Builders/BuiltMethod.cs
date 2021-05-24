@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override DeclarationBuilder Builder => this.MethodBuilder;
 
-        public override MemberBuilder MemberBuilder => this.MethodBuilder;
+        public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.MethodBuilder;
 
         public IMethodList LocalFunctions => MethodList.Empty;
 

@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override DeclarationBuilder Builder => this.PropertyBuilder;
 
-        public override MemberBuilder MemberBuilder => this.PropertyBuilder;
+        public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.PropertyBuilder;
 
         [Memo]
         public IParameterList Parameters

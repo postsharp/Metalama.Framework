@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Caravela.Framework.Project;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
 

@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.References;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
@@ -20,5 +21,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         private ParameterList() { }
 
         public static ParameterList Empty { get; } = new();
+
+        public IParameter this[ string name ] => this.Single( p => p.Name == name );
     }
 }
