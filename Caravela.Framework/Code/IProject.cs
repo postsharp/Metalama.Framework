@@ -1,7 +1,7 @@
 using Caravela.Framework.Validation;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Project
+namespace Caravela.Framework.Code
 {
     [InternalImplement]
     public interface IProject

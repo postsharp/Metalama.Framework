@@ -1,5 +1,4 @@
 #pragma warning disable CS8600, CS8603, CS8618, CS0169, CS0067
-using Caravela.Framework.Project;
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 

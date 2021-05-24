@@ -1,9 +1,9 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Validation;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 
-namespace Caravela.Framework.Project
+namespace Caravela.Framework.Policies
 {
     [InternalImplement]
     public interface IProjectPolicyBuilder
@@ -13,9 +13,8 @@ namespace Caravela.Framework.Project
         IProject Project { get; }
         
         // The builder intentionally does not give access to any ICompilation because project policies are compilation-independent.
-        // AddAspects is designed to capture the query expression and not the results of the query results. The query can be executed
-        // against introduced declarations.
-        INamedTypeSet WithTypes( Func<IQueryableCompilation, IQueryable<INamedType>> typeQuery );
+        
+        INamedTypeSet WithTypes( Func<ICompilation, IEnumerable<INamedType>> typeQuery );
 
         
         /// <summary>

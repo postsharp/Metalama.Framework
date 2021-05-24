@@ -3,7 +3,7 @@ using Caravela.Framework.Code;
 using System;
 using System.Linq.Expressions;
 
-namespace Caravela.Framework.Project
+namespace Caravela.Framework.Policies
 {
     /// <summary>
     /// Represents a set of aspect targets and offers the ability to add aspects to them.

@@ -1,4 +1,4 @@
-namespace Caravela.Framework.Project
+namespace Caravela.Framework.Policies
 {
     /// <summary>
     /// A type policy is a nested type of arbitrary name that implements <see cref="ITypePolicy"/> and

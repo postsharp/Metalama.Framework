@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Code
 {

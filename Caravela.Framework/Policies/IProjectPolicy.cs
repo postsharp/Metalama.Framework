@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-namespace Caravela.Framework.Project
+namespace Caravela.Framework.Policies
 {
     /// <summary>
     /// A project policy is a type that can add aspects and validators to the compilation in which they are defined.

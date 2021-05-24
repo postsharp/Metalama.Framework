@@ -1,5 +1,3 @@
-using Caravela.Framework.Project;
-
 namespace Caravela.Framework.Aspects
 {
     [CompileTimeOnly]

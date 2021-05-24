@@ -1,4 +1,6 @@
-namespace Caravela.Framework.Project
+using Caravela.Framework.Policies;
+
+namespace Caravela.Framework.Code
 {
     /// <summary>
     /// Base interface for project configuration objects, which are a way for compile-time libraries

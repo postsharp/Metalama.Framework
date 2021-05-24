@@ -3,7 +3,7 @@ using Caravela.Framework.Code;
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Project
+namespace Caravela.Framework.Policies
 {
     /// <summary>
     /// Represents a set of types. Offers the ability to add aspects to types or to select members

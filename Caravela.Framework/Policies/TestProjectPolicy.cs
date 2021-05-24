@@ -5,14 +5,15 @@ using Caravela.Framework.Eligibility;
 using System;
 using System.Linq;
 
-namespace Caravela.Framework.Project
+namespace Caravela.Framework.Policies
 {
     internal class TestProjectPolicy : IProjectPolicy
     {
         public void BuildPolicy( IProjectPolicyBuilder builder )
         {
-            builder.WithTypes( compilation => compilation.Types.DerivedFrom( typeof(IDisposable) ).Where( t => !t.IsAbstract ) )
+            builder.WithTypes( compilation => compilation.DeclaredTypes.DerivedFrom( typeof(IDisposable) ).Where( t => !t.IsAbstract ) )
                 .WithMembers( t => t.Methods.Where( m => m.GetEligibility<MyAspect>() == EligibilityValue.Eligible ) )
                 .AddAspect<MyAspect>();
         }
     }
+}

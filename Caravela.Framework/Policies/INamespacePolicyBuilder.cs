@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace Caravela.Framework.Project
+namespace Caravela.Framework.Policies
 {
     [InternalImplement]
     public interface INamespacePolicyBuilder
@@ -14,11 +14,11 @@ namespace Caravela.Framework.Project
         
         // The builder intentionally does not give access to the INamespace because they must be compilation-neutral.
 
-        void AddAspect<TAspect>( Func<IQueryableNamespace, IQueryable<INamedType>> typeQuery, Expression<Func<INamedType, TAspect>> createAspect )
+        void AddAspect<TAspect>( Func<INamespace, IQueryable<INamedType>> typeQuery, Expression<Func<INamedType, TAspect>> createAspect )
             where TAspect : Attribute, IAspect<INamedType>;
 
         void AddAspect<TMember, TAspect>(
-            Func<IQueryableNamespace, IQueryable<INamedType>> typeQuery,
+            Func<INamespace, IQueryable<INamedType>> typeQuery,
             Predicate<TMember> memberSelector,
             Expression<Func<TMember, TAspect>> createAspect )
             where TMember : class, IAspectTarget
