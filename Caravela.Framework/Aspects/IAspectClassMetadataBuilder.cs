@@ -6,7 +6,7 @@ using Caravela.Framework.Validation;
 namespace Caravela.Framework.Aspects
 {
     [InternalImplement]
-    public interface IAspectClassBuilder
+    public interface IAspectClassMetadataBuilder
     {
         string DisplayName { get; set; }
 

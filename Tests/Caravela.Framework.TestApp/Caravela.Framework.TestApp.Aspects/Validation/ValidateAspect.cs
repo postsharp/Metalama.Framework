@@ -55,13 +55,14 @@ namespace Caravela.Framework.TestApp.Aspects.Validation
         [OverrideFieldOrPropertySetTemplate]
         private void ValidateFieldOrPropertySetter()
         {
-            // Call any other validation method.
-            meta.Proceed();
-
+         
             foreach (var marker in meta.Markers)
             {
                 ((ValidateAttribute)marker.Marker).Validate(meta.FieldOrProperty.Name, meta.FieldOrProperty.GetValue(meta.This));
             }
+
+            meta.Proceed();
+
         }
 
         public void BuildAspect(IAspectBuilder<IMethod> builder)

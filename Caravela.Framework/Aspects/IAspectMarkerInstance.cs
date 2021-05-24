@@ -3,11 +3,13 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Validation;
+using System;
 
 namespace Caravela.Framework.Aspects
 {
     [InternalImplement]
     [CompileTimeOnly]
+    [Obsolete( "Not implemented." )]
     public interface IAspectMarkerInstance
     {
         IAspectMarker Marker { get; }

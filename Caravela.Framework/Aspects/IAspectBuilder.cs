@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Validation;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -16,11 +17,13 @@ namespace Caravela.Framework.Aspects
     [InternalImplement]
     public interface IAspectBuilder : IValidatorAdder
     {
+        [Obsolete( "Not implemented." )]
         IProject Project { get; }
 
         /// <summary>
         /// Gets the list of markers that have contributed to the current aspect instance to be created.
         /// </summary>
+        [Obsolete( "Not implemented." )]
         IReadOnlyList<IAspectMarkerInstance> Markers { get; }
 
         /// <summary>
@@ -29,6 +32,7 @@ namespace Caravela.Framework.Aspects
         /// using <see cref="IAspect{T}.BuildAspect"/>. The other instances can are exposed in this property and are sorted
         /// by order of decreasing priority.
         /// </summary>
+        [Obsolete( "Not implemented." )]
         IReadOnlyList<IAspectInstance> OtherInstances { get; }
 
         /// <summary>

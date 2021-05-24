@@ -12,11 +12,6 @@ namespace Caravela.Framework.Aspects
     [CompileTime]
     public interface IAspect { }
 
-    public interface IAspectClassInitializer
-    {
-        void BuildAspectClass( IAspectClassBuilder builder );
-    }
-
     /// <summary>
     /// The base interface for all aspects, with the type parameter indicating to which types
     /// of declarations the aspect can be added.

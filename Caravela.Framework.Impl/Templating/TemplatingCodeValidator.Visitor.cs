@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
@@ -37,18 +36,6 @@ namespace Caravela.Framework.Impl.Templating
             private ISymbol? _currentDeclaration;
 
             public bool HasError { get; private set; }
-
-            public Visitor(
-                SemanticModel semanticModel,
-                Action<Diagnostic> reportDiagnostic,
-                DesignTimeAspectPipeline pipeline,
-                CancellationToken cancellationToken ) : this(
-                semanticModel,
-                reportDiagnostic,
-                pipeline.ServiceProvider,
-                pipeline.IsCompileTimeSyntaxTreeOutdated( semanticModel.SyntaxTree.FilePath ),
-                true,
-                cancellationToken ) { }
 
             public Visitor(
                 SemanticModel semanticModel,
