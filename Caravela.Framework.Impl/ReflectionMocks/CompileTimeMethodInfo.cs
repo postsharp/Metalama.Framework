@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
             return new CompileTimeMethodInfo( method );
         }
 
-        public static ITypeSymbol? FindDeclaringTypeSymbol( Member method )
+        public static ITypeSymbol? FindDeclaringTypeSymbol( MemberOrNamedType method )
         {
             var methodDeclaringType = (method.DeclaringType as ITypeInternal)!;
             var typeSymbol = methodDeclaringType.TypeSymbol;

@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public bool IsParams => this._parameter.IsParams;
 
-        public IMember DeclaringMember => this._parameter.DeclaringMember;
+        public IMemberOrNamedType DeclaringMember => this._parameter.DeclaringMember;
 
         public ParameterInfo ToParameterInfo() => this._parameter.ToParameterInfo();
 

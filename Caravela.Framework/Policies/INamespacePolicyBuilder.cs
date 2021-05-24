@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 namespace Caravela.Framework.Policies
 {
     [InternalImplement]
+    [Obsolete( "Not implemented." )]
     public interface INamespacePolicyBuilder
     {
         IProject Project { get; }

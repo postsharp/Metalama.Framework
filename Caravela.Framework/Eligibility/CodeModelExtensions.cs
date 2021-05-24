@@ -5,8 +5,11 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using System;
 
+// ReSharper disable UnusedTypeParameter
+
 namespace Caravela.Framework.Eligibility
 {
+    [Obsolete( "Not implemented." )]
     public static class CodeModelExtensions
     {
         public static EligibilityValue GetEligibility<T>( this IAspectTarget declaration )
@@ -21,8 +24,8 @@ namespace Caravela.Framework.Eligibility
             where T : IAspect<IMethodBase>
             => throw new NotImplementedException();
 
-        public static EligibilityValue GetEligibility<T>( this IMember declaration )
-            where T : IAspect<IMember>
+        public static EligibilityValue GetEligibility<T>( this IMemberOrNamedType declaration )
+            where T : IAspect<IMemberOrNamedType>
             => throw new NotImplementedException();
 
         public static EligibilityValue GetEligibility<T>( this INamedType declaration )

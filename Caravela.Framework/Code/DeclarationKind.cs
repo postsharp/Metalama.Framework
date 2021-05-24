@@ -77,6 +77,10 @@ namespace Caravela.Framework.Code
         /// <see cref="DeclarationKind"/> for the current compilation is <see cref="Compilation"/> and not <see cref="ReferencedAssembly"/>. 
         /// </summary>
         ReferencedAssembly,
+
+        /// <summary>
+        /// <see cref="INamespace"/>.
+        /// </summary>
         Namespace
     }
 }

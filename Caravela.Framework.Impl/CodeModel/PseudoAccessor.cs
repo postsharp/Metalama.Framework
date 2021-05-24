@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsAsync => false;
 
-        public INamedType? DeclaringType => this._containingMember.DeclaringType;
+        public INamedType DeclaringType => this._containingMember.DeclaringType;
 
         public DeclarationOrigin Origin => DeclarationOrigin.Source;
 
@@ -134,7 +134,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             public PseudoAccessor DeclaringAccessor { get; }
 
-            public IMember DeclaringMember => this.DeclaringAccessor;
+            public IMemberOrNamedType DeclaringMember => this.DeclaringAccessor;
 
             public RefKind RefKind
                 => this.DeclaringAccessor.ContainingDeclaration switch

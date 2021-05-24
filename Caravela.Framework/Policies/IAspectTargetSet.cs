@@ -12,6 +12,7 @@ namespace Caravela.Framework.Policies
     /// Represents a set of aspect targets and offers the ability to add aspects to them.
     /// </summary>
     /// <typeparam name="TTarget"></typeparam>
+    [Obsolete( "Not implemented." )]
     public interface IAspectTargetSet<out TTarget>
         where TTarget : class, IAspectTarget
     {

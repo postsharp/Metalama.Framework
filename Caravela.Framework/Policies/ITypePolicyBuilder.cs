@@ -3,8 +3,10 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using System;
 
 namespace Caravela.Framework.Policies
 {
+    [Obsolete( "Not implemented." )]
     public interface ITypePolicyBuilder : IAspectBuilder<INamedType> { }
 }

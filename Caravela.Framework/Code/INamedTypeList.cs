@@ -11,8 +11,10 @@ namespace Caravela.Framework.Code
     /// </summary>
     public interface INamedTypeList : IMemberList<INamedType>
     {
+        [Obsolete( "Not implemented." )]
         IReadOnlyList<INamedType> DerivedFrom( Type type );
 
+        [Obsolete( "Not implemented." )]
         IReadOnlyList<INamedType> DerivedFrom( INamedType type );
     }
 }

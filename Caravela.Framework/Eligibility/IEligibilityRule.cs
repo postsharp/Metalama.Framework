@@ -10,6 +10,7 @@ namespace Caravela.Framework.Eligibility
     /// object extension (typically an aspect or aspect marker).
     /// </summary>
     /// <typeparam name="T">The type of object that the extension can be applied to.</typeparam>
+    [Obsolete( "Not implemented." )]
     public interface IEligibilityRule<in T>
     {
         /// <summary>

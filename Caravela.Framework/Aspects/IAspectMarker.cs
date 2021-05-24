@@ -8,6 +8,7 @@ namespace Caravela.Framework.Aspects
 {
     public interface IAspectMarker { }
 
+    // ReSharper disable once UnusedTypeParameter
     public interface IAspectMarker<in TMarkedDeclaration, TAspectTarget, TAspectClass> : IAspectMarker, IEligible<TMarkedDeclaration>
         where TMarkedDeclaration : class, IDeclaration
         where TAspectTarget : class, IAspectTarget

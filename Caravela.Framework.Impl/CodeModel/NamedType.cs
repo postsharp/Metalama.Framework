@@ -21,7 +21,7 @@ using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class NamedType : Member, ITypeInternal, ISdkNamedType
+    internal sealed class NamedType : MemberOrNamedType, ITypeInternal, ISdkNamedType
     {
         internal INamedTypeSymbol TypeSymbol { get; }
 
@@ -50,8 +50,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public override MemberInfo ToMemberInfo() => this.ToType();
 
         public override bool IsReadOnly => this.TypeSymbol.IsReadOnly;
-
-        public override bool IsAsync => false;
 
         public bool HasDefaultConstructor
             => this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||

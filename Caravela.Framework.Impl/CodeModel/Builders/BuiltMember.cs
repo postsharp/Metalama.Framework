@@ -5,45 +5,17 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Reflection;
-using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal abstract class BuiltMember : BuiltDeclaration, IMember, IMemberRef<IMember>
+    internal abstract class BuiltMember : BuiltMemberOrNamedType, IMember, IMemberRef<IMember>
     {
         protected BuiltMember( CompilationModel compilation ) : base( compilation ) { }
 
-        public abstract MemberBuilder MemberBuilder { get; }
+        IMember IDeclarationRef<IMember>.Resolve( CompilationModel compilation ) => throw new NotImplementedException();
 
-        public Accessibility Accessibility => this.MemberBuilder.Accessibility;
+        ISymbol IDeclarationRef<IMember>.GetSymbol( Compilation compilation ) => throw new NotImplementedException();
 
-        public string Name => this.MemberBuilder.Name;
-
-        public bool IsAbstract => this.MemberBuilder.IsAbstract;
-
-        public bool IsStatic => this.MemberBuilder.IsStatic;
-
-        public bool IsVirtual => this.MemberBuilder.IsVirtual;
-
-        public bool IsSealed => this.MemberBuilder.IsSealed;
-
-        public bool IsReadOnly => this.MemberBuilder.IsReadOnly;
-
-        public bool IsOverride => this.MemberBuilder.IsOverride;
-
-        public bool IsNew => this.MemberBuilder.IsNew;
-
-        public bool IsAsync => this.MemberBuilder.IsAsync;
-
-        public INamedType? DeclaringType => this.Compilation.Factory.GetDeclaration( this.MemberBuilder.DeclaringType );
-
-        public MemberInfo ToMemberInfo() => throw new NotImplementedException();
-
-        IMember IDeclarationRef<IMember>.Resolve( CompilationModel compilation ) => (IMember) this.GetForCompilation( compilation );
-
-        ISymbol IDeclarationRef<IMember>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
-
-        public object? Target => throw new NotImplementedException();
+        public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
     }
 }

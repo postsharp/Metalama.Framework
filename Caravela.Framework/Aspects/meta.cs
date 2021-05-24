@@ -79,9 +79,9 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         public static IProperty Property => CurrentContext.Property;
 
-        public static IFieldOrProperty FieldOrProperty => throw new NotImplementedException();
+        public static IFieldOrProperty FieldOrProperty => CurrentContext.FieldOrProperty;
 
-        public static IMember Member => throw new NotImplementedException();
+        public static IMemberOrNamedType Member => CurrentContext.Member;
 
         /// <summary>
         /// Gets the target event, or null if the advice does not target an event.
@@ -163,6 +163,10 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         public static IReadOnlyDictionary<string, object?> Tags => CurrentContext.Tags;
 
+        /// <summary>
+        /// Gets the list of aspect markers related to the current aspect instance.
+        /// </summary>
+        [Obsolete( "Not implemented." )]
         public static IReadOnlyList<IAspectMarkerInstance> Markers => throw new NotImplementedException();
 
         /// <summary>

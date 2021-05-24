@@ -110,7 +110,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsAsync => false;
 
-        public INamedType? DeclaringType => this._containingDeclaration.DeclaringType;
+        public INamedType DeclaringType => this._containingDeclaration.DeclaringType;
 
         public override IDeclaration? ContainingDeclaration => this._containingDeclaration;
 
@@ -120,15 +120,15 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IType IMethod.ReturnType => this.ReturnType;
 
-        Accessibility IMember.Accessibility => this.Accessibility;
+        Accessibility IMemberOrNamedType.Accessibility => this.Accessibility;
 
-        string IMember.Name => this.Name;
+        string IMemberOrNamedType.Name => this.Name;
 
-        bool IMember.IsStatic => this.IsStatic;
+        bool IMemberOrNamedType.IsStatic => this.IsStatic;
 
         bool IMember.IsVirtual => this.IsVirtual;
 
-        bool IMember.IsSealed => this.IsSealed;
+        bool IMemberOrNamedType.IsSealed => this.IsSealed;
 
         public IGenericParameterBuilder AddGenericParameter( string name )
         {

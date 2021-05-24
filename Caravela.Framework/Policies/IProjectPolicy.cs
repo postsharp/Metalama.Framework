@@ -1,6 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
+using System;
+
 namespace Caravela.Framework.Policies
 {
     /// <summary>
@@ -13,6 +16,8 @@ namespace Caravela.Framework.Policies
     ///  in inverse depth order, i.e. the one closest to the root directory first, and the ones located in the project itself last.
     ///  When several policies have the same directory depth, they are alphabetically ordered by type name.
     /// </remarks>
+    [CompileTimeOnly]
+    [Obsolete( "Not implemented." )]
     public interface IProjectPolicy
     {
         void BuildPolicy( IProjectPolicyBuilder builder );

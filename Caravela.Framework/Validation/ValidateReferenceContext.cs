@@ -3,9 +3,13 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using System;
+
+// ReSharper disable UnassignedGetOnlyAutoProperty
 
 namespace Caravela.Framework.Validation
 {
+    [Obsolete( "Not implemented." )]
     public readonly struct ValidateReferenceContext<T>
         where T : IDeclaration
     {

@@ -8,6 +8,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Eligibility
 {
+    [Obsolete( "Not implemented." )]
     public static class EligibilityExtensions
     {
         public static IEligibilityBuilder<INamedType> DeclaringType<T>( this IEligibilityBuilder<T> eligibilityBuilder )
@@ -85,7 +86,7 @@ namespace Caravela.Framework.Eligibility
             => eligibilityBuilder.AddRule( new EligibilityRule<T>( eligibilityBuilder.Ineligibility, predicate, getJustification ) );
 
         public static void MustHaveAccessibility(
-            this IEligibilityBuilder<IMember> eligibilityBuilder,
+            this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder,
             Accessibility accessibility,
             params Accessibility[] otherAccessibilities )
             => eligibilityBuilder.Require(
@@ -101,17 +102,17 @@ namespace Caravela.Framework.Eligibility
                     return $"{member} must be {formattedAccessibilities}";
                 } );
 
-        public static void MustBeStatic( this IEligibilityBuilder<IMember> eligibilityBuilder )
+        public static void MustBeStatic( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
             => eligibilityBuilder.Require(
                 member => member.IsStatic,
                 member => $"{member} must be static" );
 
-        public static void MustBeNonStatic( this IEligibilityBuilder<IMember> eligibilityBuilder )
+        public static void MustBeNonStatic( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
             => eligibilityBuilder.Require(
                 member => !member.IsStatic,
                 member => $"{member} must be non-static" );
 
-        public static void MustBeNonAbstract( this IEligibilityBuilder<IMember> eligibilityBuilder )
+        public static void MustBeNonAbstract( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
             => eligibilityBuilder.Require(
                 member => !member.IsStatic,
                 member => $"{member} must be non-static" );
@@ -126,7 +127,8 @@ namespace Caravela.Framework.Eligibility
             T obj,
             EligibilityValue requiredEligibility,
             bool requiresJustification,
-            IFormatProvider formatProvider ) where T : class
+            IFormatProvider formatProvider )
+            where T : class
         {
             var eligibility = rule.GetEligibility( obj );
             string? justification = null;

@@ -13,7 +13,7 @@ using System.Linq;
 namespace Caravela.Framework.Impl.Advices
 {
     internal abstract class IntroduceMemberAdvice<TBuilder> : Advice
-        where TBuilder : MemberBuilder
+        where TBuilder : MemberOrNamedTypeBuilder
     {
         public IntroductionScope Scope { get; }
 
@@ -25,12 +25,12 @@ namespace Caravela.Framework.Impl.Advices
 
         protected TBuilder MemberBuilder { get; init; }
 
-        protected IMember? TemplateMember { get; }
+        protected IMemberOrNamedType? TemplateMember { get; }
 
         public IntroduceMemberAdvice(
             AspectInstance aspect,
             INamedType targetDeclaration,
-            IMember? templateMember,
+            IMemberOrNamedType? templateMember,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
             IReadOnlyDictionary<string, object?> tags,

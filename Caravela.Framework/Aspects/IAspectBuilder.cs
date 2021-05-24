@@ -57,12 +57,12 @@ namespace Caravela.Framework.Aspects
         /// </remarks>
         void SkipAspect();
 
+        // TODO: This is not well-defined. It may be better to expose this on IAdvice.
+
         /// <summary>
         /// Gets a set of opaque properties that can be set by the aspect <see cref="IAspect{T}.BuildAspect"/> method and are then made
         /// visible in <see cref="meta.Tags"/>.
         /// </summary>
-
-        // TODO: This is not well-defined. It may be better to expose this on IAdvice.
         IDictionary<string, object?> Tags { get; }
 
         CancellationToken CancellationToken { get; }

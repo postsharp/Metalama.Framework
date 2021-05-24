@@ -5,13 +5,6 @@ using System;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    [Flags]
-    internal enum LinkerGeneratedFlags
-    {
-        None = 0,
-        Flattenable = 1
-    }
-
     internal readonly struct LinkerGeneratedAnnotation
     {
         public LinkerGeneratedFlags Flags { get; }

@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override DeclarationBuilder Builder => this.PropertyBuilder;
 
-        public override MemberBuilder MemberBuilder => this.PropertyBuilder;
+        public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.PropertyBuilder;
 
         [Memo]
         public IParameterList Parameters

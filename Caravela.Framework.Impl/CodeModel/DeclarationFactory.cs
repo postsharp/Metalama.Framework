@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -171,9 +172,15 @@ namespace Caravela.Framework.Impl.CodeModel
             return this.GetIType( ((ITypeInternal) type).TypeSymbol.AssertNotNull() );
         }
 
-        public T GetDeclaration<T>( T declaration )
-            where T : IDeclaration
+        [return: NotNullIfNotNull( "declaration" )]
+        public T? GetDeclaration<T>( T? declaration )
+            where T : class, IDeclaration
         {
+            if ( declaration == null )
+            {
+                return null;
+            }
+
             if ( declaration.Compilation == this.CompilationModel )
             {
                 return declaration;

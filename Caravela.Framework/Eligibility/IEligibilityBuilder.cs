@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Validation;
+using System;
 
 namespace Caravela.Framework.Eligibility
 {
@@ -13,12 +14,14 @@ namespace Caravela.Framework.Eligibility
         /// value of this property is <see cref="EligibilityValue.Ineligible"/>, but it can be changed to <see cref="EligibilityValue.EligibleForInheritanceOnly"/>
         /// using <see cref="EligibilityExtensions.ExceptForInheritance{T}"/>.
         /// </summary>
+        [Obsolete( "Not implemented." )]
         EligibilityValue Ineligibility { get; }
 
         /// <summary>
         /// Builds an immutable rule from the current builder instance.
         /// </summary>
         /// <returns></returns>
+        [Obsolete( "Not implemented." )]
         IEligibilityRule<object> Build();
     }
 
@@ -28,6 +31,7 @@ namespace Caravela.Framework.Eligibility
         /// Adds a rule to the current builder.
         /// </summary>
         /// <param name="rule"></param>
+        [Obsolete( "Not implemented." )]
         void AddRule( IEligibilityRule<T> rule );
     }
 }

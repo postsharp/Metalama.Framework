@@ -21,9 +21,4 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ITypeSymbol GetTypeSymbol( Type type );
     }
-
-    internal interface ICompilationElementFactory : ISyntaxFactory
-    {
-        CompilationModel CompilationModel { get; }
-    }
 }

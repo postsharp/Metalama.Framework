@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.CodeModel
         dynamic IPropertyInvocation.SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args )
             => this.Invocation.SetIndexerValue( instance, value, args );
 
-        MemberRef<IMember> IReplaceMemberTransformation.ReplacedMember => new( this._symbol );
+        MemberRef<IMemberOrNamedType> IReplaceMemberTransformation.ReplacedMember => new( this._symbol );
 
         IDeclaration IObservableTransformation.ContainingDeclaration => this.ContainingDeclaration.AssertNotNull();
     }

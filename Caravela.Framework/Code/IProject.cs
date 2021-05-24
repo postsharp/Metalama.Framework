@@ -17,7 +17,7 @@ namespace Caravela.Framework.Code
         string AssemblyName { get; }
 
         /// <summary>
-        /// Symbols like <c>DEBUG</c>, <c>TRACE</c> (also named constants).
+        /// Gets the list of defined symbols like <c>DEBUG</c>, <c>TRACE</c> (also named constants).
         /// </summary>
         string DefinedSymbols { get; }
 

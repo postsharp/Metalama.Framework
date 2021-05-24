@@ -11,6 +11,7 @@ namespace Caravela.Framework.Eligibility
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [InternalImplement]
+    [Obsolete( "Not implemented." )]
     public interface IDescribedObject<out T> : IFormattable
     {
         T Object { get; }

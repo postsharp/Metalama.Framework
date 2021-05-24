@@ -3,6 +3,8 @@
 
 using System;
 
+#pragma warning disable 618
+
 namespace Caravela.Framework.Eligibility.Implementation
 {
     internal class CastEligibilityRule<TIn, TOut> : IEligibilityRule<TOut>

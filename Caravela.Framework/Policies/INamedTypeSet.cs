@@ -12,6 +12,7 @@ namespace Caravela.Framework.Policies
     /// Represents a set of types. Offers the ability to add aspects to types or to select members
     /// using <see cref="WithMembers{T}"/>.
     /// </summary>
+    [Obsolete( "Not implemented." )]
     public interface INamedTypeSet : IAspectTargetSet<INamedType>
     {
         IAspectTargetSet<T> WithMembers<T>( Func<INamedType, IEnumerable<T>> selector )

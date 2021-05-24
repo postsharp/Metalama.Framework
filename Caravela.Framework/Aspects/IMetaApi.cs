@@ -26,7 +26,7 @@ namespace Caravela.Framework.Aspects
 
         IDeclaration Declaration { get; }
 
-        IMember Member { get; }
+        IMemberOrNamedType Member { get; }
 
         /// <summary>
         /// Gets the method metadata, or the accessor if this is a template for a field, property or event.

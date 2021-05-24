@@ -76,6 +76,7 @@ namespace Caravela.Framework.Impl
                     ImmutableDictionary<string, object?>.Empty );
         }
 
+#pragma warning disable 618 // Not implemented
         void IValidatorAdder.AddTargetValidator<TTarget>( TTarget targetDeclaration, Action<ValidateReferenceContext<TTarget>> validator )
             => throw new NotImplementedException();
 
@@ -84,5 +85,6 @@ namespace Caravela.Framework.Impl
             IReadOnlyList<DeclarationReferenceKind> referenceKinds,
             IReadOnlyDictionary<string, string>? properties )
             => throw new NotImplementedException();
+#pragma warning restore 618
     }
 }

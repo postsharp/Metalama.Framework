@@ -14,7 +14,8 @@ namespace Caravela.Framework.Validation
     /// Means that an internal member can be referenced only by a specific type.
     /// </summary>
     [AttributeUsage( AttributeTargets.All & ~AttributeTargets.Assembly )]
-    public class FriendAttribute : Attribute, IAspect<IMember>
+    [Obsolete( "Not implemented." )]
+    public class FriendAttribute : Attribute, IAspect<IMemberOrNamedType>
     {
         private readonly Type[] _friendTypes;
 
@@ -23,19 +24,19 @@ namespace Caravela.Framework.Validation
             this._friendTypes = otherFriendTypes.Append( friendType ).ToArray();
         }
 
-        public void BuildEligibility( IEligibilityBuilder<IMember> builder )
+        public void BuildEligibility( IEligibilityBuilder<IMemberOrNamedType> builder )
         {
             builder.MustHaveAccessibility( Accessibility.Public, Accessibility.Protected );
         }
 
-        public void BuildAspect( IAspectBuilder<IMember> builder )
+        public void BuildAspect( IAspectBuilder<IMemberOrNamedType> builder )
         {
             var properties = new Dictionary<string, string> { ["FriendTypes"] = string.Join( ";", this._friendTypes.Select( t => t.FullName ) ) };
 
-            builder.AddReferenceValidator<IMember, Validator>( builder.TargetDeclaration, new[] { DeclarationReferenceKind.Any }, properties );
+            builder.AddReferenceValidator<IMemberOrNamedType, Validator>( builder.TargetDeclaration, new[] { DeclarationReferenceKind.Any }, properties );
         }
 
-        private class Validator : IDeclarationReferenceValidator<IMember>
+        private class Validator : IDeclarationReferenceValidator<IMemberOrNamedType>
         {
             private string[] _friendTypes = null!;
 
@@ -44,7 +45,7 @@ namespace Caravela.Framework.Validation
                 this._friendTypes = properties["FriendTypes"].Split( ';' );
             }
 
-            public void ValidateReference( in ValidateReferenceContext<IMember> reference )
+            public void ValidateReference( in ValidateReferenceContext<IMemberOrNamedType> reference )
             {
                 for ( var type = reference.ReferencingType; type != null; type = type.DeclaringType )
                 {

@@ -107,7 +107,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => ((IDeclarationInternal) declaration).ToRef().Cast<T>();
 
         public static MemberRef<T> ToMemberLink<T>( this T member )
-            where T : class, IMember
+            where T : class, IMemberOrNamedType
             => new( ((IDeclarationInternal) member).ToRef() );
 
         public static Location? GetDiagnosticLocation( this IDeclaration declaration )

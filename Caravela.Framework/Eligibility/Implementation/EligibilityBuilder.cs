@@ -4,6 +4,8 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
+#pragma warning disable 618 // Not implemented.
+
 namespace Caravela.Framework.Eligibility.Implementation
 {
     internal class EligibilityBuilder<T> : IEligibilityBuilder<T>

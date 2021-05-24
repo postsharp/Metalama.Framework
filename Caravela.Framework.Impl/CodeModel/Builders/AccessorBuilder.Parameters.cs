@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-            public IMember DeclaringMember => (IMember) this.Accessor.ContainingDeclaration.AssertNotNull();
+            public IMemberOrNamedType DeclaringMember => (IMemberOrNamedType) this.Accessor.ContainingDeclaration.AssertNotNull();
 
             IType IParameter.ParameterType => this.ParameterType;
 

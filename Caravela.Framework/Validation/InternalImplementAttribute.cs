@@ -7,6 +7,8 @@ using Caravela.Framework.Eligibility;
 using System;
 using System.Collections.Generic;
 
+#pragma warning disable 618 // Not implemented
+
 namespace Caravela.Framework.Validation
 {
     [AttributeUsage( AttributeTargets.Interface )]

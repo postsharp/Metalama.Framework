@@ -7,6 +7,7 @@ using Caravela.Framework.Validation;
 namespace Caravela.Framework.Aspects
 {
     [InternalImplement]
+    [CompileTimeOnly]
     public interface IAspectMarkerInstance
     {
         IAspectMarker Marker { get; }
