@@ -27,7 +27,9 @@ namespace Caravela.Framework.Eligibility.Implementation
         {
             var predicates = this._predicates.ToImmutableArray();
 
-            return this._combinationOperator == BooleanCombinationOperator.Or ? new OrEligibilityRule<T>( predicates ) : new AndEligibilityRule<T>( predicates );
+            return this._combinationOperator == BooleanCombinationOperator.Or
+                ? new OrEligibilityRule<T>( predicates )
+                : new AndEligibilityRule<T>( predicates );
         }
     }
 }

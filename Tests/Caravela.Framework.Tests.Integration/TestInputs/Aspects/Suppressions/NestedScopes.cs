@@ -8,6 +8,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.TestFramework;
 using Caravela.Framework.Advices;
+using Caravela.Framework.Eligibility;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
 {
@@ -34,6 +35,8 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
             builder.AdviceFactory.OverrideMethod( builder.TargetDeclaration, nameof(Override), AspectLinkerOptions.Create(true) );
             builder.Diagnostics.Suppress( null, _suppression );
         }
+
+        public void BuildEligibility(IEligibilityBuilder<IMethod> builder) { }
     }
     
     [TestOutput]

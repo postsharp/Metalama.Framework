@@ -2,6 +2,7 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.Programmatic
@@ -27,6 +28,8 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
 
             // TODO: Expression bodied template.
         }
+
+        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
 
         //[IntroducePropertyTemplate]
         //public int AutoProperty { get; set; }

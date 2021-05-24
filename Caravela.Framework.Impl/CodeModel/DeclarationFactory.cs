@@ -40,6 +40,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IType GetTypeByReflectionType( Type type ) => this.GetIType( this.CompilationModel.ReflectionMapper.GetTypeSymbol( type ) );
 
+        internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )
+            => (INamespace) this._cache.GetOrAdd(
+                namespaceSymbol.ToRef(),
+                l => new Namespace( (INamespaceSymbol) l.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
             => (IAssembly) this._cache.GetOrAdd(
                 assemblySymbol.ToRef(),

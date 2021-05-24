@@ -183,9 +183,10 @@ class TargetCode
 
             var type = compilation.DeclaredTypes.Single();
             var property = type.Properties.OfName( "P" ).Single();
+            RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression() );
 
-            AssertEx.DynamicEquals( property.Value, @"this.P" );
-            AssertEx.DynamicEquals( property.GetValue( property.Value ), @"this.P.P" );
+            AssertEx.DynamicEquals( property.GetValue( thisExpression ), @"this.P" );
+            AssertEx.DynamicEquals( property.GetValue( property.GetValue( thisExpression ) ), @"this.P.P" );
         }
 
         [Fact]

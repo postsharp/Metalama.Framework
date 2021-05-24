@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using System;
 
 namespace Caravela.Framework.Eligibility.Implementation
@@ -36,7 +39,7 @@ namespace Caravela.Framework.Eligibility.Implementation
                 return $"{describedObject} is not an {typeof(TIn).Name}";
             }
 
-            return this._inner.GetIneligibilityJustification( requestedEligibility, describedObject.Cast<TOut,TIn>() );
+            return this._inner.GetIneligibilityJustification( requestedEligibility, describedObject.Cast<TOut, TIn>() );
         }
     }
 }

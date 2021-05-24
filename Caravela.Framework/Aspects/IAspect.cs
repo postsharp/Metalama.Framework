@@ -10,10 +10,7 @@ namespace Caravela.Framework.Aspects
     /// this interface, but the strongly-typed variant <see cref="IAspect{T}"/>.
     /// </summary>
     [CompileTime]
-    public interface IAspect
-    {
-        
-    }
+    public interface IAspect { }
 
     public interface IAspectClassInitializer
     {

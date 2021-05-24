@@ -17,12 +17,12 @@ namespace Caravela.Framework.Aspects
     public interface IAspectBuilder : IValidatorAdder
     {
         IProject Project { get; }
-        
+
         /// <summary>
         /// Gets the list of markers that have contributed to the current aspect instance to be created.
         /// </summary>
         IReadOnlyList<IAspectMarkerInstance> Markers { get; }
-        
+
         /// <summary>
         /// Gets the list of other instances of the same type on <see cref="TargetDeclaration"/>. When several instances
         /// of the same aspect class are added to the same declaration, only the instance with the highest priority got initialized
@@ -61,6 +61,7 @@ namespace Caravela.Framework.Aspects
         /// Gets a set of opaque properties that can be set by the aspect <see cref="IAspect{T}.BuildAspect"/> method and are then made
         /// visible in <see cref="meta.Tags"/>.
         /// </summary>
+
         // TODO: This is not well-defined. It may be better to expose this on IAdvice.
         IDictionary<string, object?> Tags { get; }
 

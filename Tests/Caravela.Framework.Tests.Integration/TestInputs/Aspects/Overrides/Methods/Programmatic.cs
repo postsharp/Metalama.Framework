@@ -3,6 +3,7 @@ using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programmatic
@@ -13,6 +14,8 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programm
         {
             var advice = builder.AdviceFactory.OverrideMethod(builder.TargetDeclaration.Methods.OfName("TargetMethod").Single(), nameof(Template));
         }
+
+        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
 
         [OverrideMethodTemplate]
         public dynamic Template()

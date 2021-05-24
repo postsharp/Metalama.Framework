@@ -19,7 +19,7 @@ namespace Caravela.Framework.Eligibility
 
         // The reason to include an IFormatProvider here is opportunistic: some implementations of IEligibilityRule need
         // to format substrings and require our custom formatter, so it is easy to pass it as a part of this object.
-        
+
         IFormatProvider FormatProvider { get; }
     }
 }

@@ -212,7 +212,7 @@ namespace Caravela.Framework.Impl
             {
                 // TODO: Map the symbol to a code model declaration (which requires a CompilationModel), then simply
                 // call our aggregate eligibility rule here.
-                
+
                 IMethodSymbol method =>
                     this._prototypeAspectInstance is IAspect<IAspectTarget> ||
                     this._prototypeAspectInstance is IAspect<IMember> ||

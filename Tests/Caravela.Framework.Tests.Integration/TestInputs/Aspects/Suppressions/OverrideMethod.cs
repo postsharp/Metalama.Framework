@@ -12,6 +12,7 @@ using Caravela.Framework.Code;
 using Caravela.TestFramework;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Eligibility;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMethod
 {
@@ -35,6 +36,8 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMet
             builder.AdviceFactory.OverrideMethod( builder.TargetDeclaration, nameof(Override), AspectLinkerOptions.Create(true) );
             builder.Diagnostics.Suppress( null, _suppression );
         }
+
+        public void BuildEligibility(IEligibilityBuilder<IMethod> builder) { }
     }
     
     [TestOutput]

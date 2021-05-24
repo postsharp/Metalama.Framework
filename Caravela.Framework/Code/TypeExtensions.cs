@@ -39,5 +39,10 @@ namespace Caravela.Framework.Code
         /// <param name="right">Another type.</param>
         /// <returns></returns>
         public static bool Is( this IType left, Type right ) => left.Compilation.InvariantComparer.Is( left, right );
+
+        [return: RunTimeOnly]
+
+        // Casts a value to this type (and returns the syntax).
+        public static dynamic Cast( this IType type, dynamic value ) => throw new NotImplementedException();
     }
 }

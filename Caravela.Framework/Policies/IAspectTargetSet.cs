@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using System;
@@ -9,12 +12,12 @@ namespace Caravela.Framework.Policies
     /// Represents a set of aspect targets and offers the ability to add aspects to them.
     /// </summary>
     /// <typeparam name="TTarget"></typeparam>
-    public interface IAspectTargetSet<out TTarget> 
+    public interface IAspectTargetSet<out TTarget>
         where TTarget : class, IAspectTarget
     {
         void AddAspect<TAspect>( Expression<Func<INamedType, TAspect>> expression )
             where TAspect : Attribute, IAspect<TTarget>;
-        
+
         void AddAspect<TAspect>()
             where TAspect : Attribute, IAspect<TTarget>, new();
     }

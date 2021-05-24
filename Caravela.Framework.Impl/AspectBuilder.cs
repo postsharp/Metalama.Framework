@@ -7,6 +7,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Validation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -21,6 +22,12 @@ namespace Caravela.Framework.Impl
         private readonly IImmutableList<IAdvice> _declarativeAdvices;
         private readonly AdviceFactory _adviceFactory;
         private bool _skipped;
+
+        IProject IAspectBuilder.Project => throw new NotImplementedException();
+
+        IReadOnlyList<IAspectMarkerInstance> IAspectBuilder.Markers => throw new NotImplementedException();
+
+        IReadOnlyList<IAspectInstance> IAspectBuilder.OtherInstances => throw new NotImplementedException();
 
         public IDiagnosticSink Diagnostics => this._diagnosticSink;
 
@@ -68,5 +75,14 @@ namespace Caravela.Framework.Impl
                     Array.Empty<IAspectSource>(),
                     ImmutableDictionary<string, object?>.Empty );
         }
+
+        void IValidatorAdder.AddTargetValidator<TTarget>( TTarget targetDeclaration, Action<ValidateReferenceContext<TTarget>> validator )
+            => throw new NotImplementedException();
+
+        void IValidatorAdder.AddReferenceValidator<TTarget, TConstraint>(
+            TTarget targetDeclaration,
+            IReadOnlyList<DeclarationReferenceKind> referenceKinds,
+            IReadOnlyDictionary<string, string>? properties )
+            => throw new NotImplementedException();
     }
 }

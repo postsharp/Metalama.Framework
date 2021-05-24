@@ -163,7 +163,6 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         public static IReadOnlyDictionary<string, object?> Tags => CurrentContext.Tags;
 
-
         public static IReadOnlyList<IAspectMarkerInstance> Markers => throw new NotImplementedException();
 
         /// <summary>

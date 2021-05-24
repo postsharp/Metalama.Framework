@@ -25,9 +25,5 @@ namespace Caravela.Framework.Code
         /// <returns>A <see cref="Type"/> that can be used only in run-time code.</returns>
         [return: RunTimeOnly]
         Type ToType();
-
-        [return: RunTimeOnly]
-        // Casts a value to this type (and returns the syntax).
-        dynamic Cast( dynamic value );
     }
 }

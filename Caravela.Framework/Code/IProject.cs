@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Caravela.Framework.Validation;
 using System.Collections.Generic;
 
@@ -10,19 +13,19 @@ namespace Caravela.Framework.Code
         /// Gets the path to the <c>csproj</c> file.
         /// </summary>
         string Path { get; }
-        
+
         string AssemblyName { get; }
 
         /// <summary>
         /// Symbols like <c>DEBUG</c>, <c>TRACE</c> (also named constants).
         /// </summary>
         string DefinedSymbols { get; }
-        
+
         /// <summary>
         /// Gets the name of the build configuration, for instance <c>Debug</c> or <c>Release</c>.
         /// </summary>
         string Configuration { get; }
-        
+
         /// <summary>
         /// Gets the identifier of the target framework, for instance <c>netstandard2.0</c>.
         /// </summary>

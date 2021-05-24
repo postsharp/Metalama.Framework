@@ -11,7 +11,8 @@ namespace Caravela.Framework.Policies
     {
         public void BuildPolicy( IProjectPolicyBuilder builder )
         {
-            builder.WithTypes( compilation => compilation.DeclaredTypes.DerivedFrom( typeof(IDisposable) ).Where( t => !t.IsAbstract ) )
+            builder
+                .WithTypes( compilation => compilation.DeclaredTypes.DerivedFrom( typeof(IDisposable) ).Where( t => !t.IsAbstract ) )
                 .WithMembers( t => t.Methods.Where( m => m.GetEligibility<MyAspect>() == EligibilityValue.Eligible ) )
                 .AddAspect<MyAspect>();
         }

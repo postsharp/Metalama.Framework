@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 namespace Caravela.Framework.Policies
 {
     /// <summary>
@@ -9,7 +12,7 @@ namespace Caravela.Framework.Policies
     {
         void BuildPolicy( ITypePolicyBuilder typePolicyBuilder );
     }
-    
+
     // TODO: the problem with this design, based on nested types, is that the nested type is compile-time-only and has access
     // to the base type which is run-time only. This makes the template compiler more complex (the type must be un-nested).
 }

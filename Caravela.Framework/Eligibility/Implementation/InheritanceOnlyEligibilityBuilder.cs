@@ -1,10 +1,13 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 namespace Caravela.Framework.Eligibility.Implementation
 {
     internal class InheritanceOnlyEligibilityBuilder<T> : IEligibilityBuilder<T>
     {
         private readonly IEligibilityBuilder<T> _inner;
 
-        public InheritanceOnlyEligibilityBuilder( IEligibilityBuilder<T> inner ) 
+        public InheritanceOnlyEligibilityBuilder( IEligibilityBuilder<T> inner )
         {
             this._inner = inner;
         }

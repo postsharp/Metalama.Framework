@@ -10,12 +10,12 @@ namespace Caravela.Framework.Eligibility
     // Example of an aspect with complex eligibility rules.
     public class MyAspect : Attribute, IAspect<IMethod>
     {
-        public void BuildAspect( IAspectBuilder<IMethod> builder ) => throw new System.NotImplementedException();
+        public void BuildAspect( IAspectBuilder<IMethod> builder ) => throw new NotImplementedException();
 
         public virtual void BuildEligibility( IEligibilityBuilder<IMethod> builder )
         {
             builder.MustBeNonStatic();
-            
+
             builder
                 .DeclaringType()
                 .MustSatisfyAll(
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Eligibility
                         and.MustHaveAccessibility( Accessibility.Public );
                         and.MustBeNonAbstract();
                     } );
-            
+
             builder.ReturnType().MustBe( typeof(void) );
             builder.ExceptForInheritance().MustBeNonAbstract();
 

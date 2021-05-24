@@ -21,6 +21,6 @@ namespace Caravela.Framework.Eligibility
         }
 
         public string ToString( string format, IFormatProvider formatProvider )
-            => this.Description?.ToString(this.FormatProvider) ?? string.Format( this.FormatProvider, "{0:" + format + "}", this.Object );
+            => this.Description?.ToString( this.FormatProvider ) ?? string.Format( this.FormatProvider, "{0:" + format + "}", this.Object );
     }
 }

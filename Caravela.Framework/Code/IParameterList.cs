@@ -10,6 +10,6 @@ namespace Caravela.Framework.Code
     /// </summary>
     public interface IParameterList : IReadOnlyList<IParameter>
     {
-        IParameter this[string name] { get; }
+        IParameter this[ string name ] { get; }
     }
 }

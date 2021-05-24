@@ -1,6 +1,7 @@
 using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Applying.InvalidTarget
@@ -10,6 +11,8 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Applying.InvalidTarget
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
         }
+
+        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
     }
 
     [TestOutput]

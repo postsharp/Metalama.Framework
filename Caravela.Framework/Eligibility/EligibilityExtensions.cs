@@ -42,13 +42,13 @@ namespace Caravela.Framework.Eligibility
                 method => $"the {index + 1}-th parameter of {method}",
                 method => index < method.Parameters.Count,
                 method => $"{method} has fewer than {index + 1} parameter(s)" );
-        
+
         public static IEligibilityBuilder<IParameter> Parameter( this IEligibilityBuilder<IMethodBase> eligibilityBuilder, string name )
             => new ChildEligibilityBuilder<IMethodBase, IParameter>(
                 eligibilityBuilder,
                 declaration => declaration.Parameters[name],
                 method => $"parameter '{name}' of {method}",
-                method => !method.Parameters.Any( p=>p.Name == name ),
+                method => !method.Parameters.Any( p => p.Name == name ),
                 method => $"{method} has no parameter named '{name}'" );
 
         public static IEligibilityBuilder<T> ExceptForInheritance<T>( this IEligibilityBuilder<T> eligibilityBuilder )
@@ -121,7 +121,6 @@ namespace Caravela.Framework.Eligibility
                 t => t.Is( type ),
                 member => $"{member} must be {type}" );
 
-
         internal static ( bool IsEligible, string? Justification ) IsEligible<T>(
             this IEligibilityRule<T> rule,
             T obj,
@@ -134,23 +133,18 @@ namespace Caravela.Framework.Eligibility
 
             if ( eligibility < requiredEligibility )
             {
-            
                 if ( requiresJustification )
                 {
                     var describedObject = new DescribedObject<T>( obj, formatProvider );
                     justification = rule.GetIneligibilityJustification( requiredEligibility, describedObject )?.ToString( formatProvider );
                 }
-                
+
                 return (false, justification);
             }
             else
             {
                 return (true, null);
             }
-
         }
-        
-        
-     
     }
 }

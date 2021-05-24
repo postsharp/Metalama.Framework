@@ -12,7 +12,7 @@ namespace Caravela.Framework.Code
     public interface INamedTypeList : IMemberList<INamedType>
     {
         IReadOnlyList<INamedType> DerivedFrom( Type type );
+
         IReadOnlyList<INamedType> DerivedFrom( INamedType type );
-        
     }
 }

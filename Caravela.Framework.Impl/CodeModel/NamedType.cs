@@ -163,7 +163,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select( DeclarationRef.FromSymbol<IGenericParameter> ) );
 
         [Memo]
-        public string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();
+        public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
 
         [Memo]
         public string FullName => this.TypeSymbol.ToDisplayString();

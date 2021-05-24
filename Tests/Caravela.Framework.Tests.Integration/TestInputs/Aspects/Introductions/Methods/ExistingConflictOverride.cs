@@ -2,6 +2,7 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictOverride
@@ -11,6 +12,8 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
         }
+
+        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.Override)]
         public int BaseMethod()
