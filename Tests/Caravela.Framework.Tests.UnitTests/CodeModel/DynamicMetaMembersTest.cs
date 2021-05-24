@@ -185,8 +185,8 @@ class TargetCode
             var property = type.Properties.OfName( "P" ).Single();
             RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression() );
 
-            AssertEx.DynamicEquals( property.GetValue( thisExpression ), @"this.P" );
-            AssertEx.DynamicEquals( property.GetValue( property.GetValue( thisExpression ) ), @"this.P.P" );
+            AssertEx.DynamicEquals( property.GetValue( thisExpression ), @"((global::TargetCode)(this)).P" );
+            AssertEx.DynamicEquals( property.GetValue( property.GetValue( thisExpression ) ), @"((global::TargetCode)(this)).P.P" );
         }
 
         [Fact]

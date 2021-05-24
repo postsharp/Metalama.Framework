@@ -56,7 +56,8 @@ namespace Foo
         {
             var code = @"
 using System;
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Policies;
 
 [assembly: A(42, new[] { E.A }, new[] { typeof(C<int[]>.N<string>), typeof(C<>.N<>) }, P = 13)]
 [assembly: CompileTime]
@@ -102,7 +103,7 @@ class A : Attribute
             // This tests that we can create compile-time assemblies that have reference projects in the same solution with compile-time code.
 
             var referencedCode = @"
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -111,7 +112,7 @@ public class ReferencedClass
 
             var referencingCode = @"
 
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 [assembly: CompileTime]
 class ReferencingClass
 {
@@ -134,7 +135,7 @@ class ReferencingClass
             // This tests that we can create compile-time assemblies that have reference compiled assemblies (out of the solution) with compile-time code.
 
             var indirectlyReferencedCode = @"
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -142,7 +143,7 @@ public class ReferencedClass
 ";
 
             var directlyReferencedCode = @"
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 [assembly: CompileTime]
 public class MiddleClass
 {
@@ -152,7 +153,7 @@ public class MiddleClass
 
             var referencingCode = @"
 
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 [assembly: CompileTime]
 class ReferencingClass
 {
@@ -234,7 +235,7 @@ class ReferencingClass
 
             string GenerateVersionedCode( int version )
                 => @"
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 [assembly: CompileTime]
 public class VersionedClass
 {
@@ -244,7 +245,7 @@ public class VersionedClass
 
             var classA = @"
 
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 [assembly: CompileTime]
 class A
 {
@@ -254,7 +255,7 @@ class A
 
             var classB = @"
 
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 [assembly: CompileTime]
 class B
 {
@@ -322,7 +323,7 @@ class B
 
             var code = @"
 
-using Caravela.Framework.Project;
+using Caravela.Framework.Policies;
 [CompileTime]
 class B
 {
@@ -347,7 +348,7 @@ class C
         public void CacheWithSameLoader()
         {
             var code = @"
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -375,7 +376,7 @@ public class ReferencedClass
         public void CacheWithDifferentLoader()
         {
             var code = @"
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -409,7 +410,7 @@ public class ReferencedClass
         {
             var code = @"
 using System;
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 
 [CompileTimeOnly]
 public class CompileTimeOnlyClass
@@ -433,7 +434,7 @@ public class RunTimeOnlyClass
 
             var expected = @"
 using System;
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 
 [CompileTimeOnly]
 public class CompileTimeOnlyClass

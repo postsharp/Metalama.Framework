@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal static class CompileTimeCodeDetector
     {
-        public static ImmutableHashSet<string> Namespaces { get; } = ImmutableHashSet.Create( "Caravela.Framework.Aspects", "Caravela.Framework.Project" );
+        public static ImmutableHashSet<string> Namespaces { get; } = ImmutableHashSet.Create( "Caravela.Framework.Aspects", "Caravela.Framework.Policies" );
 
         public static bool HasCompileTimeCode( SyntaxNode node ) => DetectCompileTimeVisitor.Instance.Visit( node );
 

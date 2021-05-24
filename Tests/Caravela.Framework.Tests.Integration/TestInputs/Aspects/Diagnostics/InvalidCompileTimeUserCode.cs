@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.InvalidCompil
         public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
 #if TESTRUNNER // Avoid the code to be parsed in the IDE.
-            aspectBuilder.BadMethod();
+            builder.BadMethod();
 #endif
         }
 
