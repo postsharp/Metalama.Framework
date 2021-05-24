@@ -14,6 +14,5 @@ namespace Caravela.Framework.Validation
         public IDiagnosticSink Diagnostics { get; }
 
         public T Declaration { get; }
-
     }
 }

@@ -20,28 +20,28 @@ namespace Caravela.Framework.Eligibility.Implementation
 
         public EligibilityValue GetEligibility( TOut obj )
         {
-            var convertedMember = obj as TIn;
-
-            if ( convertedMember == null )
+            if ( obj is TIn convertedMember )
+            {
+                return this._inner.GetEligibility( convertedMember );
+            }
+            else
             {
                 return EligibilityValue.Ineligible;
             }
-
-            return this._inner.GetEligibility( convertedMember );
         }
 
         public FormattableString? GetIneligibilityJustification(
             EligibilityValue requestedEligibility,
             IDescribedObject<TOut> describedObject )
         {
-            var convertedMember = describedObject.Object as TIn;
-
-            if ( convertedMember == null )
+            if ( describedObject.Object is TIn )
+            {
+                return this._inner.GetIneligibilityJustification( requestedEligibility, describedObject.Cast<TOut, TIn>() );    
+            }
+            else
             {
                 return $"{describedObject} is not an {typeof(TIn).Name}";
             }
-
-            return this._inner.GetIneligibilityJustification( requestedEligibility, describedObject.Cast<TOut, TIn>() );
         }
     }
 }
