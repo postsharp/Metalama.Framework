@@ -31,13 +31,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
                     break;
 
-                case Accessibility.ProtectedAndInternal:
+                case Accessibility.PrivateProtected:
                     tokenList.Add( Token( SyntaxKind.PrivateKeyword ) );
                     tokenList.Add( Token( SyntaxKind.InternalKeyword ) );
 
                     break;
 
-                case Accessibility.ProtectedOrInternal:
+                case Accessibility.ProtectedInternal:
                     tokenList.Add( Token( SyntaxKind.ProtectedKeyword ) );
                     tokenList.Add( Token( SyntaxKind.InternalKeyword ) );
 

@@ -1,16 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
+using Caravela.Framework.Impl.Diagnostics;
 using System;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class IntroduceEventAdvice : IntroduceMemberAdvice<EventBuilder>, IIntroduceEventAdvice
+    internal class IntroduceEventAdvice : IntroduceMemberAdvice<EventBuilder>
     {
         public IEventBuilder Builder => this.MemberBuilder;
 
@@ -22,9 +22,14 @@ namespace Caravela.Framework.Impl.Advices
             IMethod? removeTemplateMethod,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
-            AspectLinkerOptions? linkerOptions,
-            IReadOnlyDictionary<string, object?> tags )
-            : base( aspect, targetDeclaration, null, scope, conflictBehavior, linkerOptions, tags ) { }
+            string layerName,
+            AdviceOptions? options )
+            : base( aspect, targetDeclaration, null, scope, conflictBehavior, layerName, options ) { }
+
+        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
+        {
+            base.Initialize( declarativeAdvices, diagnosticAdder );
+        }
 
         public override AdviceResult ToResult( ICompilation compilation )
         {

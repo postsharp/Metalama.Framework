@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public CompileTimeMethodInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-        public override ExpressionSyntax Serialize( CompileTimeMethodInfo obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimeMethodInfo obj, ICompilationElementFactory syntaxFactory )
             => ParenthesizedExpression(
                 CastExpression(
                     syntaxFactory.GetTypeSyntax( typeof(MethodInfo) ),

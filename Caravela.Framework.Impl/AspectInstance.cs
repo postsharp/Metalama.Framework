@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl
 {
@@ -20,17 +19,17 @@ namespace Caravela.Framework.Impl
         /// <summary>
         /// Gets the declaration to which the aspect is applied.
         /// </summary>
-        public IDeclaration Declaration { get; }
+        public IDeclaration TargetDeclaration { get; }
 
-        public AspectClassMetadata AspectClass { get; }
+        public AspectClass AspectClass { get; }
 
-        IAspectClassMetadata IAspectInstance.AspectClass => this.AspectClass;
+        IAspectClass IAspectInstance.AspectClass => this.AspectClass;
 
-        internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClassMetadata aspectClassMetadata )
+        internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass )
         {
             this.Aspect = aspect;
-            this.Declaration = declaration;
-            this.AspectClass = aspectClassMetadata;
+            this.TargetDeclaration = declaration;
+            this.AspectClass = aspectClass;
         }
     }
 }

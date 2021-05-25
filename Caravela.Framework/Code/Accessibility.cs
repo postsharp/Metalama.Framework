@@ -10,9 +10,9 @@ namespace Caravela.Framework.Code
     {
         // TODO: This uses IL values, shouldn't it correspond to C#?
         Private,
-        ProtectedOrInternal,
+        ProtectedInternal,
         Protected,
-        ProtectedAndInternal,
+        PrivateProtected,
         Internal,
         Public
     }

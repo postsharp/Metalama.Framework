@@ -22,9 +22,9 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly ISymbol _sourceTemplateSymbol;
         private readonly MethodInfo _templateMethod;
-        private readonly AspectClassMetadata _aspectClass;
+        private readonly AspectClass _aspectClass;
 
-        public TemplateDriver( AspectClassMetadata aspectClass, ISymbol sourceTemplateSymbol, MethodInfo compiledTemplateMethodInfo )
+        public TemplateDriver( AspectClass aspectClass, ISymbol sourceTemplateSymbol, MethodInfo compiledTemplateMethodInfo )
         {
             this._sourceTemplateSymbol = sourceTemplateSymbol;
             this._templateMethod = compiledTemplateMethodInfo ?? throw new ArgumentNullException( nameof(compiledTemplateMethodInfo) );

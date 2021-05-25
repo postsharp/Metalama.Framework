@@ -1,6 +1,6 @@
-﻿using Caravela.Framework.Advices;
-using Caravela.Framework.Aspects;
+﻿using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 using System;
 using System.Collections.Generic;
@@ -24,19 +24,23 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
         {
             aspectBuilder.AdviceFactory.IntroduceInterface(aspectBuilder.TargetDeclaration, (INamedType)aspectBuilder.TargetDeclaration.Compilation.TypeFactory.GetTypeByReflectionType(typeof(ISuperInterface)));
         }
 
-        [IntroduceMethod]
+        public void BuildEligibility(IEligibilityBuilder<INamedType> builder)
+        {
+        }
+
+        [Introduce]
         public int SubInterfaceMethod()
         {
             Console.WriteLine("This is introduced interface method.");
             return meta.Proceed();
         }
 
-        [IntroduceMethod]
+        [Introduce]
         public int SuperInterfaceMethod()
         {
             Console.WriteLine("This is introduced interface method.");

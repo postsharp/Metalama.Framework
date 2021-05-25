@@ -1,7 +1,7 @@
 ﻿using System;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictFail
@@ -10,18 +10,20 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
 
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.Fail)]
+        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
+
+        [Introduce(ConflictBehavior = ConflictBehavior.Fail)]
         public int ExistingMethod()
         {
             Console.WriteLine("This is introduced method.");
             return 42;
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.Fail)]
+        [Introduce(ConflictBehavior = ConflictBehavior.Fail)]
         public static int ExistingMethod_Static()
         {
             Console.WriteLine("This is introduced method.");

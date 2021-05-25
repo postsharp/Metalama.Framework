@@ -1,8 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
+using Caravela.Framework.Validation;
+using System;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Aspects
@@ -10,6 +11,7 @@ namespace Caravela.Framework.Aspects
     /// <summary>
     /// Exposes all factory methods to create advices.
     /// </summary>
+    [InternalImplement]
     public interface IAdviceFactory
     {
         /// <summary>
@@ -17,9 +19,8 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <param name="method">The method to override.</param>
         /// <param name="defaultTemplate">Name of the template method to by used by default.</param>
-        /// <param name="aspectLinkerOptions">Aspect linker options.</param>
-        /// <returns>An advice.</returns>
-        IOverrideMethodAdvice OverrideMethod( IMethod method, string defaultTemplate, AspectLinkerOptions? aspectLinkerOptions = null );
+        /// <param name="options"></param>
+        void OverrideMethod( IMethod method, string defaultTemplate, AdviceOptions? options = null );
 
         /// <summary>
         /// Creates an advice that introduces a new method or overrides the implementation of the existing one.
@@ -28,78 +29,78 @@ namespace Caravela.Framework.Aspects
         /// <param name="defaultTemplate">Name of the template method to by used by default.</param>
         /// <param name="scope">Introduction scope.</param>
         /// <param name="conflictBehavior">Conflict behavior.</param>
-        /// <param name="aspectLinkerOptions">Aspect linker options.</param>
+        /// <param name="options"></param>
         /// <returns></returns>
-        IIntroduceMethodAdvice IntroduceMethod(
+        IMethodBuilder IntroduceMethod(
             INamedType targetType,
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null );
+            AdviceOptions? options = null );
 
-        IOverrideFieldOrPropertyAdvice OverrideFieldOrProperty(
+        void OverrideFieldOrProperty(
             IFieldOrProperty targetDeclaration,
             string defaultTemplate,
-            AspectLinkerOptions? aspectLinkerOptions = null );
+            AdviceOptions? options = null );
 
-        IOverrideFieldOrPropertyAdvice OverrideFieldOrPropertyAccessors(
+        void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
-            string defaultGetTemplate,
+            string? getTemplate,
             string? setTemplate,
-            AspectLinkerOptions? aspectLinkerOptions = null );
+            AdviceOptions? options = null );
 
-        IIntroduceFieldAdvice IntroduceField(
+        IFieldBuilder IntroduceField(
             INamedType targetType,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null );
+            AdviceOptions? options = null );
 
-        IIntroducePropertyAdvice IntroduceProperty(
+        IPropertyBuilder IntroduceProperty(
             INamedType targetType,
             string defaultPropertyTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null );
+            AdviceOptions? options = null );
 
-        IIntroducePropertyAdvice IntroduceProperty(
+        IPropertyBuilder IntroduceProperty(
             INamedType targetType,
             string name,
             string defaultGetTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null );
+            AdviceOptions? options = null );
 
-        IOverrideEventAdvice OverrideEventAccessors(
+        void OverrideEventAccessors(
             IEvent targetDeclaration,
             string? addTemplate,
             string? removeTemplate,
             string? invokeTemplate,
-            AspectLinkerOptions? aspectLinkerOptions = null );
+            AdviceOptions? options = null );
 
-        IIntroducePropertyAdvice IntroduceEvent(
+        IEventBuilder IntroduceEvent(
             INamedType targetType,
             string addTemplate,
             string removeTemplate,
             string? invokeTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null );
+            AdviceOptions? options = null );
 
-        IIntroduceInterfaceAdvice IntroduceInterface(
+        void IntroduceInterface(
             INamedType targetType,
             INamedType interfaceType,
             bool explicitImplementation = true,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null );
+            AdviceOptions? options = null );
 
-        IIntroduceInterfaceAdvice IntroduceInterface(
+        void IntroduceInterface(
             INamedType targetType,
             INamedType interfaceType,
             IReadOnlyDictionary<IMember, IMember> memberMap,
             bool explicitImplementation = true,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null );
+            AdviceOptions? options = null );
 
         /// <summary>
         /// Gets a factory objects that allows to add advices to other layers than the default one.
@@ -108,6 +109,7 @@ namespace Caravela.Framework.Aspects
         /// Layers must be declared by the aspect using <see cref="ProvidesAspectLayersAttribute"/>.
         /// </param>
         /// <returns></returns>
+        [Obsolete( "Not implemented." )]
         IAdviceFactory ForLayer( string layerName );
     }
 }

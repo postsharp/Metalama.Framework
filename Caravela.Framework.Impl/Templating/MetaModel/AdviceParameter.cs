@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public bool IsParams => this._parameter.IsParams;
 
-        public IMember DeclaringMember => this._parameter.DeclaringMember;
+        public IMemberOrNamedType DeclaringMember => this._parameter.DeclaringMember;
 
         public ParameterInfo ToParameterInfo() => this._parameter.ToParameterInfo();
 
@@ -42,6 +42,15 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IAttributeList Attributes => this._parameter.Attributes;
 
         public DeclarationKind DeclarationKind => this._parameter.DeclarationKind;
+
+        public bool HasAspect<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
+
+        [Obsolete( "Not implemented." )]
+        public IAnnotationList GetAnnotations<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
 
         public ICompilation Compilation => this._parameter.Compilation;
 

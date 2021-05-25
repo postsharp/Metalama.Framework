@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Builders;
@@ -146,12 +147,21 @@ namespace Caravela.Framework.Impl.CodeModel
 
         DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.Compilation;
 
+        public bool HasAspect<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
+
+        [Obsolete( "Not implemented." )]
+        public IAnnotationList GetAnnotations<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
+
         public bool Equals( IDeclaration other ) => throw new NotImplementedException();
 
         ICompilation ICompilationElement.Compilation => this;
 
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
-            => this._allMemberAttributesByType[type.ToRef()].Select( a => a.GetForCompilation( this ) );
+            => this._allMemberAttributesByType[type.ToRef()].Select( a => a.Resolve( this ) );
 
         internal ImmutableArray<IObservableTransformation> GetObservableTransformationsOnElement( IDeclaration declaration )
             => this._transformations[declaration.ToRef()];
@@ -160,7 +170,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             foreach ( var group in this._transformations )
             {
-                yield return (group.Key.GetForCompilation( this ), group);
+                yield return (group.Key.Resolve( this ), group);
             }
         }
 

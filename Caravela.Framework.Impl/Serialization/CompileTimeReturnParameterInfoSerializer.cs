@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
@@ -14,13 +15,15 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class CompileTimeReturnParameterInfoSerializer : ObjectSerializer<CompileTimeReturnParameterInfo, ParameterInfo>
     {
-        public override ExpressionSyntax Serialize( CompileTimeReturnParameterInfo obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimeReturnParameterInfo obj, ICompilationElementFactory syntaxFactory )
         {
+            var parameter = obj.Target.Resolve( syntaxFactory.CompilationModel );
+
             ExpressionSyntax? methodBaseExpression;
 
-            switch ( obj.DeclaringMember )
+            switch ( parameter.DeclaringMember )
             {
-                case Method method:
+                case IMethod method:
                     methodBaseExpression = this.Service.CompileTimeMethodInfoSerializer.Serialize( CompileTimeMethodInfo.Create( method ), syntaxFactory );
 
                     break;

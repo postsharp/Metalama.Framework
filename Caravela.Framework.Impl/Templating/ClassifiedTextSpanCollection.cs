@@ -225,19 +225,4 @@ namespace Caravela.Framework.Impl.Templating
 
         public int Count => this._spans.Count;
     }
-
-    public readonly struct MarkedTextSpan
-    {
-        public TextSpan Span { get; }
-
-        public TextSpanClassification Classification { get; }
-
-        internal MarkedTextSpan( in TextSpan span, TextSpanClassification classification )
-        {
-            this.Span = span;
-            this.Classification = classification;
-        }
-
-        public override string ToString() => this.Span.ToString().Replace( "2147483647", "inf" ) + "=>" + this.Classification;
-    }
 }

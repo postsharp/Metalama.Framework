@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.Linking
                     else if ( this._analysisRegistry.IsInterfaceImplementation( symbol ) )
                     {
                         // Interface implementation member. Currently only transformed into 
-                        newMembers.Add( this.GetTransformedInterfaceImplementation( member, symbol ) );
+                        newMembers.Add( GetTransformedInterfaceImplementation( member, symbol ) );
                     }
                     else if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
                     {
@@ -129,7 +129,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private MemberDeclarationSyntax GetTransformedInterfaceImplementation( MemberDeclarationSyntax member, ISymbol symbol )
+            private static MemberDeclarationSyntax GetTransformedInterfaceImplementation( MemberDeclarationSyntax member, ISymbol symbol )
             {
                 switch ( member )
                 {

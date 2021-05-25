@@ -10,8 +10,8 @@ using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Eligibility;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMethod
 {
@@ -23,18 +23,20 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMet
         {
         }
         
-        [OverrideMethodTemplateAttribute]
+        [Template]
         public dynamic Override()
         {
             int a = 0;
             return meta.Proceed();
         }
         
-        public void Initialize(IAspectBuilder<IMethod> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            aspectBuilder.AdviceFactory.OverrideMethod( aspectBuilder.TargetDeclaration, nameof(Override), AspectLinkerOptions.Create(true) );
-            aspectBuilder.Diagnostics.Suppress( null, _suppression );
+            builder.AdviceFactory.OverrideMethod( builder.TargetDeclaration, nameof(Override), AdviceOptions.Default.WithLinkerOptions(true) );
+            builder.Diagnostics.Suppress( null, _suppression );
         }
+
+        public void BuildEligibility(IEligibilityBuilder<IMethod> builder) { }
     }
     
     [TestOutput]

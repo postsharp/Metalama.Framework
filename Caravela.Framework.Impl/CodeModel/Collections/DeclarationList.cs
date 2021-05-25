@@ -87,7 +87,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
                 if ( targetItem == null )
                 {
-                    targetItem = this.SourceItems[index].GetForCompilation( this.Compilation );
+                    targetItem = this.SourceItems[index].Resolve( this.Compilation );
                     _ = Interlocked.CompareExchange( ref targetItems[index], targetItem, null );
                 }
 

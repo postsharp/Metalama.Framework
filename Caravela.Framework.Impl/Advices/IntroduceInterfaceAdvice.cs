@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
@@ -13,7 +12,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class IntroduceInterfaceAdvice : Advice, IIntroduceInterfaceAdvice
+    internal class IntroduceInterfaceAdvice : Advice
     {
         private readonly IReadOnlyDictionary<IMember, IMember>? _explicitMemberMap;
         private readonly Dictionary<IMember, IMember>? _implicitMemberMap;
@@ -26,8 +25,6 @@ namespace Caravela.Framework.Impl.Advices
 
         public ConflictBehavior ConflictBehavior { get; }
 
-        public AspectLinkerOptions? LinkerOptions { get; }
-
         public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
         public IntroduceInterfaceAdvice(
@@ -37,14 +34,13 @@ namespace Caravela.Framework.Impl.Advices
             bool isExplicit,
             IReadOnlyDictionary<IMember, IMember>? memberMap,
             ConflictBehavior conflictBehavior,
-            AspectLinkerOptions? linkerOptions,
-            IReadOnlyDictionary<string, object?> aspectTags ) : base( aspect, targetType, aspectTags )
+            string? layerName,
+            AdviceOptions? options ) : base( aspect, targetType, layerName, options )
         {
             this.InterfaceType = interfaceType;
             this.IsExplicit = isExplicit;
             this._explicitMemberMap = memberMap;
             this.ConflictBehavior = conflictBehavior;
-            this.LinkerOptions = linkerOptions;
 
             if ( this._explicitMemberMap == null )
             {

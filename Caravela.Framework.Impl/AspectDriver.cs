@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
@@ -35,13 +34,13 @@ namespace Caravela.Framework.Impl
             this._declarativeAdviceAttributes =
                 (from member in aspectType.GetMembers()
                  from attribute in member.GetAttributes()
-                 where attribute.AttributeClass?.Is( typeof(IAdviceAttribute) ) ?? false
+                 where attribute.AttributeClass?.Is( typeof(AdviceAttribute) ) ?? false
                  select (attribute, member)).ToList();
         }
 
         internal AspectInstanceResult ExecuteAspect( AspectInstance aspectInstance, CancellationToken cancellationToken )
         {
-            return aspectInstance.Declaration switch
+            return aspectInstance.TargetDeclaration switch
             {
                 ICompilation compilation => this.EvaluateAspect( compilation, aspectInstance, cancellationToken ),
                 INamedType type => this.EvaluateAspect( type, aspectInstance, cancellationToken ),
@@ -54,16 +53,15 @@ namespace Caravela.Framework.Impl
             };
         }
 
-        private AspectInstanceResult EvaluateAspect<T>( T declaration, AspectInstance aspect, CancellationToken cancellationToken )
-            where T : class, IAspectTarget
+        private AspectInstanceResult EvaluateAspect<T>( T targetDeclaration, AspectInstance aspect, CancellationToken cancellationToken )
+            where T : class, IDeclaration
         {
             static AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
                 => new(
                     false,
                     new ImmutableUserDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
-                    ImmutableArray<IAdvice>.Empty,
-                    ImmutableArray<IAspectSource>.Empty,
-                    ImmutableDictionary<string, object?>.Empty );
+                    ImmutableArray<Advice>.Empty,
+                    ImmutableArray<IAspectSource>.Empty );
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -76,21 +74,21 @@ namespace Caravela.Framework.Impl
 
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectDeclaration.CreateDiagnostic(
-                        declaration.GetDiagnosticLocation(),
-                        (this.AspectType, declaration.DeclarationKind, declaration, interfaceType) );
+                        targetDeclaration.GetDiagnosticLocation(),
+                        (this.AspectType, targetDeclaration.DeclarationKind, targetDeclaration, interfaceType) );
 
                 return CreateResultForError( diagnostic );
             }
 
-            var diagnosticSink = new UserDiagnosticSink( aspect.AspectClass.Project, declaration );
+            var diagnosticSink = new UserDiagnosticSink( aspect.AspectClass.Project, targetDeclaration );
 
             using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
             {
                 var declarativeAdvices =
-                    this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, diagnosticSink, declaration, x.Attribute, x.Member ) )
+                    this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, diagnosticSink, targetDeclaration, x.Attribute, x.Member ) )
                         .ToArray();
 
-                var compilationModel = (CompilationModel) declaration.Compilation;
+                var compilationModel = (CompilationModel) targetDeclaration.Compilation;
 
                 var adviceFactory = new AdviceFactory(
                     compilationModel,
@@ -99,11 +97,11 @@ namespace Caravela.Framework.Impl
                     compilationModel.Factory.GetNamedType( this.AspectType ),
                     aspect );
 
-                var aspectBuilder = new AspectBuilder<T>( declaration, diagnosticSink, declarativeAdvices, adviceFactory, cancellationToken );
+                var aspectBuilder = new AspectBuilder<T>( targetDeclaration, diagnosticSink, declarativeAdvices, adviceFactory, cancellationToken );
 
                 try
                 {
-                    aspectOfT.Initialize( aspectBuilder );
+                    aspectOfT.BuildAspect( aspectBuilder );
                 }
                 catch ( InvalidUserCodeException e )
                 {
@@ -111,14 +109,13 @@ namespace Caravela.Framework.Impl
                         new AspectInstanceResult(
                             false,
                             new ImmutableUserDiagnosticList( e.Diagnostics, ImmutableArray<ScopedSuppression>.Empty ),
-                            ImmutableArray<IAdvice>.Empty,
-                            ImmutableArray<IAspectSource>.Empty,
-                            ImmutableDictionary<string, object?>.Empty );
+                            ImmutableArray<Advice>.Empty,
+                            ImmutableArray<IAspectSource>.Empty );
                 }
                 catch ( Exception e )
                 {
                     var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
-                        declaration.GetDiagnosticLocation(),
+                        targetDeclaration.GetDiagnosticLocation(),
                         (this.AspectType, e.GetType().Name, e) );
 
                     return CreateResultForError( diagnostic );
@@ -131,14 +128,15 @@ namespace Caravela.Framework.Impl
         private static Advice CreateDeclarativeAdvice<T>(
             AspectInstance aspect,
             IDiagnosticAdder diagnosticAdder,
-            T declaration,
-            AttributeData attribute,
-            ISymbol templateMethod )
+            T aspectTarget,
+            AttributeData templateAttributeData,
+            ISymbol templateDeclaration )
             where T : IDeclaration
-            => attribute.CreateAdvice(
+            => templateAttributeData.CreateAdvice(
                 aspect,
                 diagnosticAdder,
-                declaration,
-                ((CompilationModel) declaration.Compilation).Factory.GetDeclaration( templateMethod ) );
+                aspectTarget,
+                ((CompilationModel) aspectTarget.Compilation).Factory.GetDeclaration( templateDeclaration ),
+                null );
     }
 }

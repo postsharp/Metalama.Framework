@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Project;
 using Caravela.TestFramework;
 using Caravela.Framework.Code;
 

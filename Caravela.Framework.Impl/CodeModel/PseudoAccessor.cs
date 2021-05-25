@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -102,6 +102,15 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public DeclarationKind DeclarationKind => DeclarationKind.Method;
 
+        public bool HasAspect<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
+
+        [Obsolete( "Not implemented." )]
+        public IAnnotationList GetAnnotations<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
+
         public IDiagnosticLocation? DiagnosticLocation => this._containingMember.DiagnosticLocation;
 
         public ICompilation Compilation => this._containingMember.Compilation;
@@ -136,7 +145,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             public PseudoAccessor DeclaringAccessor { get; }
 
-            public IMember DeclaringMember => this.DeclaringAccessor;
+            public IMemberOrNamedType DeclaringMember => this.DeclaringAccessor;
 
             public RefKind RefKind
                 => this.DeclaringAccessor.ContainingDeclaration switch
@@ -164,6 +173,15 @@ namespace Caravela.Framework.Impl.CodeModel
             public IAttributeList Attributes => throw new NotImplementedException();
 
             public DeclarationKind DeclarationKind => DeclarationKind.Parameter;
+
+            public bool HasAspect<T>()
+                where T : IAspect
+                => throw new NotImplementedException();
+
+            [Obsolete( "Not implemented." )]
+            public IAnnotationList GetAnnotations<T>()
+                where T : IAspect
+                => throw new NotImplementedException();
 
             public IDiagnosticLocation? DiagnosticLocation => throw new NotImplementedException();
 

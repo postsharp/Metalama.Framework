@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using System;
 
 namespace Caravela.Framework.Aspects
@@ -14,12 +14,17 @@ namespace Caravela.Framework.Aspects
     public abstract class OverrideFieldOrPropertyAspect : Attribute, IAspect<IFieldOrProperty>
     {
         /// <inheritdoc />
-        public virtual void Initialize( IAspectBuilder<IFieldOrProperty> aspectBuilder )
+        public virtual void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            aspectBuilder.AdviceFactory.OverrideFieldOrProperty( aspectBuilder.TargetDeclaration, nameof(this.OverrideProperty) );
+            builder.AdviceFactory.OverrideFieldOrProperty( builder.TargetDeclaration, nameof(this.OverrideProperty) );
         }
 
-        [OverrideFieldOrPropertyTemplate]
+        public virtual void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder )
+        {
+            builder.ExceptForInheritance().MustBeNonAbstract();
+        }
+
+        [Template]
         public abstract dynamic? OverrideProperty
         {
             get;

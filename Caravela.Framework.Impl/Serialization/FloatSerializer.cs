@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class FloatSerializer : ObjectSerializer<float>
     {
-        public override ExpressionSyntax Serialize( float obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( float obj, ICompilationElementFactory syntaxFactory )
         {
             if ( float.IsPositiveInfinity( obj ) )
             {

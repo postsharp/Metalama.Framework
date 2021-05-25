@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
@@ -13,7 +12,7 @@ using System.Linq;
 namespace Caravela.Framework.Impl.Advices
 {
     internal abstract class IntroduceMemberAdvice<TBuilder> : Advice
-        where TBuilder : MemberBuilder
+        where TBuilder : MemberOrNamedTypeBuilder
     {
         public IntroductionScope Scope { get; }
 
@@ -21,25 +20,22 @@ namespace Caravela.Framework.Impl.Advices
 
         public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
-        public AspectLinkerOptions? LinkerOptions { get; }
-
         protected TBuilder MemberBuilder { get; init; }
 
-        protected IMember? TemplateMember { get; }
+        protected IMemberOrNamedType? TemplateMember { get; }
 
         public IntroduceMemberAdvice(
             AspectInstance aspect,
             INamedType targetDeclaration,
-            IMember? templateMember,
+            IMemberOrNamedType? templateMember,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
-            AspectLinkerOptions? linkerOptions,
-            IReadOnlyDictionary<string, object?> tags ) : base( aspect, targetDeclaration, tags )
+            string? layerName,
+            AdviceOptions? options ) : base( aspect, targetDeclaration, layerName, options )
         {
             this.TemplateMember = templateMember;
             this.Scope = scope;
             this.ConflictBehavior = conflictBehavior;
-            this.LinkerOptions = linkerOptions;
 
             // This is to make the nullability analyzer happy. Derived classes are supposed to set this member in the
             // constructor. Other designs are more cumbersome.

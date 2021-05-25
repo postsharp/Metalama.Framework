@@ -188,7 +188,7 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             foreach ( var aspectInstance in aspectInstances )
             {
-                var depth = this.Compilation.GetDepth( aspectInstance.Declaration );
+                var depth = this.Compilation.GetDepth( aspectInstance.TargetDeclaration );
 
                 if ( !this.TryGetOrAddStep( new AspectLayerId( aspectInstance.AspectClass ), depth, true, out var step ) )
                 {

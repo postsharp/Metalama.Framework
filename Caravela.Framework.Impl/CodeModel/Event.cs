@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
             => this._symbol.ExplicitInterfaceImplementations.Select( e => this.Compilation.Factory.GetEvent( e ) ).ToList();
 
-        public EventInfo ToEventInfo() => new CompileTimeEventInfo( this._symbol, this.DeclaringType );
+        public EventInfo ToEventInfo() => new CompileTimeEventInfo( this );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 

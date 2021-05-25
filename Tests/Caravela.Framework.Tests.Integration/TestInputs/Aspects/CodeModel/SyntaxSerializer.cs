@@ -17,7 +17,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer
             var memberInfo = meta.Method.ToMemberInfo();
             var parameterInfo = meta.Method.Parameters[0].ToParameterInfo();
             var returnValueInfo = meta.Method.ReturnParameter.ToParameterInfo();
-            var type = meta.Method.DeclaringType.ToType();
+            var type = meta.Method.DeclaringType!.ToType();
            // var field = target.Method.DeclaringType.Fields.Single().ToFieldOrPropertyInfo();
             var propertyAsFieldOrProperty = meta.Method.DeclaringType.Properties.Single().ToFieldOrPropertyInfo();
             var property = meta.Method.DeclaringType.Properties.Single().ToPropertyInfo();

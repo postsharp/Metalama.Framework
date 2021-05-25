@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
@@ -15,7 +14,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class IntroducePropertyAdvice : IntroduceMemberAdvice<PropertyBuilder>, IIntroducePropertyAdvice
+    internal class IntroducePropertyAdvice : IntroduceMemberAdvice<PropertyBuilder>
     {
         private readonly IMethod? _getTemplateMethod;
         private readonly IMethod? _setTemplateMethod;
@@ -35,9 +34,9 @@ namespace Caravela.Framework.Impl.Advices
             IMethod? setTemplateMethod,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
-            AspectLinkerOptions? linkerOptions,
-            IReadOnlyDictionary<string, object?> tags )
-            : base( aspect, targetDeclaration, templateProperty, scope, conflictBehavior, linkerOptions, tags )
+            string? layerName,
+            AdviceOptions? options )
+            : base( aspect, targetDeclaration, templateProperty, scope, conflictBehavior, layerName, options )
         {
             this._getTemplateMethod = getTemplateMethod;
             this._setTemplateMethod = setTemplateMethod;
@@ -54,7 +53,7 @@ namespace Caravela.Framework.Impl.Advices
                 hasSet,
                 this.TemplateMember != null && IsAutoProperty( this.TemplateMember ),
                 this.TemplateMember != null && HasInitOnlySetter( this.TemplateMember ),
-                linkerOptions );
+                options?.LinkerOptions );
         }
 
         public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )

@@ -1,8 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Project;
+using System;
 
 namespace Caravela.Framework.Code
 {
@@ -34,5 +35,22 @@ namespace Caravela.Framework.Code
         /// Gets the kind of declaration.
         /// </summary>
         public DeclarationKind DeclarationKind { get; }
+
+        /// <summary>
+        /// Determines whether an aspect of a specified type has been added to the current declaration.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        [Obsolete( "Not implemented." )]
+        bool HasAspect<T>()
+            where T : IAspect;
+
+        /// <summary>
+        /// Gets the list of annotations registered on the current declaration for a given aspect type.
+        /// </summary>
+        /// <typeparam name="T">The type of the aspect for which the annotations are requested.</typeparam>
+        [Obsolete( "Not implemented." )]
+        IAnnotationList GetAnnotations<T>()
+            where T : IAspect;
     }
 }

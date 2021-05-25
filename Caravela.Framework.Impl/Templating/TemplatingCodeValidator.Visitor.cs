@@ -2,8 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -40,18 +40,6 @@ namespace Caravela.Framework.Impl.Templating
             public Visitor(
                 SemanticModel semanticModel,
                 Action<Diagnostic> reportDiagnostic,
-                DesignTimeAspectPipeline pipeline,
-                CancellationToken cancellationToken ) : this(
-                semanticModel,
-                reportDiagnostic,
-                pipeline.ServiceProvider,
-                pipeline.IsCompileTimeSyntaxTreeOutdated( semanticModel.SyntaxTree.FilePath ),
-                true,
-                cancellationToken ) { }
-
-            public Visitor(
-                SemanticModel semanticModel,
-                Action<Diagnostic> reportDiagnostic,
                 IServiceProvider serviceProvider,
                 bool isCompileTimeTreeOutdated,
                 bool isDesignTime,
@@ -82,7 +70,8 @@ namespace Caravela.Framework.Impl.Templating
                 base.Visit( node );
 
                 // If the scope is null (e.g. in a using statement) or compile-time-only, we should not analyze.
-                // Otherwise, we cannot reference a compile-time-only declaration.
+                // Otherwise, we cannot reference a compile-time-only declaration, except in a typeof() or nameof() expression
+                // because these are transformed by the CompileTimeCompilationBuilder.
 
                 if ( this._currentDeclarationScope is SymbolDeclarationScope.RunTimeOnly )
                 {
@@ -90,7 +79,10 @@ namespace Caravela.Framework.Impl.Templating
 
                     var referencedSymbol = symbolInfo.Symbol;
 
-                    if ( referencedSymbol != null && this._classifier.GetSymbolDeclarationScope( referencedSymbol ) == SymbolDeclarationScope.CompileTimeOnly )
+                    if ( referencedSymbol != null &&
+                         this._classifier.GetSymbolDeclarationScope( referencedSymbol ) == SymbolDeclarationScope.CompileTimeOnly &&
+                         !node.AncestorsAndSelf()
+                             .Any( n => n is TypeOfExpressionSyntax || (n is InvocationExpressionSyntax invocation && invocation.IsNameOf()) ) )
                     {
                         if ( this._alreadyReportedDiagnostics.Add( referencedSymbol ) &&
                              !(referencedSymbol.ContainingSymbol != null && this._alreadyReportedDiagnostics.Contains( referencedSymbol.ContainingSymbol )) )

@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class TimeSpanSerializer : ObjectSerializer<TimeSpan>
     {
-        public override ExpressionSyntax Serialize( TimeSpan obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( TimeSpan obj, ICompilationElementFactory syntaxFactory )
         {
             return ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof(TimeSpan) ) )
                 .AddArgumentListArguments(

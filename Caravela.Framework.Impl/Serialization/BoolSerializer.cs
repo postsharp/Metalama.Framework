@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class BoolSerializer : ObjectSerializer<bool>
     {
-        public override ExpressionSyntax Serialize( bool obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( bool obj, ICompilationElementFactory syntaxFactory )
         {
             return LiteralExpression( obj ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression );
         }

@@ -106,7 +106,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 if ( declaringType.Namespace != null )
                 {
                     topDeclaration = SyntaxFactory.NamespaceDeclaration(
-                        SyntaxFactory.ParseName( declaringType.Namespace ),
+                        SyntaxFactory.ParseName( declaringType.Namespace.FullName ),
                         default,
                         default,
                         SyntaxFactory.SingletonList<MemberDeclarationSyntax>( classDeclaration ) );

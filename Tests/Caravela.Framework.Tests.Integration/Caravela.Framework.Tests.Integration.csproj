@@ -26,11 +26,6 @@
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Templating\Syntax\Lock\" />
-    <Folder Include="Templating\Syntax\While\" />
-  </ItemGroup>
-
   <Target Name="AddCustomAssemblyMetadaAttributes" BeforeTargets="CoreGenerateAssemblyInfo">
     <ItemGroup>
       <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">

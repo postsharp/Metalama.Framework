@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl
     {
         AspectSourcePriority Priority { get; }
 
-        IEnumerable<AspectClassMetadata> AspectTypes { get; }
+        IEnumerable<AspectClass> AspectTypes { get; }
 
         IEnumerable<IDeclaration> GetExclusions( INamedType aspectType );
 
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl
         /// </summary>
         IEnumerable<AspectInstance> GetAspectInstances(
             CompilationModel compilation,
-            AspectClassMetadata aspectClassMetadata,
+            AspectClass aspectClass,
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken );
     }

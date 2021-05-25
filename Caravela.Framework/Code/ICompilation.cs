@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Project;
 using System.Collections.Generic;
 
 // TODO: InternalImplement
@@ -12,7 +11,7 @@ namespace Caravela.Framework.Code
     /// Represents a set of types compiled together. Commonly known as a "project", but this is not exactly it.
     /// </summary>
     [CompileTimeOnly]
-    public interface ICompilation : IAssembly, IAspectTarget
+    public interface ICompilation : IAssembly
     {
         /// <summary>
         /// Gets the list of types declared in the current compilation, in all namespaces, but not the nested types.

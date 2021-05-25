@@ -1,16 +1,18 @@
 ﻿using System;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.Declarative
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
         }
+
+        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
 
         // TODO: Indexers.    
 
@@ -22,7 +24,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.D
         //[IntroduceProperty]
         //public static int IntroducedProperty_Auto_Static { get; }
 
-        [IntroduceProperty]
+        [Introduce]
         public int IntroducedProperty_Accessors
         {
             get 

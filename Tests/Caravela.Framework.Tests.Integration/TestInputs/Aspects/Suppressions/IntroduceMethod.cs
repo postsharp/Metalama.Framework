@@ -9,26 +9,28 @@ using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Eligibility;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.OverrideMethod
 {
     public class SuppressWarningAttribute : Attribute, IAspect<INamedType>
     {
         private static readonly SuppressionDefinition _suppression1 = new( "CS0219" );
-        
-        [IntroduceMethodTemplateAttribute]
+
+        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
+
+        [Template]
         public void Introduced()
         {
             int x = 0;
            
         }
         
-        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            var introduced = aspectBuilder.AdviceFactory.IntroduceMethod( aspectBuilder.TargetDeclaration, nameof(Introduced));
-            aspectBuilder.Diagnostics.Suppress( introduced.Builder, _suppression1 );
+            var introduced = builder.AdviceFactory.IntroduceMethod( builder.TargetDeclaration, nameof(Introduced));
+            builder.Diagnostics.Suppress( introduced, _suppression1 );
         }
     }
     

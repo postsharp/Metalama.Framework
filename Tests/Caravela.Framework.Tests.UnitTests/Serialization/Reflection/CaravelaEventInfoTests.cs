@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.ReflectionMocks;
 using System;
@@ -87,7 +86,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var e = (single as Event)!;
 
             var actual = this
-                .Serialize( new CompileTimeEventInfo( e.Symbol, (IType) e.ContainingDeclaration! ) )
+                .Serialize( new CompileTimeEventInfo( e ) )
                 .ToString();
 
             return actual;

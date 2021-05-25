@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Project;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -108,9 +108,14 @@ namespace Caravela.Framework.Tests.UnitTests
             }
         }
 
-        internal static CompilationModel CreateCompilationModel( string code, string? dependentCode = null )
+        internal static CompilationModel CreateCompilationModel(
+            string code,
+            string? dependentCode = null,
+            bool ignoreErrors = false,
+            IEnumerable<MetadataReference>? additionalReferences = null,
+            string? name = null )
         {
-            var roslynCompilation = CreateCSharpCompilation( code, dependentCode );
+            var roslynCompilation = CreateCSharpCompilation( code, dependentCode, ignoreErrors, additionalReferences, name );
 
             return CompilationModel.CreateInitialInstance( roslynCompilation );
         }

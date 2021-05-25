@@ -22,7 +22,7 @@ using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class NamedType : Member, ITypeInternal, ISdkNamedType
+    internal sealed class NamedType : MemberOrNamedType, ITypeInternal, ISdkNamedType
     {
         internal INamedTypeSymbol TypeSymbol { get; }
 
@@ -46,13 +46,11 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
             };
 
-        public Type ToType() => CompileTimeType.Create( this.TypeSymbol );
+        public Type ToType() => CompileTimeType.Create( this );
 
         public override MemberInfo ToMemberInfo() => this.ToType();
 
         public override bool IsReadOnly => this.TypeSymbol.IsReadOnly;
-
-        public override bool IsAsync => false;
 
         public bool HasDefaultConstructor
             => this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||
@@ -164,7 +162,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select( DeclarationRef.FromSymbol<IGenericParameter> ) );
 
         [Memo]
-        public string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();
+        public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
 
         [Memo]
         public string FullName => this.TypeSymbol.ToDisplayString();

@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Caravela.Framework.Impl.CodeModel.References
 {
@@ -12,7 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
     /// </summary>
     /// <typeparam name="T"></typeparam>
     internal readonly struct MemberRef<T> : IMemberRef<T>
-        where T : class, IMember
+        where T : class, IMemberOrNamedType
     {
         public MemberRef( ISymbol symbol )
         {
@@ -21,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
             this.Target = symbol;
         }
 
-        public MemberRef( MemberBuilder builder )
+        public MemberRef( MemberOrNamedTypeBuilder builder )
         {
             this.Target = builder;
         }
@@ -33,13 +34,15 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         public object? Target { get; }
 
-        public T GetForCompilation( CompilationModel compilation ) => DeclarationRef<T>.GetForCompilation( this.Target, compilation );
+        public T Resolve( CompilationModel compilation ) => DeclarationRef<T>.Resolve( this.Target, compilation );
+
+        public ISymbol GetSymbol( Compilation compilation ) => this.Target as ISymbol ?? throw new InvalidOperationException();
 
         public string Name
             => this.Target switch
             {
                 ISymbol symbol => symbol.Name,
-                IMemberBuilder builder => builder.Name,
+                IMemberOrNamedTypeBuilder builder => builder.Name,
                 _ => throw new AssertionFailedException()
             };
 
