@@ -338,7 +338,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return null;
             }
-            
+
             this._cancellationToken.ThrowIfCancellationRequested();
 
             // Adds annotations to the children node.

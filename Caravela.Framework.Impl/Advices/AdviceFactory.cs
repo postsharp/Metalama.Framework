@@ -31,7 +31,12 @@ namespace Caravela.Framework.Impl.Advices
 
         public Dictionary<string, object?> Tags { get; } = new( StringComparer.Ordinal );
 
-        public AdviceFactory( CompilationModel compilation, IDiagnosticAdder diagnosticAdder, IReadOnlyList<Advice> declarativeAdvices, INamedType aspectType, AspectInstance aspect )
+        public AdviceFactory(
+            CompilationModel compilation,
+            IDiagnosticAdder diagnosticAdder,
+            IReadOnlyList<Advice> declarativeAdvices,
+            INamedType aspectType,
+            AspectInstance aspect )
         {
             this._aspectType = aspectType;
             this._aspect = aspect;
@@ -50,7 +55,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 return null;
             }
-            
+
             // We do the search against the Roslyn compilation because it is cheaper.
 
             var members = this._aspectType.GetSymbol().GetMembers( methodName ).ToList();
@@ -344,7 +349,15 @@ namespace Caravela.Framework.Impl.Advices
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AspectLinkerOptions? aspectLinkerOptions = null )
         {
-            return new IntroduceInterfaceAdvice( this._aspect, targetType, interfaceType, explicitImplementation, null, conflictBehavior, aspectLinkerOptions, this.Tags.ToImmutableDictionary() );
+            return new IntroduceInterfaceAdvice(
+                this._aspect,
+                targetType,
+                interfaceType,
+                explicitImplementation,
+                null,
+                conflictBehavior,
+                aspectLinkerOptions,
+                this.Tags.ToImmutableDictionary() );
         }
 
         public IIntroduceInterfaceAdvice IntroduceInterface(
@@ -355,7 +368,15 @@ namespace Caravela.Framework.Impl.Advices
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AspectLinkerOptions? aspectLinkerOptions = null )
         {
-            return new IntroduceInterfaceAdvice( this._aspect, targetType, interfaceType, true, memberMap, conflictBehavior, aspectLinkerOptions, this.Tags.ToImmutableDictionary() );
+            return new IntroduceInterfaceAdvice(
+                this._aspect,
+                targetType,
+                interfaceType,
+                true,
+                memberMap,
+                conflictBehavior,
+                aspectLinkerOptions,
+                this.Tags.ToImmutableDictionary() );
         }
 
         public IAdviceFactory ForLayer( string layerName ) => throw new NotImplementedException();

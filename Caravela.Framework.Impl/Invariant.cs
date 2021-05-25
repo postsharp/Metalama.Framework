@@ -141,11 +141,11 @@ namespace Caravela.Framework.Impl
 #if DEBUG
             var itemSet = new HashSet<T>();
 
-            foreach (var item in items)
+            foreach ( var item in items )
             {
-                if (!itemSet.Add(item))
+                if ( !itemSet.Add( item ) )
                 {
-                    throw new AssertionFailedException("The enumeration must not contain equal elements.");
+                    throw new AssertionFailedException( "The enumeration must not contain equal elements." );
                 }
 
                 yield return item;

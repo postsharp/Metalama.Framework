@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );
 
         [Memo]
-        public IReadOnlyList<IEvent> ExplicitInterfaceImplementations 
+        public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
             => this._symbol.ExplicitInterfaceImplementations.Select( e => this.Compilation.Factory.GetEvent( e ) ).ToList();
 
         public EventInfo ToEventInfo() => new CompileTimeEventInfo( this._symbol, this.DeclaringType );

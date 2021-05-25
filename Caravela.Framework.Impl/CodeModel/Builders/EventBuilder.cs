@@ -22,9 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             bool hasAdder,
             bool hasRemover,
             AspectLinkerOptions? linkerOptions )
-            : base( parentAdvice, targetType, name )
-        {
-        }
+            : base( parentAdvice, targetType, name ) { }
 
         public INamedType EventType { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 

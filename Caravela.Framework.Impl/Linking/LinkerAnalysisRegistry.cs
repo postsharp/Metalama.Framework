@@ -49,11 +49,12 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Determines whether the symbol represents introduced interface implementation.
         /// </summary>
-        /// <param name="symbol">Symbol</param>
+        /// <param name="symbol">Symbol.</param>
         /// <returns></returns>
         public bool IsInterfaceImplementation( ISymbol symbol )
         {
             var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
+
             if ( introducedMember == null )
             {
                 return false;

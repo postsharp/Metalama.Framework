@@ -150,8 +150,8 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         node = node.WithBaseList(
                             node.BaseList != null
-                            ? BaseList( node.BaseList.Types.AddRange( additionalBaseList ) )
-                            : BaseList( SeparatedList( additionalBaseList ) ) );
+                                ? BaseList( node.BaseList.Types.AddRange( additionalBaseList ) )
+                                : BaseList( SeparatedList( additionalBaseList ) ) );
                     }
 
                     return node;

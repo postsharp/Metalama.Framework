@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.Advices
             IReadOnlyDictionary<IMember, IMember>? memberMap,
             ConflictBehavior conflictBehavior,
             AspectLinkerOptions? linkerOptions,
-            IReadOnlyDictionary<string, object?> aspectTags ) : base(aspect, targetType, aspectTags)
+            IReadOnlyDictionary<string, object?> aspectTags ) : base( aspect, targetType, aspectTags )
         {
             this.InterfaceType = interfaceType;
             this.IsExplicit = isExplicit;
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Advices
             this.ConflictBehavior = conflictBehavior;
             this.LinkerOptions = linkerOptions;
 
-            if (this._explicitMemberMap == null)
+            if ( this._explicitMemberMap == null )
             {
                 this._implicitMemberMap = new Dictionary<IMember, IMember>();
             }
@@ -54,24 +54,26 @@ namespace Caravela.Framework.Impl.Advices
 
         public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
-            if (this._explicitMemberMap == null)
+            if ( this._explicitMemberMap == null )
             {
                 // No explicit member map was given, we have to detect introduced members correspoding to all interface members.
                 var compilation = this.TargetDeclaration.Compilation;
 
-                foreach (var interfaceMethod in this.InterfaceType.Methods)
+                foreach ( var interfaceMethod in this.InterfaceType.Methods )
                 {
                     var introductionAdvice = declarativeAdvices
                         .OfType<IntroduceMethodAdvice>()
-                        .SingleOrDefault( x =>
-                             x.Builder.Name == interfaceMethod.Name
-                             && x.Builder.GenericParameters.Count == interfaceMethod.GenericParameters.Count
-                             && x.Builder.Parameters.Count == interfaceMethod.Parameters.Count
-                             && x.Builder.Parameters
-                                .Select( ( p, i ) => (p, i) )
-                                .All( x =>
-                                    compilation.InvariantComparer.Equals( x.p.ParameterType, interfaceMethod.Parameters[x.i].ParameterType )
-                                    && x.p.RefKind == interfaceMethod.Parameters[x.i].RefKind ) );
+                        .SingleOrDefault(
+                            x =>
+                                x.Builder.Name == interfaceMethod.Name
+                                && x.Builder.GenericParameters.Count == interfaceMethod.GenericParameters.Count
+                                && x.Builder.Parameters.Count == interfaceMethod.Parameters.Count
+                                && x.Builder.Parameters
+                                    .Select( ( p, i ) => (p, i) )
+                                    .All(
+                                        x =>
+                                            compilation.InvariantComparer.Equals( x.p.ParameterType, interfaceMethod.Parameters[x.i].ParameterType )
+                                            && x.p.RefKind == interfaceMethod.Parameters[x.i].RefKind ) );
 
                     if ( introductionAdvice == null )
                     {
@@ -80,14 +82,17 @@ namespace Caravela.Framework.Impl.Advices
                                 this.TargetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, this.InterfaceType, interfaceMethod) ) );
                     }
-                    else if ( 
-                        !compilation.InvariantComparer.Equals( interfaceMethod.ReturnParameter.ParameterType, introductionAdvice.Builder.ReturnParameter.ParameterType )
+                    else if (
+                        !compilation.InvariantComparer.Equals(
+                            interfaceMethod.ReturnParameter.ParameterType,
+                            introductionAdvice.Builder.ReturnParameter.ParameterType )
                         || interfaceMethod.ReturnParameter.RefKind != introductionAdvice.Builder.ReturnParameter.RefKind )
                     {
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberIntroductionDoesNotMatch.CreateDiagnostic(
                                 this.TargetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, this.InterfaceType, introductionAdvice.Builder, interfaceMethod) ) );
+                                (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, this.InterfaceType, introductionAdvice.Builder,
+                                 interfaceMethod) ) );
                     }
                     else
                     {
@@ -95,18 +100,20 @@ namespace Caravela.Framework.Impl.Advices
                     }
                 }
 
-                foreach (var interfaceProperty in this.InterfaceType.Properties)
+                foreach ( var interfaceProperty in this.InterfaceType.Properties )
                 {
                     var introductionAdvice = declarativeAdvices
                         .OfType<IntroducePropertyAdvice>()
-                        .SingleOrDefault( x =>
-                             x.Builder.Name == interfaceProperty.Name
-                             && x.Builder.Parameters.Count == interfaceProperty.Parameters.Count
-                             && x.Builder.Parameters
-                                .Select( ( p, i ) => (p, i) )
-                                .All( x =>
-                                    compilation.InvariantComparer.Equals( x.p.ParameterType, interfaceProperty.Parameters[x.i].ParameterType )
-                                    && x.p.RefKind == interfaceProperty.Parameters[x.i].RefKind ) );
+                        .SingleOrDefault(
+                            x =>
+                                x.Builder.Name == interfaceProperty.Name
+                                && x.Builder.Parameters.Count == interfaceProperty.Parameters.Count
+                                && x.Builder.Parameters
+                                    .Select( ( p, i ) => (p, i) )
+                                    .All(
+                                        x =>
+                                            compilation.InvariantComparer.Equals( x.p.ParameterType, interfaceProperty.Parameters[x.i].ParameterType )
+                                            && x.p.RefKind == interfaceProperty.Parameters[x.i].RefKind ) );
 
                     if ( introductionAdvice == null )
                     {
@@ -122,7 +129,8 @@ namespace Caravela.Framework.Impl.Advices
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberIntroductionDoesNotMatch.CreateDiagnostic(
                                 this.TargetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, this.InterfaceType, introductionAdvice.Builder, interfaceProperty) ) );
+                                (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, this.InterfaceType, introductionAdvice.Builder,
+                                 interfaceProperty) ) );
                     }
                     else
                     {
@@ -148,7 +156,8 @@ namespace Caravela.Framework.Impl.Advices
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberIntroductionDoesNotMatch.CreateDiagnostic(
                                 this.TargetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, this.InterfaceType, introductionAdvice.Builder, interfaceEvent) ) );
+                                (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, this.InterfaceType, introductionAdvice.Builder,
+                                 interfaceEvent) ) );
                     }
                     else
                     {

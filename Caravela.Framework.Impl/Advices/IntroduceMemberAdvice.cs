@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Advices
             this.Scope = scope;
             this.ConflictBehavior = conflictBehavior;
             this.LinkerOptions = linkerOptions;
-            
+
             // This is to make the nullability analyzer happy. Derived classes are supposed to set this member in the
             // constructor. Other designs are more cumbersome.
             this.MemberBuilder = null!;
@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.Advices
                     {
                         this.MemberBuilder.IsStatic = false;
                     }
-                    
+
                     break;
 
                 case IntroductionScope.Instance:

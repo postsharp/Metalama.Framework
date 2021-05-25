@@ -5,6 +5,7 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
+using System;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
@@ -23,13 +24,11 @@ namespace Caravela.Framework.Impl.Advices
             ConflictBehavior conflictBehavior,
             AspectLinkerOptions? linkerOptions,
             IReadOnlyDictionary<string, object?> tags )
-            : base(aspect, targetDeclaration, null, scope, conflictBehavior, linkerOptions, tags )
-        {
-        }
+            : base( aspect, targetDeclaration, null, scope, conflictBehavior, linkerOptions, tags ) { }
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

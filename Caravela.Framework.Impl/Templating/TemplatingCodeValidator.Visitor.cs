@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.DesignTime.Diagnostics;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
@@ -35,7 +34,7 @@ namespace Caravela.Framework.Impl.Templating
 
             private SymbolDeclarationScope? _currentDeclarationScope;
             private ISymbol? _currentDeclaration;
-            
+
             public bool HasError { get; private set; }
 
             public Visitor(
@@ -189,7 +188,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     this.HasError = true;
                 }
-                
+
                 this._reportDiagnostic( diagnostic );
             }
 

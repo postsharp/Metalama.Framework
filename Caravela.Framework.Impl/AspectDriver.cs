@@ -88,10 +88,17 @@ namespace Caravela.Framework.Impl
             {
                 var declarativeAdvices =
                     this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, diagnosticSink, declaration, x.Attribute, x.Member ) )
-                    .ToArray();
+                        .ToArray();
 
                 var compilationModel = (CompilationModel) declaration.Compilation;
-                var adviceFactory = new AdviceFactory( compilationModel, diagnosticSink, declarativeAdvices, compilationModel.Factory.GetNamedType( this.AspectType ), aspect );
+
+                var adviceFactory = new AdviceFactory(
+                    compilationModel,
+                    diagnosticSink,
+                    declarativeAdvices,
+                    compilationModel.Factory.GetNamedType( this.AspectType ),
+                    aspect );
+
                 var aspectBuilder = new AspectBuilder<T>( declaration, diagnosticSink, declarativeAdvices, adviceFactory, cancellationToken );
 
                 try

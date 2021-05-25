@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IType ReturnType
             => this._semantic != AccessorSemantic.Get
-                ? ((CompilationModel) this._containingMember.Compilation).Factory.GetTypeByReflectionType( typeof( void ) )
+                ? ((CompilationModel) this._containingMember.Compilation).Factory.GetTypeByReflectionType( typeof(void) )
                 : ((IProperty) this._containingMember).Type;
 
         [Memo]

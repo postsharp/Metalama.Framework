@@ -78,8 +78,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
             return new( symbol );
         }
 
-        public static DeclarationRef<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol )
-            => new( methodSymbol, DeclarationSpecialKind.ReturnParameter );
+        public static DeclarationRef<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol ) => new( methodSymbol, DeclarationSpecialKind.ReturnParameter );
 
         internal static DeclarationRef<IDeclaration> Compilation() => new( null, DeclarationSpecialKind.Compilation );
     }

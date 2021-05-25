@@ -82,6 +82,6 @@ namespace Caravela.Framework.Impl.Transformations
         AdderOverride,
         RemoverOverride,
         RaiserOverride,
-        InterfaceImplementation,
+        InterfaceImplementation
     }
 }

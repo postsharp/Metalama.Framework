@@ -114,7 +114,7 @@ namespace Caravela.Framework.Impl.DesignTime
                         }
                     }
                 }
-                
+
                 // Perform additional analysis not done by the design-time pipeline.
                 TemplatingCodeValidator.Validate(
                     context.SemanticModel,

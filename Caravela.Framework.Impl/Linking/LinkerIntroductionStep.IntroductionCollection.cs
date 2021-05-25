@@ -57,14 +57,14 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            public void Add(IInterfaceImplementationIntroduction interfaceImplementationIntroduction, IEnumerable<BaseTypeSyntax> introducedInterfaces)
+            public void Add( IInterfaceImplementationIntroduction interfaceImplementationIntroduction, IEnumerable<BaseTypeSyntax> introducedInterfaces )
             {
-                var targetTypeSymbol = ((INamedType)interfaceImplementationIntroduction.ContainingDeclaration).GetSymbol();
+                var targetTypeSymbol = ((INamedType) interfaceImplementationIntroduction.ContainingDeclaration).GetSymbol();
 
                 // TODO: Select best syntax reference for partial classes.
-                var targetTypeDecl = (BaseTypeDeclarationSyntax)targetTypeSymbol.DeclaringSyntaxReferences.First().GetSyntax();
+                var targetTypeDecl = (BaseTypeDeclarationSyntax) targetTypeSymbol.DeclaringSyntaxReferences.First().GetSyntax();
 
-                if (!this._introducedInterfacesByTargetTypeDecl.TryGetValue(targetTypeDecl, out var interfaceList))
+                if ( !this._introducedInterfacesByTargetTypeDecl.TryGetValue( targetTypeDecl, out var interfaceList ) )
                 {
                     this._introducedInterfacesByTargetTypeDecl[targetTypeDecl] = interfaceList = new List<BaseTypeSyntax>();
                 }
@@ -83,7 +83,7 @@ namespace Caravela.Framework.Impl.Linking
                 return Enumerable.Empty<LinkerIntroducedMember>();
             }
 
-            public IEnumerable<BaseTypeSyntax> GetIntroducedInterfacesForTypeDecl( BaseTypeDeclarationSyntax typeDeclaration)
+            public IEnumerable<BaseTypeSyntax> GetIntroducedInterfacesForTypeDecl( BaseTypeDeclarationSyntax typeDeclaration )
             {
                 if ( this._introducedInterfacesByTargetTypeDecl.TryGetValue( typeDeclaration, out var interfaceList ) )
                 {

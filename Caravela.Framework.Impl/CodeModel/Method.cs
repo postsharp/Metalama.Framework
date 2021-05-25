@@ -80,7 +80,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
-            => ((IMethodSymbol)this.Symbol).ExplicitInterfaceImplementations.Select( m => this.Compilation.Factory.GetMethod( m ) ).ToList();
+            => ((IMethodSymbol) this.Symbol).ExplicitInterfaceImplementations.Select( m => this.Compilation.Factory.GetMethod( m ) ).ToList();
 
         public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
 

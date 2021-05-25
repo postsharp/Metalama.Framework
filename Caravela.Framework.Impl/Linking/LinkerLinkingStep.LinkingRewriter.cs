@@ -68,10 +68,10 @@ namespace Caravela.Framework.Impl.Linking
                         else
                         {
                             // Declaration is not inlineable, it will stay but inlineable references need to be inlined into it.
-                            newMembers.Add( this.GetTransformedNonInlineableOverride(member, semanticModel) );
+                            newMembers.Add( this.GetTransformedNonInlineableOverride( member, semanticModel ) );
                         }
                     }
-                    else if (this._analysisRegistry.IsInterfaceImplementation( symbol ))
+                    else if ( this._analysisRegistry.IsInterfaceImplementation( symbol ) )
                     {
                         // Interface implementation member. Currently only transformed into 
                         newMembers.Add( this.GetTransformedInterfaceImplementation( member, symbol ) );
@@ -95,7 +95,7 @@ namespace Caravela.Framework.Impl.Linking
                         if ( !this._analysisRegistry.IsInlineable( symbol ) )
                         {
                             // TODO: This should be inserted after all other overrides.
-                            newMembers.Add( this.GetOriginalImplDeclaration( member ) );
+                            newMembers.Add( GetOriginalImplDeclaration( member ) );
                         }
                     }
                     else
@@ -108,7 +108,7 @@ namespace Caravela.Framework.Impl.Linking
                 return node.WithMembers( List( newMembers ) );
             }
 
-            private MemberDeclarationSyntax GetTransformedNonInlineableOverride( MemberDeclarationSyntax member, SemanticModel semanticModel)
+            private MemberDeclarationSyntax GetTransformedNonInlineableOverride( MemberDeclarationSyntax member, SemanticModel semanticModel )
             {
                 switch ( member )
                 {
@@ -135,15 +135,15 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     case MethodDeclarationSyntax method:
                         // Non-inlineable method.
-                        return this.TransformInterfaceMethodImplementation( method, (IMethodSymbol)symbol );
+                        return TransformInterfaceMethodImplementation( method, (IMethodSymbol) symbol );
 
                     case PropertyDeclarationSyntax property:
                         // Non-inlineable property.
-                        return this.TransformInterfacePropertyImplementation( property, (IPropertySymbol)symbol );
+                        return TransformInterfacePropertyImplementation( property, (IPropertySymbol) symbol );
 
                     case EventDeclarationSyntax @event:
                         // Non-inlineable event.
-                        return this.TransformInterfaceEventImplementation( @event, (IEventSymbol)symbol );
+                        return TransformInterfaceEventImplementation( @event, (IEventSymbol) symbol );
 
                     default:
                         throw new AssertionFailedException();
@@ -173,20 +173,26 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private MemberDeclarationSyntax GetTransformedNonInlineableOverrideTarget( MemberDeclarationSyntax member, ISymbol lastOverrideSymbol, SemanticModel semanticModel )
+            private MemberDeclarationSyntax GetTransformedNonInlineableOverrideTarget(
+                MemberDeclarationSyntax member,
+                ISymbol lastOverrideSymbol,
+                SemanticModel semanticModel )
             {
                 switch ( member )
                 {
                     case MethodDeclarationSyntax method:
                         var lastMethodOverrideSyntax = (MethodDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+
                         return this.TransformMethod( semanticModel, method, lastMethodOverrideSyntax );
 
                     case PropertyDeclarationSyntax property:
                         var lastPropertyOverrideSyntax = (PropertyDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+
                         return this.TransformProperty( semanticModel, property, lastPropertyOverrideSyntax );
 
                     case EventDeclarationSyntax @event:
                         var lastEventOverrideSyntax = (EventDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+
                         return this.TransformEvent( semanticModel, @event, lastEventOverrideSyntax );
 
                     default:
@@ -194,9 +200,8 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private MemberDeclarationSyntax GetOriginalImplDeclaration( MemberDeclarationSyntax member )
+            private static MemberDeclarationSyntax GetOriginalImplDeclaration( MemberDeclarationSyntax member )
             {
-
                 // This is target member that is not inlineable, we need to a separate declaration.
                 switch ( member )
                 {
@@ -292,7 +297,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            public MethodDeclarationSyntax TransformInterfaceMethodImplementation(MethodDeclarationSyntax method, IMethodSymbol interfaceMethodSymbol )
+            public static MethodDeclarationSyntax TransformInterfaceMethodImplementation( MethodDeclarationSyntax method, IMethodSymbol interfaceMethodSymbol )
             {
                 var interfaceType = interfaceMethodSymbol.ContainingType;
 
@@ -310,7 +315,9 @@ namespace Caravela.Framework.Impl.Linking
                         null );
             }
 
-            public PropertyDeclarationSyntax TransformInterfacePropertyImplementation( PropertyDeclarationSyntax property, IPropertySymbol interfacePropertySymbol )
+            public static PropertyDeclarationSyntax TransformInterfacePropertyImplementation(
+                PropertyDeclarationSyntax property,
+                IPropertySymbol interfacePropertySymbol )
             {
                 var interfaceType = interfacePropertySymbol.ContainingType;
 
@@ -324,7 +331,7 @@ namespace Caravela.Framework.Impl.Linking
                         property.AccessorList.AssertNotNull() );
             }
 
-            public EventDeclarationSyntax TransformInterfaceEventImplementation( EventDeclarationSyntax @event, IEventSymbol interfaceEventSymbol )
+            public static EventDeclarationSyntax TransformInterfaceEventImplementation( EventDeclarationSyntax @event, IEventSymbol interfaceEventSymbol )
             {
                 var interfaceType = interfaceEventSymbol.ContainingType;
 
@@ -532,7 +539,7 @@ namespace Caravela.Framework.Impl.Linking
                 _ = semanticModel;
                 _ = accessor;
                 _ = symbol;
-                
+
                 throw new NotImplementedException();
             }
 

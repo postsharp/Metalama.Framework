@@ -192,24 +192,26 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IReadOnlyList<INamedType> AllImplementedInterfaces
             => // TODO: Correct order after concat and distinct?            
-            (this.BaseType?.AllImplementedInterfaces ?? Enumerable.Empty<INamedType>())
-            .Concat(
-                this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
-                .Concat( this.Compilation.GetObservableTransformationsOnElement( this )
-                         .OfType<IntroducedInterface>()
-                         .Select( i => i.InterfaceType ) ) ) 
-            .Distinct() // Remove duplicates (reimplementations of earlier interface by aspect).
-            .ToImmutableArray();
+                (this.BaseType?.AllImplementedInterfaces ?? Enumerable.Empty<INamedType>())
+                .Concat(
+                    this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
+                        .Concat(
+                            this.Compilation.GetObservableTransformationsOnElement( this )
+                                .OfType<IntroducedInterface>()
+                                .Select( i => i.InterfaceType ) ) )
+                .Distinct() // Remove duplicates (reimplementations of earlier interface by aspect).
+                .ToImmutableArray();
 
         [Memo]
         public IReadOnlyList<INamedType> ImplementedInterfaces
             => // TODO: Correct order after concat and distinct?            
-            this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
-            .Concat( this.Compilation.GetObservableTransformationsOnElement( this )
-                        .OfType<IntroducedInterface>()
-                        .Select( i => i.InterfaceType ) )
-            .Distinct() // Remove duplicates (reimplementations of earlier interface by aspect).
-            .ToImmutableArray();
+                this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
+                    .Concat(
+                        this.Compilation.GetObservableTransformationsOnElement( this )
+                            .OfType<IntroducedInterface>()
+                            .Select( i => i.InterfaceType ) )
+                    .Distinct() // Remove duplicates (reimplementations of earlier interface by aspect).
+                    .ToImmutableArray();
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
@@ -223,12 +225,13 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsSubclassOf( INamedType type )
         {
             // TODO: enum.IsSubclassOf(int) == true etc.
-            if (type.TypeKind == TypeKind.Class)
+            if ( type.TypeKind == TypeKind.Class )
             {
                 INamedType? currentType = this;
+
                 while ( currentType != null )
                 {
-                    if (this.Compilation.InvariantComparer.Equals(currentType, type))
+                    if ( this.Compilation.InvariantComparer.Equals( currentType, type ) )
                     {
                         return true;
                     }
@@ -238,13 +241,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 return false;
             }
-            else if (type.TypeKind == TypeKind.Interface)
+            else if ( type.TypeKind == TypeKind.Interface )
             {
                 return this.ImplementedInterfaces.SingleOrDefault( i => this.Compilation.InvariantComparer.Equals( i, type ) ) != null;
-            }            
+            }
             else
             {
-                return this.Compilation.InvariantComparer.Equals(this, type);
+                return this.Compilation.InvariantComparer.Equals( this, type );
             }
         }
 
@@ -252,26 +255,27 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             // TODO: Type introductions.
             var symbolInterfaceMemberImplementationSymbol = this.TypeSymbol.FindImplementationForInterfaceMember( interfaceMember.GetSymbol().AssertNotNull() );
+
             var symbolInterfaceMemberImplementation =
                 symbolInterfaceMemberImplementationSymbol != null
-                ? (IMember) this.Compilation.Factory.GetDeclaration( symbolInterfaceMemberImplementationSymbol )
-                : null;
+                    ? (IMember) this.Compilation.Factory.GetDeclaration( symbolInterfaceMemberImplementationSymbol )
+                    : null;
 
             // Introduced implementation can be implementing the interface member in a subtype.
             INamedType currentType = this;
 
-            while (currentType != null)
+            while ( currentType != null )
             {
-                var introducedInterface = 
+                var introducedInterface =
                     this.Compilation.GetObservableTransformationsOnElement( currentType )
-                    .OfType<IntroducedInterface>()
-                    .Where(i => this.Compilation.InvariantComparer.Equals(i.InterfaceType, interfaceMember.DeclaringType))
-                    .SingleOrDefault();
+                        .OfType<IntroducedInterface>()
+                        .Where( i => this.Compilation.InvariantComparer.Equals( i.InterfaceType, interfaceMember.DeclaringType ) )
+                        .SingleOrDefault();
 
-                if (introducedInterface != null)
+                if ( introducedInterface != null )
                 {
                     // TODO: Generics.
-                    if (!introducedInterface.MemberMap.TryGetValue(interfaceMember, out var interfaceMemberImplementation))
+                    if ( !introducedInterface.MemberMap.TryGetValue( interfaceMember, out var interfaceMemberImplementation ) )
                     {
                         throw new AssertionFailedException();
                     }

@@ -32,7 +32,12 @@ namespace Caravela.Framework.Impl.Transformations
 
         public MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
 
-        public IntroducedInterface( IntroduceInterfaceAdvice introduceInterfaceAdvice, INamedType targetType, INamedType interfaceType, bool isExplicit, IReadOnlyDictionary<IMember, IMember> memberMap )
+        public IntroducedInterface(
+            IntroduceInterfaceAdvice introduceInterfaceAdvice,
+            INamedType targetType,
+            INamedType interfaceType,
+            bool isExplicit,
+            IReadOnlyDictionary<IMember, IMember> memberMap )
         {
             this.Advice = introduceInterfaceAdvice;
             this.TargetType = targetType;
@@ -44,7 +49,7 @@ namespace Caravela.Framework.Impl.Transformations
         public IEnumerable<BaseTypeSyntax> GetIntroducedInterfaceImplementations()
         {
             if ( !this.TargetType.ImplementedInterfaces.Contains( this.InterfaceType ) )
-            {                             
+            {
                 // The type already implements the interface itself.
                 return new[] { (BaseTypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.InterfaceType.GetSymbol() ) };
             }
@@ -61,7 +66,7 @@ namespace Caravela.Framework.Impl.Transformations
 
             foreach ( var interfaceMethod in this.InterfaceType.Methods )
             {
-                if (!this.MemberMap.TryGetValue(interfaceMethod, out var targetMember))
+                if ( !this.MemberMap.TryGetValue( interfaceMethod, out var targetMember ) )
                 {
                     continue;
                 }
@@ -91,7 +96,7 @@ namespace Caravela.Framework.Impl.Transformations
                         interfaceMethod ) );
             }
 
-            foreach (var interfaceProperty in this.InterfaceType.Properties)
+            foreach ( var interfaceProperty in this.InterfaceType.Properties )
             {
                 if ( !this.MemberMap.TryGetValue( interfaceProperty, out var targetMember ) )
                 {
@@ -122,14 +127,14 @@ namespace Caravela.Framework.Impl.Transformations
                         interfaceProperty ) );
             }
 
-            foreach (var interfaceEvent in this.InterfaceType.Events)
+            foreach ( var interfaceEvent in this.InterfaceType.Events )
             {
                 if ( !this.MemberMap.TryGetValue( interfaceEvent, out var targetMember ) )
                 {
                     continue;
                 }
 
-                if ( targetMember is not IEvent targetEvent)
+                if ( targetMember is not IEvent targetEvent )
                 {
                     throw new AssertionFailedException();
                 }
@@ -166,7 +171,7 @@ namespace Caravela.Framework.Impl.Transformations
                         IdentifierName( targetMethod.Name ) ),
                     ArgumentList() );
 
-            if ( targetMethod.ReturnType.Is( typeof( void ) ) )
+            if ( targetMethod.ReturnType.Is( typeof(void) ) )
             {
                 return Block( ExpressionStatement( callExpression ) );
             }
@@ -176,23 +181,28 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-        private static AccessorListSyntax GetPropertyAccessorList(IProperty targetProperty)
+        private static AccessorListSyntax GetPropertyAccessorList( IProperty targetProperty )
         {
             return
                 AccessorList(
                     List(
                         new AccessorDeclarationSyntax?[]
-                        {
-                            targetProperty.Getter != null ? AccessorDeclaration(SyntaxKind.GetAccessorDeclaration, GetImplementingGetterBody(targetProperty)) : null,
-                            targetProperty.Setter != null ? AccessorDeclaration(SyntaxKind.SetAccessorDeclaration, GetImplementingSetterBody(targetProperty)) : null,
-                        }.Where( x => x != null ).AssertNoneNull() ) );
+                            {
+                                targetProperty.Getter != null
+                                    ? AccessorDeclaration( SyntaxKind.GetAccessorDeclaration, GetImplementingGetterBody( targetProperty ) )
+                                    : null,
+                                targetProperty.Setter != null
+                                    ? AccessorDeclaration( SyntaxKind.SetAccessorDeclaration, GetImplementingSetterBody( targetProperty ) )
+                                    : null
+                            }.Where( x => x != null )
+                            .AssertNoneNull() ) );
         }
 
         private static BlockSyntax GetImplementingGetterBody( IProperty targetProperty )
         {
             return
                 Block(
-                    ReturnStatement( 
+                    ReturnStatement(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             ThisExpression(),
@@ -219,10 +229,15 @@ namespace Caravela.Framework.Impl.Transformations
                 AccessorList(
                     List(
                         new AccessorDeclarationSyntax?[]
-                        {
-                            targetEvent.Adder != null ? AccessorDeclaration(SyntaxKind.AddAccessorDeclaration, GetImplementingAdderBody(targetEvent)) : null,
-                            targetEvent.Remover != null ? AccessorDeclaration(SyntaxKind.RemoveAccessorDeclaration, GetImplementingRemoverBody(targetEvent)) : null,
-                        }.Where( x => x != null ).AssertNoneNull() ) );
+                            {
+                                targetEvent.Adder != null
+                                    ? AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplementingAdderBody( targetEvent ) )
+                                    : null,
+                                targetEvent.Remover != null
+                                    ? AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, GetImplementingRemoverBody( targetEvent ) )
+                                    : null
+                            }.Where( x => x != null )
+                            .AssertNoneNull() ) );
         }
 
         private static BlockSyntax GetImplementingAdderBody( IEvent targetEvent )
