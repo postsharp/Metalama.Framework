@@ -14,7 +14,7 @@ namespace Caravela.Framework.Policies
     /// <typeparam name="TTarget"></typeparam>
     [Obsolete( "Not implemented." )]
     public interface IAspectTargetSet<out TTarget>
-        where TTarget : class, IAspectTarget
+        where TTarget : class, IDeclaration
     {
         void AddAspect<TAspect>( Expression<Func<INamedType, TAspect>> expression )
             where TAspect : Attribute, IAspect<TTarget>;

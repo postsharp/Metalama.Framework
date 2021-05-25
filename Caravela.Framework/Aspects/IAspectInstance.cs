@@ -10,6 +10,7 @@ namespace Caravela.Framework.Aspects
     /// Represents an instance of an aspect (the CLR instance itself is in the <see cref="Aspect"/> property.
     /// </summary>
     [InternalImplement]
+    [CompileTimeOnly]
     public interface IAspectInstance
     {
         /// <summary>

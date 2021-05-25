@@ -27,13 +27,12 @@ namespace Caravela.Framework.Tests.UnitTests
         {
             var code = @"
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Advices;
 class C : IAspect 
 {
   void M() {}
   int F;
 
- [OverrideMethodTemplateAttribute]
+ [TemplateAttribute]
  void Template() {}
 }
 ";

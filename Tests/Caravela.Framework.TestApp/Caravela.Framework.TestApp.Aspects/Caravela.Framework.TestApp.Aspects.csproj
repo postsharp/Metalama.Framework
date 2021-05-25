@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Validation\**" />
+    <EmbeddedResource Remove="Validation\**" />
+    <None Remove="Validation\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Caravela.Framework.TestApp.Library\Caravela.Framework.TestApp.Library.csproj" />
     <PackageReference Include="Caravela.Framework" Version="$(CaravelaVersion)" />
   </ItemGroup>

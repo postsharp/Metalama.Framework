@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Validation;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -16,12 +17,14 @@ namespace Caravela.Framework.Aspects
     [InternalImplement]
     public interface IAspectBuilder : IValidatorAdder
     {
+        [Obsolete( "Not implemented." )]
         IProject Project { get; }
 
         /// <summary>
-        /// Gets the list of markers that have contributed to the current aspect instance to be created.
+        /// Gets the list of aspects that have required this aspect to be created.
         /// </summary>
-        IReadOnlyList<IAspectMarkerInstance> Markers { get; }
+        [Obsolete( "Not implemented." )]
+        IReadOnlyList<IAspectInstance> UpstreamAspects { get; }
 
         /// <summary>
         /// Gets the list of other instances of the same type on <see cref="TargetDeclaration"/>. When several instances
@@ -29,6 +32,7 @@ namespace Caravela.Framework.Aspects
         /// using <see cref="IAspect{T}.BuildAspect"/>. The other instances can are exposed in this property and are sorted
         /// by order of decreasing priority.
         /// </summary>
+        [Obsolete( "Not implemented." )]
         IReadOnlyList<IAspectInstance> OtherInstances { get; }
 
         /// <summary>
@@ -57,15 +61,23 @@ namespace Caravela.Framework.Aspects
         /// </remarks>
         void SkipAspect();
 
-        // TODO: This is not well-defined. It may be better to expose this on IAdvice.
+        CancellationToken CancellationToken { get; }
 
         /// <summary>
-        /// Gets a set of opaque properties that can be set by the aspect <see cref="IAspect{T}.BuildAspect"/> method and are then made
-        /// visible in <see cref="meta.Tags"/>.
+        /// Requires an instance of a specified aspect type to be present on a specified declaration. If the aspect
+        /// is not present, this method adds a new instance of this aspect by using the default aspect constructor.
         /// </summary>
-        IDictionary<string, object?> Tags { get; }
-
-        CancellationToken CancellationToken { get; }
+        /// <remarks>
+        /// <para>Calling this method causes the current aspect to be present in the <see cref="UpstreamAspects"/> list
+        /// even if the required aspect was already present on the target declaration.</para>
+        /// </remarks>
+        /// <param name="target">The target declaration. It must be contained in the current type.</param>
+        /// <typeparam name="TTarget">Type of the target declaration.</typeparam>
+        /// <typeparam name="TAspect">Type of the aspect. The type must be ordered after the current aspect type.</typeparam>
+        [Obsolete( "Not implemented." )]
+        void RequireAspect<TTarget, TAspect>( TTarget target )
+            where TTarget : class, IDeclaration
+            where TAspect : IAspect<TTarget>, new();
     }
 
     /// <summary>

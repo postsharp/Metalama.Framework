@@ -1,5 +1,4 @@
 ﻿using System;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
@@ -17,13 +16,13 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
             //}
 
             {
-                var advice = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, nameof(Property));
-                advice.Builder.Accessibility = Accessibility.Public;
+                var property = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, nameof(Property));
+                property.Accessibility = Accessibility.Public;
             }
 
             {
-                var advice = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, "PropertyFromAccessors", nameof(GetPropertyTemplate), nameof(SetPropertyTemplate) );
-                advice.Builder.Accessibility = Accessibility.Public;
+                var property = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, "PropertyFromAccessors", nameof(GetPropertyTemplate), nameof(SetPropertyTemplate) );
+                property.Accessibility = Accessibility.Public;
             }
 
             // TODO: Expression bodied template.
@@ -31,10 +30,10 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
 
         public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
 
-        //[IntroducePropertyTemplate]
+        //[Template]
         //public int AutoProperty { get; set; }
 
-        [IntroducePropertyTemplate]
+        [Template]
         public int Property
         {
             get
@@ -50,14 +49,14 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
             }
         }
 
-        [IntroducePropertyGetTemplate]
+        [Template]
         public int GetPropertyTemplate()
         {
             Console.WriteLine("Get");
             return meta.Proceed();
         }
 
-        [IntroducePropertySetTemplate]
+        [Template]
         public void SetPropertyTemplate(int value)
         {
             Console.WriteLine("Set");

@@ -8,7 +8,7 @@ using System.Text;
 namespace Caravela.Framework.Eligibility.Implementation
 {
 #pragma warning disable 618 // Not implemented.
-    
+
     internal class OrEligibilityRule<T> : IEligibilityRule<T>
     {
         private ImmutableArray<IEligibilityRule<T>> _predicates;

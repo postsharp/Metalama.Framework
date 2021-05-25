@@ -213,27 +213,27 @@ namespace Caravela.Framework.Impl
                 // call our aggregate eligibility rule here.
 
                 IMethodSymbol method =>
-                    this._prototypeAspectInstance is IAspect<IAspectTarget> ||
+                    this._prototypeAspectInstance is IAspect<IDeclaration> ||
                     this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
                     this._prototypeAspectInstance is IAspect<IMethodBase> ||
                     (this._prototypeAspectInstance is IAspect<IMethod> && IsMethod( method.MethodKind )) ||
                     (this._prototypeAspectInstance is IAspect<IConstructor> && IsConstructor( method.MethodKind )),
 
-                IPropertySymbol => this._prototypeAspectInstance is IAspect<IAspectTarget> ||
+                IPropertySymbol => this._prototypeAspectInstance is IAspect<IDeclaration> ||
                                    this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
                                    this._prototypeAspectInstance is IAspect<IFieldOrProperty> ||
                                    this._prototypeAspectInstance is IAspect<IProperty>,
 
-                IFieldSymbol => this._prototypeAspectInstance is IAspect<IAspectTarget> ||
+                IFieldSymbol => this._prototypeAspectInstance is IAspect<IDeclaration> ||
                                 this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
                                 this._prototypeAspectInstance is IAspect<IFieldOrProperty> ||
                                 this._prototypeAspectInstance is IAspect<IField>,
 
-                IEventSymbol => this._prototypeAspectInstance is IAspect<IAspectTarget> ||
+                IEventSymbol => this._prototypeAspectInstance is IAspect<IDeclaration> ||
                                 this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
                                 this._prototypeAspectInstance is IAspect<IEvent>,
 
-                INamedTypeSymbol => this._prototypeAspectInstance is IAspect<IAspectTarget> ||
+                INamedTypeSymbol => this._prototypeAspectInstance is IAspect<IDeclaration> ||
                                     this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
                                     this._prototypeAspectInstance is IAspect<INamedType>,
 

@@ -1,5 +1,4 @@
-﻿using Caravela.Framework.Advices;
-using Caravela.Framework.Aspects;
+﻿using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
@@ -17,14 +16,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
         public void BuildEligibility(IEligibilityBuilder<IProperty> builder) { }
 
-        [OverrideFieldOrPropertyGetTemplate]
+        [Template]
         public dynamic GetTemplate()
         {
             Console.WriteLine("This is the overridden getter.");
             return meta.Proceed();
         }
 
-        [OverrideFieldOrPropertySetTemplate]
+        [Template]
         public void SetTemplate()
         {
             Console.WriteLine("This is the overridden setter.");

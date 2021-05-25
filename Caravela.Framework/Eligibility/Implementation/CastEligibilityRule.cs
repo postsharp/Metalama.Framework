@@ -36,7 +36,7 @@ namespace Caravela.Framework.Eligibility.Implementation
         {
             if ( describedObject.Object is TIn )
             {
-                return this._inner.GetIneligibilityJustification( requestedEligibility, describedObject.Cast<TOut, TIn>() );    
+                return this._inner.GetIneligibilityJustification( requestedEligibility, describedObject.Cast<TOut, TIn>() );
             }
             else
             {

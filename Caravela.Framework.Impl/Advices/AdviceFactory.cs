@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
@@ -19,16 +18,15 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal class AdviceFactory : IAdviceFactory
     {
+        private const string? _layerName = null;
+
         private readonly CompilationModel _compilation;
         private readonly INamedType _aspectType;
         private readonly AspectInstance _aspect;
         private readonly IDiagnosticAdder _diagnosticAdder;
+        private readonly List<Advice> _advices = new();
 
-        private readonly List<IAdvice> _advices = new();
-
-        internal IReadOnlyList<IAdvice> Advices => this._advices;
-
-        public Dictionary<string, object?> Tags { get; } = new( StringComparer.Ordinal );
+        internal IReadOnlyList<Advice> Advices => this._advices;
 
         public AdviceFactory( CompilationModel compilation, IDiagnosticAdder diagnosticAdder, INamedType aspectType, AspectInstance aspect )
         {
@@ -40,7 +38,6 @@ namespace Caravela.Framework.Impl.Advices
 
         private IMethod? GetTemplateMethod(
             string? methodName,
-            Type expectedAttributeType,
             string adviceName,
             [DoesNotReturnIf( true )] bool throwIfMissing = true )
         {
@@ -52,7 +49,7 @@ namespace Caravela.Framework.Impl.Advices
             // We do the search against the Roslyn compilation because it is cheaper.
 
             var members = this._aspectType.GetSymbol().GetMembers( methodName ).ToList();
-            var expectedAttributeTypeSymbol = this._compilation.ReflectionMapper.GetTypeSymbol( expectedAttributeType );
+            var expectedAttributeTypeSymbol = this._compilation.ReflectionMapper.GetTypeSymbol( typeof(TemplateAttribute) );
 
             if ( members.Count != 1 )
             {
@@ -81,14 +78,13 @@ namespace Caravela.Framework.Impl.Advices
 
         private IProperty? GetTemplateProperty(
             string propertyName,
-            Type expectedAttributeType,
             string adviceName,
             [DoesNotReturnIf( true )] bool throwIfMissing = true )
         {
             // We do the search against the Roslyn compilation because it is cheaper.
 
             var members = this._aspectType.GetSymbol().GetMembers( propertyName ).ToList();
-            var expectedAttributeTypeSymbol = this._compilation.ReflectionMapper.GetTypeSymbol( expectedAttributeType );
+            var expectedAttributeTypeSymbol = this._compilation.ReflectionMapper.GetTypeSymbol( typeof(TemplateAttribute) );
 
             if ( members.Count != 1 )
             {
@@ -115,12 +111,12 @@ namespace Caravela.Framework.Impl.Advices
             return this._compilation.Factory.GetProperty( property );
         }
 
-        public IOverrideMethodAdvice OverrideMethod( IMethod targetMethod, string defaultTemplate, AspectLinkerOptions? aspectLinkerOptions = null )
+        public void OverrideMethod( IMethod targetMethod, string defaultTemplate, AdviceOptions? options = null )
         {
             var diagnosticList = new DiagnosticList();
-            var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof(OverrideMethodTemplateAttribute), nameof(this.OverrideMethod) );
+            var templateMethod = this.GetTemplateMethod( defaultTemplate, nameof(this.OverrideMethod) );
 
-            var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, this.Tags.ToImmutableDictionary(), aspectLinkerOptions );
+            var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, _layerName, options );
             advice.Initialize( diagnosticList );
             this._advices.Add( advice );
 
@@ -133,19 +129,17 @@ namespace Caravela.Framework.Impl.Advices
             }
 
             this._diagnosticAdder.Report( diagnosticList );
-
-            return advice;
         }
 
-        public IIntroduceMethodAdvice IntroduceMethod(
+        public IMethodBuilder IntroduceMethod(
             INamedType targetType,
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             var diagnosticList = new DiagnosticList();
-            var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof(IntroduceMethodTemplateAttribute), nameof(this.IntroduceMethod) );
+            var templateMethod = this.GetTemplateMethod( defaultTemplate, nameof(this.IntroduceMethod) );
 
             var advice = new IntroduceMethodAdvice(
                 this._aspect,
@@ -153,8 +147,8 @@ namespace Caravela.Framework.Impl.Advices
                 templateMethod,
                 scope,
                 conflictBehavior,
-                aspectLinkerOptions,
-                this.Tags.ToImmutableDictionary() );
+                _layerName,
+                options );
 
             advice.Initialize( diagnosticList );
             this._advices.Add( advice );
@@ -168,20 +162,19 @@ namespace Caravela.Framework.Impl.Advices
 
             this._diagnosticAdder.Report( diagnosticList );
 
-            return advice;
+            return advice.Builder;
         }
 
-        public IOverrideFieldOrPropertyAdvice OverrideFieldOrProperty(
+        public void OverrideFieldOrProperty(
             IFieldOrProperty targetDeclaration,
             string defaultTemplate,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
 
             var templateProperty = this.GetTemplateProperty(
                 defaultTemplate,
-                typeof(OverrideFieldOrPropertyTemplateAttribute),
                 nameof(this.OverrideFieldOrProperty) );
 
             var advice = new OverrideFieldOrPropertyAdvice(
@@ -190,32 +183,28 @@ namespace Caravela.Framework.Impl.Advices
                 templateProperty,
                 null,
                 null,
-                this.Tags.ToImmutableDictionary(),
-                aspectLinkerOptions );
+                _layerName,
+                options );
 
             advice.Initialize( diagnosticList );
             this._advices.Add( advice );
-
-            return advice;
         }
 
-        public IOverrideFieldOrPropertyAdvice OverrideFieldOrPropertyAccessors(
+        public void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
-            string? defaultGetTemplate,
+            string? getTemplate,
             string? setTemplate,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
 
             var getTemplateMethod = this.GetTemplateMethod(
-                defaultGetTemplate,
-                typeof(OverrideFieldOrPropertyGetTemplateAttribute),
+                getTemplate,
                 nameof(this.OverrideFieldOrPropertyAccessors) );
 
             var setTemplateMethod = this.GetTemplateMethod(
                 setTemplate,
-                typeof(OverrideFieldOrPropertySetTemplateAttribute),
                 nameof(this.OverrideFieldOrPropertyAccessors) );
 
             var advice = new OverrideFieldOrPropertyAdvice(
@@ -224,36 +213,33 @@ namespace Caravela.Framework.Impl.Advices
                 null,
                 getTemplateMethod,
                 setTemplateMethod,
-                this.Tags.ToImmutableDictionary(),
-                aspectLinkerOptions );
+                _layerName,
+                options );
 
             advice.Initialize( diagnosticList );
             this._advices.Add( advice );
-
-            return advice;
         }
 
-        public IIntroduceFieldAdvice IntroduceField(
+        public IFieldBuilder IntroduceField(
             INamedType targetType,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             throw new NotImplementedException();
         }
 
-        public IIntroducePropertyAdvice IntroduceProperty(
+        public IPropertyBuilder IntroduceProperty(
             INamedType targetType,
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             var diagnosticList = new DiagnosticList();
 
             var templateProperty = this.GetTemplateProperty(
                 defaultTemplate,
-                typeof(IntroducePropertyTemplateAttribute),
                 nameof(this.IntroduceProperty) );
 
             var advice = new IntroducePropertyAdvice(
@@ -265,34 +251,32 @@ namespace Caravela.Framework.Impl.Advices
                 null,
                 scope,
                 conflictBehavior,
-                this.Tags.ToImmutableDictionary(),
-                aspectLinkerOptions );
+                _layerName,
+                options );
 
             advice.Initialize( diagnosticList );
             this._advices.Add( advice );
 
-            return advice;
+            return advice.Builder;
         }
 
-        public IIntroducePropertyAdvice IntroduceProperty(
+        public IPropertyBuilder IntroduceProperty(
             INamedType targetType,
             string name,
-            string? defaultGetTemplate,
+            string defaultGetTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             var diagnosticList = new DiagnosticList();
 
             var getTemplateMethod = this.GetTemplateMethod(
                 defaultGetTemplate,
-                typeof(IntroducePropertyGetTemplateAttribute),
                 nameof(this.OverrideFieldOrPropertyAccessors) );
 
             var setTemplateMethod = this.GetTemplateMethod(
                 setTemplate,
-                typeof(IntroducePropertySetTemplateAttribute),
                 nameof(this.OverrideFieldOrPropertyAccessors) );
 
             var advice = new IntroducePropertyAdvice(
@@ -304,33 +288,33 @@ namespace Caravela.Framework.Impl.Advices
                 setTemplateMethod,
                 scope,
                 conflictBehavior,
-                this.Tags.ToImmutableDictionary(),
-                aspectLinkerOptions );
+                _layerName,
+                options );
 
             advice.Initialize( diagnosticList );
             this._advices.Add( advice );
 
-            return advice;
+            return advice.Builder;
         }
 
-        public IOverrideEventAdvice OverrideEventAccessors(
+        public void OverrideEventAccessors(
             IEvent targetDeclaration,
             string? addTemplate,
             string? removeTemplate,
             string? invokeTemplate,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             throw new NotImplementedException();
         }
 
-        public IIntroducePropertyAdvice IntroduceEvent(
+        public IEventBuilder IntroduceEvent(
             INamedType targetType,
-            string? addTemplate,
-            string? removeTemplate,
+            string addTemplate,
+            string removeTemplate,
             string? invokeTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             throw new NotImplementedException();
         }

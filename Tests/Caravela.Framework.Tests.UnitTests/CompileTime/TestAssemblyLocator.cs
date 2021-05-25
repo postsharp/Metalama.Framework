@@ -4,7 +4,6 @@
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Tests.UnitTests.CompileTime
 {
@@ -12,7 +11,9 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
     {
         public Dictionary<AssemblyIdentity, MetadataReference> Files { get; } = new();
 
-        public bool TryFindAssembly( AssemblyIdentity assemblyIdentity, [NotNullWhen( true )] out MetadataReference? reference )
+#pragma warning disable 8767
+        public bool TryFindAssembly( AssemblyIdentity assemblyIdentity, out MetadataReference? reference )
+#pragma warning restore 8767
             => this.Files.TryGetValue( assemblyIdentity, out reference );
     }
 }

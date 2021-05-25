@@ -1,5 +1,4 @@
 ﻿using System;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
@@ -22,13 +21,13 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
             }
         }
 
-        [IntroduceMethod]
+        [Introduce]
         public void IntroducedMethod1()
         {
             Console.Write("This is introduced by the first aspect.");
         }
 
-        [OverrideMethodTemplate]
+        [Template]
         public dynamic OverrideTemplate()
         {
             try
@@ -56,13 +55,13 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
         }
 
 
-        [IntroduceMethod]
+        [Introduce]
         public void IntroducedMethod2()
         {
             Console.Write("This is introduced by the second aspect.");
         }
 
-        [OverrideMethodTemplate]
+        [Template]
         public dynamic OverrideTemplate()
         {
             try
@@ -89,13 +88,13 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
             }
         }
 
-        [IntroduceMethod]
+        [Introduce]
         public void IntroducedMethod3()
         {
             Console.Write("This is introduced by the third aspect.");
         }
 
-        [OverrideMethodTemplate]
+        [Template]
         public dynamic OverrideTemplate()
         {
             try

@@ -1,7 +1,9 @@
 ﻿using System;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.TestApp.Aspects.Validation
 {
+    [CompileTime]
     public class GreaterThanZeroAttribute : ValidateAttribute
     {
         public override void Validate(string name, dynamic value)

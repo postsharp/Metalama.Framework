@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
@@ -12,12 +11,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programm
     {
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            var advice = builder.AdviceFactory.OverrideMethod(builder.TargetDeclaration.Methods.OfName("TargetMethod").Single(), nameof(Template));
+            builder.AdviceFactory.OverrideMethod(builder.TargetDeclaration.Methods.OfName("TargetMethod").Single(), nameof(Template));
         }
 
         public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
 
-        [OverrideMethodTemplate]
+        [Template]
         public dynamic Template()
         {
             Console.WriteLine("This is the overriding method.");

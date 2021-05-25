@@ -9,7 +9,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Base interface for <see cref="IMethod"/>, <see cref="IProperty"/> and <see cref="IEvent"/>, but not <see cref="INamedType"/>.
     /// </summary>
-    public interface IMemberOrNamedType : IAspectTarget
+    public interface IMemberOrNamedType : IDeclaration
     {
         /// <summary>
         /// Gets the member accessibility (or visibility), i.e. <see cref="Code.Accessibility.Private"/>, <see cref="Code.Accessibility.Protected"/>

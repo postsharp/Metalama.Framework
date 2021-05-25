@@ -7,7 +7,6 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.TestFramework;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Eligibility;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
@@ -20,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
         {
         }
         
-        [OverrideMethodTemplateAttribute]
+        [Template]
         public dynamic Override()
         {
 #if !TESTRUNNER // Disable the warning in the main build, not during tests. (1)
@@ -32,7 +31,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
         
         public void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            builder.AdviceFactory.OverrideMethod( builder.TargetDeclaration, nameof(Override), AspectLinkerOptions.Create(true) );
+            builder.AdviceFactory.OverrideMethod( builder.TargetDeclaration, nameof(Override), AdviceOptions.Default.WithLinkerOptions(true) );
             builder.Diagnostics.Suppress( null, _suppression );
         }
 

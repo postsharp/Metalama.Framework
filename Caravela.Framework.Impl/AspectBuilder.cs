@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
@@ -19,13 +18,13 @@ namespace Caravela.Framework.Impl
         where T : class, IDeclaration
     {
         private readonly UserDiagnosticSink _diagnosticSink;
-        private readonly IImmutableList<IAdvice> _declarativeAdvices;
+        private readonly IImmutableList<Advice> _declarativeAdvices;
         private readonly AdviceFactory _adviceFactory;
         private bool _skipped;
 
         IProject IAspectBuilder.Project => throw new NotImplementedException();
 
-        IReadOnlyList<IAspectMarkerInstance> IAspectBuilder.Markers => throw new NotImplementedException();
+        IReadOnlyList<IAspectInstance> IAspectBuilder.UpstreamAspects => throw new NotImplementedException();
 
         IReadOnlyList<IAspectInstance> IAspectBuilder.OtherInstances => throw new NotImplementedException();
 
@@ -39,14 +38,17 @@ namespace Caravela.Framework.Impl
 
         public void SkipAspect() => this._skipped = true;
 
-        public IDictionary<string, object?> Tags => this._adviceFactory.Tags;
-
         public CancellationToken CancellationToken { get; }
+
+        public void RequireAspect<TTarget, TAspect>( TTarget target )
+            where TTarget : class, IDeclaration
+            where TAspect : IAspect<TTarget>, new()
+            => throw new NotImplementedException();
 
         public AspectBuilder(
             T targetDeclaration,
             UserDiagnosticSink diagnosticSink,
-            IEnumerable<IAdvice> declarativeAdvices,
+            IEnumerable<Advice> declarativeAdvices,
             AdviceFactory adviceFactory,
             CancellationToken cancellationToken )
         {
@@ -66,14 +68,12 @@ namespace Caravela.Framework.Impl
                     success,
                     this._diagnosticSink.ToImmutable(),
                     this._declarativeAdvices.ToImmutableArray().AddRange( this._adviceFactory.Advices ),
-                    Array.Empty<IAspectSource>(),
-                    this.Tags.ToImmutableDictionary() )
+                    Array.Empty<IAspectSource>() )
                 : new AspectInstanceResult(
                     success,
                     this._diagnosticSink.ToImmutable(),
-                    Array.Empty<IAdvice>(),
-                    Array.Empty<IAspectSource>(),
-                    ImmutableDictionary<string, object?>.Empty );
+                    Array.Empty<Advice>(),
+                    Array.Empty<IAspectSource>() );
         }
 
 #pragma warning disable 618 // Not implemented

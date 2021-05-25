@@ -9,7 +9,6 @@ using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Eligibility;
 
@@ -21,7 +20,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.OverrideMeth
 
         public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
 
-        [IntroduceMethodTemplateAttribute]
+        [Template]
         public void Introduced()
         {
             int x = 0;
@@ -31,7 +30,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.OverrideMeth
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             var introduced = builder.AdviceFactory.IntroduceMethod( builder.TargetDeclaration, nameof(Introduced));
-            builder.Diagnostics.Suppress( introduced.Builder, _suppression1 );
+            builder.Diagnostics.Suppress( introduced, _suppression1 );
         }
     }
     

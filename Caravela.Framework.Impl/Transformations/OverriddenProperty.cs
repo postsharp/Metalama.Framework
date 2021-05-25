@@ -139,7 +139,7 @@ namespace Caravela.Framework.Impl.Transformations
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
                     (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
                     this.Advice.AspectLayerId,
-                    this.Advice.AspectBuilderTags );
+                    this.Advice.Options.Tags );
 
                 var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( accessorTemplate );
 

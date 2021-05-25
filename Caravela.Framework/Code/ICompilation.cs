@@ -11,7 +11,7 @@ namespace Caravela.Framework.Code
     /// Represents a set of types compiled together. Commonly known as a "project", but this is not exactly it.
     /// </summary>
     [CompileTimeOnly]
-    public interface ICompilation : IAssembly, IAspectTarget
+    public interface ICompilation : IAssembly
     {
         /// <summary>
         /// Gets the list of types declared in the current compilation, in all namespaces, but not the nested types.

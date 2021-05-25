@@ -36,6 +36,8 @@ namespace Caravela.Framework.TestApp.Aspects.Eligibility
                         or.MustBe(typeof(int));
                         or.MustBe(typeof(string));
                     });
+
+            builder.Require(m => m.IsAbstract ? m.Parameters.Count > 1 : m.IsSealed, m => $"{m} must be magic");
         }
     }
 }

@@ -9,7 +9,7 @@ using System;
 
 namespace Caravela.Framework.TestApp
 {
-    public class SuppressWarningAttribute : Attribute, IAspect<IAspectTarget>
+    public class SuppressWarningAttribute : Attribute, IAspect<IDeclaration>
     {
         static SuppressionDefinition _mySuppression1 = new(  "CS1998" );
         static SuppressionDefinition _mySuppression2 = new(  "IDE0051" );
@@ -19,13 +19,13 @@ namespace Caravela.Framework.TestApp
             
         }
 
-        public void BuildAspect( IAspectBuilder<IAspectTarget> aspectBuilder )
+        public void BuildAspect( IAspectBuilder<IDeclaration> aspectBuilder )
         {
                 aspectBuilder.Diagnostics.Suppress( _mySuppression1 );
             aspectBuilder.Diagnostics.Suppress( _mySuppression2 );
         }
 
-        public void BuildEligibility(IEligibilityBuilder<IAspectTarget> builder)
+        public void BuildEligibility(IEligibilityBuilder<IDeclaration> builder)
         {
             
         }
