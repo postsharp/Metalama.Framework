@@ -12,6 +12,8 @@ namespace Caravela.Framework.Impl.CodeModel
     /// </summary>
     internal interface ISyntaxFactory
     {
+        Compilation Compilation { get; }
+
         /// <summary>
         /// Gets a fully-qualified <see cref="NameSyntax"/> for a given reflection <see cref="Type"/>.
         /// </summary>

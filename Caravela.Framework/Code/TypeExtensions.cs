@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 using System;
 
 namespace Caravela.Framework.Code
@@ -39,5 +39,9 @@ namespace Caravela.Framework.Code
         /// <param name="right">Another type.</param>
         /// <returns></returns>
         public static bool Is( this IType left, Type right ) => left.Compilation.InvariantComparer.Is( left, right );
+
+        [return: RunTimeOnly]
+        [Obsolete( "Not implemented." )]
+        public static dynamic Cast( this IType type, dynamic value ) => throw new NotImplementedException();
     }
 }

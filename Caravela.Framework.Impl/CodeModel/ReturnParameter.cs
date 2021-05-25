@@ -1,9 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
@@ -14,7 +15,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract class ReturnParameter : IParameter, IHasDiagnosticLocation, ICodeElementInternal
+    internal abstract class ReturnParameter : IParameter, IHasDiagnosticLocation, IDeclarationInternal
     {
         protected abstract RefKind SymbolRefKind { get; }
 
@@ -30,23 +31,32 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsParams => false;
 
-        public abstract IMember DeclaringMember { get; }
+        public abstract IMemberOrNamedType DeclaringMember { get; }
 
         public ParameterInfo ToParameterInfo() => CompileTimeReturnParameterInfo.Create( this );
 
-        CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
+        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
 
-        public ICodeElement? ContainingElement => this.DeclaringMember;
+        public IDeclaration? ContainingDeclaration => this.DeclaringMember;
 
         public abstract IAttributeList Attributes { get; }
 
-        public CodeElementKind ElementKind => CodeElementKind.Parameter;
+        public DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-        public ICompilation Compilation => this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
+        public bool HasAspect<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
+
+        [Obsolete( "Not implemented." )]
+        public IAnnotationList GetAnnotations<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
+
+        public ICompilation Compilation => this.ContainingDeclaration?.Compilation ?? throw new AssertionFailedException();
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
-        public abstract bool Equals( ICodeElement other );
+        public abstract bool Equals( IDeclaration other );
 
         public IDiagnosticLocation? DiagnosticLocation => this.DeclaringMember.DiagnosticLocation;
 
@@ -54,8 +64,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract ISymbol? Symbol { get; }
 
-        public abstract CodeElementLink<ICodeElement> ToLink();
+        public abstract DeclarationRef<IDeclaration> ToRef();
 
-        public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ((ICodeElementInternal) this.DeclaringMember).DeclaringSyntaxReferences;
+        public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ((IDeclarationInternal) this.DeclaringMember).DeclaringSyntaxReferences;
     }
 }

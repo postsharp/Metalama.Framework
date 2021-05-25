@@ -1,20 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class OverrideMethodAdvice : Advice, IOverrideMethodAdvice
+    internal class OverrideMethodAdvice : Advice
     {
         public IMethod TemplateMethod { get; }
-
-        public AspectLinkerOptions? LinkerOptions { get; }
 
         public new IMethod TargetDeclaration => (IMethod) base.TargetDeclaration;
 
@@ -22,11 +18,10 @@ namespace Caravela.Framework.Impl.Advices
             AspectInstance aspect,
             IMethod targetDeclaration,
             IMethod templateMethod,
-            IReadOnlyDictionary<string, object?> tags,
-            AspectLinkerOptions? linkerOptions ) : base( aspect, targetDeclaration, tags )
+            string layerName,
+            AdviceOptions? options ) : base( aspect, targetDeclaration, layerName, options )
         {
             this.TemplateMethod = templateMethod;
-            this.LinkerOptions = linkerOptions;
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }

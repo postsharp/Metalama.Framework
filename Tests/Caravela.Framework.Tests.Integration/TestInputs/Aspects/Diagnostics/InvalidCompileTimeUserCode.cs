@@ -7,10 +7,10 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.InvalidCompil
 {
     public class ErrorAttribute : OverrideMethodAspect
     {
-        public override void Initialize(IAspectBuilder<IMethod> aspectBuilder)
+        public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
 #if TESTRUNNER // Avoid the code to be parsed in the IDE.
-            aspectBuilder.BadMethod();
+            builder.BadMethod();
 #endif
         }
 

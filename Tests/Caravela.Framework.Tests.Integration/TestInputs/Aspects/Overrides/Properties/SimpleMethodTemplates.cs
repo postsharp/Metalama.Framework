@@ -1,29 +1,29 @@
-﻿using Caravela.Framework.Advices;
-using Caravela.Framework.Aspects;
+﻿using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.SimpleMethodTemplates
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class OverrideAttribute : Attribute, IAspect<IProperty>
     {
-        void IAspect<IProperty>.Initialize(IAspectBuilder<IProperty> aspectBuilder)
+        void IAspect<IProperty>.BuildAspect(IAspectBuilder<IProperty> builder)
         {
-            aspectBuilder.AdviceFactory.OverrideFieldOrPropertyAccessors(aspectBuilder.TargetDeclaration, nameof(GetTemplate), nameof(SetTemplate));
+            builder.AdviceFactory.OverrideFieldOrPropertyAccessors(builder.TargetDeclaration, nameof(GetTemplate), nameof(SetTemplate));
         }
 
-        [OverrideFieldOrPropertyGetTemplate]
+        public void BuildEligibility(IEligibilityBuilder<IProperty> builder) { }
+
+        [Template]
         public dynamic GetTemplate()
         {
             Console.WriteLine("This is the overridden getter.");
             return meta.Proceed();
         }
 
-        [OverrideFieldOrPropertySetTemplate]
+        [Template]
         public void SetTemplate()
         {
             Console.WriteLine("This is the overridden setter.");

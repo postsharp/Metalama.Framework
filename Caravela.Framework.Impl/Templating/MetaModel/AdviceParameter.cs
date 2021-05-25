@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public bool IsParams => this._parameter.IsParams;
 
-        public IMember DeclaringMember => this._parameter.DeclaringMember;
+        public IMemberOrNamedType DeclaringMember => this._parameter.DeclaringMember;
 
         public ParameterInfo ToParameterInfo() => this._parameter.ToParameterInfo();
 
@@ -35,13 +35,22 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public int Index => this._parameter.Index;
 
-        CodeOrigin ICodeElement.Origin => this._parameter.Origin;
+        DeclarationOrigin IDeclaration.Origin => this._parameter.Origin;
 
-        public ICodeElement? ContainingElement => this._parameter.ContainingElement;
+        public IDeclaration? ContainingDeclaration => this._parameter.ContainingDeclaration;
 
         public IAttributeList Attributes => this._parameter.Attributes;
 
-        public CodeElementKind ElementKind => this._parameter.ElementKind;
+        public DeclarationKind DeclarationKind => this._parameter.DeclarationKind;
+
+        public bool HasAspect<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
+
+        [Obsolete( "Not implemented." )]
+        public IAnnotationList GetAnnotations<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
 
         public ICompilation Compilation => this._parameter.Compilation;
 
@@ -54,7 +63,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this._parameter.ToDisplayString( format, context );
 
-        public bool Equals( ICodeElement other ) => throw new NotImplementedException();
+        public bool Equals( IDeclaration other ) => throw new NotImplementedException();
 
         public IDiagnosticLocation? DiagnosticLocation => this._parameter.DiagnosticLocation;
     }

@@ -5,7 +5,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Serialization;
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using MoreLinq;
@@ -13,104 +13,43 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
     /// <summary>
     /// The base class for the main process of Caravela.
     /// </summary>
-    public abstract partial class AspectPipeline : IDisposable, IAspectPipelineProperties
+    public abstract class AspectPipeline : IDisposable, IAspectPipelineProperties
     {
-        public IBuildOptions BuildOptions { get; }
+        public IProjectOptions ProjectOptions { get; }
 
         private readonly CompileTimeDomain _domain;
 
-        protected ServiceProvider ServiceProvider { get; } = new();
+        public ServiceProvider ServiceProvider { get; }
 
         IServiceProvider IAspectPipelineProperties.ServiceProvider => this.ServiceProvider;
 
-        protected AspectPipeline( IBuildOptions buildOptions, CompileTimeDomain domain, IAssemblyLocator? assemblyLocator = null )
+        protected AspectPipeline(
+            IProjectOptions projectOptions,
+            CompileTimeDomain domain,
+            IDirectoryOptions? directoryOptions = null,
+            IAssemblyLocator? assemblyLocator = null )
         {
             this._domain = domain;
-            this.BuildOptions = buildOptions;
-            this.ServiceProvider.AddService( buildOptions );
-            this.ServiceProvider.AddService( ReferenceAssemblyLocator.GetInstance() );
-            this.ServiceProvider.AddService( new SyntaxSerializationService() );
-
-            if ( assemblyLocator != null )
-            {
-                this.ServiceProvider.AddService( assemblyLocator );
-            }
+            this.ProjectOptions = projectOptions;
+            this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( directoryOptions, assemblyLocator );
         }
 
-        /// <summary>
-        /// Handles an exception thrown in the pipeline.
-        /// </summary>
-        /// <param name="exception"></param>
-        protected void HandleException( Exception exception, IDiagnosticAdder diagnosticAdder )
-        {
-            switch ( exception )
-            {
-                case InvalidUserCodeException diagnosticsException:
-                    foreach ( var diagnostic in diagnosticsException.Diagnostics )
-                    {
-                        diagnosticAdder.Report( diagnostic );
-                    }
-
-                    break;
-
-                default:
-                    if ( this.WriteUnhandledExceptionsToFile )
-                    {
-                        var guid = Guid.NewGuid();
-                        var crashReportDirectory = this.BuildOptions.GetCrashReportDirectoryOrDefault();
-
-                        if ( string.IsNullOrWhiteSpace( crashReportDirectory ) )
-                        {
-                            crashReportDirectory = Path.GetTempPath();
-                        }
-
-                        if ( !Directory.Exists( crashReportDirectory ) )
-                        {
-                            Directory.CreateDirectory( crashReportDirectory );
-                        }
-
-                        var path = Path.Combine( crashReportDirectory, $"caravela-{exception.GetType().Name}-{guid}.txt" );
-
-                        try
-                        {
-                            File.WriteAllText( path, exception.ToString() );
-                        }
-                        catch ( IOException ) { }
-
-                        Console.WriteLine( exception.ToString() );
-
-                        diagnosticAdder.Report(
-                            GeneralDiagnosticDescriptors.UncaughtException.CreateDiagnostic( null, (exception.ToDiagnosticString(), path) ) );
-                    }
-
-                    break;
-            }
-        }
-
-        public virtual bool WriteUnhandledExceptionsToFile => true;
-
-        public bool HasCachedCompileTimeProject( Compilation compilation, IDiagnosticAdder diagnosticAdder, IReadOnlyList<SyntaxTree>? compileTimeTreesHint )
-        {
-            var loader = CompileTimeProjectLoader.Create( this._domain, this.ServiceProvider );
-
-            return loader.TryGetCompileTimeProject( compilation, compileTimeTreesHint, diagnosticAdder, true, out _ );
-        }
-
-        public int PipelineInitializationCount { get; set; }
+        internal int PipelineInitializationCount { get; set; }
 
         private protected bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
             PartialCompilation compilation,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
-            [NotNullWhen( true )] out PipelineConfiguration? configuration )
+            CancellationToken cancellationToken,
+            [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
         {
             this.PipelineInitializationCount++;
 
@@ -120,7 +59,13 @@ namespace Caravela.Framework.Impl.Pipeline
             var loader = CompileTimeProjectLoader.Create( this._domain, this.ServiceProvider );
 
             // Prepare the compile-time assembly.
-            if ( !loader.TryGetCompileTimeProject( roslynCompilation, compileTimeTreesHint, diagnosticAdder, false, out var compileTimeProject ) )
+            if ( !loader.TryGetCompileTimeProject(
+                roslynCompilation,
+                compileTimeTreesHint,
+                diagnosticAdder,
+                false,
+                cancellationToken,
+                out var compileTimeProject ) )
             {
                 configuration = null;
 
@@ -128,7 +73,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             // Create aspect types.
-            var driverFactory = new AspectDriverFactory( compilation.Compilation, this.BuildOptions.PlugIns );
+            var driverFactory = new AspectDriverFactory( compilation.Compilation, this.ProjectOptions.PlugIns );
             var aspectTypeFactory = new AspectClassMetadataFactory( driverFactory );
 
             var aspectTypes = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
@@ -155,10 +100,10 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var stages = aspectLayers
                 .GroupAdjacent( x => GetGroupingKey( x.AspectClass.AspectDriver ) )
-                .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), loader ) )
+                .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), loader, compileTimeProject! ) )
                 .ToImmutableArray();
 
-            configuration = new PipelineConfiguration( stages, aspectTypes, sortedAspectLayers, compileTimeProject, loader );
+            configuration = new AspectPipelineConfiguration( stages, aspectTypes, sortedAspectLayers, compileTimeProject, loader );
 
             return true;
 
@@ -176,14 +121,20 @@ namespace Caravela.Framework.Impl.Pipeline
                 };
         }
 
+        private protected virtual IReadOnlyList<IAspectSource> CreateAspectSources( AspectPipelineConfiguration configuration )
+        {
+            return new[] { new CompilationAspectSource( configuration.AspectClasses, configuration.CompileTimeProjectLoader ) };
+        }
+
         /// <summary>
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="PipelineStageResult"/>.
         /// </summary>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
-        private protected static bool TryExecuteCore(
+        private protected bool TryExecute(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
-            PipelineConfiguration pipelineConfiguration,
+            AspectPipelineConfiguration pipelineConfiguration,
+            CancellationToken cancellationToken,
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
             // If there is no aspect in the compilation, don't execute the pipeline.
@@ -194,15 +145,13 @@ namespace Caravela.Framework.Impl.Pipeline
                 return true;
             }
 
-            var aspectSource = new CompilationAspectSource(
-                pipelineConfiguration.AspectClasses,
-                pipelineConfiguration.CompileTimeProjectLoader );
+            var aspectSources = this.CreateAspectSources( pipelineConfiguration );
 
-            pipelineStageResult = new PipelineStageResult( compilation, pipelineConfiguration.Layers, aspectSources: new[] { aspectSource } );
+            pipelineStageResult = new PipelineStageResult( compilation, pipelineConfiguration.Layers, aspectSources: aspectSources );
 
             foreach ( var stage in pipelineConfiguration.Stages )
             {
-                if ( !stage.TryExecute( pipelineStageResult!, diagnosticAdder, out var newStageResult ) )
+                if ( !stage.TryExecute( pipelineStageResult!, diagnosticAdder, cancellationToken, out var newStageResult ) )
                 {
                     return false;
                 }
@@ -216,6 +165,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             foreach ( var diagnostic in pipelineStageResult.Diagnostics.ReportedDiagnostics )
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 diagnosticAdder.Report( diagnostic );
             }
 
@@ -226,16 +176,19 @@ namespace Caravela.Framework.Impl.Pipeline
         /// Creates an instance of <see cref="HighLevelPipelineStage"/>.
         /// </summary>
         /// <param name="parts"></param>
+        /// <param name="compileTimeProject"></param>
         /// <param name="compileTimeProjectLoader"></param>
         /// <returns></returns>
         private protected abstract HighLevelPipelineStage CreateStage(
             IReadOnlyList<OrderedAspectLayer> parts,
+            CompileTimeProject compileTimeProject,
             CompileTimeProjectLoader compileTimeProjectLoader );
 
         private PipelineStage CreateStage(
             object groupKey,
             IReadOnlyList<OrderedAspectLayer> parts,
-            CompileTimeProjectLoader compileTimeProjectLoader )
+            CompileTimeProjectLoader compileTimeProjectLoader,
+            CompileTimeProject compileTimeProject )
         {
             switch ( groupKey )
             {
@@ -247,7 +200,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 case nameof(AspectDriver):
 
-                    return this.CreateStage( parts, compileTimeProjectLoader );
+                    return this.CreateStage( parts, compileTimeProject, compileTimeProjectLoader );
 
                 default:
 

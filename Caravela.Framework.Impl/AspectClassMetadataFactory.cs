@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
@@ -14,13 +13,13 @@ using System.Linq;
 namespace Caravela.Framework.Impl
 {
     /// <summary>
-    /// Creates <see cref="AspectClassMetadata"/>.
+    /// Creates <see cref="AspectClass"/>.
     /// </summary>
     internal class AspectClassMetadataFactory
     {
         private readonly AspectDriverFactory _aspectDriverFactory;
 
-        private readonly Dictionary<INamedTypeSymbol, AspectClassMetadata> _aspectClasses = new();
+        private readonly Dictionary<INamedTypeSymbol, AspectClass> _aspectClasses = new();
 
         public AspectClassMetadataFactory( AspectDriverFactory aspectDriverFactory )
         {
@@ -31,7 +30,7 @@ namespace Caravela.Framework.Impl
         /// Gets the aspect classes in a given <see cref="Compilation"/> for the closure of all references <see cref="CompileTimeProject"/>
         /// instances.
         /// </summary>
-        public IReadOnlyList<AspectClassMetadata> GetAspectClasses(
+        public IReadOnlyList<AspectClass> GetAspectClasses(
             Compilation compilation,
             CompileTimeProject? compileTimeProject,
             IDiagnosticAdder diagnosticAdder )
@@ -39,12 +38,12 @@ namespace Caravela.Framework.Impl
             if ( compileTimeProject == null )
             {
                 // No compile-time project means that there is no aspect at all.
-                return Array.Empty<AspectClassMetadata>();
+                return Array.Empty<AspectClass>();
             }
 
             // Gets the aspect types in the current compilation, including aspects types in referenced assemblies.
             var aspectTypeDataDictionary =
-                compileTimeProject.SelectManyRecursive( p => p.References, includeThis: true, throwOnDuplicate: false )
+                compileTimeProject.ClosureProjects
                     .SelectMany( p => p.AspectTypes.Select( t => (Project: p, TypeName: t) ) )
                     .ToDictionary(
                         item => item.TypeName,
@@ -54,9 +53,9 @@ namespace Caravela.Framework.Impl
         }
 
         /// <summary>
-        /// Creates a list of <see cref="AspectClassMetadata"/> given input list of aspect types. This method is used for test only.
+        /// Creates a list of <see cref="AspectClass"/> given input list of aspect types. This method is used for test only.
         /// </summary>
-        public IReadOnlyList<AspectClassMetadata> GetAspectClasses(
+        public IReadOnlyList<AspectClass> GetAspectClasses(
             IReadOnlyList<INamedTypeSymbol> aspectTypes,
             CompileTimeProject compileTimeProject,
             IDiagnosticAdder diagnosticAdder )
@@ -68,12 +67,12 @@ namespace Caravela.Framework.Impl
             return this.GetAspectClasses( aspectTypesDiagnostics, diagnosticAdder );
         }
 
-        private IReadOnlyList<AspectClassMetadata> GetAspectClasses(
+        private IReadOnlyList<AspectClass> GetAspectClasses(
             Dictionary<string, AspectTypeData> aspectTypeDataDictionary,
             IDiagnosticAdder diagnosticAdder )
         {
             // A local function that recursively processes an aspect type.
-            bool TryProcessType( INamedTypeSymbol aspectType, CompileTimeProject project, [NotNullWhen( true )] out AspectClassMetadata? metadata )
+            bool TryProcessType( INamedTypeSymbol aspectType, CompileTimeProject project, [NotNullWhen( true )] out AspectClass? metadata )
             {
                 if ( this._aspectClasses.TryGetValue( aspectType, out var existingValue ) )
                 {
@@ -82,7 +81,7 @@ namespace Caravela.Framework.Impl
                     return true;
                 }
 
-                AspectClassMetadata? baseAspectClass = null;
+                AspectClass? baseAspectClass = null;
 
                 if ( aspectType.BaseType != null )
                 {
@@ -105,7 +104,7 @@ namespace Caravela.Framework.Impl
 
                 var aspectDriver = this._aspectDriverFactory.GetAspectDriver( aspectType );
 
-                if ( !AspectClassMetadata.TryCreate( aspectType, baseAspectClass, aspectDriver, project, diagnosticAdder, out metadata ) )
+                if ( !AspectClass.TryCreate( aspectType, baseAspectClass, aspectDriver, project, diagnosticAdder, out metadata ) )
                 {
                     return false;
                 }
@@ -116,7 +115,7 @@ namespace Caravela.Framework.Impl
             }
 
             // Process all types.
-            var resultList = new List<AspectClassMetadata>( aspectTypeDataDictionary.Count );
+            var resultList = new List<AspectClass>( aspectTypeDataDictionary.Count );
 
             foreach ( var attributeTypeData in aspectTypeDataDictionary.Values )
             {

@@ -4,10 +4,10 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Project;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
@@ -23,10 +23,11 @@ namespace Caravela.Framework.Impl.Templating
 
         public TemplateMemberClassifier(
             Compilation compilation,
-            SemanticAnnotationMap semanticAnnotationMap )
+            SemanticAnnotationMap semanticAnnotationMap,
+            IServiceProvider serviceProvider )
         {
             this._semanticAnnotationMap = semanticAnnotationMap;
-            this._symbolClassifier = SymbolClassifier.GetInstance( compilation );
+            this._symbolClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
 
             var reflectionMapper = ReflectionMapper.GetInstance( compilation );
             this._metaType = reflectionMapper.GetTypeSymbol( typeof(meta) );

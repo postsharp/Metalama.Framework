@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -16,31 +17,32 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class OverflowAspectSource : IAspectSource
     {
-        private readonly List<(IAspectSource Source, AspectClassMetadata AspectClass)> _aspectSources = new();
+        private readonly List<(IAspectSource Source, AspectClass AspectClass)> _aspectSources = new();
 
         public AspectSourcePriority Priority => AspectSourcePriority.Aggregate;
 
-        public IEnumerable<AspectClassMetadata> AspectTypes => this._aspectSources.Select( a => a.AspectClass ).Distinct();
+        public IEnumerable<AspectClass> AspectTypes => this._aspectSources.Select( a => a.AspectClass ).Distinct();
 
-        public IEnumerable<ICodeElement> GetExclusions( INamedType aspectType ) => Enumerable.Empty<ICodeElement>();
+        public IEnumerable<IDeclaration> GetExclusions( INamedType aspectType ) => Enumerable.Empty<IDeclaration>();
 
         public IEnumerable<AspectInstance> GetAspectInstances(
             CompilationModel compilation,
-            AspectClassMetadata aspectClassMetadata,
-            IDiagnosticAdder diagnosticAdder )
+            AspectClass aspectClass,
+            IDiagnosticAdder diagnosticAdder,
+            CancellationToken cancellationToken )
         {
-            var aspectTypeSymbol = compilation.RoslynCompilation.GetTypeByMetadataName( aspectClassMetadata.FullName );
+            var aspectTypeSymbol = compilation.RoslynCompilation.GetTypeByMetadataName( aspectClass.FullName );
 
             return this._aspectSources
                 .Where( s => s.AspectClass.FullName.Equals( aspectTypeSymbol.GetReflectionName(), StringComparison.Ordinal ) )
                 .Select( a => a.Source )
                 .Distinct()
-                .SelectMany( a => a.GetAspectInstances( compilation, aspectClassMetadata, diagnosticAdder ) );
+                .SelectMany( a => a.GetAspectInstances( compilation, aspectClass, diagnosticAdder, cancellationToken ) );
         }
 
-        public void Add( IAspectSource aspectSource, AspectClassMetadata aspectClassMetadata )
+        public void Add( IAspectSource aspectSource, AspectClass aspectClass )
         {
-            this._aspectSources.Add( (aspectSource, aspectClassMetadata) );
+            this._aspectSources.Add( (aspectSource, aspectClass) );
         }
     }
 }

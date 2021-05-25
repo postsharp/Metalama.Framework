@@ -17,7 +17,7 @@ namespace Caravela.Framework.Code
     /// <item>Arrays as <c>IReadOnlyList&lt;object&gt;</c>.</item>
     /// </list>
     /// </remarks>
-    public interface IAttribute : ICodeElement
+    public interface IAttribute : IDeclaration
     {
         // TODO: add TargetElement?
 

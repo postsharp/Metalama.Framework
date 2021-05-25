@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Project;
+using Caravela.Framework.Eligibility;
 
 namespace Caravela.Framework.Aspects
 {
@@ -18,15 +18,15 @@ namespace Caravela.Framework.Aspects
     /// of declarations the aspect can be added.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IAspect<in T> : IAspect
-        where T : ICodeElement
+    public interface IAspect<in T> : IAspect, IEligible<T>
+        where T : class, IDeclaration
     {
         /// <summary>
         /// Initializes the aspect. The implementation must add advices or child aspects
-        /// using the <paramref name="aspectBuilder"/> parameter.
+        /// using the <paramref name="builder"/> parameter.
         /// </summary>
-        /// <param name="aspectBuilder">An object that allows the aspect to add advices and child
+        /// <param name="builder">An object that allows the aspect to add advices and child
         /// aspects.</param>
-        void Initialize( IAspectBuilder<T> aspectBuilder );
+        void BuildAspect( IAspectBuilder<T> builder );
     }
 }

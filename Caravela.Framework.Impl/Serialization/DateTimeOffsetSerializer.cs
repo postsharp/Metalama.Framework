@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class DateTimeOffsetSerializer : ObjectSerializer<DateTimeOffset>
     {
-        public override ExpressionSyntax Serialize( DateTimeOffset obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( DateTimeOffset obj, ICompilationElementFactory syntaxFactory )
         {
             var isoTime = obj.ToString( "o" );
 

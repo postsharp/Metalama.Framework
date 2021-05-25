@@ -1,10 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.Mapping;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -55,6 +58,10 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Gets the list of compile-time projects referenced by the current project.
         /// </summary>
         public IReadOnlyList<CompileTimeProject> References { get; }
+
+        [Memo]
+        public IReadOnlyList<CompileTimeProject> ClosureProjects
+            => this.SelectManyRecursive( p => p.References, includeThis: true, throwOnDuplicate: false ).ToImmutableList();
 
         /// <summary>
         /// Gets the list of transformed code files in the current project. 
@@ -223,6 +230,27 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public override string ToString() => this.RunTimeIdentity.ToString();
 
+        /// <summary>
+        /// Gets a <see cref="TextMap"/> given a the path of the transformed code file.
+        /// </summary>
         public TextMap? GetTextMap( string csFilePath ) => this._getLocationMap?.Invoke( csFilePath );
+
+        /// <summary>
+        /// Gets the list of diagnostics and suppressions defined in the current project.
+        /// </summary>
+        [Memo]
+        public DiagnosticManifest DiagnosticManifest => this.GetDiagnosticManifestImpl();
+
+        [Memo]
+        public DiagnosticManifest ClosureDiagnosticManifest => new( this.ClosureProjects.Select( p => p.DiagnosticManifest ).ToList() );
+
+        private DiagnosticManifest GetDiagnosticManifestImpl()
+        {
+            var aspectTypes = this.AspectTypes.Select( this.GetType ).WhereNotNull().ToArray();
+            var diagnostics = DiagnosticDefinitionHelper.GetDiagnosticDefinitions( aspectTypes ).ToImmutableArray();
+            var suppressions = DiagnosticDefinitionHelper.GetSuppressionDefinitions( aspectTypes ).ToImmutableArray();
+
+            return new DiagnosticManifest( diagnostics, suppressions );
+        }
     }
 }

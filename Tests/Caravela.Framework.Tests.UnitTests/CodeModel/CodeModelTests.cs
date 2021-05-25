@@ -52,17 +52,17 @@ namespace NS
             var c1 = types[0];
             Assert.Equal( "C", c1.Name );
             Assert.Equal( "C", c1.FullName );
-            Assert.IsAssignableFrom<ICompilation>( c1.ContainingElement );
+            Assert.IsAssignableFrom<ICompilation>( c1.ContainingDeclaration );
 
             var d = c1.NestedTypes.Single();
             Assert.Equal( "D", d.Name );
             Assert.Equal( "C.D", d.FullName );
-            Assert.Same( c1, d.ContainingElement );
+            Assert.Same( c1, d.ContainingDeclaration );
 
             var c2 = types[1];
             Assert.Equal( "C", c2.Name );
             Assert.Equal( "NS.C", c2.FullName );
-            Assert.IsAssignableFrom<ICompilation>( c2.ContainingElement );
+            Assert.IsAssignableFrom<ICompilation>( c2.ContainingDeclaration );
         }
 
         [Fact]
@@ -91,16 +91,16 @@ class C
 
             var method = methods[0];
             Assert.Equal( "M", method.Name );
-            Assert.Same( type, method.ContainingElement );
+            Assert.Same( type, method.ContainingDeclaration );
 
             var outerLocalFunction = method.LocalFunctions.Single();
             Assert.Equal( "Outer", outerLocalFunction.Name );
-            Assert.Same( method, outerLocalFunction.ContainingElement );
+            Assert.Same( method, outerLocalFunction.ContainingDeclaration );
 
             var innerLocalFunction = outerLocalFunction.LocalFunctions.Single();
             Assert.Equal( "Inner", innerLocalFunction.Name );
 
-            Assert.Same( outerLocalFunction, innerLocalFunction.ContainingElement );
+            Assert.Same( outerLocalFunction, innerLocalFunction.ContainingDeclaration );
         }
 
         [Fact]
@@ -174,9 +174,9 @@ interface I<T>
             CheckParameterData( m2.ReturnParameter!, m2, "int", null, -1 );
             Assert.Equal( 0, m2.Parameters.Count );
 
-            static void CheckParameterData( IParameter parameter, ICodeElement containingElement, string typeName, string? name, int index )
+            static void CheckParameterData( IParameter parameter, IDeclaration containingDeclaration, string typeName, string? name, int index )
             {
-                Assert.Same( containingElement, parameter.ContainingElement );
+                Assert.Same( containingDeclaration, parameter.ContainingDeclaration );
                 Assert.Equal( typeName, parameter.ParameterType.ToString() );
 
                 if ( name != null )

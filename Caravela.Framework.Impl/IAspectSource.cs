@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Caravela.Framework.Impl
 {
@@ -12,9 +13,9 @@ namespace Caravela.Framework.Impl
     {
         AspectSourcePriority Priority { get; }
 
-        IEnumerable<AspectClassMetadata> AspectTypes { get; }
+        IEnumerable<AspectClass> AspectTypes { get; }
 
-        IEnumerable<ICodeElement> GetExclusions( INamedType aspectType );
+        IEnumerable<IDeclaration> GetExclusions( INamedType aspectType );
 
         /// <summary>
         /// Returns a set of <see cref="AspectInstance"/> of a given type. This method is called when the given aspect
@@ -22,7 +23,8 @@ namespace Caravela.Framework.Impl
         /// </summary>
         IEnumerable<AspectInstance> GetAspectInstances(
             CompilationModel compilation,
-            AspectClassMetadata aspectClassMetadata,
-            IDiagnosticAdder diagnosticAdder );
+            AspectClass aspectClass,
+            IDiagnosticAdder diagnosticAdder,
+            CancellationToken cancellationToken );
     }
 }

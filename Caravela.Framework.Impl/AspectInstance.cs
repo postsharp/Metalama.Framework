@@ -3,12 +3,11 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl
 {
     /// <summary>
-    /// Represents an instance of an aspect and its target code element.
+    /// Represents an instance of an aspect and its target declaration.
     /// </summary>
     internal sealed class AspectInstance : IAspectInstance
     {
@@ -18,19 +17,19 @@ namespace Caravela.Framework.Impl
         public IAspect Aspect { get; }
 
         /// <summary>
-        /// Gets the element of code to which the aspect is applied.
+        /// Gets the declaration to which the aspect is applied.
         /// </summary>
-        public ICodeElement CodeElement { get; }
+        public IDeclaration TargetDeclaration { get; }
 
-        public AspectClassMetadata AspectClass { get; }
+        public AspectClass AspectClass { get; }
 
-        IAspectClassMetadata IAspectInstance.AspectClass => this.AspectClass;
+        IAspectClass IAspectInstance.AspectClass => this.AspectClass;
 
-        internal AspectInstance( IAspect aspect, ICodeElement codeElement, AspectClassMetadata aspectClassMetadata )
+        internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass )
         {
             this.Aspect = aspect;
-            this.CodeElement = codeElement;
-            this.AspectClass = aspectClassMetadata;
+            this.TargetDeclaration = declaration;
+            this.AspectClass = aspectClass;
         }
     }
 }

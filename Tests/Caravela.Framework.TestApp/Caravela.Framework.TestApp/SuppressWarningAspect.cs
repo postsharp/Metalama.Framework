@@ -3,25 +3,31 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Eligibility;
 using System;
 
 namespace Caravela.Framework.TestApp
 {
-    public class SuppressWarningAttribute : Attribute, IAspect<ICodeElement>
+    public class SuppressWarningAttribute : Attribute, IAspect<IDeclaration>
     {
-        private readonly string[] _codes;
+        static SuppressionDefinition _mySuppression1 = new(  "CS1998" );
+        static SuppressionDefinition _mySuppression2 = new(  "IDE0051" );
 
-        public SuppressWarningAttribute( params string[] codes )
+        public SuppressWarningAttribute(  )
         {
-            this._codes = codes;
+            
         }
 
-        public void Initialize( IAspectBuilder<ICodeElement> aspectBuilder )
+        public void BuildAspect( IAspectBuilder<IDeclaration> aspectBuilder )
         {
-            foreach ( var code in this._codes )
-            {
-                aspectBuilder.Diagnostics.Suppress( code, aspectBuilder.TargetDeclaration );
-            }
+                aspectBuilder.Diagnostics.Suppress( _mySuppression1 );
+            aspectBuilder.Diagnostics.Suppress( _mySuppression2 );
+        }
+
+        public void BuildEligibility(IEligibilityBuilder<IDeclaration> builder)
+        {
+            
         }
     }
 }

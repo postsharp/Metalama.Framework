@@ -18,14 +18,14 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public CompileTimePropertyInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-        public override ExpressionSyntax Serialize( CompileTimePropertyInfo obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimePropertyInfo obj, ICompilationElementFactory syntaxFactory )
         {
-            var property = obj.Property;
+            var property = obj.Target.Resolve( syntaxFactory.CompilationModel );
 
             return this.SerializeProperty( property, syntaxFactory );
         }
 
-        public ExpressionSyntax SerializeProperty( IProperty property, ISyntaxFactory syntaxFactory )
+        public ExpressionSyntax SerializeProperty( IProperty property, ICompilationElementFactory syntaxFactory )
         {
             var typeCreation = this.Service.Serialize( CompileTimeType.Create( property.DeclaringType ), syntaxFactory );
 

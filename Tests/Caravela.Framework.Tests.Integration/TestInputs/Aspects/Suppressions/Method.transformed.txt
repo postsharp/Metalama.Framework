@@ -4,7 +4,7 @@
 internal class TargetClass
 {
 #pragma warning disable CS0219
-    [SuppressWarning("CS0219")]
+    [SuppressWarning]
     private void M2(string m)
     {
         int x = 0;
@@ -17,4 +17,3 @@ internal class TargetClass
         int x = 0;
     }
 }
-

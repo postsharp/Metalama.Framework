@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 using System.Reflection;
 
 namespace Caravela.Framework.Code
@@ -9,7 +9,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a parameter of a method or property.
     /// </summary>
-    public interface IParameter : ICodeElement
+    public interface IParameter : IDeclaration
     {
         /// <summary>
         /// Gets the <c>in</c>, <c>out</c>, <c>ref</c> parameter type modifier.
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the parent <see cref="IMethod"/>, <see cref="IConstructor"/> or <see cref="IProperty"/>.
         /// </summary>
-        IMember DeclaringMember { get; }
+        IMemberOrNamedType DeclaringMember { get; }
 
         /// <summary>
         /// Gets a <see cref="ParameterInfo"/> that represents the current parameter at run time.

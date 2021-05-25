@@ -4,7 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.TestApp.Library
 {

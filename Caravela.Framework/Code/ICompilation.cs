@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 using System.Collections.Generic;
 
 // TODO: InternalImplement
@@ -29,9 +29,9 @@ namespace Caravela.Framework.Code
         IReadOnlyList<IManagedResource> ManagedResources { get; }
 
         /// <summary>
-        /// Gets a service allowing to compare types and code elements considers equal two instances that represent
-        /// the same type or code element even if they belong to different compilation versions.
+        /// Gets a service allowing to compare types and declarations considers equal two instances that represent
+        /// the same type or declaration even if they belong to different compilation versions.
         /// </summary>
-        ICodeElementComparer InvariantComparer { get; }
+        IDeclarationComparer InvariantComparer { get; }
     }
 }

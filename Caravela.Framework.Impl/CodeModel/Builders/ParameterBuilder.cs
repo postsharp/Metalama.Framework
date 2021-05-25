@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class ParameterBuilder : CodeElementBuilder, IParameterBuilder
+    internal sealed class ParameterBuilder : DeclarationBuilder, IParameterBuilder
     {
         private readonly string? _name;
         private TypedConstant _defaultValue;
@@ -32,17 +32,18 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsParams { get; set; }
 
-        public override ICodeElement? ContainingElement => this.DeclaringMember;
+        public override IDeclaration? ContainingDeclaration => this.DeclaringMember;
 
-        public override CodeElementKind ElementKind => CodeElementKind.Parameter;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-        public IMember DeclaringMember { get; }
+        public IMemberOrNamedType DeclaringMember { get; }
 
         public ParameterInfo ToRunTimeReflection() => throw new NotImplementedException();
 
         public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
 
-        public ParameterBuilder( MemberBuilder declaringMember, int index, string? name, IType type, RefKind refKind ) : base( declaringMember.ParentAdvice )
+        public ParameterBuilder( MemberOrNamedTypeBuilder declaringMember, int index, string? name, IType type, RefKind refKind ) : base(
+            declaringMember.ParentAdvice )
         {
             this.DeclaringMember = declaringMember;
             this.Index = index;

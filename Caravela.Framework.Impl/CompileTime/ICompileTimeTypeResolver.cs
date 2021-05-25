@@ -3,6 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 using System;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -14,6 +15,6 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <summary>
         /// Maps a Roslyn <see cref="ITypeSymbol"/> to a reflection <see cref="Type"/>. 
         /// </summary>
-        Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock );
+        Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock, CancellationToken cancellationToken = default );
     }
 }

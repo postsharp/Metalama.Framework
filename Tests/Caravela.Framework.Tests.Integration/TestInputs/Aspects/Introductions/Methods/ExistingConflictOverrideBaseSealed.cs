@@ -1,18 +1,20 @@
 ﻿using System;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictOverrideBaseSealed
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.Override)]
+        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
+
+        [Introduce(ConflictBehavior = ConflictBehavior.Override)]
         public int ExistingMethod()
         {
             Console.WriteLine("This is introduced method.");

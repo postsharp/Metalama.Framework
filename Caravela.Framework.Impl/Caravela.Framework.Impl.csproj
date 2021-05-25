@@ -16,21 +16,31 @@
     <None Remove="CodeModel\Before\**" />
 
     <None Remove="Serialization\Reflection\**" />
+
+    <Compile Remove="build\**" />
+
+    <None Remove="build\**" />
   </ItemGroup>
 
   <ItemGroup>
 	  <!-- We cannot use InternalsVisibleTo for Caravela.TestFramework because of obfuscation in the release build. -->
     <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests" />
     <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration" />
+    <InternalsVisibleTo Include="Caravela.Framework.CompilerAddIn" />
     
+    <!--
     <PackageReference Include="Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight" Version="$(CaravelaCompilerVersion)" />
     <PackageReference Include="Caravela.CodeAnalysis.Workspaces.Lightweight.Common" Version="$(CaravelaCompilerVersion)" />
+    -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" />
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" />
     <PackageReference Include="K4os.Hash.xxHash" Version="1.0.6" />
     <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
+    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
     <ProjectReference Include="..\Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj" />
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
     <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" />
@@ -59,10 +69,7 @@
   <ItemGroup>
     <EmbeddedResource Remove="CodeModel\Before\**" />
     <EmbeddedResource Remove="Serialization\Reflection\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="build" />
+    <EmbeddedResource Remove="build\**" />
   </ItemGroup>
 
   <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">

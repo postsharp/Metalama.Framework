@@ -4,7 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Transformations;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         public IField ReplacedField { get; }
 
-        MemberLink<IMember> IReplaceMemberTransformation.ReplacedMember => this.ReplacedField.ToMemberLink<IMember>();
+        MemberRef<IMemberOrNamedType> IReplaceMemberTransformation.ReplacedMember => this.ReplacedField.ToMemberLink<IMemberOrNamedType>();
 
         public PromotedField( Advice parentAdvice, IField field, AspectLinkerOptions? linkerOptions )
             : base( parentAdvice, field.DeclaringType, field.Name, true, true, true, false, linkerOptions )

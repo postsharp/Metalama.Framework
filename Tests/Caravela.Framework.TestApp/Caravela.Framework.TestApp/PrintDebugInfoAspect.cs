@@ -4,23 +4,24 @@
 using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.TestApp.Aspects;
-
 
 namespace Caravela.Framework.TestApp
 {
     internal class PrintDebugInfoAspect : OverrideMethodAspect
     {
-        public override void Initialize( IAspectBuilder<IMethod> aspectBuilder )
+        static DiagnosticDefinition<IDeclaration> myWarning = new( "MY001", Severity.Warning, "Hello, {0} v23." );
+        public override void BuildAspect(IAspectBuilder<IMethod> aspectBuilder )
         {
-            base.Initialize( aspectBuilder );
+            base.BuildAspect( aspectBuilder );
 
-            aspectBuilder.Diagnostics.Report( Diagnostics.Severity.Warning, "MY000", "Hello, {0} v22.", aspectBuilder.TargetDeclaration );
+            aspectBuilder.Diagnostics.Report( myWarning, aspectBuilder.TargetDeclaration );
         }
         public override dynamic OverrideMethod()
         {
             Console.WriteLine( DebugInfo.GetInfo() );
-            return meta.Proceed();
+            return Caravela.Framework.Aspects.meta.Proceed();
         }
     }
 }

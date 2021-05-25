@@ -2,24 +2,24 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Sdk;
-using Microsoft.CodeAnalysis;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.References;
 using System;
 using System.Globalization;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
-    internal class CompileTimePropertyInfo : PropertyInfo, ICompileTimeReflectionObject
+    internal class CompileTimePropertyInfo : PropertyInfo, ICompileTimeReflectionObject<IProperty>
     {
+        public IDeclarationRef<IProperty> Target { get; set; }
+
         private CompileTimePropertyInfo( IProperty property )
         {
-            this.Property = property;
+            this.Target = property.ToRef();
         }
 
         public static PropertyInfo Create( IProperty property ) => new CompileTimePropertyInfo( property );
-
-        public IProperty Property { get; }
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
@@ -54,7 +54,5 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         public override bool CanWrite => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override Type PropertyType => throw CompileTimeMocksHelper.CreateNotSupportedException();
-
-        public ISymbol Symbol => this.Property.GetSymbol().AssertNotNull();
     }
 }

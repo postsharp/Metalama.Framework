@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class StringSerializer : ObjectSerializer<string>
     {
-        public override ExpressionSyntax Serialize( string obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( string obj, ICompilationElementFactory syntaxFactory )
         {
             return SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( obj ) );
         }

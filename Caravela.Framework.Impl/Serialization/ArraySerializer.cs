@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,7 +16,7 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public ArraySerializer( SyntaxSerializationService serializers ) : base( serializers ) { }
 
-        public override ExpressionSyntax Serialize( object obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( object obj, ICompilationElementFactory syntaxFactory )
         {
             var array = (Array) obj;
 

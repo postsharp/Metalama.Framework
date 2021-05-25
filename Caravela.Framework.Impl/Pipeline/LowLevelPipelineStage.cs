@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
@@ -10,6 +11,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -19,23 +21,26 @@ namespace Caravela.Framework.Impl.Pipeline
     internal sealed class LowLevelPipelineStage : PipelineStage
     {
         private readonly IAspectWeaver _aspectWeaver;
-        private readonly AspectClassMetadata _aspectClassMetadata;
+        private readonly AspectClass _aspectClass;
 
-        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, AspectClassMetadata aspectClassMetadata, IAspectPipelineProperties properties ) : base(
-            properties )
+        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, AspectClass aspectClass, IAspectPipelineProperties properties ) : base( properties )
         {
             this._aspectWeaver = aspectWeaver;
-            this._aspectClassMetadata = aspectClassMetadata;
+            this._aspectClass = aspectClass;
         }
 
         /// <inheritdoc/>
-        public override bool TryExecute( PipelineStageResult input, IDiagnosticAdder diagnostics, [NotNullWhen( true )] out PipelineStageResult? result )
+        public override bool TryExecute(
+            PipelineStageResult input,
+            IDiagnosticAdder diagnostics,
+            CancellationToken cancellationToken,
+            [NotNullWhen( true )] out PipelineStageResult? result )
         {
             // TODO: it is suboptimal to get a CompilationModel here.
             var compilationModel = CompilationModel.CreateInitialInstance( input.PartialCompilation );
 
             var aspectInstances = input.AspectSources
-                .SelectMany( s => s.GetAspectInstances( compilationModel, this._aspectClassMetadata, diagnostics ) )
+                .SelectMany( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
                 .ToImmutableArray<IAspectInstance>();
 
             if ( !aspectInstances.Any() )
@@ -48,7 +53,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var resources = new List<ResourceDescription>();
 
             var context = new AspectWeaverContext(
-                this._aspectClassMetadata,
+                this._aspectClass,
                 aspectInstances,
                 input.PartialCompilation,
                 diagnostics.Report,
@@ -63,7 +68,7 @@ namespace Caravela.Framework.Impl.Pipeline
             catch ( Exception ex )
             {
                 diagnostics.Report(
-                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectClassMetadata.DisplayName, ex.ToDiagnosticString()) ) );
+                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectClass.DisplayName, ex.ToDiagnosticString()) ) );
 
                 result = null;
 

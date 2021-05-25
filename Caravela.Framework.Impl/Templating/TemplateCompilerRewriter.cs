@@ -8,14 +8,15 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
@@ -29,6 +30,7 @@ namespace Caravela.Framework.Impl.Templating
         private readonly string _templateName;
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
+        private readonly CancellationToken _cancellationToken;
         private readonly SerializableTypes _serializableTypes;
         private readonly TemplateMetaSyntaxFactoryImpl _templateMetaSyntaxFactory;
         private readonly TemplateMemberClassifier _templateMemberClassifier;
@@ -41,15 +43,17 @@ namespace Caravela.Framework.Impl.Templating
             Compilation compileTimeCompilation,
             SemanticAnnotationMap semanticAnnotationMap,
             IDiagnosticAdder diagnosticAdder,
-            IServiceProvider serviceProvider ) : base( compileTimeCompilation )
+            IServiceProvider serviceProvider,
+            CancellationToken cancellationToken ) : base( compileTimeCompilation )
         {
             this._templateName = templateName;
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
+            this._cancellationToken = cancellationToken;
             var syntaxSerializationService = serviceProvider.GetService<SyntaxSerializationService>();
             this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( compileTimeCompilation ) );
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
-            this._templateMemberClassifier = new TemplateMemberClassifier( compileTimeCompilation, semanticAnnotationMap );
+            this._templateMemberClassifier = new TemplateMemberClassifier( compileTimeCompilation, semanticAnnotationMap, serviceProvider );
         }
 
         public bool Success { get; private set; } = true;
@@ -162,6 +166,8 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? Visit( SyntaxNode? node )
         {
+            this._cancellationToken.ThrowIfCancellationRequested();
+
             // Captures the root symbol.
             if ( this._rootTemplateSymbol == null )
             {
@@ -267,7 +273,7 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        private bool IsDeclaredWithinTemplate( ISymbol symbol )
+        private bool IsDeclaredWithinTemplate( ISymbol? symbol )
         {
             if ( symbol == null )
             {
@@ -562,6 +568,23 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
         {
             var transformationKind = this.GetTransformationKind( node );
+
+            if ( node.IsNameOf() )
+            {
+                // nameof is always transformed into a literal.
+                var name = node.GetNameOfValue();
+
+                if ( transformationKind == TransformationKind.Transform )
+                {
+                    return this.MetaSyntaxFactory.LiteralExpression(
+                        this.MetaSyntaxFactory.Kind( SyntaxKind.StringLiteralExpression ),
+                        this.MetaSyntaxFactory.Literal( name ) );
+                }
+                else
+                {
+                    return SyntaxFactoryEx.LiteralExpression( name );
+                }
+            }
 
             if ( transformationKind != TransformationKind.Transform &&
                  node.ArgumentList.Arguments.Any( a => this._templateMemberClassifier.IsDynamicParameter( a ) ) )
@@ -1169,7 +1192,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                 {
-                    return this.Visit( CSharpSyntaxGenerator.Instance.NameExpression( namespaceOrType ) )!;
+                    return this.Visit( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( namespaceOrType ) )!;
                 }
                 else if ( symbol != null && symbol.IsStatic && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
                 {
@@ -1182,7 +1205,7 @@ namespace Caravela.Framework.Impl.Templating
                             // We have an access to a field or method with a "using static", or a non-qualified static member access.
                             return this.MetaSyntaxFactory.MemberAccessExpression(
                                 this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
-                                (ExpressionSyntax) this.Visit( CSharpSyntaxGenerator.Instance.NameExpression( symbol.ContainingType ) )!,
+                                (ExpressionSyntax) this.Visit( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( symbol.ContainingType ) )!,
                                 this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
                     }
                 }
@@ -1205,7 +1228,7 @@ namespace Caravela.Framework.Impl.Templating
             switch ( symbol )
             {
                 case INamespaceOrTypeSymbol namespaceOrType:
-                    var nameExpression = CSharpSyntaxGenerator.Instance.NameExpression( namespaceOrType );
+                    var nameExpression = LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( namespaceOrType );
 
                     transformedNode = this.GetTransformationKind( node ) == TransformationKind.Transform
                         ? this.Transform( nameExpression )

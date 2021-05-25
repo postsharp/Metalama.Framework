@@ -13,21 +13,21 @@ namespace Caravela.Framework.Impl.Linking
     internal class LexicalScopeFactory
     {
         private readonly CompilationModel _compilation;
-        private readonly Dictionary<ICodeElement, TemplateLexicalScope> _scopes;
+        private readonly Dictionary<IDeclaration, TemplateLexicalScope> _scopes;
 
         public LexicalScopeFactory( CompilationModel compilation )
         {
             this._compilation = compilation;
-            this._scopes = new Dictionary<ICodeElement, TemplateLexicalScope>( compilation.InvariantComparer );
+            this._scopes = new Dictionary<IDeclaration, TemplateLexicalScope>( compilation.InvariantComparer );
         }
 
-        public TemplateLexicalScope GetLexicalScope( ICodeElement codeElement )
+        public TemplateLexicalScope GetLexicalScope( IDeclaration declaration )
         {
-            if ( !this._scopes.TryGetValue( codeElement, out var lexicalScope ) )
+            if ( !this._scopes.TryGetValue( declaration, out var lexicalScope ) )
             {
-                switch ( codeElement )
+                switch ( declaration )
                 {
-                    case CodeElement sourceCodeElement:
+                    case Declaration sourceCodeElement:
                         this._scopes[sourceCodeElement] = lexicalScope = new TemplateLexicalScope( sourceCodeElement.LookupSymbols() );
 
                         break;
@@ -48,17 +48,17 @@ namespace Caravela.Framework.Impl.Linking
 
             switch ( introduction )
             {
-                case IOverriddenElement overriddenElement:
+                case IOverriddenDeclaration overriddenDeclaration:
                     {
-                        // When we have an IOverriddenElement, we know which symbol will be overwritten, so we take its lexical scope.
+                        // When we have an IOverriddenDeclaration, we know which symbol will be overwritten, so we take its lexical scope.
                         // All overrides of these same symbol will share the same scope.
-                        return this.GetLexicalScope( overriddenElement.OverriddenElement );
+                        return this.GetLexicalScope( overriddenDeclaration.OverriddenDeclaration );
                     }
 
-                case ICodeElement codeElement:
+                case IDeclaration declaration:
                     {
                         // We have a member introduction.
-                        if ( !this._scopes.TryGetValue( codeElement, out var lexicalScope ) )
+                        if ( !this._scopes.TryGetValue( declaration, out var lexicalScope ) )
                         {
                             // The lexical scope should be taken from the insertion point.
 
@@ -81,7 +81,7 @@ namespace Caravela.Framework.Impl.Linking
                                     break;
                             }
 
-                            this._scopes[codeElement] = lexicalScope =
+                            this._scopes[declaration] = lexicalScope =
                                 new TemplateLexicalScope( semanticModel.LookupSymbols( lookupPosition ) );
                         }
 

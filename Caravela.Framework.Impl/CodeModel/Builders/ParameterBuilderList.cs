@@ -3,12 +3,13 @@
 
 using Caravela.Framework.Code;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class ParameterBuilderList : List<IParameterBuilder>, IParameterList
     {
-        public ParameterBuilderList() : base() { }
+        public ParameterBuilderList() { }
 
         public ParameterBuilderList( IEnumerable<IParameterBuilder> parameterBuilders ) : base( parameterBuilders ) { }
 
@@ -18,5 +19,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         // This is to avoid ambiguities in extension methods because this class implements several IEnumerable<>
         public IList<IParameterBuilder> AsBuilderList => this;
+
+        public IParameter this[ string name ] => this.Single<IParameter>( p => p.Name == name );
     }
 }

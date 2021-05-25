@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -27,8 +28,13 @@ namespace Caravela.Framework.Impl.Pipeline
         /// </summary>
         /// <param name="input">The inputs.</param>
         /// <param name="diagnostics"></param>
+        /// <param name="cancellationToken"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public abstract bool TryExecute( PipelineStageResult input, IDiagnosticAdder diagnostics, [NotNullWhen( true )] out PipelineStageResult? result );
+        public abstract bool TryExecute(
+            PipelineStageResult input,
+            IDiagnosticAdder diagnostics,
+            CancellationToken cancellationToken,
+            [NotNullWhen( true )] out PipelineStageResult? result );
     }
 }

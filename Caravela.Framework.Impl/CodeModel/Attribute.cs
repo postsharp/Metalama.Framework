@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
@@ -18,22 +19,22 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly CompilationModel _compilation;
 
-        public Attribute( AttributeData data, CompilationModel compilation, ICodeElement containingElement )
+        public Attribute( AttributeData data, CompilationModel compilation, IDeclaration containingDeclaration )
         {
             this.AttributeData = data;
             this._compilation = compilation;
-            this.ContainingElement = containingElement;
+            this.ContainingDeclaration = containingDeclaration;
         }
 
         public AttributeData AttributeData { get; }
 
-        CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
+        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
 
-        public ICodeElement ContainingElement { get; }
+        public IDeclaration ContainingDeclaration { get; }
 
-        IAttributeList ICodeElement.Attributes => AttributeList.Empty;
+        IAttributeList IDeclaration.Attributes => AttributeList.Empty;
 
-        public CodeElementKind ElementKind => CodeElementKind.Attribute;
+        public DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 
         public ICompilation Compilation => this.Constructor.Compilation;
 
@@ -67,16 +68,25 @@ namespace Caravela.Framework.Impl.CodeModel
             return new TypedConstant( type, value );
         }
 
-        public bool Equals( ICodeElement other ) => throw new NotImplementedException();
+        public bool Equals( IDeclaration other ) => throw new NotImplementedException();
 
         public override string ToString() => this.AttributeData.ToString();
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
-        ICodeElement? ICodeElement.ContainingElement => this.ContainingElement;
+        IDeclaration? IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
         IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation.ToDiagnosticLocation();
 
         public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this.AttributeData );
+
+        public bool HasAspect<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
+
+        [Obsolete( "Not implemented." )]
+        public IAnnotationList GetAnnotations<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
     }
 }

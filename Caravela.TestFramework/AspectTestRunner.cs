@@ -4,7 +4,9 @@
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Caravela.TestFramework
@@ -14,7 +16,7 @@ namespace Caravela.TestFramework
     /// </summary>
     public class AspectTestRunner : TestRunnerBase
     {
-        public AspectTestRunner( string? projectDirectory = null ) : base( projectDirectory ) { }
+        public AspectTestRunner( IServiceProvider serviceProvider, string? projectDirectory = null ) : base( serviceProvider, projectDirectory ) { }
 
         /// <summary>
         /// Runs the aspect test with the given name and source.
@@ -24,19 +26,19 @@ namespace Caravela.TestFramework
         {
             var testResult = await base.RunTestAsync( testInput );
 
-            using var buildOptions = new TestBuildOptions();
+            using var buildOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
 
             var pipeline = new CompileTimeAspectPipeline( buildOptions, domain );
 
-            if ( pipeline.TryExecute( testResult, testResult.InitialCompilation, out var resultCompilation, out _ ) )
+            if ( pipeline.TryExecute( testResult, testResult.InitialCompilation, CancellationToken.None, out var resultCompilation, out _ ) )
             {
                 testResult.ResultCompilation = resultCompilation;
                 var syntaxRoot = resultCompilation.SyntaxTrees.Single().GetRoot();
 
                 if ( testInput.Options.IncludeFinalDiagnostics )
                 {
-                    testResult.ReportDiagnostics( resultCompilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
+                    testResult.Report( resultCompilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
                 }
 
                 testResult.SetTransformedTarget( syntaxRoot );

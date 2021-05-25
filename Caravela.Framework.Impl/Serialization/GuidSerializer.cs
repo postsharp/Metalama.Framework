@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class GuidSerializer : ObjectSerializer<Guid>
     {
-        public override ExpressionSyntax Serialize( Guid obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( Guid obj, ICompilationElementFactory syntaxFactory )
         {
             var b = obj.ToByteArray();
 

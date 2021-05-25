@@ -1,18 +1,21 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
-using Caravela.Framework.Project;
+using Caravela.Framework.Impl.CodeModel.References;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Accessibility = Caravela.Framework.Code.Accessibility;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltAccessor : BuiltCodeElement, IMethod, IMemberLink<IMethod>
+    internal class BuiltAccessor : BuiltDeclaration, IMethod, IMemberRef<IMethod>
     {
         private readonly BuiltMember _builtMember;
 
@@ -24,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public AccessorBuilder AccessorBuilder { get; }
 
-        public override CodeElementBuilder Builder => this.AccessorBuilder;
+        public override DeclarationBuilder Builder => this.AccessorBuilder;
 
         public Accessibility Accessibility => this.AccessorBuilder.Accessibility;
 
@@ -52,7 +55,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.AccessorBuilder.Parameters.AsBuilderList.Select( CodeElementLink.FromBuilder<IParameter, IParameterBuilder> ) );
+                this.AccessorBuilder.Parameters.AsBuilderList.Select( DeclarationRef.FromBuilder<IParameter, IParameterBuilder> ) );
 
         public MethodKind MethodKind => this.AccessorBuilder.MethodKind;
 
@@ -83,7 +86,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public object? Target => throw new NotImplementedException();
 
-        IMethod ICodeElementLink<IMethod>.GetForCompilation( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
+        IMethod IDeclarationRef<IMethod>.Resolve( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
+
+        ISymbol IDeclarationRef<IMethod>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
 
         [return: RunTimeOnly]
         public MethodInfo ToMethodInfo()

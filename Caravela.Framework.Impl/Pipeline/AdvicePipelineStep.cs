@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -22,8 +23,10 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public void AddAdvice( Advice advice ) => this._advices.Add( advice );
 
-        public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState )
+        public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState, CancellationToken cancellationToken )
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var adviceResults = this._advices
                 .Select( ai => ai.ToResult( compilation ) )
                 .ToList();

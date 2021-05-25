@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltAttribute : BuiltCodeElement, IAttribute
+    internal class BuiltAttribute : BuiltDeclaration, IAttribute
     {
         public BuiltAttribute( AttributeBuilder builder, CompilationModel compilation ) : base( compilation )
         {
@@ -15,10 +15,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public AttributeBuilder AttributeBuilder { get; }
 
-        public override CodeElementBuilder Builder => this.AttributeBuilder;
+        public override DeclarationBuilder Builder => this.AttributeBuilder;
 
         [Memo]
-        public INamedType Type => this.Compilation.Factory.GetCodeElement( this.AttributeBuilder.Constructor.DeclaringType );
+        public INamedType Type => this.Compilation.Factory.GetDeclaration( this.AttributeBuilder.Constructor.DeclaringType );
 
         [Memo]
         public IConstructor Constructor => this.Compilation.Factory.GetConstructor( this.AttributeBuilder.Constructor );

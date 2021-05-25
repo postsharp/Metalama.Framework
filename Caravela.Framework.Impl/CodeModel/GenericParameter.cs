@@ -13,7 +13,7 @@ using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class GenericParameter : CodeElement, IGenericParameter, ITypeInternal
+    internal class GenericParameter : Declaration, IGenericParameter, ITypeInternal
     {
         private readonly ITypeParameterSymbol _typeSymbol;
 
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public TypeKind TypeKind => TypeKind.GenericParameter;
 
-        public Type ToType() => CompileTimeType.Create( this._typeSymbol );
+        public Type ToType() => CompileTimeType.Create( this );
 
         public string Name => this._typeSymbol.Name;
 
@@ -47,13 +47,13 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool HasNonNullableValueTypeConstraint => this._typeSymbol.HasValueTypeConstraint;
 
         [Memo]
-        public override ICodeElement ContainingElement => this.Compilation.Factory.GetCodeElement( this._typeSymbol.ContainingSymbol );
+        public override IDeclaration ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this._typeSymbol.ContainingSymbol );
 
-        public override CodeElementKind ElementKind => CodeElementKind.GenericParameter;
+        public override DeclarationKind DeclarationKind => DeclarationKind.GenericParameter;
 
         public override ISymbol Symbol => this._typeSymbol;
 
-        CodeElementKind ICodeElement.ElementKind => CodeElementKind.GenericParameter;
+        DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.GenericParameter;
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 

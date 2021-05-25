@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class ULongSerializer : ObjectSerializer<ulong>
     {
-        public override ExpressionSyntax Serialize( ulong obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( ulong obj, ICompilationElementFactory syntaxFactory )
         {
             return SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( obj ) );
         }

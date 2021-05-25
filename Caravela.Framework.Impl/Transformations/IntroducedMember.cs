@@ -40,11 +40,11 @@ namespace Caravela.Framework.Impl.Transformations
         public AspectLinkerOptions? LinkerOptions { get; }
 
         /// <summary>
-        /// Gets the code element (overriden or introduced) that corresponds to the current <see cref="IntroducedMember"/>.
+        /// Gets the declaration (overriden or introduced) that corresponds to the current <see cref="IntroducedMember"/>.
         /// This is used to associate diagnostic suppressions to the introduced member. If <c>null</c>, diagnostics
         /// are not suppressed from the introduced member.
         /// </summary>
-        public ICodeElement? CodeElement { get; }
+        public IDeclaration? Declaration { get; }
 
         public IntroducedMember(
             IMemberIntroduction introduction,
@@ -52,14 +52,14 @@ namespace Caravela.Framework.Impl.Transformations
             AspectLayerId aspectLayerId,
             IntroducedMemberSemantic semantic,
             AspectLinkerOptions? linkerOptions,
-            ICodeElement? codeElement )
+            IDeclaration? declaration )
         {
             this.Introduction = introduction;
             this.Syntax = syntax;
             this.AspectLayerId = aspectLayerId;
             this.Semantic = semantic;
             this.LinkerOptions = linkerOptions;
-            this.CodeElement = codeElement;
+            this.Declaration = declaration;
         }
 
         /// <summary>
@@ -69,20 +69,7 @@ namespace Caravela.Framework.Impl.Transformations
         /// <returns>A new instance with specified syntax.</returns>
         public IntroducedMember WithSyntax( MemberDeclarationSyntax syntax )
         {
-            return new( this.Introduction, syntax, this.AspectLayerId, this.Semantic, this.LinkerOptions, this.CodeElement );
+            return new( this.Introduction, syntax, this.AspectLayerId, this.Semantic, this.LinkerOptions, this.Declaration );
         }
-    }
-
-    internal enum IntroducedMemberSemantic
-    {
-        Introduction,
-        MethodOverride,
-        PropertyOverride,
-        GetterOverride,
-        SetterOverride,
-        EventOverride,
-        AdderOverride,
-        RemoverOverride,
-        RaiserOverride
     }
 }

@@ -1,29 +1,39 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {
+#pragma warning disable CA1001 // Class must be disposable.
+
         /// <summary>
         /// Rewrites a run-time syntax tree into a compile-time syntax tree. Calls <see cref="TemplateCompiler"/> on templates,
         /// and removes run-time-only sub trees.
         /// </summary>
-        private sealed class ProduceCompileTimeCodeRewriter : Rewriter
+        private sealed class ProduceCompileTimeCodeRewriter : CompileTimeBaseRewriter
         {
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "hasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;
+            private readonly CancellationToken _cancellationToken;
+
+            private Context _currentContext;
 
             public bool Success { get; private set; } = true;
 
@@ -33,12 +43,16 @@ namespace Caravela.Framework.Impl.CompileTime
                 Compilation runTimeCompilation,
                 Compilation compileTimeCompilation,
                 IDiagnosticAdder diagnosticAdder,
-                TemplateCompiler templateCompiler )
-                : base( runTimeCompilation )
+                TemplateCompiler templateCompiler,
+                IServiceProvider serviceProvider,
+                CancellationToken cancellationToken )
+                : base( runTimeCompilation, serviceProvider )
             {
                 this._compileTimeCompilation = compileTimeCompilation;
                 this._diagnosticAdder = diagnosticAdder;
                 this._templateCompiler = templateCompiler;
+                this._cancellationToken = cancellationToken;
+                this._currentContext = new Context( SymbolDeclarationScope.Both, this );
             }
 
             // TODO: assembly and module-level attributes?
@@ -55,48 +69,50 @@ namespace Caravela.Framework.Impl.CompileTime
             private T? VisitTypeDeclaration<T>( T node )
                 where T : TypeDeclarationSyntax
             {
-                switch ( this.GetSymbolDeclarationScope( node ) )
+                this._cancellationToken.ThrowIfCancellationRequested();
+
+                var scope = this.GetSymbolDeclarationScope( node );
+
+                switch ( scope )
                 {
                     case SymbolDeclarationScope.RunTimeOnly:
                         return null;
 
                     default:
-                        this.FoundCompileTimeCode = true;
-
-                        var members = new List<MemberDeclarationSyntax>();
-
-                        foreach ( var member in node.Members )
+                        using ( this.WithScope( scope ) )
                         {
-                            switch ( member )
+                            this.FoundCompileTimeCode = true;
+
+                            var members = new List<MemberDeclarationSyntax>();
+
+                            foreach ( var member in node.Members )
                             {
-                                case MethodDeclarationSyntax method:
-                                    members.AddRange( this.VisitMethodDeclaration( method ).AssertNoneNull() );
+                                switch ( member )
+                                {
+                                    case MethodDeclarationSyntax method:
+                                        members.AddRange( this.VisitMethodDeclaration( method ).AssertNoneNull() );
 
-                                    break;
+                                        break;
 
-                                case IndexerDeclarationSyntax indexer:
-                                    members.AddRange( this.VisitBasePropertyDeclaration( indexer ).AssertNoneNull() );
+                                    case IndexerDeclarationSyntax indexer:
+                                        members.AddRange( this.VisitBasePropertyDeclaration( indexer ).AssertNoneNull() );
 
-                                    break;
+                                        break;
 
-                                case PropertyDeclarationSyntax property:
-                                    members.AddRange( this.VisitBasePropertyDeclaration( property ).AssertNoneNull() );
+                                    case PropertyDeclarationSyntax property:
+                                        members.AddRange( this.VisitBasePropertyDeclaration( property ).AssertNoneNull() );
 
-                                    break;
+                                        break;
 
-                                case TypeDeclarationSyntax nestedType:
-                                    members.Add( (MemberDeclarationSyntax) this.Visit( nestedType ).AssertNotNull() );
+                                    default:
+                                        members.Add( (MemberDeclarationSyntax) this.Visit( member ).AssertNotNull() );
 
-                                    break;
-
-                                default:
-                                    members.Add( member );
-
-                                    break;
+                                        break;
+                                }
                             }
-                        }
 
-                        return (T) node.WithMembers( List( members ) ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                            return (T) node.WithMembers( List( members ) ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                        }
                 }
             }
 
@@ -113,6 +129,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             node,
                             this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                             this._diagnosticAdder,
+                            this._cancellationToken,
                             out _,
                             out var transformedNode );
 
@@ -136,7 +153,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var propertySymbol = (IPropertySymbol) this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
-                if ( propertySymbol != null && this.SymbolClassifier.IsTemplate( propertySymbol ) )
+                if ( this.SymbolClassifier.IsTemplate( propertySymbol ) )
                 {
                     var success = true;
                     SyntaxNode? transformedGetDeclaration = null;
@@ -152,13 +169,6 @@ namespace Caravela.Framework.Impl.CompileTime
                             var setAccessor = node.AccessorList.Accessors.SingleOrDefault(
                                 a => a.Kind() == SyntaxKind.SetAccessorDeclaration || a.Kind() == SyntaxKind.InitAccessorDeclaration );
 
-                            var propertyParameters = node switch
-                            {
-                                PropertyDeclarationSyntax property => (SeparatedSyntaxList<ParameterSyntax>?) null,
-                                IndexerDeclarationSyntax indexer => indexer.ParameterList.Parameters,
-                                _ => throw new AssertionFailedException()
-                            };
-
                             // Auto properties don't have bodies and so we don't need templates.
 
                             if ( getAccessor != null && (getAccessor.Body != null || getAccessor.ExpressionBody != null) )
@@ -170,6 +180,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                               getAccessor,
                                               this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                               this._diagnosticAdder,
+                                              this._cancellationToken,
                                               out _,
                                               out transformedGetDeclaration );
                             }
@@ -183,6 +194,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                               setAccessor,
                                               this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                               this._diagnosticAdder,
+                                              this._cancellationToken,
                                               out _,
                                               out transformedSetDeclaration );
                             }
@@ -190,7 +202,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             // Expression bodied property.
                             if ( node is PropertyDeclarationSyntax { ExpressionBody: not null } propertyNode )
                             {
-                                // TODO: Does this preserve trivias in expression body?
+                                // TODO: Does this preserve trivia in expression body?
                                 success = success &&
                                           this._templateCompiler.TryCompile(
                                               TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
@@ -202,6 +214,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                                   propertyNode.ExpressionBody! ),
                                               this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                               this._diagnosticAdder,
+                                              this._cancellationToken,
                                               out _,
                                               out transformedGetDeclaration );
                             }
@@ -261,7 +274,89 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
+            public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
+            {
+                if ( this._currentContext.Scope == SymbolDeclarationScope.CompileTimeOnly && node.IsNameOf() )
+                {
+                    var typeSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree )
+                        .GetSymbolInfo( node.ArgumentList.Arguments[0].Expression )
+                        .Symbol;
+
+                    if ( typeSymbol != null && this.SymbolClassifier.GetSymbolDeclarationScope( typeSymbol ) == SymbolDeclarationScope.RunTimeOnly )
+                    {
+                        return SyntaxFactoryEx.LiteralExpression( typeSymbol.Name );
+                    }
+                }
+
+                return base.VisitInvocationExpression( node );
+            }
+
+            public override SyntaxNode? VisitTypeOfExpression( TypeOfExpressionSyntax node )
+            {
+                if ( this._currentContext.Scope == SymbolDeclarationScope.CompileTimeOnly )
+                {
+                    var typeSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Type ).Symbol;
+
+                    if ( typeSymbol != null && this.SymbolClassifier.GetSymbolDeclarationScope( typeSymbol ) == SymbolDeclarationScope.RunTimeOnly )
+                    {
+                        // We are in a compile-time-only block but we have a typeof to a run-time-only block. 
+                        // This is a situation we can handle by rewriting the typeof to a call to CompileTimeType.CreateFromDocumentationId.
+                        var compileTimeType =
+                            ReflectionMapper.GetInstance( this._compileTimeCompilation ).GetTypeSyntax( typeof(CompileTimeType) );
+
+                        var memberAccess =
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                compileTimeType,
+                                IdentifierName( nameof(CompileTimeType.CreateFromDocumentationId) ) );
+
+                        var invocation = InvocationExpression(
+                            memberAccess,
+                            ArgumentList(
+                                SeparatedList(
+                                    new[]
+                                    {
+                                        Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetDocumentationCommentId() ) ),
+                                        Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.ToDisplayString() ) )
+                                    } ) ) );
+
+                        return invocation;
+                    }
+                }
+
+                return base.VisitTypeOfExpression( node );
+            }
+
+            private Context WithScope( SymbolDeclarationScope scope )
+            {
+                this._currentContext = new Context( scope, this );
+
+                return this._currentContext;
+            }
+
             // TODO: top-level statements?
+
+            private class Context : IDisposable
+            {
+                private readonly ProduceCompileTimeCodeRewriter _parent;
+                private readonly Context _oldContext;
+
+                public Context( SymbolDeclarationScope scope, ProduceCompileTimeCodeRewriter parent )
+                {
+                    this.Scope = scope;
+                    this._parent = parent;
+
+                    // This will be null for the root context.
+                    this._oldContext = parent._currentContext;
+                }
+
+                public SymbolDeclarationScope Scope { get; }
+
+                public void Dispose()
+                {
+                    this._parent._currentContext = this._oldContext;
+                }
+            }
         }
     }
 }

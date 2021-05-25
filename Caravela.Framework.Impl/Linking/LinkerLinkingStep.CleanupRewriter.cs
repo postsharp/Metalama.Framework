@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Linking
                                 newStatements.Add( innerBlockStatement );
                             }
 
-                            // TODO: Solve trivias!
+                            // TODO: Solve trivia!
                         }
                         else
                         {

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
 {
-    public interface IGenericParameterBuilder : ICodeElementBuilder, IGenericParameter
+    public interface IGenericParameterBuilder : IDeclarationBuilder, IGenericParameter
     {
         /// <summary>
         /// Gets the type constraints of the generic parameter.

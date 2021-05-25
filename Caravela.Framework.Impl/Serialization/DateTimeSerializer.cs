@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class DateTimeSerializer : ObjectSerializer<DateTime>
     {
-        public override ExpressionSyntax Serialize( DateTime obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( DateTime obj, ICompilationElementFactory syntaxFactory )
         {
             return InvocationExpression(
                     MemberAccessExpression(

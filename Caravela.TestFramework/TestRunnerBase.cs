@@ -1,10 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
@@ -21,8 +22,11 @@ namespace Caravela.TestFramework
     /// </summary>
     public abstract class TestRunnerBase
     {
-        public TestRunnerBase( string? projectDirectory )
+        public IServiceProvider ServiceProvider { get; }
+
+        public TestRunnerBase( IServiceProvider serviceProvider, string? projectDirectory )
         {
+            this.ServiceProvider = serviceProvider;
             this.ProjectDirectory = projectDirectory;
         }
 
@@ -58,7 +62,7 @@ namespace Caravela.TestFramework
 
                 if ( errors.Any() )
                 {
-                    testResult.ReportDiagnostics( errors );
+                    testResult.Report( errors );
                     testResult.SetFailed( "The initial compilation failed." );
 
                     return testResult;
@@ -76,7 +80,7 @@ namespace Caravela.TestFramework
         /// <returns>A new project instance.</returns>
         public virtual Project CreateProject()
         {
-            var referenceAssemblies = ReferenceAssemblyLocator.GetInstance().SystemAssemblyPaths;
+            var referenceAssemblies = this.ServiceProvider.GetService<ReferenceAssemblyLocator>().SystemAssemblyPaths;
 
             var guid = Guid.NewGuid();
             var workspace1 = new AdhocWorkspace();

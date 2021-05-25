@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class CultureInfoSerializer : ObjectSerializer<CultureInfo>
     {
-        public override ExpressionSyntax Serialize( CultureInfo obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CultureInfo obj, ICompilationElementFactory syntaxFactory )
         {
             return ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof(CultureInfo) ) )
                 .AddArgumentListArguments(

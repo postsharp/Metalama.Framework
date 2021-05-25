@@ -9,7 +9,6 @@ namespace Caravela.AspectWorkbench.Model
             @"using System;
 using System.Collections.Generic;
 using Caravela.Framework;
-using Caravela.Framework.Project;
 using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 

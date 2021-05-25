@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
 
@@ -22,15 +21,5 @@ namespace Caravela.Framework.Aspects
         IEnumerable<IAdviceParameter> OfType( Type type );
 
         IAdviceParameterValueList Values { get; }
-    }
-
-    [CompileTimeOnly]
-    public interface IAdviceParameterValueList
-    {
-        [return: RunTimeOnly]
-        dynamic ToArray();
-
-        [return: RunTimeOnly]
-        dynamic ToValueTuple();
     }
 }

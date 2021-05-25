@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Utilities
     {
         public static readonly StructuralSymbolComparer Default =
             new(
-                StructuralSymbolComparerOptions.ContainingElement |
+                StructuralSymbolComparerOptions.ContainingDeclaration |
                 StructuralSymbolComparerOptions.Name |
                 StructuralSymbolComparerOptions.GenericParameterCount |
                 StructuralSymbolComparerOptions.ParameterTypes |
@@ -91,8 +91,8 @@ namespace Caravela.Framework.Impl.Utilities
                     throw new NotImplementedException( $"{x.Kind}" );
             }
 
-            if ( this._options.HasFlag( StructuralSymbolComparerOptions.ContainingElement )
-                 && !ContainingElementEquals( x.ContainingSymbol, y.ContainingSymbol ) )
+            if ( this._options.HasFlag( StructuralSymbolComparerOptions.ContainingDeclaration )
+                 && !ContainingDeclarationEquals( x.ContainingSymbol, y.ContainingSymbol ) )
             {
                 return false;
             }
@@ -186,14 +186,14 @@ namespace Caravela.Framework.Impl.Utilities
                 }
 
                 // TODO: optimize using for loop.
-                foreach ( var (parameterX, parameterY) in Enumerable.Zip( propertyX.Parameters, propertyY.Parameters, ( x, y ) => (x, y) ) )
+                foreach ( var (parameterX, parameterY) in propertyX.Parameters.Zip( propertyY.Parameters, ( x, y ) => (x, y) ) )
                 {
                     if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) && !TypeEquals( parameterX.Type, parameterY.Type ) )
                     {
                         return false;
                     }
 
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) && parameterY.RefKind != parameterY.RefKind )
+                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) && parameterX.RefKind != parameterY.RefKind )
                     {
                         return false;
                     }
@@ -239,7 +239,7 @@ namespace Caravela.Framework.Impl.Utilities
             }
         }
 
-        private static bool ContainingElementEquals( ISymbol x, ISymbol y )
+        private static bool ContainingDeclarationEquals( ISymbol x, ISymbol y )
         {
             var currentX = x;
             var currentY = y;
@@ -418,7 +418,7 @@ namespace Caravela.Framework.Impl.Utilities
                     throw new NotImplementedException( $"{symbol.Kind}" );
             }
 
-            if ( options.HasFlag( StructuralSymbolComparerOptions.ContainingElement ) )
+            if ( options.HasFlag( StructuralSymbolComparerOptions.ContainingDeclaration ) )
             {
                 var current = symbol.ContainingSymbol;
 
@@ -468,21 +468,5 @@ namespace Caravela.Framework.Impl.Utilities
 
             return h;
         }
-    }
-
-    [Flags]
-    internal enum StructuralSymbolComparerOptions
-    {
-        ContainingAssembly = 1 << 0,
-        ContainingElement = 1 << 1,
-        Name = 1 << 2,
-        GenericParameterCount = 1 << 3,
-        GenericArguments = 1 << 4,
-        ParameterTypes = 1 << 5,
-        ParameterModifiers = 1 << 6,
-        FieldPromotions = 1 << 7,
-
-        MethodSignature = Name | GenericParameterCount | GenericArguments | ParameterTypes | ParameterModifiers,
-        Type = Name | GenericParameterCount | GenericArguments
     }
 }

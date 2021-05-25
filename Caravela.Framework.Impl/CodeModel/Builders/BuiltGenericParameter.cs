@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltGenericParameter : BuiltCodeElement, IGenericParameter
+    internal class BuiltGenericParameter : BuiltDeclaration, IGenericParameter
     {
         public BuiltGenericParameter( GenericParameterBuilder builder, CompilationModel compilation ) : base( compilation )
         {
@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public GenericParameterBuilder GenericParameterBuilder { get; }
 
-        public override CodeElementBuilder Builder => this.GenericParameterBuilder;
+        public override DeclarationBuilder Builder => this.GenericParameterBuilder;
 
         public TypeKind TypeKind => TypeKind.GenericParameter;
 

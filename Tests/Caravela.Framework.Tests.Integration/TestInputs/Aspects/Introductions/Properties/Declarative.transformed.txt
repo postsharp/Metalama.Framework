@@ -15,5 +15,4 @@ internal class TargetClass
             global::System.Console.WriteLine(value);
         }
     }
-
 }

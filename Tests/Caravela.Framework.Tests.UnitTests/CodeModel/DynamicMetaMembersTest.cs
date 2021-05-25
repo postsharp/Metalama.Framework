@@ -2,9 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using Xunit;
@@ -35,7 +35,7 @@ class TargetCode
 
 }";
 
-            var generator = CSharpSyntaxGenerator.Instance;
+            var generator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
             var compilation = CreateCompilationModel( code );
 
@@ -183,9 +183,10 @@ class TargetCode
 
             var type = compilation.DeclaredTypes.Single();
             var property = type.Properties.OfName( "P" ).Single();
+            RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression() );
 
-            AssertEx.DynamicEquals( property.Value, @"this.P" );
-            AssertEx.DynamicEquals( property.GetValue( property.Value ), @"this.P.P" );
+            AssertEx.DynamicEquals( property.GetValue( thisExpression ), @"((global::TargetCode)(this)).P" );
+            AssertEx.DynamicEquals( property.GetValue( property.GetValue( thisExpression ) ), @"((global::TargetCode)(this)).P.P" );
         }
 
         [Fact]

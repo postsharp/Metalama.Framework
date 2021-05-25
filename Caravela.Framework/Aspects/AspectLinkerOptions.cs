@@ -6,7 +6,7 @@ namespace Caravela.Framework.Aspects
     /// <summary>
     /// Specifies behavior of the aspect linker on the advice.
     /// </summary>
-    public class AspectLinkerOptions
+    internal class AspectLinkerOptions
     {
         /// <summary>
         /// Default options.

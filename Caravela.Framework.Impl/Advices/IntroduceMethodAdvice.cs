@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
@@ -12,10 +11,8 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<MethodBuilder>, IIntroduceMethodAdvice
+    internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<MethodBuilder>
     {
-        protected override MethodBuilder MemberBuilder { get; set; }
-
         public new IMethod TemplateMember => (IMethod) base.TemplateMember.AssertNotNull();
 
         public new INamedType TargetDeclaration => base.TargetDeclaration!;
@@ -28,9 +25,9 @@ namespace Caravela.Framework.Impl.Advices
             IMethod templateMethod,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
-            AspectLinkerOptions? linkerOptions,
-            IReadOnlyDictionary<string, object?> tags )
-            : base( aspect, targetDeclaration, templateMethod, scope, conflictBehavior, tags, linkerOptions )
+            string? layerName,
+            AdviceOptions? options )
+            : base( aspect, targetDeclaration, templateMethod, scope, conflictBehavior, layerName, options )
         {
             this.MemberBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Name, this.LinkerOptions );
         }

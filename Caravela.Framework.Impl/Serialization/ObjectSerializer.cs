@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
@@ -27,7 +28,7 @@ namespace Caravela.Framework.Impl.Serialization
         /// <param name="obj"></param>
         /// <param name="syntaxFactory"></param>
         /// <returns>An expression that creates such an object.</returns>
-        public abstract ExpressionSyntax Serialize( object obj, ISyntaxFactory syntaxFactory );
+        public abstract ExpressionSyntax Serialize( object obj, ICompilationElementFactory syntaxFactory );
 
         /// <summary>
         /// Throws a <see cref="InvalidUserCodeException"/> if we are in an infinite recursion cycle because of an attempt to serialize <paramref name="obj"/>.

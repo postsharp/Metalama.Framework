@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         private PropertyInvocation Invocation => new( this );
 
-        public override CodeElementKind ElementKind => CodeElementKind.Field;
+        public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
         public override ISymbol Symbol => this._symbol;
 
@@ -82,8 +82,8 @@ namespace Caravela.Framework.Impl.CodeModel
         dynamic IPropertyInvocation.SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args )
             => this.Invocation.SetIndexerValue( instance, value, args );
 
-        MemberLink<IMember> IReplaceMemberTransformation.ReplacedMember => new( this._symbol );
+        MemberRef<IMemberOrNamedType> IReplaceMemberTransformation.ReplacedMember => new( this._symbol );
 
-        ICodeElement IObservableTransformation.ContainingElement => this.ContainingElement.AssertNotNull();
+        IDeclaration IObservableTransformation.ContainingDeclaration => this.ContainingDeclaration.AssertNotNull();
     }
 }

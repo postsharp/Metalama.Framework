@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.Linking
                     // Go through all members of the type.
                     // For members that represent overrides:
                     //  * If the member can be inlined, skip it.
-                    //  * If the member cannot be inlined (or is the root of inlining), add the transformed member with all possible inlinings.
+                    //  * If the member cannot be inlined (or is the root of inlining), add the transformed member with all possible inlining instances.
                     // For members that represent override targets (i.e. overridden members):
                     //  * If the last (transformation order) override is inlineable, replace the member with it's transformed body.
                     //  * Otherwise create a stub that calls the last override.
@@ -426,7 +426,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else if ( method.ExpressionBody != null )
                 {
-                    // TODO: Correct trivias for the generated block body.
+                    // TODO: Correct trivia for the generated block body.
                     return (BlockSyntax) inliningRewriter.VisitBlock( Block( ExpressionStatement( method.ExpressionBody.Expression ) ) ).AssertNotNull();
                 }
                 else
@@ -455,7 +455,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else if ( accessor.ExpressionBody != null )
                 {
-                    // TODO: Correct trivias for the generated block body.
+                    // TODO: Correct trivia for the generated block body.
                     return (BlockSyntax) inliningRewriter.VisitBlock( Block( ExpressionStatement( accessor.ExpressionBody.Expression ) ) ).AssertNotNull();
                 }
                 else
@@ -466,6 +466,12 @@ namespace Caravela.Framework.Impl.Linking
 
             private BlockSyntax GetRewrittenEventAccessorBody( SemanticModel semanticModel, AccessorDeclarationSyntax accessor, IMethodSymbol symbol )
             {
+                // Turn off warnings.
+                _ = this;
+                _ = semanticModel;
+                _ = accessor;
+                _ = symbol;
+
                 throw new NotImplementedException();
             }
 

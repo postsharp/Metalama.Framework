@@ -27,9 +27,9 @@ namespace Caravela.Framework.Impl.Templating
             ICompilation compilation,
             IProceedImpl proceedImpl,
             TemplateLexicalScope lexicalScope,
-            DiagnosticSink diagnosticSink,
+            UserDiagnosticSink diagnosticSink,
             SyntaxSerializationService syntaxSerializationService,
-            ISyntaxFactory syntaxFactory,
+            ICompilationElementFactory syntaxFactory,
             AspectLayerId aspectLayerId,
             IReadOnlyDictionary<string, object?> properties )
         {
@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.Templating
             Invariant.Assert( diagnosticSink.DefaultScope!.Equals( targetMethod ) );
         }
 
-        public ICodeElement TargetDeclaration => this._targetMethod;
+        public IDeclaration TargetDeclaration => this._targetMethod;
 
         public object TemplateInstance { get; }
 
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public SyntaxSerializationService SyntaxSerializationService { get; }
 
-        public ISyntaxFactory SyntaxFactory { get; }
+        public ICompilationElementFactory SyntaxFactory { get; }
 
         public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
         {
@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.Templating
             return ReturnStatement( CastExpression( ParseTypeName( this._targetMethod.ReturnType.ToDisplayString() ), returnExpression ) );
         }
 
-        public DiagnosticSink DiagnosticSink { get; }
+        public UserDiagnosticSink DiagnosticSink { get; }
 
         public AspectLayerId AspectLayerId { get; }
 

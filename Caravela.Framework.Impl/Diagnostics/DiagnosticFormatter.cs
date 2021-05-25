@@ -5,6 +5,8 @@ using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
+using System.Linq;
+using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
@@ -17,7 +19,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         object? IFormatProvider.GetFormat( Type formatType ) => formatType == typeof(ICustomFormatter) ? this : null;
 
-        string ICustomFormatter.Format( string format, object? arg, IFormatProvider formatProvider )
+        public string Format( string format, object? arg, IFormatProvider formatProvider )
         {
             switch ( arg )
             {
@@ -38,20 +40,45 @@ namespace Caravela.Framework.Impl.Diagnostics
                         }
                     }
 
-                case CodeElementKind codeElementKind:
-                    switch ( codeElementKind )
+                case DeclarationKind declarationKind:
+                    switch ( declarationKind )
                     {
-                        case CodeElementKind.GenericParameter:
+                        case DeclarationKind.GenericParameter:
                             return "generic parameter";
 
-                        case CodeElementKind.ManagedResource:
+                        case DeclarationKind.ManagedResource:
                             return "managed resource";
 
-                        case CodeElementKind.ReferencedAssembly:
+                        case DeclarationKind.ReferencedAssembly:
                             return "reference assembly";
 
                         default:
-                            return codeElementKind.ToString().ToLowerInvariant();
+                            return declarationKind.ToString().ToLowerInvariant();
+                    }
+
+                case Accessibility accessibility:
+                    switch ( accessibility )
+                    {
+                        case Accessibility.Private:
+                            return "private";
+
+                        case Accessibility.ProtectedInternal:
+                            return "protected internal";
+
+                        case Accessibility.Protected:
+                            return "protected";
+
+                        case Accessibility.PrivateProtected:
+                            return "private protected";
+
+                        case Accessibility.Internal:
+                            return "internal";
+
+                        case Accessibility.Public:
+                            return "public";
+
+                        default:
+                            return accessibility.ToString().ToLowerInvariant();
                     }
 
                 case ISymbol symbol:
@@ -59,6 +86,12 @@ namespace Caravela.Framework.Impl.Diagnostics
 
                 case IFormattable formattable:
                     return formattable.ToString( format, CultureInfo.CurrentCulture );
+
+                case string[] strings:
+                    return string.Join( ", ", strings.Select( s => s == null ? null : "'" + s + "'" ) );
+
+                case Array array:
+                    return string.Join( ", ", ((object[]) array).Select( i => this.Format( "", i, formatProvider ) ) );
 
                 default:
                     {

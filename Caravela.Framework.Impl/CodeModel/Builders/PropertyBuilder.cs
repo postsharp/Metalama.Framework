@@ -5,7 +5,6 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -20,7 +19,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IProperty
+    internal class PropertyBuilder : MemberBuilder, IPropertyBuilder
     {
         // TODO: How to set this from user code? Now it's only possible to do through template.
         private readonly bool _isAutoProperty;
@@ -65,7 +64,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override MemberDeclarationSyntax InsertPositionNode
             => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
 
-        public override CodeElementKind ElementKind => throw new NotImplementedException();
+        public override DeclarationKind DeclarationKind => throw new NotImplementedException();
 
         public bool IsIndexer => this.Name == "Items";
 
@@ -140,8 +139,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             if ( this.IsIndexer )
             {
                 var itype = this.Compilation.Factory.GetTypeByReflectionType( type );
-                var parameter = new ParameterBuilder( this, this.Parameters.Count, name, itype, refKind );
-                parameter.DefaultValue = new TypedConstant( itype, defaultValue );
+
+                var parameter = new ParameterBuilder( this, this.Parameters.Count, name, itype, refKind )
+                {
+                    DefaultValue = new TypedConstant( itype, defaultValue )
+                };
+
                 this.Parameters.Add( parameter );
 
                 return parameter;
@@ -202,7 +205,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             AccessorListSyntax GenerateAccessorList()
             {
-                switch ( (this.Getter, this.Setter) )
+                switch (this.Getter, this.Setter)
                 {
                     case (not null, not null):
                         return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );

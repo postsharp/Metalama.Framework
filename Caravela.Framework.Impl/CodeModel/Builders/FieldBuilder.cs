@@ -5,7 +5,6 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -16,7 +15,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         public override MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
 
-        public override CodeElementKind ElementKind => throw new NotImplementedException();
+        public override DeclarationKind DeclarationKind => throw new NotImplementedException();
 
         public IType Type { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 

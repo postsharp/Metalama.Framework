@@ -19,9 +19,9 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Gets diagnostics produced when linking (template expansion, inlining, etc.).
         /// </summary>
-        public ImmutableDiagnosticList Diagnostics { get; }
+        public ImmutableUserDiagnosticList Diagnostics { get; }
 
-        public AspectLinkerResult( PartialCompilation compilation, ImmutableDiagnosticList diagnostics )
+        public AspectLinkerResult( PartialCompilation compilation, ImmutableUserDiagnosticList diagnostics )
         {
             this.Compilation = compilation;
             this.Diagnostics = diagnostics;

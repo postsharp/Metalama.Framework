@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class DoubleSerializer : ObjectSerializer<double>
     {
-        public override ExpressionSyntax Serialize( double obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( double obj, ICompilationElementFactory syntaxFactory )
         {
             if ( double.IsPositiveInfinity( obj ) )
             {

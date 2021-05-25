@@ -11,9 +11,9 @@ namespace Caravela.Framework.Tests.UnitTests.Linker
 {
     public static class SyntaxExtensions
     {
-        public static SyntaxNode ToSyntaxNode( this ICodeElement codeElement )
+        public static SyntaxNode ToSyntaxNode( this IDeclaration declaration )
         {
-            if ( codeElement is CodeElement symbolicCodeElement )
+            if ( declaration is Declaration symbolicCodeElement )
             {
                 return symbolicCodeElement.Symbol.DeclaringSyntaxReferences.Single().GetSyntax();
             }
@@ -21,10 +21,10 @@ namespace Caravela.Framework.Tests.UnitTests.Linker
             throw new NotImplementedException();
         }
 
-        public static T ToSyntaxNode<T>( this ICodeElement codeElement )
+        public static T ToSyntaxNode<T>( this IDeclaration declaration )
             where T : SyntaxNode
         {
-            return (T) ToSyntaxNode( codeElement );
+            return (T) ToSyntaxNode( declaration );
         }
 
         public static string GetNormalizedText( this SyntaxTree syntaxTree )

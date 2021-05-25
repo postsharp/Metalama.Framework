@@ -1,26 +1,25 @@
 using System;
-using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.Framework.Project;
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.Tags
 {
-    class Aspect : OverrideMethodAspect
+    class Aspect : Attribute, IAspect<IMethod>
     {
-        public override void Initialize(IAspectBuilder<IMethod> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            aspectBuilder.Tags.Add("Friend", "Bernard");
-            base.Initialize(aspectBuilder);
-            
-            // By design, values written after the creation of advices are not taken into account.
-            aspectBuilder.Tags["Friend"] = "Julia";
-            
+            var options = AdviceOptions.Default.AddTag("Friend", "Bernard");
+            builder.AdviceFactory.OverrideMethod(builder.TargetDeclaration, nameof(OverrideMethod));
         }
 
-        public override dynamic OverrideMethod()
+        public void BuildEligibility(IEligibilityBuilder<IMethod> builder)
+        {
+            throw new NotImplementedException();
+        }
+
+        private dynamic OverrideMethod()
         {
             Console.WriteLine( (string?) meta.Tags["Friend"] );
             return meta.Proceed();
