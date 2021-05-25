@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceMemberAlreadyExists = new(
-                "CRA1000",
+                "CR1000",
                 "Cannot introduce member into a type because it already exists.",
                 "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}'.",
                 Error, _category );

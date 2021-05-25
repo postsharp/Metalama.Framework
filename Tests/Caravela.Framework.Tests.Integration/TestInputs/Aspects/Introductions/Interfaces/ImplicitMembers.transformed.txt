@@ -1,14 +1,15 @@
 ﻿[TestOutput]
 [Introduction]
-public class TargetClass : IInterface
+public class TargetClass
+: global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers.IInterface
 {
-	void IInterface.InterfaceMethod()
-	{
-		this.InterfaceMethod();
-	}
-
-	public void InterfaceMethod()
-	{
-        Console.WriteLine("This is introduced interface method.");
-	}
+    public global::System.Int32 InterfaceMethod()
+    {
+        global::System.Console.WriteLine("This is introduced interface method.");
+        return default(global::System.Int32);
+    }
+    global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers.IInterface.InterfaceMethod()
+    {
+        return this.InterfaceMethod();
+    }
 }

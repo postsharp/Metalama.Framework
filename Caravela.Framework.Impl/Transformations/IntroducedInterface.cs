@@ -28,9 +28,9 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IReadOnlyDictionary<IMember, IMember> MemberMap { get; }
 
-        public SyntaxTree TargetSyntaxTree => throw new NotImplementedException();
+        public SyntaxTree TargetSyntaxTree => this.TargetType.GetSymbol().DeclaringSyntaxReferences.First().SyntaxTree;
 
-        public MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
+        public MemberDeclarationSyntax InsertPositionNode => (MemberDeclarationSyntax)this.TargetType.GetSymbol().DeclaringSyntaxReferences.First().GetSyntax();
 
         public IntroducedInterface(
             IntroduceInterfaceAdvice introduceInterfaceAdvice,
@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.Transformations
             if ( !this.TargetType.ImplementedInterfaces.Contains( this.InterfaceType ) )
             {
                 // The type already implements the interface itself.
-                return new[] { (BaseTypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.InterfaceType.GetSymbol() ) };
+                return new[] { (BaseTypeSyntax) SimpleBaseType( (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.InterfaceType.GetSymbol() ) ) };
             }
             else
             {

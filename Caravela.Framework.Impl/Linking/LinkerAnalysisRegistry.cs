@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -63,6 +64,18 @@ namespace Caravela.Framework.Impl.Linking
             {
                 return introducedMember.Semantic == IntroducedMemberSemantic.InterfaceImplementation;
             }
+        }
+
+        public ISymbol GetImplementedInterfaceMember( ISymbol symbol )
+        {
+            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
+
+            if ( introducedMember == null || introducedMember.Semantic != IntroducedMemberSemantic.InterfaceImplementation )
+            {
+                throw new AssertionFailedException();
+            }
+
+            return introducedMember.Declaration?.GetSymbol().AssertNotNull();
         }
 
         /// <summary>

@@ -5,8 +5,10 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Transformations;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -53,6 +55,12 @@ namespace Caravela.Framework.Impl.Linking
                         // When we have an IOverriddenDeclaration, we know which symbol will be overwritten, so we take its lexical scope.
                         // All overrides of these same symbol will share the same scope.
                         return this.GetLexicalScope( overriddenDeclaration.OverriddenDeclaration );
+                    }
+
+                case IInterfaceImplementationIntroduction interfaceIntroduction:
+                    {
+                        // We're currently not expanding templates in interface introduction.
+                        return new TemplateLexicalScope( Enumerable.Empty<ISymbol>() );
                     }
 
                 case IDeclaration declaration:

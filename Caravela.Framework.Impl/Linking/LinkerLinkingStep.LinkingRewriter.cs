@@ -73,8 +73,10 @@ namespace Caravela.Framework.Impl.Linking
                     }
                     else if ( this._analysisRegistry.IsInterfaceImplementation( symbol ) )
                     {
-                        // Interface implementation member. Currently only transformed into 
-                        newMembers.Add( GetTransformedInterfaceImplementation( member, symbol ) );
+                        // Interface implementation member.
+                        var interfaceMember = this._analysisRegistry.GetImplementedInterfaceMember( symbol );
+
+                        newMembers.Add( GetTransformedInterfaceImplementation( member, interfaceMember ) );
                     }
                     else if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
                     {
