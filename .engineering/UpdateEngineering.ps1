@@ -10,7 +10,7 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
 }
 
 # Update/initialize the engineering subtree.
-$EngineeringDirectory = ".\.engineering"
+$EngineeringDirectory = ".engineering"
 
 If ( ( Test-Path -Path $EngineeringDirectory ) ) {
     $SubtreeCommand = "pull"
