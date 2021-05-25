@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -66,33 +67,14 @@ namespace Caravela.Framework.Impl.Linking
                         }
                         else
                         {
-                            switch ( member )
-                            {
-                                case MethodDeclarationSyntax method:
-                                    // Non-inlineable method.
-                                    var transformedMethod = this.TransformMethod( semanticModel, method, method );
-                                    newMembers.Add( transformedMethod );
-
-                                    break;
-
-                                case PropertyDeclarationSyntax property:
-                                    // Non-inlineable property.
-                                    var transformedProperty = this.TransformProperty( semanticModel, property, property );
-                                    newMembers.Add( transformedProperty );
-
-                                    break;
-
-                                case EventDeclarationSyntax @event:
-                                    // Non-inlineable event.
-                                    var transformedEvent = this.TransformEvent( semanticModel, @event, @event );
-                                    newMembers.Add( transformedEvent );
-
-                                    break;
-
-                                default:
-                                    throw new AssertionFailedException();
-                            }
+                            // Declaration is not inlineable, it will stay but inlineable references need to be inlined into it.
+                            newMembers.Add( this.GetTransformedNonInlineableOverride(member, semanticModel) );
                         }
+                    }
+                    else if (this._analysisRegistry.IsInterfaceImplementation( symbol ))
+                    {
+                        // Interface implementation member. Currently only transformed into 
+                        newMembers.Add( this.GetTransformedInterfaceImplementation( member, symbol ) );
                     }
                     else if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
                     {
@@ -102,91 +84,18 @@ namespace Caravela.Framework.Impl.Linking
                         if ( !this._analysisRegistry.IsInlineable( lastOverrideSymbol ) )
                         {
                             // Body of the last (outermost) override is not inlineable. We need to emit a trampoline method.
-                            switch ( member )
-                            {
-                                case MethodDeclarationSyntax method:
-                                    var transformedMethod = GetTrampolineMethod( method, (IMethodSymbol) lastOverrideSymbol );
-                                    newMembers.Add( transformedMethod );
-
-                                    break;
-
-                                case PropertyDeclarationSyntax property:
-                                    var transformedProperty = GetTrampolineProperty( property, (IPropertySymbol) lastOverrideSymbol );
-                                    newMembers.Add( transformedProperty );
-
-                                    break;
-
-                                case EventDeclarationSyntax @event:
-                                    var transformedEvent = GetTrampolineEvent( @event, (IEventSymbol) lastOverrideSymbol );
-                                    newMembers.Add( transformedEvent );
-
-                                    break;
-
-                                default:
-                                    throw new AssertionFailedException();
-                            }
+                            newMembers.Add( this.GetTransformedInlineableOverrideTarget( member, lastOverrideSymbol ) );
                         }
                         else
                         {
                             // Body of the last (outermost) override is inlineable. We will run inlining on the override's body/bodies and place replace the current body with the result.
-                            switch ( member )
-                            {
-                                case MethodDeclarationSyntax method:
-                                    var lastMethodOverrideSyntax = (MethodDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
-                                    var transformedMethod = this.TransformMethod( semanticModel, method, lastMethodOverrideSyntax );
-                                    newMembers.Add( transformedMethod );
-
-                                    break;
-
-                                case PropertyDeclarationSyntax property:
-                                    var lastPropertyOverrideSyntax =
-                                        (PropertyDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
-
-                                    var transformedProperty = this.TransformProperty( semanticModel, property, lastPropertyOverrideSyntax );
-                                    newMembers.Add( transformedProperty );
-
-                                    break;
-
-                                case EventDeclarationSyntax @event:
-                                    var lastEventOverrideSyntax = (EventDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
-                                    var transformedEvent = this.TransformEvent( semanticModel, @event, lastEventOverrideSyntax );
-                                    newMembers.Add( transformedEvent );
-
-                                    break;
-
-                                default:
-                                    throw new AssertionFailedException();
-                            }
+                            newMembers.Add( this.GetTransformedNonInlineableOverrideTarget( member, lastOverrideSymbol, semanticModel ) );
                         }
 
                         if ( !this._analysisRegistry.IsInlineable( symbol ) )
                         {
                             // TODO: This should be inserted after all other overrides.
-
-                            // This is target member that is not inlineable, we need to a separate declaration.
-                            switch ( member )
-                            {
-                                case MethodDeclarationSyntax method:
-                                    var originalBodyMethod = GetOriginalImplMethod( method );
-                                    newMembers.Add( originalBodyMethod );
-
-                                    break;
-
-                                case PropertyDeclarationSyntax property:
-                                    var originalBodyProperty = GetOriginalImplProperty( property );
-                                    newMembers.Add( originalBodyProperty );
-
-                                    break;
-
-                                case EventDeclarationSyntax @event:
-                                    var originalBodyEvent = GetOriginalImplEvent( @event );
-                                    newMembers.Add( originalBodyEvent );
-
-                                    break;
-
-                                default:
-                                    throw new AssertionFailedException();
-                            }
+                            newMembers.Add( this.GetOriginalImplDeclaration( member ) );
                         }
                     }
                     else
@@ -197,6 +106,112 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 return node.WithMembers( List( newMembers ) );
+            }
+
+            private MemberDeclarationSyntax GetTransformedNonInlineableOverride( MemberDeclarationSyntax member, SemanticModel semanticModel)
+            {
+                switch ( member )
+                {
+                    case MethodDeclarationSyntax method:
+                        // Non-inlineable method.
+                        return this.TransformMethod( semanticModel, method, method );
+
+                    case PropertyDeclarationSyntax property:
+                        // Non-inlineable property.
+                        return this.TransformProperty( semanticModel, property, property );
+
+                    case EventDeclarationSyntax @event:
+                        // Non-inlineable event.
+                        return this.TransformEvent( semanticModel, @event, @event );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+            private MemberDeclarationSyntax GetTransformedInterfaceImplementation( MemberDeclarationSyntax member, ISymbol symbol )
+            {
+                switch ( member )
+                {
+                    case MethodDeclarationSyntax method:
+                        // Non-inlineable method.
+                        return this.TransformInterfaceMethodImplementation( method, (IMethodSymbol)symbol );
+
+                    case PropertyDeclarationSyntax property:
+                        // Non-inlineable property.
+                        return this.TransformInterfacePropertyImplementation( property, (IPropertySymbol)symbol );
+
+                    case EventDeclarationSyntax @event:
+                        // Non-inlineable event.
+                        return this.TransformInterfaceEventImplementation( @event, (IEventSymbol)symbol );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+#pragma warning disable CA1822 // Mark members as static
+            private MemberDeclarationSyntax GetTransformedInlineableOverrideTarget( MemberDeclarationSyntax member, ISymbol lastOverrideSymbol )
+#pragma warning restore CA1822 // Mark members as static
+            {
+                switch ( member )
+                {
+                    case MethodDeclarationSyntax method:
+                        // Non-inlineable method.
+                        return GetTrampolineMethod( method, (IMethodSymbol) lastOverrideSymbol );
+
+                    case PropertyDeclarationSyntax property:
+                        // Non-inlineable property.
+                        return GetTrampolineProperty( property, (IPropertySymbol) lastOverrideSymbol );
+
+                    case EventDeclarationSyntax @event:
+                        // Non-inlineable event.
+                        return GetTrampolineEvent( @event, (IEventSymbol) lastOverrideSymbol );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+            private MemberDeclarationSyntax GetTransformedNonInlineableOverrideTarget( MemberDeclarationSyntax member, ISymbol lastOverrideSymbol, SemanticModel semanticModel )
+            {
+                switch ( member )
+                {
+                    case MethodDeclarationSyntax method:
+                        var lastMethodOverrideSyntax = (MethodDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+                        return this.TransformMethod( semanticModel, method, lastMethodOverrideSyntax );
+
+                    case PropertyDeclarationSyntax property:
+                        var lastPropertyOverrideSyntax = (PropertyDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+                        return this.TransformProperty( semanticModel, property, lastPropertyOverrideSyntax );
+
+                    case EventDeclarationSyntax @event:
+                        var lastEventOverrideSyntax = (EventDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+                        return this.TransformEvent( semanticModel, @event, lastEventOverrideSyntax );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+            private MemberDeclarationSyntax GetOriginalImplDeclaration( MemberDeclarationSyntax member )
+            {
+
+                // This is target member that is not inlineable, we need to a separate declaration.
+                switch ( member )
+                {
+                    case MethodDeclarationSyntax method:
+                        return GetOriginalImplMethod( method );
+
+                    case PropertyDeclarationSyntax property:
+                        return GetOriginalImplProperty( property );
+
+                    case EventDeclarationSyntax @event:
+                        return GetOriginalImplEvent( @event );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
 
             private MethodDeclarationSyntax TransformMethod(
@@ -275,6 +290,52 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     throw new NotImplementedException();
                 }
+            }
+
+            public MethodDeclarationSyntax TransformInterfaceMethodImplementation(MethodDeclarationSyntax method, IMethodSymbol interfaceMethodSymbol )
+            {
+                var interfaceType = interfaceMethodSymbol.ContainingType;
+
+                return
+                    MethodDeclaration(
+                        List<AttributeListSyntax>(),
+                        TokenList(),
+                        method.ReturnType,
+                        ExplicitInterfaceSpecifier( (NameSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( interfaceType ) ),
+                        Identifier( interfaceMethodSymbol.Name ),
+                        method.TypeParameterList,
+                        method.ParameterList,
+                        method.ConstraintClauses,
+                        method.Body,
+                        null );
+            }
+
+            public PropertyDeclarationSyntax TransformInterfacePropertyImplementation( PropertyDeclarationSyntax property, IPropertySymbol interfacePropertySymbol )
+            {
+                var interfaceType = interfacePropertySymbol.ContainingType;
+
+                return
+                    PropertyDeclaration(
+                        List<AttributeListSyntax>(),
+                        TokenList(),
+                        property.Type,
+                        ExplicitInterfaceSpecifier( (NameSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( interfaceType ) ),
+                        Identifier( interfacePropertySymbol.Name ),
+                        property.AccessorList.AssertNotNull() );
+            }
+
+            public EventDeclarationSyntax TransformInterfaceEventImplementation( EventDeclarationSyntax @event, IEventSymbol interfaceEventSymbol )
+            {
+                var interfaceType = interfaceEventSymbol.ContainingType;
+
+                return
+                    EventDeclaration(
+                        List<AttributeListSyntax>(),
+                        TokenList(),
+                        @event.Type,
+                        ExplicitInterfaceSpecifier( (NameSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( interfaceType ) ),
+                        Identifier( interfaceEventSymbol.Name ),
+                        @event.AccessorList );
             }
 
             private static MethodDeclarationSyntax GetTrampolineMethod( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )

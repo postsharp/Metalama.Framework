@@ -1,2 +1,2 @@
 // CompileTimeAspectPipeline.TryExecute failed. 
-// Error CRA0002 on `TargetClass`: `The aspect 'Introduction' cannot introduce member 'ExistingMethod' into type 'TargetClass' because it is already defined in type 'DerivedClass' and is sealed.`
+// Error CR0001 on `TargetClass`: `The aspect 'Introduction' cannot introduce member 'ExistingMethod' into type 'TargetClass' because it is already defined in type 'DerivedClass' and is sealed.`

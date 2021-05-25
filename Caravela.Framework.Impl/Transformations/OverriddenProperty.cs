@@ -112,7 +112,7 @@ namespace Caravela.Framework.Impl.Transformations
                             null,
                             null ),
                         this.Advice.AspectLayerId,
-                        IntroducedMemberSemantic.PropertyOverride,
+                        IntroducedMemberSemantic.Override,
                         this.LinkerOptions,
                         this.OverriddenDeclaration )
                 };

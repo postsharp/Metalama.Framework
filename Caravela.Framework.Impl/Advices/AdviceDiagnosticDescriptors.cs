@@ -11,28 +11,27 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal static class AdviceDiagnosticDescriptors
     {
-        // TODO: Use the prefix CR and use a different range (see Ranges.md). 
-        // Reserved range 0-99
+        // Reserved range 1000-1099
 
         private const string _category = "Caravela.Advices";
 
         public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceMemberAlreadyExists = new(
-                "CRA0001",
+                "CRA1000",
                 "Cannot introduce member into a type because it already exists.",
                 "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}'.",
                 Error, _category );
 
         public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceOverrideOfSealed = new(
-                "CRA0002",
+                "CR1001",
                 "Cannot introduce member into a type because it is sealed in a base class.",
                 "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}' and is sealed.",
                 Error, _category );
 
         public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceWithDifferentStaticity = new(
-                "CRA0003",
+                "CR1002",
                 "Cannot introduce member into a type because it is sealed in a base class.",
                 "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}' and " +
                 "its IsStatic flag is opposite of the introduced member.",
@@ -40,9 +39,23 @@ namespace Caravela.Framework.Impl.Advices
 
         public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType)>
             CannotIntroduceInstanceMemberIntoStaticType = new(
-                "CRA0004",
+                "CR1003",
                 "Cannot introduce instance member into a static type.",
                 "The aspect '{0}' cannot introduce instance member '{1}' into a type '{2}' because it is static.",
+                Error, _category );
+
+        public static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember InterfaceMember)>
+            MissingDeclarativeInterfaceMemberIntroduction= new(
+                "CR1004",
+                "Declarative interface member introduction is missing.",
+                "The aspect '{0}' cannot implicitly introduce interface '{1}' into a type '{2}' because it does not contain a declarative introduction corresponding to '{3}'.",
+                Error, _category );
+
+        public static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember DeclarativeIntroduction, IMember InterfaceMember)>
+            DeclarativeInterfaceMemberIntroductionDoesNotMatch = new(
+                "CR1004",
+                "Declarative interface member introduction does match interface member return type.",
+                "The aspect '{0}' cannot implicitly introduce interface '{1}' into a type '{2}' because the declarative introduction '{3}' does not have the same return type as interface member '{4}'.",
                 Error, _category );
     }
 }

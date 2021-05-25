@@ -16,8 +16,20 @@ namespace Caravela.Framework.Impl.Linking
 
             return
                 cleanLayerName != null
-                    ? $"__{overriddenDeclaration.Name}__{cleanAspectName}__{cleanLayerName}"
-                    : $"__{overriddenDeclaration.Name}__{cleanAspectName}";
+                    ? $"__Override__{overriddenDeclaration.Name}__By__{cleanAspectName}__{cleanLayerName}"
+                    : $"__Override__{overriddenDeclaration.Name}__By__{cleanAspectName}";
+        }
+
+        internal override string GetInterfaceImplementationName( AspectLayerId aspectLayer, IMember interfaceMember )
+        {
+            var cleanAspectName = aspectLayer.AspectName.Replace( "_", "__" ).Replace( ".", "_" );
+            var cleanLayerName = aspectLayer.LayerName?.Replace( "_", "__" ).Replace( ".", "_" );
+            var cleanInterfaceName = interfaceMember.DeclaringType.FullName.Replace( "_", "__" ).Replace( ".", "_" );
+
+            return
+                cleanLayerName != null
+                    ? $"__InterfaceImpl__{cleanInterfaceName}__{interfaceMember.Name}__By__{cleanAspectName}__{cleanLayerName}"
+                    : $"__InterfaceImpl__{cleanInterfaceName}__{interfaceMember.Name}__By__{cleanAspectName}";
         }
     }
 }

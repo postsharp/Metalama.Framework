@@ -34,6 +34,11 @@ namespace Caravela.Framework.Code
         INamedType? BaseType { get; }
 
         /// <summary>
+        /// Gets the list of all interfaces (recursive) that the current type implements.
+        /// </summary>
+        IReadOnlyList<INamedType> AllImplementedInterfaces { get; }
+
+        /// <summary>
         /// Gets the list of interfaces that the current type implements.
         /// </summary>
         IReadOnlyList<INamedType> ImplementedInterfaces { get; }

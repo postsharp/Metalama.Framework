@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.Linking
             var diagnostics = new UserDiagnosticSink( input.CompileTimeProject );
             var nameProvider = new LinkerIntroductionNameProvider();
             var lexicalScopeHelper = new LexicalScopeFactory( input.CompilationModel );
-            var introducedMemberCollection = new IntroducedMemberCollection();
+            var introducedCollection = new IntroductionCollection();
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
             var syntaxFactory = ReflectionMapper.GetInstance( input.CompilationModel.RoslynCompilation );
 
@@ -87,7 +87,7 @@ namespace Caravela.Framework.Impl.Linking
                     .Concat( input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
                     .ToList();
 
-            // Visit all introductions, respect aspect part ordering.
+            // Visit all member introductions, respect aspect part ordering.
             foreach ( var memberIntroduction in allTransformations.OfType<IMemberIntroduction>() )
             {
                 var introductionContext = new MemberIntroductionContext(
@@ -99,7 +99,15 @@ namespace Caravela.Framework.Impl.Linking
 
                 var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
-                introducedMemberCollection.Add( memberIntroduction, introducedMembers );
+                introducedCollection.Add( memberIntroduction, introducedMembers );
+            }
+
+            // Visit all interface introductions.
+            foreach ( var interfaceIntroduction in allTransformations.OfType<IInterfaceImplementationIntroduction>() )
+            {
+                var introducedInterfaces = interfaceIntroduction.GetIntroducedInterfaceImplementations();
+
+                introducedCollection.Add( interfaceIntroduction, introducedInterfaces );
             }
 
             // Group diagnostic suppressions by target.
@@ -109,7 +117,7 @@ namespace Caravela.Framework.Impl.Linking
 
             // Process syntax trees one by one.
             var intermediateCompilation = input.InitialCompilation;
-            Rewriter addIntroducedElementsRewriter = new( introducedMemberCollection, suppressionsByTarget, input.CompilationModel );
+            Rewriter addIntroducedElementsRewriter = new( introducedCollection, suppressionsByTarget, input.CompilationModel );
 
             foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees )
             {
@@ -133,7 +141,7 @@ namespace Caravela.Framework.Impl.Linking
                 input.CompilationModel,
                 intermediateCompilation.Compilation,
                 syntaxTreeMapping,
-                introducedMemberCollection.IntroducedMembers );
+                introducedCollection.IntroducedMembers );
 
             return new LinkerIntroductionStepOutput( diagnostics.ToImmutable(), intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
         }

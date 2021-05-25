@@ -111,6 +111,11 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
+        public static NameSyntax GetSyntaxTypeName( this IType type )
+        {
+            return (NameSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( type.GetSymbol() );
+        }
+
         public static TypeSyntax GetSyntaxReturnType( this IMethod method )
         {
             return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( method.ReturnType.GetSymbol() );

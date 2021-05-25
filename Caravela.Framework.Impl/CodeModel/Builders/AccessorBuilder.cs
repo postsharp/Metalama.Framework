@@ -155,6 +155,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             throw new NotSupportedException( "Cannot add generic parameters to accessors." );
         }
 
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
+
         [return: RunTimeOnly]
         public MethodInfo ToMethodInfo()
         {

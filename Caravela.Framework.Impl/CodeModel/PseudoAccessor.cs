@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IType ReturnType
             => this._semantic != AccessorSemantic.Get
-                ? ((CompilationModel) this._containingMember.Compilation).Factory.GetTypeByReflectionType( typeof(void) )
+                ? ((CompilationModel) this._containingMember.Compilation).Factory.GetTypeByReflectionType( typeof( void ) )
                 : ((IProperty) this._containingMember).Type;
 
         [Memo]
@@ -109,6 +109,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public dynamic Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
+
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
 
         [return: RunTimeOnly]
         public MemberInfo ToMemberInfo()

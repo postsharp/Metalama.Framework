@@ -1,0 +1,14 @@
+﻿[TestOutput]
+[Introduction]
+public class TargetClass : IInterface
+{
+	void IInterface.InterfaceMethod()
+	{
+		this.InterfaceMethod();
+	}
+
+	public void InterfaceMethod()
+	{
+        Console.WriteLine("This is introduced interface method.");
+	}
+}

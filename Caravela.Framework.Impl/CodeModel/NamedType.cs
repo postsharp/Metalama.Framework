@@ -190,14 +190,24 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.Factory.GetNamedType( this.TypeSymbol.BaseType );
 
         [Memo]
-        public IReadOnlyList<INamedType> ImplementedInterfaces
+        public IReadOnlyList<INamedType> AllImplementedInterfaces
             => // TODO: Correct order after concat and distinct?            
-            (this.BaseType?.ImplementedInterfaces ?? Enumerable.Empty<INamedType>())
+            (this.BaseType?.AllImplementedInterfaces ?? Enumerable.Empty<INamedType>())
             .Concat(
                 this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
                 .Concat( this.Compilation.GetObservableTransformationsOnElement( this )
                          .OfType<IntroducedInterface>()
                          .Select( i => i.InterfaceType ) ) ) 
+            .Distinct() // Remove duplicates (reimplementations of earlier interface by aspect).
+            .ToImmutableArray();
+
+        [Memo]
+        public IReadOnlyList<INamedType> ImplementedInterfaces
+            => // TODO: Correct order after concat and distinct?            
+            this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
+            .Concat( this.Compilation.GetObservableTransformationsOnElement( this )
+                        .OfType<IntroducedInterface>()
+                        .Select( i => i.InterfaceType ) )
             .Distinct() // Remove duplicates (reimplementations of earlier interface by aspect).
             .ToImmutableArray();
 

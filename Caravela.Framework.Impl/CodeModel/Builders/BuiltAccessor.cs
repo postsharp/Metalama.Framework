@@ -85,6 +85,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IMethod IDeclarationRef<IMethod>.GetForCompilation( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
 
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
+
         [return: RunTimeOnly]
         public MethodInfo ToMethodInfo()
         {

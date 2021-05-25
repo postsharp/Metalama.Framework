@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Project;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -53,6 +54,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public dynamic Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         IFieldOrPropertyInvocation IFieldOrProperty.Base => throw new NotImplementedException();
+
+        // TODO: When an interface is introduced, explicit implementation should appear here.
+        public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => Array.Empty<IProperty>();
 
         public dynamic GetIndexerValue( dynamic? instance, params dynamic[] args )
         {

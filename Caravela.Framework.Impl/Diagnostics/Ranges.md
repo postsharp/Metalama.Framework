@@ -1,9 +1,10 @@
 # Diagnostic Ranges
 
-| Range   | Category
-|---------+--------------------------------
-| 000-099 | General
-| 100-199 | Templating
-| 200-299 | Syntax Serialization
-| 300-319 | Design-Time
-| 400-499 | Attribute deserialization
+| Range     | Category
+|-----------+--------------------------------
+| 0000-0099 | General
+| 0100-0199 | Templating
+| 0200-0299 | Syntax Serialization
+| 0300-0319 | Design-Time
+| 0400-0499 | Attribute deserialization
+| 1000-1999 | Advices

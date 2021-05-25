@@ -76,13 +76,12 @@ namespace Caravela.Framework.Impl.Transformations
     internal enum IntroducedMemberSemantic
     {
         Introduction,
-        MethodOverride,
-        PropertyOverride,
+        Override,
         GetterOverride,
         SetterOverride,
-        EventOverride,
         AdderOverride,
         RemoverOverride,
-        RaiserOverride
+        RaiserOverride,
+        InterfaceImplementation,
     }
 }
