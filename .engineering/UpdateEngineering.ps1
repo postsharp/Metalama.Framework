@@ -27,14 +27,14 @@ If ( $LastExitCode -Ne 0 ) {
 # Clean-up existing links or copies of linked files. This also solves issues with invalid merges or updates,
 # where a link file is replaced by a file containing the original target path.
 # Keep this clean-up part up to date, so that this script can be executed on any repository in any state.
-[System.IO.File].Delete( ".\.editorconfig" )
-[System.IO.File].Delete( ".\Directory.Build.props" )
-[System.IO.File].Delete( ".\Directory.Build.targets" )
-[System.IO.File].Delete( ".\nuget.config" )
+Remove-Item ".\.editorconfig"
+Remove-Item ".\Directory.Build.props"
+Remove-Item ".\Directory.Build.targets"
+Remove-Item ".\nuget.config"
 
 Get-ChildItem ".\" -Filter "*.sln.DotSettings" | 
 Foreach-Object {
-    [System.IO.File].Delete( $_.FullName )
+    Remove-Item $_.FullName
 }
 
 # Link files.
