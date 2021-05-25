@@ -28,8 +28,6 @@ namespace Caravela.Framework.Impl.Advices
 
         internal IReadOnlyList<IAdvice> Advices => this._advices;
 
-        public Dictionary<string, object?> Tags { get; } = new( StringComparer.Ordinal );
-
         public AdviceFactory( CompilationModel compilation, IDiagnosticAdder diagnosticAdder, INamedType aspectType, AspectInstance aspect )
         {
             this._aspectType = aspectType;
@@ -115,12 +113,12 @@ namespace Caravela.Framework.Impl.Advices
             return this._compilation.Factory.GetProperty( property );
         }
 
-        public IOverrideMethodAdvice OverrideMethod( IMethod targetMethod, string defaultTemplate, AspectLinkerOptions? aspectLinkerOptions = null )
+        public void OverrideMethod( IMethod targetMethod, string defaultTemplate, AdviceOptions? options = null )
         {
             var diagnosticList = new DiagnosticList();
             var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof(OverrideMethodTemplateAttribute), nameof(this.OverrideMethod) );
 
-            var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, this.Tags.ToImmutableDictionary(), aspectLinkerOptions );
+            var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, options );
             advice.Initialize( diagnosticList );
             this._advices.Add( advice );
 
@@ -133,16 +131,14 @@ namespace Caravela.Framework.Impl.Advices
             }
 
             this._diagnosticAdder.Report( diagnosticList );
-
-            return advice;
         }
 
-        public IIntroduceMethodAdvice IntroduceMethod(
+        public IMethodBuilder IntroduceMethod(
             INamedType targetType,
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             var diagnosticList = new DiagnosticList();
             var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof(IntroduceMethodTemplateAttribute), nameof(this.IntroduceMethod) );
@@ -153,8 +149,7 @@ namespace Caravela.Framework.Impl.Advices
                 templateMethod,
                 scope,
                 conflictBehavior,
-                aspectLinkerOptions,
-                this.Tags.ToImmutableDictionary() );
+                options );
 
             advice.Initialize( diagnosticList );
             this._advices.Add( advice );
@@ -168,13 +163,13 @@ namespace Caravela.Framework.Impl.Advices
 
             this._diagnosticAdder.Report( diagnosticList );
 
-            return advice;
+            return advice.Builder;
         }
 
-        public IOverrideFieldOrPropertyAdvice OverrideFieldOrProperty(
+        public void OverrideFieldOrProperty(
             IFieldOrProperty targetDeclaration,
             string defaultTemplate,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
@@ -190,20 +185,17 @@ namespace Caravela.Framework.Impl.Advices
                 templateProperty,
                 null,
                 null,
-                this.Tags.ToImmutableDictionary(),
-                aspectLinkerOptions );
+                options );
 
             advice.Initialize( diagnosticList );
             this._advices.Add( advice );
-
-            return advice;
         }
 
-        public IOverrideFieldOrPropertyAdvice OverrideFieldOrPropertyAccessors(
+        public void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
-            string? defaultGetTemplate,
+            string defaultGetTemplate,
             string? setTemplate,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
@@ -224,30 +216,27 @@ namespace Caravela.Framework.Impl.Advices
                 null,
                 getTemplateMethod,
                 setTemplateMethod,
-                this.Tags.ToImmutableDictionary(),
-                aspectLinkerOptions );
+                options );
 
             advice.Initialize( diagnosticList );
             this._advices.Add( advice );
-
-            return advice;
         }
 
-        public IIntroduceFieldAdvice IntroduceField(
+        public IFieldBuilder IntroduceField(
             INamedType targetType,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             throw new NotImplementedException();
         }
 
-        public IIntroducePropertyAdvice IntroduceProperty(
+        public IPropertyBuilder IntroduceProperty(
             INamedType targetType,
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             var diagnosticList = new DiagnosticList();
 
@@ -265,23 +254,22 @@ namespace Caravela.Framework.Impl.Advices
                 null,
                 scope,
                 conflictBehavior,
-                this.Tags.ToImmutableDictionary(),
-                aspectLinkerOptions );
+                options );
 
             advice.Initialize( diagnosticList );
             this._advices.Add( advice );
 
-            return advice;
+            return advice.Builder;
         }
 
-        public IIntroducePropertyAdvice IntroduceProperty(
+        public IPropertyBuilder IntroduceProperty(
             INamedType targetType,
             string name,
-            string? defaultGetTemplate,
+            string defaultGetTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             var diagnosticList = new DiagnosticList();
 
@@ -304,33 +292,32 @@ namespace Caravela.Framework.Impl.Advices
                 setTemplateMethod,
                 scope,
                 conflictBehavior,
-                this.Tags.ToImmutableDictionary(),
-                aspectLinkerOptions );
+                options );
 
             advice.Initialize( diagnosticList );
             this._advices.Add( advice );
 
-            return advice;
+            return advice.Builder;
         }
 
-        public IOverrideEventAdvice OverrideEventAccessors(
+        public void OverrideEventAccessors(
             IEvent targetDeclaration,
             string? addTemplate,
             string? removeTemplate,
             string? invokeTemplate,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             throw new NotImplementedException();
         }
 
-        public IIntroducePropertyAdvice IntroduceEvent(
+        public IEventBuilder IntroduceEvent(
             INamedType targetType,
-            string? addTemplate,
-            string? removeTemplate,
+            string addTemplate,
+            string removeTemplate,
             string? invokeTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AspectLinkerOptions? aspectLinkerOptions = null )
+            AdviceOptions? options = null )
         {
             throw new NotImplementedException();
         }

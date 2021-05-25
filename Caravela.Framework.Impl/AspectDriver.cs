@@ -55,15 +55,14 @@ namespace Caravela.Framework.Impl
         }
 
         private AspectInstanceResult EvaluateAspect<T>( T declaration, AspectInstance aspect, CancellationToken cancellationToken )
-            where T : class, IAspectTarget
+            where T : class, IDeclaration
         {
             static AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
                 => new(
                     false,
                     new ImmutableUserDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<IAdvice>.Empty,
-                    ImmutableArray<IAspectSource>.Empty,
-                    ImmutableDictionary<string, object?>.Empty );
+                    ImmutableArray<IAspectSource>.Empty );
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -104,8 +103,7 @@ namespace Caravela.Framework.Impl
                             false,
                             new ImmutableUserDiagnosticList( e.Diagnostics, ImmutableArray<ScopedSuppression>.Empty ),
                             ImmutableArray<IAdvice>.Empty,
-                            ImmutableArray<IAspectSource>.Empty,
-                            ImmutableDictionary<string, object?>.Empty );
+                            ImmutableArray<IAspectSource>.Empty );
                 }
                 catch ( Exception e )
                 {

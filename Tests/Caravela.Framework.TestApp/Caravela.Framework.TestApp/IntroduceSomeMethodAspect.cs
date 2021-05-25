@@ -22,8 +22,8 @@ namespace Caravela.Framework.TestApp
         {
             foreach ( var methodName in this._methodNames )
             {
-                var advice = aspectBuilder.AdviceFactory.IntroduceMethod( aspectBuilder.TargetDeclaration, nameof( SomeIntroducedMethod ) );
-                advice.Builder.Name = methodName;
+                var method = aspectBuilder.AdviceFactory.IntroduceMethod( aspectBuilder.TargetDeclaration, nameof( SomeIntroducedMethod ) );
+                method.Name = methodName;
             }
         }
 

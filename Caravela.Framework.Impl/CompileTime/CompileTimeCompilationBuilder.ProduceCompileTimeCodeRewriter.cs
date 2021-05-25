@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CompileTime
     internal partial class CompileTimeCompilationBuilder
     {
 #pragma warning disable CA1001 // Class must be disposable.
-        
+
         /// <summary>
         /// Rewrites a run-time syntax tree into a compile-time syntax tree. Calls <see cref="TemplateCompiler"/> on templates,
         /// and removes run-time-only sub trees.

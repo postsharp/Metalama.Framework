@@ -12,7 +12,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programm
     {
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            var advice = builder.AdviceFactory.OverrideMethod(builder.TargetDeclaration.Methods.OfName("TargetMethod").Single(), nameof(Template));
+            builder.AdviceFactory.OverrideMethod(builder.TargetDeclaration.Methods.OfName("TargetMethod").Single(), nameof(Template));
         }
 
         public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }

@@ -157,17 +157,16 @@ namespace Caravela.Framework.Aspects
         public static IDiagnosticSink Diagnostics => CurrentContext.Diagnostics;
 
         /// <summary>
-        /// Gets the dictionary of tags that were configured by the <see cref="IAspect{T}.BuildAspect"/> method using 
-        /// <see cref="IAspectBuilder.Tags"/>. This property returns an immutable snapshot of the dictionary in the state it was
-        /// when the advice was created by <see cref="IAdviceFactory"/>.
+        /// Gets the dictionary of tags that were passed by the <see cref="IAspect{T}.BuildAspect"/> method using 
+        /// <see cref="AdviceOptions.Tags"/>.
         /// </summary>
         public static IReadOnlyDictionary<string, object?> Tags => CurrentContext.Tags;
 
         /// <summary>
-        /// Gets the list of aspect markers related to the current aspect instance.
+        /// Gets the list of aspect aspects that have required the current aspect.
         /// </summary>
         [Obsolete( "Not implemented." )]
-        public static IReadOnlyList<IAspectMarkerInstance> Markers => throw new NotImplementedException();
+        public static IReadOnlyList<IAspectInstance> UpstreamAspects => throw new NotImplementedException();
 
         /// <summary>
         /// Injects a comment to the target code.

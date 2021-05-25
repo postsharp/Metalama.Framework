@@ -17,13 +17,13 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
             //}
 
             {
-                var advice = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, nameof(Property));
-                advice.Builder.Accessibility = Accessibility.Public;
+                var property = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, nameof(Property));
+                property.Accessibility = Accessibility.Public;
             }
 
             {
-                var advice = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, "PropertyFromAccessors", nameof(GetPropertyTemplate), nameof(SetPropertyTemplate) );
-                advice.Builder.Accessibility = Accessibility.Public;
+                var property = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, "PropertyFromAccessors", nameof(GetPropertyTemplate), nameof(SetPropertyTemplate) );
+                property.Accessibility = Accessibility.Public;
             }
 
             // TODO: Expression bodied template.

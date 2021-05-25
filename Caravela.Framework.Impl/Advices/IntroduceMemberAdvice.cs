@@ -7,7 +7,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
@@ -21,8 +20,6 @@ namespace Caravela.Framework.Impl.Advices
 
         public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
-        public AspectLinkerOptions? LinkerOptions { get; }
-
         protected TBuilder MemberBuilder { get; init; }
 
         protected IMemberOrNamedType? TemplateMember { get; }
@@ -33,13 +30,11 @@ namespace Caravela.Framework.Impl.Advices
             IMemberOrNamedType? templateMember,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
-            IReadOnlyDictionary<string, object?> tags,
-            AspectLinkerOptions? linkerOptions ) : base( aspect, targetDeclaration, tags )
+            AdviceOptions? options ) : base( aspect, targetDeclaration, options )
         {
             this.TemplateMember = templateMember;
             this.Scope = scope;
             this.ConflictBehavior = conflictBehavior;
-            this.LinkerOptions = linkerOptions;
 
             // This is to make the nullability analyzer happy. Derived classes are supposed to set this member in the
             // constructor. Other designs are more cumbersome.

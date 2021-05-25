@@ -7,7 +7,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Accessibility = Caravela.Framework.Code.Accessibility;
@@ -43,7 +42,7 @@ namespace Caravela.Framework.Impl.Advices
             var aspectLinkerOptionsAttribute = template.Attributes.FirstOrDefault(
                 x => x.Type == x.Compilation.TypeFactory.GetTypeByReflectionType( typeof(AspectLinkerOptionsAttribute) ) );
 
-            AspectLinkerOptions? aspectLinkerOptions = null;
+            var adviceOptions = AdviceOptions.Default;
 
             if ( aspectLinkerOptionsAttribute != null )
             {
@@ -56,7 +55,7 @@ namespace Caravela.Framework.Impl.Advices
                     forceNotInlineable = (bool) forceNotInlineableValue.Value.AssertNotNull();
                 }
 
-                aspectLinkerOptions = AspectLinkerOptions.Create( forceNotInlineable );
+                adviceOptions = adviceOptions.WithLinkerOptions( forceNotInlineable );
             }
 
             switch ( attribute.AttributeClass?.Name )
@@ -72,8 +71,7 @@ namespace Caravela.Framework.Impl.Advices
                             (IMethod) template,
                             scope,
                             conflictBehavior,
-                            aspectLinkerOptions,
-                            ImmutableDictionary<string, object?>.Empty );
+                            adviceOptions );
 
                         advice.Initialize( diagnosticAdder );
 
@@ -114,8 +112,7 @@ namespace Caravela.Framework.Impl.Advices
                             null,
                             scope,
                             conflictBehavior,
-                            ImmutableDictionary<string, object?>.Empty,
-                            aspectLinkerOptions );
+                            adviceOptions );
 
                         advice.Initialize( diagnosticAdder );
 

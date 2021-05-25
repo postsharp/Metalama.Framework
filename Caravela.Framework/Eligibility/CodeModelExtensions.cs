@@ -12,8 +12,8 @@ namespace Caravela.Framework.Eligibility
     [Obsolete( "Not implemented." )]
     public static class CodeModelExtensions
     {
-        public static EligibilityValue GetEligibility<T>( this IAspectTarget declaration )
-            where T : IAspect<IAspectTarget>
+        public static EligibilityValue GetEligibility<T>( this IDeclaration declaration )
+            where T : IAspect<IDeclaration>
             => throw new NotImplementedException();
 
         public static EligibilityValue GetEligibility<T>( this IMethod declaration )

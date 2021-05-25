@@ -7,7 +7,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using System;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -26,11 +25,10 @@ namespace Caravela.Framework.Impl.Advices
             string name,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
-            AspectLinkerOptions? linkerOptions,
-            IReadOnlyDictionary<string, object?> tags )
-            : base( aspect, targetDeclaration, null, scope, conflictBehavior, tags, linkerOptions )
+            AdviceOptions? options )
+            : base( aspect, targetDeclaration, null, scope, conflictBehavior, options )
         {
-            this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, name, linkerOptions );
+            this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, name, options?.LinkerOptions );
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )

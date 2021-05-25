@@ -12,34 +12,34 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             {
-                var advice = builder.AdviceFactory.IntroduceMethod(builder.TargetDeclaration, nameof(Template));
-                advice.Builder.Name = "IntroducedMethod_Parameters";
-                advice.Builder.AddParameter("x", typeof(int));
-                advice.Builder.AddParameter("y", typeof(int));
+                var introduced = builder.AdviceFactory.IntroduceMethod(builder.TargetDeclaration, nameof(Template));
+                introduced.Name = "IntroducedMethod_Parameters";
+                introduced.AddParameter("x", typeof(int));
+                introduced.AddParameter("y", typeof(int));
             }
 
             {
-                var advice = builder.AdviceFactory.IntroduceMethod(builder.TargetDeclaration, nameof(Template));
-                advice.Builder.Name = "IntroducedMethod_ReturnType";
-                advice.Builder.ReturnType = advice.Builder.Compilation.TypeFactory.GetTypeByReflectionType(typeof(int));
+                var introduced = builder.AdviceFactory.IntroduceMethod(builder.TargetDeclaration, nameof(Template));
+                introduced.Name = "IntroducedMethod_ReturnType";
+                introduced.ReturnType = introduced.Compilation.TypeFactory.GetTypeByReflectionType(typeof(int));
             }
 
             {
-                var advice = builder.AdviceFactory.IntroduceMethod(builder.TargetDeclaration, nameof(Template));
-                advice.Builder.Name = "IntroducedMethod_Accessibility";
-                advice.Builder.Accessibility = Accessibility.Private;
+                var introduced = builder.AdviceFactory.IntroduceMethod(builder.TargetDeclaration, nameof(Template));
+                introduced.Name = "IntroducedMethod_Accessibility";
+                introduced.Accessibility = Accessibility.Private;
             }
 
             {
-                var advice = builder.AdviceFactory.IntroduceMethod(builder.TargetDeclaration, nameof(Template));
-                advice.Builder.Name = "IntroducedMethod_IsStatic";
-                advice.Builder.IsStatic = true;
+                var introduced = builder.AdviceFactory.IntroduceMethod(builder.TargetDeclaration, nameof(Template));
+                introduced.Name = "IntroducedMethod_IsStatic";
+                introduced.IsStatic = true;
             }
 
             {
-                var advice = builder.AdviceFactory.IntroduceMethod(builder.TargetDeclaration, nameof(Template));
-                advice.Builder.Name = "IntroducedMethod_IsVirtual";
-                advice.Builder.IsVirtual = true;
+                var introduced = builder.AdviceFactory.IntroduceMethod(builder.TargetDeclaration, nameof(Template));
+                introduced.Name = "IntroducedMethod_IsVirtual";
+                introduced.IsVirtual = true;
             }
 
             // TODO: Other members.

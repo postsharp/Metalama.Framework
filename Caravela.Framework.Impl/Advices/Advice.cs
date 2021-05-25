@@ -5,7 +5,6 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -19,18 +18,17 @@ namespace Caravela.Framework.Impl.Advices
 
         public AspectLayerId AspectLayerId { get; }
 
-        public string? LayerName { get; set; }
+        public string? LayerName { get; }
 
-        /// <summary>
-        /// Gets a read-only of tags set by <see cref="IAspectBuilder.Tags"/>.
-        /// </summary>
-        public IReadOnlyDictionary<string, object?> AspectBuilderTags { get; }
+        public AdviceOptions Options { get; }
 
-        protected Advice( AspectInstance aspect, IDeclaration targetDeclaration, IReadOnlyDictionary<string, object?> aspectTags )
+        public AspectLinkerOptions? LinkerOptions => this.Options.LinkerOptions;
+
+        protected Advice( AspectInstance aspect, IDeclaration targetDeclaration, AdviceOptions? options )
         {
+            this.Options = options ?? AdviceOptions.Default;
             this.Aspect = aspect;
             this.TargetDeclaration = targetDeclaration.AssertNotNull();
-            this.AspectBuilderTags = aspectTags;
             this.AspectLayerId = new AspectLayerId( this.Aspect.AspectClass, this.LayerName );
         }
 

@@ -6,7 +6,6 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -14,19 +13,15 @@ namespace Caravela.Framework.Impl.Advices
     {
         public IMethod TemplateMethod { get; }
 
-        public AspectLinkerOptions? LinkerOptions { get; }
-
         public new IMethod TargetDeclaration => (IMethod) base.TargetDeclaration;
 
         public OverrideMethodAdvice(
             AspectInstance aspect,
             IMethod targetDeclaration,
             IMethod templateMethod,
-            IReadOnlyDictionary<string, object?> tags,
-            AspectLinkerOptions? linkerOptions ) : base( aspect, targetDeclaration, tags )
+            AdviceOptions? options ) : base( aspect, targetDeclaration, options )
         {
             this.TemplateMethod = templateMethod;
-            this.LinkerOptions = linkerOptions;
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }

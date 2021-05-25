@@ -4,7 +4,7 @@
 namespace Caravela.Framework.Eligibility.Implementation
 {
 #pragma warning disable 618 // Not implemented.
-    
+
     internal class InheritanceOnlyEligibilityBuilder<T> : IEligibilityBuilder<T>
     {
         private readonly IEligibilityBuilder<T> _inner;

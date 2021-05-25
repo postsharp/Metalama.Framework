@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
@@ -35,9 +34,8 @@ namespace Caravela.Framework.Impl.Advices
             IMethod? setTemplateMethod,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
-            IReadOnlyDictionary<string, object?> tags,
-            AspectLinkerOptions? linkerOptions )
-            : base( aspect, targetDeclaration, templateProperty, scope, conflictBehavior, tags, linkerOptions )
+            AdviceOptions? options )
+            : base( aspect, targetDeclaration, templateProperty, scope, conflictBehavior, options )
         {
             this._getTemplateMethod = getTemplateMethod;
             this._setTemplateMethod = setTemplateMethod;
@@ -54,7 +52,7 @@ namespace Caravela.Framework.Impl.Advices
                 hasSet,
                 this.TemplateMember != null && IsAutoProperty( this.TemplateMember ),
                 this.TemplateMember != null && HasInitOnlySetter( this.TemplateMember ),
-                linkerOptions );
+                options?.LinkerOptions );
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )
