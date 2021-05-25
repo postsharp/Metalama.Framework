@@ -9,13 +9,15 @@ $random = "$random1$random2"
 
 $props = "<Project><PropertyGroup><LocalBuildId>$random</LocalBuildId></PropertyGroup></Project>"
 
-del "artifacts\bin\Debug\*.nupkg"
+Remove-Item "..\artifacts\bin\Debug\*.nupkg"
 
-if ( Test-Path LocalBuildId.props ) {
-    Remove-Item LocalBuildId.props
+$LocalBuildIdProps = "..\LocalBuildId.props";
+
+if ( Test-Path $LocalBuildIdProps ) {
+    Remove-Item $LocalBuildIdProps
 }
 
-New-Item LocalBuildId.props -Value $props | Out-Null
+New-Item $LocalBuildIdProps -Value $props | Out-Null
 
 & dotnet pack
-& "$PSScriptRoot\kill.ps1"
+& kill.ps1

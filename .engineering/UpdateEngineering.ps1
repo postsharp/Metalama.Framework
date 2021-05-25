@@ -18,7 +18,7 @@ If ( ( Test-Path -Path $EngineeringDirectory ) ) {
     $SubtreeCommand = "add"
 }
 
-git subtree $SubtreeCommand --prefix $EngineeringDirectory https://postsharp@dev.azure.com/postsharp/Caravela/_git/Caravela.Engineering master --squash
+& git subtree $SubtreeCommand --prefix $EngineeringDirectory https://postsharp@dev.azure.com/postsharp/Caravela/_git/Caravela.Engineering master --squash
 
 If ( $LastExitCode -Ne 0 ) {
     throw "Failed to $SubtreeCommand subtree."
