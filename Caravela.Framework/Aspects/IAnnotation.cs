@@ -17,6 +17,8 @@ namespace Caravela.Framework.Aspects
     [Obsolete( "Not implemented." )]
     public interface IAnnotation { }
 
+    // ReSharper disable UnusedTypeParameter
+
     /// <summary>
     /// An annotation is an object that can be applied to a declaration and that provides information to an aspect.
     /// Annotations are exposed on the <see cref="IDeclaration.GetAnnotations{T}"/> property of the <see cref="IDeclaration"/> interface.
@@ -25,7 +27,7 @@ namespace Caravela.Framework.Aspects
     /// <typeparam name="TAspect">The type of aspects for which the annotation is meaningful.</typeparam>
     [CompileTimeOnly]
     [Obsolete( "Not implemented." )]
-    public interface IAnnotation<TTarget, TAspect> : IEligible<TTarget>, IAnnotation
+    public interface IAnnotation<in TTarget, TAspect> : IEligible<TTarget>, IAnnotation
         where TAspect : IAspect
         where TTarget : class, IDeclaration { }
 }

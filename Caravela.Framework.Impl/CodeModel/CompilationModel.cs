@@ -147,7 +147,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
         DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.Compilation;
 
-        public bool HasAspect<T>() where T : IAspect => throw new NotImplementedException();
+        public bool HasAspect<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
 
         [Obsolete( "Not implemented." )]
         public IAnnotationList GetAnnotations<T>()

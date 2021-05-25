@@ -17,16 +17,16 @@ namespace Caravela.Framework.Impl.Templating
     /// </summary>
     internal class TemplateMemberClassifier
     {
-        private readonly SemanticAnnotationMap _semanticAnnotationMap;
+        private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly ITypeSymbol _metaType;
         private readonly ISymbolClassifier _symbolClassifier;
 
         public TemplateMemberClassifier(
             Compilation compilation,
-            SemanticAnnotationMap semanticAnnotationMap,
+            SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
             IServiceProvider serviceProvider )
         {
-            this._semanticAnnotationMap = semanticAnnotationMap;
+            this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
             this._symbolClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
 
             var reflectionMapper = ReflectionMapper.GetInstance( compilation );
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Templating
 #pragma warning restore CA1822
 
         public bool IsDynamicParameter( ArgumentSyntax argument )
-            => this._semanticAnnotationMap.GetParameterSymbol( argument )?.Type is
+            => this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type is
                 IDynamicTypeSymbol
                 or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
 
@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.Templating
                symbol.ContainingType.GetDocumentationCommentId() == this._metaType.GetDocumentationCommentId();
 
         public bool IsRunTimeMethod( SyntaxNode node )
-            => this._semanticAnnotationMap.GetSymbol( node ) is IMethodSymbol symbol && this.IsRunTimeMethod( symbol );
+            => this._syntaxTreeAnnotationMap.GetSymbol( node ) is IMethodSymbol symbol && this.IsRunTimeMethod( symbol );
 
         /// <summary>
         /// Determines if a node is of <c>dynamic</c> type.
@@ -60,8 +60,8 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         public bool IsDynamicType( SyntaxNode originalNode )
         {
-            var expressionType = this._semanticAnnotationMap.GetExpressionType( originalNode );
-            var nodeSymbol = this._semanticAnnotationMap.GetSymbol( originalNode );
+            var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( originalNode );
+            var nodeSymbol = this._syntaxTreeAnnotationMap.GetSymbol( originalNode );
 
             if ( !this.IsCompileTime( nodeSymbol ) )
             {
@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.Templating
             else
             {
                 if ( originalNode is InvocationExpressionSyntax invocation
-                     && this._semanticAnnotationMap.GetSymbol( invocation.Expression ) is IMethodSymbol invokedMethod )
+                     && this._syntaxTreeAnnotationMap.GetSymbol( invocation.Expression ) is IMethodSymbol invokedMethod )
                 {
                     return invokedMethod.GetReturnTypeAttributes().Any( a => a.AttributeClass?.Name == nameof(RunTimeOnlyAttribute) );
                 }
@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             // TODO: This class and usages must be removed.
 
-            var symbol = this._semanticAnnotationMap.GetSymbol( node );
+            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
             if ( symbol == null )
             {
@@ -120,7 +120,7 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         public MetaMemberKind GetMetaMemberKind( SyntaxNode node )
         {
-            var symbol = this._semanticAnnotationMap.GetSymbol( node );
+            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
             return this.GetMetaMemberKind( symbol );
         }
@@ -151,7 +151,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( node.Identifier.Text == "value" )
             {
-                var symbol = this._semanticAnnotationMap.GetSymbol( node );
+                var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
                 return
                     symbol is IParameterSymbol parameter && parameter.ContainingSymbol is IMethodSymbol method

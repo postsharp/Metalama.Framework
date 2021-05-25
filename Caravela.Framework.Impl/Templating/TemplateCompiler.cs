@@ -16,14 +16,14 @@ namespace Caravela.Framework.Impl.Templating
         public const string TemplateMethodSuffix = "_Template";
 
         private readonly IServiceProvider _serviceProvider;
-        private readonly SemanticAnnotationMap _semanticAnnotationMap = new();
+        private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap = new();
 
         public TemplateCompiler( IServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }
 
-        public ILocationAnnotationMap LocationAnnotationMap => this._semanticAnnotationMap;
+        public ILocationAnnotationMapBuilder LocationAnnotationMap => this._syntaxTreeAnnotationMap;
 
         public bool TryAnnotate(
             SyntaxNode sourceSyntaxRoot,
@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // Annotate the syntax tree with symbols.
-            currentSyntaxRoot = this._semanticAnnotationMap.AnnotateTree( sourceSyntaxRoot, semanticModel );
+            currentSyntaxRoot = this._syntaxTreeAnnotationMap.AnnotateTemplate( sourceSyntaxRoot, semanticModel );
 
             FixupTreeForDiagnostics();
 
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Templating
             // Annotate the syntax tree with info about build- and run-time nodes,
             var annotatorRewriter = new TemplateAnnotator(
                 (CSharpCompilation) semanticModel.Compilation,
-                this._semanticAnnotationMap,
+                this._syntaxTreeAnnotationMap,
                 diagnostics,
                 this._serviceProvider,
                 cancellationToken );
@@ -106,7 +106,7 @@ namespace Caravela.Framework.Impl.Templating
             var templateCompilerRewriter = new TemplateCompilerRewriter(
                 templateName,
                 compileTimeCompilation,
-                this._semanticAnnotationMap,
+                this._syntaxTreeAnnotationMap,
                 diagnostics,
                 this._serviceProvider,
                 cancellationToken );

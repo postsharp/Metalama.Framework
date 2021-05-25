@@ -407,7 +407,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 manifest,
                 assemblyPath,
                 sourceDirectory,
-                TextMap.Read );
+                cs => TextMapFile.Read( Path.ChangeExtension( cs, ".map" ) ) );
 
             return true;
         }
