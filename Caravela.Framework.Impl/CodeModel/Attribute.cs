@@ -84,6 +84,9 @@ namespace Caravela.Framework.Impl.CodeModel
             where T : IAspect
             => throw new NotImplementedException();
 
-        public IAnnotationList GetAnnotations<T>() where T : IAspect => throw new NotImplementedException();
+        [Obsolete( "Not implemented." )]
+        public IAnnotationList GetAnnotations<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
     }
 }
