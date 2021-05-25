@@ -13,13 +13,4 @@ namespace Caravela.Framework.Impl.Templating
     {
         Location? GetLocation( SyntaxNodeOrToken node );
     }
-
-    public interface ILocationAnnotationMapBuilder : ILocationAnnotationMap
-    {
-        SyntaxNode AddLocationAnnotation( SyntaxNode originalNode, SyntaxNode transformedNode );
-
-        SyntaxToken AddLocationAnnotation( SyntaxToken originalToken );
-
-        SyntaxNode AddLocationAnnotationsRecursive( SyntaxNode node );
-    }
 }
