@@ -43,6 +43,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public DeclarationKind DeclarationKind => this._parameter.DeclarationKind;
 
+        public bool HasAspect<T>() where T : IAspect => throw new NotImplementedException();
+
+        public IAnnotationList GetAnnotations<T>() where T : IAspect => throw new NotImplementedException();
+
         public ICompilation Compilation => this._parameter.Compilation;
 
         public dynamic Value

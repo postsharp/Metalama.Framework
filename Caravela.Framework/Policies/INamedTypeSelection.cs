@@ -12,9 +12,9 @@ namespace Caravela.Framework.Policies
     /// using <see cref="WithMembers{T}"/>.
     /// </summary>
     [Obsolete( "Not implemented." )]
-    public interface INamedTypeSet : IAspectTargetSet<INamedType>
+    public interface INamedTypeSelection : IDeclarationSelection<INamedType>
     {
-        IAspectTargetSet<T> WithMembers<T>( Func<INamedType, IEnumerable<T>> selector )
+        IDeclarationSelection<T> WithMembers<T>( Func<INamedType, IEnumerable<T>> selector )
             where T : class, IDeclaration;
     }
 }

@@ -16,7 +16,7 @@ namespace Caravela.Framework.Policies
 
         // The builder intentionally does not give access to the INamespace because they must be compilation-neutral.
 
-        INamedTypeSet WithTypes( Func<INamespace, IEnumerable<INamedType>> typeQuery );
+        INamedTypeSelection WithTypes( Func<INamespace, IEnumerable<INamedType>> typeQuery );
 
         void AddValidator( Action<ValidateDeclarationContext<INamespace>> validator );
 
