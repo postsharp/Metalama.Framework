@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
@@ -15,12 +14,13 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal static class AdviceAttributeFactory
     {
-        public static IAdvice CreateAdvice<T>(
+        public static Advice CreateAdvice<T>(
             this AttributeData attribute,
             AspectInstance aspect,
             IDiagnosticAdder diagnosticAdder,
-            T declaration,
-            IDeclaration template )
+            T aspectTargetDeclaration,
+            IDeclaration templateDeclaration,
+            string? layerName )
             where T : IDeclaration
         {
             var namedArguments = attribute.NamedArguments.ToDictionary( p => p.Key, p => p.Value );
@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Advices
                 return false;
             }
 
-            var aspectLinkerOptionsAttribute = template.Attributes.FirstOrDefault(
+            var aspectLinkerOptionsAttribute = templateDeclaration.Attributes.FirstOrDefault(
                 x => x.Type == x.Compilation.TypeFactory.GetTypeByReflectionType( typeof(AspectLinkerOptionsAttribute) ) );
 
             var adviceOptions = AdviceOptions.Default;
@@ -60,80 +60,72 @@ namespace Caravela.Framework.Impl.Advices
 
             switch ( attribute.AttributeClass?.Name )
             {
-                case nameof(IntroduceMethodAttribute):
+                case nameof(IntroduceAttribute):
                     {
-                        TryGetNamedArgument<IntroductionScope>( nameof(IntroduceMethodAttribute.Scope), out var scope );
-                        TryGetNamedArgument<ConflictBehavior>( nameof(IntroduceMethodAttribute.ConflictBehavior), out var conflictBehavior );
+                        TryGetNamedArgument<IntroductionScope>( nameof(IntroduceAttribute.Scope), out var scope );
+                        TryGetNamedArgument<ConflictBehavior>( nameof(IntroduceAttribute.ConflictBehavior), out var conflictBehavior );
+                        IMemberBuilder builder;
+                        Advice advice;
 
-                        var advice = new IntroduceMethodAdvice(
-                            aspect,
-                            (INamedType) declaration,
-                            (IMethod) template,
-                            scope,
-                            conflictBehavior,
-                            adviceOptions );
+                        switch ( templateDeclaration )
+                        {
+                            case IMethod templateMethod:
+                                var introduceMethodAdvice = new IntroduceMethodAdvice(
+                                    aspect,
+                                    (INamedType) aspectTargetDeclaration,
+                                    templateMethod,
+                                    scope,
+                                    conflictBehavior,
+                                    layerName,
+                                    adviceOptions );
+
+                                advice = introduceMethodAdvice;
+                                builder = introduceMethodAdvice.Builder;
+
+                                break;
+
+                            case IProperty templateProperty:
+                                var introducePropertyAdvice = new IntroducePropertyAdvice(
+                                    aspect,
+                                    (INamedType) aspectTargetDeclaration,
+                                    templateProperty,
+                                    null,
+                                    null,
+                                    null,
+                                    scope,
+                                    conflictBehavior,
+                                    layerName,
+                                    adviceOptions );
+
+                                advice = introducePropertyAdvice;
+                                builder = introducePropertyAdvice.Builder;
+
+                                break;
+
+                            default:
+                                throw new AssertionFailedException();
+                        }
 
                         advice.Initialize( diagnosticAdder );
 
-                        if ( TryGetNamedArgument<string>( nameof(IntroduceMethodAttribute.Name), out var name ) )
+                        if ( TryGetNamedArgument<string>( nameof(IntroduceAttribute.Name), out var name ) )
                         {
-                            advice.Builder.Name = name;
+                            builder.Name = name;
                         }
 
-                        if ( TryGetNamedArgument<bool>( nameof(IntroduceMethodAttribute.IsVirtual), out var isVirtual ) )
+                        if ( TryGetNamedArgument<bool>( nameof(IntroduceAttribute.IsVirtual), out var isVirtual ) )
                         {
-                            advice.Builder.IsVirtual = isVirtual;
+                            builder.IsVirtual = isVirtual;
                         }
 
-                        if ( TryGetNamedArgument<bool>( nameof(IntroduceMethodAttribute.IsSealed), out var isSealed ) )
+                        if ( TryGetNamedArgument<bool>( nameof(IntroduceAttribute.IsSealed), out var isSealed ) )
                         {
-                            advice.Builder.IsSealed = isSealed;
+                            builder.IsSealed = isSealed;
                         }
 
-                        if ( TryGetNamedArgument<Accessibility>( nameof(IntroduceMethodAttribute.Accessibility), out var accessibility ) )
+                        if ( TryGetNamedArgument<Accessibility>( nameof(IntroduceAttribute.Accessibility), out var accessibility ) )
                         {
-                            advice.Builder.Accessibility = accessibility;
-                        }
-
-                        return advice;
-                    }
-
-                case nameof(IntroducePropertyAttribute):
-                    {
-                        TryGetNamedArgument<IntroductionScope>( nameof(IntroduceMethodAttribute.Scope), out var scope );
-                        TryGetNamedArgument<ConflictBehavior>( nameof(IntroduceMethodAttribute.ConflictBehavior), out var conflictBehavior );
-
-                        var advice = new IntroducePropertyAdvice(
-                            aspect,
-                            (INamedType) declaration,
-                            (IProperty) template,
-                            null,
-                            null,
-                            null,
-                            scope,
-                            conflictBehavior,
-                            adviceOptions );
-
-                        advice.Initialize( diagnosticAdder );
-
-                        if ( TryGetNamedArgument<string>( nameof(IntroduceMethodAttribute.Name), out var name ) )
-                        {
-                            advice.Builder.Name = name;
-                        }
-
-                        if ( TryGetNamedArgument<bool>( nameof(IntroduceMethodAttribute.IsVirtual), out var isVirtual ) )
-                        {
-                            advice.Builder.IsVirtual = isVirtual;
-                        }
-
-                        if ( TryGetNamedArgument<bool>( nameof(IntroduceMethodAttribute.IsSealed), out var isSealed ) )
-                        {
-                            advice.Builder.IsSealed = isSealed;
-                        }
-
-                        if ( TryGetNamedArgument<Accessibility>( nameof(IntroduceMethodAttribute.Accessibility), out var accessibility ) )
-                        {
-                            advice.Builder.Accessibility = accessibility;
+                            builder.Accessibility = accessibility;
                         }
 
                         return advice;

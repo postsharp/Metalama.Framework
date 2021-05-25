@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
@@ -19,14 +18,15 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal class AdviceFactory : IAdviceFactory
     {
+        private const string? _layerName = null;
+
         private readonly CompilationModel _compilation;
         private readonly INamedType _aspectType;
         private readonly AspectInstance _aspect;
         private readonly IDiagnosticAdder _diagnosticAdder;
+        private readonly List<Advice> _advices = new();
 
-        private readonly List<IAdvice> _advices = new();
-
-        internal IReadOnlyList<IAdvice> Advices => this._advices;
+        internal IReadOnlyList<Advice> Advices => this._advices;
 
         public AdviceFactory( CompilationModel compilation, IDiagnosticAdder diagnosticAdder, INamedType aspectType, AspectInstance aspect )
         {
@@ -38,7 +38,6 @@ namespace Caravela.Framework.Impl.Advices
 
         private IMethod? GetTemplateMethod(
             string? methodName,
-            Type expectedAttributeType,
             string adviceName,
             [DoesNotReturnIf( true )] bool throwIfMissing = true )
         {
@@ -50,7 +49,7 @@ namespace Caravela.Framework.Impl.Advices
             // We do the search against the Roslyn compilation because it is cheaper.
 
             var members = this._aspectType.GetSymbol().GetMembers( methodName ).ToList();
-            var expectedAttributeTypeSymbol = this._compilation.ReflectionMapper.GetTypeSymbol( expectedAttributeType );
+            var expectedAttributeTypeSymbol = this._compilation.ReflectionMapper.GetTypeSymbol( typeof(TemplateAttribute) );
 
             if ( members.Count != 1 )
             {
@@ -79,14 +78,13 @@ namespace Caravela.Framework.Impl.Advices
 
         private IProperty? GetTemplateProperty(
             string propertyName,
-            Type expectedAttributeType,
             string adviceName,
             [DoesNotReturnIf( true )] bool throwIfMissing = true )
         {
             // We do the search against the Roslyn compilation because it is cheaper.
 
             var members = this._aspectType.GetSymbol().GetMembers( propertyName ).ToList();
-            var expectedAttributeTypeSymbol = this._compilation.ReflectionMapper.GetTypeSymbol( expectedAttributeType );
+            var expectedAttributeTypeSymbol = this._compilation.ReflectionMapper.GetTypeSymbol( typeof(TemplateAttribute) );
 
             if ( members.Count != 1 )
             {
@@ -116,9 +114,9 @@ namespace Caravela.Framework.Impl.Advices
         public void OverrideMethod( IMethod targetMethod, string defaultTemplate, AdviceOptions? options = null )
         {
             var diagnosticList = new DiagnosticList();
-            var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof(OverrideMethodTemplateAttribute), nameof(this.OverrideMethod) );
+            var templateMethod = this.GetTemplateMethod( defaultTemplate, nameof(this.OverrideMethod) );
 
-            var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, options );
+            var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, _layerName, options );
             advice.Initialize( diagnosticList );
             this._advices.Add( advice );
 
@@ -141,7 +139,7 @@ namespace Caravela.Framework.Impl.Advices
             AdviceOptions? options = null )
         {
             var diagnosticList = new DiagnosticList();
-            var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof(IntroduceMethodTemplateAttribute), nameof(this.IntroduceMethod) );
+            var templateMethod = this.GetTemplateMethod( defaultTemplate, nameof(this.IntroduceMethod) );
 
             var advice = new IntroduceMethodAdvice(
                 this._aspect,
@@ -149,6 +147,7 @@ namespace Caravela.Framework.Impl.Advices
                 templateMethod,
                 scope,
                 conflictBehavior,
+                _layerName,
                 options );
 
             advice.Initialize( diagnosticList );
@@ -176,7 +175,6 @@ namespace Caravela.Framework.Impl.Advices
 
             var templateProperty = this.GetTemplateProperty(
                 defaultTemplate,
-                typeof(OverrideFieldOrPropertyTemplateAttribute),
                 nameof(this.OverrideFieldOrProperty) );
 
             var advice = new OverrideFieldOrPropertyAdvice(
@@ -185,6 +183,7 @@ namespace Caravela.Framework.Impl.Advices
                 templateProperty,
                 null,
                 null,
+                _layerName,
                 options );
 
             advice.Initialize( diagnosticList );
@@ -202,12 +201,10 @@ namespace Caravela.Framework.Impl.Advices
 
             var getTemplateMethod = this.GetTemplateMethod(
                 defaultGetTemplate,
-                typeof(OverrideFieldOrPropertyGetTemplateAttribute),
                 nameof(this.OverrideFieldOrPropertyAccessors) );
 
             var setTemplateMethod = this.GetTemplateMethod(
                 setTemplate,
-                typeof(OverrideFieldOrPropertySetTemplateAttribute),
                 nameof(this.OverrideFieldOrPropertyAccessors) );
 
             var advice = new OverrideFieldOrPropertyAdvice(
@@ -216,6 +213,7 @@ namespace Caravela.Framework.Impl.Advices
                 null,
                 getTemplateMethod,
                 setTemplateMethod,
+                _layerName,
                 options );
 
             advice.Initialize( diagnosticList );
@@ -242,7 +240,6 @@ namespace Caravela.Framework.Impl.Advices
 
             var templateProperty = this.GetTemplateProperty(
                 defaultTemplate,
-                typeof(IntroducePropertyTemplateAttribute),
                 nameof(this.IntroduceProperty) );
 
             var advice = new IntroducePropertyAdvice(
@@ -254,6 +251,7 @@ namespace Caravela.Framework.Impl.Advices
                 null,
                 scope,
                 conflictBehavior,
+                _layerName,
                 options );
 
             advice.Initialize( diagnosticList );
@@ -275,12 +273,10 @@ namespace Caravela.Framework.Impl.Advices
 
             var getTemplateMethod = this.GetTemplateMethod(
                 defaultGetTemplate,
-                typeof(IntroducePropertyGetTemplateAttribute),
                 nameof(this.OverrideFieldOrPropertyAccessors) );
 
             var setTemplateMethod = this.GetTemplateMethod(
                 setTemplate,
-                typeof(IntroducePropertySetTemplateAttribute),
                 nameof(this.OverrideFieldOrPropertyAccessors) );
 
             var advice = new IntroducePropertyAdvice(
@@ -292,6 +288,7 @@ namespace Caravela.Framework.Impl.Advices
                 setTemplateMethod,
                 scope,
                 conflictBehavior,
+                _layerName,
                 options );
 
             advice.Initialize( diagnosticList );

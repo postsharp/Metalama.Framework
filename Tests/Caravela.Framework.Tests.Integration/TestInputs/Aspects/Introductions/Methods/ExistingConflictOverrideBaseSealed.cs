@@ -1,5 +1,4 @@
 ﻿using System;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
@@ -15,7 +14,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
 
         public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.Override)]
+        [Introduce(ConflictBehavior = ConflictBehavior.Override)]
         public int ExistingMethod()
         {
             Console.WriteLine("This is introduced method.");

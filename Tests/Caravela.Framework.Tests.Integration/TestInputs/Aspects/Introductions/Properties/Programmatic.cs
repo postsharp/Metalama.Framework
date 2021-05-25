@@ -1,5 +1,4 @@
 ﻿using System;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
@@ -31,10 +30,10 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
 
         public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
 
-        //[IntroducePropertyTemplate]
+        //[Template]
         //public int AutoProperty { get; set; }
 
-        [IntroducePropertyTemplate]
+        [Template]
         public int Property
         {
             get
@@ -50,14 +49,14 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
             }
         }
 
-        [IntroducePropertyGetTemplate]
+        [Template]
         public int GetPropertyTemplate()
         {
             Console.WriteLine("Get");
             return meta.Proceed();
         }
 
-        [IntroducePropertySetTemplate]
+        [Template]
         public void SetPropertyTemplate(int value)
         {
             Console.WriteLine("Set");

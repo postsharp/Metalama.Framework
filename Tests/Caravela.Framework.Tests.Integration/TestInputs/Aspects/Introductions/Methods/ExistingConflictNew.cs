@@ -1,5 +1,4 @@
 ﻿using System;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
@@ -15,121 +14,121 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
 
         public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public int BaseClassMethod()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public static int BaseClassMethod_Static()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public int HiddenBaseClassMethod()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public static int HiddenBaseClassMethod_Static()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public int HiddenBaseClassVirtualMethod()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public int HiddenVirtualBaseClassVirtualMethod()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public int BaseClassVirtualMethod()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public int BaseClassVirtualSealedMethod()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public int BaseClassVirtualOverridenMethod()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public int BaseClassAbstractMethod()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public int BaseClassAbstractSealedMethod()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public int DerivedClassMethod()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public static int DerivedClassMethod_Static()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public int DerivedClassVirtualMethod()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public int DerivedClassVirtualSealedMethod()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public int ExistingMethod()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public static int ExistingMethod_Static()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public int ExistingVirtualMethod()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public int NonExistentMethod()
         {
             return meta.Proceed();
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(ConflictBehavior = ConflictBehavior.New)]
         public static int NonExistentMethod_Static()
         {
             return meta.Proceed();

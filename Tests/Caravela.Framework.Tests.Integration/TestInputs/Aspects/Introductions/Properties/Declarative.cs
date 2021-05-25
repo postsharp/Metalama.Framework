@@ -1,5 +1,4 @@
 ﻿using System;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
@@ -25,7 +24,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.D
         //[IntroduceProperty]
         //public static int IntroducedProperty_Auto_Static { get; }
 
-        [IntroduceProperty]
+        [Introduce]
         public int IntroducedProperty_Accessors
         {
             get 

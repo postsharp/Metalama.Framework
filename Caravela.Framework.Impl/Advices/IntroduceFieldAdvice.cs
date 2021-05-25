@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
@@ -13,7 +12,7 @@ namespace Caravela.Framework.Impl.Advices
     // ReSharper disable once UnusedType.Global
     // TODO: Use this type and remove the warning waiver.
 
-    internal class IntroduceFieldAdvice : IntroduceMemberAdvice<FieldBuilder>, IIntroduceFieldAdvice
+    internal class IntroduceFieldAdvice : IntroduceMemberAdvice<FieldBuilder>
     {
         public IFieldBuilder Builder => this.MemberBuilder;
 
@@ -25,8 +24,9 @@ namespace Caravela.Framework.Impl.Advices
             string name,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
+            string layerName,
             AdviceOptions? options )
-            : base( aspect, targetDeclaration, null, scope, conflictBehavior, options )
+            : base( aspect, targetDeclaration, null, scope, conflictBehavior, layerName, options )
         {
             this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, name, options?.LinkerOptions );
         }

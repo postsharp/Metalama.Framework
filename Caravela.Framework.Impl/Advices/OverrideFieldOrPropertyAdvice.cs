@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
@@ -10,7 +9,7 @@ using Caravela.Framework.Impl.Transformations;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class OverrideFieldOrPropertyAdvice : Advice, IOverrideFieldOrPropertyAdvice
+    internal class OverrideFieldOrPropertyAdvice : Advice
     {
         public IProperty? TemplateProperty { get; }
 
@@ -26,8 +25,9 @@ namespace Caravela.Framework.Impl.Advices
             IProperty? templateProperty,
             IMethod? getTemplateMethod,
             IMethod? setTemplateMethod,
+            string layerName,
             AdviceOptions? options )
-            : base( aspect, targetDeclaration, options )
+            : base( aspect, targetDeclaration, layerName, options )
         {
             // We need either property template or (one or more) accessor templates, but never both.
             Invariant.Assert( templateProperty != null || getTemplateMethod != null || setTemplateMethod != null );

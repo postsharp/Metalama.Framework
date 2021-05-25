@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
@@ -14,7 +13,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class IntroducePropertyAdvice : IntroduceMemberAdvice<PropertyBuilder>, IIntroducePropertyAdvice
+    internal class IntroducePropertyAdvice : IntroduceMemberAdvice<PropertyBuilder>
     {
         private readonly IMethod? _getTemplateMethod;
         private readonly IMethod? _setTemplateMethod;
@@ -34,8 +33,9 @@ namespace Caravela.Framework.Impl.Advices
             IMethod? setTemplateMethod,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
+            string? layerName,
             AdviceOptions? options )
-            : base( aspect, targetDeclaration, templateProperty, scope, conflictBehavior, options )
+            : base( aspect, targetDeclaration, templateProperty, scope, conflictBehavior, layerName, options )
         {
             this._getTemplateMethod = getTemplateMethod;
             this._setTemplateMethod = setTemplateMethod;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
@@ -17,7 +16,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programm
 
         public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
 
-        [OverrideMethodTemplate]
+        [Template]
         public dynamic Template()
         {
             Console.WriteLine("This is the overriding method.");

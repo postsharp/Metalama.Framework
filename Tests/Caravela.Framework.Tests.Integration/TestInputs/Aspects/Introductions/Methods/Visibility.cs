@@ -1,5 +1,4 @@
 ﻿using System;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
@@ -15,42 +14,42 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Visi
 
         public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
 
-        [IntroduceMethod(Accessibility = Accessibility.Private)]
+        [Introduce(Accessibility = Accessibility.Private)]
         public int Private()
         {
             Console.WriteLine("This is introduced method.");
             return 42;
         }
 
-        [IntroduceMethod(Accessibility = Accessibility.ProtectedInternal)]
+        [Introduce(Accessibility = Accessibility.ProtectedInternal)]
         public int ProtectedInternal()
         {
             Console.WriteLine("This is introduced method.");
             return 42;
         }
 
-        [IntroduceMethod(Accessibility = Accessibility.PrivateProtected)]
+        [Introduce(Accessibility = Accessibility.PrivateProtected)]
         public int PrivateProtected()
         {
             Console.WriteLine("This is introduced method.");
             return 42;
         }
 
-        [IntroduceMethod(Accessibility = Accessibility.Internal)]
+        [Introduce(Accessibility = Accessibility.Internal)]
         public int Internal()
         {
             Console.WriteLine("This is introduced method.");
             return 42;
         }
 
-        [IntroduceMethod(Accessibility = Accessibility.Protected)]
+        [Introduce(Accessibility = Accessibility.Protected)]
         public int Protected()
         {
             Console.WriteLine("This is introduced method.");
             return 42;
         }
 
-        [IntroduceMethod(Accessibility = Accessibility.Public)]
+        [Introduce(Accessibility = Accessibility.Public)]
         public int Public()
         {
             Console.WriteLine("This is introduced method.");

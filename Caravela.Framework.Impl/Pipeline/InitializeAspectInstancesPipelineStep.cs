@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using System.Collections.Generic;
@@ -31,7 +30,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var reportedDiagnostics = aspectInstanceResults.SelectMany( air => air.Diagnostics.ReportedDiagnostics );
             var diagnosticSuppressions = aspectInstanceResults.SelectMany( air => air.Diagnostics.DiagnosticSuppressions );
             var addedAspectSources = aspectInstanceResults.SelectMany( air => air.AspectSources );
-            var addedAdvices = aspectInstanceResults.SelectMany( air => air.Advices ).Cast<Advice>();
+            var addedAdvices = aspectInstanceResults.SelectMany( air => air.Advices );
 
             pipelineStepsState.AddDiagnostics( reportedDiagnostics, diagnosticSuppressions );
             success &= pipelineStepsState.AddAspectSources( addedAspectSources );
