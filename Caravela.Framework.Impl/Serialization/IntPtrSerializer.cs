@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class IntPtrSerializer : ObjectSerializer<IntPtr>
     {
-        public override ExpressionSyntax Serialize( IntPtr obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( IntPtr obj, ICompilationElementFactory syntaxFactory )
         {
             return SyntaxFactory.ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof(IntPtr) ) )
                 .AddArgumentListArguments(

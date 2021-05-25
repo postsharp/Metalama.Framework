@@ -15,10 +15,10 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class TypeSerializer : ObjectSerializer<Type>
     {
-        public override ExpressionSyntax Serialize( Type obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( Type obj, ICompilationElementFactory syntaxFactory )
             => this.SerializeTypeSymbolRecursive( syntaxFactory.GetTypeSymbol( obj ), syntaxFactory );
 
-        public ExpressionSyntax SerializeTypeSymbolRecursive( ITypeSymbol symbol, ISyntaxFactory syntaxFactory )
+        public ExpressionSyntax SerializeTypeSymbolRecursive( ITypeSymbol symbol, ICompilationElementFactory syntaxFactory )
         {
             if ( symbol.TypeKind == TypeKind.Array )
             {

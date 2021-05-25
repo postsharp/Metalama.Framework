@@ -1,6 +1,5 @@
 #pragma warning disable CS8600, CS8603
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Project;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.GotoNotSupported

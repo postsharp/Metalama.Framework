@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Code
 {
@@ -11,9 +11,6 @@ namespace Caravela.Framework.Code
     [CompileTimeOnly]
     public interface IFieldOrPropertyInvocation
     {
-        [RunTimeOnly]
-        dynamic Value { get; set; }
-
         /// <summary>
         /// Get the value for a different instance.
         /// </summary>

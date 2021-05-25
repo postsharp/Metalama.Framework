@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -120,15 +120,15 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IType IMethod.ReturnType => this.ReturnType;
 
-        Accessibility IMember.Accessibility => this.Accessibility;
+        Accessibility IMemberOrNamedType.Accessibility => this.Accessibility;
 
-        string IMember.Name => this.Name;
+        string IMemberOrNamedType.Name => this.Name;
 
-        bool IMember.IsStatic => this.IsStatic;
+        bool IMemberOrNamedType.IsStatic => this.IsStatic;
 
         bool IMember.IsVirtual => this.IsVirtual;
 
-        bool IMember.IsSealed => this.IsSealed;
+        bool IMemberOrNamedType.IsSealed => this.IsSealed;
 
         public IGenericParameterBuilder AddGenericParameter( string name )
         {

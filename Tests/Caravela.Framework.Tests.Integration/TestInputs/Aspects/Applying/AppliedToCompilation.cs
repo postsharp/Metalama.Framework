@@ -1,6 +1,7 @@
 using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 
 [assembly: Caravela.Framework.IntegrationTests.Aspects.Applying.AppliedToCompilation.MyAspect]
@@ -9,9 +10,11 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Applying.AppliedToCompilat
 {
     public class MyAspect : Attribute, IAspect<ICompilation>
     {
-        public void Initialize(IAspectBuilder<ICompilation> aspectBuilder)
+        public void BuildAspect(IAspectBuilder<ICompilation> builder)
         {
         }
+
+        public void BuildEligibility(IEligibilityBuilder<ICompilation> builder) { }
     }
 
     [TestOutput]

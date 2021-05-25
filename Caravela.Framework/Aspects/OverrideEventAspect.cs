@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using System;
 
 namespace Caravela.Framework.Aspects
@@ -14,10 +15,10 @@ namespace Caravela.Framework.Aspects
     public abstract class OverrideEventAspect : Attribute, IAspect<IEvent>
     {
         /// <inheritdoc />
-        public virtual void Initialize( IAspectBuilder<IEvent> aspectBuilder )
+        public virtual void BuildAspect( IAspectBuilder<IEvent> builder )
         {
-            aspectBuilder.AdviceFactory.OverrideEventAccessors(
-                aspectBuilder.TargetDeclaration,
+            builder.AdviceFactory.OverrideEventAccessors(
+                builder.TargetDeclaration,
                 nameof(this.OverrideAdd),
                 nameof(this.OverrideRemove),
                 nameof(this.OverrideInvoke) );
@@ -31,5 +32,10 @@ namespace Caravela.Framework.Aspects
 
         [OverrideEventInvokeTemplate]
         public abstract void OverrideInvoke( dynamic handler );
+
+        public virtual void BuildEligibility( IEligibilityBuilder<IEvent> builder )
+        {
+            builder.ExceptForInheritance().MustBeNonAbstract();
+        }
     }
 }

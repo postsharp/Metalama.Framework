@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class DecimalSerializer : ObjectSerializer<decimal>
     {
-        public override ExpressionSyntax Serialize( decimal obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( decimal obj, ICompilationElementFactory syntaxFactory )
         {
             return SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( obj ) );
         }

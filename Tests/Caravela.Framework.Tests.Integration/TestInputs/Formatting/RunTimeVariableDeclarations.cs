@@ -1,6 +1,5 @@
 ﻿#pragma warning disable CS0219
 
-using Caravela.Framework.Project;
 using System;
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;

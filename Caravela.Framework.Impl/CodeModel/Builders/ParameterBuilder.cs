@@ -36,13 +36,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-        public IMember DeclaringMember { get; }
+        public IMemberOrNamedType DeclaringMember { get; }
 
         public ParameterInfo ToRunTimeReflection() => throw new NotImplementedException();
 
         public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
 
-        public ParameterBuilder( MemberBuilder declaringMember, int index, string? name, IType type, RefKind refKind ) : base( declaringMember.ParentAdvice )
+        public ParameterBuilder( MemberOrNamedTypeBuilder declaringMember, int index, string? name, IType type, RefKind refKind ) : base(
+            declaringMember.ParentAdvice )
         {
             this.DeclaringMember = declaringMember;
             this.Index = index;

@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IDeclaration Declaration { get; }
 
-        public IMember Member => this.Declaration as IMember ?? throw this.CreateInvalidOperationException( nameof(this.Member) );
+        public IMemberOrNamedType Member => this.Declaration as IMemberOrNamedType ?? throw this.CreateInvalidOperationException( nameof(this.Member) );
 
         public IMethod Method => this._methodBase as IMethod ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
 
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public ICompilation Compilation { get; }
 
         private ThisInstanceDynamicReceiver GetThisOrBase( string expressionName, LinkerAnnotation linkerAnnotation )
-            => this._type is { IsStatic: false } && this.Declaration is IMember { IsStatic: false }
+            => this._type is { IsStatic: false } && this.Declaration is IMemberOrNamedType { IsStatic: false }
                 ? new ThisInstanceDynamicReceiver( this.Type, linkerAnnotation )
                 : throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
                     (this._common.TemplateSymbol, expressionName, this.Declaration, this.Declaration.DeclarationKind) );

@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -80,6 +79,10 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         public static IProperty Property => CurrentContext.Property;
 
+        public static IFieldOrProperty FieldOrProperty => CurrentContext.FieldOrProperty;
+
+        public static IMemberOrNamedType Member => CurrentContext.Member;
+
         /// <summary>
         /// Gets the target event, or null if the advice does not target an event.
         /// </summary>
@@ -154,11 +157,17 @@ namespace Caravela.Framework.Aspects
         public static IDiagnosticSink Diagnostics => CurrentContext.Diagnostics;
 
         /// <summary>
-        /// Gets the dictionary of tags that were configured by the <see cref="IAspect{T}.Initialize"/> method using 
+        /// Gets the dictionary of tags that were configured by the <see cref="IAspect{T}.BuildAspect"/> method using 
         /// <see cref="IAspectBuilder.Tags"/>. This property returns an immutable snapshot of the dictionary in the state it was
         /// when the advice was created by <see cref="IAdviceFactory"/>.
         /// </summary>
         public static IReadOnlyDictionary<string, object?> Tags => CurrentContext.Tags;
+
+        /// <summary>
+        /// Gets the list of aspect markers related to the current aspect instance.
+        /// </summary>
+        [Obsolete( "Not implemented." )]
+        public static IReadOnlyList<IAspectMarkerInstance> Markers => throw new NotImplementedException();
 
         /// <summary>
         /// Injects a comment to the target code.

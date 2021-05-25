@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Project;
 using System;
 using System.Reflection;
 
@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     internal partial class AccessorBuilder
     {
         // TODO: Move all types into separate files.
-        
+
         private abstract class ParameterBase : DeclarationBuilder, IParameterBuilder
         {
             protected AccessorBuilder Accessor { get; }
@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-            public IMember DeclaringMember => (IMember) this.Accessor.ContainingDeclaration.AssertNotNull();
+            public IMemberOrNamedType DeclaringMember => (IMemberOrNamedType) this.Accessor.ContainingDeclaration.AssertNotNull();
 
             IType IParameter.ParameterType => this.ParameterType;
 

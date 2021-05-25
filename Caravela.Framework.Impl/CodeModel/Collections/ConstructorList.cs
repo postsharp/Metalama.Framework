@@ -10,7 +10,9 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 {
     internal class ConstructorList : MethodBaseList<IConstructor>, IConstructorList
     {
-        public ConstructorList( Declaration? containingDeclaration, IEnumerable<MemberRef<IConstructor>> sourceItems ) : base( containingDeclaration, sourceItems ) { }
+        public ConstructorList( Declaration? containingDeclaration, IEnumerable<MemberRef<IConstructor>> sourceItems ) : base(
+            containingDeclaration,
+            sourceItems ) { }
 
         public IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<Type?>? argumentTypes )
         {

@@ -3,22 +3,23 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.References;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
-    internal class CompileTimeReturnParameterInfo : ParameterInfo
+    internal class CompileTimeReturnParameterInfo : ParameterInfo, ICompileTimeReflectionObject<IParameter>
     {
-        private CompileTimeReturnParameterInfo( ReturnParameter returnParameter )
+        public IDeclarationRef<IParameter> Target { get; }
+
+        private CompileTimeReturnParameterInfo( IParameter returnParameter )
         {
-            this.DeclaringMember = returnParameter.DeclaringMember;
+            this.Target = returnParameter.ToRef();
         }
 
-        public static ParameterInfo Create( ReturnParameter returnParameter )
+        public static ParameterInfo Create( IParameter returnParameter )
         {
             return new CompileTimeReturnParameterInfo( returnParameter );
         }
-
-        public IMember DeclaringMember { get; }
     }
 }

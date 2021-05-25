@@ -7,13 +7,13 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.Tags
 {
     class Aspect : OverrideMethodAspect
     {
-        public override void Initialize(IAspectBuilder<IMethod> aspectBuilder)
+        public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            aspectBuilder.Tags.Add("Friend", "Bernard");
-            base.Initialize(aspectBuilder);
+            builder.Tags.Add("Friend", "Bernard");
+            base.BuildAspect(builder);
             
             // By design, values written after the creation of advices are not taken into account.
-            aspectBuilder.Tags["Friend"] = "Julia";
+            builder.Tags["Friend"] = "Julia";
             
         }
 

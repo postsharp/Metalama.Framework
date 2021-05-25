@@ -3,12 +3,14 @@
 
 using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
+using Caravela.Framework.Validation;
 
 namespace Caravela.Framework.Aspects
 {
     /// <summary>
     /// Exposes all factory methods to create advices.
     /// </summary>
+    [InternalImplement]
     public interface IAdviceFactory
     {
         /// <summary>

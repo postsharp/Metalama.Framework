@@ -3,14 +3,21 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.References;
+using System;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
     internal class NamedTypeList : MemberList<INamedType, MemberRef<INamedType>>, INamedTypeList
     {
-        public NamedTypeList( INamedType containingDeclaration, IEnumerable<MemberRef<INamedType>> sourceItems ) : base( containingDeclaration, sourceItems ) { }
+        public NamedTypeList( INamedType containingDeclaration, IEnumerable<MemberRef<INamedType>> sourceItems ) :
+            base( containingDeclaration, sourceItems ) { }
 
-        public NamedTypeList( ICompilation containingDeclaration, IEnumerable<MemberRef<INamedType>> sourceItems ) : base( containingDeclaration, sourceItems ) { }
+        public NamedTypeList( ICompilation containingDeclaration, IEnumerable<MemberRef<INamedType>> sourceItems ) :
+            base( containingDeclaration, sourceItems ) { }
+
+        IReadOnlyList<INamedType> INamedTypeList.DerivedFrom( Type type ) => throw new NotImplementedException();
+
+        IReadOnlyList<INamedType> INamedTypeList.DerivedFrom( INamedType type ) => throw new NotImplementedException();
     }
 }

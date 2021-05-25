@@ -5,6 +5,7 @@ using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -338,7 +339,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return null;
             }
-            
+
             this._cancellationToken.ThrowIfCancellationRequested();
 
             // Adds annotations to the children node.
@@ -536,6 +537,12 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
         {
+            // nameof() is always compile-time.
+            if ( node.IsNameOf() )
+            {
+                return node.AddScopeAnnotation( SymbolDeclarationScope.Both );
+            }
+
             // If we have any out/ref argument that assigns a compile-time variable, the whole method call is compile-time, and we cannot
             // be in a run-time-conditional block.
             var compileTimeOutArguments = node.ArgumentList.Arguments.Where(

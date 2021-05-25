@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 ? new PseudoAccessor( this, AccessorSemantic.Raise )
                 : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );
 
-        public EventInfo ToEventInfo() => new CompileTimeEventInfo( this._symbol, this.DeclaringType );
+        public EventInfo ToEventInfo() => new CompileTimeEventInfo( this );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 

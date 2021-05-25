@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Linking
             this._aspectLayerId = aspectLayerId;
             this._overriddenDeclaration = overriddenDeclaration;
             this._order = order;
-            
+
             // TODO: Use the parameter or remove it.
             _ = syntaxFactory;
         }

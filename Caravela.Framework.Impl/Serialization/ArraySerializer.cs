@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public ArraySerializer( SyntaxSerializationService serializers ) : base( serializers ) { }
 
-        public override ExpressionSyntax Serialize( object obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( object obj, ICompilationElementFactory syntaxFactory )
         {
             var array = (Array) obj;
 

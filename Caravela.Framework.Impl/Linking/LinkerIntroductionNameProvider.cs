@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal class LinkerIntroductionNameProvider : IntroductionNameProvider
     {
-        internal override string GetOverrideName( AspectLayerId aspectLayer, IMember overriddenDeclaration )
+        internal override string GetOverrideName( AspectLayerId aspectLayer, IMemberOrNamedType overriddenDeclaration )
         {
             // TODO: Obviously these replace methods are not very efficient.
             var cleanAspectName = aspectLayer.AspectName.Replace( "_", "__" ).Replace( ".", "_" );

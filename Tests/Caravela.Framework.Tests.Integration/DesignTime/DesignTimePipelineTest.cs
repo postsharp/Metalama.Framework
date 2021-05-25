@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Project;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -152,16 +152,19 @@ F1.cs:
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Eligibility;
 
 class MyAspect : System.Attribute, IAspect<IMethod>
 {
    private static readonly DiagnosticDefinition<int> _description = new(""MY001"", Severity.Warning, ""My Message $version$,{0}"" );
    public int Version;
 
-   public void Initialize( IAspectBuilder<IMethod> aspectBuilder )
+   public void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
    {
         aspectBuilder.Diagnostics.Report( _description, this.Version );
    }
+
+public void BuildEligibility( IEligibilityBuilder<IMethod> builder ) {}
 }
 ";
 

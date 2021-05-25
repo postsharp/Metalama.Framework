@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Caravela.Framework.Project;
-
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 

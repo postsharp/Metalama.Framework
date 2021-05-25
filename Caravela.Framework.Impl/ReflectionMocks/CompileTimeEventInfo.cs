@@ -3,31 +3,25 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Serialization;
-using Microsoft.CodeAnalysis;
+using Caravela.Framework.Impl.CodeModel.References;
 using System;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
-    internal class CompileTimeEventInfo : EventInfo, ICompileTimeReflectionMember
+    internal class CompileTimeEventInfo : EventInfo, ICompileTimeReflectionObject<IEvent>
     {
-        public CompileTimeEventInfo( ISymbol symbol, IType containingType )
+        public IDeclarationRef<IEvent> Target { get; }
+
+        public CompileTimeEventInfo( IEvent @event )
         {
-            this.Symbol = symbol;
-            this.ContainingType = containingType;
+            this.Target = @event.ToRef();
         }
 
         public static CompileTimeEventInfo Create( IEvent @event )
         {
-            var fullEvent = (Event) @event;
-
-            return new CompileTimeEventInfo( fullEvent.Symbol, fullEvent.DeclaringType );
+            return new( @event );
         }
-
-        public ISymbol Symbol { get; }
-
-        public IType ContainingType { get; }
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
@@ -48,7 +42,5 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         public override MethodInfo GetRemoveMethod( bool nonPublic ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override EventAttributes Attributes => throw CompileTimeMocksHelper.CreateNotSupportedException();
-
-        public ITypeSymbol? DeclaringTypeSymbol => throw new NotImplementedException();
     }
 }

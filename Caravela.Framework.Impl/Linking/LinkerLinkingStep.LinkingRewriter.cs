@@ -471,7 +471,7 @@ namespace Caravela.Framework.Impl.Linking
                 _ = semanticModel;
                 _ = accessor;
                 _ = symbol;
-                
+
                 throw new NotImplementedException();
             }
 

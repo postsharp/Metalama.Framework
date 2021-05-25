@@ -151,7 +151,7 @@ namespace Caravela.Framework.Impl.CodeModel
         ICompilation ICompilationElement.Compilation => this;
 
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
-            => this._allMemberAttributesByType[type.ToRef()].Select( a => a.GetForCompilation( this ) );
+            => this._allMemberAttributesByType[type.ToRef()].Select( a => a.Resolve( this ) );
 
         internal ImmutableArray<IObservableTransformation> GetObservableTransformationsOnElement( IDeclaration declaration )
             => this._transformations[declaration.ToRef()];
@@ -160,7 +160,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             foreach ( var group in this._transformations )
             {
-                yield return (group.Key.GetForCompilation( this ), group);
+                yield return (group.Key.Resolve( this ), group);
             }
         }
 

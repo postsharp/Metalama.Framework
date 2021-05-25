@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
     /// </summary>
     /// <typeparam name="T"></typeparam>
     internal interface IMemberRef<out T> : IDeclarationRef<T>
-        where T : IMember
+        where T : IMemberOrNamedType
     {
         /// <summary>
         /// Gets the member name without resolving to the target.

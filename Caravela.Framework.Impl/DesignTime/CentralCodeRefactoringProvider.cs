@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.DesignTime
         }
 
         private static Task<Solution> AddAspectAttribute(
-            AspectClassMetadata aspect,
+            AspectClass aspect,
             ISymbol targetSymbol,
             Document targetDocument,
             CancellationToken cancellationToken )
@@ -107,7 +107,7 @@ namespace Caravela.Framework.Impl.DesignTime
         private static Task<Solution> ExpandAspectToCode(
             ProjectOptions projectOptions,
             Compilation compilation,
-            AspectClassMetadata aspect,
+            AspectClass aspect,
             ISymbol targetSymbol,
             Document targetDocument,
             CancellationToken cancellationToken )

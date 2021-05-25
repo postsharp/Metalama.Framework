@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -16,7 +17,7 @@ namespace Caravela.Framework.Sdk
         /// <summary>
         /// Gets the type of aspects that must be handled.
         /// </summary>
-        public IAspectClassMetadata AspectClass { get; }
+        public IAspectClass AspectClass { get; }
 
         /// <summary>
         /// Gets the set of aspect instances that must be weaved.
@@ -40,13 +41,13 @@ namespace Caravela.Framework.Sdk
         public void AddManifestResource( ResourceDescription resource ) => this._addManifestResource( resource );
 
         internal AspectWeaverContext(
-            IAspectClassMetadata aspectClassMetadata,
+            IAspectClass aspectClass,
             IReadOnlyList<IAspectInstance> aspectInstances,
             IPartialCompilation compilation,
             Action<Diagnostic> addDiagnostic,
             Action<ResourceDescription> addManifestResource )
         {
-            this.AspectClass = aspectClassMetadata;
+            this.AspectClass = aspectClass;
             this.AspectInstances = aspectInstances;
             this.Compilation = compilation;
             this._addDiagnostic = addDiagnostic;

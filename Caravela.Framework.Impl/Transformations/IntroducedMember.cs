@@ -72,17 +72,4 @@ namespace Caravela.Framework.Impl.Transformations
             return new( this.Introduction, syntax, this.AspectLayerId, this.Semantic, this.LinkerOptions, this.Declaration );
         }
     }
-
-    internal enum IntroducedMemberSemantic
-    {
-        Introduction,
-        MethodOverride,
-        PropertyOverride,
-        GetterOverride,
-        SetterOverride,
-        EventOverride,
-        AdderOverride,
-        RemoverOverride,
-        RaiserOverride
-    }
 }

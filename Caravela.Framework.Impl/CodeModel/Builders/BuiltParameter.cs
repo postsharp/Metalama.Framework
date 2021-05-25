@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsParams => this.ParameterBuilder.IsParams;
 
         [Memo]
-        public IMember DeclaringMember => this.Compilation.Factory.GetDeclaration( this.ParameterBuilder.DeclaringMember );
+        public IMemberOrNamedType DeclaringMember => this.Compilation.Factory.GetDeclaration( this.ParameterBuilder.DeclaringMember );
 
         public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
     }

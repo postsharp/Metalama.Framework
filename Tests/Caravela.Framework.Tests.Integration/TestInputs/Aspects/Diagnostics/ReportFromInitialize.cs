@@ -15,12 +15,12 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromIni
         private static readonly DiagnosticDefinition _info = new( "MY003", Severity.Info,"Info" );
         private static readonly DiagnosticDefinition _hidden = new( "MY004", Severity.Hidden,"Hidden" );
 
-        public override void Initialize(IAspectBuilder<IMethod> aspectBuilder)
+        public override void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            aspectBuilder.Diagnostics.Report( _error );
-            aspectBuilder.Diagnostics.Report( _warning );
-            aspectBuilder.Diagnostics.Report( _info );
-            aspectBuilder.Diagnostics.Report(  _hidden );
+            builder.Diagnostics.Report( _error );
+            builder.Diagnostics.Report( _warning );
+            builder.Diagnostics.Report( _info );
+            builder.Diagnostics.Report(  _hidden );
         }
 
         public override dynamic? OverrideMethod()

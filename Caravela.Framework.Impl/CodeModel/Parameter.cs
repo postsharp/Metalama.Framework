@@ -16,11 +16,11 @@ namespace Caravela.Framework.Impl.CodeModel
         public IParameterSymbol ParameterSymbol { get; }
 
         [Memo]
-        public Member DeclaringMember => (Member) this.Compilation.Factory.GetDeclaration( this.ParameterSymbol.ContainingSymbol );
+        public MemberOrNamedType DeclaringMember => (MemberOrNamedType) this.Compilation.Factory.GetDeclaration( this.ParameterSymbol.ContainingSymbol );
 
-        public ParameterInfo ToParameterInfo() => CompileTimeParameterInfo.Create( this.ParameterSymbol, this.ContainingDeclaration );
+        public ParameterInfo ToParameterInfo() => CompileTimeParameterInfo.Create( this );
 
-        IMember IParameter.DeclaringMember => this.DeclaringMember;
+        IMemberOrNamedType IParameter.DeclaringMember => this.DeclaringMember;
 
         public Parameter( IParameterSymbol symbol, CompilationModel compilation ) : base( compilation )
         {

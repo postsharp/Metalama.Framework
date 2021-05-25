@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class SByteSerializer : ObjectSerializer<sbyte>
     {
-        public override ExpressionSyntax Serialize( sbyte obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( sbyte obj, ICompilationElementFactory syntaxFactory )
         {
             return SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( obj ) );
         }
