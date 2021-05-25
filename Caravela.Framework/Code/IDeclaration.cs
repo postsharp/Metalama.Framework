@@ -49,6 +49,7 @@ namespace Caravela.Framework.Code
         /// Gets the list of annotations registered on the current declaration for a given aspect type.
         /// </summary>
         /// <typeparam name="T">The type of the aspect for which the annotations are requested.</typeparam>
+        [Obsolete( "Not implemented." )]
         IAnnotationList GetAnnotations<T>()
             where T : IAspect;
     }

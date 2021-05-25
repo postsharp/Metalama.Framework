@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
+using System;
 
 namespace Caravela.Framework.Aspects
 {
@@ -13,6 +14,7 @@ namespace Caravela.Framework.Aspects
     /// interface.
     /// </summary>
     [CompileTimeOnly]
+    [Obsolete( "Not implemented." )]
     public interface IAnnotation { }
 
     /// <summary>
@@ -22,6 +24,7 @@ namespace Caravela.Framework.Aspects
     /// <typeparam name="TTarget">The type of declarations on which the declaration can be added.</typeparam>
     /// <typeparam name="TAspect">The type of aspects for which the annotation is meaningful.</typeparam>
     [CompileTimeOnly]
+    [Obsolete( "Not implemented." )]
     public interface IAnnotation<TTarget, TAspect> : IEligible<TTarget>, IAnnotation
         where TAspect : IAspect
         where TTarget : class, IDeclaration { }
