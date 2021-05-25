@@ -11,6 +11,7 @@
          TeamCity is responsible for setting the VersionSuffix property -->
     <PropertyGroup Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">
         <ProductVersion Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">$(ProductMainVersion)-build-$(VersionSuffix)</ProductVersion>
+        <AssemblyVersion>$(MainVersion)$([System.DateTime]::Now.ToString('MMdd.HHmm'))</AssemblyVersion>
     </PropertyGroup>
 
     <!-- For local builds, the LocalBuildId property must be defined before calling `dotnet pack` -->
@@ -24,7 +25,7 @@
     </PropertyGroup>
 
     <Target Name="PrintVersion">
-        <Message Text="ProductVersion=$(ProductVersion)" />
+        <Message Text="ProductVersion=$(ProductVersion);AssemblyVersion=$(AssemblyVersion)" />
     </Target>
 
     <!-- Emits an error if `dotnet pack` is called in a local debug build, but Run CreateLocalPackages.ps1 has not been called. -->
