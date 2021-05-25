@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
@@ -32,7 +31,7 @@ namespace Caravela.Framework.TestApp
 
         }
 
-        [IntroduceMethodTemplate]
+        [Template]
         public static void SomeIntroducedMethod()
         {
             Console.WriteLine( "From IntroduceSomeMethodAspect!" );
@@ -40,13 +39,13 @@ namespace Caravela.Framework.TestApp
             var x = meta.Proceed();
         }
 
-        [IntroduceMethod]
+        [Introduce]
         public void SomeOtherIntroducedMethod()
         {
             
         }
 
-        [IntroduceMethod]
+        [Introduce]
         public void SomeOtherIntroducedMethod5()
         {
 

@@ -192,7 +192,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
-            string defaultGetTemplate,
+            string? getTemplate,
             string? setTemplate,
             AdviceOptions? options = null )
         {
@@ -200,7 +200,7 @@ namespace Caravela.Framework.Impl.Advices
             var diagnosticList = new DiagnosticList();
 
             var getTemplateMethod = this.GetTemplateMethod(
-                defaultGetTemplate,
+                getTemplate,
                 nameof(this.OverrideFieldOrPropertyAccessors) );
 
             var setTemplateMethod = this.GetTemplateMethod(

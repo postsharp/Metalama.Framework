@@ -44,7 +44,7 @@ namespace Caravela.Framework.Aspects
 
         void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
-            string defaultGetTemplate,
+            string? getTemplate,
             string? setTemplate,
             AdviceOptions? options = null );
 
