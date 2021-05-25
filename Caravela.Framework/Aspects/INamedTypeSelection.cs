@@ -5,16 +5,16 @@ using Caravela.Framework.Code;
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Policies
+namespace Caravela.Framework.Aspects
 {
     /// <summary>
     /// Represents a set of types. Offers the ability to add aspects to types or to select members
     /// using <see cref="WithMembers{T}"/>.
     /// </summary>
     [Obsolete( "Not implemented." )]
-    public interface INamedTypeSet : IAspectTargetSet<INamedType>
+    public interface INamedTypeSelection : IDeclarationSelection<INamedType>
     {
-        IAspectTargetSet<T> WithMembers<T>( Func<INamedType, IEnumerable<T>> selector )
+        IDeclarationSelection<T> WithMembers<T>( Func<INamedType, IEnumerable<T>> selector )
             where T : class, IDeclaration;
     }
 }

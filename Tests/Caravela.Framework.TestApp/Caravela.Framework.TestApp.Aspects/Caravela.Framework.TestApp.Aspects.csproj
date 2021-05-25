@@ -8,8 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Annotations\**" />
     <Compile Remove="Validation\**" />
+    <EmbeddedResource Remove="Annotations\**" />
     <EmbeddedResource Remove="Validation\**" />
+    <None Remove="Annotations\**" />
     <None Remove="Validation\**" />
   </ItemGroup>
 

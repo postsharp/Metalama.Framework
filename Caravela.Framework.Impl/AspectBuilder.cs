@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Policies;
 using Caravela.Framework.Validation;
 using System;
 using System.Collections.Generic;
@@ -32,6 +33,11 @@ namespace Caravela.Framework.Impl
 
         public T TargetDeclaration { get; }
 
+        [Obsolete( "Not implemented." )]
+        public IDeclarationSelection<TMember> WithMembers<TMember>( Func<T, TMember> selector )
+            where TMember : class, IDeclaration
+            => throw new NotImplementedException();
+
         IDeclaration IAspectBuilder.TargetDeclaration => this.TargetDeclaration;
 
         public IAdviceFactory AdviceFactory => this._adviceFactory;
@@ -39,11 +45,6 @@ namespace Caravela.Framework.Impl
         public void SkipAspect() => this._skipped = true;
 
         public CancellationToken CancellationToken { get; }
-
-        public void RequireAspect<TTarget, TAspect>( TTarget target )
-            where TTarget : class, IDeclaration
-            where TAspect : IAspect<TTarget>, new()
-            => throw new NotImplementedException();
 
         public AspectBuilder(
             T targetDeclaration,

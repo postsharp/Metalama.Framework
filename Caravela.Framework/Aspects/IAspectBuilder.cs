@@ -62,34 +62,30 @@ namespace Caravela.Framework.Aspects
         void SkipAspect();
 
         CancellationToken CancellationToken { get; }
-
-        /// <summary>
-        /// Requires an instance of a specified aspect type to be present on a specified declaration. If the aspect
-        /// is not present, this method adds a new instance of this aspect by using the default aspect constructor.
-        /// </summary>
-        /// <remarks>
-        /// <para>Calling this method causes the current aspect to be present in the <see cref="UpstreamAspects"/> list
-        /// even if the required aspect was already present on the target declaration.</para>
-        /// </remarks>
-        /// <param name="target">The target declaration. It must be contained in the current type.</param>
-        /// <typeparam name="TTarget">Type of the target declaration.</typeparam>
-        /// <typeparam name="TAspect">Type of the aspect. The type must be ordered after the current aspect type.</typeparam>
-        [Obsolete( "Not implemented." )]
-        void RequireAspect<TTarget, TAspect>( TTarget target )
-            where TTarget : class, IDeclaration
-            where TAspect : IAspect<TTarget>, new();
     }
 
     /// <summary>
     /// An object by the <see cref="IAspect{T}.BuildAspect"/> method of the aspect to provide advices and child
     /// aspects. This is the strongly-typed variant of the <see cref="IAspectBuilder"/> interface.
     /// </summary>
-    public interface IAspectBuilder<out T> : IAspectBuilder
-        where T : IDeclaration
+    public interface IAspectBuilder<out TAspectTarget> : IAspectBuilder
+        where TAspectTarget : IDeclaration
     {
         /// <summary>
         /// Gets the declaration to which the aspect was added.
         /// </summary>
-        new T TargetDeclaration { get; }
+        new TAspectTarget TargetDeclaration { get; }
+
+        /// <summary>
+        /// Selects members of the current target declaration with the purpose of adding aspects and annotations to them
+        /// using e.g. <see cref="IDeclarationSelection{TDeclaration}.AddAspect{TAspect}(System.Linq.Expressions.Expression{System.Func{TDeclaration,TAspect}})"/>
+        /// or <see cref="IDeclarationSelection{TDeclaration}.AddAnnotation{TAspect,TAnnotation}"/>.
+        /// </summary>
+        /// <param name="selector"></param>
+        /// <typeparam name="TMember"></typeparam>
+        /// <returns></returns>
+        [Obsolete( "Not implemented." )]
+        IDeclarationSelection<TMember> WithMembers<TMember>( Func<TAspectTarget, TMember> selector )
+            where TMember : class, IDeclaration;
     }
 }

@@ -102,6 +102,15 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public DeclarationKind DeclarationKind => DeclarationKind.Method;
 
+        public bool HasAspect<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
+
+        [Obsolete( "Not implemented." )]
+        public IAnnotationList GetAnnotations<T>()
+            where T : IAspect
+            => throw new NotImplementedException();
+
         public IDiagnosticLocation? DiagnosticLocation => this._containingMember.DiagnosticLocation;
 
         public ICompilation Compilation => this._containingMember.Compilation;
@@ -162,6 +171,15 @@ namespace Caravela.Framework.Impl.CodeModel
             public IAttributeList Attributes => throw new NotImplementedException();
 
             public DeclarationKind DeclarationKind => DeclarationKind.Parameter;
+
+            public bool HasAspect<T>()
+                where T : IAspect
+                => throw new NotImplementedException();
+
+            [Obsolete( "Not implemented." )]
+            public IAnnotationList GetAnnotations<T>()
+                where T : IAspect
+                => throw new NotImplementedException();
 
             public IDiagnosticLocation? DiagnosticLocation => throw new NotImplementedException();
 
