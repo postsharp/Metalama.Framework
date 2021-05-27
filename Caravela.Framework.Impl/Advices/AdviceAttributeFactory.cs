@@ -102,6 +102,24 @@ namespace Caravela.Framework.Impl.Advices
 
                                 break;
 
+                            case IEvent templateEvent:
+                                var introduceEventAdvice = new IntroduceEventAdvice(
+                                    aspect,
+                                    (INamedType) aspectTargetDeclaration,
+                                    templateEvent,
+                                    null,
+                                    null,
+                                    null,
+                                    scope,
+                                    conflictBehavior,
+                                    layerName,
+                                    adviceOptions );
+
+                                advice = introduceEventAdvice;
+                                builder = introduceEventAdvice.Builder;
+
+                                break;
+
                             default:
                                 throw new AssertionFailedException();
                         }

@@ -26,6 +26,10 @@
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TestInputs\Aspects\Introductions\Fields\" />
+  </ItemGroup>
+
   <Target Name="AddCustomAssemblyMetadaAttributes" BeforeTargets="CoreGenerateAssemblyInfo">
     <ItemGroup>
       <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">

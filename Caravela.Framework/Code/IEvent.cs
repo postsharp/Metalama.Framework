@@ -5,6 +5,8 @@ using Caravela.Framework.Aspects;
 using System.Collections.Generic;
 using System.Reflection;
 
+#pragma warning disable SA1623 // Property summary documentation should match accessors
+
 namespace Caravela.Framework.Code
 {
     /// <summary>
@@ -34,6 +36,11 @@ namespace Caravela.Framework.Code
         /// as with a normal method.
         /// </summary>
         IMethod? Raiser { get; }
+
+        /// <summary>
+        /// Allows invocation of the base event (<see langword="null" /> if the method was introduced by the current aspect).
+        /// </summary>
+        IEventInvocation? Base { get; }
 
         /// <summary>
         /// Gets a list of interface events this event explicitly implements.
