@@ -327,6 +327,18 @@ namespace Caravela.Framework.Impl.CompileTime
                 return base.VisitTypeOfExpression( node );
             }
 
+            private T? AddLocationAnnotation<T>( T? originalNode, T? transformedNode )
+                where T : SyntaxNode
+                => originalNode == null || transformedNode == null
+                    ? null
+                    : (T?) this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( originalNode, transformedNode! );
+
+            // The default implementation of Visit(SyntaxNode) and Visit(SyntaxToken) adds the location annotations.
+
+            public override SyntaxNode? Visit( SyntaxNode? node ) => this.AddLocationAnnotation( node, base.Visit( node ) );
+
+            public override SyntaxToken VisitToken( SyntaxToken token ) => this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( token );
+
             private Context WithScope( SymbolDeclarationScope scope )
             {
                 this._currentContext = new Context( scope, this );

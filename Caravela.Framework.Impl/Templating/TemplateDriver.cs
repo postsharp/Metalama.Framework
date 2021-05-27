@@ -127,7 +127,9 @@ namespace Caravela.Framework.Impl.Templating
                 return null;
             }
 
-            var transformedText = SourceText.From( File.ReadAllText( frame.File.TransformedPath ) );
+            var transformedFileFullPath = Path.Combine( this._aspectClass.Project.Directory, frame.File.TransformedPath );
+
+            var transformedText = SourceText.From( File.ReadAllText( transformedFileFullPath ) );
 
             // Find the node in the syntax tree.
             var textLines = transformedText.Lines;

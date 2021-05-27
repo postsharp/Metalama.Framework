@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Templating
         private static readonly SyntaxAnnotation _scopeMismatchAnnotation = new( _scopeMismatchKind );
 
         private static readonly ImmutableList<string> _templateAnnotationKinds =
-            SemanticAnnotationMap.AnnotationKinds.AddRange(
+            SyntaxTreeAnnotationMap.AnnotationKinds.AddRange(
                 new[] { _scopeAnnotationKind, _noIndentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind } );
 
         public static bool HasScopeAnnotation( this SyntaxNode node )
@@ -174,7 +174,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public static T WithSymbolAnnotationsFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode
-            => node.WithAdditionalAnnotations( source.GetAnnotations( SemanticAnnotationMap.AnnotationKinds ) );
+            => node.WithAdditionalAnnotations( source.GetAnnotations( SyntaxTreeAnnotationMap.AnnotationKinds ) );
 
         public static T WithTemplateAnnotationsFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode
