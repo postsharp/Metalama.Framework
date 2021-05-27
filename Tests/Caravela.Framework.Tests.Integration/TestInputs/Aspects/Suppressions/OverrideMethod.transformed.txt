@@ -7,11 +7,11 @@ internal class TargetClass
     [SuppressWarning]
     private void M2(string m)
     {
-        this.__M2__Caravela_Framework_Tests_Integration_Aspects_Suppressions_IntroduceMethod_SuppressWarningAttribute(m);
+        this.__Override__M2__By__Caravela_Framework_Tests_Integration_Aspects_Suppressions_IntroduceMethod_SuppressWarningAttribute(m);
     }
 #pragma warning restore CS0219
 #pragma warning disable CS0219
-    private void __M2__Caravela_Framework_Tests_Integration_Aspects_Suppressions_IntroduceMethod_SuppressWarningAttribute(string m)
+    private void __Override__M2__By__Caravela_Framework_Tests_Integration_Aspects_Suppressions_IntroduceMethod_SuppressWarningAttribute(string m)
     {
         int a = 0;
         int x = 0;
