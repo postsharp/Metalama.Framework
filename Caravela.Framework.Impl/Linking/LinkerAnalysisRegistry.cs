@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl.Linking
                 throw new AssertionFailedException();
             }
 
-            return introducedMember.Declaration?.GetSymbol().AssertNotNull();
+            return (introducedMember.Declaration?.GetSymbol()).AssertNotNull();
         }
 
         /// <summary>
