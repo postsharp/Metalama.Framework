@@ -7,4 +7,4 @@
 | 0200-0299 | Syntax Serialization
 | 0300-0319 | Design-Time
 | 0400-0499 | Attribute deserialization
-| 1000-1999 | Advices
+| 0500-0599 | Advices

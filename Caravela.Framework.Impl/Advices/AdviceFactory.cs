@@ -353,6 +353,21 @@ namespace Caravela.Framework.Impl.Advices
 
         public void IntroduceInterface(
             INamedType targetType,
+            Type interfaceType,
+            bool explicitImplementation = true,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AdviceOptions? options = null )
+        {
+            this.IntroduceInterface(
+                targetType,
+                (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( interfaceType ),
+                explicitImplementation,
+                conflictBehavior, 
+                options );
+        }
+
+        public void IntroduceInterface(
+            INamedType targetType,
             INamedType interfaceType,
             IReadOnlyDictionary<IMember, IMember> memberMap,
             bool explicitImplementation = true,
@@ -373,6 +388,23 @@ namespace Caravela.Framework.Impl.Advices
 
             advice.Initialize( this._declarativeAdvices, diagnosticList );
             this._advices.Add( advice );
+        }
+
+        public void IntroduceInterface(
+            INamedType targetType,
+            Type interfaceType,
+            IReadOnlyDictionary<IMember, IMember> memberMap,
+            bool explicitImplementation = true,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AdviceOptions? options = null )
+        {
+            this.IntroduceInterface(
+                targetType,
+                (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( interfaceType ),
+                memberMap,
+                explicitImplementation,
+                conflictBehavior,
+                options );
         }
 
         public IAdviceFactory ForLayer( string layerName ) => throw new NotImplementedException();

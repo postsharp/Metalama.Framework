@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Advices
             AdviceOptions? options )
             : base( aspect, targetDeclaration, null, scope, conflictBehavior, layerName, options ) { }
 
-        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( declarativeAdvices, diagnosticAdder );
         }

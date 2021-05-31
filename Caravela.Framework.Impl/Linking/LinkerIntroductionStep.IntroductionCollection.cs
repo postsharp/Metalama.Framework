@@ -61,8 +61,8 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var targetTypeSymbol = ((INamedType) interfaceImplementationIntroduction.ContainingDeclaration).GetSymbol();
 
-                // TODO: Select best syntax reference for partial classes.
-                var targetTypeDecl = (BaseTypeDeclarationSyntax) targetTypeSymbol.DeclaringSyntaxReferences.First().GetSyntax();
+                // Heuristic: select the file with the shortest path.
+                var targetTypeDecl = (BaseTypeDeclarationSyntax) targetTypeSymbol.DeclaringSyntaxReferences.OrderBy(x => x.SyntaxTree.FilePath.Length).First().GetSyntax();
 
                 if ( !this._introducedInterfacesByTargetTypeDecl.TryGetValue( targetTypeDecl, out var interfaceList ) )
                 {

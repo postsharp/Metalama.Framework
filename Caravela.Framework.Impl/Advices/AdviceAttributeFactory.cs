@@ -106,7 +106,7 @@ namespace Caravela.Framework.Impl.Advices
                                 throw new AssertionFailedException();
                         }
 
-                        advice.Initialize( null, diagnosticAdder );
+                        advice.Initialize( Array.Empty<Advice>(), diagnosticAdder );
 
                         if ( TryGetNamedArgument<string>( nameof(IntroduceAttribute.Name), out var name ) )
                         {
