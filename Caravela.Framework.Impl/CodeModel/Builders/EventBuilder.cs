@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             this._isEventField = isEventField;
             this.LinkerOptions = linkerOptions;
-            this.EventType = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof( EventHandler ) );
+            this.EventType = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(EventHandler) );
         }
 
         public IType EventType { get; set; }
@@ -71,18 +71,17 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             var @event =
                 this._isEventField
-                ? EventFieldDeclaration(
-                    List<AttributeListSyntax>(), // TODO: Attributes.
-                    GenerateModifierList(),
-                    VariableDeclaration(
-                        (TypeSyntax) syntaxGenerator.TypeExpression( this.EventType.GetSymbol() ),
-                        SeparatedList(
-                            new[]
-                            {
-                                VariableDeclarator( Identifier( this.Name ), null, null ), // TODO: Initializer.
-                            } ) ) )
-                : throw new NotImplementedException();
-
+                    ? EventFieldDeclaration(
+                        List<AttributeListSyntax>(), // TODO: Attributes.
+                        GenerateModifierList(),
+                        VariableDeclaration(
+                            (TypeSyntax) syntaxGenerator.TypeExpression( this.EventType.GetSymbol() ),
+                            SeparatedList(
+                                new[]
+                                {
+                                    VariableDeclarator( Identifier( this.Name ), null, null ) // TODO: Initializer.
+                                } ) ) )
+                    : throw new NotImplementedException();
 
             return new[]
             {

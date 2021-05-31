@@ -62,7 +62,8 @@ namespace Caravela.Framework.Impl.Linking
                 var targetTypeSymbol = ((INamedType) interfaceImplementationIntroduction.ContainingDeclaration).GetSymbol();
 
                 // Heuristic: select the file with the shortest path.
-                var targetTypeDecl = (BaseTypeDeclarationSyntax) targetTypeSymbol.DeclaringSyntaxReferences.OrderBy(x => x.SyntaxTree.FilePath.Length).First().GetSyntax();
+                var targetTypeDecl =
+                    (BaseTypeDeclarationSyntax) targetTypeSymbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).First().GetSyntax();
 
                 if ( !this._introducedInterfacesByTargetTypeDecl.TryGetValue( targetTypeDecl, out var interfaceList ) )
                 {

@@ -8,7 +8,6 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -32,9 +31,9 @@ namespace Caravela.Framework.Impl.Advices
             IMethod? removeTemplateMethod,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
-            string layerName,
+            string? layerName,
             AdviceOptions? options )
-            : base( aspect, targetDeclaration, eventTemplate, scope, conflictBehavior, layerName, options ) 
+            : base( aspect, targetDeclaration, eventTemplate, scope, conflictBehavior, layerName, options )
         {
             this._addTemplateMethod = addTemplateMethod;
             this._removeTemplateMethod = removeTemplateMethod;
@@ -44,7 +43,7 @@ namespace Caravela.Framework.Impl.Advices
                 this.TargetDeclaration,
                 eventTemplate?.Name ?? explicitName.AssertNotNull(),
                 eventTemplate != null && IsEventField( eventTemplate ),
-                options?.LinkerOptions );                
+                options?.LinkerOptions );
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
@@ -53,7 +52,9 @@ namespace Caravela.Framework.Impl.Advices
 
             // TODO: Checks.
 
-            this.MemberBuilder.EventType = (this.TemplateMember?.EventType ?? this._addTemplateMethod?.Parameters.FirstOrDefault().AssertNotNull().ParameterType).AssertNotNull();
+            this.MemberBuilder.EventType =
+                (this.TemplateMember?.EventType ?? this._addTemplateMethod?.Parameters.FirstOrDefault().AssertNotNull().ParameterType).AssertNotNull();
+
             this.MemberBuilder.Accessibility = (this.TemplateMember?.Accessibility ?? this._addTemplateMethod?.Accessibility).AssertNotNull();
         }
 

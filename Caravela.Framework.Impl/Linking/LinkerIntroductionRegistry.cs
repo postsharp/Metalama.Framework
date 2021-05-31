@@ -132,14 +132,15 @@ namespace Caravela.Framework.Impl.Linking
             var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedMember.Syntax );
 
             SyntaxNode symbolSyntax;
-            if (intermediateSyntax is EventFieldDeclarationSyntax eventFieldSyntax)
+
+            if ( intermediateSyntax is EventFieldDeclarationSyntax eventFieldSyntax )
             {
                 symbolSyntax = eventFieldSyntax.Declaration.Variables.First();
             }
             else
-            { 
+            {
                 symbolSyntax = intermediateSyntax;
-            }    
+            }
 
             return this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree ).GetDeclaredSymbol( symbolSyntax ).AssertNotNull();
         }

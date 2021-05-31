@@ -61,12 +61,13 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         // Take the initial position of the target type.
                         var syntaxReference =
-                            interfaceIntroduction.ContainingDeclaration.GetSymbol().AssertNotNull()
-                            .DeclaringSyntaxReferences
-                            .Where( x => x.SyntaxTree == introduction.TargetSyntaxTree )
-                            .Single();
+                            interfaceIntroduction.ContainingDeclaration.GetSymbol()
+                                .AssertNotNull()
+                                .DeclaringSyntaxReferences
+                                .Where( x => x.SyntaxTree == introduction.TargetSyntaxTree )
+                                .Single();
 
-                        var typeDeclSyntax = (BaseTypeDeclarationSyntax)syntaxReference.GetSyntax();
+                        var typeDeclSyntax = (BaseTypeDeclarationSyntax) syntaxReference.GetSyntax();
 
                         var semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
 
