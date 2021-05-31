@@ -1,4 +1,6 @@
-﻿using Caravela.Framework.Aspects;
+﻿#pragma warning disable CS0067
+
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
