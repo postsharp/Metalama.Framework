@@ -90,6 +90,7 @@ namespace Caravela.Framework.Impl.Templating
                 return false;
             }
 
+            // TODO: Reporting diagnostics here can result in duplicate reports because there may be several templates in one syntax tree.
             var sourceDiagnostics = semanticModel.GetDiagnostics( sourceSyntaxRoot.Span, cancellationToken );
 
             if ( sourceDiagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
@@ -105,6 +106,7 @@ namespace Caravela.Framework.Impl.Templating
             // Compile the syntax tree.
             var templateCompilerRewriter = new TemplateCompilerRewriter(
                 templateName,
+                semanticModel.Compilation,
                 compileTimeCompilation,
                 this._syntaxTreeAnnotationMap,
                 diagnostics,

@@ -17,7 +17,7 @@ namespace Caravela.Framework.Eligibility
         /// description, dependencies, or layers.</param>
         void BuildEligibility( IEligibilityBuilder<T> builder )
 #if NETCOREAPP3_1
-            {}
+            { }
 #else
             ;
 #endif

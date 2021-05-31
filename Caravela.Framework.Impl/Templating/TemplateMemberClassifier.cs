@@ -22,14 +22,14 @@ namespace Caravela.Framework.Impl.Templating
         private readonly ISymbolClassifier _symbolClassifier;
 
         public TemplateMemberClassifier(
-            Compilation compilation,
+            Compilation runTimeCompilation,
             SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
             IServiceProvider serviceProvider )
         {
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
-            this._symbolClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
+            this._symbolClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
 
-            var reflectionMapper = ReflectionMapper.GetInstance( compilation );
+            var reflectionMapper = ReflectionMapper.GetInstance( runTimeCompilation );
             this._metaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
         }
 

@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -20,14 +21,13 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     public class ReferenceAssemblyLocator
     {
-        private readonly string _projectText;
         private readonly string _cacheDirectory;
+        private const string _frameworkAssemblyName = "Caravela.Framework";
 
         /// <summary>
         /// Gets the name (without path and extension) of Caravela assemblies.
         /// </summary>
-        public ImmutableArray<string> CaravelaAssemblyNames { get; } = ImmutableArray.Create(
-            "Caravela.Framework",
+        private ImmutableArray<string> CaravelaImplementationAssemblyNames { get; } = ImmutableArray.Create(
             "Caravela.Framework.Sdk",
             "Caravela.Framework.Impl" );
 
@@ -49,15 +49,60 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <summary>
         /// Gets the full path of all standard assemblies, including Caravela, Roslyn and .NET standard.
         /// </summary>
-        public ImmutableArray<string> StandardAssemblyPaths { get; }
+        public ImmutableArray<MetadataReference> StandardCompileTimeMetadataReferences { get; }
 
         public ReferenceAssemblyLocator( IServiceProvider serviceProvider )
         {
             this._cacheDirectory = serviceProvider.GetService<IDirectoryOptions>().AssemblyLocatorCacheDirectory;
 
+            this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
+
+            this.SystemAssemblyNames = this.SystemAssemblyPaths
+                .Select( Path.GetFileNameWithoutExtension )
+                .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
+
+            this.StandardAssemblyNames = this.CaravelaImplementationAssemblyNames
+                .Concat( _frameworkAssemblyName )
+                .Concat( this.SystemAssemblyPaths )
+                .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
+
+            // Make sure all necessary assemblies are loaded in the current AppDomain.
+            _ = new AspectWeaverAttribute( null! );
+            _ = meta.CompileTime<object>( null );
+            
+            // Get our public API assembly in its .NET Standard 2.0 build.
+            var frameworkAssemblyReference = (MetadataReference)
+                MetadataReference.CreateFromStream( this.GetType().Assembly.GetManifestResourceStream( _frameworkAssemblyName + ".dll" ) );
+            
+            // Get implementation assembly paths from the current AppDomain
+            var caravelaImplementationPaths = AppDomain.CurrentDomain.GetAssemblies()
+                .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
+                .Select( a => a.Location )
+                .Where( path => this.CaravelaImplementationAssemblyNames.Contains( Path.GetFileNameWithoutExtension( path ) ) )
+                .ToList();
+
+            // Assert that we found everything we need, because debugging is difficult when this step goes wrong.
+            foreach ( var assemblyName in this.CaravelaImplementationAssemblyNames )
+            {
+                if ( !caravelaImplementationPaths.Any( a => a.EndsWith( assemblyName + ".dll", StringComparison.OrdinalIgnoreCase ) ) )
+                {
+                    throw new AssertionFailedException( $"Cannot find {assemblyName}." );
+                }
+            }
+
+            this.StandardCompileTimeMetadataReferences = 
+                this.SystemAssemblyPaths
+                    .Concat( caravelaImplementationPaths )
+                    .Select( c => (MetadataReference) MetadataReference.CreateFromFile( c ) )
+                    .Prepend( frameworkAssemblyReference )
+                    .ToImmutableArray();
+        }
+
+        private IEnumerable<string> GetSystemAssemblyPaths()
+        {
             var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
 
-            this._projectText =
+            var projectText =
                 $@"
 <Project Sdk='Microsoft.NET.Sdk'>
   <PropertyGroup>
@@ -66,47 +111,13 @@ namespace Caravela.Framework.Impl.CompileTime
   <ItemGroup>
     <PackageReference Include='Microsoft.CSharp' Version='{metadataReader.GetPackageVersion( "Microsoft.CSharp" )}' />
     <PackageReference Include='Microsoft.CodeAnalysis.CSharp' Version='{metadataReader.GetPackageVersion( "Microsoft.CodeAnalysis.CSharp" )}' />
+    <PackageReference Include='System.Collections.Immutable' Version='{metadataReader.GetPackageVersion( "System.Collections.Immutable" )}' />
   </ItemGroup>
   <Target Name='WriteReferenceAssemblies' DependsOnTargets='FindReferenceAssembliesForReferences'>
     <WriteLinesToFile File='assemblies.txt' Overwrite='true' Lines='@(ReferencePathWithRefAssemblies)' />
   </Target>
 </Project>";
-
-            this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
-
-            this.SystemAssemblyNames = this.SystemAssemblyPaths
-                .Select( Path.GetFileNameWithoutExtension )
-                .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
-
-            this.StandardAssemblyNames = this.CaravelaAssemblyNames
-                .Concat( this.SystemAssemblyPaths )
-                .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
-
-            // Make sure all necessary assemblies are loaded in the current AppDomain.
-            _ = new AspectWeaverAttribute( null! );
-            _ = meta.CompileTime<object>( null );
-
-            // Get assembly paths from the current AppDomain
-            var caravelaPaths = AppDomain.CurrentDomain.GetAssemblies()
-                .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
-                .Select( a => a.Location )
-                .Where( path => this.CaravelaAssemblyNames.Contains( Path.GetFileNameWithoutExtension( path ) ) )
-                .ToList();
-
-            // Assert that we found everything we need, because debugging is difficult when this step goes wrong.
-            foreach ( var assemblyName in this.CaravelaAssemblyNames )
-            {
-                if ( !caravelaPaths.Any( a => a.EndsWith( assemblyName + ".dll", StringComparison.OrdinalIgnoreCase ) ) )
-                {
-                    throw new AssertionFailedException( $"Cannot find {assemblyName}." );
-                }
-            }
-
-            this.StandardAssemblyPaths = this.SystemAssemblyPaths.Concat( caravelaPaths ).ToImmutableArray();
-        }
-
-        private IEnumerable<string> GetSystemAssemblyPaths()
-        {
+            
             var tempProjectDirectory = Path.Combine( this._cacheDirectory, nameof(ReferenceAssemblyLocator) );
 
             using var mutex = MutexHelper.WithGlobalLock( tempProjectDirectory );
@@ -124,7 +135,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             Directory.CreateDirectory( tempProjectDirectory );
 
-            File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), this._projectText );
+            File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), projectText );
 
             var psi = new ProcessStartInfo( "dotnet", "build -t:WriteReferenceAssemblies" )
             {

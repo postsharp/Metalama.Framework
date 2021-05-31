@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl
                 var builder = new AspectClassBuilder( this );
                 this._prototypeAspectInstance.BuildAspectClass( builder );
 
-                this._layers = builder.Layers.Prepend( null ).Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
+                this._layers = builder.Layers.As<string?>().Prepend( null ).Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
             }
 
             // TODO: get all eligibility rules from the prototype instance and combine them into a single rule.

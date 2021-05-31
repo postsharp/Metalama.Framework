@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System;
@@ -130,6 +131,8 @@ namespace Caravela.Framework.Impl.Templating.Mapping
 
             return file;
         }
+
+        public static TextMapFile? ReadForSource( string path ) => Read( Path.ChangeExtension( path, ".map" ) );
 
         private static bool TryRead( BinaryReader reader, out TextMapFile? file )
         {

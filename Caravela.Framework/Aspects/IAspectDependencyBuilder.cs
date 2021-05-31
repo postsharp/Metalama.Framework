@@ -6,6 +6,11 @@ using System;
 
 namespace Caravela.Framework.Aspects
 {
+    /// <summary>
+    /// Exposes methods that allows to express the dependencies of the aspect. This object is available on the <see cref="IAspectClassBuilder.Dependencies"/>
+    /// property of the <see cref="IAspectClassBuilder"/> interface and can be called from implementations of the <see cref="IAspect.BuildAspectClass(IAspectClassBuilder)"/>
+    /// method.
+    /// </summary>
     [InternalImplement]
     public interface IAspectDependencyBuilder
     {

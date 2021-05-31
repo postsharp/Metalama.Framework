@@ -198,8 +198,7 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             var assemblyLocator = this._serviceProvider.GetService<ReferenceAssemblyLocator>();
 
-            var standardReferences = assemblyLocator.StandardAssemblyPaths
-                .Select( path => MetadataReference.CreateFromFile( path ) );
+            var standardReferences = assemblyLocator.StandardCompileTimeMetadataReferences;
 
             return CSharpCompilation.Create(
                     assemblyName,
@@ -423,7 +422,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     manifest,
                     outputPaths.Pe,
                     outputPaths.Directory,
-                    TextMapFile.Read );
+                    TextMapFile.ReadForSource );
 
                 this._cache.Add( projectHash, project );
 
