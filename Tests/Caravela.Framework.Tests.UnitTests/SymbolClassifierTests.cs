@@ -29,6 +29,7 @@ namespace Caravela.Framework.Tests.UnitTests
 using Caravela.Framework.Aspects;
 class C : IAspect 
 {
+ public void BuildAspectClass( IAspectClassBuilder builder ) { }
   void M() {}
   int F;
 

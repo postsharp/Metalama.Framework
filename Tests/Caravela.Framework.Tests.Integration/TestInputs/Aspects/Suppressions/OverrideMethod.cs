@@ -37,6 +37,8 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMet
         }
 
         public void BuildEligibility(IEligibilityBuilder<IMethod> builder) { }
+        
+        public void BuildAspectClass( IAspectClassBuilder builder ) { }
     }
     
     [TestOutput]

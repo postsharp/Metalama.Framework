@@ -29,6 +29,8 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
         }
 
         public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
+        
+        public void BuildAspectClass( IAspectClassBuilder builder ) { }
 
         //[Template]
         //public int AutoProperty { get; set; }

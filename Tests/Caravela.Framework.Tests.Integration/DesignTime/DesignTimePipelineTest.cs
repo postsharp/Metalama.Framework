@@ -164,7 +164,8 @@ class MyAspect : System.Attribute, IAspect<IMethod>
         aspectBuilder.Diagnostics.Report( _description, this.Version );
    }
 
-public void BuildEligibility( IEligibilityBuilder<IMethod> builder ) {}
+public void BuildEligibility( IEligibilityBuilder<IMethod> builder ) { }
+public void BuildAspectClass( IAspectClassBuilder builder ) { }
 }
 ";
 

@@ -10,9 +10,9 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Applying.AppliedToCompilat
 {
     public class MyAspect : Attribute, IAspect<ICompilation>
     {
-        public void BuildAspect(IAspectBuilder<ICompilation> builder)
-        {
-        }
+        public void BuildAspect(IAspectBuilder<ICompilation> builder) { }
+
+        public void BuildAspectClass( IAspectClassBuilder builder ) { }
 
         public void BuildEligibility(IEligibilityBuilder<ICompilation> builder) { }
     }

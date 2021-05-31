@@ -8,13 +8,18 @@ namespace Caravela.Framework.Eligibility
     public interface IEligible<in T>
         where T : class, IDeclaration
     {
-        // Constraints on implementation:
-        //  * must be public
-        //  * must call the base method as the first statement
-        //  * cannot reference any instance member (except the call to the base method).
-
-        // On .NET Core, this method could have an empty default implementation.
-
-        void BuildEligibility( IEligibilityBuilder<T> builder );
+        /// <summary>
+        /// Configures the eligibility of the aspect or attribute.
+        /// Implementations are not allowed to reference non-static members.
+        /// Implementations must call the implementation of the base class if it exists.
+        /// </summary>
+        /// <param name="builder">An object that allows the aspect to configure characteristics like
+        /// description, dependencies, or layers.</param>
+        void BuildEligibility( IEligibilityBuilder<T> builder )
+#if NETCOREAPP3_1
+            {}
+#else
+            ;
+#endif
     }
 }

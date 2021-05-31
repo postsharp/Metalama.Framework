@@ -15,6 +15,8 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
 
         public void BuildEligibility(IEligibilityBuilder<IProperty> builder) { }
+        
+        public void BuildAspectClass( IAspectClassBuilder builder ) { }
 
         [Template]
         public dynamic GetTemplate()

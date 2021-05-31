@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -67,6 +68,7 @@ namespace Caravela.Framework.Tests.UnitTests
                         MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
                         MetadataReference.CreateFromFile( typeof(DynamicAttribute).Assembly.Location ),
                         MetadataReference.CreateFromFile( typeof(TestBase).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof(ImmutableArray).Assembly.Location ),
                         MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ) );
             }
 

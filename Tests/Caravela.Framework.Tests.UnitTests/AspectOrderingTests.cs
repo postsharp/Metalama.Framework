@@ -4,24 +4,41 @@
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.TestFramework;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests
 {
     public class AspectOrderingTests : TestBase
     {
-        private static string GetOrderedAspectLayers( string code, params string[] aspectNames )
+        private string GetOrderedAspectLayers( string code, params string[] aspectNames )
         {
             var compilation = CreateCompilationModel( code );
             DiagnosticList diagnostics = new();
 
+            using var isolatedTest = this.WithIsolatedTest();
+
+            var compileTimeDomain = new UnloadableCompileTimeDomain();
+            var loader = CompileTimeProjectLoader.Create( compileTimeDomain, isolatedTest.ServiceProvider );
+
+            Assert.True(
+                loader.TryGetCompileTimeProject(
+                    compilation.RoslynCompilation,
+                    null,
+                    new DiagnosticList(),
+                    false,
+                    CancellationToken.None,
+                    out var compileTimeProject ) );
+
             var aspectTypeFactory = new AspectClassMetadataFactory( new AspectDriverFactory( compilation.RoslynCompilation, ImmutableArray<object>.Empty ) );
 
             var aspectNamedTypes = aspectNames.Select( name => compilation.DeclaredTypes.OfName( name ).Single().GetSymbol() ).ToReadOnlyList();
-            var aspectTypes = aspectTypeFactory.GetAspectClasses( aspectNamedTypes, null!, diagnostics ).ToImmutableArray();
+            var aspectTypes = aspectTypeFactory.GetAspectClasses( aspectNamedTypes, compileTimeProject!, diagnostics ).ToImmutableArray();
             var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
 
             var dependencies = new IAspectOrderingSource[]
@@ -47,10 +64,14 @@ namespace Caravela.Framework.Tests.UnitTests
         public void OneSingleLayerAspect()
         {
             var code = @"
-class Aspect1 {}
+using Caravela.Framework.Aspects;
+class Aspect1 : IAspect 
+{
+public void BuildAspectClass( IAspectClassBuilder builder ) { }
+}
 ";
 
-            var ordered = GetOrderedAspectLayers( code, "Aspect1" );
+            var ordered = this.GetOrderedAspectLayers( code, "Aspect1" );
             Assert.Equal( "Aspect1 => 0", ordered );
         }
 
@@ -59,11 +80,16 @@ class Aspect1 {}
         {
             var code = @"
 using Caravela.Framework.Aspects;
-[ProvidesAspectLayersAttribute(""Layer1"")]
-class Aspect1 {}
+class Aspect1 : IAspect
+{
+    public void BuildAspectClass( IAspectClassBuilder builder ) 
+    {
+        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
+    }
+}
 ";
 
-            var ordered = GetOrderedAspectLayers( code, "Aspect1" );
+            var ordered = this.GetOrderedAspectLayers( code, "Aspect1" );
             Assert.Equal( "Aspect1 => 0, Aspect1:Layer1 => 1", ordered );
         }
 
@@ -72,14 +98,24 @@ class Aspect1 {}
         {
             var code = @"
 using Caravela.Framework.Aspects;
-[ProvidesAspectLayersAttribute(""Layer1"")]
-class Aspect1 {}
+class Aspect1 : IAspect
+{
+    public void BuildAspectClass( IAspectClassBuilder builder ) 
+    {
+        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
+    }
+}
 
-[ProvidesAspectLayersAttribute(""Layer1"")]
-class Aspect2 {}
+class Aspect2 : IAspect
+{
+    public void BuildAspectClass( IAspectClassBuilder builder ) 
+    {
+        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
+    }
+}
 ";
 
-            var ordered = GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
+            var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
             Assert.Equal( "Aspect1 => 0, Aspect2 => 0, Aspect1:Layer1 => 1, Aspect2:Layer1 => 1", ordered );
         }
 
@@ -91,14 +127,23 @@ using Caravela.Framework.Aspects;
 
 [assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1), typeof(Aspect3) ) ]
 
-class Aspect3{}
+class Aspect3 : IAspect
+{
+    public void BuildAspectClass( IAspectClassBuilder builder )  { }
+}
 
-class Aspect1 {}
+class Aspect1 : IAspect
+{
+    public void BuildAspectClass( IAspectClassBuilder builder )  { }
+}
 
-class Aspect2 {}
+class Aspect2 : IAspect
+{
+    public void BuildAspectClass( IAspectClassBuilder builder )  { }
+}
 ";
 
-            var ordered = GetOrderedAspectLayers( code, "Aspect1", "Aspect2", "Aspect3" );
+            var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2", "Aspect3" );
             Assert.Equal( "Aspect3 => 0, Aspect1 => 1, Aspect2 => 2", ordered );
         }
 
@@ -117,7 +162,7 @@ class Aspect1 {}
 class Aspect2 {}
 ";
 
-            var ordered = GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
+            var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
             Assert.Equal( "Aspect1 => 0, Aspect1:Layer1 => 1, Aspect2 => 2, Aspect2:Layer1 => 3", ordered );
         }
 
@@ -129,14 +174,25 @@ using Caravela.Framework.Aspects;
 
 [assembly: AspectOrder( ""Aspect2"", ""Aspect1"" ) ]
 
-[ProvidesAspectLayersAttribute(""Layer1"")]
-class Aspect1 {}
+class Aspect1  : IAspect
+{
+    public void BuildAspectClass( IAspectClassBuilder builder ) 
+    {
+        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
+    }
+}
 
 [ProvidesAspectLayersAttribute(""Layer1"")]
-class Aspect2 {}
+class Aspect2  : IAspect
+{
+    public void BuildAspectClass( IAspectClassBuilder builder ) 
+    {
+        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
+    }
+}
 ";
 
-            var ordered = GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
+            var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
             Assert.Equal( "Aspect1 => 0, Aspect1:Layer1 => 1, Aspect2 => 1, Aspect2:Layer1 => 2", ordered );
         }
 
@@ -146,13 +202,18 @@ class Aspect2 {}
             var code = @"
 using Caravela.Framework.Aspects;
 
-[ProvidesAspectLayersAttribute(""Layer1"")]
-class Aspect1 {}
+class Aspect1  : IAspect
+{
+    public void BuildAspectClass( IAspectClassBuilder builder ) 
+    {
+        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
+    }
+}
 
 class Aspect2 : Aspect1 {}
 ";
 
-            var ordered = GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
+            var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
             Assert.Equal( "Aspect1 => 0, Aspect2 => 0, Aspect1:Layer1 => 1, Aspect2:Layer1 => 1", ordered );
         }
     }
