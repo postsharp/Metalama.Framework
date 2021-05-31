@@ -13,6 +13,7 @@ internal class TargetClass
         ;
         return;
     }
+
     [InnerOverride]
     [OuterOverride]
     public void TargetMethod_Void(int x, int y)
@@ -25,6 +26,7 @@ internal class TargetClass
         ;
         return;
     }
+
     [InnerOverride]
     [OuterOverride]
     public int TargetMethod_Int()
@@ -34,6 +36,7 @@ internal class TargetClass
         Console.WriteLine("This is the original method.");
         return 42;
     }
+
     [InnerOverride]
     [OuterOverride]
     public int TargetMethod_Int(int x, int y)

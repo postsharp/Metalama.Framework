@@ -28,6 +28,9 @@ namespace Caravela.Framework.Impl.Transformations
 
                 case IProperty property:
                     return GetMemberSyntaxModifierList( property );
+
+                case IEvent @event:
+                    return GetMemberSyntaxModifierList( @event );
             }
 
             throw new AssertionFailedException();
@@ -111,9 +114,9 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-        public static NameSyntax GetSyntaxTypeName( this IType type )
+        public static TypeSyntax GetSyntaxType( this IType type )
         {
-            return (NameSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( type.GetSymbol() );
+            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( type.GetSymbol() );
         }
 
         public static TypeSyntax GetSyntaxReturnType( this IMethod method )

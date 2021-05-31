@@ -83,19 +83,29 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             (IDeclaration) methodBase,
             common )
         {
-            // TODO: if the method is a getter/setter/adder/remover, set the event or property.
-
             this._methodBase = methodBase;
             this._type = methodBase.DeclaringType;
             this._parameters = new AdviceParameterList( methodBase );
+
+            switch ( methodBase.MethodKind )
+            {
+                case MethodKind.EventAdd:
+                case MethodKind.EventRemove:
+                case MethodKind.EventRaise:
+                    this._event = (IEvent)methodBase.ContainingDeclaration.AssertNotNull();
+                    break;
+
+                case MethodKind.PropertyGet:
+                case MethodKind.PropertySet:
+                    this._fieldOrProperty = (IProperty)methodBase.ContainingDeclaration.AssertNotNull();
+                    break;
+            }
         }
 
         public MetaApi( IFieldOrProperty fieldOrProperty, MetaApiProperties common ) : this(
             (IDeclaration) fieldOrProperty,
             common )
         {
-            // TODO: if the method is a getter/setter/adder/remover, set the event or property.
-
             this._fieldOrProperty = fieldOrProperty;
             this._type = fieldOrProperty.DeclaringType;
 

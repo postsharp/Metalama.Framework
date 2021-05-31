@@ -1,0 +1,2 @@
+// CompileTimeAspectPipeline.TryExecute failed. 
+// Error CR1000 on `TargetClass`: `The aspect 'Introduction' cannot introduce member 'InterfaceMethod' into type 'TargetClass' because it is already defined in type 'BaseClass'.`

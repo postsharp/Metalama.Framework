@@ -7,7 +7,7 @@ using System;
 #pragma warning disable CS0169
 #pragma warning disable CS0414
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Aspect
+namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_GetSet
 {
     // Tests single OverrideProperty aspect with trivial template on methods with trivial bodies.
 
@@ -33,52 +33,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     internal class TargetClass
     {
         [Override]
-        private int _instanceField;
-
-        [Override]
-        private int _initializerField = 42;
-
-        // Needs to change accesses in ctors to the newly defined backing field.
-        // Linker needs to rewrite ctor bodies if there is any such field.
-        [Override]
-        private readonly int _readOnlyField;
-
-        [Override]
-        private readonly int _initializerReadOnlyField = 42;
-
-        [Override]
-        public int PublicInstanceField;
-
-        [Override]
-        public static int PublicStaticField;
-
-        // Same as readonly field.
-        [Override]
-        public int AutoProperty { get; }
-
-        [Override]
-        public int AutoPropertyWithSetter { get; set; }
-
-        [Override]
-        public int AutoPropertyWithPrivateSetter { get; private set; }
-
-        [Override]
-        public int AutoPropertyWithInitSetter { get; init; }
-
-        [Override]
-        public int AutoPropertyWithInitializer { get; set; } = 42;
-
-        [Override]
-        public int ExpressionProperty => 42;
-
-        [Override]
-        public static int StaticProperty
+        public int Property
         {
             get
             {
                 Console.WriteLine("This is the original getter.");
                 return 42;
             }
+
             set
             {
                 Console.WriteLine($"This is the original setter, setting {value}.");
@@ -86,13 +48,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
 
         [Override]
-        public int InstanceProperty
+        public static int Static_Property
         {
             get
             {
                 Console.WriteLine("This is the original getter.");
                 return 42;
             }
+
             set
             {
                 Console.WriteLine($"This is the original setter, setting {value}.");
@@ -100,33 +63,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
 
         [Override]
-        public int InitProperty
+        public int RestrictedGetProperty
         {
-            get
+            private get
             {
                 Console.WriteLine("This is the original getter.");
                 return 42;
             }
 
-            init
-            {
-                Console.WriteLine($"This is the original setter, setting {value}.");
-            }
-        }
-
-        [Override]
-        public int GetterProperty
-        {
-            get
-            {
-                Console.WriteLine("This is the original getter.");
-                return 42;
-            }
-        }
-
-        [Override]
-        public int SetterProperty
-        {
             set
             {
                 Console.WriteLine($"This is the original setter, setting {value}.");
@@ -134,22 +78,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
 
         [Override]
-        public int InitSetterProperty
+        public static int Static_RestrictedGetProperty
         {
-            init
-            {
-                Console.WriteLine($"This is the original setter, setting {value}.");
-            }
-        }
-
-        [Override]
-        protected int ProtectedProperty
-        {
-            get
+            private get
             {
                 Console.WriteLine("This is the original getter.");
                 return 42;
             }
+
             set
             {
                 Console.WriteLine($"This is the original setter, setting {value}.");
@@ -157,13 +93,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
 
         [Override]
-        public int DifferentAccessibilityProperty
+        public int RestrictedSetProperty
         {
             get
             {
                 Console.WriteLine("This is the original getter.");
                 return 42;
             }
+
             private set
             {
                 Console.WriteLine($"This is the original setter, setting {value}.");
@@ -171,17 +108,64 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
 
         [Override]
-        protected int ExpressionBodiedProperty
+        public static int Static_RestrictedSetProperty
+        {
+            get
+            {
+                Console.WriteLine("This is the original getter.");
+                return 42;
+            }
+
+            private set
+            {
+                Console.WriteLine($"This is the original setter, setting {value}.");
+            }
+        }
+
+        [Override]
+        public int GetExpressionProperty
         {
             get => 42;
+
+            set
+            {
+                Console.WriteLine($"This is the original setter, setting {value}.");
+            }
+        }
+
+        [Override]
+        public static int Static_GetExpressionProperty
+        {
+            get => 42;
+
+            set
+            {
+                Console.WriteLine($"This is the original setter, setting {value}.");
+            }
+        }
+
+        [Override]
+        public int InitExpressionProperty
+        {
+            get
+            {
+                Console.WriteLine("This is the original getter.");
+                return 42;
+            }
+
             set => Console.WriteLine($"This is the original setter, setting {value}.");
         }
 
-        public TargetClass()
+        [Override]
+        public static int Static_InitExpressionProperty
         {
-            this._readOnlyField = 42;
-            this._initializerReadOnlyField = 27;
-            this.AutoProperty = 42;
+            get
+            {
+                Console.WriteLine("This is the original getter.");
+                return 42;
+            }
+
+            set => Console.WriteLine($"This is the original setter, setting {value}.");
         }
     }
 }

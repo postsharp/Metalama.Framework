@@ -1,0 +1,11 @@
+// CompileTimeAspectPipeline.TryExecute failed. 
+// Error CR0112 on `SetPropertyTemplate`: `The advice 'NotifyPropertyChangedAttribute.SetPropertyTemplate()' threw 'InvalidUserCodeException' when applied to 'TargetClass.Property2.set':
+// Caravela.Framework.Impl.InvalidUserCodeException: Test.cs(47,37): error CR0115: The advice 'NotifyPropertyChangedAttribute.SetPropertyTemplate()' cannot use 'meta.Property' in an advice applied to method 'TargetClass.Property2.set' because there is no 'IProperty' in the context of a method.
+//    at Caravela.Framework.Impl.Templating.MetaModel.MetaApi.get_Property()
+//    at Caravela.Framework.Aspects.meta.get_Property()
+//    at Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.NotifyPropertyChanged.NotifyPropertyChangedAttribute.SetPropertyTemplate_Template()`
+// Error CR0112 on `SetPropertyTemplate`: `The advice 'NotifyPropertyChangedAttribute.SetPropertyTemplate()' threw 'InvalidUserCodeException' when applied to 'TargetClass.Property1.set':
+// Caravela.Framework.Impl.InvalidUserCodeException: Test.cs(45,37): error CR0115: The advice 'NotifyPropertyChangedAttribute.SetPropertyTemplate()' cannot use 'meta.Property' in an advice applied to method 'TargetClass.Property1.set' because there is no 'IProperty' in the context of a method.
+//    at Caravela.Framework.Impl.Templating.MetaModel.MetaApi.get_Property()
+//    at Caravela.Framework.Aspects.meta.get_Property()
+//    at Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.NotifyPropertyChanged.NotifyPropertyChangedAttribute.SetPropertyTemplate_Template()`

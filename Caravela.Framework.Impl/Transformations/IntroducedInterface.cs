@@ -115,7 +115,7 @@ namespace Caravela.Framework.Impl.Transformations
                         PropertyDeclaration(
                             List<AttributeListSyntax>(),
                             interfaceProperty.GetSyntaxModifierList(),
-                            interfaceProperty.Type.GetSyntaxTypeName(),
+                            interfaceProperty.Type.GetSyntaxType(),
                             null,
                             Identifier( context.IntroductionNameProvider.GetInterfaceImplementationName( this.Advice.AspectLayerId, interfaceProperty ) ),
                             GetPropertyAccessorList( targetProperty ),
@@ -143,15 +143,13 @@ namespace Caravela.Framework.Impl.Transformations
                 introducedMembers.Add(
                     new IntroducedMember(
                         this,
-                        PropertyDeclaration(
+                        EventDeclaration(
                             List<AttributeListSyntax>(),
                             interfaceEvent.GetSyntaxModifierList(),
-                            interfaceEvent.EventType.GetSyntaxTypeName(),
+                            interfaceEvent.EventType.GetSyntaxType(),
                             null,
                             Identifier( context.IntroductionNameProvider.GetInterfaceImplementationName( this.Advice.AspectLayerId, interfaceEvent ) ),
-                            GetEventAccessorList( targetEvent ),
-                            null,
-                            null ),
+                            GetEventAccessorList( targetEvent ) ),
                         this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.InterfaceImplementation,
                         this.Advice.LinkerOptions,
