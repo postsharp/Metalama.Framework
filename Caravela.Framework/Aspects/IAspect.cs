@@ -41,6 +41,11 @@ namespace Caravela.Framework.Aspects
         /// using the <paramref name="builder"/> parameter.
         /// </summary>
         /// <param name="builder">An object that allows the aspect to add advices, child aspects and validators.</param>
-        void BuildAspect( IAspectBuilder<T> builder );
+        void BuildAspect( IAspectBuilder<T> builder )
+#if NETCOREAPP3_1
+            {}
+#else
+            ;
+#endif
     }
 }
