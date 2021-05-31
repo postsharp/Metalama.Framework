@@ -8,8 +8,6 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     public class ImplementedInterfaceList : List<INamedType>, IImplementedInterfaceList
     {
-        public ImplementedInterfaceList(IEnumerable<INamedType> interfaces) : base(interfaces)
-        {
-        }
+        public ImplementedInterfaceList( IEnumerable<INamedType> interfaces ) : base( interfaces ) { }
     }
 }

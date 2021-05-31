@@ -102,6 +102,7 @@ namespace Caravela.Framework.Impl.Linking
                     case IEventSymbol eventSymbol:
 
                         var addBodySyntax = eventSymbol.AddMethod?.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax();
+
                         if ( addBodySyntax != null )
                         {
                             var addBodyVisitor = new MethodBodyWalker();
@@ -111,6 +112,7 @@ namespace Caravela.Framework.Impl.Linking
                         }
 
                         var removeBodySyntax = eventSymbol.RemoveMethod?.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax();
+
                         if ( removeBodySyntax != null )
                         {
                             var removeBodyVisitor = new MethodBodyWalker();
