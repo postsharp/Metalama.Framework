@@ -276,7 +276,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
             {
-                if ( this._currentContext.Scope == SymbolDeclarationScope.CompileTimeOnly && node.IsNameOf() )
+                if ( this._currentContext.Scope != SymbolDeclarationScope.RunTimeOnly && node.IsNameOf() )
                 {
                     var typeSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree )
                         .GetSymbolInfo( node.ArgumentList.Arguments[0].Expression )
@@ -293,7 +293,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public override SyntaxNode? VisitTypeOfExpression( TypeOfExpressionSyntax node )
             {
-                if ( this._currentContext.Scope == SymbolDeclarationScope.CompileTimeOnly )
+                if ( this._currentContext.Scope != SymbolDeclarationScope.RunTimeOnly )
                 {
                     var typeSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Type ).Symbol;
 

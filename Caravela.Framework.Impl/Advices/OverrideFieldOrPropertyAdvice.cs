@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -38,7 +39,7 @@ namespace Caravela.Framework.Impl.Advices
             this.SetTemplateMethod = setTemplateMethod;
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
+        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder ) { }
 
         public override AdviceResult ToResult( ICompilation compilation )
         {

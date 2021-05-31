@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
@@ -41,7 +42,7 @@ namespace Caravela.Framework.Impl.Advices
             this.MemberBuilder = null!;
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
             this.MemberBuilder.Accessibility = this.TemplateMember?.Accessibility ?? Accessibility.Private;
 

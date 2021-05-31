@@ -22,13 +22,13 @@ namespace Caravela.Framework.Impl.Linking
         {
             private readonly CompilationModel _compilation;
             private readonly ImmutableMultiValueDictionary<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
-            private readonly IntroducedMemberCollection _introducedMemberCollection;
+            private readonly IntroductionCollection _introducedMemberCollection;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
             public Rewriter(
-                IntroducedMemberCollection introducedMemberCollection,
+                IntroductionCollection introducedMemberCollection,
                 ImmutableMultiValueDictionary<IDeclaration, ScopedSuppression> diagnosticSuppressions,
                 CompilationModel compilation )
             {
@@ -126,6 +126,7 @@ namespace Caravela.Framework.Impl.Linking
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
             {
                 var members = new List<MemberDeclarationSyntax>( node.Members.Count );
+                var additionalBaseList = this._introducedMemberCollection.GetIntroducedInterfacesForTypeDecl( node );
 
                 using ( var classSuppressions = this.WithSuppressions( node ) )
                 {
@@ -143,7 +144,17 @@ namespace Caravela.Framework.Impl.Linking
 
                     AddIntroductionsOnPosition( node );
 
-                    return this.AddSuppression( node, classSuppressions.NewSuppressions ).WithMembers( List( members ) );
+                    node = this.AddSuppression( node, classSuppressions.NewSuppressions ).WithMembers( List( members ) );
+
+                    if ( additionalBaseList.Any() )
+                    {
+                        node = node.WithBaseList(
+                            node.BaseList != null
+                                ? BaseList( node.BaseList.Types.AddRange( additionalBaseList ) )
+                                : BaseList( SeparatedList( additionalBaseList ) ) );
+                    }
+
+                    return node;
                 }
 
                 // TODO: Try to avoid closure allocation.

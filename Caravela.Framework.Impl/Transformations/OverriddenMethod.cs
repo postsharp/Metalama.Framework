@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.Transformations
                             newMethodBody,
                             null ),
                         this.Advice.AspectLayerId,
-                        IntroducedMemberSemantic.MethodOverride,
+                        IntroducedMemberSemantic.Override,
                         this.LinkerOptions,
                         this.OverriddenDeclaration )
                 };

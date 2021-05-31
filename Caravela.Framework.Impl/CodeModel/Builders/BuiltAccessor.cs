@@ -90,6 +90,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         ISymbol IDeclarationRef<IMethod>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
 
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
+
         [return: RunTimeOnly]
         public MethodInfo ToMethodInfo()
         {

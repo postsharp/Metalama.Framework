@@ -4,6 +4,8 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -20,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public INamedType EventType => this.Compilation.Factory.GetNamedType( (INamedTypeSymbol) this._symbol.Type );
+        public IType EventType => this.Compilation.Factory.GetIType( this._symbol.Type );
 
         [Memo]
         public IMethod Adder => this.Compilation.Factory.GetMethod( this._symbol.AddMethod! );
@@ -34,6 +36,10 @@ namespace Caravela.Framework.Impl.CodeModel
             => this._symbol.RaiseMethod == null
                 ? new PseudoAccessor( this, AccessorSemantic.Raise )
                 : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );
+
+        [Memo]
+        public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
+            => this._symbol.ExplicitInterfaceImplementations.Select( e => this.Compilation.Factory.GetEvent( e ) ).ToList();
 
         public EventInfo ToEventInfo() => new CompileTimeEventInfo( this );
 

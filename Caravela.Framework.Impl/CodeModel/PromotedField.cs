@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using RefKind = Caravela.Framework.Code.RefKind;
 
@@ -74,6 +75,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public override bool IsReadOnly => this._symbol.IsReadOnly;
 
         public override bool IsAsync => false;
+
+        public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => Array.Empty<IProperty>();
 
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
 

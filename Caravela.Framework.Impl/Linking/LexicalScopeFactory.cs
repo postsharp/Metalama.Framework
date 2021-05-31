@@ -5,8 +5,10 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -53,6 +55,24 @@ namespace Caravela.Framework.Impl.Linking
                         // When we have an IOverriddenDeclaration, we know which symbol will be overwritten, so we take its lexical scope.
                         // All overrides of these same symbol will share the same scope.
                         return this.GetLexicalScope( overriddenDeclaration.OverriddenDeclaration );
+                    }
+
+                case IInterfaceImplementationIntroduction interfaceIntroduction:
+                    {
+                        // Take the initial position of the target type.
+                        var syntaxReference =
+                            interfaceIntroduction.ContainingDeclaration.GetSymbol().AssertNotNull()
+                            .DeclaringSyntaxReferences
+                            .Where( x => x.SyntaxTree == introduction.TargetSyntaxTree )
+                            .Single();
+
+                        var typeDeclSyntax = (BaseTypeDeclarationSyntax)syntaxReference.GetSyntax();
+
+                        var semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
+
+                        var symbols = semanticModel.LookupSymbols( typeDeclSyntax.OpenBraceToken.SpanStart );
+
+                        return new TemplateLexicalScope( symbols );
                     }
 
                 case IDeclaration declaration:

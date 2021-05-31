@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Validation;
 using System;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Aspects
 {
@@ -83,6 +84,36 @@ namespace Caravela.Framework.Aspects
             string removeTemplate,
             string? invokeTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AdviceOptions? options = null );
+
+        void IntroduceInterface(
+            INamedType targetType,
+            INamedType interfaceType,
+            bool explicitImplementation = true,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AdviceOptions? options = null );
+
+        void IntroduceInterface(
+            INamedType targetType,
+            Type interfaceType,
+            bool explicitImplementation = true,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AdviceOptions? options = null );
+
+        void IntroduceInterface(
+            INamedType targetType,
+            INamedType interfaceType,
+            IReadOnlyDictionary<IMember, IMember> memberMap,
+            bool explicitImplementation = true,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AdviceOptions? options = null );
+
+        void IntroduceInterface(
+            INamedType targetType,
+            Type interfaceType,
+            IReadOnlyDictionary<IMember, IMember> memberMap,
+            bool explicitImplementation = true,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AdviceOptions? options = null );
 

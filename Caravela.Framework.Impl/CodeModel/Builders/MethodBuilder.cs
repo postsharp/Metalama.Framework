@@ -84,6 +84,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
+        // TODO: When an interface is introduced, explicit implementation should appear here.
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
+
         public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, AspectLinkerOptions? linkerOptions )
             : base( parentAdvice, targetType, name )
         {

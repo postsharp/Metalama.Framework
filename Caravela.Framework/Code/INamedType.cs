@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Code
 {
@@ -34,9 +35,14 @@ namespace Caravela.Framework.Code
         INamedType? BaseType { get; }
 
         /// <summary>
+        /// Gets the list of all interfaces (recursive) that the current type implements.
+        /// </summary>
+        IImplementedInterfaceList AllImplementedInterfaces { get; }
+
+        /// <summary>
         /// Gets the list of interfaces that the current type implements.
         /// </summary>
-        IReadOnlyList<INamedType> ImplementedInterfaces { get; }
+        IImplementedInterfaceList ImplementedInterfaces { get; }
 
         /// <summary>
         /// Gets the namespace of the current type.
@@ -125,5 +131,20 @@ namespace Caravela.Framework.Code
         /// Gets the assembly that declared this type.
         /// </summary>
         IAssembly DeclaringAssembly { get; }
+
+        /// <summary>
+        /// Determines whether the type if subclass of the given class or interface.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        bool IsSubclassOf( INamedType type );
+
+        /// <summary>
+        /// Finds the the implementation of the given interface member that is valid for this type.
+        /// </summary>
+        /// <param name="interfaceMember"></param>
+        /// <param name="implementationMember"></param>
+        /// <returns></returns>
+        bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen(true)] out IMember? implementationMember );
     }
 }

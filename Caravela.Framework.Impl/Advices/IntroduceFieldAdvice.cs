@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using System;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -31,7 +32,7 @@ namespace Caravela.Framework.Impl.Advices
             this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, name, options?.LinkerOptions );
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
             throw new NotImplementedException();
         }
