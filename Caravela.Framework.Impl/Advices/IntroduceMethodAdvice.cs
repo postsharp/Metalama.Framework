@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Advices
             this.MemberBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Name, this.LinkerOptions );
         }
 
-        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( declarativeAdvices, diagnosticAdder );
 

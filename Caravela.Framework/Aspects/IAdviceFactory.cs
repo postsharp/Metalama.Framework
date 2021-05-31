@@ -96,7 +96,22 @@ namespace Caravela.Framework.Aspects
 
         void IntroduceInterface(
             INamedType targetType,
+            Type interfaceType,
+            bool explicitImplementation = true,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AdviceOptions? options = null );
+
+        void IntroduceInterface(
+            INamedType targetType,
             INamedType interfaceType,
+            IReadOnlyDictionary<IMember, IMember> memberMap,
+            bool explicitImplementation = true,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AdviceOptions? options = null );
+
+        void IntroduceInterface(
+            INamedType targetType,
+            Type interfaceType,
             IReadOnlyDictionary<IMember, IMember> memberMap,
             bool explicitImplementation = true,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
