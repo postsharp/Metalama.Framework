@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Advices
                 options?.LinkerOptions );
         }
 
-        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( declarativeAdvices, diagnosticAdder );
 

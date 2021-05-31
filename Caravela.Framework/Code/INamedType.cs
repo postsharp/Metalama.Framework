@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Code
 {
@@ -36,12 +37,12 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the list of all interfaces (recursive) that the current type implements.
         /// </summary>
-        IReadOnlyList<INamedType> AllImplementedInterfaces { get; }
+        IImplementedInterfaceList AllImplementedInterfaces { get; }
 
         /// <summary>
         /// Gets the list of interfaces that the current type implements.
         /// </summary>
-        IReadOnlyList<INamedType> ImplementedInterfaces { get; }
+        IImplementedInterfaceList ImplementedInterfaces { get; }
 
         /// <summary>
         /// Gets the namespace of the current type.
@@ -142,7 +143,8 @@ namespace Caravela.Framework.Code
         /// Finds the the implementation of the given interface member that is valid for this type.
         /// </summary>
         /// <param name="interfaceMember"></param>
+        /// <param name="implementationMember"></param>
         /// <returns></returns>
-        IMember? FindImplementationForInterfaceMember( IMember interfaceMember );
+        bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen(true)] out IMember? implementationMember );
     }
 }

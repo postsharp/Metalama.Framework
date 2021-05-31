@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
@@ -188,7 +189,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.Factory.GetNamedType( this.TypeSymbol.BaseType );
 
         [Memo]
-        public IReadOnlyList<INamedType> AllImplementedInterfaces
+        public IImplementedInterfaceList AllImplementedInterfaces
             => // TODO: Correct order after concat and distinct?            
                 (this.BaseType?.AllImplementedInterfaces ?? Enumerable.Empty<INamedType>())
                 .Concat(
@@ -198,18 +199,20 @@ namespace Caravela.Framework.Impl.CodeModel
                                 .OfType<IntroducedInterface>()
                                 .Select( i => i.InterfaceType ) ) )
                 .Distinct() // Remove duplicates (reimplementations of earlier interface by aspect).
-                .ToImmutableArray();
+                .ToImmutableArray()
+                .ToImplementedInterfaceList();
 
         [Memo]
-        public IReadOnlyList<INamedType> ImplementedInterfaces
+        public IImplementedInterfaceList ImplementedInterfaces
             => // TODO: Correct order after concat and distinct?            
                 this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
-                    .Concat(
-                        this.Compilation.GetObservableTransformationsOnElement( this )
-                            .OfType<IntroducedInterface>()
-                            .Select( i => i.InterfaceType ) )
-                    .Distinct() // Remove duplicates (reimplementations of earlier interface by aspect).
-                    .ToImmutableArray();
+                .Concat(
+                    this.Compilation.GetObservableTransformationsOnElement( this )
+                        .OfType<IntroducedInterface>()
+                        .Select( i => i.InterfaceType ) )
+                .Distinct() // Remove duplicates (reimplementations of earlier interface by aspect).
+                .ToImmutableArray()
+                .ToImplementedInterfaceList();
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
@@ -249,7 +252,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        public IMember? FindImplementationForInterfaceMember( IMember interfaceMember )
+        public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen(true)] out IMember? implementationMember )
         {
             // TODO: Type introductions.
             var symbolInterfaceMemberImplementationSymbol = this.TypeSymbol.FindImplementationForInterfaceMember( interfaceMember.GetSymbol().AssertNotNull() );
@@ -281,16 +284,27 @@ namespace Caravela.Framework.Impl.CodeModel
                     // Which is later in inheritance?
                     if ( symbolInterfaceMemberImplementation == null || currentType.IsSubclassOf( symbolInterfaceMemberImplementation.DeclaringType ) )
                     {
-                        return interfaceMemberImplementation;
+                        implementationMember = interfaceMemberImplementation;
+                        return true;
                     }
                     else
                     {
-                        return symbolInterfaceMemberImplementation;
+                        implementationMember = symbolInterfaceMemberImplementation;
+                        return true;
                     }
                 }
             }
 
-            return symbolInterfaceMemberImplementation;
+            if ( symbolInterfaceMemberImplementation != null )
+            {
+                implementationMember = symbolInterfaceMemberImplementation;
+                return true;
+            }
+            else
+            {
+                implementationMember = null;
+                return false;
+            }
         }
     }
 }
