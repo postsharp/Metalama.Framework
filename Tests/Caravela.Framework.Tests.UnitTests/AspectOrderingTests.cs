@@ -155,11 +155,21 @@ using Caravela.Framework.Aspects;
 
 [assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) ) ]
 
-[ProvidesAspectLayersAttribute(""Layer1"")]
-class Aspect1 {}
+class Aspect1 : IAspect
+{
+    public void BuildAspectClass( IAspectClassBuilder builder ) 
+    {
+        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
+    }
+}
 
-[ProvidesAspectLayersAttribute(""Layer1"")]
-class Aspect2 {}
+class Aspect2 : IAspect
+{
+    public void BuildAspectClass( IAspectClassBuilder builder ) 
+    {
+        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
+    }
+}
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
@@ -182,7 +192,6 @@ class Aspect1  : IAspect
     }
 }
 
-[ProvidesAspectLayersAttribute(""Layer1"")]
 class Aspect2  : IAspect
 {
     public void BuildAspectClass( IAspectClassBuilder builder ) 
