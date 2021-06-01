@@ -21,19 +21,22 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class PropertyBuilder : MemberBuilder, IPropertyBuilder
     {
-        // TODO: How to set this from user code? Now it's only possible to do through template.
-        private readonly bool _isAutoProperty;
         private readonly bool _hasInitOnlySetter;
 
         RefKind IProperty.RefKind => this.RefKind;
 
         public RefKind RefKind { get; set; }
 
-        public bool IsByRef => this.RefKind != RefKind.None;
+        public Writeability Writeability =>
+            this switch
+            {                
+                { Setter: null, IsAutoPropertyOrField: false } => Writeability.None,
+                { Setter: null, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
+                { _hasInitOnlySetter: true } => Writeability.InitOnly,
+                _ => Writeability.All,
+            };
 
-        public bool IsRef => this.RefKind == RefKind.Ref;
-
-        public bool IsRefReadonly => this.RefKind == RefKind.RefReadOnly;
+        public bool IsAutoPropertyOrField { get; }
 
         public ParameterBuilderList Parameters { get; } = new();
 
@@ -97,7 +100,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 this.Setter = new AccessorBuilder( this, MethodKind.PropertySet );
             }
 
-            this._isAutoProperty = isAutoProperty;
+            this.IsAutoPropertyOrField = isAutoProperty;
             this._hasInitOnlySetter = hasInitOnlySetter;
         }
 
@@ -239,7 +242,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         SyntaxKind.GetAccessorDeclaration,
                         List<AttributeListSyntax>(),
                         TokenList( tokens ),
-                        this._isAutoProperty
+                        this.IsAutoPropertyOrField
                             ? null
                             : Block( ReturnStatement( DefaultExpression( (TypeSyntax) syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
                         null );
@@ -259,7 +262,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         this._hasInitOnlySetter ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
                         List<AttributeListSyntax>(),
                         TokenList( tokens ),
-                        this._isAutoProperty
+                        this.IsAutoPropertyOrField
                             ? null
                             : Block(),
                         null );

@@ -51,8 +51,8 @@ namespace Caravela.Framework.Impl.Advices
                 name,
                 hasGet,
                 hasSet,
-                this.TemplateMember != null && IsAutoProperty( this.TemplateMember ),
-                this.TemplateMember != null && HasInitOnlySetter( this.TemplateMember ),
+                this.TemplateMember != null && this.TemplateMember.IsAutoPropertyOrField,
+                this.TemplateMember != null && this.TemplateMember.Writeability == Writeability.InitOnly,
                 options?.LinkerOptions );
         }
 
@@ -71,27 +71,6 @@ namespace Caravela.Framework.Impl.Advices
             return AdviceResult.Create(
                 this.MemberBuilder,
                 new OverriddenProperty( this, this.MemberBuilder, this.TemplateMember, this._getTemplateMethod, this._setTemplateMethod, this.LinkerOptions ) );
-        }
-
-        private static bool HasInitOnlySetter( IProperty templateProperty )
-        {
-            var symbol = (IPropertySymbol) templateProperty.GetSymbol().AssertNotNull();
-
-            return symbol.SetMethod?.IsInitOnly == true;
-        }
-
-        private static bool IsAutoProperty( IProperty templateProperty )
-        {
-            var symbol = (IPropertySymbol) templateProperty.GetSymbol().AssertNotNull();
-            var syntax = symbol.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax(); // TODO: Partial?
-
-            if ( syntax == null )
-            {
-                // TODO: How to detect without source code?
-                return false;
-            }
-
-            return ((PropertyDeclarationSyntax) syntax).AccessorList?.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) == true;
         }
     }
 }

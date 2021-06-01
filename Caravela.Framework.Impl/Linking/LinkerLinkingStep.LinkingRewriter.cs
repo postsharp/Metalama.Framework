@@ -94,15 +94,22 @@ namespace Caravela.Framework.Impl.Linking
                             newMembers.Add( this.GetTransformedNonInlineableOverrideTarget( member, lastOverrideSymbol, semanticModel ) );
                         }
 
+                        // TODO: This should be inserted after all other overrides.
                         if ( !this._analysisRegistry.IsInlineable( symbol ) )
                         {
-                            // TODO: This should be inserted after all other overrides.
                             newMembers.Add( GetOriginalImplDeclaration( member ) );
+                        }
+                        else
+                        {
+                            if (symbol is IPropertySymbol propertySymbol && IsAutoPropertyDeclaration( (BasePropertyDeclarationSyntax)member ) )
+                            {
+                                newMembers.Add( GetImplicitBackingFieldDeclaration( (BasePropertyDeclarationSyntax) member, propertySymbol ) );
+                            }
                         }
                     }
                     else
                     {
-                        // Normal method without any transformations.
+                        // Normal member without any transformations.
                         newMembers.Add( member );
                     }
                 }
@@ -258,7 +265,9 @@ namespace Caravela.Framework.Impl.Linking
                     return propertyDeclaration
                         .WithAccessorList( AccessorList( List( transformedAccessors ) ) )
                         .WithLeadingTrivia( propertyDeclaration.GetLeadingTrivia() )
-                        .WithTrailingTrivia( propertyDeclaration.GetTrailingTrivia() );
+                        .WithTrailingTrivia( propertyDeclaration.GetTrailingTrivia() )
+                        .WithExpressionBody(null)
+                        .WithSemicolonToken(Token(SyntaxKind.None));
                 }
                 else
                 {
@@ -516,6 +525,7 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         SyntaxKind.GetAccessorDeclaration => new PropertyGetInliningRewriter( this._analysisRegistry, semanticModel, propertySymbol ),
                         SyntaxKind.SetAccessorDeclaration => new PropertySetInliningRewriter( this._analysisRegistry, semanticModel, propertySymbol ),
+                        SyntaxKind.InitAccessorDeclaration => new PropertySetInliningRewriter( this._analysisRegistry, semanticModel, propertySymbol ),
                         _ => throw new AssertionFailedException( $"{accessor.Kind()}" )
                     };
 
@@ -558,6 +568,48 @@ namespace Caravela.Framework.Impl.Linking
             private static MemberDeclarationSyntax GetOriginalImplEvent( EventDeclarationSyntax @event )
             {
                 return @event.WithIdentifier( Identifier( GetOriginalImplMemberName( @event.Identifier.ValueText ) ) );
+            }
+
+            public static string GetImplicitBackingFieldName( IPropertySymbol property )
+            {
+                return $"__{property.Name}__BackingField";
+            }
+
+            private static MemberDeclarationSyntax GetImplicitBackingFieldDeclaration( BasePropertyDeclarationSyntax propertyDeclaration, IPropertySymbol propertySymbol )
+            {
+                return FieldDeclaration(
+                    List<AttributeListSyntax>(),
+                    GetModifiers(propertySymbol),
+                    VariableDeclaration(
+                        propertyDeclaration.Type,
+                        SingletonSeparatedList( VariableDeclarator( GetImplicitBackingFieldName( propertySymbol ) ) ) ) );
+
+                static SyntaxTokenList GetModifiers( IPropertySymbol propertySymbol )
+                {
+                    var modifiers = new List<SyntaxToken>();
+
+                    if ( propertySymbol.IsStatic )
+                    {
+                        modifiers.Add( Token( SyntaxKind.StaticKeyword ) );
+                    }
+
+                    modifiers.Add( Token( SyntaxKind.PrivateKeyword ) );
+
+                    return TokenList( modifiers );
+                }
+            }
+
+            private static bool IsAutoPropertyDeclaration( BasePropertyDeclarationSyntax basePropertyDeclaration )
+            {
+                switch ( basePropertyDeclaration )
+                {
+                    case PropertyDeclarationSyntax propertyDeclaration:
+                        return propertyDeclaration.ExpressionBody == null
+                            && propertyDeclaration.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true
+                            && propertyDeclaration.Modifiers.All( x => x.Kind() != SyntaxKind.AbstractKeyword );
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
         }
     }

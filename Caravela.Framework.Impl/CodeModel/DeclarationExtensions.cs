@@ -285,7 +285,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 modifiers |= DeclarationModifiers.Sealed;
             }
 
-            if ( member.IsReadOnly )
+            if ( member is IField field && field.Writeability == Writeability.ConstructorOnly )
             {
                 modifiers |= DeclarationModifiers.ReadOnly;
             }
@@ -324,5 +324,13 @@ namespace Caravela.Framework.Impl.CodeModel
                 DeclarationKind.GenericParameter => "generic parameter",
                 _ => kind.ToString().ToLowerInvariant()
             };
+
+        internal static bool IsAutoProperty( this IPropertySymbol symbol )
+            => !symbol.IsAbstract
+            && symbol.DeclaringSyntaxReferences.All(
+                sr =>
+                    sr.GetSyntax() is BasePropertyDeclarationSyntax propertyDecl
+                    && propertyDecl.AccessorList != null
+                    && propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) );
     }
 }

@@ -32,6 +32,16 @@ namespace Caravela.Framework.Code
         IMethod? Setter { get; }
 
         /// <summary>
+        /// Gets writeability of the field or property.
+        /// </summary>
+        Writeability Writeability { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the declaration is auto-property or field.
+        /// </summary>
+        bool IsAutoPropertyOrField { get; }
+
+        /// <summary>
         /// Determines if the property existed before the current aspect was advice
         /// (<see langword="false" /> if it was introduced by the current aspect).
         /// </summary>

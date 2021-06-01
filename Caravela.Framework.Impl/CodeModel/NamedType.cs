@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override MemberInfo ToMemberInfo() => this.ToType();
 
-        public override bool IsReadOnly => this.TypeSymbol.IsReadOnly;
+        public bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
         public bool HasDefaultConstructor
             => this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||

@@ -36,6 +36,9 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         public int Property { get; }
 
         [Override]
+        public static int Static_Property { get; }
+
+        [Override]
         private int PrivateProperty { get; }
 
         [Override]
@@ -54,6 +57,9 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         public int PropertyWithSetter { get; set; }
 
         [Override]
+        public static int Static_PropertyWithSetter { get; set; }
+
+        [Override]
         public int PropertyWithRestrictedSetter { get; private set; }
 
         [Override]
@@ -65,7 +71,19 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         [Override]
         public int PropertyWithRestrictedInitSetter { get; protected init; }
 
-        [Override]
-        public int PropertyWithInitializer { get; set; } = 42;
+        // Needs to change accesses in ctors to the newly defined backing field.
+        // Linker needs to rewrite ctor bodies if there is any such field.
+
+        //[Override]
+        //public int GetterPropertyWithInitializer { get; } = 42;
+
+        //[Override]
+        //public static int Static_GetterPropertyWithInitializer { get; } = 42;
+
+        //[Override]
+        //public int PropertyWithInitializer { get; set; } = 42;
+
+        //[Override]
+        //public static int Static_PropertyWithInitializer { get; set; } = 42;
     }
 }

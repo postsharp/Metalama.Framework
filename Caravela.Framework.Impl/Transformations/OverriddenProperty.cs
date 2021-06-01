@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl.Transformations
                                                 : null,
                                             setAccessorBody != null
                                                 ? AccessorDeclaration(
-                                                    SyntaxKind.SetAccessorDeclaration,
+                                                    this.OverriddenDeclaration.Writeability == Writeability.InitOnly ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
                                                     List<AttributeListSyntax>(),
                                                     this.OverriddenDeclaration.Setter.AssertNotNull().GetSyntaxModifierList(),
                                                     setAccessorBody )

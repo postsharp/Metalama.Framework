@@ -82,6 +82,8 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => throw new InvalidOperationException()
             };
 
+        public abstract bool IsReadOnly { get; }
+
         public abstract System.Reflection.MethodBase ToMethodBase();
 
         public override MemberInfo ToMemberInfo() => this.ToMethodBase();

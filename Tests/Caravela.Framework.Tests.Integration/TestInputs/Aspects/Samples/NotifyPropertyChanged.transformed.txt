@@ -1,11 +1,41 @@
-// CompileTimeAspectPipeline.TryExecute failed. 
-// Error CR0112 on `SetPropertyTemplate`: `The advice 'NotifyPropertyChangedAttribute.SetPropertyTemplate()' threw 'InvalidUserCodeException' when applied to 'TargetClass.Property2.set':
-// Caravela.Framework.Impl.InvalidUserCodeException: Test.cs(47,37): error CR0115: The advice 'NotifyPropertyChangedAttribute.SetPropertyTemplate()' cannot use 'meta.Property' in an advice applied to method 'TargetClass.Property2.set' because there is no 'IProperty' in the context of a method.
-//    at Caravela.Framework.Impl.Templating.MetaModel.MetaApi.get_Property()
-//    at Caravela.Framework.Aspects.meta.get_Property()
-//    at Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.NotifyPropertyChanged.NotifyPropertyChangedAttribute.SetPropertyTemplate_Template()`
-// Error CR0112 on `SetPropertyTemplate`: `The advice 'NotifyPropertyChangedAttribute.SetPropertyTemplate()' threw 'InvalidUserCodeException' when applied to 'TargetClass.Property1.set':
-// Caravela.Framework.Impl.InvalidUserCodeException: Test.cs(45,37): error CR0115: The advice 'NotifyPropertyChangedAttribute.SetPropertyTemplate()' cannot use 'meta.Property' in an advice applied to method 'TargetClass.Property1.set' because there is no 'IProperty' in the context of a method.
-//    at Caravela.Framework.Impl.Templating.MetaModel.MetaApi.get_Property()
-//    at Caravela.Framework.Aspects.meta.get_Property()
-//    at Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.NotifyPropertyChanged.NotifyPropertyChangedAttribute.SetPropertyTemplate_Template()`
+[TestOutput]
+[NotifyPropertyChanged]
+internal class TargetClass
+: global::System.ComponentModel.INotifyPropertyChanged
+{
+    public int Property1
+    {
+        set
+        {
+            global::System.Int32 result;
+            this.__Property1__BackingField = value;
+            this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs("Property1"));
+            return;
+        }
+    }
+
+    public int Property2
+    {
+        set
+        {
+            global::System.Int32 result;
+            this.__Property2__BackingField = value;
+            this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs("Property2"));
+            return;
+        }
+    }
+    public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+
+    event global::System.ComponentModel.PropertyChangedEventHandler? global::System.ComponentModel.INotifyPropertyChanged.PropertyChanged
+    {
+        add
+        {
+            this.PropertyChanged += value;
+        }
+
+        remove
+        {
+            this.PropertyChanged -= value;
+        }
+    }
+}
