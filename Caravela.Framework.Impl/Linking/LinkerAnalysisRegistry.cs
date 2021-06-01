@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -39,11 +40,42 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Determines whether the symbol represents override target.
         /// </summary>
-        /// <param name="symbol">Method symbol.</param>
+        /// <param name="symbol">Symbol.</param>
         /// <returns><c>True</c> if the method is override target, otherwise <c>false</c>.</returns>
         public bool IsOverrideTarget( ISymbol symbol )
         {
             return this._introductionRegistry.GetOverridesForSymbol( symbol ).Count > 0;
+        }
+
+        /// <summary>
+        /// Determines whether the symbol represents introduced interface implementation.
+        /// </summary>
+        /// <param name="symbol">Symbol.</param>
+        /// <returns></returns>
+        public bool IsInterfaceImplementation( ISymbol symbol )
+        {
+            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
+
+            if ( introducedMember == null )
+            {
+                return false;
+            }
+            else
+            {
+                return introducedMember.Semantic == IntroducedMemberSemantic.InterfaceImplementation;
+            }
+        }
+
+        public ISymbol GetImplementedInterfaceMember( ISymbol symbol )
+        {
+            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
+
+            if ( introducedMember == null || introducedMember.Semantic != IntroducedMemberSemantic.InterfaceImplementation )
+            {
+                throw new AssertionFailedException();
+            }
+
+            return (introducedMember.Declaration?.GetSymbol()).AssertNotNull();
         }
 
         /// <summary>
@@ -144,8 +176,7 @@ namespace Caravela.Framework.Impl.Linking
                 return false;
             }
 
-            return introducedMember.Semantic == IntroducedMemberSemantic.MethodOverride
-                   || introducedMember.Semantic == IntroducedMemberSemantic.PropertyOverride;
+            return introducedMember.Semantic == IntroducedMemberSemantic.Override;
         }
 
         /// <summary>

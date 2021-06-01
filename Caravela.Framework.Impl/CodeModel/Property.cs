@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using RefKind = Caravela.Framework.Code.RefKind;
@@ -34,6 +35,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsRef => this.RefKind == RefKind.Ref;
 
         public bool IsRefReadonly => this.RefKind == RefKind.RefReadOnly;
+
+        public bool IsExplicitInterfaceImplementation => !this._symbol.ExplicitInterfaceImplementations.IsEmpty;
 
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
@@ -71,6 +74,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool HasBase => true;
 
         IFieldOrPropertyInvocation IFieldOrProperty.Base => this.Base;
+
+        [Memo]
+        public IReadOnlyList<IProperty> ExplicitInterfaceImplementations
+            => this._symbol.ExplicitInterfaceImplementations.Select( p => this.Compilation.Factory.GetProperty( p ) ).ToList();
 
         public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
 

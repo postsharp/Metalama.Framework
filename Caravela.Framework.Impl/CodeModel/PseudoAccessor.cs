@@ -119,6 +119,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
+
         [return: RunTimeOnly]
         public MemberInfo ToMemberInfo()
         {

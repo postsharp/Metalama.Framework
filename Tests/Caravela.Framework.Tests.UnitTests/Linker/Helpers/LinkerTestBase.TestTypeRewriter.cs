@@ -362,8 +362,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                                 new AspectLayerId( aspectName.AssertNotNull(), layerName ),
                                 node switch
                                 {
-                                    MethodDeclarationSyntax _ => IntroducedMemberSemantic.MethodOverride,
-                                    PropertyDeclarationSyntax _ => IntroducedMemberSemantic.PropertyOverride,
+                                    MethodDeclarationSyntax _ => IntroducedMemberSemantic.Override,
+                                    PropertyDeclarationSyntax _ => IntroducedMemberSemantic.Override,
                                     _ => throw new NotSupportedException()
                                 },
                                 AspectLinkerOptions.Create( forceNotInlineable ),

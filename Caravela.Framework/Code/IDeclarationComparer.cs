@@ -6,18 +6,16 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
 {
-    public interface IDeclarationComparer : IEqualityComparer<IType>, IEqualityComparer<IDeclaration>
+    public interface IDeclarationComparer : IEqualityComparer<IType>, IEqualityComparer<IDeclaration>, IEqualityComparer<INamedType>
     {
         /// <summary>
-        /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,
-        /// given as an <see cref="IType"/>.
+        /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the left <see cref="IType"/> is assignable to right <see cref="IType"/>.
         /// </summary>
         /// <returns></returns>
         bool Is( IType left, IType right );
 
         /// <summary>
-        /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,
-        /// given as a reflection <see cref="Type"/>.
+        /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the left <see cref="Type"/> is assignable to right <see cref="Type"/>.
         /// </summary>
         /// <returns></returns>
         bool Is( IType left, Type right );

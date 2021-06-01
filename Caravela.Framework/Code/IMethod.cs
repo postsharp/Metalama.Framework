@@ -60,6 +60,11 @@ namespace Caravela.Framework.Code
         IMethod? OverriddenMethod { get; }
 
         /// <summary>
+        /// Gets a list of interface methods this method explicitly implements.
+        /// </summary>
+        IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; }
+
+        /// <summary>
         /// Gets a <see cref="MethodInfo"/> that represents the current method at run time.
         /// </summary>
         /// <returns>A <see cref="MethodInfo"/> that can be used only in run-time code.</returns>

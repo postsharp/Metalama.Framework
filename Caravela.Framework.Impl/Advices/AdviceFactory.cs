@@ -24,16 +24,25 @@ namespace Caravela.Framework.Impl.Advices
         private readonly INamedType _aspectType;
         private readonly AspectInstance _aspect;
         private readonly IDiagnosticAdder _diagnosticAdder;
+        private readonly IReadOnlyList<Advice> _declarativeAdvices;
         private readonly List<Advice> _advices = new();
 
         internal IReadOnlyList<Advice> Advices => this._advices;
 
-        public AdviceFactory( CompilationModel compilation, IDiagnosticAdder diagnosticAdder, INamedType aspectType, AspectInstance aspect )
+        public Dictionary<string, object?> Tags { get; } = new( StringComparer.Ordinal );
+
+        public AdviceFactory(
+            CompilationModel compilation,
+            IDiagnosticAdder diagnosticAdder,
+            IReadOnlyList<Advice> declarativeAdvices,
+            INamedType aspectType,
+            AspectInstance aspect )
         {
             this._aspectType = aspectType;
             this._aspect = aspect;
             this._compilation = compilation;
             this._diagnosticAdder = diagnosticAdder;
+            this._declarativeAdvices = declarativeAdvices;
         }
 
         private IMethod? GetTemplateMethod(
@@ -117,7 +126,7 @@ namespace Caravela.Framework.Impl.Advices
             var templateMethod = this.GetTemplateMethod( defaultTemplate, nameof(this.OverrideMethod) );
 
             var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, _layerName, options );
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
             this._advices.Add( advice );
 
             if ( diagnosticList.Any( d => d.Severity == DiagnosticSeverity.Error ) )
@@ -150,7 +159,7 @@ namespace Caravela.Framework.Impl.Advices
                 _layerName,
                 options );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
             this._advices.Add( advice );
 
             if ( diagnosticList.Any( d => d.Severity == DiagnosticSeverity.Error ) )
@@ -186,7 +195,7 @@ namespace Caravela.Framework.Impl.Advices
                 _layerName,
                 options );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
             this._advices.Add( advice );
         }
 
@@ -216,7 +225,7 @@ namespace Caravela.Framework.Impl.Advices
                 _layerName,
                 options );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
             this._advices.Add( advice );
         }
 
@@ -254,7 +263,7 @@ namespace Caravela.Framework.Impl.Advices
                 _layerName,
                 options );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
             this._advices.Add( advice );
 
             return advice.Builder;
@@ -291,7 +300,7 @@ namespace Caravela.Framework.Impl.Advices
                 _layerName,
                 options );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
             this._advices.Add( advice );
 
             return advice.Builder;
@@ -317,6 +326,85 @@ namespace Caravela.Framework.Impl.Advices
             AdviceOptions? options = null )
         {
             throw new NotImplementedException();
+        }
+
+        public void IntroduceInterface(
+            INamedType targetType,
+            INamedType interfaceType,
+            bool explicitImplementation = true,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AdviceOptions? options = null )
+        {
+            var diagnosticList = new DiagnosticList();
+
+            var advice = new IntroduceInterfaceAdvice(
+                this._aspect,
+                targetType,
+                interfaceType,
+                explicitImplementation,
+                null,
+                conflictBehavior,
+                _layerName,
+                options );
+
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            this._advices.Add( advice );
+        }
+
+        public void IntroduceInterface(
+            INamedType targetType,
+            Type interfaceType,
+            bool explicitImplementation = true,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AdviceOptions? options = null )
+        {
+            this.IntroduceInterface(
+                targetType,
+                (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( interfaceType ),
+                explicitImplementation,
+                conflictBehavior, 
+                options );
+        }
+
+        public void IntroduceInterface(
+            INamedType targetType,
+            INamedType interfaceType,
+            IReadOnlyDictionary<IMember, IMember> memberMap,
+            bool explicitImplementation = true,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AdviceOptions? options = null )
+        {
+            var diagnosticList = new DiagnosticList();
+
+            var advice = new IntroduceInterfaceAdvice(
+                this._aspect,
+                targetType,
+                interfaceType,
+                explicitImplementation,
+                memberMap,
+                conflictBehavior,
+                _layerName,
+                options );
+
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            this._advices.Add( advice );
+        }
+
+        public void IntroduceInterface(
+            INamedType targetType,
+            Type interfaceType,
+            IReadOnlyDictionary<IMember, IMember> memberMap,
+            bool explicitImplementation = true,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AdviceOptions? options = null )
+        {
+            this.IntroduceInterface(
+                targetType,
+                (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( interfaceType ),
+                memberMap,
+                explicitImplementation,
+                conflictBehavior,
+                options );
         }
 
         public IAdviceFactory ForLayer( string layerName ) => throw new NotImplementedException();

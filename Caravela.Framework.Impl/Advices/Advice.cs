@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -27,7 +28,7 @@ namespace Caravela.Framework.Impl.Advices
             this.AspectLayerId = new AspectLayerId( this.Aspect.AspectClass, layerName );
         }
 
-        public abstract void Initialize( IDiagnosticAdder diagnosticAdder );
+        public abstract void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder );
 
         public abstract AdviceResult ToResult( ICompilation compilation );
     }

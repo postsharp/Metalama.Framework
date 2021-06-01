@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
@@ -55,9 +56,9 @@ namespace Caravela.Framework.Impl.Advices
                 options?.LinkerOptions );
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( diagnosticAdder );
+            base.Initialize( declarativeAdvices, diagnosticAdder );
 
             // TODO: The rest (unify with methods?).
 
