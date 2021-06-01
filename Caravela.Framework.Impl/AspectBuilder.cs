@@ -77,7 +77,8 @@ namespace Caravela.Framework.Impl
         }
 
 #pragma warning disable 618 // Not implemented
-        public void RegisterAspectLayerBuildAction( Action<IAspectLayerBuilder<T>> buildAction ) => throw new NotImplementedException();
+        void IAspectBuilder<T>.SetAspectLayerBuildAction( string layerName, Action<IAspectLayerBuilder<T>> buildAction ) 
+            => throw new NotImplementedException();
 
         void IValidatorAdder.AddTargetValidator<TTarget>( TTarget targetDeclaration, Action<ValidateReferenceContext<TTarget>> validator )
             => throw new NotImplementedException();

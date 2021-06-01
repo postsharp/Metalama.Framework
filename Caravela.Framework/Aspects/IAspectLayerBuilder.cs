@@ -11,7 +11,7 @@ using System.Threading;
 namespace Caravela.Framework.Aspects
 {
     /// <summary>
-    /// An object used by the delegated passed to <see cref="IAspectBuilder{TAspectTarget}.RegisterAspectLayerBuildAction"/> method of the aspect to provide advices, child
+    /// An object used by the delegated passed to <see cref="IAspectBuilder{TAspectTarget}.SetAspectLayerBuildAction"/> method of the aspect to provide advices, child
     /// aspects and validators, or report diagnostics. This is a weakly-typed variant of the <see cref="IAspectLayerBuilder{T}"/> interface.
     /// </summary>
     [InternalImplement]
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Aspects
     }
     
     /// <summary>
-    /// An object used by the delegated passed to <see cref="IAspectBuilder{TAspectTarget}.RegisterAspectLayerBuildAction"/> method of the aspect to provide advices, child
+    /// An object used by the delegated passed to <see cref="IAspectBuilder{TAspectTarget}.SetAspectLayerBuildAction"/> method of the aspect to provide advices, child
     /// aspects and validators, or report diagnostics. This is the strongly-typed variant of the <see cref="IAspectLayerBuilder"/> interface.
     /// </summary>
     public interface IAspectLayerBuilder<out TAspectTarget> : IAspectLayerBuilder

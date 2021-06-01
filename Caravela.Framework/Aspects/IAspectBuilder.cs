@@ -36,8 +36,9 @@ namespace Caravela.Framework.Aspects
         /// Registers the build action for an aspect layer. The aspect layer must have been defined
         /// by the <see cref="IAspect.BuildAspectClass"/> method.
         /// </summary>
+        /// <param name="layerName"></param>
         /// <param name="buildAction"></param>
         [Obsolete( "Not implemented." )]
-        void RegisterAspectLayerBuildAction( Action<IAspectLayerBuilder<TAspectTarget>> buildAction );
+        void SetAspectLayerBuildAction( string layerName, Action<IAspectLayerBuilder<TAspectTarget>> buildAction );
     }
 }
