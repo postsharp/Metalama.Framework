@@ -13,8 +13,6 @@ namespace Caravela.Framework.Aspects
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field )]
     public abstract class OverrideFieldOrPropertyAspect : Attribute, IAspect<IFieldOrProperty>
     {
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
         /// <inheritdoc />
         public virtual void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
@@ -25,6 +23,8 @@ namespace Caravela.Framework.Aspects
         {
             builder.ExceptForInheritance().MustBeNonAbstract();
         }
+
+        public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }
 
         [Template]
         public abstract dynamic? OverrideProperty

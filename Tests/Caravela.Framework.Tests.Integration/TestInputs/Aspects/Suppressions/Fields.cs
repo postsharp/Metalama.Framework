@@ -23,7 +23,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.Fields
         {
         }
 
-        public void BuildEligibility(IEligibilityBuilder<IField> builder) { }
+       
         
         public void BuildAspectClass( IAspectClassBuilder builder ) { }
 

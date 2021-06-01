@@ -1,7 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
+using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Templating;
@@ -9,11 +13,13 @@ using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Editing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -71,48 +77,99 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
-                var scope = this.GetSymbolDeclarationScope( node );
+                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 
-                switch ( scope )
+                var scope = this.SymbolClassifier.GetSymbolDeclarationScope( symbol );
+
+                if ( scope == SymbolDeclarationScope.RunTimeOnly )
                 {
-                    case SymbolDeclarationScope.RunTimeOnly:
-                        return null;
+                    return null;
+                }
+                else
+                {
+                    this.FoundCompileTimeCode = true;
 
-                    default:
-                        using ( this.WithScope( scope ) )
+                    // Add type members.
+
+                    var members = new List<MemberDeclarationSyntax>();
+
+                    using ( this.WithScope( scope ) )
+                    {
+                        foreach ( var member in node.Members )
                         {
-                            this.FoundCompileTimeCode = true;
-
-                            var members = new List<MemberDeclarationSyntax>();
-
-                            foreach ( var member in node.Members )
+                            switch ( member )
                             {
-                                switch ( member )
+                                case MethodDeclarationSyntax method:
+                                    members.AddRange( this.VisitMethodDeclaration( method ).AssertNoneNull() );
+
+                                    break;
+
+                                case IndexerDeclarationSyntax indexer:
+                                    members.AddRange( this.VisitBasePropertyDeclaration( indexer ).AssertNoneNull() );
+
+                                    break;
+
+                                case PropertyDeclarationSyntax property:
+                                    members.AddRange( this.VisitBasePropertyDeclaration( property ).AssertNoneNull() );
+
+                                    break;
+
+                                default:
+                                    members.Add( (MemberDeclarationSyntax) this.Visit( member ).AssertNotNull() );
+
+                                    break;
+                            }
+                        }
+                    }
+
+                    // Add non-implemented members of IAspect and IEligible.
+                    SyntaxGenerator syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
+                    var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces );
+
+                    foreach ( var implementedInterface in allImplementedInterfaces )
+                    {
+                        if ( implementedInterface.Name == nameof(IAspect) || implementedInterface.Name == nameof(IEligible<IDeclaration>) )
+                        {
+                            foreach ( var member in implementedInterface.GetMembers() )
+                            {
+                                if ( member is not IMethodSymbol method )
                                 {
-                                    case MethodDeclarationSyntax method:
-                                        members.AddRange( this.VisitMethodDeclaration( method ).AssertNoneNull() );
+                                    continue;
+                                }
 
-                                        break;
+                                var memberImplementation = (IMethodSymbol?) symbol.FindImplementationForInterfaceMember( member );
 
-                                    case IndexerDeclarationSyntax indexer:
-                                        members.AddRange( this.VisitBasePropertyDeclaration( indexer ).AssertNoneNull() );
+                                if ( memberImplementation == null || memberImplementation.ContainingType.TypeKind == TypeKind.Interface )
+                                {
+                                    var newMethod = MethodDeclaration(
+                                            default,
+                                            default,
+                                            (TypeSyntax) syntaxGenerator.TypeExpression( method.ReturnType ),
+                                            ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.TypeExpression( implementedInterface ) ),
+                                            Identifier( method.Name ),
+                                            default,
+                                            ParameterList(
+                                                SeparatedList(
+                                                    method.Parameters.Select(
+                                                        p => Parameter(
+                                                            default,
+                                                            default,
+                                                            (TypeSyntax) syntaxGenerator.TypeExpression( p.Type ),
+                                                            Identifier( p.Name ),
+                                                            default ) ) ) ),
+                                            default,
+                                            Block(),
+                                            default,
+                                            Token( SyntaxKind.SemicolonToken ) )
+                                        .NormalizeWhitespace();
 
-                                        break;
-
-                                    case PropertyDeclarationSyntax property:
-                                        members.AddRange( this.VisitBasePropertyDeclaration( property ).AssertNoneNull() );
-
-                                        break;
-
-                                    default:
-                                        members.Add( (MemberDeclarationSyntax) this.Visit( member ).AssertNotNull() );
-
-                                        break;
+                                    members.Add( newMethod );
                                 }
                             }
-
-                            return (T) node.WithMembers( List( members ) ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                         }
+                    }
+
+                    return (T) node.WithMembers( List( members ) ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
             }
 

@@ -21,9 +21,9 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     public class ReferenceAssemblyLocator
     {
-        private readonly string _cacheDirectory;
         private const string _frameworkAssemblyName = "Caravela.Framework";
-
+        private readonly string _cacheDirectory;
+        
         /// <summary>
         /// Gets the name (without path and extension) of Caravela assemblies.
         /// </summary>
@@ -69,11 +69,11 @@ namespace Caravela.Framework.Impl.CompileTime
             // Make sure all necessary assemblies are loaded in the current AppDomain.
             _ = new AspectWeaverAttribute( null! );
             _ = meta.CompileTime<object>( null );
-            
+
             // Get our public API assembly in its .NET Standard 2.0 build.
             var frameworkAssemblyReference = (MetadataReference)
                 MetadataReference.CreateFromStream( this.GetType().Assembly.GetManifestResourceStream( _frameworkAssemblyName + ".dll" ) );
-            
+
             // Get implementation assembly paths from the current AppDomain
             var caravelaImplementationPaths = AppDomain.CurrentDomain.GetAssemblies()
                 .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
@@ -90,7 +90,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
-            this.StandardCompileTimeMetadataReferences = 
+            this.StandardCompileTimeMetadataReferences =
                 this.SystemAssemblyPaths
                     .Concat( caravelaImplementationPaths )
                     .Select( c => (MetadataReference) MetadataReference.CreateFromFile( c ) )
@@ -117,7 +117,7 @@ namespace Caravela.Framework.Impl.CompileTime
     <WriteLinesToFile File='assemblies.txt' Overwrite='true' Lines='@(ReferencePathWithRefAssemblies)' />
   </Target>
 </Project>";
-            
+
             var tempProjectDirectory = Path.Combine( this._cacheDirectory, nameof(ReferenceAssemblyLocator) );
 
             using var mutex = MutexHelper.WithGlobalLock( tempProjectDirectory );

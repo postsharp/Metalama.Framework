@@ -18,8 +18,10 @@ namespace Caravela.TestFramework
                 .Select( r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) )
                 .ToList();
 
-            var systemLibraries = AppDomain.CurrentDomain.GetAssemblies().Where( a => !a.IsDynamic && a.FullName != null && a.FullName.StartsWith( "System", StringComparison.Ordinal ) 
-                                                                                                   && !string.IsNullOrEmpty( a.Location ));
+            var systemLibraries = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(
+                    a => !a.IsDynamic && a.FullName != null && a.FullName.StartsWith( "System", StringComparison.Ordinal )
+                         && !string.IsNullOrEmpty( a.Location ) );
 
             return CSharpCompilation.Create( name ?? "test_" + Guid.NewGuid() )
                 .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )

@@ -13,8 +13,6 @@ namespace Caravela.Framework.Aspects
     [AttributeUsage( AttributeTargets.Method )]
     public abstract class OverrideMethodAspect : Attribute, IAspect<IMethod>
     {
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
         /// <inheritdoc />
         public virtual void BuildAspect( IAspectBuilder<IMethod> builder )
         {
@@ -25,6 +23,8 @@ namespace Caravela.Framework.Aspects
         {
             builder.ExceptForInheritance().MustBeNonAbstract();
         }
+
+        public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }
 
         /// <summary>
         /// Default template of the new method implementation.

@@ -198,7 +198,7 @@ namespace Caravela.Framework.Impl.CodeModel
                             this.Compilation.GetObservableTransformationsOnElement( this )
                                 .OfType<IntroducedInterface>()
                                 .Select( i => i.InterfaceType ) ) )
-                .Distinct() // Remove duplicates (reimplementations of earlier interface by aspect).
+                .Distinct() // Remove duplicates (re-implementations of earlier interface by aspect).
                 .ToImmutableArray()
                 .ToImplementedInterfaceList();
 
@@ -206,13 +206,13 @@ namespace Caravela.Framework.Impl.CodeModel
         public IImplementedInterfaceList ImplementedInterfaces
             => // TODO: Correct order after concat and distinct?            
                 this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
-                .Concat(
-                    this.Compilation.GetObservableTransformationsOnElement( this )
-                        .OfType<IntroducedInterface>()
-                        .Select( i => i.InterfaceType ) )
-                .Distinct() // Remove duplicates (reimplementations of earlier interface by aspect).
-                .ToImmutableArray()
-                .ToImplementedInterfaceList();
+                    .Concat(
+                        this.Compilation.GetObservableTransformationsOnElement( this )
+                            .OfType<IntroducedInterface>()
+                            .Select( i => i.InterfaceType ) )
+                    .Distinct() // Remove duplicates (re-implementations of earlier interface by aspect).
+                    .ToImmutableArray()
+                    .ToImplementedInterfaceList();
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
@@ -252,7 +252,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen(true)] out IMember? implementationMember )
+        public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
         {
             // TODO: Type introductions.
             var symbolInterfaceMemberImplementationSymbol = this.TypeSymbol.FindImplementationForInterfaceMember( interfaceMember.GetSymbol().AssertNotNull() );
@@ -285,11 +285,13 @@ namespace Caravela.Framework.Impl.CodeModel
                     if ( symbolInterfaceMemberImplementation == null || currentType.IsSubclassOf( symbolInterfaceMemberImplementation.DeclaringType ) )
                     {
                         implementationMember = interfaceMemberImplementation;
+
                         return true;
                     }
                     else
                     {
                         implementationMember = symbolInterfaceMemberImplementation;
+
                         return true;
                     }
                 }
@@ -298,11 +300,13 @@ namespace Caravela.Framework.Impl.CodeModel
             if ( symbolInterfaceMemberImplementation != null )
             {
                 implementationMember = symbolInterfaceMemberImplementation;
+
                 return true;
             }
             else
             {
                 implementationMember = null;
+
                 return false;
             }
         }

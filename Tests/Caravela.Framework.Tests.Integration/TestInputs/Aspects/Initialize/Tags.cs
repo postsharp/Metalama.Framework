@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.Tags
             builder.AdviceFactory.OverrideMethod(builder.TargetDeclaration, nameof(OverrideMethod));
         }
 
-        public void BuildEligibility(IEligibilityBuilder<IMethod> builder) { }
+       
         
         public void BuildAspectClass( IAspectClassBuilder builder ) { }
 

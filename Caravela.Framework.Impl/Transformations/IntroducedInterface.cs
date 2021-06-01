@@ -7,14 +7,13 @@ using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal class IntroducedInterface : IObservableTransformation, IInterfaceImplementationIntroduction, IMemberIntroduction
+    internal class IntroducedInterface : IInterfaceImplementationIntroduction, IMemberIntroduction
     {
         public IDeclaration ContainingDeclaration => this.TargetType;
 
@@ -30,7 +29,8 @@ namespace Caravela.Framework.Impl.Transformations
 
         public SyntaxTree TargetSyntaxTree => this.TargetType.GetSymbol().DeclaringSyntaxReferences.First().SyntaxTree;
 
-        public MemberDeclarationSyntax InsertPositionNode => (MemberDeclarationSyntax)this.TargetType.GetSymbol().DeclaringSyntaxReferences.First().GetSyntax();
+        public MemberDeclarationSyntax InsertPositionNode
+            => (MemberDeclarationSyntax) this.TargetType.GetSymbol().DeclaringSyntaxReferences.First().GetSyntax();
 
         public IntroducedInterface(
             IntroduceInterfaceAdvice introduceInterfaceAdvice,
@@ -51,7 +51,11 @@ namespace Caravela.Framework.Impl.Transformations
             if ( !this.TargetType.ImplementedInterfaces.Contains( this.InterfaceType ) )
             {
                 // The type already implements the interface itself.
-                return new[] { (BaseTypeSyntax) SimpleBaseType( (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.InterfaceType.GetSymbol() ) ) };
+                return new[]
+                {
+                    (BaseTypeSyntax) SimpleBaseType(
+                        (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.InterfaceType.GetSymbol() ) )
+                };
             }
             else
             {
@@ -186,7 +190,7 @@ namespace Caravela.Framework.Impl.Transformations
             return
                 AccessorList(
                     List(
-                        new AccessorDeclarationSyntax?[]
+                        new[]
                             {
                                 targetProperty.Getter != null
                                     ? AccessorDeclaration( SyntaxKind.GetAccessorDeclaration, GetImplementingGetterBody( targetProperty ) )
@@ -228,7 +232,7 @@ namespace Caravela.Framework.Impl.Transformations
             return
                 AccessorList(
                     List(
-                        new AccessorDeclarationSyntax?[]
+                        new[]
                             {
                                 targetEvent.Adder != null
                                     ? AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplementingAdderBody( targetEvent ) )

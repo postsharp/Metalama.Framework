@@ -89,6 +89,7 @@ namespace Caravela.Framework.Impl
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
             this.AspectType = aspectType;
             this._prototypeAspectInstance = prototype;
+            this.CanExpandToSource = !this.IsAbstract && this.AspectType.GetConstructor( Type.EmptyTypes ) != null;
         }
 
         private void Initialize()

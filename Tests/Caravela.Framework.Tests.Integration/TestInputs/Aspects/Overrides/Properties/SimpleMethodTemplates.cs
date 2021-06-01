@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             builder.AdviceFactory.OverrideFieldOrPropertyAccessors(builder.TargetDeclaration, nameof(GetTemplate), nameof(SetTemplate));
         }
 
-        public void BuildEligibility(IEligibilityBuilder<IProperty> builder) { }
+       
         
         public void BuildAspectClass( IAspectClassBuilder builder ) { }
 

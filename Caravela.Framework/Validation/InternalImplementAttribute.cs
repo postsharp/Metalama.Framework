@@ -19,8 +19,6 @@ namespace Caravela.Framework.Validation
             builder.MustHaveAccessibility( Accessibility.Public );
         }
 
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
         public void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder.AddReferenceValidator<INamedType, Validator>( builder.TargetDeclaration, new[] { DeclarationReferenceKind.ImplementsInterface } );
@@ -38,5 +36,7 @@ namespace Caravela.Framework.Validation
                 }
             }
         }
+
+        public void BuildAspectClass( IAspectClassBuilder builder ) { }
     }
 }

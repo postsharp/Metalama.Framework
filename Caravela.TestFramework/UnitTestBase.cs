@@ -130,7 +130,8 @@ namespace Caravela.TestFramework
 
             Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );
 
-            var storedTransformedSourceText = File.Exists( actualTransformedPath ) ? NormalizeString( await File.ReadAllTextAsync( actualTransformedPath ) ) : null;
+            var storedTransformedSourceText =
+                File.Exists( actualTransformedPath ) ? NormalizeString( await File.ReadAllTextAsync( actualTransformedPath ) ) : null;
 
             if ( expectedTransformedSourceText == actualTransformedSourceText
                  && storedTransformedSourceText != expectedNonNormalizedSourceText )

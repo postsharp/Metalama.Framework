@@ -8,9 +8,9 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Applying.InvalidTarget
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder) { }
+       
 
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
+       
         
         public void BuildAspectClass( IAspectClassBuilder builder ) { }
     }

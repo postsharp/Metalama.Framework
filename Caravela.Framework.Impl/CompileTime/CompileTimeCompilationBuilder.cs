@@ -497,7 +497,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         cancellationToken,
                         out var compileTimeCompilation,
                         out var locationAnnotationMap,
-                        out var syntaxTreeMap ) )
+                        out _ ) )
                     {
                         project = null;
 

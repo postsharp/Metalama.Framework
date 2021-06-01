@@ -29,7 +29,8 @@ namespace Caravela.Framework.Aspects
 
         private static IMetaApi CurrentContext => _currentContext.Value ?? throw NewInvalidOperationException();
 
-        private static InvalidOperationException NewInvalidOperationException() => new( "The 'meta' API can be used only in the execution context of a template." );
+        private static InvalidOperationException NewInvalidOperationException()
+            => new( "The 'meta' API can be used only in the execution context of a template." );
 
         /// <summary>
         /// Injects the logic that has been intercepted. For instance, in an <see cref="OverrideMethodAspect"/>,
