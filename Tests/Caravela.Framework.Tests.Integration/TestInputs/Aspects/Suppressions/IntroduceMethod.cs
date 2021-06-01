@@ -20,8 +20,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.OverrideMeth
 
        
         
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
+        
         [Template]
         public void Introduced()
         {

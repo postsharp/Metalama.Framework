@@ -23,8 +23,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.Methods
 
        
         
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
+        
         public void BuildAspect(IAspectBuilder<IMethod> builder)
         {
             builder.Diagnostics.Suppress( null, _suppression1 );

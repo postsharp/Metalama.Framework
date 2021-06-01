@@ -165,7 +165,6 @@ class MyAspect : System.Attribute, IAspect<IMethod>
    }
 
 public void BuildEligibility( IEligibilityBuilder<IMethod> builder ) { }
-public void BuildAspectClass( IAspectClassBuilder builder ) { }
 }
 ";
 

@@ -38,8 +38,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMet
 
        
         
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-    }
+            }
     
     [TestOutput]
     internal class TargetClass

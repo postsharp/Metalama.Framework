@@ -12,8 +12,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Scop
 
        
         
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
+        
         [Introduce(Scope = IntroductionScope.Default)]
         public int DefaultScope()
         {

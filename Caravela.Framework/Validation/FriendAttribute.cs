@@ -29,8 +29,6 @@ namespace Caravela.Framework.Validation
             builder.MustHaveAccessibility( Accessibility.Public, Accessibility.Protected );
         }
 
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
         public void BuildAspect( IAspectBuilder<IMemberOrNamedType> builder )
         {
             var properties = new Dictionary<string, string> { ["FriendTypes"] = string.Join( ";", this._friendTypes.Select( t => t.FullName ) ) };
@@ -66,5 +64,7 @@ namespace Caravela.Framework.Validation
                     this._friendTypes );
             }
         }
+
+        public void BuildAspectClass( IAspectClassBuilder builder ) { }
     }
 }

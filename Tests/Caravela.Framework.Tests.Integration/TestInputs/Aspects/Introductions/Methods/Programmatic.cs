@@ -46,8 +46,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
 
        
         
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
+        
         [Template]
         public dynamic Template()
         {

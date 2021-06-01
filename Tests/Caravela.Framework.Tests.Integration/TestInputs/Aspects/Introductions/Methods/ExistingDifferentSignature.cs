@@ -12,8 +12,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
 
        
         
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
+        
         [Introduce]
         public int ExistingMethod()
         {

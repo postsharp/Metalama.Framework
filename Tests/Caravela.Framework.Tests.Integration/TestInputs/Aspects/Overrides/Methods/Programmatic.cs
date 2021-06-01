@@ -14,8 +14,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programm
             builder.AdviceFactory.OverrideMethod(builder.TargetDeclaration.Methods.OfName("TargetMethod").Single(), nameof(Template));
         }
         
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
+        
        
 
         [Template]

@@ -67,7 +67,6 @@ namespace Caravela.Framework.Tests.UnitTests
 using Caravela.Framework.Aspects;
 class Aspect1 : IAspect 
 {
-public void BuildAspectClass( IAspectClassBuilder builder ) { }
 }
 ";
 
@@ -129,17 +128,17 @@ using Caravela.Framework.Aspects;
 
 class Aspect3 : IAspect
 {
-    public void BuildAspectClass( IAspectClassBuilder builder )  { }
+    
 }
 
 class Aspect1 : IAspect
 {
-    public void BuildAspectClass( IAspectClassBuilder builder )  { }
+    
 }
 
 class Aspect2 : IAspect
 {
-    public void BuildAspectClass( IAspectClassBuilder builder )  { }
+    
 }
 ";
 

@@ -16,8 +16,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.Tags
 
        
         
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
+        
         private dynamic OverrideMethod()
         {
             Console.WriteLine( (string?) meta.Tags["Friend"] );

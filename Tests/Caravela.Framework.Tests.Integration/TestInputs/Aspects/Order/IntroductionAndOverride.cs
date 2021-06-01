@@ -13,8 +13,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
     {
        
         
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
+        
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             foreach (var method in builder.TargetDeclaration.Methods)
@@ -48,8 +47,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
     {
        
         
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
+        
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             foreach (var method in builder.TargetDeclaration.Methods)
@@ -84,8 +82,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
     {
        
         
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
+        
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             foreach (var method in builder.TargetDeclaration.Methods)

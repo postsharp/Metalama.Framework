@@ -12,8 +12,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Applying.InvalidTarget
 
        
         
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-    }
+            }
 
     [TestOutput]
     internal class TargetClass

@@ -10,8 +10,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.D
     {
        
         
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
+        
        
 
         // TODO: Indexers.    

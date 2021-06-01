@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         private const string _frameworkAssemblyName = "Caravela.Framework";
         private readonly string _cacheDirectory;
-        
+
         /// <summary>
         /// Gets the name (without path and extension) of Caravela assemblies.
         /// </summary>

@@ -12,8 +12,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Visi
 
        
         
-        public void BuildAspectClass( IAspectClassBuilder builder ) { }
-
+        
         [Introduce(Accessibility = Accessibility.Private)]
         public int Private()
         {
