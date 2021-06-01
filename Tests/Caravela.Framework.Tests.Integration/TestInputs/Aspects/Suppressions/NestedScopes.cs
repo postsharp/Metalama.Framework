@@ -35,8 +35,9 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
             builder.Diagnostics.Suppress( null, _suppression );
         }
 
-        public void BuildEligibility(IEligibilityBuilder<IMethod> builder) { }
-    }
+       
+        
+            }
     
     [TestOutput]
     internal class TargetClass

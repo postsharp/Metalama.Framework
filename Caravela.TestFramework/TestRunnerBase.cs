@@ -1,17 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -80,7 +75,7 @@ namespace Caravela.TestFramework
         /// <returns>A new project instance.</returns>
         public virtual Project CreateProject()
         {
-            var referenceAssemblies = this.ServiceProvider.GetService<ReferenceAssemblyLocator>().SystemAssemblyPaths;
+            var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null, typeof(TestRunnerBase) );
 
             var guid = Guid.NewGuid();
             var workspace1 = new AdhocWorkspace();
@@ -88,11 +83,7 @@ namespace Caravela.TestFramework
 
             var project = solution.AddProject( guid.ToString(), guid.ToString(), LanguageNames.CSharp )
                 .WithCompilationOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )
-                .AddMetadataReferences( referenceAssemblies.Select( f => MetadataReference.CreateFromFile( f ) ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof(TemplateSyntaxFactory).Assembly.Location ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof(MetadataLoadContext).Assembly.Location ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof(TestOutputAttribute).Assembly.Location ) );
+                .AddMetadataReferences( compilation.References );
 
             // Don't add the assembly containing the code to test because it would result in duplicate symbols.
 

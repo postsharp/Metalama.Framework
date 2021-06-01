@@ -15,9 +15,9 @@ namespace Caravela.Framework.Impl.Templating
         {
             private readonly ReflectionMapper _reflectionMapper;
 
-            public MetaSyntaxFactoryImpl( Compilation compilation )
+            public MetaSyntaxFactoryImpl( Compilation compileTimeCompilation )
             {
-                this._reflectionMapper = ReflectionMapper.GetInstance( compilation );
+                this._reflectionMapper = ReflectionMapper.GetInstance( compileTimeCompilation );
             }
 
             public TypeSyntax Type( Type type ) => this._reflectionMapper.GetTypeSyntax( type );

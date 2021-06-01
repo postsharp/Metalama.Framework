@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Templating
     internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDiagnosticAdder
     {
         private readonly string _templateName;
-        private readonly SemanticAnnotationMap _semanticAnnotationMap;
+        private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
         private readonly CancellationToken _cancellationToken;
         private readonly SerializableTypes _serializableTypes;
@@ -40,20 +40,21 @@ namespace Caravela.Framework.Impl.Templating
 
         public TemplateCompilerRewriter(
             string templateName,
+            Compilation runTimeCompilation,
             Compilation compileTimeCompilation,
-            SemanticAnnotationMap semanticAnnotationMap,
+            SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
             IDiagnosticAdder diagnosticAdder,
             IServiceProvider serviceProvider,
             CancellationToken cancellationToken ) : base( compileTimeCompilation )
         {
             this._templateName = templateName;
-            this._semanticAnnotationMap = semanticAnnotationMap;
+            this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
             this._cancellationToken = cancellationToken;
             var syntaxSerializationService = serviceProvider.GetService<SyntaxSerializationService>();
-            this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( compileTimeCompilation ) );
+            this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( runTimeCompilation ) );
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
-            this._templateMemberClassifier = new TemplateMemberClassifier( compileTimeCompilation, semanticAnnotationMap, serviceProvider );
+            this._templateMemberClassifier = new TemplateMemberClassifier( runTimeCompilation, syntaxTreeAnnotationMap, serviceProvider );
         }
 
         public bool Success { get; private set; } = true;
@@ -176,7 +177,7 @@ namespace Caravela.Framework.Impl.Templating
                     throw new ArgumentNullException( nameof(node) );
                 }
 
-                this._rootTemplateSymbol = this._semanticAnnotationMap.GetDeclaredSymbol( node );
+                this._rootTemplateSymbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node );
 
                 if ( this._rootTemplateSymbol == null )
                 {
@@ -192,7 +193,7 @@ namespace Caravela.Framework.Impl.Templating
             // tuple can be initialize from variables and then items take names from variable name
             // but variable name is not safe and could be renamed because of target variables 
             // in this case we initialize tuple with explicit names
-            var symbol = (INamedTypeSymbol) this._semanticAnnotationMap.GetExpressionType( node )!;
+            var symbol = (INamedTypeSymbol) this._syntaxTreeAnnotationMap.GetExpressionType( node )!;
             var transformedArguments = new ArgumentSyntax[node.Arguments.Count];
 
             for ( var i = 0; i < symbol.TupleElements.Length; i++ )
@@ -232,7 +233,7 @@ namespace Caravela.Framework.Impl.Templating
                 // reserves the name at expansion time. The result is stored in a local variable of the expanded template.
                 // Then, each template reference uses this local variable.
 
-                var identifierSymbol = this._semanticAnnotationMap.GetDeclaredSymbol( token.Parent! );
+                var identifierSymbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( token.Parent! );
 
                 if ( this.IsDeclaredWithinTemplate( identifierSymbol! ) )
                 {
@@ -305,7 +306,7 @@ namespace Caravela.Framework.Impl.Templating
             // stored in a template variable named __foo, where foo is the variable name in the template. This variable is defined
             // and initialized in the VisitVariableDeclarator.
             // For identifiers declared outside of the template we just call the regular Roslyn SyntaxFactory.IdentifierName().
-            var identifierSymbol = this._semanticAnnotationMap.GetSymbol( node );
+            var identifierSymbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
             if ( this.IsDeclaredWithinTemplate( identifierSymbol! ) )
             {
@@ -321,7 +322,7 @@ namespace Caravela.Framework.Impl.Templating
                     // However, this can happen in an incorrect/incomplete compilation. In this case, returning anything is fine.
                     this.Report(
                         TemplatingDiagnosticDescriptors.UndeclaredRunTimeIdentifier.CreateDiagnostic(
-                            this._semanticAnnotationMap.GetLocation( node ),
+                            this._syntaxTreeAnnotationMap.GetLocation( node ),
                             node.Identifier.Text ) );
 
                     this.Success = false;
@@ -405,7 +406,7 @@ namespace Caravela.Framework.Impl.Templating
                     break;
             }
 
-            var type = this._semanticAnnotationMap.GetExpressionType( expression )!;
+            var type = this._syntaxTreeAnnotationMap.GetExpressionType( expression )!;
 
             // A local function that wraps the input `expression` into a LiteralExpression.
             ExpressionSyntax CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind syntaxKind )
@@ -433,7 +434,7 @@ namespace Caravela.Framework.Impl.Templating
                     {
                         this.Report(
                             TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic(
-                                this._semanticAnnotationMap.GetLocation( expression ),
+                                this._syntaxTreeAnnotationMap.GetLocation( expression ),
                                 "" ) );
 
                         return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
@@ -449,7 +450,7 @@ namespace Caravela.Framework.Impl.Templating
                     {
                         // This expression can generate a diagnostic, so we need to pass location information.
                         var expressionText = SyntaxFactoryEx.LiteralExpression( expression.ToString() );
-                        var location = this._templateMetaSyntaxFactory.Location( this._semanticAnnotationMap.GetLocation( expression ) );
+                        var location = this._templateMetaSyntaxFactory.Location( this._syntaxTreeAnnotationMap.GetLocation( expression ) );
 
                         invocation = invocation.WithArgumentList( ArgumentList( SeparatedList( new[] { Argument( expressionText ), Argument( location ) } ) ) );
                     }
@@ -490,7 +491,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 default:
                     // Try to find a serializer for this type.
-                    if ( this._serializableTypes.IsSerializable( type, this._semanticAnnotationMap.GetLocation( expression ), this ) )
+                    if ( this._serializableTypes.IsSerializable( type, this._syntaxTreeAnnotationMap.GetLocation( expression ), this ) )
                     {
                         return InvocationExpression(
                             this._templateMetaSyntaxFactory.GenericTemplateSyntaxFactoryMember(
@@ -517,7 +518,7 @@ namespace Caravela.Framework.Impl.Templating
 
             // Cast to dynamic expressions.
             if ( transformationKind != TransformationKind.Transform &&
-                 this._semanticAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol )
+                 this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol )
             {
                 return InvocationExpression(
                     this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.CreateDynamicMemberAccessExpression) ),
@@ -640,7 +641,7 @@ namespace Caravela.Framework.Impl.Templating
             // Expand extension methods.
             if ( transformationKind == TransformationKind.Transform )
             {
-                var symbol = this._semanticAnnotationMap.GetSymbol( node.Expression );
+                var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Expression );
 
                 if ( symbol is IMethodSymbol { IsExtensionMethod: true } method )
                 {
@@ -1159,7 +1160,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( node.Expression != null && this._templateMemberClassifier.IsProceed( node.Expression ) )
             {
-                var expressionType = this._semanticAnnotationMap.GetExpressionType( node.Expression );
+                var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression );
 
                 if ( expressionType == null )
                 {
@@ -1188,7 +1189,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // Fully qualifies simple identifiers.
 
-                var symbol = this._semanticAnnotationMap.GetSymbol( node );
+                var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
                 if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                 {
@@ -1223,7 +1224,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         private bool TryVisitNamespaceOrTypeName( SyntaxNode node, [NotNullWhen( true )] out SyntaxNode? transformedNode )
         {
-            var symbol = this._semanticAnnotationMap.GetSymbol( node );
+            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
             switch ( symbol )
             {

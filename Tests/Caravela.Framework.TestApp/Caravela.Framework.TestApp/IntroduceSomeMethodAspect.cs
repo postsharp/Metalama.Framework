@@ -26,11 +26,6 @@ namespace Caravela.Framework.TestApp
             }
         }
 
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder)
-        {
-
-        }
-
         [Template]
         public static void SomeIntroducedMethod()
         {

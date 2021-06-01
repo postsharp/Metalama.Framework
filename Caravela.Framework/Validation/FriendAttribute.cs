@@ -64,5 +64,7 @@ namespace Caravela.Framework.Validation
                     this._friendTypes );
             }
         }
+
+        public void BuildAspectClass( IAspectClassBuilder builder ) { }
     }
 }

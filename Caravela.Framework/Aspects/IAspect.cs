@@ -11,7 +11,22 @@ namespace Caravela.Framework.Aspects
     /// this interface, but the strongly-typed variant <see cref="IAspect{T}"/>.
     /// </summary>
     [CompileTime]
-    public interface IAspect { }
+    public interface IAspect
+    {
+        /// <summary>
+        /// Configures the static characteristics of the aspect, i.e. those that do not depend on the instance state
+        /// of the aspect class. Implementations are not allowed to reference non-static members.
+        /// Implementations must call the implementation of the base class if it exists.
+        /// </summary>
+        /// <param name="builder">An object that allows the aspect to configure characteristics like
+        /// description, dependencies, or layers.</param>
+        void BuildAspectClass( IAspectClassBuilder builder )
+#if NETCOREAPP3_1
+        { }
+#else
+            ;
+#endif
+    }
 
     /// <summary>
     /// The base interface for all aspects, with the type parameter indicating to which types
@@ -22,11 +37,15 @@ namespace Caravela.Framework.Aspects
         where T : class, IDeclaration
     {
         /// <summary>
-        /// Initializes the aspect. The implementation must add advices or child aspects
+        /// Initializes the aspect. The implementation must add advices, child aspects and validators
         /// using the <paramref name="builder"/> parameter.
         /// </summary>
-        /// <param name="builder">An object that allows the aspect to add advices and child
-        /// aspects.</param>
-        void BuildAspect( IAspectBuilder<T> builder );
+        /// <param name="builder">An object that allows the aspect to add advices, child aspects and validators.</param>
+        void BuildAspect( IAspectBuilder<T> builder )
+#if NETCOREAPP3_1
+        { }
+#else
+            ;
+#endif
     }
 }

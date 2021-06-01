@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Serialization;
@@ -77,12 +78,15 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 testAnalyzer.Visit( templateSyntaxRoot );
             }
 
+            var assemblyLocator = this.ServiceProvider.GetService<ReferenceAssemblyLocator>();
+
             // Create an empty compilation (just with references) for the compile-time project.
             var compileTimeCompilation = CSharpCompilation.Create(
-                "assemblyName",
-                Array.Empty<SyntaxTree>(),
-                testResult.Project.MetadataReferences,
-                (CSharpCompilationOptions) testResult.Project.CompilationOptions! );
+                    "assemblyName",
+                    Array.Empty<SyntaxTree>(),
+                    assemblyLocator.StandardCompileTimeMetadataReferences,
+                    (CSharpCompilationOptions) testResult.Project.CompilationOptions! )
+                .AddReferences( MetadataReference.CreateFromFile( typeof(TestTemplateAttribute).Assembly.Location ) );
 
             var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult, this.ServiceProvider );
 

@@ -55,13 +55,13 @@ namespace Caravela.Framework.Code
 
         public override bool IsDefined( Type attributeType, bool inherit ) => this.UnderlyingMemberInfo.IsDefined( attributeType, inherit );
 
-        public override Type DeclaringType => this.UnderlyingMemberInfo.DeclaringType;
+        public override Type DeclaringType => this.UnderlyingMemberInfo.DeclaringType!;
 
         public override MemberTypes MemberType => this.UnderlyingMemberInfo.MemberType;
 
         public override string Name => this.UnderlyingMemberInfo.Name;
 
-        public override Type ReflectedType => this.UnderlyingMemberInfo.ReflectedType;
+        public override Type ReflectedType => this.UnderlyingMemberInfo.ReflectedType!;
 
         public object? GetValue( object? obj )
         {

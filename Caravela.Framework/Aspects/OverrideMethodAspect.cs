@@ -24,6 +24,8 @@ namespace Caravela.Framework.Aspects
             builder.ExceptForInheritance().MustBeNonAbstract();
         }
 
+        public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }
+
         /// <summary>
         /// Default template of the new method implementation.
         /// </summary>

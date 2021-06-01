@@ -29,7 +29,7 @@ namespace Caravela.Framework.Tests.UnitTests
 using Caravela.Framework.Aspects;
 class C : IAspect 
 {
-  void M() {}
+   void M() {}
   int F;
 
  [TemplateAttribute]

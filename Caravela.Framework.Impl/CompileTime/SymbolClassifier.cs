@@ -93,7 +93,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 return null;
             }
 
-            if ( this._referenceAssemblyLocator.SystemAssemblyNames.Contains( assembly.Name ) )
+            if ( assembly.Name == "System.Private.CoreLib" || this._referenceAssemblyLocator.SystemAssemblyNames.Contains( assembly.Name ) )
             {
                 // .NET Standard, Roslyn, ...
                 return SymbolDeclarationScope.Both;

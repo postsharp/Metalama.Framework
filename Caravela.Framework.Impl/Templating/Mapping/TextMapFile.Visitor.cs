@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Templating.Mapping
 {
-    internal partial class TextMap
+    internal partial class TextMapFile
     {
         private class Visitor : CSharpSyntaxWalker
         {
