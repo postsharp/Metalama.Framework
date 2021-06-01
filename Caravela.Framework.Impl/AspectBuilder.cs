@@ -22,11 +22,11 @@ namespace Caravela.Framework.Impl
         private readonly AdviceFactory _adviceFactory;
         private bool _skipped;
 
-        IProject IAspectBuilder.Project => throw new NotImplementedException();
+        IProject IAspectLayerBuilder.Project => throw new NotImplementedException();
 
-        IReadOnlyList<IAspectInstance> IAspectBuilder.UpstreamAspects => throw new NotImplementedException();
+        IReadOnlyList<IAspectInstance> IAspectLayerBuilder.UpstreamAspects => throw new NotImplementedException();
 
-        IReadOnlyList<IAspectInstance> IAspectBuilder.OtherInstances => throw new NotImplementedException();
+        IReadOnlyList<IAspectInstance> IAspectLayerBuilder.OtherInstances => throw new NotImplementedException();
 
         public IDiagnosticSink Diagnostics => this._diagnosticSink;
 
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl
             where TMember : class, IDeclaration
             => throw new NotImplementedException();
 
-        IDeclaration IAspectBuilder.TargetDeclaration => this.TargetDeclaration;
+        IDeclaration IAspectLayerBuilder.TargetDeclaration => this.TargetDeclaration;
 
         public IAdviceFactory AdviceFactory => this._adviceFactory;
 
@@ -77,6 +77,8 @@ namespace Caravela.Framework.Impl
         }
 
 #pragma warning disable 618 // Not implemented
+        public void RegisterAspectLayerBuildAction( Action<IAspectLayerBuilder<T>> buildAction ) => throw new NotImplementedException();
+
         void IValidatorAdder.AddTargetValidator<TTarget>( TTarget targetDeclaration, Action<ValidateReferenceContext<TTarget>> validator )
             => throw new NotImplementedException();
 

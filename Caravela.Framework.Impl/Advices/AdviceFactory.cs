@@ -406,7 +406,5 @@ namespace Caravela.Framework.Impl.Advices
                 conflictBehavior,
                 options );
         }
-
-        public IAdviceFactory ForLayer( string layerName ) => throw new NotImplementedException();
     }
 }
