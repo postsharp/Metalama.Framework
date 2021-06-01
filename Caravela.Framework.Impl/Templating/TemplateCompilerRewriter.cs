@@ -40,6 +40,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public TemplateCompilerRewriter(
             string templateName,
+            Compilation runTimeCompilation,
             Compilation compileTimeCompilation,
             SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
             IDiagnosticAdder diagnosticAdder,
@@ -51,9 +52,9 @@ namespace Caravela.Framework.Impl.Templating
             this._diagnosticAdder = diagnosticAdder;
             this._cancellationToken = cancellationToken;
             var syntaxSerializationService = serviceProvider.GetService<SyntaxSerializationService>();
-            this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( compileTimeCompilation ) );
+            this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( runTimeCompilation ) );
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
-            this._templateMemberClassifier = new TemplateMemberClassifier( compileTimeCompilation, syntaxTreeAnnotationMap, serviceProvider );
+            this._templateMemberClassifier = new TemplateMemberClassifier( runTimeCompilation, syntaxTreeAnnotationMap, serviceProvider );
         }
 
         public bool Success { get; private set; } = true;

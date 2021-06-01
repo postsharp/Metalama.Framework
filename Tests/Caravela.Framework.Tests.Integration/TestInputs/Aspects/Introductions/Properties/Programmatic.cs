@@ -28,8 +28,9 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
             // TODO: Expression bodied template.
         }
 
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
-
+       
+        
+        
         //[Template]
         //public int AutoProperty { get; set; }
 

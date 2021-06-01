@@ -362,7 +362,7 @@ namespace Caravela.Framework.Impl.Advices
                 targetType,
                 (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( interfaceType ),
                 explicitImplementation,
-                conflictBehavior, 
+                conflictBehavior,
                 options );
         }
 

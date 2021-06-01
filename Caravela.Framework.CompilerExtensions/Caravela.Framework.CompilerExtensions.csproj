@@ -32,7 +32,7 @@
 		<PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" PrivateAssets="all"><GeneratePathProperty>true</GeneratePathProperty></PackageReference>
 		<EmbeddedResource Include="$(PkgMicrosoft_Bcl_HashCode)\lib\netstandard2.0\Microsoft.Bcl.HashCode.dll" Link="Resources\Microsoft.Bcl.HashCode.dll" />
 
-		<PackageReference Include="K4os.Hash.xxHash" Version="1.0.6" PrivateAssets="all"><GeneratePathProperty>true</GeneratePathProperty></PackageReference>
+		<PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" PrivateAssets="all"><GeneratePathProperty>true</GeneratePathProperty></PackageReference>
 		<EmbeddedResource Include="$(PkgK4os_Hash_xxHash)\lib\netstandard2.0\K4os.Hash.xxHash.dll" Link="Resources\K4os.Hash.xxHash.dll" />
 
 

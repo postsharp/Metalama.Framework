@@ -145,6 +145,6 @@ namespace Caravela.Framework.Code
         /// <param name="interfaceMember"></param>
         /// <param name="implementationMember"></param>
         /// <returns></returns>
-        bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen(true)] out IMember? implementationMember );
+        bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember );
     }
 }

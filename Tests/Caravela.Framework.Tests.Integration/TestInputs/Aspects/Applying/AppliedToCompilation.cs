@@ -8,14 +8,8 @@ using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Applying.AppliedToCompilation
 {
-    public class MyAspect : Attribute, IAspect<ICompilation>
-    {
-        public void BuildAspect(IAspectBuilder<ICompilation> builder)
-        {
-        }
+    public class MyAspect : Attribute, IAspect<ICompilation> { }
 
-        public void BuildEligibility(IEligibilityBuilder<ICompilation> builder) { }
-    }
 
     [TestOutput]
     internal class TargetClass

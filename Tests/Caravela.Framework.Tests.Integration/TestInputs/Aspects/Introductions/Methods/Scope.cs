@@ -8,12 +8,11 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Scop
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
-        {
-        }
+       
 
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
-
+       
+        
+        
         [Introduce(Scope = IntroductionScope.Default)]
         public int DefaultScope()
         {

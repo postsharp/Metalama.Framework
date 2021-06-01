@@ -24,9 +24,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 return string.Empty;
             }
 
-            if ( s is IErrorTypeSymbol )
+            if ( s is IErrorTypeSymbol error )
             {
-                throw new ArgumentOutOfRangeException( nameof(s), "Cannot get the name of an error symbol." );
+                throw new ArgumentOutOfRangeException( nameof(s), $"Cannot get the reflection name of the unresolved symbol '{error.Name}'." );
             }
 
             var sb = new StringBuilder();

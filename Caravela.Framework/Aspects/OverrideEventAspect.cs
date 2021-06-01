@@ -13,6 +13,8 @@ namespace Caravela.Framework.Aspects
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field )]
     public abstract class OverrideEventAspect : Attribute, IAspect<IEvent>
     {
+        public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }
+
         /// <inheritdoc />
         public virtual void BuildAspect( IAspectBuilder<IEvent> builder )
         {

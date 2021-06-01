@@ -8,11 +8,10 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.D
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
-        {
-        }
-
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
+       
+        
+        
+       
 
         // TODO: Indexers.    
 

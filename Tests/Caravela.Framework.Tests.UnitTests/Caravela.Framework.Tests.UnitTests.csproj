@@ -16,9 +16,7 @@
     <PackageReference Include="coverlet.collector" Version="1.2.0" />
     <PackageReference Include="Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight" Version="$(CaravelaCompilerVersion)" />
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     <ProjectReference Include="..\..\Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj" />
     <ProjectReference Include="..\..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" />
     <ProjectReference Include="..\..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" />
