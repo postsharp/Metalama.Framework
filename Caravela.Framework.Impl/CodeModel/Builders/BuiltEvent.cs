@@ -24,8 +24,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.EventBuilder;
 
-        public IEventInvocation Base => throw new NotImplementedException();
-
         public IType EventType => this.EventBuilder.EventType;
 
         [Memo]
@@ -36,9 +34,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod? Raiser => null;
 
-        public bool HasBase => throw new NotImplementedException();
+        IEventInvoker IEvent.BaseInvoker => throw new NotImplementedException();
 
-        IEventInvocation IEvent.Base => throw new NotImplementedException();
+        public IEventInvoker Invoker => throw new NotImplementedException();
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
         public IReadOnlyList<IEvent> ExplicitInterfaceImplementations => Array.Empty<IEvent>();

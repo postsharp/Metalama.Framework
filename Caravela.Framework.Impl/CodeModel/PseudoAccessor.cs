@@ -42,9 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsOpenGeneric => this._containingMember.DeclaringType.IsOpenGeneric;
 
-        public bool HasBase => false;
-
-        public IMethodInvocation Base => throw new InvalidOperationException();
+        public IMethodInvoker Invoker => throw new NotImplementedException();
 
         public IMethod? OverriddenMethod => null;
 
@@ -115,8 +113,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public ICompilation Compilation => this._containingMember.Compilation;
 
-        public dynamic Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
-
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
@@ -140,6 +136,8 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotSupportedException();
+
+        public IMethodInvoker? BaseInvoker => throw new NotImplementedException();
 
         private sealed class ReturnParam : IParameter
         {

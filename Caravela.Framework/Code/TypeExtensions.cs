@@ -40,8 +40,17 @@ namespace Caravela.Framework.Code
         /// <returns></returns>
         public static bool Is( this IType left, Type right ) => left.Compilation.InvariantComparer.Is( left, right );
 
+        public static bool Is( this IType left, SpecialType right )
+            => left.Compilation.InvariantComparer.Is( left, left.Compilation.TypeFactory.GetSpecialType( right ) );
+
         [return: RunTimeOnly]
         [Obsolete( "Not implemented." )]
         public static dynamic Cast( this IType type, dynamic value ) => throw new NotImplementedException();
+    }
+
+    public enum SpecialType
+    {
+        None,
+        Void
     }
 }

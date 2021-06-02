@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,11 +12,11 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class EventInvocation : IEventInvocation
+    internal class EventInvoker : Invoker, IEventInvoker
     {
         public IEvent Member { get; }
 
-        public EventInvocation( IEvent member )
+        public EventInvoker( IEvent member, LinkingOrder order ) : base( member, order )
         {
             this.Member = member;
         }
@@ -39,6 +40,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public object AddDelegate( object? instance, object? value )
         {
+            // TODO: Use LinkerAnnotation.
+
             var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ) );
 
             var expression = AssignmentExpression( SyntaxKind.AddAssignmentExpression, eventAccess, RuntimeExpression.GetSyntaxFromValue( value ) );
@@ -48,6 +51,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public object RemoveDelegate( object? instance, object? value )
         {
+            // TODO: Use LinkerAnnotation.
+
             var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ) );
 
             var expression = AssignmentExpression( SyntaxKind.SubtractAssignmentExpression, eventAccess, RuntimeExpression.GetSyntaxFromValue( value ) );
@@ -55,6 +60,6 @@ namespace Caravela.Framework.Impl.CodeModel
             return new DynamicExpression( expression, this.Member.EventType, false );
         }
 
-        public IEventInvocation Base => throw new NotImplementedException();
+        public IEventInvoker Base => throw new NotImplementedException();
     }
 }

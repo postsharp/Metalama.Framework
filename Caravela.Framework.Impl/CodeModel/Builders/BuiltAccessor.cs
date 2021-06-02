@@ -59,8 +59,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public MethodKind MethodKind => this.AccessorBuilder.MethodKind;
 
-        public dynamic Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
-
         [Memo]
         public IParameter ReturnParameter => new BuiltParameter( this.AccessorBuilder.ReturnParameter, this.Compilation );
 
@@ -76,9 +74,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
 
-        public bool HasBase => throw new NotImplementedException();
+        public IMethodInvoker? BaseInvoker => throw new NotImplementedException();
 
-        public IMethodInvocation Base => throw new NotImplementedException();
+        public IMethodInvoker Invoker => throw new NotImplementedException();
 
         public IMethod? OverriddenMethod => throw new NotImplementedException();
 

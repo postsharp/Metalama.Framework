@@ -39,7 +39,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             var value = meta.Parameters[0].Value;
 
-            if ( value != meta.Property.GetValue( meta.This ) )
+            if ( value != meta.Property.Value )
             {
                 meta.This.OnPropertyChanged(meta.Property.Name);
                 

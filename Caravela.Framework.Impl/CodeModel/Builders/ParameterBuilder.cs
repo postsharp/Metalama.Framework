@@ -38,8 +38,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMemberOrNamedType DeclaringMember { get; }
 
-        public ParameterInfo ToRunTimeReflection() => throw new NotImplementedException();
-
         public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
 
         public ParameterBuilder( MemberOrNamedTypeBuilder declaringMember, int index, string? name, IType type, RefKind refKind ) : base(
@@ -60,7 +58,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         internal ParameterSyntax ToDeclarationSyntax()
         {
-            var syntaxGenerator = this.Compilation.SyntaxGenerator;
+            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
             return (ParameterSyntax) syntaxGenerator.ParameterDeclaration(
                 this.Name,

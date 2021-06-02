@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
@@ -20,8 +21,15 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly IFieldSymbol _symbol;
 
+        IFieldOrPropertyInvoker? IFieldOrProperty.BaseInvoker => this.BaseInvoker;
+
+        IFieldOrPropertyInvoker IFieldOrProperty.Invoker => this.Invoker;
+
         [Memo]
-        private PropertyInvocation Invocation => new( this );
+        public IPropertyInvoker Invoker => new PropertyInvoker( this, LinkingOrder.Default );
+
+        [Memo]
+        public IPropertyInvoker BaseInvoker => new PropertyInvoker( this, LinkingOrder.Original );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
@@ -42,25 +50,13 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IMethod? Setter => null;
 
-        public dynamic Value
-        {
-            get => new FieldOrPropertyInvocation( this ).Value;
-            set => throw new InvalidOperationException();
-        }
+        public object GetValue( object? instance ) => this.Invoker.GetValue( instance );
 
-        public object GetValue( object? instance ) => this.Invocation.GetValue( instance );
-
-        public object SetValue( object? instance, object value ) => this.Invocation.SetValue( instance, value );
-
-        public bool HasBase => true;
-
-        IFieldOrPropertyInvocation IFieldOrProperty.Base => new PropertyInvocation( this ).Base;
+        public object SetValue( object? instance, object value ) => this.Invoker.SetValue( instance, value );
 
         public PropertyInfo ToPropertyInfo() => throw new NotImplementedException();
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
-
-        public IPropertyInvocation Base => throw new NotImplementedException();
 
         RefKind IProperty.RefKind => RefKind.None;
 
@@ -70,7 +66,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         bool IProperty.IsRefReadonly => false;
 
-        IParameterList IProperty.Parameters => ParameterList.Empty;
+        IParameterList IHasParameters.Parameters => ParameterList.Empty;
 
         public override bool IsReadOnly => this._symbol.IsReadOnly;
 
@@ -79,11 +75,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => Array.Empty<IProperty>();
 
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
-
-        dynamic IPropertyInvocation.GetIndexerValue( dynamic? instance, params dynamic[] args ) => this.Invocation.GetIndexerValue( instance, args );
-
-        dynamic IPropertyInvocation.SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args )
-            => this.Invocation.SetIndexerValue( instance, value, args );
 
         MemberRef<IMemberOrNamedType> IReplaceMemberTransformation.ReplacedMember => new( this._symbol );
 

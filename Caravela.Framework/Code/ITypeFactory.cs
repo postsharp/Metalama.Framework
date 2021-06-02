@@ -47,5 +47,7 @@ namespace Caravela.Framework.Code
         /// <param name="pointedType"></param>
         /// <returns></returns>
         IPointerType MakePointerType( IType pointedType );
+
+        IType GetSpecialType( SpecialType specialType );
     }
 }

@@ -10,7 +10,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// A base interface for <see cref="IField"/> and <see cref="IProperty"/>.
     /// </summary>
-    public interface IFieldOrProperty : IMember, IFieldOrPropertyInvocation
+    public interface IFieldOrProperty : IMember
     {
         /// <summary>
         /// Gets the field or property type.
@@ -32,15 +32,11 @@ namespace Caravela.Framework.Code
         IMethod? Setter { get; }
 
         /// <summary>
-        /// Determines if the property existed before the current aspect was advice
-        /// (<see langword="false" /> if it was introduced by the current aspect).
-        /// </summary>
-        bool HasBase { get; }
-
-        /// <summary>
         /// Allows invocation of the base property (<see langword="null" /> if the method was introduced by the current aspect).
         /// </summary>
-        IFieldOrPropertyInvocation Base { get; }
+        IFieldOrPropertyInvoker? BaseInvoker { get; }
+
+        IFieldOrPropertyInvoker Invoker { get; }
 
         /// <summary>
         /// Gets a <see cref="FieldOrPropertyInfo"/> that represents the current field or property at run time.

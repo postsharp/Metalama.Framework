@@ -9,7 +9,7 @@ namespace Caravela.Framework.Code
     /// Allows adding/removing delegates to/from events.
     /// </summary>
     [CompileTimeOnly]
-    public interface IEventInvocation
+    public interface IEventInvoker
     {
         /// <summary>
         /// Add a delegate to the event.

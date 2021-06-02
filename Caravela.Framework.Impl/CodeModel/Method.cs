@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
@@ -44,18 +45,18 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsOpenGeneric => this.GenericArguments.Any( ga => ga is IGenericParameter ) || this.DeclaringType.IsOpenGeneric;
 
-        public object Invoke( object? instance, params object[] args ) => new MethodInvocation( this ).Invoke( instance, args );
-
-        public bool HasBase => true;
-
-        public IMethodInvocation Base => throw new NotImplementedException();
-
         public IMethod WithGenericArguments( params IType[] genericArguments )
         {
             var symbolWithGenericArguments = this.MethodSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() );
 
             return new Method( symbolWithGenericArguments, this.Compilation );
         }
+
+        [Memo]
+        public IMethodInvoker? BaseInvoker => new MethodInvoker( this, LinkingOrder.Original );
+
+        [Memo]
+        public IMethodInvoker Invoker => new MethodInvoker( this, LinkingOrder.Default );
 
         public override bool IsReadOnly => this.MethodSymbol.IsReadOnly;
 

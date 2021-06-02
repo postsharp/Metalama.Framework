@@ -142,7 +142,7 @@ namespace Caravela.Framework.Impl.Transformations
                     new LinkerOverridePropertyProceedImpl(
                         this.Advice.AspectLayerId,
                         accessor,
-                        LinkerAnnotationOrder.Default,
+                        LinkingOrder.Default,
                         context.SyntaxFactory ),
                     context.LexicalScope,
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),

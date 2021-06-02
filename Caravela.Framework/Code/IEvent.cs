@@ -40,7 +40,9 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Allows invocation of the base event (<see langword="null" /> if the method was introduced by the current aspect).
         /// </summary>
-        IEventInvocation? Base { get; }
+        IEventInvoker? BaseInvoker { get; }
+
+        IEventInvoker Invoker { get; }
 
         /// <summary>
         /// Gets a list of interface events this event explicitly implements.

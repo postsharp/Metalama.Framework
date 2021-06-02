@@ -23,9 +23,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod? Setter => throw new NotImplementedException();
 
-        public bool HasBase => throw new NotImplementedException();
+        public IFieldOrPropertyInvoker? BaseInvoker => throw new NotImplementedException();
 
-        public IFieldOrPropertyInvocation Base => throw new NotImplementedException();
+        public IFieldOrPropertyInvoker Invoker => throw new NotImplementedException();
+
+        public IFieldOrPropertyInvoker Base => throw new NotImplementedException();
 
         public dynamic Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
@@ -40,16 +42,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic GetValue( dynamic? instance )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic SetValue( dynamic? instance, dynamic value )
         {
             throw new NotImplementedException();
         }

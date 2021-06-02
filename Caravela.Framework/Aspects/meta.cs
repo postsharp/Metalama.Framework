@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects.AdvisedCode;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using System;
@@ -72,21 +73,21 @@ namespace Caravela.Framework.Aspects
         /// To invoke the method, use <c>Invoke</c>.
         /// e.g. <c>OverrideMethodContext.Method.Invoke(1, 2, 3);</c>.
         /// </remarks>
-        public static IMethod Method => CurrentContext.Method;
+        public static IAdviceMethod Method => CurrentContext.Method;
 
         /// <summary>
         /// Gets the target field or property, or null if the advice does not target a field or a property.
         /// </summary>
-        public static IProperty Property => CurrentContext.Property;
+        public static IAdviceProperty Property => CurrentContext.Property;
 
-        public static IFieldOrProperty FieldOrProperty => CurrentContext.FieldOrProperty;
+        public static IAdviceFieldOrProperty FieldOrProperty => CurrentContext.FieldOrProperty;
 
         public static IMemberOrNamedType Member => CurrentContext.Member;
 
         /// <summary>
         /// Gets the target event, or null if the advice does not target an event.
         /// </summary>
-        public static IEvent Event => CurrentContext.Event;
+        public static IAdviceEvent Event => CurrentContext.Event;
 
         /// <summary>
         /// Gets the list of parameters of <see cref="Method"/>.

@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     {
         private readonly string? _expressionTypeName;
         private ITypeSymbol? _expressionType;
-
+        
         /// <summary>
         /// Gets a value indicating whether it is legal to use the <c>out</c> or <c>ref</c> argument modifier with this expression.
         /// </summary>
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         /// </summary>
         /// <param name="runtimeExpression"></param>
         /// <returns></returns>
-        public static implicit operator ExpressionSyntax( RuntimeExpression runtimeExpression ) => runtimeExpression.Syntax;
+        public static implicit operator ExpressionSyntax?( RuntimeExpression? runtimeExpression ) => runtimeExpression?.Syntax;
 
         private ITypeSymbol? GetExpressionType( ITypeFactory typeFactory )
         {

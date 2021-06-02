@@ -8,7 +8,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Allows accessing the value of properties and indexers.
     /// </summary>
-    public interface IPropertyInvocation : IFieldOrPropertyInvocation
+    public interface IPropertyInvoker : IFieldOrPropertyInvoker
     {
         /// <summary>
         /// Get the value for an indexer.

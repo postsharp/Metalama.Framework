@@ -37,9 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public ParameterBuilderList Parameters { get; } = new();
 
-        IParameterList IProperty.Parameters => this.Parameters;
-
-        public IPropertyInvocation Base => throw new NotImplementedException();
+        IParameterList IHasParameters.Parameters => this.Parameters;
 
         IType IFieldOrProperty.Type => this.Type;
 
@@ -53,11 +51,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IMethod? IFieldOrProperty.Setter => this.Setter;
 
-        public bool HasBase => throw new NotImplementedException();
+        public IFieldOrPropertyInvoker? BaseInvoker => throw new NotImplementedException();
 
-        public dynamic Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        IPropertyInvoker IProperty.Invoker => throw new NotImplementedException();
 
-        IFieldOrPropertyInvocation IFieldOrProperty.Base => throw new NotImplementedException();
+        public IFieldOrPropertyInvoker Invoker => throw new NotImplementedException();
 
         public AspectLinkerOptions? LinkerOptions { get; }
 
@@ -101,26 +99,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             this._hasInitOnlySetter = hasInitOnlySetter;
         }
 
-        public dynamic GetIndexerValue( dynamic? instance, params dynamic[] args )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic GetValue( dynamic? instance )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic SetValue( dynamic? instance, dynamic value )
-        {
-            throw new NotImplementedException();
-        }
-
         public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
         {
             if ( this.IsIndexer )
@@ -160,7 +138,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = this.Compilation.SyntaxGenerator;
+            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
             // TODO: Indexers.
             var property =
@@ -271,6 +249,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             throw new NotImplementedException();
         }
+
+        IPropertyInvoker? IProperty.BaseInvoker => throw new NotImplementedException();
 
         [return: RunTimeOnly]
         public FieldOrPropertyInfo ToFieldOrPropertyInfo()

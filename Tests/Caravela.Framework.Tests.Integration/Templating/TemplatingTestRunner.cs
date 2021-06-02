@@ -244,7 +244,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 new LinkerOverrideMethodProceedImpl(
                     default,
                     targetMethod,
-                    LinkerAnnotationOrder.Default,
+                    LinkingOrder.Default,
                     compilation.Factory ),
                 lexicalScope,
                 this._syntaxSerializationService,

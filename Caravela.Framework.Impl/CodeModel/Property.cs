@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
@@ -23,8 +24,15 @@ namespace Caravela.Framework.Impl.CodeModel
             this._symbol = symbol;
         }
 
+        IFieldOrPropertyInvoker? IFieldOrProperty.BaseInvoker => this.BaseInvoker;
+
+        IFieldOrPropertyInvoker IFieldOrProperty.Invoker => this.Invoker;
+
         [Memo]
-        private PropertyInvocation Invocation => new( this );
+        public IPropertyInvoker Invoker => new PropertyInvoker( this, LinkingOrder.Default );
+
+        [Memo]
+        public IPropertyInvoker BaseInvoker => new PropertyInvoker( this, LinkingOrder.Original );
 
         public override ISymbol Symbol => this._symbol;
 
@@ -57,23 +65,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 
-        public object Value
-        {
-            get => new PropertyInvocation( this ).Value;
-            set => throw new InvalidOperationException();
-        }
+        public object GetValue( object? instance ) => this.Invoker.GetValue( instance );
 
-        public object GetValue( object? instance ) => this.Invocation.GetValue( instance );
+        public object SetValue( object? instance, object value ) => this.Invoker.SetValue( instance, value );
 
-        public object SetValue( object? instance, object value ) => this.Invocation.SetValue( instance, value );
+        public object GetIndexerValue( object? instance, params object[] args ) => this.Invoker.GetIndexerValue( instance, args );
 
-        public object GetIndexerValue( object? instance, params object[] args ) => this.Invocation.GetIndexerValue( instance, args );
-
-        public object SetIndexerValue( object? instance, object value, params object[] args ) => this.Invocation.SetIndexerValue( instance, value, args );
-
-        public bool HasBase => true;
-
-        IFieldOrPropertyInvocation IFieldOrProperty.Base => this.Base;
+        public object SetIndexerValue( object? instance, object value, params object[] args ) => this.Invoker.SetIndexerValue( instance, value, args );
 
         [Memo]
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations
@@ -81,9 +79,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
 
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
+        IPropertyInvoker? IProperty.BaseInvoker => throw new NotImplementedException();
 
-        public IPropertyInvocation Base => this.Invocation.Base;
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
         public override string ToString() => this._symbol.ToString();
 

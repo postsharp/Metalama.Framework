@@ -5,7 +5,7 @@ using Caravela.Framework.Code;
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Aspects
+namespace Caravela.Framework.Aspects.AdvisedCode
 {
     /// <summary>
     /// Represents the list of parameters of the method being overridden by the advice.

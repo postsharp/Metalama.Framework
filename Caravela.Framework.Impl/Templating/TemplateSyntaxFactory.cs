@@ -44,6 +44,9 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        public static StatementSyntax? ToStatement( ExpressionSyntax? expression )
+            => expression == null ? null : SyntaxFactory.ExpressionStatement( expression );
+
         public static StatementSyntax[] ToStatementArray( List<StatementOrTrivia> list )
         {
             var statementList = new List<StatementSyntax>( list.Count );

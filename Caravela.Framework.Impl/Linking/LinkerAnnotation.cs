@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Gets a value indicating which version of the semantic must be invoked.
         /// </summary>
-        public LinkerAnnotationOrder Order { get; }
+        public LinkingOrder Order { get; }
 
         /// <summary>
         /// Gets a value indicating target kind. For example self or property get accessor.
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public LinkerAnnotation(
             AspectLayerId aspectLayer,
-            LinkerAnnotationOrder order,
+            LinkingOrder order,
             LinkerAnnotationTargetKind targetKind = LinkerAnnotationTargetKind.Self )
         {
             this.AspectLayer = aspectLayer;
@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             var parts = str.Split( '$' );
 
-            var parseSuccess1 = Enum.TryParse<LinkerAnnotationOrder>( parts[1], out var order );
+            var parseSuccess1 = Enum.TryParse<LinkingOrder>( parts[1], out var order );
 
             Invariant.Assert( parseSuccess1 );
 

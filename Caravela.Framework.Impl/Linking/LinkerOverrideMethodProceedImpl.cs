@@ -17,13 +17,13 @@ namespace Caravela.Framework.Impl.Linking
     {
         private readonly IMethod _overriddenDeclaration;
         private readonly AspectLayerId _aspectLayerId;
-        private readonly LinkerAnnotationOrder _order;
+        private readonly LinkingOrder _order;
         private readonly ISyntaxFactory _syntaxFactory;
 
         public LinkerOverrideMethodProceedImpl(
             AspectLayerId aspectLayerId,
             IMethod overriddenDeclaration,
-            LinkerAnnotationOrder order,
+            LinkingOrder order,
             ISyntaxFactory syntaxFactory )
         {
             this._aspectLayerId = aspectLayerId;

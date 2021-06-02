@@ -9,7 +9,7 @@ namespace Caravela.Framework.Code
     /// Allows invocation of the method.
     /// </summary>
     [CompileTimeOnly]
-    public interface IMethodInvocation
+    public interface IMethodInvoker
     {
         /// <summary>
         /// Invokes the method.

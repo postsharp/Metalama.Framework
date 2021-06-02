@@ -2,9 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -23,7 +23,10 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        private FieldOrPropertyInvocation Invocation => new( this );
+        public IFieldOrPropertyInvoker? BaseInvoker => new FieldOrPropertyInvoker( this, LinkingOrder.Original );
+
+        [Memo]
+        public IFieldOrPropertyInvoker Invoker => new FieldOrPropertyInvoker( this, LinkingOrder.Default );
 
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
@@ -33,20 +36,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public IMethod? Setter => new PseudoAccessor( this, AccessorSemantic.Set );
-
-        public dynamic Value
-        {
-            get => this.Invocation.Value;
-            set => throw new InvalidOperationException();
-        }
-
-        public dynamic GetValue( object? instance ) => this.Invocation.GetValue( instance );
-
-        public dynamic SetValue( object? instance, object value ) => this.Invocation.SetValue( instance, value );
-
-        public bool HasBase => true;
-
-        public IFieldOrPropertyInvocation Base => this.Invocation.Base;
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 

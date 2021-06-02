@@ -22,6 +22,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public GenericParameterBuilderList GenericParameters { get; } = new();
 
+        public IMethodInvoker Invoker => throw new NotImplementedException();
+
         public IMethod? OverriddenMethod { get; set; }
 
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
@@ -63,7 +65,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IMethodList IMethodBase.LocalFunctions => MethodList.Empty;
 
-        IParameterList IMethodBase.Parameters => this.Parameters;
+        IParameterList IHasParameters.Parameters => this.Parameters;
 
         IGenericParameterList IMethod.GenericParameters => this.GenericParameters;
 
@@ -78,9 +80,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IMethod IMethod.WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
 
-        bool IMethod.HasBase => throw new NotImplementedException();
-
-        IMethodInvocation IMethod.Base => throw new NotImplementedException();
+        public IMethodInvoker? BaseInvoker => null;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
@@ -109,7 +109,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = this.Compilation.SyntaxGenerator;
+            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
             var method = (MethodDeclarationSyntax)
                 syntaxGenerator.MethodDeclaration(
@@ -136,7 +136,5 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         // TODO: Temporary
         public override MemberDeclarationSyntax InsertPositionNode
             => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
-
-        dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
     }
 }

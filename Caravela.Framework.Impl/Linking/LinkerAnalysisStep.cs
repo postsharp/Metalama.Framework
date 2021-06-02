@@ -33,12 +33,12 @@ namespace Caravela.Framework.Impl.Linking
                     // Determine which version of the semantic is being invoked.
                     switch ( linkerAnnotation.Order )
                     {
-                        case LinkerAnnotationOrder.Original: // Original
+                        case LinkingOrder.Original: // Original
                             targetLayer = null;
 
                             break;
 
-                        case LinkerAnnotationOrder.Default: // Next one.
+                        case LinkingOrder.Default: // Next one.
                             targetLayer = linkerAnnotation.AspectLayer;
 
                             break;

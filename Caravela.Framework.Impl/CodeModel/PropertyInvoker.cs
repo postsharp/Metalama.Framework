@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,7 +11,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class PropertyInvocation : FieldOrPropertyInvocation
+    internal class PropertyInvoker : FieldOrPropertyInvoker, IPropertyInvoker
     {
         protected IProperty Property => (IProperty) this.Member;
 
@@ -53,6 +54,6 @@ namespace Caravela.Framework.Impl.CodeModel
             return new DynamicExpression( expression, this.Member.Type, false );
         }
 
-        public PropertyInvocation( IProperty member ) : base( member ) { }
+        public PropertyInvoker( IProperty member, LinkingOrder order ) : base( member, order ) { }
     }
 }

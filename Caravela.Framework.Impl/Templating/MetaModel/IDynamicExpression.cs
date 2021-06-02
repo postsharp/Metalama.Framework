@@ -15,9 +15,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         /// <summary>
         /// Creates a <see cref="RuntimeExpression"/>, i.e. the syntax representing the member.
         /// </summary>
-        /// <param name="expressionText"></param>
-        /// <param name="location"></param>
-        /// <returns></returns>
-        RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null );
+        RuntimeExpression? CreateExpression( string? expressionText = null, Location? location = null );
     }
 }

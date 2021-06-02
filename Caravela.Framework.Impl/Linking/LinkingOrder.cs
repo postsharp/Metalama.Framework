@@ -3,7 +3,7 @@
 
 namespace Caravela.Framework.Impl.Linking
 {
-    internal enum LinkerAnnotationOrder
+    internal enum LinkingOrder
     {
         /// <summary>
         /// Calls the semantic in the state it is after the current aspect has been applied.

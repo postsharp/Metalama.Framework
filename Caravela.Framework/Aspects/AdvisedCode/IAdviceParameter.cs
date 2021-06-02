@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 
-namespace Caravela.Framework.Aspects
+namespace Caravela.Framework.Aspects.AdvisedCode
 {
     /// <summary>
     /// Represents a parameter in the method being overridden by the advice. This interface augments <see cref="IParameter"/>

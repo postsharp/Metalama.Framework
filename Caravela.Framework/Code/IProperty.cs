@@ -12,7 +12,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a property.
     /// </summary>
-    public interface IProperty : IFieldOrProperty, IPropertyInvocation
+    public interface IProperty : IFieldOrProperty, IHasParameters
     {
         /// <summary>
         /// Gets the <c>in</c>, <c>ref</c>, <c>ref readonly</c> property type modifier.
@@ -37,16 +37,6 @@ namespace Caravela.Framework.Code
         bool IsRefReadonly { get; }
 
         /// <summary>
-        /// Gets the list of parameters of the property, if it is an indexer.
-        /// </summary>
-        IParameterList Parameters { get; }
-
-        /// <summary>
-        /// Allows invocation of the base method (<see langword="null" /> if the method was introduced by the current aspect).
-        /// </summary>
-        new IPropertyInvocation Base { get; }
-
-        /// <summary>
         /// Gets a list of interface properties this property explicitly implements.
         /// </summary>
         IReadOnlyList<IProperty> ExplicitInterfaceImplementations { get; }
@@ -57,5 +47,9 @@ namespace Caravela.Framework.Code
         /// <returns>A <see cref="PropertyInfo"/> that can be used only in run-time code.</returns>
         [return: RunTimeOnly]
         PropertyInfo ToPropertyInfo();
+
+        new IPropertyInvoker? BaseInvoker { get; }
+
+        new IPropertyInvoker Invoker { get; }
     }
 }

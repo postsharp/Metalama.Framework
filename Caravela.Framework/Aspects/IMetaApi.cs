@@ -1,9 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects.AdvisedCode;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Validation;
+using System;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Aspects
@@ -16,13 +18,14 @@ namespace Caravela.Framework.Aspects
     [InternalImplement]
     internal interface IMetaApi
     {
+        [Obsolete( "Not implemented." )]
         IConstructor Constructor { get; }
 
         IMethodBase MethodBase { get; }
 
-        IField Field { get; }
+        IAdviceField Field { get; }
 
-        IFieldOrProperty FieldOrProperty { get; }
+        IAdviceFieldOrProperty FieldOrProperty { get; }
 
         IDeclaration Declaration { get; }
 
@@ -32,20 +35,20 @@ namespace Caravela.Framework.Aspects
         /// Gets the method metadata, or the accessor if this is a template for a field, property or event.
         /// </summary>
         /// <remarks>
-        /// To invoke the method, use <see cref="IMethodInvocation.Invoke"/>,
+        /// To invoke the method, use <see cref="IMethodInvoker.Invoke"/>,
         /// e.g. <c>meta.Method.Invoke(1, 2, 3);</c>.
         /// </remarks>
-        IMethod Method { get; }
+        IAdviceMethod Method { get; }
 
         /// <summary>
         /// Gets the target field or property, or null if the advice does not target a field or a property.
         /// </summary>
-        IProperty Property { get; }
+        IAdviceProperty Property { get; }
 
         /// <summary>
         /// Gets the target event, or null if the advice does not target an event.
         /// </summary>
-        IEvent Event { get; }
+        IAdviceEvent Event { get; }
 
         /// <summary>
         /// Gets the list of parameters of <see cref="Method"/>.

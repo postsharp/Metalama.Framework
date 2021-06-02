@@ -9,7 +9,7 @@ namespace Caravela.Framework.Code
     /// Allows accessing the the value of fields or properties.
     /// </summary>
     [CompileTimeOnly]
-    public interface IFieldOrPropertyInvocation
+    public interface IFieldOrPropertyInvoker
     {
         /// <summary>
         /// Get the value for a different instance.

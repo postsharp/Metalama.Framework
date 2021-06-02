@@ -41,8 +41,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsRefReadonly => this.PropertyBuilder.IsRefReadonly;
 
-        public IPropertyInvocation Base => throw new NotImplementedException();
-
         public IType Type => this.PropertyBuilder.Type;
 
         [Memo]
@@ -51,34 +49,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IMethod? Setter => this.PropertyBuilder.Setter != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.Setter ) : null;
 
-        public bool HasBase => throw new NotImplementedException();
+        public IFieldOrPropertyInvoker? BaseInvoker => throw new NotImplementedException();
 
-        public dynamic Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        IPropertyInvoker IProperty.Invoker => throw new NotImplementedException();
 
-        IFieldOrPropertyInvocation IFieldOrProperty.Base => throw new NotImplementedException();
+        public IFieldOrPropertyInvoker Invoker => throw new NotImplementedException();
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => Array.Empty<IProperty>();
-
-        public dynamic GetIndexerValue( dynamic? instance, params dynamic[] args )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic GetValue( dynamic? instance )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic SetValue( dynamic? instance, dynamic value )
-        {
-            throw new NotImplementedException();
-        }
 
         [return: RunTimeOnly]
         public FieldOrPropertyInfo ToFieldOrPropertyInfo()
@@ -91,6 +69,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             throw new NotImplementedException();
         }
+
+        IPropertyInvoker? IProperty.BaseInvoker => throw new NotImplementedException();
 
         IProperty IDeclarationRef<IProperty>.Resolve( CompilationModel compilation ) => (IProperty) this.GetForCompilation( compilation );
 

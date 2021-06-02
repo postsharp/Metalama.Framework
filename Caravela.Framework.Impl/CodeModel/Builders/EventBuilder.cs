@@ -38,7 +38,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IType EventType { get; set; }
 
-        public IEventInvocation Base => throw new NotImplementedException();
+        public IEventInvoker BaseInvoker => throw new NotImplementedException();
+
+        public IEventInvoker Invoker => throw new NotImplementedException();
 
         [Memo]
         public IMethodBuilder Adder => new AccessorBuilder( this, MethodKind.EventAdd );
@@ -67,7 +69,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = this.Compilation.SyntaxGenerator;
+            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
             var @event =
                 this._isEventField
