@@ -1,15 +1,45 @@
 [TestOutput]
-[Introduction]
-public class TargetClass
-: global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers.IInterface
+[NotifyPropertyChanged]
+class Car
 {
-    public global::System.Int32 InterfaceMethod()
+    string? _make;
+    double _power;
+    public string? Make
     {
-        global::System.Console.WriteLine("This is introduced interface method.");
-        return default(global::System.Int32);
+        set
+        {
+            var value = value;
+            if (value != this.Make)
+            {
+                this.OnPropertyChanged("Make");
+                global::System.String dummy;
+                _make = value;
+            }
+
+            return;
+        }
     }
-    global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers.IInterface.InterfaceMethod()
+    public double Power
     {
-        return this.InterfaceMethod();
+        set
+        {
+            var value = value;
+            if (value != this.Power)
+            {
+                this.OnPropertyChanged("Power");
+                global::System.Double dummy;
+                _power = value;
+            }
+
+            return;
+        }
+    }
+
+
+    public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+
+    protected void OnPropertyChanged(global::System.String name)
+    {
+        this.PropertyChanged?.Invoke(new global::System.ComponentModel.PropertyChangedEventArgs("name"));
     }
 }

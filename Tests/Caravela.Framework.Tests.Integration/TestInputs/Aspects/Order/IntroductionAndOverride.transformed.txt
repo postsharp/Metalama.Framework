@@ -32,6 +32,8 @@ internal class TargetClass
             global::System.Console.Write("This is overridden by the first aspect.");
         }
     }
+
+
     public void IntroducedMethod3()
     {
         try
@@ -57,6 +59,7 @@ internal class TargetClass
             global::System.Console.Write("This is overridden by the first aspect.");
         }
     }
+
     public void IntroducedMethod2()
     {
         try
@@ -70,6 +73,7 @@ internal class TargetClass
             global::System.Console.Write("This is overridden by the first aspect.");
         }
     }
+
     public void IntroducedMethod1()
     {
         global::System.Console.Write("This is introduced by the first aspect.");

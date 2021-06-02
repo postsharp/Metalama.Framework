@@ -12,6 +12,8 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 {
     class NotifyPropertyChangedAttribute : Attribute, IAspect<INamedType>
     {
+#pragma warning disable CS0067
+        
         public void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             // This does not work yet.
@@ -23,11 +25,12 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         }
 
         [Introduce]
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         [Introduce( ConflictBehavior = ConflictBehavior.Ignore )]
         protected void OnPropertyChanged(string name)
         {
+            // TODO: remove meta.RunTime (28716).
             meta.This.PropertyChanged?.Invoke(new PropertyChangedEventArgs(meta.RunTime( meta.Parameters[0].Name )));
         }
 
@@ -40,21 +43,23 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             {
                 meta.This.OnPropertyChanged(meta.Property.Name);
                 
-                // TODO: Fix after Proceed refactoring.
+                // TODO: Fix after Proceed refactoring (28573).
                 var dummy = meta.Proceed();
             }
 
             return value;
         }
+        
+#pragma warning restore CS0067        
     }
 
     [TestOutput]
     [NotifyPropertyChanged]
     class Car
     {
-        string _make;
+        string? _make;
         double _power;
-        public string Make { get => _make; set => _make = value; }
+        public string? Make { get => _make; set => _make = value; }
         public double Power { get => _power; set => _power = value; }
 
     }

@@ -228,13 +228,14 @@ namespace Caravela.Framework.Tests.Integration.Templating
             }
 
             var lexicalScope = new TemplateLexicalScope( ((Declaration) targetMethod).LookupSymbols() );
-            
-            var metaApi = MetaApi.ForMethod(targetMethod,
-                                            new MetaApiProperties(
-                                                diagnostics,
-                                                templateMethod,
-                                                ImmutableDictionary<string, object?>.Empty,
-                                                default ));
+
+            var metaApi = MetaApi.ForMethod(
+                targetMethod,
+                new MetaApiProperties(
+                    diagnostics,
+                    templateMethod,
+                    ImmutableDictionary<string, object?>.Empty,
+                    default ) );
 
             return new TemplateExpansionContext(
                 templateInstance,

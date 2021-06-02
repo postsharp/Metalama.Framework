@@ -11,6 +11,8 @@ internal class TargetClass
         int x = 0;
     }
 #pragma warning disable CS0219
+
+
     public void Introduced()
     {
         int x = 0;

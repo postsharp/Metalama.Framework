@@ -8,7 +8,6 @@ using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
@@ -18,7 +17,7 @@ namespace Caravela.Framework.Impl.Templating
     internal class TemplateExpansionContext
     {
         public TemplateLexicalScope LexicalScope { get; }
-        
+
         public MetaApi MetaApi { get; }
 
         public TemplateExpansionContext(
@@ -40,7 +39,6 @@ namespace Caravela.Framework.Impl.Templating
             Invariant.Assert( this.DiagnosticSink.DefaultScope != null );
             Invariant.Assert( this.DiagnosticSink.DefaultScope!.Equals( this.MetaApi.Declaration ) );
         }
-
 
         public object TemplateInstance { get; }
 
@@ -76,6 +74,5 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public UserDiagnosticSink DiagnosticSink => this.MetaApi.Diagnostics;
-
     }
 }

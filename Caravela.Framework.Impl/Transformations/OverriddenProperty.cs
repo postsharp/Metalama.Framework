@@ -133,8 +133,8 @@ namespace Caravela.Framework.Impl.Transformations
                         context.DiagnosticSink,
                         accessorTemplate.GetSymbol(),
                         this.Advice.Options.Tags,
-                        this.Advice.AspectLayerId ));
-                
+                        this.Advice.AspectLayerId ) );
+
                 var expansionContext = new TemplateExpansionContext(
                     this.Advice.Aspect.Aspect,
                     metaApi,

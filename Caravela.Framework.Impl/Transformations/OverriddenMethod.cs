@@ -53,12 +53,13 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 var methodName = context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration );
 
-                var metaApi = MetaApi.ForMethod(this.OverriddenDeclaration,
-                                                     new MetaApiProperties(
-                                                         context.DiagnosticSink,
-                                                         this.TemplateMethod.GetSymbol(),
-                                                         this.Advice.Options.Tags,
-                                                         this.Advice.AspectLayerId ));
+                var metaApi = MetaApi.ForMethod(
+                    this.OverriddenDeclaration,
+                    new MetaApiProperties(
+                        context.DiagnosticSink,
+                        this.TemplateMethod.GetSymbol(),
+                        this.Advice.Options.Tags,
+                        this.Advice.AspectLayerId ) );
 
                 var expansionContext = new TemplateExpansionContext(
                     this.Advice.Aspect.Aspect,
