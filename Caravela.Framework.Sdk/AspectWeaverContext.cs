@@ -25,9 +25,9 @@ namespace Caravela.Framework.Sdk
         public IReadOnlyList<IAspectInstance> AspectInstances { get; }
 
         /// <summary>
-        /// Gets the input <see cref="CSharpCompilation"/>.
+        /// Gets or sets the compilation.
         /// </summary>
-        public IPartialCompilation Compilation { get; }
+        public IPartialCompilation Compilation { get; set; }
 
         private readonly Action<Diagnostic> _addDiagnostic;
 
