@@ -169,9 +169,26 @@ namespace Caravela.Framework.Impl.Advices
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
-            // TODO: Conflicts, errors, etc.
-
-            return AdviceResult.Create( new IntroducedInterface( this, this.TargetDeclaration, this.InterfaceType, this.IsExplicit, this.MemberMap ) );
+            if ( this.TargetDeclaration.ImplementedInterfaces.Contains( this.InterfaceType ) )
+            {
+                switch ( this.ConflictBehavior )
+                {
+                    case ConflictBehavior.Fail:
+                        return AdviceResult.Create( 
+                            AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateDiagnostic( 
+                                this.TargetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.DisplayName, this.InterfaceType, this.TargetDeclaration) ) );
+                    case ConflictBehavior.Ignore:
+                        return AdviceResult.Create();
+                    default:
+                        // TODO: Diagnostic?
+                        throw new NotImplementedException();
+                }
+            }
+            else
+            {
+                return AdviceResult.Create( new IntroducedInterface( this, this.TargetDeclaration, this.InterfaceType, this.IsExplicit, this.MemberMap ) );
+            }
         }
     }
 }

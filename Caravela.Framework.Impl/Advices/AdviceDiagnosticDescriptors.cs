@@ -67,5 +67,12 @@ namespace Caravela.Framework.Impl.Advices
                 "Cannot use [Introduce] in an aspect that is applied to a declaration that is neither a type nor a type member.",
                 "The aspect '{0}' cannot introduce a {1} because it has been applied to a {2}, which is neither a type nor a type member.",
                 Error, _category );
+
+        public static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType)>
+            InterfaceIsAlreadyImplemented = new(
+                "CR0507",
+                "Cannot introduce and interface when the target type already implements it.",
+                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because it is already implemented and ConflictBehavior is set to Fail.",
+                Error, _category );
     }
 }
