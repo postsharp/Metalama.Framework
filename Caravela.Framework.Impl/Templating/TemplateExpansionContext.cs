@@ -17,37 +17,30 @@ namespace Caravela.Framework.Impl.Templating
 
     internal class TemplateExpansionContext
     {
-        private readonly IMethod _targetMethod;
-
         public TemplateLexicalScope LexicalScope { get; }
+        
+        public MetaApi MetaApi { get; }
 
         public TemplateExpansionContext(
             object templateInstance,
-            IMethod targetMethod,
+            MetaApi metaApi,
             ICompilation compilation,
             IProceedImpl proceedImpl,
             TemplateLexicalScope lexicalScope,
-            UserDiagnosticSink diagnosticSink,
             SyntaxSerializationService syntaxSerializationService,
-            ICompilationElementFactory syntaxFactory,
-            AspectLayerId aspectLayerId,
-            IReadOnlyDictionary<string, object?> properties )
+            ICompilationElementFactory syntaxFactory )
         {
             this.TemplateInstance = templateInstance;
-            this._targetMethod = targetMethod;
+            this.MetaApi = metaApi;
             this.Compilation = compilation;
             this.ProceedImplementation = proceedImpl;
-            this.DiagnosticSink = diagnosticSink;
             this.SyntaxSerializationService = syntaxSerializationService;
             this.SyntaxFactory = syntaxFactory;
-            this.AspectLayerId = aspectLayerId;
-            this.Properties = properties;
             this.LexicalScope = lexicalScope;
-            Invariant.Assert( diagnosticSink.DefaultScope != null );
-            Invariant.Assert( diagnosticSink.DefaultScope!.Equals( targetMethod ) );
+            Invariant.Assert( this.DiagnosticSink.DefaultScope != null );
+            Invariant.Assert( this.DiagnosticSink.DefaultScope!.Equals( this.MetaApi.Declaration ) );
         }
 
-        public IDeclaration TargetDeclaration => this._targetMethod;
 
         public object TemplateInstance { get; }
 
@@ -66,7 +59,7 @@ namespace Caravela.Framework.Impl.Templating
                 return ReturnStatement();
             }
 
-            if ( this._targetMethod.ReturnType.Is( typeof(void) ) )
+            if ( this.MetaApi.Method.ReturnType.Is( typeof(void) ) )
             {
                 return ReturnStatement();
             }
@@ -79,13 +72,10 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // TODO: validate the returnExpression according to the method's return type.
-            return ReturnStatement( CastExpression( ParseTypeName( this._targetMethod.ReturnType.ToDisplayString() ), returnExpression ) );
+            return ReturnStatement( CastExpression( ParseTypeName( this.MetaApi.Method.ReturnType.ToDisplayString() ), returnExpression ) );
         }
 
-        public UserDiagnosticSink DiagnosticSink { get; }
+        public UserDiagnosticSink DiagnosticSink => this.MetaApi.Diagnostics;
 
-        public AspectLayerId AspectLayerId { get; }
-
-        public IReadOnlyDictionary<string, object?> Properties { get; }
     }
 }

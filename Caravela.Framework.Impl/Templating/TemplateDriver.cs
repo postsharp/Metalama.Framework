@@ -38,22 +38,10 @@ namespace Caravela.Framework.Impl.Templating
         {
             Invariant.Assert( templateExpansionContext.DiagnosticSink.DefaultScope != null );
 
-            // TODO: support target declaration other than a method.
-            if ( templateExpansionContext.TargetDeclaration is not IMethod targetMethod )
-            {
-                throw new NotImplementedException();
-            }
-
-            MetaApiProperties commonProperties =
-                new( templateExpansionContext.DiagnosticSink, this._sourceTemplateSymbol, templateExpansionContext.Properties, templateExpansionContext
-                         .AspectLayerId );
-
-            var templateContext = new MetaApi( targetMethod, commonProperties );
-
             var errorCountBefore = templateExpansionContext.DiagnosticSink.ErrorCount;
 
             using ( TemplateSyntaxFactory.WithContext( templateExpansionContext ) )
-            using ( meta.WithContext( templateContext, templateExpansionContext.ProceedImplementation ) )
+            using ( meta.WithContext( templateExpansionContext.MetaApi, templateExpansionContext.ProceedImplementation ) )
             {
                 SyntaxNode output;
 
@@ -78,7 +66,9 @@ namespace Caravela.Framework.Impl.Templating
                         diagnosticAdder.Report(
                             TemplatingDiagnosticDescriptors.ExceptionInTemplate.CreateDiagnostic(
                                 location,
-                                (this._sourceTemplateSymbol, templateExpansionContext.TargetDeclaration, userException.GetType().Name,
+                                (this._sourceTemplateSymbol,
+                                 templateExpansionContext.MetaApi.Declaration, 
+                                 userException.GetType().Name,
                                  userException.ToString()) ) );
 
                         block = null;

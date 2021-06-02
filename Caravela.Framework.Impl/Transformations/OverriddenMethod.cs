@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -52,9 +53,16 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 var methodName = context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration );
 
+                var metaApi = MetaApi.ForMethod(this.OverriddenDeclaration,
+                                                     new MetaApiProperties(
+                                                         context.DiagnosticSink,
+                                                         this.TemplateMethod.GetSymbol(),
+                                                         this.Advice.Options.Tags,
+                                                         this.Advice.AspectLayerId ));
+
                 var expansionContext = new TemplateExpansionContext(
                     this.Advice.Aspect.Aspect,
-                    this.OverriddenDeclaration,
+                    metaApi,
                     this.OverriddenDeclaration.Compilation,
                     new LinkerOverrideMethodProceedImpl(
                         this.Advice.AspectLayerId,
@@ -62,11 +70,8 @@ namespace Caravela.Framework.Impl.Transformations
                         LinkerAnnotationOrder.Default,
                         context.SyntaxFactory ),
                     context.LexicalScope,
-                    context.DiagnosticSink,
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
-                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
-                    this.Advice.AspectLayerId,
-                    this.Advice.Options.Tags );
+                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
 
                 var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( this.TemplateMethod );
 
