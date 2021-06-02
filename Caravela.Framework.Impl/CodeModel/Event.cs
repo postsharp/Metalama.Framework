@@ -22,6 +22,9 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
+        private EventInvocation Invocation => new( this );
+
+        [Memo]
         public IType EventType => this.Compilation.Factory.GetIType( this._symbol.Type );
 
         [Memo]
@@ -42,6 +45,8 @@ namespace Caravela.Framework.Impl.CodeModel
             => this._symbol.ExplicitInterfaceImplementations.Select( e => this.Compilation.Factory.GetEvent( e ) ).ToList();
 
         public EventInfo ToEventInfo() => new CompileTimeEventInfo( this );
+
+        public IEventInvocation Base => this.Invocation.Base;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 

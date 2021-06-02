@@ -100,20 +100,25 @@ namespace Caravela.Framework.Impl.Linking
                         break;
 
                     case IEventSymbol eventSymbol:
-                        if ( eventSymbol.AddMethod != null )
+
+                        var addBodySyntax = eventSymbol.AddMethod?.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax();
+
+                        if ( addBodySyntax != null )
                         {
                             var addBodyVisitor = new MethodBodyWalker();
-                            addBodyVisitor.Visit( eventSymbol.AddMethod.DeclaringSyntaxReferences.Single().GetSyntax() );
+                            addBodyVisitor.Visit( addBodySyntax );
 
-                            methodBodyInfos[eventSymbol.AddMethod] = new MemberAnalysisResult( addBodyVisitor.ReturnStatementCount == 0 );
+                            methodBodyInfos[eventSymbol.AddMethod!] = new MemberAnalysisResult( addBodyVisitor.ReturnStatementCount == 0 );
                         }
 
-                        if ( eventSymbol.RemoveMethod != null )
+                        var removeBodySyntax = eventSymbol.RemoveMethod?.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax();
+
+                        if ( removeBodySyntax != null )
                         {
                             var removeBodyVisitor = new MethodBodyWalker();
-                            removeBodyVisitor.Visit( eventSymbol.RemoveMethod.DeclaringSyntaxReferences.Single().GetSyntax() );
+                            removeBodyVisitor.Visit( removeBodySyntax );
 
-                            methodBodyInfos[eventSymbol.RemoveMethod] = new MemberAnalysisResult( removeBodyVisitor.ReturnStatementCount == 0 );
+                            methodBodyInfos[eventSymbol.RemoveMethod!] = new MemberAnalysisResult( removeBodyVisitor.ReturnStatementCount == 0 );
                         }
 
                         break;
