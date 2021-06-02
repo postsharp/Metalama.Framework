@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
 
+#pragma warning disable CS0067
+
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.NotifyPropertyChanged
 {
     [AttributeUsage(AttributeTargets.Class)]

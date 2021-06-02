@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public AspectLinkerOptions? LinkerOptions { get; }
 
         public override MemberDeclarationSyntax InsertPositionNode
-            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
+            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
 
         public override DeclarationKind DeclarationKind => throw new NotImplementedException();
 

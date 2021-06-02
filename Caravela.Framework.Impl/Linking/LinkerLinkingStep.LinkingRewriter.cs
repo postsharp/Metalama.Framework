@@ -613,10 +613,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 static SyntaxTokenList GetModifiers( IPropertySymbol propertySymbol )
                 {
-                    var modifiers = new List<SyntaxToken>
-                    {
-                        Token( SyntaxKind.PrivateKeyword )
-                    };
+                    var modifiers = new List<SyntaxToken> { Token( SyntaxKind.PrivateKeyword ) };
 
                     if ( propertySymbol.IsStatic )
                     {

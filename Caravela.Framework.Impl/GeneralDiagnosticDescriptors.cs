@@ -16,10 +16,10 @@ namespace Caravela.Framework.Impl
         private const string _category = "Caravela.General";
 
         public static readonly DiagnosticDefinition<(string Message, string File)> UnhandledException =
-            new( "CR0001", 
-                 _category, 
+            new( "CR0001",
+                 _category,
                  "Unexpected exception occurred in Caravela: {0} Exception details are in '{1}'. " +
-                 " Please report this issue at https://www.postsharp.net/support and attach this file to the ticket.", 
+                 " Please report this issue at https://www.postsharp.net/support and attach this file to the ticket.",
                  Error,
                  "Unexpected exception in Caravela." );
 
