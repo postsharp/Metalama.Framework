@@ -5,7 +5,7 @@ namespace Caravela.Framework.Code
 {
     public interface IEventBuilder : IMemberBuilder, IEvent
     {
-        new INamedType EventType { get; set; } // TODO: This should be IType
+        new IType EventType { get; set; }
 
         new IMethodBuilder Adder { get; }
 

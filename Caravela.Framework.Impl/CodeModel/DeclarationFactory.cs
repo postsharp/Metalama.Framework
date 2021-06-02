@@ -145,11 +145,17 @@ namespace Caravela.Framework.Impl.CodeModel
                 DeclarationRef.FromBuilder( propertyBuilder ),
                 l => new BuiltProperty( (PropertyBuilder) l.Target!, this.CompilationModel ) );
 
+        internal IEvent GetEvent( EventBuilder propertyBuilder )
+            => (IEvent) this._cache.GetOrAdd(
+                DeclarationRef.FromBuilder( propertyBuilder ),
+                l => new BuiltEvent( (EventBuilder) l.Target!, this.CompilationModel ) );
+
         internal IDeclaration GetDeclaration( DeclarationBuilder builder )
             => builder switch
             {
                 MethodBuilder methodBuilder => this.GetMethod( methodBuilder ),
                 PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder ),
+                EventBuilder eventBuilder => this.GetEvent( eventBuilder ),
                 ParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
                 GenericParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),

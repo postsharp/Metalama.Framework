@@ -5,50 +5,113 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class EventBuilder : MemberBuilder, IEventBuilder
     {
+        private readonly bool _isEventField;
+
+        public AspectLinkerOptions? LinkerOptions { get; }
+
         public EventBuilder(
             Advice parentAdvice,
             INamedType targetType,
             string name,
-            bool hasAdder,
-            bool hasRemover,
+            bool isEventField,
             AspectLinkerOptions? linkerOptions )
-            : base( parentAdvice, targetType, name ) { }
+            : base( parentAdvice, targetType, name )
+        {
+            this._isEventField = isEventField;
+            this.LinkerOptions = linkerOptions;
+            this.EventType = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(EventHandler) );
+        }
 
-        public INamedType EventType { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public IType EventType { get; set; }
 
-        public IMethodBuilder Adder => throw new NotImplementedException();
+        public IEventInvocation Base => throw new NotImplementedException();
 
-        public IMethodBuilder Remover => throw new NotImplementedException();
+        [Memo]
+        public IMethodBuilder Adder => new AccessorBuilder( this, MethodKind.EventAdd );
 
-        public IMethodBuilder? Raiser => throw new NotImplementedException();
+        [Memo]
+        public IMethodBuilder Remover => new AccessorBuilder( this, MethodKind.EventRemove );
 
-        public override MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
+        public IMethodBuilder? Raiser => null;
 
-        public override DeclarationKind DeclarationKind => throw new NotImplementedException();
+        [Memo]
+        public override MemberDeclarationSyntax InsertPositionNode
+            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
 
-        IType IEvent.EventType => throw new NotImplementedException();
+        public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 
-        IMethod IEvent.Adder => throw new NotImplementedException();
+        IType IEvent.EventType => this.EventType;
 
-        IMethod IEvent.Remover => throw new NotImplementedException();
+        IMethod IEvent.Adder => this.Adder;
 
-        IMethod? IEvent.Raiser => throw new NotImplementedException();
+        IMethod IEvent.Remover => this.Remover;
+
+        IMethod? IEvent.Raiser => this.Raiser;
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
         public IReadOnlyList<IEvent> ExplicitInterfaceImplementations => Array.Empty<IEvent>();
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            throw new NotImplementedException();
+            var syntaxGenerator = this.Compilation.SyntaxGenerator;
+
+            var @event =
+                this._isEventField
+                    ? EventFieldDeclaration(
+                        List<AttributeListSyntax>(), // TODO: Attributes.
+                        GenerateModifierList(),
+                        VariableDeclaration(
+                            (TypeSyntax) syntaxGenerator.TypeExpression( this.EventType.GetSymbol() ),
+                            SeparatedList(
+                                new[]
+                                {
+                                    VariableDeclarator( Identifier( this.Name ), null, null ) // TODO: Initializer.
+                                } ) ) )
+                    : throw new NotImplementedException();
+
+            return new[]
+            {
+                new IntroducedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this )
+            };
+
+            SyntaxTokenList GenerateModifierList()
+            {
+                // Modifiers for event.
+                var tokens = new List<SyntaxToken>();
+
+                this.Accessibility.AddTokens( tokens );
+
+                if ( this.IsAbstract )
+                {
+                    tokens.Add( Token( SyntaxKind.AbstractKeyword ) );
+                }
+
+                if ( this.IsSealed )
+                {
+                    tokens.Add( Token( SyntaxKind.SealedKeyword ) );
+                }
+
+                if ( this.IsOverride )
+                {
+                    tokens.Add( Token( SyntaxKind.OverrideKeyword ) );
+                }
+
+                return TokenList( tokens );
+            }
         }
 
         [return: RunTimeOnly]
