@@ -24,10 +24,5 @@ namespace Caravela.Framework.TestApp
                 aspectBuilder.Diagnostics.Suppress( _mySuppression1 );
             aspectBuilder.Diagnostics.Suppress( _mySuppression2 );
         }
-
-        public void BuildEligibility(IEligibilityBuilder<IDeclaration> builder)
-        {
-            
-        }
     }
 }

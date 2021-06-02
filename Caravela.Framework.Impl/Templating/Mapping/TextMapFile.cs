@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.Collections;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
+using System;
 using System.IO;
 
 namespace Caravela.Framework.Impl.Templating.Mapping
@@ -13,7 +14,7 @@ namespace Caravela.Framework.Impl.Templating.Mapping
     /// (including a character, line and column) of the target file is mapped to a set of <see cref="TextPoint"/>
     /// in the source file.
     /// </summary>
-    internal partial class TextMap
+    internal partial class TextMapFile
     {
         private const ulong _signature = 0xdfdfce7c841fe388;
 
@@ -33,14 +34,14 @@ namespace Caravela.Framework.Impl.Templating.Mapping
         /// </summary>
         public string TargetPath { get; }
 
-        private TextMap( string sourcePath, string targetPath )
+        private TextMapFile( string sourcePath, string targetPath )
         {
             this.SourcePath = sourcePath;
             this.TargetPath = targetPath;
             this._mapsByTargetCharacter = new SkipListIndexedDictionary<int, TextPointMapping>();
         }
 
-        private TextMap(
+        private TextMapFile(
             string sourcePath,
             string targetPath,
             SkipListIndexedDictionary<int, TextPointMapping> mapsByTargetCharacter )
@@ -56,12 +57,12 @@ namespace Caravela.Framework.Impl.Templating.Mapping
         }
 
         /// <summary>
-        /// Serializes the current <see cref="TextMap"/> into a <see cref="Stream"/>.
+        /// Serializes the current <see cref="TextMapFile"/> into a <see cref="Stream"/>.
         /// </summary>
         public void Write( Stream stream ) => this.Write( new BinaryWriter( stream ) );
 
         /// <summary>
-        /// Serializes the current <see cref="TextMap"/> into a <see cref="BinaryWriter"/>.
+        /// Serializes the current <see cref="TextMapFile"/> into a <see cref="BinaryWriter"/>.
         /// </summary>
         public void Write( BinaryWriter writer )
         {
@@ -79,20 +80,20 @@ namespace Caravela.Framework.Impl.Templating.Mapping
         }
 
         /// <summary>
-        /// Creates a <see cref="TextMap"/> for a transformed <see cref="SyntaxTree"/> that has annotations
+        /// Creates a <see cref="TextMapFile"/> for a transformed <see cref="SyntaxTree"/> that has annotations
         /// of an <see cref="ILocationAnnotationMap"/> that maps the transformed locations to source locations.
         /// </summary>
         /// <param name="targetSyntaxTree">The target (transformed) <see cref="SyntaxTree"/>.</param>
         /// <param name="annotationMap">The <see cref="ILocationAnnotationMap"/> that can map annotations inside <paramref name="targetSyntaxTree"/>
         /// to locations in the source syntax tree.</param>
-        /// <returns>A <see cref="TextMap"/>, or <c>null</c> if <paramref name="targetSyntaxTree"/> has no <see cref="SyntaxTree.FilePath"/> or does
+        /// <returns>A <see cref="TextMapFile"/>, or <c>null</c> if <paramref name="targetSyntaxTree"/> has no <see cref="SyntaxTree.FilePath"/> or does
         /// not contain any node mapped to a source tree.</returns>
-        public static TextMap? Create( SyntaxTree targetSyntaxTree, ILocationAnnotationMap annotationMap )
+        public static TextMapFile? Create( SyntaxTree targetSyntaxTree, ILocationAnnotationMap annotationMap )
         {
             if ( string.IsNullOrEmpty( targetSyntaxTree.FilePath ) )
             {
                 // We cannot create a map if it has no name.
-                return null;
+                throw new ArgumentOutOfRangeException( nameof(targetSyntaxTree), "The FilePath property must not be empty." );
             }
 
             Visitor visitor = new( annotationMap );
@@ -105,15 +106,15 @@ namespace Caravela.Framework.Impl.Templating.Mapping
                 return null;
             }
 
-            return new TextMap( visitor.SourcePath, targetSyntaxTree.FilePath, visitor.TextPointMappings );
+            return new TextMapFile( visitor.SourcePath, targetSyntaxTree.FilePath, visitor.TextPointMappings );
         }
 
         /// <summary>
-        /// Reads a <see cref="TextMap"/> from the file system.
+        /// Reads a <see cref="TextMapFile"/> from the file system.
         /// </summary>
-        /// <param name="path">The full path of the serialized <see cref="TextMap"/>.</param>
-        /// <returns>The deserialized <see cref="TextMap"/>, or <c>null</c> if the file does not exist or is incorrect.</returns>
-        public static TextMap? Read( string path )
+        /// <param name="path">The full path of the serialized <see cref="TextMapFile"/>.</param>
+        /// <returns>The deserialized <see cref="TextMapFile"/>, or <c>null</c> if the file does not exist or is incorrect.</returns>
+        public static TextMapFile? Read( string path )
         {
             if ( !File.Exists( path ) )
             {
@@ -130,7 +131,9 @@ namespace Caravela.Framework.Impl.Templating.Mapping
             return file;
         }
 
-        private static bool TryRead( BinaryReader reader, out TextMap? file )
+        public static TextMapFile? ReadForSource( string path ) => Read( Path.ChangeExtension( path, ".map" ) );
+
+        private static bool TryRead( BinaryReader reader, out TextMapFile? file )
         {
             file = null;
 
@@ -157,7 +160,7 @@ namespace Caravela.Framework.Impl.Templating.Mapping
 
                 var count = reader.ReadInt32();
 
-                file = new TextMap( sourcePath, targetPath );
+                file = new TextMapFile( sourcePath, targetPath );
 
                 for ( var i = 0; i < count; i++ )
                 {

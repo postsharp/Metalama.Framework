@@ -8,12 +8,11 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Visi
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
-        {
-        }
+       
 
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
-
+       
+        
+        
         [Introduce(Accessibility = Accessibility.Private)]
         public int Private()
         {

@@ -13,7 +13,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal class IntroducedInterface : IObservableTransformation, IInterfaceImplementationIntroduction, IMemberIntroduction
+    internal class IntroducedInterface : IInterfaceImplementationIntroduction, IMemberIntroduction
     {
         public IDeclaration ContainingDeclaration => this.TargetType;
 
@@ -190,7 +190,7 @@ namespace Caravela.Framework.Impl.Transformations
             return
                 AccessorList(
                     List(
-                        new AccessorDeclarationSyntax?[]
+                        new[]
                             {
                                 targetProperty.Getter != null
                                     ? AccessorDeclaration( SyntaxKind.GetAccessorDeclaration, GetImplementingGetterBody( targetProperty ) )
@@ -232,7 +232,7 @@ namespace Caravela.Framework.Impl.Transformations
             return
                 AccessorList(
                     List(
-                        new AccessorDeclarationSyntax?[]
+                        new[]
                             {
                                 targetEvent.Adder != null
                                     ? AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplementingAdderBody( targetEvent ) )

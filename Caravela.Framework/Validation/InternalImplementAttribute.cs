@@ -36,5 +36,7 @@ namespace Caravela.Framework.Validation
                 }
             }
         }
+
+        public void BuildAspectClass( IAspectClassBuilder builder ) { }
     }
 }

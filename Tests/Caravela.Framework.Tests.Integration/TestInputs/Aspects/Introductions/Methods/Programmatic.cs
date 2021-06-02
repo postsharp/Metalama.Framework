@@ -44,8 +44,9 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
             // TODO: Other members.
         }
 
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
-
+       
+        
+        
         [Template]
         public dynamic Template()
         {

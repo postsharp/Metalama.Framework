@@ -22,11 +22,11 @@ namespace Caravela.Framework.Impl.Templating
 {
     /// <summary>
     /// A <see cref="CSharpSyntaxRewriter"/> that adds annotation that distinguish compile-time from
-    /// run-time syntax nodes. The input should be a syntax tree annotated with a <see cref="SemanticAnnotationMap"/>.
+    /// run-time syntax nodes. The input should be a syntax tree annotated with a <see cref="SyntaxTreeAnnotationMap"/>.
     /// </summary>
     internal partial class TemplateAnnotator : CSharpSyntaxRewriter
     {
-        private readonly SemanticAnnotationMap _semanticAnnotationMap;
+        private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
         private readonly CancellationToken _cancellationToken;
         private readonly TemplateMemberClassifier _templateMemberClassifier;
@@ -44,17 +44,17 @@ namespace Caravela.Framework.Impl.Templating
 
         public TemplateAnnotator(
             CSharpCompilation compilation,
-            SemanticAnnotationMap semanticAnnotationMap,
+            SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
             IDiagnosticAdder diagnosticAdder,
             IServiceProvider serviceProvider,
             CancellationToken cancellationToken )
         {
             this._symbolScopeClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
-            this._semanticAnnotationMap = semanticAnnotationMap;
+            this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
             this._cancellationToken = cancellationToken;
 
-            this._templateMemberClassifier = new TemplateMemberClassifier( compilation, semanticAnnotationMap, serviceProvider );
+            this._templateMemberClassifier = new TemplateMemberClassifier( compilation, syntaxTreeAnnotationMap, serviceProvider );
 
             // add default values of scope
             this._currentScopeContext = ScopeContext.Default;
@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <typeparam name="T"></typeparam>
         private void ReportDiagnostic<T>( DiagnosticDefinition<T> descriptor, SyntaxNodeOrToken targetNode, T arguments )
         {
-            var location = this._semanticAnnotationMap.GetLocation( targetNode );
+            var location = this._syntaxTreeAnnotationMap.GetLocation( targetNode );
 
             this.ReportDiagnostic( descriptor, location, arguments );
         }
@@ -191,7 +191,7 @@ namespace Caravela.Framework.Impl.Templating
                     // If the node is an identifier, it means it should have a symbol,
                     // and the scope is given by the symbol.
 
-                    var symbol = this._semanticAnnotationMap.GetSymbol( name );
+                    var symbol = this._syntaxTreeAnnotationMap.GetSymbol( name );
 
                     if ( symbol != null )
                     {
@@ -217,7 +217,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private SymbolDeclarationScope GetExpressionTypeScope( SyntaxNode? node )
         {
-            if ( node != null && this._semanticAnnotationMap.GetExpressionType( node ) is { } parentExpressionType )
+            if ( node != null && this._syntaxTreeAnnotationMap.GetExpressionType( node ) is { } parentExpressionType )
             {
                 return this.GetSymbolScope( parentExpressionType );
             }
@@ -395,7 +395,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             var scope = this._currentScopeContext.ForceCompileTimeOnlyExpression ? SymbolDeclarationScope.CompileTimeOnly : SymbolDeclarationScope.RunTimeOnly;
 
-            var symbol = this._semanticAnnotationMap.GetDeclaredSymbol( node );
+            var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node );
 
             if ( symbol != null )
             {
@@ -418,7 +418,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
         {
-            var typeScope = this.GetSymbolScope( this._semanticAnnotationMap.GetDeclaredSymbol( node ) );
+            var typeScope = this.GetSymbolScope( this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node ) );
 
             if ( typeScope != SymbolDeclarationScope.RunTimeOnly )
             {
@@ -433,7 +433,7 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
         {
             var identifierNameSyntax = (IdentifierNameSyntax) base.VisitIdentifierName( node )!;
-            var symbol = this._semanticAnnotationMap.GetSymbol( node );
+            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
             if ( symbol != null )
             {
@@ -509,7 +509,7 @@ namespace Caravela.Framework.Impl.Templating
 
                     break;
 
-                case SymbolDeclarationScope.Unknown when this._semanticAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol:
+                case SymbolDeclarationScope.Unknown when this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol:
                     // This is a member access of a dynamic receiver.
                     scope = SymbolDeclarationScope.RunTimeOnly;
 
@@ -589,7 +589,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 foreach ( var argument in node.ArgumentList.Arguments )
                 {
-                    var parameterType = this._semanticAnnotationMap.GetParameterSymbol( argument )?.Type;
+                    var parameterType = this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type;
 
                     ArgumentSyntax transformedArgument;
 
@@ -710,7 +710,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitForEachStatement( ForEachStatementSyntax node )
         {
-            var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol( node )!;
+            var local = (ILocalSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node )!;
 
             var annotatedExpression = this.Visit( node.Expression )!;
 
@@ -800,7 +800,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitSingleVariableDesignation( SingleVariableDesignationSyntax node )
         {
-            var symbol = (ILocalSymbol?) this._semanticAnnotationMap.GetDeclaredSymbol( node );
+            var symbol = (ILocalSymbol?) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node );
 
             var scope = this._currentScopeContext.ForceCompileTimeOnlyExpression ? SymbolDeclarationScope.CompileTimeOnly : SymbolDeclarationScope.RunTimeOnly;
 
@@ -858,7 +858,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitVariableDeclarator( VariableDeclaratorSyntax node )
         {
-            var symbol = this._semanticAnnotationMap.GetDeclaredSymbol( node )!;
+            var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node )!;
 
             if ( symbol is not ILocalSymbol local )
             {
@@ -975,7 +975,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
-            var symbol = this._semanticAnnotationMap.GetDeclaredSymbol( node )!;
+            var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node )!;
 
             if ( this._symbolScopeClassifier.IsTemplate( symbol ) )
             {
@@ -1509,7 +1509,7 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
         {
             var scope = this.GetNodeScope( node );
-            var symbol = this._semanticAnnotationMap.GetSymbol( node );
+            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
             var transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;
 
@@ -1538,7 +1538,7 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
         {
             var transformedType = this.Visit( node.Type );
-            var objectType = this._semanticAnnotationMap.GetExpressionType( node );
+            var objectType = this._syntaxTreeAnnotationMap.GetExpressionType( node );
             var objectTypeScope = this.GetSymbolScope( objectType );
 
             ScopeContext? context = null;

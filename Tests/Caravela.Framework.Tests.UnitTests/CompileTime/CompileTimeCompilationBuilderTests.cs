@@ -456,7 +456,7 @@ public class CompileTimeOnlyClass
             DiagnosticList diagnosticList = new();
             Assert.True( loader.TryGetCompileTimeProject( compilation, null, diagnosticList, false, CancellationToken.None, out var compileTimeProject ) );
 
-            var transformed = File.ReadAllText( compileTimeProject!.CodeFiles[0].TransformedPath );
+            var transformed = File.ReadAllText( Path.Combine( compileTimeProject!.Directory!, compileTimeProject!.CodeFiles[0].TransformedPath ) );
 
             Assert.Equal( expected, transformed );
 

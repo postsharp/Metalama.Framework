@@ -24,10 +24,6 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.AdviceFactory.IntroduceInterface(aspectBuilder.TargetDeclaration, (INamedType)aspectBuilder.TargetDeclaration.Compilation.TypeFactory.GetTypeByReflectionType(typeof(IInterface)));
         }
 
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder)
-        {
-        }
-
         [Introduce]
         public int InterfaceMethod()
         {

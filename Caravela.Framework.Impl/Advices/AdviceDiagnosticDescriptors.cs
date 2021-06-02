@@ -48,14 +48,17 @@ namespace Caravela.Framework.Impl.Advices
             MissingDeclarativeInterfaceMemberIntroduction = new(
                 "CR0504",
                 "Declarative interface member introduction is missing.",
-                "The aspect '{0}' cannot implicitly introduce interface '{1}' into the type '{2}' because it does not contain a declarative introduction (using [Introduce]) for the interface member '{3}'.",
+                "The aspect '{0}' cannot implicitly introduce interface '{1}' into the type '{2}' because it" +
+                " does not contain a declarative introduction (using [Introduce]) for the interface member '{3}'.",
                 Error, _category );
 
-        public static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember DeclarativeIntroduction, IMember InterfaceMember)>
+        public static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember DeclarativeIntroduction,
+                IMember InterfaceMember)>
             DeclarativeInterfaceMemberIntroductionDoesNotMatch = new(
                 "CR0505",
                 "Declarative interface member introduction does match interface member return type.",
-                "The aspect '{0}' cannot implicitly introduce interface '{1}' into the  type '{2}' because the introduced member '{3}' does not have the same return type as interface member '{4}'.",
+                "The aspect '{0}' cannot implicitly introduce interface '{1}' into the  type '{2}' because the introduced member '{3}'" +
+                " does not have the same return type as interface member '{4}'.",
                 Error, _category );
     }
 }

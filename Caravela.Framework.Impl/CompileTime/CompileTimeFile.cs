@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Templating.Mapping;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System;
@@ -44,14 +45,12 @@ namespace Caravela.Framework.Impl.CompileTime
             // Deserializer.
         }
 
-        public CompileTimeFile( string transformedPath, SyntaxTree sourceSyntaxTree )
+        public CompileTimeFile( TextMapFile textMapFile )
         {
-            var sourceText = sourceSyntaxTree.GetText();
-
-            this.SourcePath = sourceSyntaxTree.FilePath;
-            this.TransformedPath = transformedPath;
-            this.SourceHash = sourceText.GetChecksum();
-            this.SourceHashAlgorithm = sourceText.ChecksumAlgorithm;
+            this.SourcePath = textMapFile.SourcePath;
+            this.TransformedPath = textMapFile.TargetPath;
+            this.SourceHash = ImmutableArray<byte>.Empty;
+            this.SourceHashAlgorithm = SourceHashAlgorithm.None;
         }
 
         /// <summary>

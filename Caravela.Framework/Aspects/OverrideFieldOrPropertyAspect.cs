@@ -24,6 +24,8 @@ namespace Caravela.Framework.Aspects
             builder.ExceptForInheritance().MustBeNonAbstract();
         }
 
+        public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }
+
         [Template]
         public abstract dynamic? OverrideProperty
         {

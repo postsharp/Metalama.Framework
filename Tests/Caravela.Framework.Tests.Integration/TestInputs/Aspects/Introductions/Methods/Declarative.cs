@@ -8,11 +8,6 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
-        {
-        }
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
-
         [Introduce]
         public void IntroducedMethod_Void()
         {

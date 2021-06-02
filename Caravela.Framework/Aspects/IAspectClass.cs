@@ -21,6 +21,8 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         string DisplayName { get; }
 
+        string? Description { get; }
+
         /// <summary>
         /// Gets a value indicating whether the aspect class is an abstract class.
         /// </summary>

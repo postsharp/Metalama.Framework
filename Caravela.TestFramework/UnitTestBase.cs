@@ -25,7 +25,7 @@ namespace Caravela.TestFramework
     {
         protected ITestOutputHelper Logger { get; }
 
-        public ServiceProvider ServiceProvider { get; }
+        protected ServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Gets the root directory path of the current test project.
@@ -43,7 +43,7 @@ namespace Caravela.TestFramework
         /// Initializes a new instance of the <see cref="UnitTestBase"/> class.
         /// </summary>
         /// <param name="logger">The Xunit logger.</param>
-        public UnitTestBase( ITestOutputHelper logger )
+        protected UnitTestBase( ITestOutputHelper logger )
         {
             this.Logger = logger;
             this.ProjectDirectory = TestEnvironment.GetProjectDirectory( this.GetType().Assembly );
@@ -51,14 +51,14 @@ namespace Caravela.TestFramework
             this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( new TestProjectOptions() );
         }
 
-        protected void WriteDiagnostic( Diagnostic diagnostic )
+        private void WriteDiagnostic( Diagnostic diagnostic )
         {
             this.Logger.WriteLine( diagnostic.ToString() );
         }
 
         protected abstract TestRunnerBase CreateTestRunner();
 
-        protected void WriteDiagnostics( IEnumerable<Diagnostic> diagnostics )
+        private void WriteDiagnostics( IEnumerable<Diagnostic> diagnostics )
         {
             foreach ( var diagnostic in diagnostics )
             {
@@ -130,18 +130,19 @@ namespace Caravela.TestFramework
 
             Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );
 
-            var storedTransformedSourceText = File.Exists( actualTransformedPath ) ? NormalizeString( File.ReadAllText( actualTransformedPath ) ) : null;
+            var storedTransformedSourceText =
+                File.Exists( actualTransformedPath ) ? NormalizeString( await File.ReadAllTextAsync( actualTransformedPath ) ) : null;
 
             if ( expectedTransformedSourceText == actualTransformedSourceText
                  && storedTransformedSourceText != expectedNonNormalizedSourceText )
             {
                 // Update the obj/transformed file to the non-normalized expected text, so that future call to update_transformed.txt
                 // does not overwrite any whitespace change.
-                File.WriteAllText( actualTransformedPath, expectedNonNormalizedSourceText );
+                await File.WriteAllTextAsync( actualTransformedPath, expectedNonNormalizedSourceText );
             }
             else if ( storedTransformedSourceText == null || storedTransformedSourceText != actualTransformedSourceText )
             {
-                File.WriteAllText( actualTransformedPath, actualTransformedSourceText );
+                await File.WriteAllTextAsync( actualTransformedPath, actualTransformedSourceText );
             }
 
             Assert.Equal( expectedTransformedSourceText, actualTransformedSourceText );

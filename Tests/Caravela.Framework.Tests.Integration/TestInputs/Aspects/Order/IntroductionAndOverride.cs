@@ -11,8 +11,9 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
 {
     public class FirstAttribute : Attribute, IAspect<INamedType>
     {
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
-
+       
+        
+        
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             foreach (var method in builder.TargetDeclaration.Methods)
@@ -44,8 +45,9 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
 
     public class SecondAttribute : Attribute, IAspect<INamedType>
     {
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
-
+       
+        
+        
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             foreach (var method in builder.TargetDeclaration.Methods)
@@ -78,8 +80,9 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
 
     public class ThirdAttribute : Attribute, IAspect<INamedType>
     {
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) { }
-
+       
+        
+        
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             foreach (var method in builder.TargetDeclaration.Methods)

@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             if ( this._explicitMemberMap == null )
             {
-                // No explicit member map was given, we have to detect introduced members correspoding to all interface members.
+                // No explicit member map was given, we have to detect introduced members corresponding to all interface members.
                 var compilation = this.TargetDeclaration.Compilation;
 
                 foreach ( var interfaceMethod in this.InterfaceType.Methods )

@@ -198,7 +198,7 @@ namespace Caravela.Framework.Impl.CodeModel
                             this.Compilation.GetObservableTransformationsOnElement( this )
                                 .OfType<IntroducedInterface>()
                                 .Select( i => i.InterfaceType ) ) )
-                .Distinct() // Remove duplicates (reimplementations of earlier interface by aspect).
+                .Distinct() // Remove duplicates (re-implementations of earlier interface by aspect).
                 .ToImmutableArray()
                 .ToImplementedInterfaceList();
 
@@ -210,7 +210,7 @@ namespace Caravela.Framework.Impl.CodeModel
                         this.Compilation.GetObservableTransformationsOnElement( this )
                             .OfType<IntroducedInterface>()
                             .Select( i => i.InterfaceType ) )
-                    .Distinct() // Remove duplicates (reimplementations of earlier interface by aspect).
+                    .Distinct() // Remove duplicates (re-implementations of earlier interface by aspect).
                     .ToImmutableArray()
                     .ToImplementedInterfaceList();
 

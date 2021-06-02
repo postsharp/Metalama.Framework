@@ -14,11 +14,9 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.Tags
             builder.AdviceFactory.OverrideMethod(builder.TargetDeclaration, nameof(OverrideMethod));
         }
 
-        public void BuildEligibility(IEligibilityBuilder<IMethod> builder)
-        {
-            throw new NotImplementedException();
-        }
-
+       
+        
+        
         private dynamic OverrideMethod()
         {
             Console.WriteLine( (string?) meta.Tags["Friend"] );
