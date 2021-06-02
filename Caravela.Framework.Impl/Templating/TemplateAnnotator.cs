@@ -3,7 +3,6 @@
 
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
@@ -446,12 +445,13 @@ namespace Caravela.Framework.Impl.Templating
                     // Template code cannot be referenced in a template until this is implemented.
                     if ( this._symbolScopeClassifier.IsTemplate( symbol ) )
                     {
-                        this.ReportDiagnostic( TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate, 
-                            node, (symbol, this._currentTemplateMember!));
+                        this.ReportDiagnostic(
+                            TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate,
+                            node,
+                            (symbol, this._currentTemplateMember!) );
                     }
-
                 }
-                
+
                 var annotatedNode = identifierNameSyntax.AddScopeAnnotation( scope );
 
                 annotatedNode = (IdentifierNameSyntax) this.AddColoringAnnotations( annotatedNode, symbol, scope )!;
@@ -736,7 +736,8 @@ namespace Caravela.Framework.Impl.Templating
 
             StatementSyntax annotatedStatement;
 
-            using ( this.WithScopeContext( ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, forEachScope, $"foreach ( {node.Type} {node.Identifier} in ... )" ) ) )
+            using ( this.WithScopeContext(
+                ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, forEachScope, $"foreach ( {node.Type} {node.Identifier} in ... )" ) ) )
             {
                 annotatedStatement = this.Visit( node.Statement )!;
             }
@@ -1144,7 +1145,11 @@ namespace Caravela.Framework.Impl.Templating
 
             StatementSyntax transformedStatement;
 
-            using ( this.WithScopeContext( ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, SymbolDeclarationScope.RunTimeOnly, $"for ( {node.Initializers}; ... )" ) ) )
+            using ( this.WithScopeContext(
+                ScopeContext.CreateBreakOrContinueScope(
+                    this._currentScopeContext,
+                    SymbolDeclarationScope.RunTimeOnly,
+                    $"for ( {node.Initializers}; ... )" ) ) )
             {
                 transformedStatement = this.Visit( node.Statement )!;
             }
@@ -1173,7 +1178,8 @@ namespace Caravela.Framework.Impl.Templating
 
             StatementSyntax annotatedStatement;
 
-            using ( this.WithScopeContext( ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, conditionScope, $"while ( {node.Condition} )" ) ) )
+            using ( this.WithScopeContext(
+                ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, conditionScope, $"while ( {node.Condition} )" ) ) )
             {
                 annotatedStatement = this.Visit( node.Statement )!;
             }

@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.Advices
                 "The aspect '{0}' cannot implicitly introduce interface '{1}' into the  type '{2}' because the introduced member '{3}'" +
                 " does not have the same return type as interface member '{4}'.",
                 Error, _category );
-        
+
         public static readonly DiagnosticDefinition<(string AspectType, DeclarationKind IntroducedDeclarationKind, DeclarationKind TargetDeclarationKind)>
             CannotUseIntroduceWithoutDeclaringType = new(
                 "CR0506",

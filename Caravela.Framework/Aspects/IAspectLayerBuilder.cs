@@ -52,7 +52,7 @@ namespace Caravela.Framework.Aspects
 
         CancellationToken CancellationToken { get; }
     }
-    
+
     /// <summary>
     /// An object used by the delegated passed to <see cref="IAspectBuilder{TAspectTarget}.SetAspectLayerBuildAction"/> method of the aspect to provide advices, child
     /// aspects and validators, or report diagnostics. This is the strongly-typed variant of the <see cref="IAspectLayerBuilder"/> interface.

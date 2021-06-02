@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Aspects;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 

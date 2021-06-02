@@ -91,7 +91,6 @@ namespace Caravela.Framework.Impl.Advices
                                 advice = null;
 
                                 return false;
-
                         }
 
                         switch ( templateDeclaration )

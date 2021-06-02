@@ -135,7 +135,7 @@ namespace Caravela.Framework.Impl
             ISymbol templateDeclaration )
             where T : IDeclaration
         {
-             templateAttributeData.TryCreateAdvice(
+            templateAttributeData.TryCreateAdvice(
                 aspect,
                 diagnosticAdder,
                 aspectTarget,
@@ -143,7 +143,7 @@ namespace Caravela.Framework.Impl
                 null,
                 out var advice );
 
-             return advice;
+            return advice;
         }
     }
 }
