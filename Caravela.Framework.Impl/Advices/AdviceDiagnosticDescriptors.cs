@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal static class AdviceDiagnosticDescriptors
     {
-        // Reserved range 1000-1099
+        // Reserved range 500-599
 
         private const string _category = "Caravela.Advices";
 
@@ -59,6 +59,13 @@ namespace Caravela.Framework.Impl.Advices
                 "Declarative interface member introduction does match interface member return type.",
                 "The aspect '{0}' cannot implicitly introduce interface '{1}' into the  type '{2}' because the introduced member '{3}'" +
                 " does not have the same return type as interface member '{4}'.",
+                Error, _category );
+
+        public static readonly DiagnosticDefinition<(string AspectType, DeclarationKind IntroducedDeclarationKind, DeclarationKind TargetDeclarationKind)>
+            CannotUseIntroduceWithoutDeclaringType = new(
+                "CR0506",
+                "Cannot use [Introduce] in an aspect that is applied to a declaration that is neither a type nor a type member.",
+                "The aspect '{0}' cannot introduce a {1} because it has been applied to a {2}, which is neither a type nor a type member.",
                 Error, _category );
     }
 }

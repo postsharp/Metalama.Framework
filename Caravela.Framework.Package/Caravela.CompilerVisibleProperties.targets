@@ -7,8 +7,6 @@
         <CompilerVisibleProperty Include="DebugCaravela" />
         <CompilerVisibleProperty Include="DebugCaravelaAnalyzer" />
         <CompilerVisibleProperty Include="DebugCaravelaIde" />
-        <CompilerVisibleProperty Include="CaravelaCrashReportDirectory" />
-        <CompilerVisibleProperty Include="CaravelaCompileTimeProjectDirectory" />
         <CompilerVisibleProperty Include="CaravelaProjectId" />
         <CompilerVisibleProperty Include="CaravelaBuildTouchFile" />
         <CompilerVisibleProperty Include="AssemblyName" />

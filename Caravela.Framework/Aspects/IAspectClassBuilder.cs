@@ -25,6 +25,8 @@ namespace Caravela.Framework.Aspects
 
         /// <summary>
         /// Gets or sets the list of layers of the aspect. Layers must be sorted by order of execution (e.g. inverse order of application).
+        /// Layers must then be initialized in the <see cref="IAspect{T}.BuildAspect"/> method using
+        /// <see cref="IAspectBuilder{TAspectTarget}.SetAspectLayerBuildAction"/> method.
         /// </summary>
         ImmutableArray<string> Layers { get; set; }
 

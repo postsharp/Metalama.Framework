@@ -9,5 +9,13 @@ namespace Caravela.Framework.Aspects
     /// Custom attribute that marks the target method as a template for <see cref="IAdviceFactory.IntroduceProperty(Caravela.Framework.Code.INamedType,string,Caravela.Framework.Aspects.IntroductionScope,Caravela.Framework.Aspects.ConflictBehavior,Caravela.Framework.Aspects.AdviceOptions?)"/> and results in creation of the advice.
     /// </summary>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
-    public class IntroduceAttribute : AdviceAttribute { }
+    public class IntroduceAttribute : AdviceAttribute
+    {
+        /// <summary>
+        /// Gets or sets the name of the aspect layer into which the member will be introduced. The layer must have been defined in the implementation of the
+        /// <see cref="IAspect.BuildAspectClass"/> method.
+        /// </summary>
+        [Obsolete( "Not implemented." )]
+        public string? Layer { get; set; }
+    }
 }
