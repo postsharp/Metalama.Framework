@@ -71,12 +71,20 @@ namespace Caravela.Framework.Impl.Transformations
                 var getTemplateMethod = this.TemplateProperty != null ? this.TemplateProperty.Getter : this.GetTemplateMethod;
                 var setTemplateMethod = this.TemplateProperty != null ? this.TemplateProperty.Setter : this.SetTemplateMethod;
 
-                var getAccessorBody = getTemplateMethod != null && this.OverriddenDeclaration.Getter != null
-                    ? this.ExpandAccessorTemplate( context, getTemplateMethod, this.OverriddenDeclaration.Getter )
+                var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration;
+
+                var getAccessorBody = 
+                    this.OverriddenDeclaration.Getter != null
+                    ? getTemplateMethod != null 
+                        ? this.ExpandAccessorTemplate( context, getTemplateMethod, this.OverriddenDeclaration.Getter )
+                        : this.GetIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration )
                     : null;
 
-                var setAccessorBody = setTemplateMethod != null && this.OverriddenDeclaration.Setter != null
-                    ? this.ExpandAccessorTemplate( context, setTemplateMethod, this.OverriddenDeclaration.Setter )
+                var setAccessorBody = 
+                    this.OverriddenDeclaration.Setter != null
+                    ? setTemplateMethod != null
+                        ? this.ExpandAccessorTemplate( context, setTemplateMethod, this.OverriddenDeclaration.Setter )
+                        : this.GetIdentityAccessorBody( setAccessorDeclarationKind )
                     : null;
 
                 var overrides = new[]
@@ -102,7 +110,7 @@ namespace Caravela.Framework.Impl.Transformations
                                                 : null,
                                             setAccessorBody != null
                                                 ? AccessorDeclaration(
-                                                    this.OverriddenDeclaration.Writeability == Writeability.InitOnly ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
+                                                    setAccessorDeclarationKind,
                                                     List<AttributeListSyntax>(),
                                                     this.OverriddenDeclaration.Setter.AssertNotNull().GetSyntaxModifierList(),
                                                     setAccessorBody )
@@ -150,6 +158,58 @@ namespace Caravela.Framework.Impl.Transformations
                 }
 
                 return newMethodBody;
+            }
+        }
+
+        /// <summary>
+        /// Creates a trivial passthrough body for cases where we have template only for one accessor kind.
+        /// </summary>
+        /// <param name="accessorDeclarationKind"></param>
+        /// <returns></returns>
+        private BlockSyntax? GetIdentityAccessorBody( SyntaxKind accessorDeclarationKind )
+        {
+            switch ( accessorDeclarationKind )
+            {
+                case SyntaxKind.GetAccessorDeclaration:
+                    return 
+                        Block( 
+                            ReturnStatement( 
+                                GetPropertyAccessExpression()
+                                .AddLinkerAnnotation( 
+                                    new LinkerAnnotation( 
+                                        this.Advice.AspectLayerId, 
+                                        LinkerAnnotationOrder.Default, 
+                                        LinkerAnnotationTargetKind.PropertySetAccessor ) ) ) );
+
+                case SyntaxKind.SetAccessorDeclaration:
+                case SyntaxKind.InitAccessorDeclaration:
+                    return
+                        Block(
+                            ExpressionStatement(
+                                AssignmentExpression(
+                                    SyntaxKind.SimpleAssignmentExpression,
+                                    GetPropertyAccessExpression().AddLinkerAnnotation( 
+                                        new LinkerAnnotation( 
+                                            this.Advice.AspectLayerId, 
+                                            LinkerAnnotationOrder.Default, 
+                                            LinkerAnnotationTargetKind.PropertySetAccessor)),
+                                    IdentifierName( "value" ) ) ) );
+
+                default:
+                    throw new AssertionFailedException();
+            }
+
+            ExpressionSyntax GetPropertyAccessExpression()
+            {
+                if ( !this.OverriddenDeclaration.IsStatic )
+                {
+                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this.OverriddenDeclaration.Name ) );
+                }
+                else
+                {
+                    // TODO: Full qualification.
+                    return IdentifierName( this.OverriddenDeclaration.Name );
+                }
             }
         }
 

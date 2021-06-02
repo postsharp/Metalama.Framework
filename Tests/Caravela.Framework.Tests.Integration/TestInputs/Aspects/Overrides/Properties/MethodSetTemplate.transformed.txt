@@ -12,8 +12,8 @@ internal class TargetClass
         set
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             this.__AutoProperty__BackingField = value;
+            return;
         }
     }
 
@@ -30,8 +30,8 @@ internal class TargetClass
         set
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             __Static_AutoProperty__BackingField = value;
+            return;
         }
     }
 
@@ -48,8 +48,8 @@ internal class TargetClass
         init
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             this.__AutoProperty_Init__BackingField = value;
+            return;
         }
     }
 
@@ -78,8 +78,8 @@ internal class TargetClass
         set
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             Console.WriteLine($"This is the original setter, setting {value}.");
+            return;
         }
     }
 
@@ -95,8 +95,8 @@ internal class TargetClass
         set
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             Console.WriteLine($"This is the original setter, setting {value}.");
+            return;
         }
     }
 
@@ -112,8 +112,8 @@ internal class TargetClass
         init
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             Console.WriteLine($"This is the original setter, setting {value}.");
+            return;
         }
     }
 
@@ -133,8 +133,8 @@ internal class TargetClass
         set
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             Console.WriteLine($"This is the original setter, setting {value}.");
+            return;
         }
     }
 
@@ -144,8 +144,8 @@ internal class TargetClass
         init
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             Console.WriteLine($"This is the original setter, setting {value}.");
+            return;
         }
     }
 }

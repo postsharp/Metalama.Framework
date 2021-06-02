@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertySetTemplate
+namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.MethodSetTemplate
 {
     // Tests get-only property template.
 
@@ -14,17 +14,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         public void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
         {
-            builder.AdviceFactory.OverrideFieldOrProperty(builder.TargetDeclaration, nameof(OverrideProperty));
+            builder.AdviceFactory.OverrideFieldOrPropertyAccessors(builder.TargetDeclaration, null, nameof(SetProperty));
         }
 
         [Template]
-        public dynamic? OverrideProperty
+        public dynamic? SetProperty()
         {
-            set
-            {
-                Console.WriteLine($"This is the overridden setter.");
-                var discard = meta.Proceed();
-            }
+            Console.WriteLine($"This is the overridden setter.");
+            return meta.Proceed();
         }
     }
 

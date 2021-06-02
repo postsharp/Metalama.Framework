@@ -11,7 +11,7 @@ internal class TargetClass
         }
     }
 
-    private int __Property__BackingField;
+    private readonly int __Property__BackingField;
 
     [Override]
     public static int Static_Property
@@ -23,7 +23,7 @@ internal class TargetClass
         }
     }
 
-    static private int __Static_Property__BackingField;
+    private static readonly int __Static_Property__BackingField;
 
     [Override]
     private int PrivateProperty
@@ -35,7 +35,7 @@ internal class TargetClass
         }
     }
 
-    private int __PrivateProperty__BackingField;
+    private readonly int __PrivateProperty__BackingField;
 
     [Override]
     private int ProtectedProperty
@@ -47,7 +47,7 @@ internal class TargetClass
         }
     }
 
-    private int __ProtectedProperty__BackingField;
+    private readonly int __ProtectedProperty__BackingField;
 
     [Override]
     private protected int PrivateProtectedProperty
@@ -59,7 +59,7 @@ internal class TargetClass
         }
     }
 
-    private int __PrivateProtectedProperty__BackingField;
+    private readonly int __PrivateProtectedProperty__BackingField;
 
     [Override]
     protected internal int ProtectedInternalProperty
@@ -71,7 +71,7 @@ internal class TargetClass
         }
     }
 
-    private int __ProtectedInternalProperty__BackingField;
+    private readonly int __ProtectedInternalProperty__BackingField;
 
     [Override]
     protected internal int InternalProperty
@@ -83,7 +83,7 @@ internal class TargetClass
         }
     }
 
-    private int __InternalProperty__BackingField;
+    private readonly int __InternalProperty__BackingField;
 
     [Override]
     public int PropertyWithSetter
@@ -121,7 +121,7 @@ internal class TargetClass
         }
     }
 
-    static private int __Static_PropertyWithSetter__BackingField;
+    private static int __Static_PropertyWithSetter__BackingField;
 
     [Override]
     public int PropertyWithRestrictedSetter

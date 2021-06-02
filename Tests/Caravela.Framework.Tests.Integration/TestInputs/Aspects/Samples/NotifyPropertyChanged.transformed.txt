@@ -5,6 +5,11 @@ internal class TargetClass
 {
     public int Property1
     {
+        get
+        {
+            return this.__Property1__BackingField;
+        }
+
         set
         {
             global::System.Int32 result;
@@ -14,8 +19,15 @@ internal class TargetClass
         }
     }
 
+    private int __Property1__BackingField;
+
     public int Property2
     {
+        get
+        {
+            return this.__Property2__BackingField;
+        }
+
         set
         {
             global::System.Int32 result;
@@ -24,6 +36,9 @@ internal class TargetClass
             return;
         }
     }
+
+    private int __Property2__BackingField;
+
     public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 
     event global::System.ComponentModel.PropertyChangedEventHandler? global::System.ComponentModel.INotifyPropertyChanged.PropertyChanged

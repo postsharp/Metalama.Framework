@@ -251,15 +251,38 @@ namespace Caravela.Framework.Impl.Linking
                     var transformedAccessors = new List<AccessorDeclarationSyntax>();
                     var symbol = semanticModel.GetDeclaredSymbol( propertyDeclaration ).AssertNotNull();
 
-                    foreach ( var originalAccessor in propertyBodySource.AccessorList.Accessors )
+                    if ( propertyDeclaration.AccessorList != null )
                     {
+                        // Go through accessors on the property and rewrite them.
+                        foreach ( var originalAccessor in propertyDeclaration.AccessorList.Accessors )
+                        {
+                            var accessorBodySource =
+                                propertyBodySource.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == originalAccessor.Kind() )
+                                ?? originalAccessor;
+
+                            transformedAccessors.Add(
+                                AccessorDeclaration(
+                                    originalAccessor.Kind(),
+                                    this.GetRewrittenPropertyAccessorBody(
+                                        semanticModel,
+                                        accessorBodySource,
+                                        symbol ) ) );
+                        }
+                    }
+                    else
+                    {
+                        // Expression body property.
+                        var accessorBodySource =
+                            propertyBodySource.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration )
+                            ?? AccessorDeclaration( SyntaxKind.GetKeyword, Block( ReturnStatement( propertyDeclaration.ExpressionBody.AssertNotNull().Expression ) ) );
+
                         transformedAccessors.Add(
                             AccessorDeclaration(
-                                originalAccessor.Kind(),
+                                SyntaxKind.GetAccessorDeclaration,
                                 this.GetRewrittenPropertyAccessorBody(
                                     semanticModel,
-                                    originalAccessor,
-                                    symbol ) ) );
+                                    accessorBodySource,
+                                    symbol ) ) );                         
                     }
 
                     return propertyDeclaration
@@ -588,12 +611,17 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     var modifiers = new List<SyntaxToken>();
 
+                    modifiers.Add( Token( SyntaxKind.PrivateKeyword ) );
+
                     if ( propertySymbol.IsStatic )
                     {
                         modifiers.Add( Token( SyntaxKind.StaticKeyword ) );
                     }
 
-                    modifiers.Add( Token( SyntaxKind.PrivateKeyword ) );
+                    if ( propertySymbol.SetMethod == null )
+                    {
+                        modifiers.Add( Token( SyntaxKind.ReadOnlyKeyword ) );
+                    }
 
                     return TokenList( modifiers );
                 }

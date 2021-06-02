@@ -15,6 +15,10 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     public interface IInterface
     {
         int InterfaceMethod();
+
+        event EventHandler Event;
+
+        //int Property { get; set; }
     }
 
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
@@ -30,6 +34,12 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             Console.WriteLine("This is introduced interface method.");
             return meta.Proceed();
         }
+
+        [Introduce]
+        public event EventHandler Event;
+
+        //[Introduce]
+        //public int Property { get; set; }
     }
 
     [TestOutput]

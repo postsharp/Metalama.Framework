@@ -6,13 +6,12 @@ internal class TargetClass
     {
         get
         {
+            global::System.Console.WriteLine($"This is the overridden setter.");
             return this.__AutoProperty__BackingField;
         }
 
         set
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             this.__AutoProperty__BackingField = value;
         }
     }
@@ -24,13 +23,12 @@ internal class TargetClass
     {
         get
         {
+            global::System.Console.WriteLine($"This is the overridden setter.");
             return __Static_AutoProperty__BackingField;
         }
 
         set
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             __Static_AutoProperty__BackingField = value;
         }
     }
@@ -42,13 +40,12 @@ internal class TargetClass
     {
         get
         {
+            global::System.Console.WriteLine($"This is the overridden setter.");
             return this.__AutoProperty_Init__BackingField;
         }
 
         init
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             this.__AutoProperty_Init__BackingField = value;
         }
     }
@@ -60,6 +57,7 @@ internal class TargetClass
     {
         get
         {
+            global::System.Console.WriteLine($"This is the overridden setter.");
             return this.__AutoProperty_GetOnly__BackingField;
         }
     }
@@ -71,14 +69,13 @@ internal class TargetClass
     {
         get
         {
+            global::System.Console.WriteLine($"This is the overridden setter.");
             Console.WriteLine("This is the original getter.");
             return 42;
         }
 
         set
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             Console.WriteLine($"This is the original setter, setting {value}.");
         }
     }
@@ -88,14 +85,13 @@ internal class TargetClass
     {
         get
         {
+            global::System.Console.WriteLine($"This is the overridden setter.");
             Console.WriteLine("This is the original getter.");
             return 42;
         }
 
         set
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             Console.WriteLine($"This is the original setter, setting {value}.");
         }
     }
@@ -105,14 +101,13 @@ internal class TargetClass
     {
         get
         {
+            global::System.Console.WriteLine($"This is the overridden setter.");
             Console.WriteLine("This is the original getter.");
             return 42;
         }
 
         init
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             Console.WriteLine($"This is the original setter, setting {value}.");
         }
     }
@@ -122,6 +117,7 @@ internal class TargetClass
     {
         get
         {
+            global::System.Console.WriteLine($"This is the overridden setter.");
             Console.WriteLine("This is the original getter.");
             return 42;
         }
@@ -132,8 +128,6 @@ internal class TargetClass
     {
         set
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             Console.WriteLine($"This is the original setter, setting {value}.");
         }
     }
@@ -143,8 +137,6 @@ internal class TargetClass
     {
         init
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            global::System.Int32 discard;
             Console.WriteLine($"This is the original setter, setting {value}.");
         }
     }

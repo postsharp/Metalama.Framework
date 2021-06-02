@@ -9,7 +9,7 @@ using System;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyTemplate_Get
 {
-    // Tests single OverrideProperty aspect with trivial template on methods with trivial bodies.
+    // Tests single OverrideProperty aspect on get-only properties.
 
     public class OverrideAttribute : OverrideFieldOrPropertyAspect
     {

@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertySetTemplate
+namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertyGetTemplate
 {
     // Tests get-only property template.
 
@@ -20,10 +20,10 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         [Template]
         public dynamic? OverrideProperty
         {
-            set
+            get
             {
                 Console.WriteLine($"This is the overridden setter.");
-                var discard = meta.Proceed();
+                return meta.Proceed();
             }
         }
     }
