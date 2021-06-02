@@ -17,7 +17,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.MethodRef
         {
            Console.WriteLine( this.GetParameterName() );
            Console.WriteLine( GetParameterNameStatic(meta.Parameters.First()) );
-           return default!;
+           return meta.Proceed();
         }
     }
     

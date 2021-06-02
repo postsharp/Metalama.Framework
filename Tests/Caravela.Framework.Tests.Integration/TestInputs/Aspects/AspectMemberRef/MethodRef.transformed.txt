@@ -4,6 +4,5 @@ static int Foo(int a)
 {
     global::System.Console.WriteLine("a");
     global::System.Console.WriteLine("a");
-    return default;
+    return 0;
 }
-

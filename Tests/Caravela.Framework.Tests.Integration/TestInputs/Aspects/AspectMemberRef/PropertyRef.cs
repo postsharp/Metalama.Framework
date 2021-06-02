@@ -13,7 +13,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.PropertyRe
         public override dynamic OverrideMethod()
         {
            Console.WriteLine( this.Property );
-           return default!;
+           return meta.Proceed();
         }
     }
     

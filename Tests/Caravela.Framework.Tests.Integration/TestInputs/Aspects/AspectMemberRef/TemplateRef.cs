@@ -16,7 +16,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.TemplateRe
         public override dynamic OverrideMethod()
         {
             this.Introduced();
-           return default!;
+           return meta.Proceed();
         }
     }
     
