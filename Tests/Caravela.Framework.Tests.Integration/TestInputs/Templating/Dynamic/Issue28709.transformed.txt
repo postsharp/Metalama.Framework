@@ -1,0 +1,29 @@
+using System;
+using System.Text;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
+
+namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.Issue28709
+{
+
+    public class CacheAttribute : OverrideMethodAspect
+    {
+        public override dynamic OverrideMethod() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+
+    }
+
+    // Placeholder implementation of a cache because the hosted try.postsharp.net does not allow for MemoryCache.
+
+    class Program
+    {
+        [Cache]
+        static int Add(int a, int b, out int c)
+        {
+            global::System.Console.WriteLine("IsOut=False");
+            global::System.Console.WriteLine("IsOut=False");
+            global::System.Console.WriteLine("IsOut=True");
+            return default;
+        }
+    }
+
+}
