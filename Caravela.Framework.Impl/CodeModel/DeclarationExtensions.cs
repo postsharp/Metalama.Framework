@@ -327,10 +327,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal static bool IsAutoProperty( this IPropertySymbol symbol )
             => !symbol.IsAbstract
-            && symbol.DeclaringSyntaxReferences.All(
-                sr =>
-                    sr.GetSyntax() is BasePropertyDeclarationSyntax propertyDecl
-                    && propertyDecl.AccessorList != null
-                    && propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) );
+               && symbol.DeclaringSyntaxReferences.All(
+                   sr =>
+                       sr.GetSyntax() is BasePropertyDeclarationSyntax propertyDecl
+                       && propertyDecl.AccessorList != null
+                       && propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) );
     }
 }

@@ -151,9 +151,10 @@ namespace Caravela.Framework.Impl.Linking
                 var rewrittenBlock =
                     declaration switch
                     {
-                        AccessorDeclarationSyntax { Body: not null } accessorDecl => (BlockSyntax) innerRewriter.VisitBlock( accessorDecl.Body! ).AssertNotNull(),
+                        AccessorDeclarationSyntax
+                            { Body: not null } accessorDecl => (BlockSyntax) innerRewriter.VisitBlock( accessorDecl.Body! ).AssertNotNull(),
                         AccessorDeclarationSyntax { ExpressionBody: not null } accessorDecl
-                            => (BlockSyntax) innerRewriter.Visit( Block( ReturnStatement( accessorDecl.ExpressionBody!.Expression ) ) ).AssertNotNull(),                  
+                            => (BlockSyntax) innerRewriter.Visit( Block( ReturnStatement( accessorDecl.ExpressionBody!.Expression ) ) ).AssertNotNull(),
                         ArrowExpressionClauseSyntax { Expression: not null } arrowExprClause
                             => (BlockSyntax) innerRewriter.Visit( Block( ReturnStatement( arrowExprClause.Expression! ) ) ).AssertNotNull(),
                         AccessorDeclarationSyntax _ when calledProperty.IsAbstract == false

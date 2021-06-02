@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-
 #pragma warning disable SA1623 // Property summary documentation should match accessors
 
 namespace Caravela.Framework.Code

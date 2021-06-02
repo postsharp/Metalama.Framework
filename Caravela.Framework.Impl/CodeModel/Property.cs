@@ -83,12 +83,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
         // TODO: Memo does not work here.
         // [Memo]
-        public Writeability Writeability =>
-            this._symbol switch
+        public Writeability Writeability
+            => this._symbol switch
             {
                 { IsReadOnly: true } => Writeability.None,
                 { SetMethod: { IsInitOnly: true } _ } => Writeability.InitOnly,
-                _ => Writeability.All,
+                _ => Writeability.All
             };
 
         // TODO: Memo does not work here.

@@ -139,11 +139,11 @@ namespace Caravela.Framework.Impl.Linking
                             (BlockSyntax) innerRewriter.Visit( Block( ExpressionStatement( declaration.ExpressionBody.Expression ) ) )
                                 .AssertNotNull(),
                         { Body: null, ExpressionBody: null } when calledProperty.IsAbstract == false
-                            => Block( 
-                                ExpressionStatement( 
-                                    AssignmentExpression( 
-                                        SyntaxKind.SimpleAssignmentExpression, 
-                                        GetImplicitBackingFieldAccessExpression( calledProperty ), 
+                            => Block(
+                                ExpressionStatement(
+                                    AssignmentExpression(
+                                        SyntaxKind.SimpleAssignmentExpression,
+                                        GetImplicitBackingFieldAccessExpression( calledProperty ),
                                         IdentifierName( "value" ) ) ) ),
                         _ => throw new NotSupportedException()
                     };

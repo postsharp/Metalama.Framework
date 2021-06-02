@@ -36,7 +36,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         }
 
         [Introduce]
-        public event EventHandler Event;
+        public event EventHandler? Event;
 
         //[Introduce]
         //public int Property { get; set; }

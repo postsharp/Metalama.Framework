@@ -209,7 +209,10 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else
                 {
-                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( LinkingRewriter.GetImplicitBackingFieldName( property ) ) );
+                    return MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ThisExpression(),
+                        IdentifierName( LinkingRewriter.GetImplicitBackingFieldName( property ) ) );
                 }
             }
 

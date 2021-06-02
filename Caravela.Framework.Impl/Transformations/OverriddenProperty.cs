@@ -71,21 +71,23 @@ namespace Caravela.Framework.Impl.Transformations
                 var getTemplateMethod = this.TemplateProperty != null ? this.TemplateProperty.Getter : this.GetTemplateMethod;
                 var setTemplateMethod = this.TemplateProperty != null ? this.TemplateProperty.Setter : this.SetTemplateMethod;
 
-                var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration;
+                var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly
+                    ? SyntaxKind.InitAccessorDeclaration
+                    : SyntaxKind.SetAccessorDeclaration;
 
-                var getAccessorBody = 
+                var getAccessorBody =
                     this.OverriddenDeclaration.Getter != null
-                    ? getTemplateMethod != null 
-                        ? this.ExpandAccessorTemplate( context, getTemplateMethod, this.OverriddenDeclaration.Getter )
-                        : this.GetIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration )
-                    : null;
+                        ? getTemplateMethod != null
+                            ? this.ExpandAccessorTemplate( context, getTemplateMethod, this.OverriddenDeclaration.Getter )
+                            : this.GetIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration )
+                        : null;
 
-                var setAccessorBody = 
+                var setAccessorBody =
                     this.OverriddenDeclaration.Setter != null
-                    ? setTemplateMethod != null
-                        ? this.ExpandAccessorTemplate( context, setTemplateMethod, this.OverriddenDeclaration.Setter )
-                        : this.GetIdentityAccessorBody( setAccessorDeclarationKind )
-                    : null;
+                        ? setTemplateMethod != null
+                            ? this.ExpandAccessorTemplate( context, setTemplateMethod, this.OverriddenDeclaration.Setter )
+                            : this.GetIdentityAccessorBody( setAccessorDeclarationKind )
+                        : null;
 
                 var overrides = new[]
                 {
@@ -171,15 +173,15 @@ namespace Caravela.Framework.Impl.Transformations
             switch ( accessorDeclarationKind )
             {
                 case SyntaxKind.GetAccessorDeclaration:
-                    return 
-                        Block( 
-                            ReturnStatement( 
+                    return
+                        Block(
+                            ReturnStatement(
                                 GetPropertyAccessExpression()
-                                .AddLinkerAnnotation( 
-                                    new LinkerAnnotation( 
-                                        this.Advice.AspectLayerId, 
-                                        LinkerAnnotationOrder.Default, 
-                                        LinkerAnnotationTargetKind.PropertySetAccessor ) ) ) );
+                                    .AddLinkerAnnotation(
+                                        new LinkerAnnotation(
+                                            this.Advice.AspectLayerId,
+                                            LinkerAnnotationOrder.Default,
+                                            LinkerAnnotationTargetKind.PropertySetAccessor ) ) ) );
 
                 case SyntaxKind.SetAccessorDeclaration:
                 case SyntaxKind.InitAccessorDeclaration:
@@ -188,11 +190,12 @@ namespace Caravela.Framework.Impl.Transformations
                             ExpressionStatement(
                                 AssignmentExpression(
                                     SyntaxKind.SimpleAssignmentExpression,
-                                    GetPropertyAccessExpression().AddLinkerAnnotation( 
-                                        new LinkerAnnotation( 
-                                            this.Advice.AspectLayerId, 
-                                            LinkerAnnotationOrder.Default, 
-                                            LinkerAnnotationTargetKind.PropertySetAccessor)),
+                                    GetPropertyAccessExpression()
+                                        .AddLinkerAnnotation(
+                                            new LinkerAnnotation(
+                                                this.Advice.AspectLayerId,
+                                                LinkerAnnotationOrder.Default,
+                                                LinkerAnnotationTargetKind.PropertySetAccessor ) ),
                                     IdentifierName( "value" ) ) ) );
 
                 default:
@@ -203,7 +206,10 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 if ( !this.OverriddenDeclaration.IsStatic )
                 {
-                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this.OverriddenDeclaration.Name ) );
+                    return MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ThisExpression(),
+                        IdentifierName( this.OverriddenDeclaration.Name ) );
                 }
                 else
                 {

@@ -36,12 +36,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
         // TODO: Memo does not work here.
         // [Memo]
-        public Writeability Writeability =>
-            this._symbol switch
+        public Writeability Writeability
+            => this._symbol switch
             {
                 { IsConst: true } => Writeability.None,
                 { IsReadOnly: true } => Writeability.ConstructorOnly,
-                _ => Writeability.All,
+                _ => Writeability.All
             };
 
         public bool IsAutoPropertyOrField => true;

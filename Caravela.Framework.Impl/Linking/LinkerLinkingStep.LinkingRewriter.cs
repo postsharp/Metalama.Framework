@@ -101,7 +101,7 @@ namespace Caravela.Framework.Impl.Linking
                         }
                         else
                         {
-                            if (symbol is IPropertySymbol propertySymbol && IsAutoPropertyDeclaration( (BasePropertyDeclarationSyntax)member ) )
+                            if ( symbol is IPropertySymbol propertySymbol && IsAutoPropertyDeclaration( (BasePropertyDeclarationSyntax) member ) )
                             {
                                 newMembers.Add( GetImplicitBackingFieldDeclaration( (BasePropertyDeclarationSyntax) member, propertySymbol ) );
                             }
@@ -274,7 +274,9 @@ namespace Caravela.Framework.Impl.Linking
                         // Expression body property.
                         var accessorBodySource =
                             propertyBodySource.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration )
-                            ?? AccessorDeclaration( SyntaxKind.GetKeyword, Block( ReturnStatement( propertyDeclaration.ExpressionBody.AssertNotNull().Expression ) ) );
+                            ?? AccessorDeclaration(
+                                SyntaxKind.GetKeyword,
+                                Block( ReturnStatement( propertyDeclaration.ExpressionBody.AssertNotNull().Expression ) ) );
 
                         transformedAccessors.Add(
                             AccessorDeclaration(
@@ -282,15 +284,15 @@ namespace Caravela.Framework.Impl.Linking
                                 this.GetRewrittenPropertyAccessorBody(
                                     semanticModel,
                                     accessorBodySource,
-                                    symbol ) ) );                         
+                                    symbol ) ) );
                     }
 
                     return propertyDeclaration
                         .WithAccessorList( AccessorList( List( transformedAccessors ) ) )
                         .WithLeadingTrivia( propertyDeclaration.GetLeadingTrivia() )
                         .WithTrailingTrivia( propertyDeclaration.GetTrailingTrivia() )
-                        .WithExpressionBody(null)
-                        .WithSemicolonToken(Token(SyntaxKind.None));
+                        .WithExpressionBody( null )
+                        .WithSemicolonToken( Token( SyntaxKind.None ) );
                 }
                 else
                 {
@@ -598,20 +600,23 @@ namespace Caravela.Framework.Impl.Linking
                 return $"__{property.Name}__BackingField";
             }
 
-            private static MemberDeclarationSyntax GetImplicitBackingFieldDeclaration( BasePropertyDeclarationSyntax propertyDeclaration, IPropertySymbol propertySymbol )
+            private static MemberDeclarationSyntax GetImplicitBackingFieldDeclaration(
+                BasePropertyDeclarationSyntax propertyDeclaration,
+                IPropertySymbol propertySymbol )
             {
                 return FieldDeclaration(
                     List<AttributeListSyntax>(),
-                    GetModifiers(propertySymbol),
+                    GetModifiers( propertySymbol ),
                     VariableDeclaration(
                         propertyDeclaration.Type,
                         SingletonSeparatedList( VariableDeclarator( GetImplicitBackingFieldName( propertySymbol ) ) ) ) );
 
                 static SyntaxTokenList GetModifiers( IPropertySymbol propertySymbol )
                 {
-                    var modifiers = new List<SyntaxToken>();
-
-                    modifiers.Add( Token( SyntaxKind.PrivateKeyword ) );
+                    var modifiers = new List<SyntaxToken>
+                    {
+                        Token( SyntaxKind.PrivateKeyword )
+                    };
 
                     if ( propertySymbol.IsStatic )
                     {
@@ -633,8 +638,9 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     case PropertyDeclarationSyntax propertyDeclaration:
                         return propertyDeclaration.ExpressionBody == null
-                            && propertyDeclaration.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true
-                            && propertyDeclaration.Modifiers.All( x => x.Kind() != SyntaxKind.AbstractKeyword );
+                               && propertyDeclaration.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true
+                               && propertyDeclaration.Modifiers.All( x => x.Kind() != SyntaxKind.AbstractKeyword );
+
                     default:
                         throw new AssertionFailedException();
                 }

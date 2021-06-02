@@ -27,13 +27,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public RefKind RefKind { get; set; }
 
-        public Writeability Writeability =>
-            this switch
-            {                
+        public Writeability Writeability
+            => this switch
+            {
                 { Setter: null, IsAutoPropertyOrField: false } => Writeability.None,
                 { Setter: null, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
                 { _hasInitOnlySetter: true } => Writeability.InitOnly,
-                _ => Writeability.All,
+                _ => Writeability.All
             };
 
         public bool IsAutoPropertyOrField { get; }

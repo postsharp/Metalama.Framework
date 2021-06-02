@@ -92,12 +92,14 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 case MethodKind.EventAdd:
                 case MethodKind.EventRemove:
                 case MethodKind.EventRaise:
-                    this._event = (IEvent)methodBase.ContainingDeclaration.AssertNotNull();
+                    this._event = (IEvent) methodBase.ContainingDeclaration.AssertNotNull();
+
                     break;
 
                 case MethodKind.PropertyGet:
                 case MethodKind.PropertySet:
-                    this._fieldOrProperty = (IProperty)methodBase.ContainingDeclaration.AssertNotNull();
+                    this._fieldOrProperty = (IProperty) methodBase.ContainingDeclaration.AssertNotNull();
+
                     break;
             }
         }
