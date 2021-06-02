@@ -15,10 +15,7 @@
     <Target Name="ExportCaravelaFrameworkProperties" BeforeTargets="PrepareForBuild">
         <Error Text="The IntermediateOutputPath property is not defined." Condition="'$(IntermediateOutputPath)'==''" />
         <PropertyGroup>
-            <!-- TODO: this property is now unused -->
-            <CaravelaCompileTimeProjectDirectory Condition="'$(CaravelaCompileTimeProjectDirectory)'==''">$(MSBuildProjectDirectory)\$(IntermediateOutputPath)compileTime</CaravelaCompileTimeProjectDirectory>
             <CaravelaBuildTouchFile>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)CaravelaBuild.touch</CaravelaBuildTouchFile>
-
         </PropertyGroup>
     </Target>
 

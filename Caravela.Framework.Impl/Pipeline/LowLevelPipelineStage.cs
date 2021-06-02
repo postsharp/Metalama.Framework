@@ -63,7 +63,8 @@ namespace Caravela.Framework.Impl.Pipeline
 
             try
             {
-                newCompilation = (PartialCompilation) this._aspectWeaver.Transform( context );
+                this._aspectWeaver.Transform( context );
+                newCompilation = (PartialCompilation) context.Compilation;
             }
             catch ( Exception ex )
             {

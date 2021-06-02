@@ -13,6 +13,26 @@ namespace Caravela.Framework.Impl
         public static ITypeSymbol? GetTypeByReflectionType( this Compilation compilation, Type type )
             => ReflectionMapper.GetInstance( compilation ).GetTypeSymbol( type );
 
+        public static bool IsMemberOf( this ISymbol member, INamedTypeSymbol type )
+        {
+            if ( member.ContainingType == null )
+            {
+                return false;
+            }
+
+            if ( SymbolEqualityComparer.Default.Equals( member.ContainingType, type ) )
+            {
+                return true;
+            }
+
+            if ( type.BaseType != null && member.IsMemberOf( type.BaseType ) )
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public static bool Is( this ITypeSymbol left, Type right )
         {
             if ( right.IsGenericType )

@@ -68,11 +68,12 @@ namespace Caravela.Framework.Impl.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<string> CannotSetCompileTimeVariableInRunTimeConditionalBlock
+        internal static readonly DiagnosticDefinition<(string VariableName, string RunTimeCondition)> CannotSetCompileTimeVariableInRunTimeConditionalBlock
             = new(
                 "CR0108",
                 "Cannot set a compile-time variable in a block whose execution depends on a run-time condition",
-                "Cannot set the compile-time variable '{0}' here because it is part of a block whose execution depends on a run-time condition.",
+                "Cannot set the compile-time variable '{0}' here because it is part of a block whose execution depends on the run-time condition '{1}'. " +
+                "Move the assignment out of the run-time-conditional block.",
                 _category,
                 Error );
 
@@ -84,11 +85,12 @@ namespace Caravela.Framework.Impl.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<string> CannotHaveCompileTimeLoopInRunTimeConditionalBlock
+        internal static readonly DiagnosticDefinition<(string VariableName, string RunTimeCondition)> CannotHaveCompileTimeLoopInRunTimeConditionalBlock
             = new(
                 "CR0110",
                 "Cannot have a compile-time loop in a block whose execution depends on a run-time condition",
-                "The compile-time loop '{0}' is not allowed here because it is a part of block whose execution depends on a run-time condition.",
+                "The compile-time loop '{0}' is not allowed here because it is a part of block whose execution depends on the run-time condition '{1}'. " + 
+                "Move the loop out of the run-time-conditional block.",
                 _category,
                 Error );
 
@@ -166,6 +168,16 @@ namespace Caravela.Framework.Impl.Templating
                     "The declaration contains compile-time code but it does not import the proper namespaces.",
                     "The compile-time declaration '{0}' contains compile-time code but it does not explicitly import any of the following namespaces: {1}. "
                     + "This may cause an inconsistent design-time experience. Import one of these namespaces explicitly.",
+                    _category,
+                    Error );
+
+        internal static readonly DiagnosticDefinition<(ISymbol ReferencedDeclaration, ISymbol ReferencingDeclaration)>
+            TemplateCannotReferenceTemplate
+                = new(
+                    "CR0220",
+                    "A template cannot reference another template.",
+                    "The declaration '{0}' cannot be referenced from '{1}' both declarations are templates, " 
+                    + "and templates cannot reference each other yet.",
                     _category,
                     Error );
     }

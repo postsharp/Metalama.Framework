@@ -18,7 +18,6 @@ namespace Caravela.Framework.Sdk
         /// Transforms a Roslyn compilation according to some given aspects.
         /// </summary>
         /// <param name="context"></param>
-        /// <returns></returns>
-        IPartialCompilation Transform( AspectWeaverContext context );
+        void Transform( AspectWeaverContext context );
     }
 }

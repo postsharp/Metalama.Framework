@@ -34,14 +34,6 @@ namespace Caravela.Framework.Impl.Options
 
         public bool DebugIdeProcess => this.GetBooleanOption( "DebugCaravelaIde" );
 
-        public bool MapPdbToTransformedCode => this.GetBooleanOption( "CaravelaDebugTransformedCode" );
-
-        public string? CompileTimeProjectDirectory => this.GetStringOption( "CaravelaCompileTimeProjectDirectory" );
-
-        public string? CrashReportDirectory => this.GetStringOption( "CaravelaCrashReportDirectory" );
-
-        public string CacheDirectory => this.GetStringOption( "CaravelaCacheDirectory" ) ?? TempPathHelper.GetTempPath( "Cache" );
-
         public string ProjectId => this.GetStringOption( "CaravelaProjectId" ) ?? this._defaultProjectId;
 
         public string? BuildTouchFile => this.GetStringOption( "CaravelaBuildTouchFile" );

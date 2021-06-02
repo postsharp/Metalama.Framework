@@ -14,13 +14,14 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal static class AdviceAttributeFactory
     {
-        public static Advice CreateAdvice<T>(
+        public static bool TryCreateAdvice<T>(
             this AttributeData attribute,
             AspectInstance aspect,
             IDiagnosticAdder diagnosticAdder,
             T aspectTargetDeclaration,
             IDeclaration templateDeclaration,
-            string? layerName )
+            string? layerName,
+            [NotNullWhen( true )] out Advice? advice )
             where T : IDeclaration
         {
             var namedArguments = attribute.NamedArguments.ToDictionary( p => p.Key, p => p.Value );
@@ -65,14 +66,39 @@ namespace Caravela.Framework.Impl.Advices
                         TryGetNamedArgument<IntroductionScope>( nameof(IntroduceAttribute.Scope), out var scope );
                         TryGetNamedArgument<ConflictBehavior>( nameof(IntroduceAttribute.ConflictBehavior), out var conflictBehavior );
                         IMemberBuilder builder;
-                        Advice advice;
+                        INamedType targetType;
+
+                        switch ( aspectTargetDeclaration )
+                        {
+                            case IMember member:
+                                targetType = member.DeclaringType;
+
+                                break;
+
+                            case INamedType type:
+                                targetType = type;
+
+                                break;
+
+                            default:
+                                // TODO: This error should probably not be reported when the aspect is used, but when it is compiled, because it does not depend on a specific target.
+                                // However, we don't have the infrastructure to do it now.
+                                diagnosticAdder.Report(
+                                    AdviceDiagnosticDescriptors.CannotUseIntroduceWithoutDeclaringType.CreateDiagnostic(
+                                        attribute.GetLocation(),
+                                        (aspect.AspectClass.DisplayName, templateDeclaration.DeclarationKind, aspectTargetDeclaration.DeclarationKind) ) );
+
+                                advice = null;
+
+                                return false;
+                        }
 
                         switch ( templateDeclaration )
                         {
                             case IMethod templateMethod:
                                 var introduceMethodAdvice = new IntroduceMethodAdvice(
                                     aspect,
-                                    (INamedType) aspectTargetDeclaration,
+                                    targetType,
                                     templateMethod,
                                     scope,
                                     conflictBehavior,
@@ -87,7 +113,7 @@ namespace Caravela.Framework.Impl.Advices
                             case IProperty templateProperty:
                                 var introducePropertyAdvice = new IntroducePropertyAdvice(
                                     aspect,
-                                    (INamedType) aspectTargetDeclaration,
+                                    targetType,
                                     templateProperty,
                                     null,
                                     null,
@@ -146,7 +172,7 @@ namespace Caravela.Framework.Impl.Advices
                             builder.Accessibility = accessibility;
                         }
 
-                        return advice;
+                        return true;
                     }
             }
 

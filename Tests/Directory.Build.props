@@ -8,8 +8,4 @@
         <IsPackable>False</IsPackable>
     </PropertyGroup>
     
-    <PropertyGroup Condition="'$(Configuration)'=='DebugAspects'">
-        <CaravelaDebugTransformedCode>True</CaravelaDebugTransformedCode>
-    </PropertyGroup>
-    
 </Project>
