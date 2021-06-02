@@ -168,5 +168,16 @@ namespace Caravela.Framework.Impl.Templating
                     + "This may cause an inconsistent design-time experience. Import one of these namespaces explicitly.",
                     _category,
                     Error );
+        
+        internal static readonly DiagnosticDefinition<(ISymbol ReferencedDeclaration, ISymbol ReferencingDeclaration)>
+            TemplateCannotReferenceTemplate
+                = new(
+                    "CR0220",
+                    "A template cannot reference another template.",
+                    "The declaration '{0}' cannot be referenced from '{1}' both declarations are templates and a template cannot be referenced in a template yet.",
+                    _category,
+                    Error );
+
+
     }
 }

@@ -3,6 +3,7 @@
 
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
@@ -164,8 +165,9 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         private bool IsAspectMember( ISymbol symbol )
             => this._currentTemplateMember != null
-               && (SymbolEqualityComparer.Default.Equals( symbol, this._currentTemplateMember )
-                   || (symbol.ContainingSymbol != null && SymbolEqualityComparer.Default.Equals( symbol.ContainingSymbol, this._currentTemplateMember )));
+               && symbol.ContainingType != null
+               && symbol.ContainingType.SpecialType != SpecialType.System_Object
+               && symbol.IsMemberOf( this._currentTemplateMember.ContainingType );
 
         /// <summary>
         /// Gets the scope of a <see cref="SyntaxNode"/>.
@@ -438,6 +440,18 @@ namespace Caravela.Framework.Impl.Templating
             if ( symbol != null )
             {
                 var scope = this.GetSymbolScope( symbol );
+
+                if ( scope == SymbolDeclarationScope.CompileTimeOnly )
+                {
+                    // Template code cannot be referenced in a template until this is implemented.
+                    if ( this._symbolScopeClassifier.IsTemplate( symbol ) )
+                    {
+                        this.ReportDiagnostic( TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate, 
+                            node, (symbol, this._currentTemplateMember!));
+                    }
+
+                }
+                
                 var annotatedNode = identifierNameSyntax.AddScopeAnnotation( scope );
 
                 annotatedNode = (IdentifierNameSyntax) this.AddColoringAnnotations( annotatedNode, symbol, scope )!;

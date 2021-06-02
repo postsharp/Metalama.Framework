@@ -85,7 +85,9 @@ namespace Caravela.Framework.Impl
             using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
             {
                 var declarativeAdvices =
-                    this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, diagnosticSink, targetDeclaration, x.Attribute, x.Member ) )
+                    this._declarativeAdviceAttributes
+                        .Select( x => CreateDeclarativeAdvice( aspect, diagnosticSink, targetDeclaration, x.Attribute, x.Member ) )
+                        .WhereNotNull()
                         .ToArray();
 
                 var compilationModel = (CompilationModel) targetDeclaration.Compilation;
@@ -125,18 +127,23 @@ namespace Caravela.Framework.Impl
             }
         }
 
-        private static Advice CreateDeclarativeAdvice<T>(
+        private static Advice? CreateDeclarativeAdvice<T>(
             AspectInstance aspect,
             IDiagnosticAdder diagnosticAdder,
             T aspectTarget,
             AttributeData templateAttributeData,
             ISymbol templateDeclaration )
             where T : IDeclaration
-            => templateAttributeData.CreateAdvice(
+        {
+             templateAttributeData.TryCreateAdvice(
                 aspect,
                 diagnosticAdder,
                 aspectTarget,
                 ((CompilationModel) aspectTarget.Compilation).Factory.GetDeclaration( templateDeclaration ),
-                null );
+                null,
+                out var advice );
+
+             return advice;
+        }
     }
 }

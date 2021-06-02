@@ -15,6 +15,10 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         [Theory]
         [FromDirectory( @"Aspects\Order" )]
         public Task Order( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+        
+        [Theory]
+        [FromDirectory( @"Aspects\AspectMemberRef" )]
+        public Task AspectMemberRef( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
         [FromDirectory( @"Aspects\Introductions\Interfaces" )]

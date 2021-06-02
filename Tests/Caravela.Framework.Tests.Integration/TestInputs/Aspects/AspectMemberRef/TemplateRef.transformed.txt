@@ -1,0 +1,4 @@
+// CompileTimeAspectPipeline.TryExecute failed. 
+// Error CR0220 on `Introduced`: `The declaration 'RetryAttribute.Introduced()' cannot be referenced from 'RetryAttribute.OverrideMethod()' both declarations are templates and a template cannot be referenced in a template yet.`
+
+

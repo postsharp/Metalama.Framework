@@ -2,15 +2,19 @@ using System;
 using System.Text;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Aspects;
+using Caravela.TestFramework;
+
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.Issue28709
 {
-
-    public class CacheAttribute : OverrideMethodAspect
+      [CompileTime]
+    class Aspect
     {
-        public override dynamic OverrideMethod()
+        [TestTemplate]
+        dynamic? Template()
         {
-            foreach (var p in meta.Parameters)
+             foreach (var p in meta.Parameters)
             {
                 Console.WriteLine( "IsOut=" + p.IsOut());
             }
@@ -20,11 +24,11 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.Issue28709
     }
     
     // Placeholder implementation of a cache because the hosted try.postsharp.net does not allow for MemoryCache.
-    
-    class Program
+
+    [TestOutput]
+    class TargetCode
     {
-        [Cache]
-        static int Add(int a, int b, out int c )
+        static int Method(int a, int b, out int c )
         {
             Console.WriteLine("Thinking...");
             return c = a + b;
