@@ -148,7 +148,7 @@ namespace Caravela.Framework.Impl.Templating
 
             // Aspect members are processed as compile-time-only by the template compiler even if some members can also
             // be called from run-time code.
-            if ( this.IsTemplateMember( symbol ) )
+            if ( this.IsAspectMember( symbol ) )
             {
                 return SymbolDeclarationScope.CompileTimeOnly;
             }
@@ -162,7 +162,7 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        private bool IsTemplateMember( ISymbol symbol )
+        private bool IsAspectMember( ISymbol symbol )
             => this._currentTemplateMember != null
                && (SymbolEqualityComparer.Default.Equals( symbol, this._currentTemplateMember )
                    || (symbol.ContainingSymbol != null && SymbolEqualityComparer.Default.Equals( symbol.ContainingSymbol, this._currentTemplateMember )));
@@ -564,7 +564,7 @@ namespace Caravela.Framework.Impl.Templating
                     this.ReportDiagnostic(
                         TemplatingDiagnosticDescriptors.CannotSetCompileTimeVariableInRunTimeConditionalBlock,
                         compileTimeOutArguments[0],
-                        compileTimeOutArguments[0].ToString() );
+                        (compileTimeOutArguments[0].ToString(), this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
                 }
             }
 
@@ -687,7 +687,7 @@ namespace Caravela.Framework.Impl.Templating
 
             // We have an if statement where the condition is a runtime expression. Any variable assignment
             // within this statement should make the variable as runtime-only, so we're calling EnterRuntimeConditionalBlock.
-            using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalScope( this._currentScopeContext ) ) )
+            using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalScope( this._currentScopeContext, "if ( " + node.Condition + " )" ) ) )
             {
                 var annotatedStatement = this.Visit( node.Statement )!;
                 var annotatedElse = this.Visit( node.Else )!;
@@ -722,7 +722,7 @@ namespace Caravela.Framework.Impl.Templating
 
             StatementSyntax annotatedStatement;
 
-            using ( this.WithScopeContext( ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, forEachScope ) ) )
+            using ( this.WithScopeContext( ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, forEachScope, $"foreach ( {node.Type} {node.Identifier} in ... )" ) ) )
             {
                 annotatedStatement = this.Visit( node.Statement )!;
             }
@@ -1027,7 +1027,7 @@ namespace Caravela.Framework.Impl.Templating
                     this.ReportDiagnostic(
                         TemplatingDiagnosticDescriptors.CannotSetCompileTimeVariableInRunTimeConditionalBlock,
                         operand,
-                        operand.ToString() );
+                        (operand.ToString(), this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
                 }
             }
 
@@ -1052,7 +1052,7 @@ namespace Caravela.Framework.Impl.Templating
                     this.ReportDiagnostic(
                         TemplatingDiagnosticDescriptors.CannotSetCompileTimeVariableInRunTimeConditionalBlock,
                         node.Left,
-                        node.Left.ToString() );
+                        (node.Left.ToString(), this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
                 }
 
                 // The right part must be compile-time.
@@ -1130,7 +1130,7 @@ namespace Caravela.Framework.Impl.Templating
 
             StatementSyntax transformedStatement;
 
-            using ( this.WithScopeContext( ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, SymbolDeclarationScope.RunTimeOnly ) ) )
+            using ( this.WithScopeContext( ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, SymbolDeclarationScope.RunTimeOnly, $"for ( {node.Initializers}; ... )" ) ) )
             {
                 transformedStatement = this.Visit( node.Statement )!;
             }
@@ -1159,7 +1159,7 @@ namespace Caravela.Framework.Impl.Templating
 
             StatementSyntax annotatedStatement;
 
-            using ( this.WithScopeContext( ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, conditionScope ) ) )
+            using ( this.WithScopeContext( ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, conditionScope, $"while ( {node.Condition} )" ) ) )
             {
                 annotatedStatement = this.Visit( node.Statement )!;
             }
@@ -1340,6 +1340,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             var transformedSections = new SwitchSectionSyntax[node.Sections.Count];
+            var switchReason = $"switch ( {node.Expression} )";
 
             for ( var i = 0; i < node.Sections.Count; i++ )
             {
@@ -1360,7 +1361,7 @@ namespace Caravela.Framework.Impl.Templating
                     this.RequireScope( transformedLabels, expressionScope, compileTimeReason );
                 }
 
-                using ( this.WithScopeContext( ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, expressionScope ) ) )
+                using ( this.WithScopeContext( ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, expressionScope, switchReason ) ) )
                 {
                     transformedStatements = section.Statements.Select( s => this.Visit( s )! ).ToArray();
                 }
@@ -1466,7 +1467,7 @@ namespace Caravela.Framework.Impl.Templating
                 this.ReportDiagnostic(
                     TemplatingDiagnosticDescriptors.CannotHaveCompileTimeLoopInRunTimeConditionalBlock,
                     nodeForDiagnostic,
-                    statementName );
+                    (statementName, this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
             }
         }
 
@@ -1614,7 +1615,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var @catch = node.Catches[i];
 
-                using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalScope( this._currentScopeContext ) ) )
+                using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalScope( this._currentScopeContext, "catch" ) ) )
                 {
                     var annotatedCatch = this.Visit( @catch )!;
                     annotatedCatches[i] = annotatedCatch;
@@ -1625,7 +1626,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( node.Finally != null )
             {
-                using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalScope( this._currentScopeContext ) ) )
+                using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalScope( this._currentScopeContext, "finally" ) ) )
                 {
                     annotatedFinally = this.Visit( node.Finally )!;
                 }
