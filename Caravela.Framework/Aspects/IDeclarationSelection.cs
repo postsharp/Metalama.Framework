@@ -41,7 +41,7 @@ namespace Caravela.Framework.Aspects
         /// is not present, this method adds a new instance of the aspect (if any) by using the default aspect constructor.
         /// </summary>
         /// <remarks>
-        /// <para>Calling this method causes the current aspect to be present in the <see cref="IAspectBuilder.UpstreamAspects"/> list
+        /// <para>Calling this method causes the current aspect to be present in the <see cref="IAspectLayerBuilder.UpstreamAspects"/> list
         /// even if the required aspect was already present on the target declaration.</para>
         /// </remarks>
         /// <param name="target">The target declaration. It must be contained in the current type.</param>
