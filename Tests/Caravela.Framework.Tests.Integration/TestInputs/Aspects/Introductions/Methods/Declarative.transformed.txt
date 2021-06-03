@@ -1,3 +1,4 @@
+
 [TestOutput]
 [Introduction]
 internal class TargetClass
@@ -18,7 +19,7 @@ internal class TargetClass
 
     public global::System.Int32 IntroducedMethod_Param(global::System.Int32 x)
     {
-        global::System.Console.WriteLine("This is introduced method.");
+        global::System.Console.WriteLine($"This is introduced method, x = {x}.");
         return default(global::System.Int32);
     }
 
@@ -34,3 +35,4 @@ internal class TargetClass
         return default(global::System.Int32);
     }
 }
+

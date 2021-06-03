@@ -186,7 +186,10 @@ class TargetCode
             RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression() );
 
             AssertEx.DynamicEquals( property.Invokers.Final.GetValue( thisExpression ), @"((global::TargetCode)(this)).P" );
-            AssertEx.DynamicEquals( property.Invokers.Final.GetValue( property.Invokers.Final.GetValue( thisExpression ) ), @"((global::TargetCode)(this)).P.P" );
+
+            AssertEx.DynamicEquals(
+                property.Invokers.Final.GetValue( property.Invokers.Final.GetValue( thisExpression ) ),
+                @"((global::TargetCode)(this)).P.P" );
         }
 
         [Fact]

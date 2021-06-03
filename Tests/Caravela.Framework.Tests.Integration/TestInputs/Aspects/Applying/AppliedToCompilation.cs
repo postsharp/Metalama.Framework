@@ -8,7 +8,13 @@ using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Applying.AppliedToCompilation
 {
-    public class MyAspect : Attribute, IAspect<ICompilation> { }
+    public class MyAspect : Attribute, IAspect<ICompilation> 
+    { 
+        public void BuildAspect( IAspectBuilder<ICompilation> builder )
+        {
+            throw new Exception("Oops");
+        }
+    }
 
 
     [TestOutput]

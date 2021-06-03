@@ -314,6 +314,14 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     return this.MetaSyntaxFactory.IdentifierName1( IdentifierName( declaredSymbolNameLocal.Text ) );
                 }
+                else if ( identifierSymbol is IParameterSymbol parameterSymbol
+                          && SymbolEqualityComparer.Default.Equals( parameterSymbol.ContainingSymbol, this._rootTemplateSymbol ) )
+                {
+                    // We have a reference to a template parameter. Currently, only introductions can have template parameters, and these don't need
+                    // to be renamed.
+
+                    return base.TransformIdentifierName( node );
+                }
                 else
                 {
                     // That should not happen in a correct compilation because IdentifierName is used only for an identifier reference, not an identifier definition.
