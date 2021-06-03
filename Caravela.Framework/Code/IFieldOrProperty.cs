@@ -45,7 +45,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets an object that allows to get or set the value of the current field or property.
         /// </summary>
-        IInvokerFactory<IFieldOrPropertyInvoker> Invoker { get; }
+        IInvokerFactory<IFieldOrPropertyInvoker> Invokers { get; }
 
         /// <summary>
         /// Gets a <see cref="FieldOrPropertyInfo"/> that represents the current field or property at run time.

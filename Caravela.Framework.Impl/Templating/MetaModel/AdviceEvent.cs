@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         [Memo]
         public IAdviceMethod? Raiser => this.Underlying.Raiser != null ? new AdviceMethod( this.Underlying.Raiser ) : null;
 
-        public IInvokerFactory<IEventInvoker> Invoker => this.Underlying.Invoker;
+        public IInvokerFactory<IEventInvoker> Invokers => this.Underlying.Invokers;
 
         IMethod IEvent.Adder => this.Adder;
 

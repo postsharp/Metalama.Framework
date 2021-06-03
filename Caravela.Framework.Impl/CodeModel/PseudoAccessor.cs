@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsOpenGeneric => this._containingMember.DeclaringType.IsOpenGeneric;
 
         [Memo]
-        public IInvokerFactory<IMethodInvoker> Invoker => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ) );
+        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ) );
 
         public IMethod? OverriddenMethod => null;
 

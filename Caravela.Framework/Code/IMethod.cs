@@ -48,7 +48,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets an object that allows to invoke the current method.
         /// </summary>
-        IInvokerFactory<IMethodInvoker> Invoker { get; }
+        IInvokerFactory<IMethodInvoker> Invokers { get; }
 
         /// <summary>
         /// Gets the base method that is overridden by the current method.

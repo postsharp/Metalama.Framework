@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IInvokerFactory<IFieldOrPropertyInvoker> Invoker
+        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
             => new InvokerFactory<IFieldOrPropertyInvoker>( order => new FieldOrPropertyInvoker( this, order ) );
 
         [Memo]

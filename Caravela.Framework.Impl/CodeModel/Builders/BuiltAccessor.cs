@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
 
         [Memo]
-        public IInvokerFactory<IMethodInvoker> Invoker => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), false );
+        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), false );
 
         public IMethod? OverriddenMethod => throw new NotImplementedException();
 

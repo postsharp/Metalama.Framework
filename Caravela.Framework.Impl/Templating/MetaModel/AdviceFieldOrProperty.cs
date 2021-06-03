@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public bool IsAutoPropertyOrField => this.Underlying.IsAutoPropertyOrField;
 
-        public IInvokerFactory<IFieldOrPropertyInvoker> Invoker => this.Underlying.Invoker;
+        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers => this.Underlying.Invokers;
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.Underlying.ToFieldOrPropertyInfo();
 
@@ -31,12 +31,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         {
             get
             {
-                if ( this.Invoker.Base == null )
+                if ( this.Invokers.Base == null )
                 {
                     throw new InvalidOperationException( "Cannot get or set the base value because there is no base property or field." );
                 }
 
-                return this.Invoker.Base.GetValue( this.This );
+                return this.Invokers.Base.GetValue( this.This );
             }
             set => throw new NotSupportedException();
         }

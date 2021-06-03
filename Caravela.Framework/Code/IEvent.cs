@@ -41,7 +41,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets an object that allows to add or remove a handler to or from the current event. 
         /// </summary>
-        IInvokerFactory<IEventInvoker> Invoker { get; }
+        IInvokerFactory<IEventInvoker> Invokers { get; }
 
         /// <summary>
         /// Gets a list of interface events this event explicitly implements.

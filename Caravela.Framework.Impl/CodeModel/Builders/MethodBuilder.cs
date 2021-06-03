@@ -8,6 +8,7 @@ using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -25,8 +26,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public GenericParameterBuilderList GenericParameters { get; } = new();
 
-        IInvokerFactory<IMethodInvoker> IMethod.Invoker
-            => throw new NotSupportedException( "Invokers are supported in build declarations but not in builders." );
+        [Memo]
+        public IInvokerFactory<IMethodInvoker> Invokers
+            => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), false );
 
         public IMethod? OverriddenMethod { get; set; }
 

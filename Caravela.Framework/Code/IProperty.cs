@@ -32,6 +32,6 @@ namespace Caravela.Framework.Code
         [return: RunTimeOnly]
         PropertyInfo ToPropertyInfo();
 
-        new IInvokerFactory<IPropertyInvoker> Invoker { get; }
+        new IInvokerFactory<IPropertyInvoker> Invokers { get; }
     }
 }

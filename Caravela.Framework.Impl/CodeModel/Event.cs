@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IInvokerFactory<IEventInvoker> Invoker => new InvokerFactory<IEventInvoker>( order => new EventInvoker( this, order ) );
+        public IInvokerFactory<IEventInvoker> Invokers => new InvokerFactory<IEventInvoker>( order => new EventInvoker( this, order ) );
 
         [Memo]
         public IType EventType => this.Compilation.Factory.GetIType( this._symbol.Type );

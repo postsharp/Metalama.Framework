@@ -51,10 +51,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IMethod? Setter => this.PropertyBuilder.Setter != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.Setter ) : null;
 
-        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invoker => this.Invoker;
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 
         [Memo]
-        public IInvokerFactory<IPropertyInvoker> Invoker => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ), false );
+        public IInvokerFactory<IPropertyInvoker> Invokers => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ), false );
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => Array.Empty<IProperty>();

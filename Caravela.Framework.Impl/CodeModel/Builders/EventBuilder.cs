@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -48,7 +49,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethodBuilder? Raiser => null;
 
-        IInvokerFactory<IEventInvoker> IEvent.Invoker => throw new NotSupportedException( "Invokers are supported in build declarations but not in builders." );
+        [Memo]
+        public IInvokerFactory<IEventInvoker> Invokers => new InvokerFactory<IEventInvoker>( order => new EventInvoker( this, order ), false );
 
         [Memo]
         public override MemberDeclarationSyntax InsertPositionNode

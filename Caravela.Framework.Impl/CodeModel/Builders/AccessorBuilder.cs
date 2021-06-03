@@ -7,6 +7,7 @@ using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -50,8 +51,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsOpenGeneric => false;
 
-        IInvokerFactory<IMethodInvoker> IMethod.Invoker
-            => throw new NotSupportedException( "Invokers are supported in build declarations but not in builders." );
+        [Memo]
+        public IInvokerFactory<IMethodInvoker> Invokers
+            => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), false );
 
         public IMethod? OverriddenMethod => throw new NotImplementedException();
 

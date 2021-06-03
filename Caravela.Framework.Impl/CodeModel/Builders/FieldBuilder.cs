@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -25,8 +26,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod? Setter => throw new NotImplementedException();
 
-        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invoker
-            => throw new NotSupportedException( "Invokers are supported in build declarations but not in builders." );
+        [Memo]
+        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers => new InvokerFactory<IFieldOrPropertyInvoker>( order => new FieldOrPropertyInvoker( this, order ), false );
 
         IType IFieldOrProperty.Type => throw new NotImplementedException();
 

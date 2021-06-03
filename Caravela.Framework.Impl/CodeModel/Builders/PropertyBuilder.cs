@@ -56,12 +56,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethodBuilder? Setter { get; }
 
-        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invoker => this.Invoker;
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 
         IMethod? IFieldOrProperty.Setter => this.Setter;
 
         [Memo]
-        public IInvokerFactory<IPropertyInvoker> Invoker => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ) );
+        public IInvokerFactory<IPropertyInvoker> Invokers => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ), false );
 
         public AspectLinkerOptions? LinkerOptions { get; }
 
