@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Collections;
@@ -11,12 +12,10 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Editing;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using DeclarationKind = Caravela.Framework.Code.DeclarationKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -40,6 +39,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return new CompilationModel( prototype, introducedDeclarations );
         }
+
+        /// <summary>
+        /// Returns a shallow clone of the current compilation, but annotated with a given <see cref="AspectLayerId"/>.
+        /// </summary>
+        internal CompilationModel WithAspectLayerId( AspectLayerId aspectLayerId ) => new( this, aspectLayerId );
 
         internal ReflectionMapper ReflectionMapper { get; }
 
@@ -112,7 +116,18 @@ namespace Caravela.Framework.Impl.CodeModel
             this._allMemberAttributesByType = prototype._allMemberAttributesByType.AddRange( allAttributes, a => a.AttributeType );
         }
 
-        internal SyntaxGenerator SyntaxGenerator { get; } = LanguageServiceFactory.CSharpSyntaxGenerator;
+        private CompilationModel( CompilationModel prototype, AspectLayerId aspectLayerId )
+        {
+            this.AspectLayerId = aspectLayerId;
+            this.Revision = prototype.Revision + 1;
+            this.PartialCompilation = prototype.PartialCompilation;
+            this.ReflectionMapper = prototype.ReflectionMapper;
+            this.InvariantComparer = prototype.InvariantComparer;
+            this._transformations = prototype._transformations;
+            this.Factory = new DeclarationFactory( this );
+            this._depthsCache = prototype._depthsCache;
+            this._allMemberAttributesByType = prototype._allMemberAttributesByType;
+        }
 
         public int Revision { get; }
 
@@ -251,5 +266,10 @@ namespace Caravela.Framework.Impl.CodeModel
         IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => null;
 
         public string? Name => this.RoslynCompilation.AssemblyName;
+
+        public AspectLayerId AspectLayerId
+        {
+            get;
+        }
     }
 }

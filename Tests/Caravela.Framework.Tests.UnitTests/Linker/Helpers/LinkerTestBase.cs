@@ -190,6 +190,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                     A.CallTo( () => ((IMemberIntroduction) observableTransformation).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
 
+                    // ReSharper disable SuspiciousTypeConversion.Global
+
                     // TODO: This should be a deep copy of declarations to have a correct parent.
                     A.CallTo( () => ((IMethod) observableTransformation).LocalFunctions ).Returns( symbolHelperElement.LocalFunctions );
                     A.CallTo( () => ((IMethod) observableTransformation).Parameters ).Returns( symbolHelperElement.Parameters );

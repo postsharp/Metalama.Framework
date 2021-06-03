@@ -3,7 +3,10 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -38,8 +41,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IType EventType { get; set; }
 
-        public IEventInvocation Base => throw new NotImplementedException();
-
         [Memo]
         public IMethodBuilder Adder => new AccessorBuilder( this, MethodKind.EventAdd );
 
@@ -47,6 +48,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethodBuilder Remover => new AccessorBuilder( this, MethodKind.EventRemove );
 
         public IMethodBuilder? Raiser => null;
+
+        [Memo]
+        public IInvokerFactory<IEventInvoker> Invokers => new InvokerFactory<IEventInvoker>( order => new EventInvoker( this, order ), false );
 
         [Memo]
         public override MemberDeclarationSyntax InsertPositionNode
@@ -67,7 +71,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = this.Compilation.SyntaxGenerator;
+            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
             var @event =
                 this._isEventField

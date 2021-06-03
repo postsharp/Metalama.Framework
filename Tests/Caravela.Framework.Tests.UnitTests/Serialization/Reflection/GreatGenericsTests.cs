@@ -191,7 +191,7 @@ class User {
                 expectedCode );
         }
 
-        private void TestSerializable<T>( string context, IFieldOrPropertyInvocation property, Action<T> withResult, string expectedCode )
+        private void TestSerializable<T>( string context, IFieldOrProperty property, Action<T> withResult, string expectedCode )
         {
             this.TestExpression<T>(
                 context,

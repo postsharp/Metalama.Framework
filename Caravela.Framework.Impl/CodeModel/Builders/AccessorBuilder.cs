@@ -3,7 +3,11 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -47,16 +51,16 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsOpenGeneric => false;
 
-        public bool HasBase => throw new NotImplementedException();
-
-        public IMethodInvocation Base => throw new NotImplementedException();
+        [Memo]
+        public IInvokerFactory<IMethodInvoker> Invokers
+            => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), false );
 
         public IMethod? OverriddenMethod => throw new NotImplementedException();
 
         // TODO: Local functions from templates will never be visible (which is probably only thing possible).
         public IMethodList LocalFunctions => MethodList.Empty;
 
-        IParameterList IMethodBase.Parameters => this.Parameters;
+        IParameterList IHasParameters.Parameters => this.Parameters;
 
         public ParameterBuilderList Parameters
             => (this._containingDeclaration, this.MethodKind) switch
@@ -143,11 +147,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
         {
             throw new NotSupportedException( "Cannot directly add parameters to accessors." );
-        }
-
-        public dynamic Invoke( dynamic? instance, params dynamic[] args )
-        {
-            throw new NotImplementedException();
         }
 
         public IMethod WithGenericArguments( params IType[] genericArguments )

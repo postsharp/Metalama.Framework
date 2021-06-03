@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code.Invokers;
 
 #pragma warning disable SA1623 // Property summary documentation should match accessors
 
@@ -10,7 +11,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// A base interface for <see cref="IField"/> and <see cref="IProperty"/>.
     /// </summary>
-    public interface IFieldOrProperty : IMember, IFieldOrPropertyInvocation
+    public interface IFieldOrProperty : IMember
     {
         /// <summary>
         /// Gets the field or property type.
@@ -42,15 +43,9 @@ namespace Caravela.Framework.Code
         bool IsAutoPropertyOrField { get; }
 
         /// <summary>
-        /// Determines if the property existed before the current aspect was advice
-        /// (<see langword="false" /> if it was introduced by the current aspect).
+        /// Gets an object that allows to get or set the value of the current field or property.
         /// </summary>
-        bool HasBase { get; }
-
-        /// <summary>
-        /// Allows invocation of the base property (<see langword="null" /> if the method was introduced by the current aspect).
-        /// </summary>
-        IFieldOrPropertyInvocation Base { get; }
+        IInvokerFactory<IFieldOrPropertyInvoker> Invokers { get; }
 
         /// <summary>
         /// Gets a <see cref="FieldOrPropertyInfo"/> that represents the current field or property at run time.

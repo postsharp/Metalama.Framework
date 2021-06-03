@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.Transformations
                     new LinkerOverrideMethodProceedImpl(
                         this.Advice.AspectLayerId,
                         this.OverriddenDeclaration,
-                        LinkerAnnotationOrder.Default,
+                        LinkingOrder.Default,
                         context.SyntaxFactory ),
                     context.LexicalScope,
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),

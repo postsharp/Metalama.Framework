@@ -44,6 +44,9 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        public static StatementSyntax? ToStatement( ExpressionSyntax? expression )
+            => expression == null ? null : SyntaxFactory.ExpressionStatement( expression );
+
         public static StatementSyntax[] ToStatementArray( List<StatementOrTrivia> list )
         {
             var statementList = new List<StatementSyntax>( list.Count );
@@ -114,17 +117,24 @@ namespace Caravela.Framework.Impl.Templating
         public static StatementSyntax TemplateReturnStatement( ExpressionSyntax? returnExpression )
             => ExpansionContext.CreateReturnStatement( returnExpression );
 
-        public static RuntimeExpression CreateDynamicMemberAccessExpression( IDynamicExpression dynamicExpression, string member )
+        public static RuntimeExpression? CreateDynamicMemberAccessExpression( IDynamicExpression dynamicExpression, string member )
         {
             if ( dynamicExpression is IDynamicReceiver dynamicMemberAccess )
             {
                 return dynamicMemberAccess.CreateMemberAccessExpression( member );
             }
 
+            var expression = dynamicExpression.CreateExpression();
+
+            if ( expression == null )
+            {
+                return null;
+            }
+
             return new RuntimeExpression(
                 SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    dynamicExpression.CreateExpression().Syntax,
+                    expression.Syntax,
                     SyntaxFactory.IdentifierName( member ) ) );
         }
 

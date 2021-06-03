@@ -300,7 +300,7 @@ dotnet_diagnostic.SA1615.severity = none
 dotnet_diagnostic.SA1616.severity = none
 
 # SA1201: Elements should appear in the correct order
-dotnet_diagnostic.SA1201.severity = suggestion
+dotnet_diagnostic.SA1201.severity = none
 
 # SA1601: Partial elements should be documented
 dotnet_diagnostic.SA1601.severity = none

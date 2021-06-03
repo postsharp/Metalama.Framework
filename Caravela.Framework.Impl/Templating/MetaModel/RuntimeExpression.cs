@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         /// </summary>
         /// <param name="runtimeExpression"></param>
         /// <returns></returns>
-        public static implicit operator ExpressionSyntax( RuntimeExpression runtimeExpression ) => runtimeExpression.Syntax;
+        public static implicit operator ExpressionSyntax?( RuntimeExpression? runtimeExpression ) => runtimeExpression?.Syntax;
 
         private ITypeSymbol? GetExpressionType( ITypeFactory typeFactory )
         {

@@ -13,12 +13,12 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Gets the aspect layer.
         /// </summary>
-        public AspectLayerId AspectLayer { get; }
+        public AspectLayerId AspectLayerId { get; }
 
         /// <summary>
         /// Gets a value indicating which version of the semantic must be invoked.
         /// </summary>
-        public LinkerAnnotationOrder Order { get; }
+        public LinkingOrder Order { get; }
 
         /// <summary>
         /// Gets a value indicating target kind. For example self or property get accessor.
@@ -26,11 +26,11 @@ namespace Caravela.Framework.Impl.Linking
         public LinkerAnnotationTargetKind TargetKind { get; }
 
         public LinkerAnnotation(
-            AspectLayerId aspectLayer,
-            LinkerAnnotationOrder order,
+            AspectLayerId aspectLayerId,
+            LinkingOrder order,
             LinkerAnnotationTargetKind targetKind = LinkerAnnotationTargetKind.Self )
         {
-            this.AspectLayer = aspectLayer;
+            this.AspectLayerId = aspectLayerId;
             this.Order = order;
             this.TargetKind = targetKind;
         }
@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             var parts = str.Split( '$' );
 
-            var parseSuccess1 = Enum.TryParse<LinkerAnnotationOrder>( parts[1], out var order );
+            var parseSuccess1 = Enum.TryParse<LinkingOrder>( parts[1], out var order );
 
             Invariant.Assert( parseSuccess1 );
 
@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public override string ToString()
         {
-            return $"{this.AspectLayer.FullName}${this.Order}${this.TargetKind}";
+            return $"{this.AspectLayerId.FullName}${this.Order}${this.TargetKind}";
         }
     }
 }

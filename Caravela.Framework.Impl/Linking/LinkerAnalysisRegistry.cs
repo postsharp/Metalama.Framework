@@ -209,7 +209,7 @@ namespace Caravela.Framework.Impl.Linking
             // TODO: Other things than methods.
             var overrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
             var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (o.AspectLayerId, Index: i) ).ToReadOnlyList();
-            var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceAnnotation.AspectLayer ).Index;
+            var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceAnnotation.AspectLayerId ).Index;
 
             // TODO: Optimize.
             var previousLayerOverride = (

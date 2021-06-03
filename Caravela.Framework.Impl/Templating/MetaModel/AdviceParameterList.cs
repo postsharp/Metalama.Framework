@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
+using Caravela.Framework.Aspects.AdvisedCode;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using System;
@@ -13,10 +13,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 {
     internal partial class AdviceParameterList : IAdviceParameterList, IAdviceParameterValueList
     {
-        private readonly IMethodBase _method;
+        private readonly IHasParameters _method;
         private readonly AdviceParameter[] _parameters;
 
-        public AdviceParameterList( IMethodBase method )
+        public AdviceParameterList( IHasParameters method )
         {
             this._method = method;
             this._parameters = method.Parameters.Select( p => new AdviceParameter( p ) ).ToArray();

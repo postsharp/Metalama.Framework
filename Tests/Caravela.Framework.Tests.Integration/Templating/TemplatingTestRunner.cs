@@ -227,6 +227,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 throw new InvalidOperationException( "The symbol of the target method was not found." );
             }
 
+            // ReSharper disable once SuspiciousTypeConversion.Global
             var lexicalScope = new TemplateLexicalScope( ((Declaration) targetMethod).LookupSymbols() );
 
             var metaApi = MetaApi.ForMethod(
@@ -244,7 +245,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 new LinkerOverrideMethodProceedImpl(
                     default,
                     targetMethod,
-                    LinkerAnnotationOrder.Default,
+                    LinkingOrder.Default,
                     compilation.Factory ),
                 lexicalScope,
                 this._syntaxSerializationService,

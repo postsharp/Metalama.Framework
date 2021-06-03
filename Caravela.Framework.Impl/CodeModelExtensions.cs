@@ -12,6 +12,8 @@ namespace Caravela.Framework.Impl
 {
     internal static class CodeModelExtensions
     {
+        public static CompilationModel GetCompilationModel( this IDeclaration declaration ) => (CompilationModel) declaration.Compilation;
+
         // TODO: should this be in the SDK?
         public static INamedTypeSymbol GetSymbol( this INamedType namedType )
         {

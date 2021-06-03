@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Types;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Serialization;
@@ -10,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -20,6 +22,8 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly ConcurrentDictionary<DeclarationRef<IDeclaration>, object> _cache =
             new( DeclarationRefEqualityComparer<DeclarationRef<IDeclaration>>.Instance );
+
+        private IType? _voidType;
 
         public DeclarationFactory( CompilationModel compilation )
         {
@@ -119,6 +123,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IPointerType ITypeFactory.MakePointerType( IType pointedType )
             => (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ITypeInternal) pointedType).TypeSymbol.AssertNotNull() ) );
+
+        public IType GetSpecialType( SpecialType specialType )
+            => specialType switch
+            {
+                SpecialType.Void => this._voidType ??= this.GetTypeByReflectionType( typeof(void) ),
+                _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
+            };
 
         internal IAttribute GetAttribute( AttributeBuilder attributeBuilder )
             => (IAttribute) this._cache.GetOrAdd(
