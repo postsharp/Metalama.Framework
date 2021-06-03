@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Types;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Serialization;
@@ -127,7 +128,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => specialType switch
             {
                 SpecialType.Void => this._voidType ??= this.GetTypeByReflectionType( typeof(void) ),
-                _ => throw new ArgumentOutOfRangeException( nameof(specialType) ),
+                _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
             };
 
         internal IAttribute GetAttribute( AttributeBuilder attributeBuilder )

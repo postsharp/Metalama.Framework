@@ -2,8 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -61,11 +66,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
 
-        public IMethodInvoker? BaseInvoker => throw new NotImplementedException();
+        [Memo]
+        public IMethodInvoker? BaseInvoker => new MethodInvoker( this, InvokerOrder.Base );
 
-        public IMethodInvoker Invoker => throw new NotImplementedException();
-
-        public IMethodInvoker Base => throw new NotImplementedException();
+        [Memo]
+        public IMethodInvoker Invoker => new MethodInvoker( this, InvokerOrder.Default );
 
         public IMethod? OverriddenMethod => throw new NotImplementedException();
 

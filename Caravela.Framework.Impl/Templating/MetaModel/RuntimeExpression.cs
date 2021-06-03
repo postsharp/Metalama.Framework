@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     {
         private readonly string? _expressionTypeName;
         private ITypeSymbol? _expressionType;
-        
+
         /// <summary>
         /// Gets a value indicating whether it is legal to use the <c>out</c> or <c>ref</c> argument modifier with this expression.
         /// </summary>

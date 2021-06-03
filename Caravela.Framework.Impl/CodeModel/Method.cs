@@ -2,7 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.ReflectionMocks;
@@ -53,10 +56,10 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IMethodInvoker? BaseInvoker => new MethodInvoker( this, LinkingOrder.Original );
+        public IMethodInvoker? BaseInvoker => new MethodInvoker( this, InvokerOrder.Base );
 
         [Memo]
-        public IMethodInvoker Invoker => new MethodInvoker( this, LinkingOrder.Default );
+        public IMethodInvoker Invoker => new MethodInvoker( this, InvokerOrder.Default );
 
         public override bool IsReadOnly => this.MethodSymbol.IsReadOnly;
 

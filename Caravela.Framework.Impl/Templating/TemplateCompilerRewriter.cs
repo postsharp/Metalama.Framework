@@ -565,11 +565,11 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
         }
-        
+
         protected override ExpressionSyntax TransformExpressionStatement( ExpressionStatementSyntax node )
         {
             var expression = this.Transform( node.Expression );
-            
+
             var toArrayStatementExpression = InvocationExpression(
                 this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ToStatement) ),
                 ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );

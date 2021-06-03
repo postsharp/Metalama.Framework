@@ -3,6 +3,8 @@
 
 using Caravela.Framework.Aspects.AdvisedCode;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using System.Collections.Generic;
 using System.Reflection;
 

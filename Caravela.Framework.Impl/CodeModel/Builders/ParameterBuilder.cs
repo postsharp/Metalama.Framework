@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Reflection;

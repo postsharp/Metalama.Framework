@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code.Invokers;
 
 #pragma warning disable SA1623 // Property summary documentation should match accessors
 

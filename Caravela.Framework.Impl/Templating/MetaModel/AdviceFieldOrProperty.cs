@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects.AdvisedCode;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Invokers;
 using System;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel

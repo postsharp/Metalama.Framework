@@ -3,6 +3,8 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;

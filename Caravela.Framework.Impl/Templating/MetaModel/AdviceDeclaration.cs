@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Diagnostics;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel

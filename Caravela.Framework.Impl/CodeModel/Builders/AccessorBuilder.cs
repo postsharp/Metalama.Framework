@@ -3,6 +3,9 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using System;
 using System.Collections.Generic;

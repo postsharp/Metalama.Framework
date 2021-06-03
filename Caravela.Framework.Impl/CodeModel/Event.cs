@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Invokers;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
@@ -23,10 +25,10 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IEventInvoker Invoker => new EventInvoker( this, LinkingOrder.Default );
+        public IEventInvoker Invoker => new EventInvoker( this, InvokerOrder.Default );
 
         [Memo]
-        public IEventInvoker BaseInvoker => new EventInvoker( this, LinkingOrder.Original );
+        public IEventInvoker BaseInvoker => new EventInvoker( this, InvokerOrder.Base );
 
         [Memo]
         public IType EventType => this.Compilation.Factory.GetIType( this._symbol.Type );

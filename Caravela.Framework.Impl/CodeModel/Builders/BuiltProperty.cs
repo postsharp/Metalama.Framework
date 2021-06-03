@@ -3,8 +3,13 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -49,9 +54,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IMethod? Setter => this.PropertyBuilder.Setter != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.Setter ) : null;
 
-        public IFieldOrPropertyInvoker? BaseInvoker => throw new NotImplementedException();
+        [Memo]
+        public IFieldOrPropertyInvoker? BaseInvoker => new PropertyInvoker( this, InvokerOrder.Base );
 
-        IPropertyInvoker IProperty.Invoker => throw new NotImplementedException();
+        [Memo]
+        IPropertyInvoker IProperty.Invoker => new PropertyInvoker( this, InvokerOrder.Default );
 
         public IFieldOrPropertyInvoker Invoker => throw new NotImplementedException();
 

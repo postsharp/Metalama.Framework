@@ -2,7 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
@@ -26,10 +29,10 @@ namespace Caravela.Framework.Impl.CodeModel
         IFieldOrPropertyInvoker IFieldOrProperty.Invoker => this.Invoker;
 
         [Memo]
-        public IPropertyInvoker Invoker => new PropertyInvoker( this, LinkingOrder.Default );
+        public IPropertyInvoker Invoker => new PropertyInvoker( this, InvokerOrder.Default );
 
         [Memo]
-        public IPropertyInvoker BaseInvoker => new PropertyInvoker( this, LinkingOrder.Original );
+        public IPropertyInvoker BaseInvoker => new PropertyInvoker( this, InvokerOrder.Base );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 

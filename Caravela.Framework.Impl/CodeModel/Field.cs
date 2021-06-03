@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Invokers;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
@@ -23,10 +25,10 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IFieldOrPropertyInvoker? BaseInvoker => new FieldOrPropertyInvoker( this, LinkingOrder.Original );
+        public IFieldOrPropertyInvoker? BaseInvoker => new FieldOrPropertyInvoker( this, InvokerOrder.Base );
 
         [Memo]
-        public IFieldOrPropertyInvoker Invoker => new FieldOrPropertyInvoker( this, LinkingOrder.Default );
+        public IFieldOrPropertyInvoker Invoker => new FieldOrPropertyInvoker( this, InvokerOrder.Default );
 
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
