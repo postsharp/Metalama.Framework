@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
@@ -25,7 +25,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
         [Introduce]
         public int IntroducedMethod_Param(int x)
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine($"This is introduced method, x = {x}.");
             return meta.Proceed();
         }
 
