@@ -14,8 +14,6 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         public bool IsSealed => this.Symbol.IsSealed;
 
-        public abstract bool IsReadOnly { get; }
-
         public bool IsNew
         {
             get

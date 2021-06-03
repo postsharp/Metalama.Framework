@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -84,14 +85,14 @@ namespace Caravela.Framework.Impl.Linking
                 return Enumerable.Empty<LinkerIntroducedMember>();
             }
 
-            public IEnumerable<BaseTypeSyntax> GetIntroducedInterfacesForTypeDecl( BaseTypeDeclarationSyntax typeDeclaration )
+            public IReadOnlyList<BaseTypeSyntax> GetIntroducedInterfacesForTypeDecl( BaseTypeDeclarationSyntax typeDeclaration )
             {
                 if ( this._introducedInterfacesByTargetTypeDecl.TryGetValue( typeDeclaration, out var interfaceList ) )
                 {
                     return interfaceList;
                 }
 
-                return Enumerable.Empty<BaseTypeSyntax>();
+                return Array.Empty<BaseTypeSyntax>();
             }
         }
     }

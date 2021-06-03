@@ -32,6 +32,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public AspectLinkerOptions? LinkerOptions { get; }
 
+        public Writeability Writeability => throw new NotImplementedException();
+
+        public bool IsAutoPropertyOrField => throw new NotImplementedException();
+
         public FieldBuilder( Advice parentAdvice, INamedType targetType, string name, AspectLinkerOptions? linkerOptions )
             : base( parentAdvice, targetType, name )
         {

@@ -34,11 +34,21 @@ namespace Caravela.Framework.Impl.CodeModel
         public IMethod? Getter => new PseudoAccessor( this, AccessorSemantic.Get );
 
         [Memo]
-        public IMethod? Setter => new PseudoAccessor( this, AccessorSemantic.Set );
+        public IMethod? Setter => this.Writeability != Writeability.None ? new PseudoAccessor( this, AccessorSemantic.Set ) : null;
+
+        // TODO: Memo does not work here.
+        // [Memo]
+        public Writeability Writeability
+            => this._symbol switch
+            {
+                { IsConst: true } => Writeability.None,
+                { IsReadOnly: true } => Writeability.ConstructorOnly,
+                _ => Writeability.All
+            };
+
+        public bool IsAutoPropertyOrField => true;
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
-
-        public override bool IsReadOnly => this._symbol.IsReadOnly;
 
         public override bool IsAsync => false;
 

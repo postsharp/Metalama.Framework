@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         [Memo]
         public override MemberDeclarationSyntax InsertPositionNode
-            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
+            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 

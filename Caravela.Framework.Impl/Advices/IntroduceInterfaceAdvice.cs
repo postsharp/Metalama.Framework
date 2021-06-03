@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Advices
         private readonly IReadOnlyDictionary<IMember, IMember>? _explicitMemberMap;
         private readonly Dictionary<IMember, IMember>? _implicitMemberMap;
 
-        public INamedType InterfaceType { get; }
+        private INamedType InterfaceType { get; }
 
         public bool IsExplicit { get; }
 
@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.Advices
             }
         }
 
-        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
             if ( this._explicitMemberMap == null )
             {
@@ -60,11 +60,11 @@ namespace Caravela.Framework.Impl.Advices
                     var introductionAdvice = declarativeAdvices
                         .OfType<IntroduceMethodAdvice>()
                         .SingleOrDefault(
-                            x =>
-                                x.Builder.Name == interfaceMethod.Name
-                                && x.Builder.GenericParameters.Count == interfaceMethod.GenericParameters.Count
-                                && x.Builder.Parameters.Count == interfaceMethod.Parameters.Count
-                                && x.Builder.Parameters
+                            a =>
+                                a.Builder.Name == interfaceMethod.Name
+                                && a.Builder.GenericParameters.Count == interfaceMethod.GenericParameters.Count
+                                && a.Builder.Parameters.Count == interfaceMethod.Parameters.Count
+                                && a.Builder.Parameters
                                     .Select( ( p, i ) => (p, i) )
                                     .All(
                                         xx =>
@@ -101,10 +101,10 @@ namespace Caravela.Framework.Impl.Advices
                     var introductionAdvice = declarativeAdvices
                         .OfType<IntroducePropertyAdvice>()
                         .SingleOrDefault(
-                            x =>
-                                x.Builder.Name == interfaceProperty.Name
-                                && x.Builder.Parameters.Count == interfaceProperty.Parameters.Count
-                                && x.Builder.Parameters
+                            a =>
+                                a.Builder.Name == interfaceProperty.Name
+                                && a.Builder.Parameters.Count == interfaceProperty.Parameters.Count
+                                && a.Builder.Parameters
                                     .Select( ( p, i ) => (p, i) )
                                     .All(
                                         xx =>

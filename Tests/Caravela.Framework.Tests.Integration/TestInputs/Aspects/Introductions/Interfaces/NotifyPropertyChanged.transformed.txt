@@ -6,6 +6,11 @@ class Car
     double _power;
     public string? Make
     {
+        get
+        {
+            return _make;
+        }
+
         set
         {
             var value = value;
@@ -21,6 +26,11 @@ class Car
     }
     public double Power
     {
+        get
+        {
+            return _power;
+        }
+
         set
         {
             var value = value;

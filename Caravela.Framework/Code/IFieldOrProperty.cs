@@ -33,6 +33,16 @@ namespace Caravela.Framework.Code
         IMethod? Setter { get; }
 
         /// <summary>
+        /// Gets writeability of the field or property, i.e. the situations in which the field or property can be written.
+        /// </summary>
+        Writeability Writeability { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the declaration is an auto-property or a field.
+        /// </summary>
+        bool IsAutoPropertyOrField { get; }
+
+        /// <summary>
         /// Gets an object that allows to get or set the value of the current field or property.
         /// </summary>
         IInvokerFactory<IFieldOrPropertyInvoker> Invoker { get; }

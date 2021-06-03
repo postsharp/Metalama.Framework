@@ -42,10 +42,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
         // TODO: pseudo-accessors
         [Memo]
-        public IMethod? Getter => null;
+        public IMethod? Getter => new PseudoAccessor( this, AccessorSemantic.Get );
 
         [Memo]
-        public IMethod? Setter => null;
+        public IMethod? Setter => new PseudoAccessor( this, AccessorSemantic.Set );
 
         public PropertyInfo ToPropertyInfo() => throw new NotImplementedException();
 
@@ -53,15 +53,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
         RefKind IProperty.RefKind => RefKind.None;
 
-        bool IProperty.IsByRef => false;
+        public bool IsAutoPropertyOrField => true;
 
-        bool IProperty.IsRef => false;
-
-        bool IProperty.IsRefReadonly => false;
+        public Writeability Writeability => this._symbol.IsReadOnly ? Writeability.ConstructorOnly : Writeability.All;
 
         IParameterList IHasParameters.Parameters => ParameterList.Empty;
-
-        public override bool IsReadOnly => this._symbol.IsReadOnly;
 
         public override bool IsAsync => false;
 

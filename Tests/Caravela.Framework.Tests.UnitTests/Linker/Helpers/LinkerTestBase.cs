@@ -17,6 +17,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+// ReSharper disable SuspiciousTypeConversion.Global
+
 namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 {
     // Aspect linker tests' source use [PseudoIntroduction] and [PseudoOverride] attributes, that cause the marked declaration to be removed
