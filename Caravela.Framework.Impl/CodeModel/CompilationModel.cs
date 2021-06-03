@@ -68,9 +68,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
             this.Factory = new DeclarationFactory( this );
 
-            // TODO: Move this to a virtual/lazy method because this should not be done for a partial model.
-
-            var allDeclarations = this.PartialCompilation.Types.SelectManyRecursive<ISymbol>( s => s.GetContainedSymbols(), includeFirstLevel: true );
+            var allDeclarations =
+                this.PartialCompilation.Types.SelectManyRecursive<ISymbol>( s => s.GetContainedSymbols(), includeFirstLevel: true )
+                    .Concat( new[] { (ISymbol) this.PartialCompilation.Compilation.Assembly, this.PartialCompilation.Compilation.SourceModule } );
 
             var allAttributes = allDeclarations.SelectMany( c => c.GetAllAttributes() );
 
