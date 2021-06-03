@@ -27,7 +27,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethod? Setter => throw new NotImplementedException();
 
         [Memo]
-        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers => new InvokerFactory<IFieldOrPropertyInvoker>( order => new FieldOrPropertyInvoker( this, order ), false );
+        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
+            => new InvokerFactory<IFieldOrPropertyInvoker>( order => new FieldOrPropertyInvoker( this, order ), false );
 
         IType IFieldOrProperty.Type => throw new NotImplementedException();
 

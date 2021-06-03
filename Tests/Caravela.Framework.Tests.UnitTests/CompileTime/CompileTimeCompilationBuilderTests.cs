@@ -442,7 +442,7 @@ public class CompileTimeOnlyClass
    static Type Type1 = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.CreateFromDocumentationId(""T:RunTimeOnlyClass"",""RunTimeOnlyClass"");
    static Type Type2 = typeof(CompileTimeOnlyClass);
    static string Name1 = ""RunTimeOnlyClass"";
-   static string Name2 = nameof(CompileTimeOnlyClass);
+   static string Name2 = ""CompileTimeOnlyClass"";
 
    void Method() { var t = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.CreateFromDocumentationId(""T:RunTimeOnlyClass"",""RunTimeOnlyClass""); }
    string Property => ""RunTimeOnlyClass"";
