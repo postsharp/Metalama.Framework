@@ -16,7 +16,6 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         
         public void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            // This does not work yet.
             builder.AdviceFactory.IntroduceInterface(builder.TargetDeclaration, typeof(INotifyPropertyChanged));
             foreach ( var property in builder.TargetDeclaration.Properties
                 .Where( p => p.Accessibility == Accessibility.Public && p.Writeability == Writeability.All ) )
