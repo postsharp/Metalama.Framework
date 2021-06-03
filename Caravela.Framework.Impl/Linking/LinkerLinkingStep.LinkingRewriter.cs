@@ -263,6 +263,8 @@ namespace Caravela.Framework.Impl.Linking
                             transformedAccessors.Add(
                                 AccessorDeclaration(
                                     originalAccessor.Kind(),
+                                    List<AttributeListSyntax>(),
+                                    originalAccessor.Modifiers,
                                     this.GetRewrittenPropertyAccessorBody(
                                         semanticModel,
                                         accessorBodySource,

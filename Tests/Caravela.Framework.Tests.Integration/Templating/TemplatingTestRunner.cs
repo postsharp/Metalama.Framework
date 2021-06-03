@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Sdk;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
@@ -170,7 +171,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 var driver = new TemplateDriver( null!, templateMethod, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InitialCompilation );
-                var expansionContext = this.CreateTemplateExpansionContext( assembly, compilationModel );
+                var expansionContext = this.CreateTemplateExpansionContext( assembly, compilationModel, templateMethod );
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult, out var output );
 
@@ -197,7 +198,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             return testResult;
         }
 
-        private TemplateExpansionContext CreateTemplateExpansionContext( Assembly assembly, CompilationModel compilation )
+        private TemplateExpansionContext CreateTemplateExpansionContext( Assembly assembly, CompilationModel compilation, ISymbol templateMethod )
         {
             var roslynCompilation = compilation.RoslynCompilation;
 
@@ -228,9 +229,17 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             var lexicalScope = new TemplateLexicalScope( ((Declaration) targetMethod).LookupSymbols() );
 
+            var metaApi = MetaApi.ForMethod(
+                targetMethod,
+                new MetaApiProperties(
+                    diagnostics,
+                    templateMethod,
+                    ImmutableDictionary<string, object?>.Empty,
+                    default ) );
+
             return new TemplateExpansionContext(
                 templateInstance,
-                targetMethod,
+                metaApi,
                 compilation,
                 new LinkerOverrideMethodProceedImpl(
                     default,
@@ -238,11 +247,8 @@ namespace Caravela.Framework.Tests.Integration.Templating
                     LinkerAnnotationOrder.Default,
                     compilation.Factory ),
                 lexicalScope,
-                diagnostics,
                 this._syntaxSerializationService,
-                compilation.Factory,
-                default,
-                ImmutableDictionary<string, object?>.Empty );
+                compilation.Factory );
         }
     }
 }

@@ -42,7 +42,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         private int PrivateProperty { get; }
 
         [Override]
-        private int ProtectedProperty { get; }
+        protected int ProtectedProperty { get; }
 
         [Override]
         private protected int PrivateProtectedProperty { get; }

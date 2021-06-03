@@ -48,6 +48,21 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
 
         [Override]
+        private int PrivateProperty
+        {
+            get
+            {
+                Console.WriteLine("This is the original getter.");
+                return 42;
+            }
+
+            set
+            {
+                Console.WriteLine($"This is the original setter, setting {value}.");
+            }
+        }
+
+        [Override]
         public static int Static_Property
         {
             get
@@ -78,6 +93,21 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
 
         [Override]
+        protected int ProtectedRestrictedGetProperty
+        {
+            private get
+            {
+                Console.WriteLine("This is the original getter.");
+                return 42;
+            }
+
+            set
+            {
+                Console.WriteLine($"This is the original setter, setting {value}.");
+            }
+        }
+
+        [Override]
         public static int Static_RestrictedGetProperty
         {
             private get
@@ -94,6 +124,21 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
         [Override]
         public int RestrictedSetProperty
+        {
+            get
+            {
+                Console.WriteLine("This is the original getter.");
+                return 42;
+            }
+
+            private set
+            {
+                Console.WriteLine($"This is the original setter, setting {value}.");
+            }
+        }
+
+        [Override]
+        protected int ProtectedestrictedSetProperty
         {
             get
             {

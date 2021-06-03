@@ -166,7 +166,7 @@ namespace Caravela.Framework.Impl.Linking
                         // IMPORTANT: This need to be here and cannot be in introducedMember.Syntax, result of TrackNodes is not trackable!
                         var introducedNode = introducedMember.Syntax.TrackNodes( introducedMember.Syntax );
 
-                        introducedNode = introducedNode.NormalizeWhitespace();
+                        introducedNode = introducedNode.NormalizeWhitespace().WithLeadingTrivia( LineFeed, LineFeed );
 
                         if ( introducedMember.Declaration != null )
                         {

@@ -24,10 +24,6 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
             }
         }
 
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder)
-        {
-        }
-
         [Introduce]
         public event PropertyChangedEventHandler? PropertyChanged;
 

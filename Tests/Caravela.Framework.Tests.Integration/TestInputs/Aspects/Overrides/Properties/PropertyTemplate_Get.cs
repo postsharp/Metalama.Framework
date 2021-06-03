@@ -36,10 +36,23 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         public int ExpressionProperty => 42;
 
         [Override]
+        private int PrivateExpressionProperty => 42;
+
+        [Override]
         public static int Static_ExpressionProperty => 42;
 
         [Override]
         public int GetterProperty
+        {
+            get
+            {
+                Console.WriteLine("This is the original getter.");
+                return 42;
+            }
+        }
+
+        [Override]
+        private int PrivateGetterProperty
         {
             get
             {
@@ -60,6 +73,12 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
         [Override]
         public int GetterExpressionProperty
+        {
+            get => 42;
+        }
+
+        [Override]
+        private int PrivateGetterExpressionProperty
         {
             get => 42;
         }
