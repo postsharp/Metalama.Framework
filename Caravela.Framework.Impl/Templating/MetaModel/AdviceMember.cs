@@ -22,8 +22,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public bool IsSealed => this.Underlying.IsSealed;
 
-        public bool IsReadOnly => this.Underlying.IsReadOnly;
-
         public bool IsNew => this.Underlying.IsNew;
 
         public bool IsVirtual => this.Underlying.IsVirtual;

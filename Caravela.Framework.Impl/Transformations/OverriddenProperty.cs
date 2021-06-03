@@ -187,7 +187,7 @@ namespace Caravela.Framework.Impl.Transformations
                                     .AddLinkerAnnotation(
                                         new LinkerAnnotation(
                                             this.Advice.AspectLayerId,
-                                            LinkerAnnotationOrder.Default,
+                                            LinkingOrder.Default,
                                             LinkerAnnotationTargetKind.PropertySetAccessor ) ) ) );
 
                 case SyntaxKind.SetAccessorDeclaration:
@@ -201,7 +201,7 @@ namespace Caravela.Framework.Impl.Transformations
                                         .AddLinkerAnnotation(
                                             new LinkerAnnotation(
                                                 this.Advice.AspectLayerId,
-                                                LinkerAnnotationOrder.Default,
+                                                LinkingOrder.Default,
                                                 LinkerAnnotationTargetKind.PropertySetAccessor ) ),
                                     IdentifierName( "value" ) ) ) );
 

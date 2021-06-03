@@ -45,6 +45,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public MethodKind MethodKind => this.Underlying.MethodKind;
 
+        public bool IsReadOnly => this.Underlying.IsReadOnly;
+
         public MethodBase ToMethodBase() => this.Underlying.ToMethodBase();
 
         public IParameter ReturnParameter => this.Underlying.ReturnParameter;

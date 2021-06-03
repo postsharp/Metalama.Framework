@@ -16,12 +16,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public RefKind RefKind => this.Underlying.RefKind;
 
-        public bool IsByRef => this.Underlying.IsByRef;
-
-        public bool IsRef => this.Underlying.IsRef;
-
-        public bool IsRefReadonly => this.Underlying.IsRefReadonly;
-
         [Memo]
         public IAdviceParameterList Parameters => new AdviceParameterList( this.Underlying );
 

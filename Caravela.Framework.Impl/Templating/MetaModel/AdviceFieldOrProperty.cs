@@ -19,6 +19,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IMethod? Setter => this.Underlying.Setter;
 
+        public Writeability Writeability => this.Underlying.Writeability;
+
+        public bool IsAutoPropertyOrField => this.Underlying.IsAutoPropertyOrField;
+
         public IInvokerFactory<IFieldOrPropertyInvoker> Invoker => this.Underlying.Invoker;
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.Underlying.ToFieldOrPropertyInfo();
