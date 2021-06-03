@@ -6,7 +6,6 @@ using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using static Caravela.Framework.Diagnostics.Severity;
 
 namespace Caravela.Framework.Impl
@@ -113,7 +112,7 @@ namespace Caravela.Framework.Impl
             InvalidCompileTimeProjectResource = new(
                 "CR0030", _category, "The compile-time project in assembly '{0}' is corrupted.", Error,
                 "The compile-time project resource file was corrupted." );
-        
+
         public static readonly DiagnosticDefinition<(ISymbol TemplateMethod, ISymbol[] RunTimeOnlyTypes)>
             VirtualTemplateCannotReferenceRunTimeOnlyTypes = new(
                 "CR0031", _category, "The template '{0}' cannot be virtual because it references the following runtime-only types: {1}.", Error,
