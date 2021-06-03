@@ -20,11 +20,17 @@ namespace Caravela.Framework.Impl.Templating
         private const string _colorAnnotationKind = "color";
         private const string _templateAnnotationKind = "template";
         private const string _scopeMismatchKind = "scopeMismatch";
+        private const string _buildTimeAnnotationData = "buildTime";
+        private const string _runTimeAnnotationData = "runTime";
+        private const string _dynamicAnnotationData = "compileTimeDynamic";
+        private const string _runTimeDynamicAnnotationData = "runTimeDynamic";
+        private const string _unknownAnnotationData = "unknown";
 
-        private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( _scopeAnnotationKind, "buildTime" );
-        private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( _scopeAnnotationKind, "runTime" );
-        private static readonly SyntaxAnnotation _dynamicAnnotation = new( _scopeAnnotationKind, "dynamic" );
-        private static readonly SyntaxAnnotation _unknownAnnotation = new( _scopeAnnotationKind, "unknown" );
+        private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( _scopeAnnotationKind, _buildTimeAnnotationData );
+        private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( _scopeAnnotationKind, _runTimeAnnotationData );
+        private static readonly SyntaxAnnotation _compileTimeDynamicAnnotation = new( _scopeAnnotationKind, _dynamicAnnotationData );
+        private static readonly SyntaxAnnotation _runTimeDynamicAnnotation = new( _scopeAnnotationKind, _runTimeDynamicAnnotationData );
+        private static readonly SyntaxAnnotation _unknownAnnotation = new( _scopeAnnotationKind, _unknownAnnotationData );
         private static readonly SyntaxAnnotation _templateAnnotation = new( _templateAnnotationKind );
         private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new( _noIndentAnnotationKind );
         private static readonly SyntaxAnnotation _scopeMismatchAnnotation = new( _scopeMismatchKind );
@@ -50,16 +56,19 @@ namespace Caravela.Framework.Impl.Templating
 
             switch ( annotation.Data )
             {
-                case "buildTime":
+                case _buildTimeAnnotationData:
                     return SymbolDeclarationScope.CompileTimeOnly;
 
-                case "runTime":
+                case _runTimeAnnotationData:
                     return SymbolDeclarationScope.RunTimeOnly;
 
-                case "unknown":
+                case _unknownAnnotationData:
                     return SymbolDeclarationScope.Unknown;
 
-                case "dynamic":
+                case _dynamicAnnotationData:
+                    return SymbolDeclarationScope.CompileTimeDynamic;
+
+                case _runTimeDynamicAnnotationData:
                     return SymbolDeclarationScope.Dynamic;
 
                 default:
@@ -148,8 +157,11 @@ namespace Caravela.Framework.Impl.Templating
                 case SymbolDeclarationScope.Unknown:
                     return node.WithAdditionalAnnotations( _unknownAnnotation );
 
+                case SymbolDeclarationScope.CompileTimeDynamic:
+                    return node.WithAdditionalAnnotations( _compileTimeDynamicAnnotation );
+
                 case SymbolDeclarationScope.Dynamic:
-                    return node.WithAdditionalAnnotations( _dynamicAnnotation );
+                    return node.WithAdditionalAnnotations( _runTimeDynamicAnnotation );
 
                 default:
                     throw new AssertionFailedException();

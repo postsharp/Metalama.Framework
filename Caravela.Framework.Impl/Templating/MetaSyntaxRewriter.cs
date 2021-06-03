@@ -114,7 +114,7 @@ namespace Caravela.Framework.Impl.Templating
                         return this.TransformExpression( (ExpressionSyntax) this.Visit( expression ) );
 
                     case ArgumentSyntax argument:
-                        return this.TransformArgument( (ArgumentSyntax) this.Visit( argument ) );
+                        return this.TransformArgument( argument );
 
                     default:
                         throw new AssertionFailedException( $"Unexpected node kind: {node.Kind()}." );

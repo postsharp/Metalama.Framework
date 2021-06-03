@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.Templating
     {
         private class ScopeContext
         {
-            private readonly SymbolDeclarationScope _forcedScope;
+            private readonly SymbolDeclarationScope _preferredScope;
 
             public static ScopeContext Default => new( SymbolDeclarationScope.Both, false, null, SymbolDeclarationScope.Both, null );
 
@@ -18,9 +18,9 @@ namespace Caravela.Framework.Impl.Templating
             /// <summary>
             /// Gets a value indicating whether the current expression is obliged to be compile-time-only.
             /// </summary>
-            public bool ForceCompileTimeOnlyExpression => this._forcedScope == SymbolDeclarationScope.CompileTimeOnly;
+            public bool ForceCompileTimeOnlyExpression => this._preferredScope == SymbolDeclarationScope.CompileTimeOnly;
 
-            public bool PreferRunTimeExpression => this._forcedScope == SymbolDeclarationScope.RunTimeOnly;
+            public bool PreferRunTimeExpression => this._preferredScope == SymbolDeclarationScope.RunTimeOnly;
 
             /// <summary>
             /// Gets a value indicating whether the current node is guarded by a conditional statement where the condition is a runtime-only
@@ -30,20 +30,20 @@ namespace Caravela.Framework.Impl.Templating
 
             public string? IsRuntimeConditionalBlockReason { get; }
 
-            public string? ForcedScopeReason { get; }
+            public string? PreferredScopeReason { get; }
 
             private ScopeContext(
                 SymbolDeclarationScope currentBreakOrContinueScope,
                 bool isRuntimeConditionalBlock,
                 string? isRuntimeConditionalBlockReason,
-                SymbolDeclarationScope forcedScope,
-                string? forcedScopeReason )
+                SymbolDeclarationScope preferredScope,
+                string? preferredScopeReason )
             {
                 this.CurrentBreakOrContinueScope = currentBreakOrContinueScope;
                 this.IsRuntimeConditionalBlock = isRuntimeConditionalBlock;
                 this.IsRuntimeConditionalBlockReason = isRuntimeConditionalBlockReason;
-                this._forcedScope = forcedScope;
-                this.ForcedScopeReason = forcedScopeReason;
+                this._preferredScope = preferredScope;
+                this.PreferredScopeReason = preferredScopeReason;
             }
 
             /// <summary>
@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.Templating
                 => new( parentScope.CurrentBreakOrContinueScope, parentScope.IsRuntimeConditionalBlock, parentScope.IsRuntimeConditionalBlockReason,
                         SymbolDeclarationScope.CompileTimeOnly, reason );
 
-            public static ScopeContext CreateForcedRunTimeScope( ScopeContext parentScope, string reason )
+            public static ScopeContext CreatePreferredRunTimeScope( ScopeContext parentScope, string reason )
                 => new( parentScope.CurrentBreakOrContinueScope, parentScope.IsRuntimeConditionalBlock, parentScope.IsRuntimeConditionalBlockReason,
                         SymbolDeclarationScope.RunTimeOnly, reason );
 
@@ -69,15 +69,15 @@ namespace Caravela.Framework.Impl.Templating
                     parentScope.CurrentBreakOrContinueScope,
                     true,
                     reason,
-                    parentScope._forcedScope,
-                    parentScope.ForcedScopeReason );
+                    parentScope._preferredScope,
+                    parentScope.PreferredScopeReason );
 
             public static ScopeContext CreateBreakOrContinueScope( ScopeContext parentScope, SymbolDeclarationScope scope, string reason )
                 => new( scope,
                         scope == SymbolDeclarationScope.RunTimeOnly || parentScope.IsRuntimeConditionalBlock,
                         reason,
-                        parentScope._forcedScope,
-                        parentScope.ForcedScopeReason );
+                        parentScope._preferredScope,
+                        parentScope.PreferredScopeReason );
         }
     }
 }

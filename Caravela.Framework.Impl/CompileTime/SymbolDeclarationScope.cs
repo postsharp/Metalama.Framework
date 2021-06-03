@@ -42,6 +42,11 @@ namespace Caravela.Framework.Impl.CompileTime
         /// value does not need to be of the <c>dynamic</c> itself. However, the member must be decorated with both
         /// <see cref="CompileTimeAttribute"/> (possibly inherited) and <see cref="RunTimeOnlyAttribute"/>.
         /// </summary>
+        CompileTimeDynamic,
+
+        /// <summary>
+        /// A member of a dynamic receiver.
+        /// </summary>
         Dynamic
     }
 }

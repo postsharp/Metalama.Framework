@@ -142,9 +142,12 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         protected override TransformationKind GetTransformationKind( SyntaxNode node )
         {
-            if ( !node.GetScopeFromAnnotation().MustBeTransformed() )
+            var scope = node.GetScopeFromAnnotation();
+
+            // Take a decision from the node if we can.
+            if ( scope != SymbolDeclarationScope.Both && scope != SymbolDeclarationScope.Unknown )
             {
-                return TransformationKind.None;
+                return scope.MustBeTransformed() ? TransformationKind.Transform : TransformationKind.None;
             }
 
             // Look for annotation on the parent, but stop at 'if' and 'foreach' statements,
@@ -435,7 +438,7 @@ namespace Caravela.Framework.Impl.Templating
                 return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
             }
 
-            switch ( type.Name )
+            switch ( type?.Name )
             {
                 case "dynamic":
                     if ( this._templateMemberClassifier.IsProceed( expression ) )
@@ -496,6 +499,9 @@ namespace Caravela.Framework.Impl.Templating
                                                         nameof(TemplateSyntaxFactory.BooleanKeyword) ) )
                                                 .AddArgumentListArguments( Argument( expression ) ) ) ) ),
                             Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateReferenceId( type ) ) ) ) );
+
+                case null:
+                    throw new AssertionFailedException( $"Cannot convert {expression} to a run-time value." );
 
                 default:
                     // Try to find a serializer for this type.
@@ -609,18 +615,38 @@ namespace Caravela.Framework.Impl.Templating
             if ( transformationKind != TransformationKind.Transform &&
                  node.ArgumentList.Arguments.Any( a => this._templateMemberClassifier.IsDynamicParameter( a ) ) )
             {
-                var transformedArguments = node.ArgumentList.Arguments.Select(
-                        a => this._templateMemberClassifier.IsDynamicParameter( a )
-                            ? Argument( this.CreateRunTimeExpression( a.Expression ) )
-                            : this.Visit( a )! )
-                    .ToArray();
+                // We are transforming a call to a compile-time method that accepts dynamic arguments.
+
+                SyntaxNode? TransformArgument( ArgumentSyntax a )
+                {
+                    if ( this._templateMemberClassifier.IsDynamicParameter( a ) )
+                    {
+                        if ( a.GetScopeFromAnnotation() != SymbolDeclarationScope.RunTimeOnly )
+                        {
+                            return Argument( this.CreateRunTimeExpression( a.Expression ) );
+                        }
+                        else
+                        {
+                            return Argument( (ExpressionSyntax) this.Visit( a.Expression )! );
+                        }
+                    }
+                    else
+                    {
+                        return this.Visit( a );
+                    }
+                }
+
+                var transformedArguments = node.ArgumentList.Arguments.Select( syntax => TransformArgument( syntax )! ).ToArray();
 
                 return node.Update(
                     (ExpressionSyntax) this.Visit( node.Expression )!,
                     ArgumentList( SeparatedList( transformedArguments )! ) );
             }
-
-            if ( this._templateMemberClassifier.IsProceed( node.Expression ) )
+            else if ( this._templateMemberClassifier.IsDynamicType( node.Expression ) )
+            {
+                // We are in an invocation like: `meta.This.Foo(...)`.
+            }
+            else if ( this._templateMemberClassifier.IsProceed( node.Expression ) )
             {
                 // We cannot call proceed in an unsupported statement.
                 this.Report( TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic( node.Expression.GetLocation(), "" ) );

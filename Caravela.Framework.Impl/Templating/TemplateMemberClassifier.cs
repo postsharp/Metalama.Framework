@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Templating
             this._metaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
         }
 
-        private bool IsCompileTime( ISymbol? symbol )
+        public bool IsCompileTime( ISymbol? symbol )
             => symbol != null && this._symbolClassifier.GetSymbolDeclarationScope( symbol ).DynamicToCompileTimeOnly()
                 == SymbolDeclarationScope.CompileTimeOnly;
 
@@ -41,10 +41,7 @@ namespace Caravela.Framework.Impl.Templating
         public bool IsDynamicType( ITypeSymbol? type ) => type is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
 #pragma warning restore CA1822
 
-        public bool IsDynamicParameter( ArgumentSyntax argument )
-            => this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type is
-                IDynamicTypeSymbol
-                or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
+        public bool IsDynamicParameter( ArgumentSyntax argument ) => this.IsDynamicType( this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type );
 
         public bool IsRunTimeMethod( ISymbol symbol )
             => symbol.Name == nameof(meta.RunTime) &&
@@ -61,16 +58,15 @@ namespace Caravela.Framework.Impl.Templating
         public bool IsDynamicType( SyntaxNode originalNode )
         {
             var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( originalNode );
-            var nodeSymbol = this._syntaxTreeAnnotationMap.GetSymbol( originalNode );
 
-            if ( !this.IsCompileTime( nodeSymbol ) )
+            if ( this.IsDynamicType( expressionType ) )
             {
-                // This may be a dynamic member, but a purely run-time one, and we are not interested in those.
-                return false;
+                return true;
             }
 
-            if ( this.IsDynamicType( expressionType ) ||
-                 (nodeSymbol is IMethodSymbol method && this.IsDynamicType( method.ReturnType )) ||
+            var nodeSymbol = this._syntaxTreeAnnotationMap.GetSymbol( originalNode );
+
+            if ( (nodeSymbol is IMethodSymbol method && this.IsDynamicType( method.ReturnType )) ||
                  (nodeSymbol is IPropertySymbol property && this.IsDynamicType( property.Type )) )
             {
                 return true;
@@ -163,5 +159,7 @@ namespace Caravela.Framework.Impl.Templating
                 return false;
             }
         }
+
+        public bool IsCompileTime( SyntaxNode node ) => this.IsCompileTime( this._syntaxTreeAnnotationMap.GetSymbol( node ) );
     }
 }
