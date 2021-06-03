@@ -70,7 +70,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;
 
-        public IDiagnosticSink Diagnostics => this._common.Diagnostics;
+        IDiagnosticSink IMetaApi.Diagnostics => this._common.Diagnostics;
+
+        public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
 
         private MetaApi( IDeclaration declaration, MetaApiProperties common )
         {
@@ -79,49 +81,36 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this._common = common;
         }
 
-        public MetaApi( IMethodBase methodBase, MetaApiProperties common ) : this(
+        private MetaApi( IMethodBase methodBase, MetaApiProperties common ) : this(
             (IDeclaration) methodBase,
             common )
         {
             this._methodBase = methodBase;
             this._type = methodBase.DeclaringType;
             this._parameters = new AdviceParameterList( methodBase );
-
-            switch ( methodBase.MethodKind )
-            {
-                case MethodKind.EventAdd:
-                case MethodKind.EventRemove:
-                case MethodKind.EventRaise:
-                    this._event = (IEvent) methodBase.ContainingDeclaration.AssertNotNull();
-
-                    break;
-
-                case MethodKind.PropertyGet:
-                case MethodKind.PropertySet:
-                    this._fieldOrProperty = (IProperty) methodBase.ContainingDeclaration.AssertNotNull();
-
-                    break;
-            }
         }
 
-        public MetaApi( IFieldOrProperty fieldOrProperty, MetaApiProperties common ) : this(
-            (IDeclaration) fieldOrProperty,
-            common )
+        private MetaApi( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
         {
+            this._methodBase = accessor;
             this._fieldOrProperty = fieldOrProperty;
             this._type = fieldOrProperty.DeclaringType;
-
-            // TODO: indexer parameters
+            this._parameters = new AdviceParameterList( accessor );
         }
 
-        public MetaApi( IEvent @event, MetaApiProperties common ) : this( (IDeclaration) @event, common )
+        private MetaApi( IEvent @event, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
         {
-            // TODO: if the method is a getter/setter/adder/remover, set the event or property.
-
             this._event = @event;
             this._type = @event.DeclaringType;
-
-            // TODO: event parameters
+            this._methodBase = accessor;
+            this._parameters = new AdviceParameterList( accessor );
         }
+
+        public static MetaApi ForMethod( IMethodBase methodBase, MetaApiProperties common ) => new( methodBase, common );
+
+        public static MetaApi ForFieldOrProperty( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common )
+            => new( fieldOrProperty, accessor, common );
+
+        public static MetaApi ForEvent( IEvent @event, IMethod accessor, MetaApiProperties common ) => new( @event, accessor, common );
     }
 }
