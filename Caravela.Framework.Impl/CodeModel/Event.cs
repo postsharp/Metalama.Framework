@@ -50,8 +50,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 
-        public override bool IsReadOnly => false;
-
         public override bool IsAsync => false;
 
         public override MemberInfo ToMemberInfo() => this.ToEventInfo();

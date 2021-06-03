@@ -37,11 +37,6 @@ namespace Caravela.Framework.Code
         bool IsSealed { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the member is <c>readonly</c>.
-        /// </summary>
-        bool IsReadOnly { get; }
-
-        /// <summary>
         /// Gets a value indicating whether the member is <c>new</c>.
         /// </summary>
         bool IsNew { get; }

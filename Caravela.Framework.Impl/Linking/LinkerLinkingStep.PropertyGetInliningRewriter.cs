@@ -144,15 +144,21 @@ namespace Caravela.Framework.Impl.Linking
 
                 // Create the top-most inlining rewriter for the called method.
                 var innerRewriter = new PropertyGetInliningRewriter( this.AnalysisRegistry, this.SemanticModel, calledProperty, returnVariableName, labelId );
-                var declaration = (AccessorDeclarationSyntax) calledProperty.GetMethod.AssertNotNull().DeclaringSyntaxReferences.Single().GetSyntax();
+                var declaration = calledProperty.GetMethod.AssertNotNull().DeclaringSyntaxReferences.Single().GetSyntax();
 
                 // Run the inlined method's body through the rewriter.
+                // TODO: Preserve trivias.
                 var rewrittenBlock =
                     declaration switch
                     {
-                        { Body: not null } => (BlockSyntax) innerRewriter.VisitBlock( declaration.Body ).AssertNotNull(),
-                        { ExpressionBody: not null } => (BlockSyntax) innerRewriter.Visit( Block( ReturnStatement( declaration.ExpressionBody.Expression ) ) )
-                            .AssertNotNull(),                  // TODO: Preserve trivia.
+                        AccessorDeclarationSyntax
+                            { Body: not null } accessorDecl => (BlockSyntax) innerRewriter.VisitBlock( accessorDecl.Body! ).AssertNotNull(),
+                        AccessorDeclarationSyntax { ExpressionBody: not null } accessorDecl
+                            => (BlockSyntax) innerRewriter.Visit( Block( ReturnStatement( accessorDecl.ExpressionBody!.Expression ) ) ).AssertNotNull(),
+                        ArrowExpressionClauseSyntax { Expression: not null } arrowExprClause
+                            => (BlockSyntax) innerRewriter.Visit( Block( ReturnStatement( arrowExprClause.Expression! ) ) ).AssertNotNull(),
+                        AccessorDeclarationSyntax _ when calledProperty.IsAbstract == false
+                            => Block( ReturnStatement( GetImplicitBackingFieldAccessExpression( calledProperty ) ) ),
                         _ => throw new NotSupportedException() // TODO: Auto-properties.
                     };
 

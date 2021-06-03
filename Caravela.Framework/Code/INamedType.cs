@@ -121,6 +121,11 @@ namespace Caravela.Framework.Code
         IConstructor? StaticConstructor { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the type is <c>readonly</c>.
+        /// </summary>
+        bool IsReadOnly { get; }
+
+        /// <summary>
         /// Makes a generic instance of the current generic type definition.
         /// </summary>
         /// <param name="genericArguments"></param>

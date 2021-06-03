@@ -35,11 +35,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public RefKind RefKind => this.PropertyBuilder.RefKind;
 
-        public bool IsByRef => this.PropertyBuilder.IsByRef;
+        public Writeability Writeability => this.PropertyBuilder.Writeability;
 
-        public bool IsRef => this.PropertyBuilder.IsRef;
-
-        public bool IsRefReadonly => this.PropertyBuilder.IsRefReadonly;
+        public bool IsAutoPropertyOrField => this.PropertyBuilder.IsAutoPropertyOrField;
 
         public IPropertyInvocation Base => throw new NotImplementedException();
 

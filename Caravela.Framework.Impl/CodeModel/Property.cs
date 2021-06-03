@@ -30,12 +30,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public RefKind RefKind => this._symbol.RefKind.ToOurRefKind();
 
-        public bool IsByRef => this.RefKind != RefKind.None;
-
-        public bool IsRef => this.RefKind == RefKind.Ref;
-
-        public bool IsRefReadonly => this.RefKind == RefKind.RefReadOnly;
-
         public bool IsExplicitInterfaceImplementation => !this._symbol.ExplicitInterfaceImplementations.IsEmpty;
 
         [Memo]
@@ -87,7 +81,19 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override string ToString() => this._symbol.ToString();
 
-        public override bool IsReadOnly => this._symbol.IsReadOnly;
+        // TODO: Memo does not work here.
+        // [Memo]
+        public Writeability Writeability
+            => this._symbol switch
+            {
+                { IsReadOnly: true } => Writeability.None,
+                { SetMethod: { IsInitOnly: true } _ } => Writeability.InitOnly,
+                _ => Writeability.All
+            };
+
+        // TODO: Memo does not work here.
+        // [Memo]
+        public bool IsAutoPropertyOrField => this._symbol.IsAutoProperty();
 
         public override bool IsAsync => false;
 

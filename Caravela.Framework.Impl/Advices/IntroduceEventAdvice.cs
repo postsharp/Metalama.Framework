@@ -16,6 +16,9 @@ namespace Caravela.Framework.Impl.Advices
     internal class IntroduceEventAdvice : IntroduceMemberAdvice<EventBuilder>
     {
         private readonly IMethod? _addTemplateMethod;
+
+        // ReSharper disable once NotAccessedField.Local
+        // ReSharper disable once IDE0052
         private readonly IMethod? _removeTemplateMethod;
 
         public new IEvent? TemplateMember => (IEvent?) base.TemplateMember;
