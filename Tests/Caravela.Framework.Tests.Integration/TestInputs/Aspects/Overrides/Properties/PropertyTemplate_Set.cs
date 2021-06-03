@@ -42,6 +42,15 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
 
         [Override]
+        private int PrivateProperty
+        {
+            set
+            {
+                Console.WriteLine($"This is the original setter, setting {value}.");
+            }
+        }
+
+        [Override]
         public static int Static_Property
         {
             set
@@ -52,6 +61,12 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
         [Override]
         public int ExpressionProperty
+        {
+            set => Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+
+        [Override]
+        private int PrivateExpressionProperty
         {
             set => Console.WriteLine($"This is the original setter, setting {value}.");
         }

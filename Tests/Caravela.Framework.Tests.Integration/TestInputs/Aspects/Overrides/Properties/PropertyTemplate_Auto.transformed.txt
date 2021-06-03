@@ -38,7 +38,7 @@ internal class TargetClass
     private readonly int __PrivateProperty__BackingField;
 
     [Override]
-    private int ProtectedProperty
+    protected int ProtectedProperty
     {
         get
         {
@@ -132,7 +132,7 @@ internal class TargetClass
             return this.__PropertyWithRestrictedSetter__BackingField;
         }
 
-        set
+        private set
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
             global::System.Int32 discard;
@@ -145,7 +145,7 @@ internal class TargetClass
     [Override]
     public int PropertyWithRestrictedGetter
     {
-        get
+        private get
         {
             global::System.Console.WriteLine("This is the overridden getter.");
             return this.__PropertyWithRestrictedGetter__BackingField;
@@ -189,7 +189,7 @@ internal class TargetClass
             return this.__PropertyWithRestrictedInitSetter__BackingField;
         }
 
-        init
+        protected init
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
             global::System.Int32 discard;

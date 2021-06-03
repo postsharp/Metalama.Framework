@@ -42,7 +42,22 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
 
         [Override]
+        private int PrivateProperty
+        {
+            init
+            {
+                Console.WriteLine($"This is the original setter, setting {value}.");
+            }
+        }
+
+        [Override]
         public int ExpressionProperty
+        {
+            init => Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+
+        [Override]
+        private int PrivateExpressionProperty
         {
             init => Console.WriteLine($"This is the original setter, setting {value}.");
         }
