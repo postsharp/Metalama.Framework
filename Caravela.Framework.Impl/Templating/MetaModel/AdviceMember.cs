@@ -39,6 +39,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IDynamicReceiver This
             => new ThisInstanceDynamicReceiver(
                 this.DeclaringType,
-                new LinkerAnnotation( this.Underlying.GetCompilationModel().AspectLayerId, LinkingOrder.Original ) );
+                new LinkerAnnotation( this.Underlying.GetCompilationModel().AspectLayerId, LinkingOrder.Base ) );
     }
 }

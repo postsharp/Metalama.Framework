@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Linking;
+using System;
 
 namespace Caravela.Framework.Impl.CodeModel.Invokers
 {
@@ -18,7 +19,8 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             var linkingOrder = order switch
             {
                 InvokerOrder.Base => LinkingOrder.Base,
-                InvokerOrder.Default => LinkingOrder.Default
+                InvokerOrder.Default => LinkingOrder.Default,
+                _ => throw new ArgumentOutOfRangeException( nameof(order), order, null )
             };
 
             this.LinkerAnnotation = new LinkerAnnotation(

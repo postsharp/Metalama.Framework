@@ -23,9 +23,4 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public RuntimeExpression? CreateExpression( string? expressionText, Location? location = null )
             => new( this._expression, this._type, this._isReferenceable );
     }
-
-    internal class EmptyStatementDynamicExpression : IDynamicExpression
-    {
-        public RuntimeExpression? CreateExpression( string? expressionText = null, Location? location = null ) => null;
-    }
 }

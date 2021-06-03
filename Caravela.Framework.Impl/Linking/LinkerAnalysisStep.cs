@@ -23,23 +23,38 @@ namespace Caravela.Framework.Impl.Linking
             var referenceCounters = new Dictionary<SymbolVersion, int>();
             var methodBodyInfos = new Dictionary<ISymbol, MemberAnalysisResult>();
 
+            var layersId = input.OrderedAspectLayers.Select( x => x.AspectLayerId ).ToArray();
+
             foreach ( var syntaxTree in input.IntermediateCompilation.SyntaxTrees )
             {
                 foreach ( var referencingNode in syntaxTree.GetRoot().GetAnnotatedNodes( LinkerAnnotationExtensions.AnnotationKind ) )
                 {
                     var linkerAnnotation = referencingNode.GetLinkerAnnotation().AssertNotNull();
-                    AspectLayerId? targetLayer;
+                    AspectLayerId? targetLayerId;
 
                     // Determine which version of the semantic is being invoked.
                     switch ( linkerAnnotation.Order )
                     {
+                        case LinkingOrder.Base: // TODO:
+                            var currentLayerIndex = Array.IndexOf( layersId, linkerAnnotation.AspectLayerId );
+                            Invariant.Assert( currentLayerIndex >= 0 );
+
+                            targetLayerId = currentLayerIndex == 0 ? null : layersId[currentLayerIndex - 1];
+
+                            break;
+                            
                         case LinkingOrder.Original: // Original
-                            targetLayer = null;
+                            targetLayerId = null;
 
                             break;
 
+                        case LinkingOrder.Final:
+                            targetLayerId = layersId[layersId.Length - 1];
+
+                            break;
+                        
                         case LinkingOrder.Default: // Next one.
-                            targetLayer = linkerAnnotation.AspectLayer;
+                            targetLayerId = linkerAnnotation.AspectLayerId;
 
                             break;
 
@@ -55,7 +70,7 @@ namespace Caravela.Framework.Impl.Linking
                         continue;
                     }
 
-                    var symbolVersion = new SymbolVersion( symbolInfo.Symbol.AssertNotNull(), targetLayer, linkerAnnotation.TargetKind );
+                    var symbolVersion = new SymbolVersion( symbolInfo.Symbol.AssertNotNull(), targetLayerId, linkerAnnotation.TargetKind );
 
                     _ = referenceCounters.TryGetValue( symbolVersion, out var counter );
                     referenceCounters[symbolVersion] = counter + 1;

@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Diagnostics;
+using System;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -33,8 +34,14 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public DeclarationKind DeclarationKind => this.Underlying.DeclarationKind;
 
-        public bool HasAspect<T1>() where T1 : IAspect => this.Underlying.HasAspect<T1>();
+        [Obsolete( "Not implemented." )]
+        public bool HasAspect<T1>()
+            where T1 : IAspect
+            => this.Underlying.HasAspect<T1>();
 
-        public IAnnotationList GetAnnotations<T1>() where T1 : IAspect => this.Underlying.GetAnnotations<T1>();
+        [Obsolete( "Not implemented." )]
+        public IAnnotationList GetAnnotations<T1>()
+            where T1 : IAspect
+            => this.Underlying.GetAnnotations<T1>();
     }
 }

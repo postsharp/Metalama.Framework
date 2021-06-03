@@ -8,17 +8,6 @@ using System.Reflection;
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Represents a method, constructor, or property.
-    /// </summary>
-    public interface IHasParameters : ICompilationElement, IDisplayable
-    {
-        /// <summary>
-        /// Gets the list of parameters of the current method.
-        /// </summary>
-        IParameterList Parameters { get; }
-    }
-
-    /// <summary>
     /// Represents a method or a constructor.
     /// </summary>
     public interface IMethodBase : IMember, IHasParameters

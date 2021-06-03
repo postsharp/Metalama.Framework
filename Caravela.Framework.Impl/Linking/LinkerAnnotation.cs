@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Gets the aspect layer.
         /// </summary>
-        public AspectLayerId AspectLayer { get; }
+        public AspectLayerId AspectLayerId { get; }
 
         /// <summary>
         /// Gets a value indicating which version of the semantic must be invoked.
@@ -26,11 +26,11 @@ namespace Caravela.Framework.Impl.Linking
         public LinkerAnnotationTargetKind TargetKind { get; }
 
         public LinkerAnnotation(
-            AspectLayerId aspectLayer,
+            AspectLayerId aspectLayerId,
             LinkingOrder order,
             LinkerAnnotationTargetKind targetKind = LinkerAnnotationTargetKind.Self )
         {
-            this.AspectLayer = aspectLayer;
+            this.AspectLayerId = aspectLayerId;
             this.Order = order;
             this.TargetKind = targetKind;
         }
@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public override string ToString()
         {
-            return $"{this.AspectLayer.FullName}${this.Order}${this.TargetKind}";
+            return $"{this.AspectLayerId.FullName}${this.Order}${this.TargetKind}";
         }
     }
 }

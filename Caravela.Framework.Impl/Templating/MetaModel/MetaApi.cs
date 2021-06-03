@@ -56,7 +56,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             return this._type switch
             {
                 null => throw this.CreateInvalidOperationException( expressionName ),
-
                 { IsStatic: false } when this.Declaration is IMemberOrNamedType { IsStatic: false }
                     => new ThisInstanceDynamicReceiver(
                         this.Type,
@@ -69,11 +68,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public dynamic This => this.GetThisOrBase( "meta.This", new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Default ) );
 
-        public dynamic Base => this.GetThisOrBase( "meta.Base", new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Original ) );
+        public dynamic Base => this.GetThisOrBase( "meta.Base", new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Base ) );
 
         public dynamic ThisStatic => new ThisTypeDynamicReceiver( this.Type, new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Default ) );
 
-        public dynamic BaseStatic => new ThisTypeDynamicReceiver( this.Type, new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Original ) );
+        public dynamic BaseStatic => new ThisTypeDynamicReceiver( this.Type, new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Base ) );
 
         public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;
 

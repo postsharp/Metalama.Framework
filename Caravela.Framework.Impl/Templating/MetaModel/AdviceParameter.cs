@@ -36,8 +36,5 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             get => new DynamicExpression( SyntaxFactory.IdentifierName( this.Underlying.Name! ), this.Underlying.ParameterType, true );
             set => throw new NotImplementedException();
         }
-
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-            => this.Underlying.ToDisplayString( format, context );
     }
 }
