@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -125,9 +126,18 @@ namespace Caravela.Framework.Impl.Transformations
         {
             using ( context.DiagnosticSink.WithDefaultScope( accessor ) )
             {
+                var metaApi = MetaApi.ForFieldOrProperty(
+                    this.OverriddenDeclaration,
+                    accessor,
+                    new MetaApiProperties(
+                        context.DiagnosticSink,
+                        accessorTemplate.GetSymbol(),
+                        this.Advice.Options.Tags,
+                        this.Advice.AspectLayerId ) );
+
                 var expansionContext = new TemplateExpansionContext(
                     this.Advice.Aspect.Aspect,
-                    accessor,
+                    metaApi,
                     this.OverriddenDeclaration.Compilation,
                     new LinkerOverridePropertyProceedImpl(
                         this.Advice.AspectLayerId,
@@ -135,11 +145,8 @@ namespace Caravela.Framework.Impl.Transformations
                         LinkerAnnotationOrder.Default,
                         context.SyntaxFactory ),
                     context.LexicalScope,
-                    context.DiagnosticSink,
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
-                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
-                    this.Advice.AspectLayerId,
-                    this.Advice.Options.Tags );
+                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
 
                 var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( accessorTemplate );
 

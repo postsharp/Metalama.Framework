@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.Pipeline
                             Directory.CreateDirectory( tempPath );
                         }
                     } );
-                
+
                 var reportFile = Path.Combine( tempPath, $"exception-{Guid.NewGuid()}.txt" );
                 File.WriteAllText( reportFile, e.ToString() );
 
@@ -68,7 +68,6 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 return transformerContext.Compilation;
             }
-
         }
     }
 }
