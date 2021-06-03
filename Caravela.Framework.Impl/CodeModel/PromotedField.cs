@@ -7,7 +7,6 @@ using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
@@ -24,15 +23,10 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly IFieldSymbol _symbol;
 
-        IFieldOrPropertyInvoker? IFieldOrProperty.BaseInvoker => this.BaseInvoker;
-
-        IFieldOrPropertyInvoker IFieldOrProperty.Invoker => this.Invoker;
-
         [Memo]
-        public IPropertyInvoker Invoker => new PropertyInvoker( this, InvokerOrder.Default );
+        public IInvokerFactory<IPropertyInvoker> Invoker => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ) );
 
-        [Memo]
-        public IPropertyInvoker BaseInvoker => new PropertyInvoker( this, InvokerOrder.Base );
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invoker => this.Invoker;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
@@ -52,10 +46,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public IMethod? Setter => null;
-
-        public object GetValue( object? instance ) => this.Invoker.GetValue( instance );
-
-        public object SetValue( object? instance, object value ) => this.Invoker.SetValue( instance, value );
 
         public PropertyInfo ToPropertyInfo() => throw new NotImplementedException();
 

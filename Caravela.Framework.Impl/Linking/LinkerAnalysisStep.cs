@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Linking
                             targetLayerId = currentLayerIndex == 0 ? null : layersId[currentLayerIndex - 1];
 
                             break;
-                            
+
                         case LinkingOrder.Original: // Original
                             targetLayerId = null;
 
@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.Linking
                             targetLayerId = layersId[layersId.Length - 1];
 
                             break;
-                        
+
                         case LinkingOrder.Default: // Next one.
                             targetLayerId = linkerAnnotation.AspectLayerId;
 

@@ -40,10 +40,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IType EventType { get; set; }
 
-        public IEventInvoker BaseInvoker => throw new NotImplementedException();
-
-        public IEventInvoker Invoker => throw new NotImplementedException();
-
         [Memo]
         public IMethodBuilder Adder => new AccessorBuilder( this, MethodKind.EventAdd );
 
@@ -51,6 +47,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethodBuilder Remover => new AccessorBuilder( this, MethodKind.EventRemove );
 
         public IMethodBuilder? Raiser => null;
+
+        IInvokerFactory<IEventInvoker> IEvent.Invoker => throw new NotSupportedException( "Invokers are supported in build declarations but not in builders." );
 
         [Memo]
         public override MemberDeclarationSyntax InsertPositionNode

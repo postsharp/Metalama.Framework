@@ -39,11 +39,9 @@ namespace Caravela.Framework.Code
         IMethod? Raiser { get; }
 
         /// <summary>
-        /// Allows invocation of the base event (<see langword="null" /> if the method was introduced by the current aspect).
+        /// Gets an object that allows to add or remove a handler to or from the current event. 
         /// </summary>
-        IEventInvoker? BaseInvoker { get; }
-
-        IEventInvoker Invoker { get; }
+        IInvokerFactory<IEventInvoker> Invoker { get; }
 
         /// <summary>
         /// Gets a list of interface events this event explicitly implements.

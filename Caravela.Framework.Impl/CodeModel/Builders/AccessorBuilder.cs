@@ -50,7 +50,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsOpenGeneric => false;
 
-        public IMethodInvoker Invoker => throw new NotImplementedException();
+        IInvokerFactory<IMethodInvoker> IMethod.Invoker
+            => throw new NotSupportedException( "Invokers are supported in build declarations but not in builders." );
 
         public IMethod? OverriddenMethod => throw new NotImplementedException();
 
@@ -150,8 +151,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             throw new NotSupportedException( "Cannot add generic parameters to accessors." );
         }
-
-        public IMethodInvoker? BaseInvoker => throw new NotImplementedException();
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
 

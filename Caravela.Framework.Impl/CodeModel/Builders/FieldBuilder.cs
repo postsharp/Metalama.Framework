@@ -25,13 +25,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod? Setter => throw new NotImplementedException();
 
-        public IFieldOrPropertyInvoker? BaseInvoker => throw new NotImplementedException();
-
-        public IFieldOrPropertyInvoker Invoker => throw new NotImplementedException();
-
-        public IFieldOrPropertyInvoker Base => throw new NotImplementedException();
-
-        public dynamic Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invoker
+            => throw new NotSupportedException( "Invokers are supported in build declarations but not in builders." );
 
         IType IFieldOrProperty.Type => throw new NotImplementedException();
 

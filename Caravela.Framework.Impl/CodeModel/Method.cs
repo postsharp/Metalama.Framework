@@ -7,7 +7,6 @@ using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
@@ -19,7 +18,7 @@ using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal partial class Method : MethodBase, IMethod
+    internal class Method : MethodBase, IMethod
     {
         public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
@@ -56,10 +55,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IMethodInvoker? BaseInvoker => new MethodInvoker( this, InvokerOrder.Base );
-
-        [Memo]
-        public IMethodInvoker Invoker => new MethodInvoker( this, InvokerOrder.Default );
+        public IInvokerFactory<IMethodInvoker> Invoker => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ) );
 
         public override bool IsReadOnly => this.MethodSymbol.IsReadOnly;
 

@@ -19,9 +19,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IMethod? Setter => this.Underlying.Setter;
 
-        public IFieldOrPropertyInvoker? BaseInvoker => this.Underlying.BaseInvoker;
-
-        public IFieldOrPropertyInvoker Invoker => this.Underlying.Invoker;
+        public IInvokerFactory<IFieldOrPropertyInvoker> Invoker => this.Underlying.Invoker;
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.Underlying.ToFieldOrPropertyInfo();
 
@@ -29,8 +27,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         {
             get
             {
-                // TODO: What to do when there is no base invoker?
-                return this.Underlying.BaseInvoker.AssertNotNull().GetValue( this.This );
+                if ( this.Invoker.Base == null )
+                {
+                    throw new InvalidOperationException( "Cannot get or set the base value because there is no base property or field." );
+                }
+
+                return this.Invoker.Base.GetValue( this.This );
             }
             set => throw new NotSupportedException();
         }

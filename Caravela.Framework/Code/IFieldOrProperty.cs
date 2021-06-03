@@ -33,11 +33,9 @@ namespace Caravela.Framework.Code
         IMethod? Setter { get; }
 
         /// <summary>
-        /// Allows invocation of the base property (<see langword="null" /> if the method was introduced by the current aspect).
+        /// Gets an object that allows to get or set the value of the current field or property.
         /// </summary>
-        IFieldOrPropertyInvoker? BaseInvoker { get; }
-
-        IFieldOrPropertyInvoker Invoker { get; }
+        IInvokerFactory<IFieldOrPropertyInvoker> Invoker { get; }
 
         /// <summary>
         /// Gets a <see cref="FieldOrPropertyInfo"/> that represents the current field or property at run time.

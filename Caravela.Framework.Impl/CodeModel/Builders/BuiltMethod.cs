@@ -8,7 +8,6 @@ using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -67,10 +66,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
 
         [Memo]
-        public IMethodInvoker? BaseInvoker => new MethodInvoker( this, InvokerOrder.Base );
-
-        [Memo]
-        public IMethodInvoker Invoker => new MethodInvoker( this, InvokerOrder.Default );
+        public IInvokerFactory<IMethodInvoker> Invoker => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), false );
 
         public IMethod? OverriddenMethod => throw new NotImplementedException();
 

@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Invokers;
-using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System.Reflection;
@@ -25,10 +24,8 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IFieldOrPropertyInvoker? BaseInvoker => new FieldOrPropertyInvoker( this, InvokerOrder.Base );
-
-        [Memo]
-        public IFieldOrPropertyInvoker Invoker => new FieldOrPropertyInvoker( this, InvokerOrder.Default );
+        public IInvokerFactory<IFieldOrPropertyInvoker> Invoker
+            => new InvokerFactory<IFieldOrPropertyInvoker>( order => new FieldOrPropertyInvoker( this, order ) );
 
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );

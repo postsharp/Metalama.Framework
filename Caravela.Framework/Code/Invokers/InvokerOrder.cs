@@ -6,6 +6,6 @@ namespace Caravela.Framework.Code.Invokers
     public enum InvokerOrder
     {
         Default,
-        Base,
+        Base
     }
 }

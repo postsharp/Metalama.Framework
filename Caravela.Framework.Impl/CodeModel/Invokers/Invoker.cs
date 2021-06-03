@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
         protected Invoker( IDeclaration declaration, InvokerOrder order )
         {
             this.Order = order;
-            
+
             var linkingOrder = order switch
             {
                 InvokerOrder.Base => LinkingOrder.Base,
@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             this.LinkerAnnotation = new LinkerAnnotation(
                 declaration.GetCompilationModel().AspectLayerId,
-                linkingOrder);
+                linkingOrder );
         }
 
         public InvokerOrder Order { get; }

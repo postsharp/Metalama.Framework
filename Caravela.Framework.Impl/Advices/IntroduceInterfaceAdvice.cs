@@ -67,9 +67,9 @@ namespace Caravela.Framework.Impl.Advices
                                 && x.Builder.Parameters
                                     .Select( ( p, i ) => (p, i) )
                                     .All(
-                                        x =>
-                                            compilation.InvariantComparer.Equals( x.p.ParameterType, interfaceMethod.Parameters[x.i].ParameterType )
-                                            && x.p.RefKind == interfaceMethod.Parameters[x.i].RefKind ) );
+                                        xx =>
+                                            compilation.InvariantComparer.Equals( xx.p.ParameterType, interfaceMethod.Parameters[xx.i].ParameterType )
+                                            && xx.p.RefKind == interfaceMethod.Parameters[xx.i].RefKind ) );
 
                     if ( introductionAdvice == null )
                     {
@@ -107,9 +107,9 @@ namespace Caravela.Framework.Impl.Advices
                                 && x.Builder.Parameters
                                     .Select( ( p, i ) => (p, i) )
                                     .All(
-                                        x =>
-                                            compilation.InvariantComparer.Equals( x.p.ParameterType, interfaceProperty.Parameters[x.i].ParameterType )
-                                            && x.p.RefKind == interfaceProperty.Parameters[x.i].RefKind ) );
+                                        xx =>
+                                            compilation.InvariantComparer.Equals( xx.p.ParameterType, interfaceProperty.Parameters[xx.i].ParameterType )
+                                            && xx.p.RefKind == interfaceProperty.Parameters[xx.i].RefKind ) );
 
                     if ( introductionAdvice == null )
                     {

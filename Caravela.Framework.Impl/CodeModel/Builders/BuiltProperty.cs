@@ -9,7 +9,6 @@ using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -54,13 +53,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IMethod? Setter => this.PropertyBuilder.Setter != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.Setter ) : null;
 
-        [Memo]
-        public IFieldOrPropertyInvoker? BaseInvoker => new PropertyInvoker( this, InvokerOrder.Base );
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invoker => this.Invoker;
 
         [Memo]
-        IPropertyInvoker IProperty.Invoker => new PropertyInvoker( this, InvokerOrder.Default );
-
-        public IFieldOrPropertyInvoker Invoker => throw new NotImplementedException();
+        public IInvokerFactory<IPropertyInvoker> Invoker => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ), false );
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => Array.Empty<IProperty>();
@@ -76,8 +72,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             throw new NotImplementedException();
         }
-
-        IPropertyInvoker? IProperty.BaseInvoker => throw new NotImplementedException();
 
         IProperty IDeclarationRef<IProperty>.Resolve( CompilationModel compilation ) => (IProperty) this.GetForCompilation( compilation );
 

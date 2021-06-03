@@ -7,6 +7,7 @@ using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using System;
 using System.Collections.Generic;
@@ -44,7 +45,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsOpenGeneric => this._containingMember.DeclaringType.IsOpenGeneric;
 
-        public IMethodInvoker Invoker => throw new NotImplementedException();
+        [Memo]
+        public IInvokerFactory<IMethodInvoker> Invoker => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ) );
 
         public IMethod? OverriddenMethod => null;
 
@@ -138,8 +140,6 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotSupportedException();
-
-        public IMethodInvoker? BaseInvoker => throw new NotImplementedException();
 
         private sealed class ReturnParam : IParameter
         {

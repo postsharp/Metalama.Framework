@@ -9,13 +9,13 @@ namespace Caravela.Framework.Impl.Linking
         /// Calls the semantic in the state it is after the current aspect has been applied.
         /// </summary>
         Default,
-        
+
         /// <summary>
         /// Gets the final state of the semantic with all transformation. If the semantic is virtual, this results in a virtual call.
         /// Otherwise, this results in a call to the semantic with all transformations of the current class (but not of derived classes).
         /// </summary>
         Final,
-        
+
         /// <summary>
         /// Gets the state of the semantic before the current aspect layer. If the semantic is  <c>override</c> or <c>new</c> and we are
         /// in the first aspect layer for the current type, this results in a call to <c>base</c>. 

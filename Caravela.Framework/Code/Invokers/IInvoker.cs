@@ -12,6 +12,6 @@ namespace Caravela.Framework.Code.Invokers
         /// <summary>
         /// Gets a value indicating which layer of the semantic must be invoked relatively to the current layer.
         /// </summary>
-        InvokerOrder Order { get; }   
+        InvokerOrder Order { get; }
     }
 }

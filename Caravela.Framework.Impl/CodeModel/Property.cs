@@ -9,7 +9,6 @@ using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -26,15 +25,10 @@ namespace Caravela.Framework.Impl.CodeModel
             this._symbol = symbol;
         }
 
-        IFieldOrPropertyInvoker? IFieldOrProperty.BaseInvoker => this.BaseInvoker;
-
-        IFieldOrPropertyInvoker IFieldOrProperty.Invoker => this.Invoker;
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invoker => this.Invoker;
 
         [Memo]
-        public IPropertyInvoker Invoker => new PropertyInvoker( this, InvokerOrder.Default );
-
-        [Memo]
-        public IPropertyInvoker BaseInvoker => new PropertyInvoker( this, InvokerOrder.Base );
+        public IInvokerFactory<IPropertyInvoker> Invoker => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ) );
 
         public override ISymbol Symbol => this._symbol;
 
@@ -67,21 +61,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 
-        public object GetValue( object? instance ) => this.Invoker.GetValue( instance );
-
-        public object SetValue( object? instance, object value ) => this.Invoker.SetValue( instance, value );
-
-        public object GetIndexerValue( object? instance, params object[] args ) => this.Invoker.GetIndexerValue( instance, args );
-
-        public object SetIndexerValue( object? instance, object value, params object[] args ) => this.Invoker.SetIndexerValue( instance, value, args );
-
         [Memo]
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations
             => this._symbol.ExplicitInterfaceImplementations.Select( p => this.Compilation.Factory.GetProperty( p ) ).ToList();
 
         public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
-
-        IPropertyInvoker? IProperty.BaseInvoker => throw new NotImplementedException();
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 

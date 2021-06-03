@@ -31,8 +31,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public PropertyInfo ToPropertyInfo() => this.Underlying.ToPropertyInfo();
 
-        public new IPropertyInvoker? BaseInvoker => this.Underlying.BaseInvoker;
-
-        public new IPropertyInvoker Invoker => this.Underlying.Invoker;
+        public new IInvokerFactory<IPropertyInvoker> Invoker => this.Underlying.Invoker;
     }
 }

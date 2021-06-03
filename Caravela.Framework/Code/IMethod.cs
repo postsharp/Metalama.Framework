@@ -46,11 +46,9 @@ namespace Caravela.Framework.Code
         IMethod WithGenericArguments( params IType[] genericArguments );
 
         /// <summary>
-        /// Gets an object that allows invocation of the base method (<see langword="base" /> if the method was introduced by the current aspect).
+        /// Gets an object that allows to invoke the current method.
         /// </summary>
-        IMethodInvoker? BaseInvoker { get; }
-
-        IMethodInvoker Invoker { get; }
+        IInvokerFactory<IMethodInvoker> Invoker { get; }
 
         /// <summary>
         /// Gets the base method that is overridden by the current method.

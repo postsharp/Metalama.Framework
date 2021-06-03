@@ -25,7 +25,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public GenericParameterBuilderList GenericParameters { get; } = new();
 
-        public IMethodInvoker Invoker => throw new NotImplementedException();
+        IInvokerFactory<IMethodInvoker> IMethod.Invoker
+            => throw new NotSupportedException( "Invokers are supported in build declarations but not in builders." );
 
         public IMethod? OverriddenMethod { get; set; }
 
@@ -74,7 +75,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IReadOnlyList<IType> IMethod.GenericArguments => ImmutableArray<IType>.Empty;
 
-        bool IMethod.IsOpenGeneric => true;
+        bool IMethod.IsOpenGeneric => this.GenericParameters.Count > 0;
 
         // We don't currently support adding other methods than default ones.
         public MethodKind MethodKind => MethodKind.Default;
@@ -82,8 +83,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
 
         IMethod IMethod.WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
-
-        public IMethodInvoker? BaseInvoker => null;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 

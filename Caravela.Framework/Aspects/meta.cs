@@ -13,14 +13,14 @@ using System.Threading;
 
 namespace Caravela.Framework.Aspects
 {
+    // ReSharper disable once InconsistentNaming
+
     /// <summary>
     /// Exposes the meta-model and the meta-functions to a template method.
     /// </summary>
     [CompileTimeOnly]
     [TemplateKeyword]
 #pragma warning disable SA1300, IDE1006 // Element should begin with upper-case letter
-
-    // ReSharper disable once InconsistentNaming
     public static class meta
 #pragma warning restore SA1300, IDE1006 // Element should begin with upper-case letter
     {
@@ -111,7 +111,8 @@ namespace Caravela.Framework.Aspects
         /// Gets a <c>dynamic</c> object that represents an instance of the target type. It can be used as a value (e.g. as a method argument)
         /// or can be used to get access to <i>instance</i> members of the instance (e.g. <c>meta.This.MyMethod()</c>).
         /// The <see cref="This"/> property exposes the state of the target type as it is <i>after</i> the application
-        /// of the current aspect layer. To access the prior layer (or the base type, if there is no prior layer), use <see cref="Base"/>.
+        /// of all aspects. If the member is <c>virtual</c>, a virtual call is performed, therefore the implementation on the child type
+        /// (possibly with all applied aspects) is performed.  To access the prior layer (or the base type, if there is no prior layer), use <see cref="Base"/>.
         /// To access static members, use <see cref="ThisStatic"/>.
         /// </summary>
         /// <seealso cref="Base"/>
@@ -122,7 +123,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets a <c>dynamic</c> object that must be used to get access to <i>instance</i> members of the instance (e.g. <c>meta.Base.MyMethod()</c>).
         /// The <see cref="Base"/> property exposes the state of the target type as it is <i>before</i> the application
-        /// of the current aspect layer. To access the current layer, use <see cref="This"/>.
+        /// of the current aspect layer. To access the final layer, use <see cref="This"/>.
         /// To access static members, use <see cref="BaseStatic"/>.
         /// </summary>
         /// <seealso cref="This"/>
@@ -133,7 +134,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets a <c>dynamic</c> object that must be used to get access to <i>static</i> members of the type (e.g. <c>meta.ThisStatic.MyStaticMethod()</c>).
         /// The <see cref="ThisStatic"/> property exposes the state of the target type as it is <i>after</i> the application
-        /// of the current aspect layer. To access the prior layer (or the base type, if there is no prior layer), use <see cref="BaseStatic"/>.
+        /// of all aspects. To access the prior layer (or the base type, if there is no prior layer), use <see cref="BaseStatic"/>.
         /// To access instance members, use <see cref="This"/>.
         /// </summary>
         /// <seealso cref="This"/>
@@ -144,7 +145,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets a <c>dynamic</c> object that must be used to get access to <i>static</i> members of the type (e.g. <c>meta.BaseStatic.MyStaticMethod()</c>).
         /// The <see cref="BaseStatic"/> property exposes the state of the target type as it is <i>before</i> the application
-        /// of the current aspect layer. To access the current layer, use <see cref="ThisStatic"/>.
+        /// of the current aspect layer. To access the final layer, use <see cref="ThisStatic"/>.
         /// To access instance members, use <see cref="Base"/>.
         /// </summary>
         /// <seealso cref="Base"/>

@@ -7,6 +7,7 @@ using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -52,13 +53,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethodBuilder? Setter { get; }
 
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invoker => this.Invoker;
+
         IMethod? IFieldOrProperty.Setter => this.Setter;
 
-        public IFieldOrPropertyInvoker? BaseInvoker => throw new NotImplementedException();
-
-        IPropertyInvoker IProperty.Invoker => throw new NotImplementedException();
-
-        public IFieldOrPropertyInvoker Invoker => throw new NotImplementedException();
+        [Memo]
+        public IInvokerFactory<IPropertyInvoker> Invoker => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ) );
 
         public AspectLinkerOptions? LinkerOptions { get; }
 
@@ -252,8 +252,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             throw new NotImplementedException();
         }
-
-        IPropertyInvoker? IProperty.BaseInvoker => throw new NotImplementedException();
 
         [return: RunTimeOnly]
         public FieldOrPropertyInfo ToFieldOrPropertyInfo()

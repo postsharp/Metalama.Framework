@@ -21,9 +21,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public dynamic Invoke( params dynamic[] args )
         {
-            if ( this.BaseInvoker != null )
+            if ( this.Invoker.Base != null )
             {
-                return this.BaseInvoker.Invoke( this.IsStatic ? null : this.This, args );
+                return this.Invoker.Base.Invoke( this.IsStatic ? null : this.This, args );
             }
             else if ( this.ReturnType.Is( SpecialType.Void ) )
             {
@@ -59,9 +59,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IMethod WithGenericArguments( params IType[] genericArguments ) => this.Underlying.WithGenericArguments( genericArguments );
 
-        public IMethodInvoker? BaseInvoker => this.Underlying.BaseInvoker;
-
-        public IMethodInvoker Invoker => this.Underlying.Invoker;
+        public IInvokerFactory<IMethodInvoker> Invoker => this.Underlying.Invoker;
 
         public IMethod? OverriddenMethod => this.Underlying.OverriddenMethod;
 
