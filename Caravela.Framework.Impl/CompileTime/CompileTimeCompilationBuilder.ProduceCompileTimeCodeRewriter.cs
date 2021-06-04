@@ -13,7 +13,6 @@ using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Editing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -124,7 +123,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
 
                     // Add non-implemented members of IAspect and IEligible.
-                    SyntaxGenerator syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
+                    var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
                     var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces );
 
                     foreach ( var implementedInterface in allImplementedInterfaces )

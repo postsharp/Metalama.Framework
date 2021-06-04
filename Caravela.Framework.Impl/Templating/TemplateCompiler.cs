@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private readonly IServiceProvider _serviceProvider;
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap = new();
-        private ITemplateCompilerSpy? _spy;
+        private readonly ITemplateCompilerSpy? _spy;
         private readonly SerializableTypes _serializableTypes;
 
         public TemplateCompiler( IServiceProvider serviceProvider, Compilation runTimeCompilation )

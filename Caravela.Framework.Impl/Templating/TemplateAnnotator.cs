@@ -113,32 +113,10 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         private TemplatingScope GetSymbolScope( ISymbol? symbol )
         {
-            TemplatingScope NeutralToPreferred( TemplatingScope scope )
-            {
-                if ( scope != TemplatingScope.Both )
-                {
-                    return scope;
-                }
-                else
-                {
-                    if ( this._currentScopeContext.PreferRunTimeExpression )
-                    {
-                        if ( symbol is ITypeSymbol typeSymbol )
-                        {
-                            if ( !this._serializableTypes.IsSerializable( typeSymbol ) )
-                            {
-                                return TemplatingScope.RunTimeOnly;
-                            }
-                        }
-                    }
-
-                    return TemplatingScope.Both;
-                }
-            }
 
             if ( symbol == null )
             {
-                return NeutralToPreferred( TemplatingScope.Both );
+                return GetMoreSpecificScope( TemplatingScope.Both );
             }
 
             // For local variables, we decide based on  _buildTimeLocals only. This collection is updated
@@ -156,7 +134,7 @@ namespace Caravela.Framework.Impl.Templating
             }
             else if ( symbol is { ContainingType: { IsAnonymousType: true } containingType } )
             {
-                return NeutralToPreferred( this.GetSymbolScope( containingType ) );
+                return GetMoreSpecificScope( this.GetSymbolScope( containingType ) );
             }
 
             // The TemplateContext.runTime method must be processed separately. It is a compile-time-only method whose
@@ -188,7 +166,31 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // For other symbols, we use the SymbolScopeClassifier.
-            return NeutralToPreferred( this._symbolScopeClassifier.GetTemplatingScope( symbol ) );
+            return GetMoreSpecificScope( this._symbolScopeClassifier.GetTemplatingScope( symbol ) );
+
+            TemplatingScope GetMoreSpecificScope( TemplatingScope scope )
+            {
+                if ( scope != TemplatingScope.Both )
+                {
+                    return scope;
+                }
+                else
+                {
+                    if ( this._currentScopeContext.PreferRunTimeExpression )
+                    {
+                        if ( symbol is ITypeSymbol typeSymbol )
+                        {
+                            if ( !this._serializableTypes.IsSerializable( typeSymbol ) )
+                            {
+                                return TemplatingScope.RunTimeOnly;
+                            }
+                        }
+                    }
+
+                    return TemplatingScope.Both;
+                }
+            }
+
         }
 
         /// <summary>

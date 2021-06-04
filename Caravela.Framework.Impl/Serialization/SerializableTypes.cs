@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Serialization
             this._serializableTypes = serializableTypes.Select( t => t.GetDocumentationCommentId().AssertNotNull() ).ToImmutableHashSet();
         }
 
-        private bool IsSerializableIntrinsic( ITypeSymbol type )
+        private static bool IsSerializableIntrinsic( ITypeSymbol type )
         {
             switch ( type.SpecialType )
             {
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Serialization
 
         public bool IsSerializable( ITypeSymbol type, Location? diagnosticLocation = null, IDiagnosticAdder? diagnosticAdder = null )
         {
-            if ( this.IsSerializableIntrinsic( type ) )
+            if ( IsSerializableIntrinsic( type ) )
             {
                 return true;
             }

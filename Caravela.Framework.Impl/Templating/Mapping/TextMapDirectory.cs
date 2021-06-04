@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Templating.Mapping
         {
             var dictionaryBuilder = ImmutableDictionary.CreateBuilder<string, TextMapFile>();
 
-            foreach ( string filePath in Directory.GetFiles( directory, "*.map" ) )
+            foreach ( var filePath in Directory.GetFiles( directory, "*.map" ) )
             {
                 var file = TextMapFile.Read( filePath );
 

@@ -5,8 +5,15 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Templating
 {
+    /// <summary>
+    /// An interface that can be injected into the service provider to get callbacks from the <see cref="TemplateCompiler"/>
+    /// class. For testing only.
+    /// </summary>
     public interface ITemplateCompilerSpy
     {
+        /// <summary>
+        /// Method invoked by the <see cref="TemplateCompiler.TryAnnotate"/> method.
+        /// </summary>
         void ReportAnnotatedSyntaxNode( SyntaxNode sourceSyntaxRoot, SyntaxNode annotatedSyntaxRoot );
     }
 }

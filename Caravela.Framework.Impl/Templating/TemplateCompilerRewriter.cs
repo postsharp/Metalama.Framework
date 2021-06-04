@@ -438,6 +438,7 @@ namespace Caravela.Framework.Impl.Templating
                 return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
             }
 
+            // ReSharper disable once ConstantConditionalAccessQualifier
             switch ( type?.Name )
             {
                 case "dynamic":
@@ -617,7 +618,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // We are transforming a call to a compile-time method that accepts dynamic arguments.
 
-                SyntaxNode? TransformArgument( ArgumentSyntax a )
+                SyntaxNode? LocalTransformArgument( ArgumentSyntax a )
                 {
                     if ( this._templateMemberClassifier.IsDynamicParameter( a ) )
                     {
@@ -636,7 +637,7 @@ namespace Caravela.Framework.Impl.Templating
                     }
                 }
 
-                var transformedArguments = node.ArgumentList.Arguments.Select( syntax => TransformArgument( syntax )! ).ToArray();
+                var transformedArguments = node.ArgumentList.Arguments.Select( syntax => LocalTransformArgument( syntax )! ).ToArray();
 
                 return node.Update(
                     (ExpressionSyntax) this.Visit( node.Expression )!,
