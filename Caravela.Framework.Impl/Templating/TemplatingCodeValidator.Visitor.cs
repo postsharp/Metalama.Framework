@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Templating
             private readonly IServiceProvider _serviceProvider;
             private readonly bool _hasCompileTimeCodeFast;
 
-            private TemplatingScope? _currentDeclarationScope;
+            private TemplatingScope? _currentScope;
             private ISymbol? _currentDeclaration;
 
             public bool HasError { get; private set; }
@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.Templating
                 // Otherwise, we cannot reference a compile-time-only declaration, except in a typeof() or nameof() expression
                 // because these are transformed by the CompileTimeCompilationBuilder.
 
-                if ( this._currentDeclarationScope is TemplatingScope.RunTimeOnly )
+                if ( this._currentScope is TemplatingScope.RunTimeOnly )
                 {
                     var symbolInfo = this._semanticModel.GetSymbolInfo( node );
 
@@ -204,7 +204,7 @@ namespace Caravela.Framework.Impl.Templating
                     }
 
                     var context = new ScopeCookie( this, scope, declaredSymbol );
-                    this._currentDeclarationScope = scope;
+                    this._currentScope = scope;
                     this._currentDeclaration = declaredSymbol;
 
                     return context;
@@ -222,7 +222,7 @@ namespace Caravela.Framework.Impl.Templating
                 public ScopeCookie( Visitor parent, TemplatingScope scope, ISymbol? symbol )
                 {
                     this._parent = parent;
-                    this._previousScope = parent._currentDeclarationScope;
+                    this._previousScope = parent._currentScope;
                     this._previousDeclaration = parent._currentDeclaration;
                     this.Scope = scope;
                     this.Symbol = symbol;
@@ -236,7 +236,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     if ( this._parent != null )
                     {
-                        this._parent._currentDeclarationScope = this._previousScope;
+                        this._parent._currentScope = this._previousScope;
                         this._parent._currentDeclaration = this._previousDeclaration;
                     }
                 }

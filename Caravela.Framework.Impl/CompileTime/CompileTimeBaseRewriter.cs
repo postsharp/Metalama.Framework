@@ -113,7 +113,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( message ) ) ) ) );
         }
 
-        protected TemplatingScope GetSymbolDeclarationScope( MemberDeclarationSyntax node )
+        protected TemplatingScope GetTemplatingScope( MemberDeclarationSyntax node )
         {
             var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 

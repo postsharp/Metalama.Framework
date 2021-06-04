@@ -5,7 +5,7 @@ using System;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal static class SymbolDeclarationScopeExtensions
+    internal static class TemplatingScopeExtensions
     {
         public static bool MustBeTransformed( this TemplatingScope scope )
             => scope.ReplaceDefault( TemplatingScope.RunTimeOnly ) is
