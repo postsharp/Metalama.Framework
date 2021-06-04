@@ -31,7 +31,8 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly CompileTimeDomain _domain;
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
         private readonly IDirectoryOptions _directoryOptions;
-
+        private readonly ICompileTimeCompilationBuilderSpy? _spy;
+ 
         private static readonly string _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).VersionId;
 
         public const string ResourceName = "Caravela.CompileTimeAssembly";
@@ -41,6 +42,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this._directoryOptions = serviceProvider.GetService<IDirectoryOptions>();
             this._serviceProvider = serviceProvider;
             this._domain = domain;
+            this._spy = serviceProvider.GetOptionalService<ICompileTimeCompilationBuilderSpy>();
         }
 
         private static ulong ComputeSourceHash( IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log = null )
@@ -121,7 +123,7 @@ namespace Caravela.Framework.Impl.CompileTime
             var assemblyName = GetCompileTimeAssemblyName( runTimeCompilation.AssemblyName!, hash );
             compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( assemblyName, referencedProjects );
 
-            var templateCompiler = new TemplateCompiler( this._serviceProvider );
+            var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilation );
 
             var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
                 runTimeCompilation,
@@ -159,6 +161,8 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees.Select( t => t.TransformedTree ) );
+            
+            this._spy?.ReportCompileTimeCompilation( compileTimeCompilation );
 
             compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitTrees( compileTimeCompilation );
 

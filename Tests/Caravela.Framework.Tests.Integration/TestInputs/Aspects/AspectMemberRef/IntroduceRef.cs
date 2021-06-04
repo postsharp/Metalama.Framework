@@ -5,17 +5,17 @@ using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
 using Caravela.Framework.Code;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.TemplateRef
+namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.IntroduceRef
 {
 
     public class RetryAttribute : OverrideMethodAspect
     {
-        [Template]
-        void Template() {}
+        [Introduce]
+        void Introduced() {}
     
         public override dynamic OverrideMethod()
         {
-            this.Template();
+            this.Introduced();
            return meta.Proceed();
         }
     }

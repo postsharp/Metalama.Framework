@@ -5,13 +5,26 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
+    internal enum TemplateMemberKind
+    {
+        /// <summary>
+        /// Not a template member.
+        /// </summary>
+        None,
+        
+        Template,
+        
+        Introduction
+        
+    }
+    
     /// <summary>
     /// Determines the kind of symbol: template, <see cref="TemplatingScope.CompileTimeOnly"/>,
     /// <see cref="TemplatingScope.RunTimeOnly"/>.
     /// </summary>
     internal interface ISymbolClassifier
     {
-        bool IsTemplate( ISymbol symbol );
+        TemplateMemberKind GetTemplateMemberKind( ISymbol symbol );
 
         TemplatingScope GetTemplatingScope( ISymbol symbol );
     }

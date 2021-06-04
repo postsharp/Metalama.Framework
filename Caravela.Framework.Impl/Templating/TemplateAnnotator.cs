@@ -5,6 +5,7 @@ using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -28,6 +29,7 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
+        private readonly SerializableTypes _serializableTypes;
         private readonly CancellationToken _cancellationToken;
         private readonly TemplateMemberClassifier _templateMemberClassifier;
 
@@ -47,11 +49,13 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
             IDiagnosticAdder diagnosticAdder,
             IServiceProvider serviceProvider,
+            SerializableTypes serializableTypes,
             CancellationToken cancellationToken )
         {
             this._symbolScopeClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
+            this._serializableTypes = serializableTypes;
             this._cancellationToken = cancellationToken;
 
             this._templateMemberClassifier = new TemplateMemberClassifier( compilation, syntaxTreeAnnotationMap, serviceProvider );
@@ -157,7 +161,15 @@ namespace Caravela.Framework.Impl.Templating
             // be called from run-time code.
             if ( this.IsAspectMember( symbol ) )
             {
-                return TemplatingScope.CompileTimeOnly;
+                switch ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) )
+                {
+                    case TemplateMemberKind.Introduction:
+                        return TemplatingScope.RunTimeOnly;
+                    
+                    default:
+                        return TemplatingScope.CompileTimeOnly;
+                }
+                
             }
 
             // For other symbols, we use the SymbolScopeClassifier.
@@ -455,7 +467,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( scope == TemplatingScope.CompileTimeOnly )
                 {
                     // Template code cannot be referenced in a template until this is implemented.
-                    if ( this._symbolScopeClassifier.IsTemplate( symbol ) )
+                    if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) == TemplateMemberKind.Template )
                     {
                         this.ReportDiagnostic(
                             TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate,
@@ -782,7 +794,7 @@ namespace Caravela.Framework.Impl.Templating
 
             var annotatedExpression = this.Visit( node.Expression )!;
 
-            var forEachScope = this.GetNodeScope( annotatedExpression ).ReplaceDefault( TemplatingScope.RunTimeOnly );
+            var forEachScope = this.GetNodeScope( annotatedExpression ).ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
 
             this.SetLocalSymbolScope( local, forEachScope, node.Identifier );
 
@@ -949,7 +961,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( transformedInitializer != null )
                 {
-                    localScope = this.GetNodeScope( transformedInitializer.Value ).ReplaceDefault( TemplatingScope.RunTimeOnly ).DynamicToRunTimeOnly();
+                    localScope = this.GetNodeScope( transformedInitializer.Value ).ReplaceIndeterminate( TemplatingScope.RunTimeOnly ).DynamicToRunTimeOnly();
                 }
                 else
                 {
@@ -1046,7 +1058,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node )!;
 
-            if ( this._symbolScopeClassifier.IsTemplate( symbol ) )
+            if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) != TemplateMemberKind.None )
             {
                 var previousTemplateMember = this._currentTemplateMember;
                 this._currentTemplateMember = symbol;

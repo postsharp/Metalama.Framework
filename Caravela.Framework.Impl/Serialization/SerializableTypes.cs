@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -22,8 +23,39 @@ namespace Caravela.Framework.Impl.Serialization
             this._serializableTypes = serializableTypes.Select( t => t.GetDocumentationCommentId().AssertNotNull() ).ToImmutableHashSet();
         }
 
+        private bool IsSerializableIntrinsic( ITypeSymbol type )
+        {
+            switch ( type.SpecialType )
+            {
+                case SpecialType.System_Boolean:
+                case SpecialType.System_Char:
+                case SpecialType.System_SByte:
+                case SpecialType.System_Byte:
+                case SpecialType.System_Int16:
+                case SpecialType.System_UInt16:
+                case SpecialType.System_Int32:
+                case SpecialType.System_UInt32:
+                case SpecialType.System_Int64:
+                case SpecialType.System_UInt64:
+                case SpecialType.System_Decimal:
+                case SpecialType.System_Single:
+                case SpecialType.System_Double:
+                case SpecialType.System_String:
+                    return true;
+                
+                default:
+                    return false;
+            }
+            
+        }
+
         public bool IsSerializable( ITypeSymbol type, Location? diagnosticLocation = null, IDiagnosticAdder? diagnosticAdder = null )
         {
+            if ( IsSerializableIntrinsic( type ) )
+            {
+                return true;
+            }
+            
             var id = type.GetDocumentationCommentId().AssertNotNull();
 
             if ( this._serializableTypes.Contains( id ) )

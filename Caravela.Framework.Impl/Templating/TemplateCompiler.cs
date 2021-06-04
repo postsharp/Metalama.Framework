@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -17,10 +19,16 @@ namespace Caravela.Framework.Impl.Templating
 
         private readonly IServiceProvider _serviceProvider;
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap = new();
+        private ITemplateCompilerSpy? _spy;
+        private readonly SerializableTypes _serializableTypes;
 
-        public TemplateCompiler( IServiceProvider serviceProvider )
+        public TemplateCompiler( IServiceProvider serviceProvider, Compilation runTimeCompilation )
         {
             this._serviceProvider = serviceProvider;
+            var syntaxSerializationService = serviceProvider.GetService<SyntaxSerializationService>();
+            this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( runTimeCompilation ) );
+
+            this._spy = serviceProvider.GetOptionalService<ITemplateCompilerSpy>();
         }
 
         public ILocationAnnotationMapBuilder LocationAnnotationMap => this._syntaxTreeAnnotationMap;
@@ -60,9 +68,12 @@ namespace Caravela.Framework.Impl.Templating
                 this._syntaxTreeAnnotationMap,
                 diagnostics,
                 this._serviceProvider,
+                this._serializableTypes,
                 cancellationToken );
 
             annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot )!;
+
+            this._spy?.ReportAnnotatedSyntaxNode( sourceSyntaxRoot, annotatedSyntaxRoot );
 
             // Stop if we have any error.
             if ( !annotatorRewriter.Success )
@@ -111,6 +122,7 @@ namespace Caravela.Framework.Impl.Templating
                 this._syntaxTreeAnnotationMap,
                 diagnostics,
                 this._serviceProvider,
+                this._serializableTypes,
                 cancellationToken );
 
             transformedSyntaxRoot = templateCompilerRewriter.Visit( annotatedSyntaxRoot );

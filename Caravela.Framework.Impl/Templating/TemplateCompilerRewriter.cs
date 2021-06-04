@@ -45,14 +45,14 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
             IDiagnosticAdder diagnosticAdder,
             IServiceProvider serviceProvider,
+            SerializableTypes serializableTypes,
             CancellationToken cancellationToken ) : base( compileTimeCompilation )
         {
             this._templateName = templateName;
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
             this._cancellationToken = cancellationToken;
-            var syntaxSerializationService = serviceProvider.GetService<SyntaxSerializationService>();
-            this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( runTimeCompilation ) );
+            this._serializableTypes = serializableTypes;
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
             this._templateMemberClassifier = new TemplateMemberClassifier( runTimeCompilation, syntaxTreeAnnotationMap, serviceProvider );
         }

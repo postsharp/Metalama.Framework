@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             var diagnostics = new DiagnosticList();
 
-            var templateCompiler = new TemplateCompiler( this._serviceProvider );
+            var templateCompiler = new TemplateCompiler( this._serviceProvider, semanticModel.Compilation );
 
             _ = templateCompiler.TryAnnotate( semanticModel.SyntaxTree.GetRoot(), semanticModel, diagnostics, cancellationToken, out var annotatedSyntaxRoot );
 

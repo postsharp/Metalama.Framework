@@ -202,7 +202,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var methodSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
 
-                if ( methodSymbol == null || !this.SymbolClassifier.IsTemplate( methodSymbol ) )
+                if ( methodSymbol == null || this.SymbolClassifier.GetTemplateMemberKind( methodSymbol ) == TemplateMemberKind.None )
                 {
                     yield return (MethodDeclarationSyntax) base.VisitMethodDeclaration( node ).AssertNotNull();
 
@@ -251,7 +251,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var propertySymbol = (IPropertySymbol) this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
-                if ( !this.SymbolClassifier.IsTemplate( propertySymbol ) )
+                if ( this.SymbolClassifier.GetTemplateMemberKind( propertySymbol ) == TemplateMemberKind.None )
                 {
                     yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
 

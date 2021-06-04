@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// 'MembersOnly' means that the rule applies to the members of the type, but not to the type itself.
         /// </summary>
         private static readonly Dictionary<string, (TemplatingScope Scope, bool MembersOnly)> _wellKnownRunTimeTypes =
-            new (Type Type, TemplatingScope Scope, bool MembersOnly)[]
+            new (System.Type Type, TemplatingScope Scope, bool MembersOnly)[]
             {
                 (typeof(Console), TemplatingScope.RunTimeOnly, false),
                 (typeof(Process), TemplatingScope.RunTimeOnly, false),
@@ -48,26 +48,44 @@ namespace Caravela.Framework.Impl.CompileTime
             this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
         }
 
-        public bool IsTemplate( ISymbol symbol )
+        public TemplateMemberKind GetTemplateMemberKind( ISymbol symbol )
         {
             // Look for a [Template] attribute on the symbol.
-            if ( symbol.GetAttributes().Any( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._templateAttribute ) ) )
+            var templateAttribute = symbol
+                .GetAttributes()
+                .FirstOrDefault( this.IsTemplateAttribute );
+
+            if ( templateAttribute != null )
             {
-                return true;
+                return GetTemplateMemberKind( templateAttribute );
             }
 
             switch ( symbol )
             {
                 case IMethodSymbol { OverriddenMethod: { } overriddenMethod }:
                     // Look at the overriden method.
-                    return this.IsTemplate( overriddenMethod! );
+                    return this.GetTemplateMemberKind( overriddenMethod! );
 
                 case IPropertySymbol { OverriddenProperty: { } overriddenProperty }:
                     // Look at the overridden property.
-                    return this.IsTemplate( overriddenProperty! );
+                    return this.GetTemplateMemberKind( overriddenProperty! );
 
                 default:
-                    return false;
+                    return TemplateMemberKind.None;
+            }
+        }
+
+        private bool IsTemplateAttribute( AttributeData a ) => this._compilation.HasImplicitConversion( a.AttributeClass, this._templateAttribute );
+
+        private static TemplateMemberKind GetTemplateMemberKind( AttributeData templateAttribute )
+        {
+            switch ( templateAttribute.AttributeClass?.Name )
+            {
+                case nameof(IntroduceAttribute):
+                    return TemplateMemberKind.Introduction;
+
+                default:
+                    return TemplateMemberKind.Template;
             }
         }
 
@@ -77,13 +95,14 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 return TemplatingScope.CompileTimeOnly;
             }
-
-            if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeAttribute ) )
+            else if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeAttribute ) )
             {
                 return TemplatingScope.Both;
             }
-
-            return null;
+            else
+            {
+                return null;
+            }
         }
 
         private TemplatingScope? GetAssemblyScope( IAssemblySymbol? assembly )
