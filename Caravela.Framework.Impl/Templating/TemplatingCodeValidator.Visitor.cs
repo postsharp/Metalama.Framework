@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Templating
             private readonly IServiceProvider _serviceProvider;
             private readonly bool _hasCompileTimeCodeFast;
 
-            private SymbolDeclarationScope? _currentDeclarationScope;
+            private TemplatingScope? _currentScope;
             private ISymbol? _currentDeclaration;
 
             public bool HasError { get; private set; }
@@ -73,14 +73,14 @@ namespace Caravela.Framework.Impl.Templating
                 // Otherwise, we cannot reference a compile-time-only declaration, except in a typeof() or nameof() expression
                 // because these are transformed by the CompileTimeCompilationBuilder.
 
-                if ( this._currentDeclarationScope is SymbolDeclarationScope.RunTimeOnly )
+                if ( this._currentScope is TemplatingScope.RunTimeOnly )
                 {
                     var symbolInfo = this._semanticModel.GetSymbolInfo( node );
 
                     var referencedSymbol = symbolInfo.Symbol;
 
                     if ( referencedSymbol != null &&
-                         this._classifier.GetSymbolDeclarationScope( referencedSymbol ) == SymbolDeclarationScope.CompileTimeOnly &&
+                         this._classifier.GetTemplatingScope( referencedSymbol ) == TemplatingScope.CompileTimeOnly &&
                          !node.AncestorsAndSelf()
                              .Any( n => n is TypeOfExpressionSyntax || (n is InvocationExpressionSyntax invocation && invocation.IsNameOf()) ) )
                     {
@@ -100,7 +100,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 using var scope = this.WithScope( node );
 
-                if ( (scope.Scope == SymbolDeclarationScope.Both || scope.Scope == SymbolDeclarationScope.Both) &&
+                if ( (scope.Scope == TemplatingScope.Both || scope.Scope == TemplatingScope.Both) &&
                      this._isCompileTimeTreeOutdated )
                 {
                     this.Report(
@@ -193,9 +193,9 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( declaredSymbol != null )
                 {
-                    var scope = this._classifier.GetSymbolDeclarationScope( declaredSymbol );
+                    var scope = this._classifier.GetTemplatingScope( declaredSymbol );
 
-                    if ( scope != SymbolDeclarationScope.RunTimeOnly && !this._hasCompileTimeCodeFast )
+                    if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast )
                     {
                         this.Report(
                             TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateDiagnostic(
@@ -204,7 +204,7 @@ namespace Caravela.Framework.Impl.Templating
                     }
 
                     var context = new ScopeCookie( this, scope, declaredSymbol );
-                    this._currentDeclarationScope = scope;
+                    this._currentScope = scope;
                     this._currentDeclaration = declaredSymbol;
 
                     return context;
@@ -216,19 +216,19 @@ namespace Caravela.Framework.Impl.Templating
             private readonly struct ScopeCookie : IDisposable
             {
                 private readonly Visitor? _parent;
-                private readonly SymbolDeclarationScope? _previousScope;
+                private readonly TemplatingScope? _previousScope;
                 private readonly ISymbol? _previousDeclaration;
 
-                public ScopeCookie( Visitor parent, SymbolDeclarationScope scope, ISymbol? symbol )
+                public ScopeCookie( Visitor parent, TemplatingScope scope, ISymbol? symbol )
                 {
                     this._parent = parent;
-                    this._previousScope = parent._currentDeclarationScope;
+                    this._previousScope = parent._currentScope;
                     this._previousDeclaration = parent._currentDeclaration;
                     this.Scope = scope;
                     this.Symbol = symbol;
                 }
 
-                public SymbolDeclarationScope Scope { get; }
+                public TemplatingScope Scope { get; }
 
                 public ISymbol? Symbol { get; }
 
@@ -236,7 +236,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     if ( this._parent != null )
                     {
-                        this._parent._currentDeclarationScope = this._previousScope;
+                        this._parent._currentScope = this._previousScope;
                         this._parent._currentDeclaration = this._previousDeclaration;
                     }
                 }

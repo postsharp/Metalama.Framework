@@ -113,11 +113,11 @@ namespace Caravela.Framework.Impl.CompileTime
                     .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( message ) ) ) ) );
         }
 
-        protected SymbolDeclarationScope GetSymbolDeclarationScope( MemberDeclarationSyntax node )
+        protected TemplatingScope GetTemplatingScope( MemberDeclarationSyntax node )
         {
             var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 
-            return this.SymbolClassifier.GetSymbolDeclarationScope( symbol );
+            return this.SymbolClassifier.GetTemplatingScope( symbol );
         }
     }
 }

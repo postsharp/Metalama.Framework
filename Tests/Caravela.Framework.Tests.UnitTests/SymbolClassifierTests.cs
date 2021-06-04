@@ -13,12 +13,12 @@ namespace Caravela.Framework.Tests.UnitTests
 {
     public class SymbolClassifierTests : TestBase
     {
-        private void AssertScope( IDeclaration declaration, SymbolDeclarationScope expectedScope )
+        private void AssertScope( IDeclaration declaration, TemplatingScope expectedScope )
         {
             var classifier = this.ServiceProvider.GetService<SymbolClassificationService>()
                 .GetClassifier( ((Declaration) declaration).Compilation.RoslynCompilation );
 
-            var actualScope = classifier.GetSymbolDeclarationScope( declaration.GetSymbol()! );
+            var actualScope = classifier.GetTemplatingScope( declaration.GetSymbol()! );
             Assert.Equal( expectedScope, actualScope );
         }
 
@@ -39,10 +39,10 @@ class C : IAspect
 
             var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes.OfName( "C" ).Single();
-            this.AssertScope( type, SymbolDeclarationScope.Both );
-            this.AssertScope( type.Fields.OfName( "F" ).Single(), SymbolDeclarationScope.Both );
-            this.AssertScope( type.Methods.OfName( "M" ).Single(), SymbolDeclarationScope.Both );
-            this.AssertScope( type.Methods.OfName( "Template" ).Single(), SymbolDeclarationScope.CompileTimeOnly );
+            this.AssertScope( type, TemplatingScope.Both );
+            this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.Both );
+            this.AssertScope( type.Methods.OfName( "M" ).Single(), TemplatingScope.Both );
+            this.AssertScope( type.Methods.OfName( "Template" ).Single(), TemplatingScope.CompileTimeOnly );
         }
 
         [Fact]
@@ -65,11 +65,11 @@ class D : System.IDisposable
 
             var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes.OfName( "C" ).Single();
-            this.AssertScope( type, SymbolDeclarationScope.RunTimeOnly );
-            this.AssertScope( type.Fields.OfName( "F" ).Single(), SymbolDeclarationScope.RunTimeOnly );
-            this.AssertScope( type.Methods.OfName( "M" ).Single(), SymbolDeclarationScope.RunTimeOnly );
+            this.AssertScope( type, TemplatingScope.RunTimeOnly );
+            this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.RunTimeOnly );
+            this.AssertScope( type.Methods.OfName( "M" ).Single(), TemplatingScope.RunTimeOnly );
 
-            this.AssertScope( compilation.DeclaredTypes.OfName( "D" ).Single(), SymbolDeclarationScope.RunTimeOnly );
+            this.AssertScope( compilation.DeclaredTypes.OfName( "D" ).Single(), TemplatingScope.RunTimeOnly );
         }
 
         [Fact]
@@ -85,7 +85,7 @@ class C
 
             var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes.OfName( "C" ).Single();
-            this.AssertScope( type, SymbolDeclarationScope.Both );
+            this.AssertScope( type, TemplatingScope.Both );
         }
 
         [Fact]
@@ -104,9 +104,9 @@ class C
 
             var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes.OfName( "C" ).Single();
-            this.AssertScope( type, SymbolDeclarationScope.CompileTimeOnly );
-            this.AssertScope( type.Fields.OfName( "F" ).Single(), SymbolDeclarationScope.CompileTimeOnly );
-            this.AssertScope( type.Methods.OfName( "M" ).Single(), SymbolDeclarationScope.CompileTimeOnly );
+            this.AssertScope( type, TemplatingScope.CompileTimeOnly );
+            this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.CompileTimeOnly );
+            this.AssertScope( type.Methods.OfName( "M" ).Single(), TemplatingScope.CompileTimeOnly );
         }
 
         [Fact]
@@ -124,7 +124,7 @@ class C
 ";
 
             var compilation = CreateCompilationModel( code );
-            this.AssertScope( compilation.DeclaredTypes.OfName( "C" ).Single(), SymbolDeclarationScope.Both );
+            this.AssertScope( compilation.DeclaredTypes.OfName( "C" ).Single(), TemplatingScope.Both );
         }
     }
 }

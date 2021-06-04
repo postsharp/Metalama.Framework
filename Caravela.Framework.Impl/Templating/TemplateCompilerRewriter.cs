@@ -145,7 +145,7 @@ namespace Caravela.Framework.Impl.Templating
             var scope = node.GetScopeFromAnnotation();
 
             // Take a decision from the node if we can.
-            if ( scope != SymbolDeclarationScope.Both && scope != SymbolDeclarationScope.Unknown )
+            if ( scope != TemplatingScope.Both && scope != TemplatingScope.Unknown )
             {
                 return scope.MustBeTransformed() ? TransformationKind.Transform : TransformationKind.None;
             }
@@ -621,7 +621,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     if ( this._templateMemberClassifier.IsDynamicParameter( a ) )
                     {
-                        if ( a.GetScopeFromAnnotation() != SymbolDeclarationScope.RunTimeOnly )
+                        if ( a.GetScopeFromAnnotation() != TemplatingScope.RunTimeOnly )
                         {
                             return Argument( this.CreateRunTimeExpression( a.Expression ) );
                         }

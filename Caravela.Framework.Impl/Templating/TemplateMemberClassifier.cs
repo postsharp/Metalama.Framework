@@ -34,8 +34,8 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public bool IsCompileTime( ISymbol? symbol )
-            => symbol != null && this._symbolClassifier.GetSymbolDeclarationScope( symbol ).DynamicToCompileTimeOnly()
-                == SymbolDeclarationScope.CompileTimeOnly;
+            => symbol != null && this._symbolClassifier.GetTemplatingScope( symbol ).DynamicToCompileTimeOnly()
+                == TemplatingScope.CompileTimeOnly;
 
 #pragma warning disable CA1822 // Static anyway.
         public bool IsDynamicType( ITypeSymbol? type ) => type is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };

@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// <summary>
     /// Defines where a symbol or an expression can be used, i.e. in compile-time code, in run-time code, or both.
     /// </summary>
-    internal enum SymbolDeclarationScope
+    internal enum TemplatingScope
     {
         /// <summary>
         /// The symbol can be used both at compile time or at run time.
