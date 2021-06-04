@@ -145,6 +145,12 @@ namespace Caravela.TestFramework
                 await File.WriteAllTextAsync( actualTransformedPath, actualTransformedSourceText );
             }
 
+            // Write all diagnostics to the logger.
+            foreach ( var diagnostic in testResult.Diagnostics )
+            {
+                this.Logger.WriteLine( diagnostic.ToString() );
+            }
+
             Assert.Equal( expectedTransformedSourceText, actualTransformedSourceText );
         }
 

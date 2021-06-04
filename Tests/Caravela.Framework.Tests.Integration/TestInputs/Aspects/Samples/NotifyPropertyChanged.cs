@@ -31,7 +31,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
         public dynamic SetPropertyTemplate()
         {
             var result = meta.Proceed();
-            meta.This.PropertyChanged?.Invoke(meta.RunTime(meta.This), new PropertyChangedEventArgs( meta.RunTime(meta.Property.Name)));
+            meta.This.PropertyChanged?.Invoke(meta.This, new PropertyChangedEventArgs( meta.Property.Name));
             return result;
         }
     }

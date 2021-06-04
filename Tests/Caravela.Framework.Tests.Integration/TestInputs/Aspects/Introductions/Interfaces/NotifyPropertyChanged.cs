@@ -16,9 +16,9 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         
         public void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            // This does not work yet.
-            // builder.AdviceFactory.IntroduceInterface(builder.TargetDeclaration, typeof(INotifyPropertyChanged));
-            foreach ( var property in builder.TargetDeclaration.Properties.Where( p => p.Accessibility == Accessibility.Public ) )
+            builder.AdviceFactory.IntroduceInterface(builder.TargetDeclaration, typeof(INotifyPropertyChanged));
+            foreach ( var property in builder.TargetDeclaration.Properties
+                .Where( p => p.Accessibility == Accessibility.Public && p.Writeability == Writeability.All ) )
             {
                 builder.AdviceFactory.OverrideFieldOrPropertyAccessors( property, null, nameof(OverridePropertySetter) );
             }
@@ -30,8 +30,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         [Introduce( ConflictBehavior = ConflictBehavior.Ignore )]
         protected void OnPropertyChanged(string name)
         {
-            // TODO: remove meta.RunTime (28716).
-            meta.This.PropertyChanged?.Invoke(new PropertyChangedEventArgs(meta.RunTime( meta.Parameters[0].Name )));
+            meta.This.PropertyChanged?.Invoke(new PropertyChangedEventArgs(meta.Parameters[0].Name ));
         }
 
         [Template]
@@ -57,10 +56,8 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     [NotifyPropertyChanged]
     class Car
     {
-        string? _make;
-        double _power;
-        public string? Make { get => _make; set => _make = value; }
-        public double Power { get => _power; set => _power = value; }
+        public string? Make {get; set;}
+        public double Power {get;set;}
 
     }
 }

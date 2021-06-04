@@ -109,9 +109,16 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         private SymbolDeclarationScope GetSymbolScope( ISymbol? symbol )
         {
+            SymbolDeclarationScope NeutralToPreferred( SymbolDeclarationScope scope )
+                => scope switch
+                {
+                    SymbolDeclarationScope.Both => this._currentScopeContext.PreferRunTimeExpression ? SymbolDeclarationScope.RunTimeOnly : scope,
+                    _ => scope
+                };
+
             if ( symbol == null )
             {
-                return SymbolDeclarationScope.Both;
+                return NeutralToPreferred( SymbolDeclarationScope.Both );
             }
 
             // For local variables, we decide based on  _buildTimeLocals only. This collection is updated
@@ -129,7 +136,7 @@ namespace Caravela.Framework.Impl.Templating
             }
             else if ( symbol is { ContainingType: { IsAnonymousType: true } containingType } )
             {
-                return this.GetSymbolScope( containingType );
+                return NeutralToPreferred( this.GetSymbolScope( containingType ) );
             }
 
             // The TemplateContext.runTime method must be processed separately. It is a compile-time-only method whose
@@ -154,7 +161,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // For other symbols, we use the SymbolScopeClassifier.
-            return this._symbolScopeClassifier.GetSymbolDeclarationScope( symbol );
+            return NeutralToPreferred( this._symbolScopeClassifier.GetSymbolDeclarationScope( symbol ) );
         }
 
         /// <summary>
@@ -183,7 +190,12 @@ namespace Caravela.Framework.Impl.Templating
             // If the node is dynamic, it is run-time only.
             if ( this._templateMemberClassifier.IsDynamicType( node ) )
             {
-                return SymbolDeclarationScope.Dynamic;
+                var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
+
+                // Dynamic local variables are considered compile-time because they must be transformed. 
+                return this._templateMemberClassifier.IsCompileTime( symbol ) || symbol is ILocalSymbol
+                    ? SymbolDeclarationScope.CompileTimeDynamic
+                    : SymbolDeclarationScope.Dynamic;
             }
 
             switch ( node )
@@ -270,7 +282,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 switch ( scope )
                 {
-                    case SymbolDeclarationScope.Dynamic:
+                    case SymbolDeclarationScope.CompileTimeDynamic:
                     case SymbolDeclarationScope.RunTimeOnly:
                         runtimeCount++;
 
@@ -357,7 +369,7 @@ namespace Caravela.Framework.Impl.Templating
                         transformedNode,
                         SymbolDeclarationScope.RunTimeOnly,
                         SymbolDeclarationScope.CompileTimeOnly,
-                        this._currentScopeContext.ForcedScopeReason! );
+                        this._currentScopeContext.PreferredScopeReason! );
 
                     return transformedNode.AddScopeMismatchAnnotation();
                 }
@@ -485,7 +497,8 @@ namespace Caravela.Framework.Impl.Templating
                             var node = nodeOrToken.AsNode() ?? nodeOrToken.Parent;
 
                             if ( node != null &&
-                                 this._templateMemberClassifier.IsDynamicType( node ) )
+                                 this._templateMemberClassifier.IsDynamicType( node ) &&
+                                 symbol is not ITypeSymbol )
                             {
                                 // Annotate dynamic members differently for syntax coloring.
                                 nodeOrToken = nodeOrToken.AddColoringAnnotation( TextSpanClassification.Dynamic );
@@ -511,14 +524,21 @@ namespace Caravela.Framework.Impl.Templating
             {
                 case SymbolDeclarationScope.CompileTimeOnly:
                     // If the member is compile-time (because of rules on the symbol), the expression on the left MUST be compile-time.
-                    context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a compile-time-only member '${node.Name}'" );
+                    context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a compile-time-only member '{node.Name}'" );
                     scope = SymbolDeclarationScope.CompileTimeOnly;
 
                     break;
 
+                case SymbolDeclarationScope.CompileTimeDynamic:
+                    // This dynamic member is compile-time but the result is run-time.
+                    context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a compile-time-only member '{node.Name}'" );
+                    scope = SymbolDeclarationScope.CompileTimeDynamic;
+
+                    break;
+
                 case SymbolDeclarationScope.Dynamic:
-                    // Dynamic members are compile-time but the result is run-time.
-                    context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a compile-time-only member '${node.Name}'" );
+                    // A member is run-time dynamic because the left part is dynamic, so there is no need to force it run-time.
+                    // It can actually contain build-time subexpressions.
                     scope = SymbolDeclarationScope.Dynamic;
 
                     break;
@@ -526,6 +546,7 @@ namespace Caravela.Framework.Impl.Templating
                 case SymbolDeclarationScope.Unknown when this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol:
                     // This is a member access of a dynamic receiver.
                     scope = SymbolDeclarationScope.RunTimeOnly;
+                    context = ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, $"a member of the run-time-only '{node.Name}'" );
 
                     break;
 
@@ -591,26 +612,59 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             var expressionScope = this.GetNodeScope( transformedExpression );
+            var expressionSymbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Expression );
+
+            var parameters = expressionSymbol switch
+            {
+                null => default,
+                IMethodSymbol method => method.Parameters,
+                IPropertySymbol property => property.Parameters,
+                IParameterSymbol parameter when parameter.Type.TypeKind == TypeKind.Delegate => ((INamedTypeSymbol) parameter.Type).Constructors.Single()
+                    .Parameters,
+                ILocalSymbol local when local.Type.TypeKind == TypeKind.Delegate => ((INamedTypeSymbol) local.Type).Constructors.Single().Parameters,
+                _ => throw new NotImplementedException( $"Don't know how to get the parameters of '{expressionSymbol}'." )
+            };
 
             InvocationExpressionSyntax updatedInvocation;
 
-            if ( expressionScope.DynamicToCompileTimeOnly() == SymbolDeclarationScope.CompileTimeOnly )
+            if ( expressionScope.DynamicToCompileTimeOnly() is SymbolDeclarationScope.CompileTimeOnly or SymbolDeclarationScope.Dynamic )
             {
-                // If the expression on the left side is compile-time (because of rules on the symbol),
-                // then arguments MUST be compile-time, unless they are dynamic.
+                // If the expression on the left side is compile-time (because of rules on the symbol) or dynamic,
+                // we know the scope of arguments upfront. Otherwise, we need to decide of the invocation scope based on arguments (else branch of this if).
 
                 var transformedArguments = new List<ArgumentSyntax>( node.ArgumentList.Arguments.Count );
 
-                foreach ( var argument in node.ArgumentList.Arguments )
+                for ( var argumentIndex = 0; argumentIndex < node.ArgumentList.Arguments.Count; argumentIndex++ )
                 {
-                    var parameterType = this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type;
+                    var argument = node.ArgumentList.Arguments[argumentIndex];
+
+                    // The parameter index can be different than the argument index in case of 'params xx[]'.
+                    IParameterSymbol? parameter;
+
+                    if ( !parameters.IsDefault )
+                    {
+                        var parameterIndex = argumentIndex >= parameters.Length ? parameters.Length - 1 : argumentIndex;
+                        parameter = parameters[parameterIndex];
+                    }
+                    else
+                    {
+                        parameter = null;
+                    }
+
+                    var argumentType = parameter?.Type ?? this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type;
 
                     ArgumentSyntax transformedArgument;
 
                     // dynamic or dynamic[]
-                    if ( this._templateMemberClassifier.IsDynamicType( parameterType ) )
+                    if ( expressionScope.IsDynamic() || this._templateMemberClassifier.IsDynamicType( argumentType ) )
                     {
-                        transformedArgument = (ArgumentSyntax) this.VisitArgument( argument )!;
+                        using ( this.WithScopeContext(
+                            ScopeContext.CreatePreferredRunTimeScope(
+                                this._currentScopeContext,
+                                $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString()}'" ) ) )
+                        {
+                            transformedArgument = (ArgumentSyntax) this.VisitArgument( argument )!;
+                        }
                     }
                     else
                     {
@@ -923,7 +977,7 @@ namespace Caravela.Framework.Impl.Templating
                 using ( this.WithScopeContext(
                     localScope == SymbolDeclarationScope.CompileTimeOnly
                         ? ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, "creation of a compile-time object" )
-                        : ScopeContext.CreateForcedRunTimeScope( this._currentScopeContext, "creation of a run-time object" ) ) )
+                        : ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, "creation of a run-time object" ) ) )
                 {
                     transformedArguments = node.ArgumentList.Arguments.Select( a => this.Visit( a )! ).ToArray();
                 }
@@ -1457,6 +1511,7 @@ namespace Caravela.Framework.Impl.Templating
 
             // TODO: remove the next line (it should come as Dynamic).
             if ( (existingScope == SymbolDeclarationScope.CompileTimeOnly && this._templateMemberClassifier.IsDynamicType( node )) ||
+                 existingScope == SymbolDeclarationScope.CompileTimeDynamic ||
                  existingScope == SymbolDeclarationScope.Dynamic )
             {
                 existingScope = SymbolDeclarationScope.RunTimeOnly;
@@ -1603,7 +1658,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitThrowExpression( ThrowExpressionSyntax node )
         {
-            using ( this.WithScopeContext( ScopeContext.CreateForcedRunTimeScope( this._currentScopeContext, "an expression of a 'throw' expression" ) ) )
+            using ( this.WithScopeContext( ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, "an expression of a 'throw' expression" ) ) )
             {
                 var transformedExpression = this.Visit( node.Expression )!;
 
@@ -1615,7 +1670,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitThrowStatement( ThrowStatementSyntax node )
         {
-            using ( this.WithScopeContext( ScopeContext.CreateForcedRunTimeScope( this._currentScopeContext, "an expression of a 'throw' statement" ) ) )
+            using ( this.WithScopeContext( ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, "an expression of a 'throw' statement" ) ) )
             {
                 var transformedExpression = this.Visit( node.Expression )!;
 

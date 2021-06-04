@@ -1,14 +1,14 @@
+
 [TestOutput]
 [NotifyPropertyChanged]
 class Car
+: global::System.ComponentModel.INotifyPropertyChanged
 {
-    string? _make;
-    double _power;
     public string? Make
     {
         get
         {
-            return _make;
+            return this.__Make__BackingField;
         }
 
         set
@@ -18,17 +18,20 @@ class Car
             {
                 this.OnPropertyChanged("Make");
                 global::System.String dummy;
-                _make = value;
+                this.__Make__BackingField = value;
             }
 
             return;
         }
     }
+
+    private string? __Make__BackingField;
+
     public double Power
     {
         get
         {
-            return _power;
+            return this.__Power__BackingField;
         }
 
         set
@@ -38,13 +41,14 @@ class Car
             {
                 this.OnPropertyChanged("Power");
                 global::System.Double dummy;
-                _power = value;
+                this.__Power__BackingField = value;
             }
 
             return;
         }
     }
 
+    private double __Power__BackingField;
 
     public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 
@@ -52,4 +56,18 @@ class Car
     {
         this.PropertyChanged?.Invoke(new global::System.ComponentModel.PropertyChangedEventArgs("name"));
     }
+
+    event global::System.ComponentModel.PropertyChangedEventHandler? global::System.ComponentModel.INotifyPropertyChanged.PropertyChanged
+    {
+        add
+        {
+            this.PropertyChanged += value;
+        }
+
+        remove
+        {
+            this.PropertyChanged -= value;
+        }
+    }
 }
+

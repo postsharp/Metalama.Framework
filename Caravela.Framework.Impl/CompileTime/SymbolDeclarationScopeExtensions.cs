@@ -8,13 +8,18 @@ namespace Caravela.Framework.Impl.CompileTime
     internal static class SymbolDeclarationScopeExtensions
     {
         public static bool MustBeTransformed( this SymbolDeclarationScope scope )
-            => scope.ReplaceDefault( SymbolDeclarationScope.RunTimeOnly ) == SymbolDeclarationScope.RunTimeOnly;
+            => scope.ReplaceDefault( SymbolDeclarationScope.RunTimeOnly ) is
+                SymbolDeclarationScope.RunTimeOnly or
+                SymbolDeclarationScope.Dynamic;
 
         public static SymbolDeclarationScope DynamicToRunTimeOnly( this SymbolDeclarationScope scope )
-            => scope == SymbolDeclarationScope.Dynamic ? SymbolDeclarationScope.RunTimeOnly : scope;
+            => scope == SymbolDeclarationScope.CompileTimeDynamic ? SymbolDeclarationScope.RunTimeOnly : scope;
 
         public static SymbolDeclarationScope DynamicToCompileTimeOnly( this SymbolDeclarationScope scope )
-            => scope == SymbolDeclarationScope.Dynamic ? SymbolDeclarationScope.CompileTimeOnly : scope;
+            => scope == SymbolDeclarationScope.CompileTimeDynamic ? SymbolDeclarationScope.CompileTimeOnly : scope;
+
+        public static bool IsDynamic( this SymbolDeclarationScope scope )
+            => scope is SymbolDeclarationScope.CompileTimeDynamic or SymbolDeclarationScope.Dynamic;
 
         public static SymbolDeclarationScope ReplaceDefault( this SymbolDeclarationScope scope, SymbolDeclarationScope defaultScope )
             => scope == SymbolDeclarationScope.Both || scope == SymbolDeclarationScope.Unknown ? defaultScope : scope;
@@ -26,6 +31,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 SymbolDeclarationScope.CompileTimeOnly => "compile-time",
                 SymbolDeclarationScope.Both => "both",
                 SymbolDeclarationScope.Unknown => "unknown",
+                SymbolDeclarationScope.CompileTimeDynamic => "dynamic compile-time",
+                SymbolDeclarationScope.Dynamic => "dynamic",
 
                 // We also throw an exception for Dynamic because a caller should convert dynamic to run-time or compile-time according to the context.
                 _ => throw new ArgumentOutOfRangeException( nameof(scope) )
