@@ -30,7 +30,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
         [Introduce]
         protected virtual void OnPropertyChanged( string name )
         {
-            this.PropertyChanged.Invoke(meta.This, new PropertyChangedEventArgs( meta.Property.Name));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs( name));
         }
 
         [Template]

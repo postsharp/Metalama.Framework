@@ -32,7 +32,7 @@ namespace Caravela.TestFramework
             using var domain = new UnloadableCompileTimeDomain();
 
             var pipeline = new CompileTimeAspectPipeline( buildOptions, domain );
-            var spy = new Spy(testResult);
+            var spy = new Spy( testResult );
             pipeline.ServiceProvider.AddService<ICompileTimeCompilationBuilderSpy>( spy );
             pipeline.ServiceProvider.AddService<ITemplateCompilerSpy>( spy );
 
@@ -59,7 +59,7 @@ namespace Caravela.TestFramework
         // We don't want the base class to report errors in the input compilation because the pipeline does.
         protected override bool ReportInvalidInputCompilation => false;
 
-        class Spy : ICompileTimeCompilationBuilderSpy, ITemplateCompilerSpy
+        private class Spy : ICompileTimeCompilationBuilderSpy, ITemplateCompilerSpy
         {
             private readonly TestResult _testResult;
             private SyntaxNode? _annotatedSyntaxRoot;

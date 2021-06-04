@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -42,20 +41,19 @@ namespace Caravela.Framework.Impl.Serialization
                 case SpecialType.System_Double:
                 case SpecialType.System_String:
                     return true;
-                
+
                 default:
                     return false;
             }
-            
         }
 
         public bool IsSerializable( ITypeSymbol type, Location? diagnosticLocation = null, IDiagnosticAdder? diagnosticAdder = null )
         {
-            if ( IsSerializableIntrinsic( type ) )
+            if ( this.IsSerializableIntrinsic( type ) )
             {
                 return true;
             }
-            
+
             var id = type.GetDocumentationCommentId().AssertNotNull();
 
             if ( this._serializableTypes.Contains( id ) )

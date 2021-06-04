@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
         private readonly IDirectoryOptions _directoryOptions;
         private readonly ICompileTimeCompilationBuilderSpy? _spy;
- 
+
         private static readonly string _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).VersionId;
 
         public const string ResourceName = "Caravela.CompileTimeAssembly";
@@ -161,7 +161,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees.Select( t => t.TransformedTree ) );
-            
+
             this._spy?.ReportCompileTimeCompilation( compileTimeCompilation );
 
             compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitTrees( compileTimeCompilation );

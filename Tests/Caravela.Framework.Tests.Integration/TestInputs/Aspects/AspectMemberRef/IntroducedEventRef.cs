@@ -1,11 +1,12 @@
 using System;
 using System.Text;
 using System.Linq;
+using System.ComponentModel;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
 using Caravela.Framework.Code;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.IntroducedPropertyRef
+namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.IntroducedEventRef
 {
 
     public class RetryAttribute : Attribute, IAspect<INamedType>
@@ -13,11 +14,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.Introduced
         [Introduce]
         void IntroducedMethod1( string name ) 
         {
-            this.IntroducedProperty = name;
+            this.MyEvent.Invoke( meta.This, new PropertyChangedEventArgs( name ) );
+            this.MyEvent( meta.This, new PropertyChangedEventArgs( name ) );
         }
         
         [Introduce]
-        string IntroducedProperty { get { return meta.Property.DeclaringType.Name; } set {} }
+        event PropertyChangedEventHandler? MyEvent;
         
     }
     

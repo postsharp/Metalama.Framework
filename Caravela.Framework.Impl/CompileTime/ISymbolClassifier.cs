@@ -11,13 +11,12 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Not a template member.
         /// </summary>
         None,
-        
+
         Template,
-        
+
         Introduction
-        
     }
-    
+
     /// <summary>
     /// Determines the kind of symbol: template, <see cref="TemplatingScope.CompileTimeOnly"/>,
     /// <see cref="TemplatingScope.RunTimeOnly"/>.

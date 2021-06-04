@@ -131,11 +131,9 @@ namespace Caravela.Framework.Impl.Templating
                             }
                         }
                     }
-                    
+
                     return TemplatingScope.Both;
                 }
-
-                
             }
 
             if ( symbol == null )
@@ -183,11 +181,10 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     case TemplateMemberKind.Introduction:
                         return TemplatingScope.RunTimeOnly;
-                    
+
                     default:
                         return TemplatingScope.CompileTimeOnly;
                 }
-                
             }
 
             // For other symbols, we use the SymbolScopeClassifier.
@@ -281,8 +278,6 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         private TemplatingScope GetExpressionScope( IEnumerable<TemplatingScope>? childrenScopes, SyntaxNode? originalParent = null )
         {
-            
-
             // Get the scope of type of the parent node.
 
             if ( originalParent != null )
@@ -385,11 +380,11 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return null;
             }
-            
-            if (this._currentScopeContext.ForceCompileTimeOnlyExpression)
+
+            if ( this._currentScopeContext.ForceCompileTimeOnlyExpression )
             {
-                if (visitedNode.GetScopeFromAnnotation() == TemplatingScope.RunTimeOnly ||
-                    this._templateMemberClassifier.IsDynamicType( visitedNode ))
+                if ( visitedNode.GetScopeFromAnnotation() == TemplatingScope.RunTimeOnly ||
+                     this._templateMemberClassifier.IsDynamicType( visitedNode ) )
                 {
                     // The current expression is obliged to be compile-time-only by inference.
                     // Emit an error if the type of the expression is inferred to be runtime-only.
@@ -404,13 +399,13 @@ namespace Caravela.Framework.Impl.Templating
 
                 // the current expression can be annotated as unknown (f.e. parameters of lambda expression)
                 // that means it can be used as compile time and it doesn't need to be annotated as compileTime.
-                if (visitedNode.GetScopeFromAnnotation() != TemplatingScope.Unknown)
+                if ( visitedNode.GetScopeFromAnnotation() != TemplatingScope.Unknown )
                 {
                     return visitedNode.ReplaceScopeAnnotation( TemplatingScope.CompileTimeOnly );
                 }
             }
 
-            if (visitedNode.HasScopeAnnotation())
+            if ( visitedNode.HasScopeAnnotation() )
             {
                 // If the transformed node has already an annotation, it means it has already been classified by
                 // a previous run of the algorithm, and there is no need to classify it again.
@@ -650,6 +645,7 @@ namespace Caravela.Framework.Impl.Templating
                 IParameterSymbol parameter when parameter.Type.TypeKind == TypeKind.Delegate => ((INamedTypeSymbol) parameter.Type).Constructors.Single()
                     .Parameters,
                 ILocalSymbol local when local.Type.TypeKind == TypeKind.Delegate => ((INamedTypeSymbol) local.Type).Constructors.Single().Parameters,
+                IEventSymbol @event => ((INamedTypeSymbol) @event.Type).Constructors.Single().Parameters,
                 _ => throw new NotImplementedException( $"Don't know how to get the parameters of '{expressionSymbol}'." )
             };
 

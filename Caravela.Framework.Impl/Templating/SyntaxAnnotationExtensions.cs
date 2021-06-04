@@ -72,7 +72,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 case _runTimeDynamicAnnotationData:
                     return TemplatingScope.Dynamic;
-                
+
                 case _bothAnnotationData:
                     return TemplatingScope.Both;
 
@@ -152,7 +152,8 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( node.HasAnnotations( _scopeAnnotationKind ) && scope != node.GetScopeFromAnnotation() )
             {
-                throw new AssertionFailedException( $"The scope of the {node.Kind()} has already been set to {node.GetScopeFromAnnotation()} and cannot be changed to {scope}." );
+                throw new AssertionFailedException(
+                    $"The scope of the {node.Kind()} has already been set to {node.GetScopeFromAnnotation()} and cannot be changed to {scope}." );
             }
 
             switch ( scope )
@@ -171,7 +172,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 case TemplatingScope.Dynamic:
                     return node.WithAdditionalAnnotations( _runTimeDynamicAnnotation );
-                
+
                 case TemplatingScope.Both:
                     return node.WithAdditionalAnnotations( _bothAnnotation );
 

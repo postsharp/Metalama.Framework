@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public static bool IsRunTime( this TemplatingScope scope )
             => scope is TemplatingScope.Dynamic or TemplatingScope.CompileTimeDynamic or TemplatingScope.RunTimeOnly;
-        
+
         public static TemplatingScope ReplaceIndeterminate( this TemplatingScope scope, TemplatingScope defaultScope )
             => scope.IsIndeterminate() ? defaultScope : scope;
 
