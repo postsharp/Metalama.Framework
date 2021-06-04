@@ -142,7 +142,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         protected override TransformationKind GetTransformationKind( SyntaxNode node )
         {
-            var scope = node.GetScopeFromAnnotation();
+            var scope = node.GetScopeFromAnnotation().GetValueOrDefault();
 
             // Take a decision from the node if we can.
             if ( scope != TemplatingScope.Both && scope != TemplatingScope.Unknown )
@@ -156,7 +156,7 @@ namespace Caravela.Framework.Impl.Templating
                   parent != null;
                   parent = parent.Parent )
             {
-                if ( !parent.GetScopeFromAnnotation().MustBeTransformed() )
+                if ( !parent.GetScopeFromAnnotation().GetValueOrDefault().MustBeTransformed() )
                 {
                     return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax
                            || parent is SwitchSectionSyntax
