@@ -1,4 +1,4 @@
-﻿using Caravela.Framework.Aspects;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
@@ -26,13 +26,21 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
 
         [Introduce]
         public event PropertyChangedEventHandler? PropertyChanged;
+        
+        [Introduce]
+        protected virtual void OnPropertyChanged( string name )
+        {
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs( name));
+        }
 
         [Template]
-        public dynamic SetPropertyTemplate()
+        public void SetPropertyTemplate(dynamic value)
         {
-            var result = meta.Proceed();
-            meta.This.PropertyChanged?.Invoke(meta.This, new PropertyChangedEventArgs( meta.Property.Name));
-            return result;
+            if ( value != meta.Property.Value )
+            {
+                this.OnPropertyChanged( meta.Property.Name );
+                var result = meta.Proceed();
+            }
         }
     }
 

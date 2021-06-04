@@ -31,6 +31,7 @@ namespace Caravela.Framework.Impl.Templating
             private readonly CancellationToken _cancellationToken;
             private readonly IServiceProvider _serviceProvider;
             private readonly bool _hasCompileTimeCodeFast;
+            private TemplateCompiler? _templateCompiler;
 
             private TemplatingScope? _currentScope;
             private ISymbol? _currentDeclaration;
@@ -116,12 +117,12 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var methodSymbol = this._semanticModel.GetDeclaredSymbol( node );
 
-                if ( methodSymbol != null && this._classifier.IsTemplate( methodSymbol ) )
+                if ( methodSymbol != null && this._classifier.GetTemplateMemberKind( methodSymbol ) != TemplateMemberKind.None )
                 {
                     if ( this._isDesignTime )
                     {
-                        TemplateCompiler templateCompiler = new( this._serviceProvider );
-                        _ = templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _ );
+                        this._templateCompiler ??= new TemplateCompiler( this._serviceProvider, this._semanticModel.Compilation );
+                        _ = this._templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _ );
                     }
                     else
                     {

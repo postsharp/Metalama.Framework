@@ -26,7 +26,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
         {
             this._semanticModel = semanticModel;
             this._diagnosticAdder = diagnosticAdder;
-            this._templateCompiler = new TemplateCompiler( serviceProvider );
+            this._templateCompiler = new TemplateCompiler( serviceProvider, semanticModel.Compilation );
         }
 
         public bool HasError { get; private set; }

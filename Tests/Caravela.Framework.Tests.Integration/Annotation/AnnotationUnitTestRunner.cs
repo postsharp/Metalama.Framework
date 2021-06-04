@@ -37,7 +37,7 @@ namespace Caravela.Framework.Tests.Integration.Annotation
 
             DiagnosticList diagnostics = new();
 
-            TemplateCompiler templateCompiler = new( this.ServiceProvider );
+            TemplateCompiler templateCompiler = new( this.ServiceProvider, result.InitialCompilation );
 
             var templateCompilerSuccess = templateCompiler.TryAnnotate(
                 templateSyntaxRoot,

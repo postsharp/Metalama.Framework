@@ -45,14 +45,14 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
             IDiagnosticAdder diagnosticAdder,
             IServiceProvider serviceProvider,
+            SerializableTypes serializableTypes,
             CancellationToken cancellationToken ) : base( compileTimeCompilation )
         {
             this._templateName = templateName;
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
             this._cancellationToken = cancellationToken;
-            var syntaxSerializationService = serviceProvider.GetService<SyntaxSerializationService>();
-            this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( runTimeCompilation ) );
+            this._serializableTypes = serializableTypes;
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
             this._templateMemberClassifier = new TemplateMemberClassifier( runTimeCompilation, syntaxTreeAnnotationMap, serviceProvider );
         }
@@ -142,7 +142,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         protected override TransformationKind GetTransformationKind( SyntaxNode node )
         {
-            var scope = node.GetScopeFromAnnotation();
+            var scope = node.GetScopeFromAnnotation().GetValueOrDefault();
 
             // Take a decision from the node if we can.
             if ( scope != TemplatingScope.Both && scope != TemplatingScope.Unknown )
@@ -156,7 +156,7 @@ namespace Caravela.Framework.Impl.Templating
                   parent != null;
                   parent = parent.Parent )
             {
-                if ( !parent.GetScopeFromAnnotation().MustBeTransformed() )
+                if ( !parent.GetScopeFromAnnotation().GetValueOrDefault().MustBeTransformed() )
                 {
                     return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax
                            || parent is SwitchSectionSyntax
@@ -438,6 +438,7 @@ namespace Caravela.Framework.Impl.Templating
                 return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
             }
 
+            // ReSharper disable once ConstantConditionalAccessQualifier
             switch ( type?.Name )
             {
                 case "dynamic":
@@ -617,7 +618,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // We are transforming a call to a compile-time method that accepts dynamic arguments.
 
-                SyntaxNode? TransformArgument( ArgumentSyntax a )
+                SyntaxNode? LocalTransformArgument( ArgumentSyntax a )
                 {
                     if ( this._templateMemberClassifier.IsDynamicParameter( a ) )
                     {
@@ -636,7 +637,7 @@ namespace Caravela.Framework.Impl.Templating
                     }
                 }
 
-                var transformedArguments = node.ArgumentList.Arguments.Select( syntax => TransformArgument( syntax )! ).ToArray();
+                var transformedArguments = node.ArgumentList.Arguments.Select( syntax => LocalTransformArgument( syntax )! ).ToArray();
 
                 return node.Update(
                     (ExpressionSyntax) this.Visit( node.Expression )!,

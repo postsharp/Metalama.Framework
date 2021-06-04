@@ -5,6 +5,7 @@ using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -28,6 +29,7 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
+        private readonly SerializableTypes _serializableTypes;
         private readonly CancellationToken _cancellationToken;
         private readonly TemplateMemberClassifier _templateMemberClassifier;
 
@@ -47,11 +49,13 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
             IDiagnosticAdder diagnosticAdder,
             IServiceProvider serviceProvider,
+            SerializableTypes serializableTypes,
             CancellationToken cancellationToken )
         {
             this._symbolScopeClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
+            this._serializableTypes = serializableTypes;
             this._cancellationToken = cancellationToken;
 
             this._templateMemberClassifier = new TemplateMemberClassifier( compilation, syntaxTreeAnnotationMap, serviceProvider );
@@ -109,16 +113,10 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         private TemplatingScope GetSymbolScope( ISymbol? symbol )
         {
-            TemplatingScope NeutralToPreferred( TemplatingScope scope )
-                => scope switch
-                {
-                    TemplatingScope.Both => this._currentScopeContext.PreferRunTimeExpression ? TemplatingScope.RunTimeOnly : scope,
-                    _ => scope
-                };
 
             if ( symbol == null )
             {
-                return NeutralToPreferred( TemplatingScope.Both );
+                return GetMoreSpecificScope( TemplatingScope.Both );
             }
 
             // For local variables, we decide based on  _buildTimeLocals only. This collection is updated
@@ -136,7 +134,7 @@ namespace Caravela.Framework.Impl.Templating
             }
             else if ( symbol is { ContainingType: { IsAnonymousType: true } containingType } )
             {
-                return NeutralToPreferred( this.GetSymbolScope( containingType ) );
+                return GetMoreSpecificScope( this.GetSymbolScope( containingType ) );
             }
 
             // The TemplateContext.runTime method must be processed separately. It is a compile-time-only method whose
@@ -157,11 +155,42 @@ namespace Caravela.Framework.Impl.Templating
             // be called from run-time code.
             if ( this.IsAspectMember( symbol ) )
             {
-                return TemplatingScope.CompileTimeOnly;
+                switch ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) )
+                {
+                    case TemplateMemberKind.Introduction:
+                        return TemplatingScope.RunTimeOnly;
+
+                    default:
+                        return TemplatingScope.CompileTimeOnly;
+                }
             }
 
             // For other symbols, we use the SymbolScopeClassifier.
-            return NeutralToPreferred( this._symbolScopeClassifier.GetTemplatingScope( symbol ) );
+            return GetMoreSpecificScope( this._symbolScopeClassifier.GetTemplatingScope( symbol ) );
+
+            TemplatingScope GetMoreSpecificScope( TemplatingScope scope )
+            {
+                if ( scope != TemplatingScope.Both )
+                {
+                    return scope;
+                }
+                else
+                {
+                    if ( this._currentScopeContext.PreferRunTimeExpression )
+                    {
+                        if ( symbol is ITypeSymbol typeSymbol )
+                        {
+                            if ( !this._serializableTypes.IsSerializable( typeSymbol ) )
+                            {
+                                return TemplatingScope.RunTimeOnly;
+                            }
+                        }
+                    }
+
+                    return TemplatingScope.Both;
+                }
+            }
+
         }
 
         /// <summary>
@@ -222,7 +251,7 @@ namespace Caravela.Framework.Impl.Templating
                 default:
                     // Otherwise, the scope is given by the annotation given by the deeper
                     // visitor or the previous algorithm iteration.
-                    return node.GetScopeFromAnnotation();
+                    return node.GetScopeFromAnnotation().GetValueOrDefault();
             }
         }
 
@@ -240,33 +269,26 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        private TemplatingScope GetExpressionScope( IEnumerable<SyntaxNode?>? children, SyntaxNode? parent = null )
-            => this.GetExpressionScope( children?.Select( this.GetNodeScope ), parent );
+        private TemplatingScope GetExpressionScope( IEnumerable<SyntaxNode?>? annotatedChildren, SyntaxNode? originalParent = null )
+            => this.GetExpressionScope( annotatedChildren?.Select( this.GetNodeScope ), originalParent );
 
         /// <summary>
         /// Gives the <see cref="TemplatingScope"/> of a parent given the scope of its children.
         /// </summary>
         /// <param name="childrenScopes"></param>
-        /// <param name="parent"></param>
+        /// <param name="originalParent"></param>
         /// <returns></returns>
-        private TemplatingScope GetExpressionScope( IEnumerable<TemplatingScope>? childrenScopes, SyntaxNode? parent = null )
+        private TemplatingScope GetExpressionScope( IEnumerable<TemplatingScope>? childrenScopes, SyntaxNode? originalParent = null )
         {
-            var parentExpressionScope = this.GetExpressionTypeScope( parent );
-
             // Get the scope of type of the parent node.
 
-            if ( parent != null )
+            if ( originalParent != null )
             {
-                // In some cases, the expression scope can be decided without looking at children.
-                if ( (this._currentScopeContext.PreferRunTimeExpression && parentExpressionScope != TemplatingScope.CompileTimeOnly)
-                     || parentExpressionScope == TemplatingScope.RunTimeOnly )
+                var parentExpressionScope = this.GetExpressionTypeScope( originalParent );
+
+                if ( !parentExpressionScope.IsIndeterminate() )
                 {
-                    // We have build-time children, but the current node itself must be run-time.
-                    return TemplatingScope.RunTimeOnly;
-                }
-                else if ( parentExpressionScope == TemplatingScope.CompileTimeOnly )
-                {
-                    return TemplatingScope.CompileTimeOnly;
+                    return parentExpressionScope;
                 }
             }
 
@@ -306,12 +328,6 @@ namespace Caravela.Framework.Impl.Templating
             }
             else if ( compileTimeOnlyCount > 0 )
             {
-                if ( parentExpressionScope != TemplatingScope.Both )
-                {
-                    // We should not get here because the case was processed before looking at the children.
-                    throw new AssertionFailedException();
-                }
-
                 return TemplatingScope.CompileTimeOnly;
             }
             else
@@ -348,51 +364,60 @@ namespace Caravela.Framework.Impl.Templating
         [return: NotNullIfNotNull( "node" )]
         private SyntaxNode? DefaultVisitImpl( SyntaxNode? node )
         {
-            if ( node == null )
-            {
-                return null;
-            }
-
             this._cancellationToken.ThrowIfCancellationRequested();
 
             // Adds annotations to the children node.
             var transformedNode = base.Visit( node );
 
+            return this.AddScopeAnnotationToVisitedNode( node, transformedNode );
+        }
+
+        /// <summary>
+        /// Adds scope annotation to a node that has been visited - so children are annotated but not the node itself.
+        /// </summary>
+        [return: NotNullIfNotNull( "node" )]
+        private SyntaxNode? AddScopeAnnotationToVisitedNode( SyntaxNode? node, SyntaxNode? visitedNode )
+        {
+            if ( visitedNode == null )
+            {
+                return null;
+            }
+
             if ( this._currentScopeContext.ForceCompileTimeOnlyExpression )
             {
-                if ( transformedNode.GetScopeFromAnnotation() == TemplatingScope.RunTimeOnly ||
-                     this._templateMemberClassifier.IsDynamicType( transformedNode ) )
+                if ( visitedNode.GetScopeFromAnnotation() == TemplatingScope.RunTimeOnly ||
+                     this._templateMemberClassifier.IsDynamicType( visitedNode ) )
                 {
                     // The current expression is obliged to be compile-time-only by inference.
                     // Emit an error if the type of the expression is inferred to be runtime-only.
                     this.RequireScope(
-                        transformedNode,
+                        visitedNode,
                         TemplatingScope.RunTimeOnly,
                         TemplatingScope.CompileTimeOnly,
                         this._currentScopeContext.PreferredScopeReason! );
 
-                    return transformedNode.AddScopeMismatchAnnotation();
+                    return visitedNode.AddScopeMismatchAnnotation();
                 }
 
                 // the current expression can be annotated as unknown (f.e. parameters of lambda expression)
                 // that means it can be used as compile time and it doesn't need to be annotated as compileTime.
-                if ( transformedNode.GetScopeFromAnnotation() != TemplatingScope.Unknown )
+                if ( visitedNode.GetScopeFromAnnotation() != TemplatingScope.Unknown )
                 {
-                    return transformedNode.AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
+                    return visitedNode.ReplaceScopeAnnotation( TemplatingScope.CompileTimeOnly );
                 }
             }
 
-            if ( transformedNode.HasScopeAnnotation() )
+            if ( visitedNode.HasScopeAnnotation() )
             {
                 // If the transformed node has already an annotation, it means it has already been classified by
                 // a previous run of the algorithm, and there is no need to classify it again.
-                return transformedNode;
+                return visitedNode;
             }
 
             // Here is the default implementation for expressions. The scope of the parent is the combined scope of the children.
-            var childNodes = transformedNode.ChildNodes().Where( c => c is ExpressionSyntax );
+            var childNodes = visitedNode.ChildNodes().Where( c => c is ExpressionSyntax );
 
-            return transformedNode.AddScopeAnnotation( this.GetExpressionScope( childNodes, node ) );
+            return visitedNode.AddScopeAnnotation( this.GetExpressionScope( childNodes, node ) );
         }
 
         #region Anonymous objects
@@ -455,7 +480,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( scope == TemplatingScope.CompileTimeOnly )
                 {
                     // Template code cannot be referenced in a template until this is implemented.
-                    if ( this._symbolScopeClassifier.IsTemplate( symbol ) )
+                    if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) == TemplateMemberKind.Template )
                     {
                         this.ReportDiagnostic(
                             TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate,
@@ -622,14 +647,15 @@ namespace Caravela.Framework.Impl.Templating
                 IParameterSymbol parameter when parameter.Type.TypeKind == TypeKind.Delegate => ((INamedTypeSymbol) parameter.Type).Constructors.Single()
                     .Parameters,
                 ILocalSymbol local when local.Type.TypeKind == TypeKind.Delegate => ((INamedTypeSymbol) local.Type).Constructors.Single().Parameters,
+                IEventSymbol @event => ((INamedTypeSymbol) @event.Type).Constructors.Single().Parameters,
                 _ => throw new NotImplementedException( $"Don't know how to get the parameters of '{expressionSymbol}'." )
             };
 
             InvocationExpressionSyntax updatedInvocation;
 
-            if ( expressionScope.DynamicToCompileTimeOnly() is TemplatingScope.CompileTimeOnly or TemplatingScope.Dynamic )
+            if ( !expressionScope.IsIndeterminate() )
             {
-                // If the expression on the left side is compile-time (because of rules on the symbol) or dynamic,
+                // If the scope of the expression on the left side is known (because of rules on the symbol),
                 // we know the scope of arguments upfront. Otherwise, we need to decide of the invocation scope based on arguments (else branch of this if).
 
                 var transformedArguments = new List<ArgumentSyntax>( node.ArgumentList.Arguments.Count );
@@ -662,6 +688,16 @@ namespace Caravela.Framework.Impl.Templating
                             ScopeContext.CreatePreferredRunTimeScope(
                                 this._currentScopeContext,
                                 $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString()}'" ) ) )
+                        {
+                            transformedArgument = (ArgumentSyntax) this.VisitArgument( argument )!;
+                        }
+                    }
+                    else if ( expressionScope.IsRunTime() )
+                    {
+                        using ( this.WithScopeContext(
+                            ScopeContext.CreatePreferredRunTimeScope(
+                                this._currentScopeContext,
+                                $"argument of the run-time method '{node.Expression}'" ) ) )
                         {
                             transformedArgument = (ArgumentSyntax) this.VisitArgument( argument )!;
                         }
@@ -782,7 +818,7 @@ namespace Caravela.Framework.Impl.Templating
 
             var annotatedExpression = this.Visit( node.Expression )!;
 
-            var forEachScope = this.GetNodeScope( annotatedExpression ).ReplaceDefault( TemplatingScope.RunTimeOnly );
+            var forEachScope = this.GetNodeScope( annotatedExpression ).ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
 
             this.SetLocalSymbolScope( local, forEachScope, node.Identifier );
 
@@ -949,7 +985,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( transformedInitializer != null )
                 {
-                    localScope = this.GetNodeScope( transformedInitializer.Value ).ReplaceDefault( TemplatingScope.RunTimeOnly ).DynamicToRunTimeOnly();
+                    localScope = this.GetNodeScope( transformedInitializer.Value ).ReplaceIndeterminate( TemplatingScope.RunTimeOnly ).DynamicToRunTimeOnly();
                 }
                 else
                 {
@@ -1046,7 +1082,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node )!;
 
-            if ( this._symbolScopeClassifier.IsTemplate( symbol ) )
+            if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) != TemplateMemberKind.None )
             {
                 var previousTemplateMember = this._currentTemplateMember;
                 this._currentTemplateMember = symbol;
@@ -1165,7 +1201,9 @@ namespace Caravela.Framework.Impl.Templating
                     return this.AnnotateCastExpression( transformedNode, annotatedType!, annotatedExpression! );
             }
 
-            return base.VisitBinaryExpression( node );
+            var visitedNode = base.VisitBinaryExpression( node );
+
+            return this.AddScopeAnnotationToVisitedNode( node, visitedNode );
         }
 
         private SyntaxNode? AnnotateCastExpression( SyntaxNode transformedCastNode, TypeSyntax annotatedType, ExpressionSyntax annotatedExpression )
@@ -1371,7 +1409,7 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitSwitchExpression( SwitchExpressionSyntax node )
         {
             var transformedGoverningExpression = this.Visit( node.GoverningExpression )!;
-            var governingExpressionScope = transformedGoverningExpression.GetScopeFromAnnotation();
+            var governingExpressionScope = transformedGoverningExpression.GetScopeFromAnnotation().GetValueOrDefault();
 
             if ( (governingExpressionScope == TemplatingScope.CompileTimeOnly
                   && this._templateMemberClassifier.IsDynamicType( transformedGoverningExpression ))
@@ -1405,7 +1443,7 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitSwitchStatement( SwitchStatementSyntax node )
         {
             var annotatedExpression = this.Visit( node.Expression )!;
-            var expressionScope = annotatedExpression.GetScopeFromAnnotation();
+            var expressionScope = annotatedExpression.GetScopeFromAnnotation().GetValueOrDefault();
 
             if ( (expressionScope == TemplatingScope.CompileTimeOnly && this._templateMemberClassifier.IsDynamicType( annotatedExpression ))
                  || expressionScope != TemplatingScope.CompileTimeOnly )

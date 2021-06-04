@@ -10,12 +10,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.TemplateRe
 
     public class RetryAttribute : OverrideMethodAspect
     {
-        [Introduce]
-        void Introduced() {}
+        [Template]
+        void Template() {}
     
         public override dynamic OverrideMethod()
         {
-            this.Introduced();
+            this.Template();
            return meta.Proceed();
         }
     }

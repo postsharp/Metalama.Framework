@@ -414,6 +414,11 @@ namespace Caravela.Framework.Impl.Utilities
 
                     break;
 
+                case IDynamicTypeSymbol:
+                    h = 41574;
+
+                    break;
+
                 default:
                     throw new NotImplementedException( $"{symbol.Kind}" );
             }

@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.CompileTime
     internal static class TemplatingScopeExtensions
     {
         public static bool MustBeTransformed( this TemplatingScope scope )
-            => scope.ReplaceDefault( TemplatingScope.RunTimeOnly ) is
+            => scope.ReplaceIndeterminate( TemplatingScope.RunTimeOnly ) is
                 TemplatingScope.RunTimeOnly or
                 TemplatingScope.Dynamic;
 
@@ -20,8 +20,13 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public static bool IsDynamic( this TemplatingScope scope ) => scope is TemplatingScope.CompileTimeDynamic or TemplatingScope.Dynamic;
 
-        public static TemplatingScope ReplaceDefault( this TemplatingScope scope, TemplatingScope defaultScope )
-            => scope == TemplatingScope.Both || scope == TemplatingScope.Unknown ? defaultScope : scope;
+        public static bool IsIndeterminate( this TemplatingScope scope ) => scope is TemplatingScope.Both or TemplatingScope.Unknown;
+
+        public static bool IsRunTime( this TemplatingScope scope )
+            => scope is TemplatingScope.Dynamic or TemplatingScope.CompileTimeDynamic or TemplatingScope.RunTimeOnly;
+
+        public static TemplatingScope ReplaceIndeterminate( this TemplatingScope scope, TemplatingScope defaultScope )
+            => scope.IsIndeterminate() ? defaultScope : scope;
 
         public static string ToDisplayString( this TemplatingScope scope )
             => scope switch

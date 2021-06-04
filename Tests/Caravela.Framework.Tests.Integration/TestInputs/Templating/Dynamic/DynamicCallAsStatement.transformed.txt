@@ -1,5 +1,5 @@
 {
     this.Method(a).AssertNotNull();
-    _ = this.Method((global::System.Int32)(1));
+    _ = this.Method(1);
     return default;
 }

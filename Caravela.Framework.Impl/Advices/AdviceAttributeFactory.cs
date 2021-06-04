@@ -132,7 +132,7 @@ namespace Caravela.Framework.Impl.Advices
                             case IEvent templateEvent:
                                 var introduceEventAdvice = new IntroduceEventAdvice(
                                     aspect,
-                                    (INamedType) aspectTargetDeclaration,
+                                    targetType,
                                     templateEvent,
                                     null,
                                     null,

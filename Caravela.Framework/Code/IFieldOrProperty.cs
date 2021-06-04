@@ -4,8 +4,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code.Invokers;
 
-#pragma warning disable SA1623 // Property summary documentation should match accessors
-
 namespace Caravela.Framework.Code
 {
     /// <summary>

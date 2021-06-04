@@ -13,7 +13,6 @@ using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Editing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -124,7 +123,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
 
                     // Add non-implemented members of IAspect and IEligible.
-                    SyntaxGenerator syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
+                    var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
                     var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces );
 
                     foreach ( var implementedInterface in allImplementedInterfaces )
@@ -202,7 +201,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var methodSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
 
-                if ( methodSymbol == null || !this.SymbolClassifier.IsTemplate( methodSymbol ) )
+                if ( methodSymbol == null || this.SymbolClassifier.GetTemplateMemberKind( methodSymbol ) == TemplateMemberKind.None )
                 {
                     yield return (MethodDeclarationSyntax) base.VisitMethodDeclaration( node ).AssertNotNull();
 
@@ -251,7 +250,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var propertySymbol = (IPropertySymbol) this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
-                if ( !this.SymbolClassifier.IsTemplate( propertySymbol ) )
+                if ( this.SymbolClassifier.GetTemplateMemberKind( propertySymbol ) == TemplateMemberKind.None )
                 {
                     yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
 
