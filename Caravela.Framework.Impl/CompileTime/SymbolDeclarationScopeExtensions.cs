@@ -7,32 +7,32 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal static class SymbolDeclarationScopeExtensions
     {
-        public static bool MustBeTransformed( this SymbolDeclarationScope scope )
-            => scope.ReplaceDefault( SymbolDeclarationScope.RunTimeOnly ) is
-                SymbolDeclarationScope.RunTimeOnly or
-                SymbolDeclarationScope.Dynamic;
+        public static bool MustBeTransformed( this TemplatingScope scope )
+            => scope.ReplaceDefault( TemplatingScope.RunTimeOnly ) is
+                TemplatingScope.RunTimeOnly or
+                TemplatingScope.Dynamic;
 
-        public static SymbolDeclarationScope DynamicToRunTimeOnly( this SymbolDeclarationScope scope )
-            => scope == SymbolDeclarationScope.CompileTimeDynamic ? SymbolDeclarationScope.RunTimeOnly : scope;
+        public static TemplatingScope DynamicToRunTimeOnly( this TemplatingScope scope )
+            => scope == TemplatingScope.CompileTimeDynamic ? TemplatingScope.RunTimeOnly : scope;
 
-        public static SymbolDeclarationScope DynamicToCompileTimeOnly( this SymbolDeclarationScope scope )
-            => scope == SymbolDeclarationScope.CompileTimeDynamic ? SymbolDeclarationScope.CompileTimeOnly : scope;
+        public static TemplatingScope DynamicToCompileTimeOnly( this TemplatingScope scope )
+            => scope == TemplatingScope.CompileTimeDynamic ? TemplatingScope.CompileTimeOnly : scope;
 
-        public static bool IsDynamic( this SymbolDeclarationScope scope )
-            => scope is SymbolDeclarationScope.CompileTimeDynamic or SymbolDeclarationScope.Dynamic;
+        public static bool IsDynamic( this TemplatingScope scope )
+            => scope is TemplatingScope.CompileTimeDynamic or TemplatingScope.Dynamic;
 
-        public static SymbolDeclarationScope ReplaceDefault( this SymbolDeclarationScope scope, SymbolDeclarationScope defaultScope )
-            => scope == SymbolDeclarationScope.Both || scope == SymbolDeclarationScope.Unknown ? defaultScope : scope;
+        public static TemplatingScope ReplaceDefault( this TemplatingScope scope, TemplatingScope defaultScope )
+            => scope == TemplatingScope.Both || scope == TemplatingScope.Unknown ? defaultScope : scope;
 
-        public static string ToDisplayString( this SymbolDeclarationScope scope )
+        public static string ToDisplayString( this TemplatingScope scope )
             => scope switch
             {
-                SymbolDeclarationScope.RunTimeOnly => "run-time",
-                SymbolDeclarationScope.CompileTimeOnly => "compile-time",
-                SymbolDeclarationScope.Both => "both",
-                SymbolDeclarationScope.Unknown => "unknown",
-                SymbolDeclarationScope.CompileTimeDynamic => "dynamic compile-time",
-                SymbolDeclarationScope.Dynamic => "dynamic",
+                TemplatingScope.RunTimeOnly => "run-time",
+                TemplatingScope.CompileTimeOnly => "compile-time",
+                TemplatingScope.Both => "both",
+                TemplatingScope.Unknown => "unknown",
+                TemplatingScope.CompileTimeDynamic => "dynamic compile-time",
+                TemplatingScope.Dynamic => "dynamic",
 
                 // We also throw an exception for Dynamic because a caller should convert dynamic to run-time or compile-time according to the context.
                 _ => throw new ArgumentOutOfRangeException( nameof(scope) )

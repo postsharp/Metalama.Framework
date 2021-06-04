@@ -44,32 +44,32 @@ namespace Caravela.Framework.Impl.Templating
             return node.HasAnnotations( _scopeAnnotationKind );
         }
 
-        public static SymbolDeclarationScope GetScopeFromAnnotation( this SyntaxNode node )
+        public static TemplatingScope GetScopeFromAnnotation( this SyntaxNode node )
         {
             var annotation = node.GetAnnotations( _scopeAnnotationKind ).SingleOrDefault();
 
             // No annotation means it is default scope usable for both (runTime or compileTime)
             if ( annotation == null )
             {
-                return SymbolDeclarationScope.Both;
+                return TemplatingScope.Both;
             }
 
             switch ( annotation.Data )
             {
                 case _buildTimeAnnotationData:
-                    return SymbolDeclarationScope.CompileTimeOnly;
+                    return TemplatingScope.CompileTimeOnly;
 
                 case _runTimeAnnotationData:
-                    return SymbolDeclarationScope.RunTimeOnly;
+                    return TemplatingScope.RunTimeOnly;
 
                 case _unknownAnnotationData:
-                    return SymbolDeclarationScope.Unknown;
+                    return TemplatingScope.Unknown;
 
                 case _dynamicAnnotationData:
-                    return SymbolDeclarationScope.CompileTimeDynamic;
+                    return TemplatingScope.CompileTimeDynamic;
 
                 case _runTimeDynamicAnnotationData:
-                    return SymbolDeclarationScope.Dynamic;
+                    return TemplatingScope.Dynamic;
 
                 default:
                     throw new AssertionFailedException();
@@ -120,7 +120,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         [return: NotNullIfNotNull( "node" )]
-        public static T? AddScopeAnnotation<T>( this T? node, SymbolDeclarationScope scope )
+        public static T? AddScopeAnnotation<T>( this T? node, TemplatingScope scope )
             where T : SyntaxNode
         {
             if ( node == null )
@@ -130,7 +130,7 @@ namespace Caravela.Framework.Impl.Templating
 
             var existingScope = node.GetScopeFromAnnotation();
 
-            if ( existingScope != SymbolDeclarationScope.Both )
+            if ( existingScope != TemplatingScope.Both )
             {
                 if ( existingScope != scope )
                 {
@@ -140,7 +140,7 @@ namespace Caravela.Framework.Impl.Templating
                 return node;
             }
 
-            if ( scope == SymbolDeclarationScope.Both )
+            if ( scope == TemplatingScope.Both )
             {
                 // There is nothing to do because the default scope is Both.
                 return node;
@@ -148,19 +148,19 @@ namespace Caravela.Framework.Impl.Templating
 
             switch ( scope )
             {
-                case SymbolDeclarationScope.CompileTimeOnly:
+                case TemplatingScope.CompileTimeOnly:
                     return node.WithAdditionalAnnotations( _buildTimeOnlyAnnotation );
 
-                case SymbolDeclarationScope.RunTimeOnly:
+                case TemplatingScope.RunTimeOnly:
                     return node.WithAdditionalAnnotations( _runTimeOnlyAnnotation );
 
-                case SymbolDeclarationScope.Unknown:
+                case TemplatingScope.Unknown:
                     return node.WithAdditionalAnnotations( _unknownAnnotation );
 
-                case SymbolDeclarationScope.CompileTimeDynamic:
+                case TemplatingScope.CompileTimeDynamic:
                     return node.WithAdditionalAnnotations( _compileTimeDynamicAnnotation );
 
-                case SymbolDeclarationScope.Dynamic:
+                case TemplatingScope.Dynamic:
                     return node.WithAdditionalAnnotations( _runTimeDynamicAnnotation );
 
                 default:

@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._templateCompiler = templateCompiler;
                 this._cancellationToken = cancellationToken;
                 this._symbolClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
-                this._currentContext = new Context( SymbolDeclarationScope.Both, this );
+                this._currentContext = new Context( TemplatingScope.Both, this );
             }
 
             // TODO: assembly and module-level attributes?
@@ -80,9 +80,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 
-                var scope = this.SymbolClassifier.GetSymbolDeclarationScope( symbol );
+                var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
 
-                if ( scope == SymbolDeclarationScope.RunTimeOnly )
+                if ( scope == TemplatingScope.RunTimeOnly )
                 {
                     return null;
                 }
@@ -182,7 +182,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         .Distinct( SymbolEqualityComparer.Default )
                         .WhereNotNull()
                         .Where( t => t is not IDynamicTypeSymbol )
-                        .Where( t => this._symbolClassifier.GetSymbolDeclarationScope( t ) == SymbolDeclarationScope.RunTimeOnly )
+                        .Where( t => this._symbolClassifier.GetTemplatingScope( t ) == TemplatingScope.RunTimeOnly )
                         .ToArray();
 
                 if ( runTimeOnlyParameters.Length > 0 )
@@ -389,7 +389,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
             {
-                if ( this._currentContext.Scope != SymbolDeclarationScope.RunTimeOnly && node.IsNameOf() )
+                if ( this._currentContext.Scope != TemplatingScope.RunTimeOnly && node.IsNameOf() )
                 {
                     var symbolInfo = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree )
                         .GetSymbolInfo( node.ArgumentList.Arguments[0].Expression );
@@ -407,11 +407,11 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public override SyntaxNode? VisitTypeOfExpression( TypeOfExpressionSyntax node )
             {
-                if ( this._currentContext.Scope != SymbolDeclarationScope.RunTimeOnly )
+                if ( this._currentContext.Scope != TemplatingScope.RunTimeOnly )
                 {
                     var typeSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Type ).Symbol;
 
-                    if ( typeSymbol != null && this.SymbolClassifier.GetSymbolDeclarationScope( typeSymbol ) == SymbolDeclarationScope.RunTimeOnly )
+                    if ( typeSymbol != null && this.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
                     {
                         // We are in a compile-time-only block but we have a typeof to a run-time-only block. 
                         // This is a situation we can handle by rewriting the typeof to a call to CompileTimeType.CreateFromDocumentationId.
@@ -453,7 +453,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public override SyntaxToken VisitToken( SyntaxToken token ) => this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( token );
 
-            private Context WithScope( SymbolDeclarationScope scope )
+            private Context WithScope( TemplatingScope scope )
             {
                 this._currentContext = new Context( scope, this );
 
@@ -467,7 +467,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 private readonly ProduceCompileTimeCodeRewriter _parent;
                 private readonly Context _oldContext;
 
-                public Context( SymbolDeclarationScope scope, ProduceCompileTimeCodeRewriter parent )
+                public Context( TemplatingScope scope, ProduceCompileTimeCodeRewriter parent )
                 {
                     this.Scope = scope;
                     this._parent = parent;
@@ -476,7 +476,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     this._oldContext = parent._currentContext;
                 }
 
-                public SymbolDeclarationScope Scope { get; }
+                public TemplatingScope Scope { get; }
 
                 public void Dispose()
                 {

@@ -9,18 +9,18 @@ namespace Caravela.Framework.Impl.Templating
     {
         private class ScopeContext
         {
-            private readonly SymbolDeclarationScope _preferredScope;
+            private readonly TemplatingScope _preferredScope;
 
-            public static ScopeContext Default => new( SymbolDeclarationScope.Both, false, null, SymbolDeclarationScope.Both, null );
+            public static ScopeContext Default => new( TemplatingScope.Both, false, null, TemplatingScope.Both, null );
 
-            public SymbolDeclarationScope CurrentBreakOrContinueScope { get; }
+            public TemplatingScope CurrentBreakOrContinueScope { get; }
 
             /// <summary>
             /// Gets a value indicating whether the current expression is obliged to be compile-time-only.
             /// </summary>
-            public bool ForceCompileTimeOnlyExpression => this._preferredScope == SymbolDeclarationScope.CompileTimeOnly;
+            public bool ForceCompileTimeOnlyExpression => this._preferredScope == TemplatingScope.CompileTimeOnly;
 
-            public bool PreferRunTimeExpression => this._preferredScope == SymbolDeclarationScope.RunTimeOnly;
+            public bool PreferRunTimeExpression => this._preferredScope == TemplatingScope.RunTimeOnly;
 
             /// <summary>
             /// Gets a value indicating whether the current node is guarded by a conditional statement where the condition is a runtime-only
@@ -33,10 +33,10 @@ namespace Caravela.Framework.Impl.Templating
             public string? PreferredScopeReason { get; }
 
             private ScopeContext(
-                SymbolDeclarationScope currentBreakOrContinueScope,
+                TemplatingScope currentBreakOrContinueScope,
                 bool isRuntimeConditionalBlock,
                 string? isRuntimeConditionalBlockReason,
-                SymbolDeclarationScope preferredScope,
+                TemplatingScope preferredScope,
                 string? preferredScopeReason )
             {
                 this.CurrentBreakOrContinueScope = currentBreakOrContinueScope;
@@ -53,11 +53,11 @@ namespace Caravela.Framework.Impl.Templating
             /// <returns>A cookie to dispose at the end.</returns>
             public static ScopeContext CreateForcedCompileTimeScope( ScopeContext parentScope, string reason )
                 => new( parentScope.CurrentBreakOrContinueScope, parentScope.IsRuntimeConditionalBlock, parentScope.IsRuntimeConditionalBlockReason,
-                        SymbolDeclarationScope.CompileTimeOnly, reason );
+                        TemplatingScope.CompileTimeOnly, reason );
 
             public static ScopeContext CreatePreferredRunTimeScope( ScopeContext parentScope, string reason )
                 => new( parentScope.CurrentBreakOrContinueScope, parentScope.IsRuntimeConditionalBlock, parentScope.IsRuntimeConditionalBlockReason,
-                        SymbolDeclarationScope.RunTimeOnly, reason );
+                        TemplatingScope.RunTimeOnly, reason );
 
             /// <summary>
             /// Enters a branch of the syntax tree whose execution depends on a runtime-only condition.
@@ -72,9 +72,9 @@ namespace Caravela.Framework.Impl.Templating
                     parentScope._preferredScope,
                     parentScope.PreferredScopeReason );
 
-            public static ScopeContext CreateBreakOrContinueScope( ScopeContext parentScope, SymbolDeclarationScope scope, string reason )
+            public static ScopeContext CreateBreakOrContinueScope( ScopeContext parentScope, TemplatingScope scope, string reason )
                 => new( scope,
-                        scope == SymbolDeclarationScope.RunTimeOnly || parentScope.IsRuntimeConditionalBlock,
+                        scope == TemplatingScope.RunTimeOnly || parentScope.IsRuntimeConditionalBlock,
                         reason,
                         parentScope._preferredScope,
                         parentScope.PreferredScopeReason );
