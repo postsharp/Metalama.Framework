@@ -1,4 +1,17 @@
-// CompileTimeAspectPipeline.TryExecute failed. 
-// Error CR0220 on `Template`: `The declaration 'RetryAttribute.Template()' cannot be referenced from 'RetryAttribute.OverrideMethod()' both declarations are templates, and templates cannot reference each other yet.`
 
+[TestOutput]
+class Program
+{
+    [Retry]
+    static int Foo(int a)
+    {
+        this.Introduced("Foo");
+        return 0;
+    }
+
+
+    private void Introduced(global::System.String name)
+    {
+    }
+}
 
