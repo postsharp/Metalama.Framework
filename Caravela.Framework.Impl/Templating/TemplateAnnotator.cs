@@ -281,22 +281,17 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         private TemplatingScope GetExpressionScope( IEnumerable<TemplatingScope>? childrenScopes, SyntaxNode? originalParent = null )
         {
-            var parentExpressionScope = this.GetExpressionTypeScope( originalParent );
+            
 
             // Get the scope of type of the parent node.
 
             if ( originalParent != null )
             {
-                // In some cases, the expression scope can be decided without looking at children.
-                if ( (this._currentScopeContext.PreferRunTimeExpression && parentExpressionScope != TemplatingScope.CompileTimeOnly)
-                     || parentExpressionScope == TemplatingScope.RunTimeOnly )
+                var parentExpressionScope = this.GetExpressionTypeScope( originalParent );
+
+                if ( !parentExpressionScope.IsIndeterminate() )
                 {
-                    // We have build-time children, but the current node itself must be run-time.
-                    return TemplatingScope.RunTimeOnly;
-                }
-                else if ( parentExpressionScope == TemplatingScope.CompileTimeOnly )
-                {
-                    return TemplatingScope.CompileTimeOnly;
+                    return parentExpressionScope;
                 }
             }
 
@@ -336,12 +331,6 @@ namespace Caravela.Framework.Impl.Templating
             }
             else if ( compileTimeOnlyCount > 0 )
             {
-                if ( parentExpressionScope != TemplatingScope.Both )
-                {
-                    // We should not get here because the case was processed before looking at the children.
-                    throw new AssertionFailedException();
-                }
-
                 return TemplatingScope.CompileTimeOnly;
             }
             else
