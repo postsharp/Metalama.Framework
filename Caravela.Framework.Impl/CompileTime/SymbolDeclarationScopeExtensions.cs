@@ -18,8 +18,7 @@ namespace Caravela.Framework.Impl.CompileTime
         public static TemplatingScope DynamicToCompileTimeOnly( this TemplatingScope scope )
             => scope == TemplatingScope.CompileTimeDynamic ? TemplatingScope.CompileTimeOnly : scope;
 
-        public static bool IsDynamic( this TemplatingScope scope )
-            => scope is TemplatingScope.CompileTimeDynamic or TemplatingScope.Dynamic;
+        public static bool IsDynamic( this TemplatingScope scope ) => scope is TemplatingScope.CompileTimeDynamic or TemplatingScope.Dynamic;
 
         public static TemplatingScope ReplaceDefault( this TemplatingScope scope, TemplatingScope defaultScope )
             => scope == TemplatingScope.Both || scope == TemplatingScope.Unknown ? defaultScope : scope;
