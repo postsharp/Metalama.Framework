@@ -14,7 +14,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.Introduced
         [Introduce]
         void IntroducedMethod1( string name ) 
         {
-            this.MyEvent.Invoke( meta.This, new PropertyChangedEventArgs( name ) );
+            this.MyEvent?.Invoke( meta.This, new PropertyChangedEventArgs( name ) );
             this.MyEvent( meta.This, new PropertyChangedEventArgs( name ) );
         }
         
