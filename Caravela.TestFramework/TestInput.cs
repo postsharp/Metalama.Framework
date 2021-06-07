@@ -40,9 +40,9 @@ namespace Caravela.TestFramework
 
                     case "IncludeAllSeverities":
                         this.Options.IncludeAllSeverities = true;
-                        
+
                         break;
-                        
+
                     case "DesignTime":
                         this.Options.TestRunnerKind = TestRunnerKind.DesignTime;
 

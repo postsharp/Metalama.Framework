@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Utilities
         private Logger( TextWriter textWriter )
         {
             this._textWriter = textWriter;
-            
+
             this.Write( $"Process={Process.GetCurrentProcess().ProcessName}, CommandLine={Environment.CommandLine}." );
         }
 

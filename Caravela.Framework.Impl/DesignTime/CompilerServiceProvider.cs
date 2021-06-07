@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Compiler;
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
@@ -21,7 +20,7 @@ namespace Caravela.Framework.Impl.DesignTime
         static CompilerServiceProvider()
         {
             DesignTimeEntryPointManager.Instance.RegisterServiceProvider( _instance );
-            
+
             // Also configure logging.
             // TODO: Move to Microsoft.Extensions.Logging.
 
@@ -35,8 +34,8 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public static void Initialize()
         {
-                // Make sure the type is initialized.
-                _ = _instance.GetType();
+            // Make sure the type is initialized.
+            _ = _instance.GetType();
         }
 
         private static void InitializeLogging()
@@ -48,7 +47,7 @@ namespace Caravela.Framework.Impl.DesignTime
             RetryHelper.Retry(
                 () =>
                 {
-                    if (!Directory.Exists( directory ))
+                    if ( !Directory.Exists( directory ) )
                     {
                         Directory.CreateDirectory( directory );
                     }

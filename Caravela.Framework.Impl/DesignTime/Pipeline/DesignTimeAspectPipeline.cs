@@ -6,7 +6,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.DesignTime.Diagnostics;
 using Caravela.Framework.Impl.DesignTime.Diff;
-using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
@@ -173,8 +172,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             {
                 if ( this.Status == DesignTimeAspectPipelineStatus.Ready )
                 {
-                    Logger.Instance?.Write(
-                        $"DesignTimeAspectPipeline.InvalidateCache('{newCompilation.AssemblyName}'): compile-time change detected." );
+                    Logger.Instance?.Write( $"DesignTimeAspectPipeline.InvalidateCache('{newCompilation.AssemblyName}'): compile-time change detected." );
 
                     this.Status = DesignTimeAspectPipelineStatus.NeedsExternalBuild;
 

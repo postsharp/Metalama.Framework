@@ -3,8 +3,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace Caravela.Framework.Impl.Utilities
 {
@@ -12,7 +10,7 @@ namespace Caravela.Framework.Impl.Utilities
     {
         private static readonly string _tempPath;
         private static readonly string _version;
-        
+
         static TempPathHelper()
         {
             _tempPath = Path.GetTempPath();

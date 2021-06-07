@@ -63,7 +63,5 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         [Theory]
         [FromDirectory( @"Aspects\Applying" )]
         public Task Applying( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
-
-        
     }
 }

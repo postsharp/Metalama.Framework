@@ -13,7 +13,6 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 {
     public class PipelineTests : TestBase
     {
-
         [Fact]
         public void NoAspect()
         {
@@ -32,8 +31,6 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             var syntaxTree2 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" );
             pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree2 ), CancellationToken.None );
         }
-
-    
 
         [Fact]
         public void InitializePipelineWithDifferentCompilation()
@@ -59,6 +56,5 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             var syntaxTree2 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" );
             pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree2 ), CancellationToken.None );
         }
-
     }
 }

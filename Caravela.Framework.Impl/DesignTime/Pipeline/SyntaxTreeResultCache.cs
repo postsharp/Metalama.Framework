@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.DesignTime.Diff;
-using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;

@@ -12,26 +12,24 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 {
     public class PartialCompilationTests : TestBase
     {
-            [Fact]
-                public void Bug28733()
-                {
-                    var code = new Dictionary<string, string> { ["Class1.cs"] = "class Class1 { class Nested {} }" };
-                    
-                    var compilation = CreateCSharpCompilation( code );
-        
-                    using var buildOptions = new TestProjectOptions();
-                    using var domain = new UnloadableCompileTimeDomain();
-                    DesignTimeAspectPipeline pipeline = new( buildOptions, domain );
-                    var syntaxTree1 = compilation.SyntaxTrees.Single();
-                    var partialCompilation = PartialCompilation.CreatePartial( compilation, syntaxTree1 );
-                    
-                    // Under bug 28733, the following line would throw
-                    // `AssertionFailedException: The item Class1.Nested of type NonErrorNamedTypeSymbol has been visited twice.`
-                    _ = CompilationModel.CreateInitialInstance( partialCompilation );
-                    
-                }
-                
-              
+        [Fact]
+        public void Bug28733()
+        {
+            var code = new Dictionary<string, string> { ["Class1.cs"] = "class Class1 { class Nested {} }" };
+
+            var compilation = CreateCSharpCompilation( code );
+
+            using var buildOptions = new TestProjectOptions();
+            using var domain = new UnloadableCompileTimeDomain();
+            DesignTimeAspectPipeline pipeline = new( buildOptions, domain );
+            var syntaxTree1 = compilation.SyntaxTrees.Single();
+            var partialCompilation = PartialCompilation.CreatePartial( compilation, syntaxTree1 );
+
+            // Under bug 28733, the following line would throw
+            // `AssertionFailedException: The item Class1.Nested of type NonErrorNamedTypeSymbol has been visited twice.`
+            _ = CompilationModel.CreateInitialInstance( partialCompilation );
+        }
+
         [Fact]
         public void CreatePartialCompilationModel()
         {

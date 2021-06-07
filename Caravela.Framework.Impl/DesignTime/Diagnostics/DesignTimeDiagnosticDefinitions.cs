@@ -50,7 +50,6 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
             {
                 CompilerServiceProvider.Initialize();
             }
-            
 
             var userDefinedDescriptors = UserDiagnosticRegistrationService.GetInstance().GetSupportedDescriptors();
 

@@ -61,20 +61,18 @@ namespace Caravela.AspectWorkbench.ViewModels
             {
                 this.ErrorsDocument = new FlowDocument();
                 this.TransformedTargetDocument = null;
-                
+
                 var testInput = new TestInput( "interactive", this.TestText );
 
-
-                TestRunnerBase testRunner = ( testInput.Options.TestRunnerKind,  this.TestText.Contains( "[TestTemplate]" ) ) switch
+                TestRunnerBase testRunner = (testInput.Options.TestRunnerKind, this.TestText.Contains( "[TestTemplate]" )) switch
                 {
-                    ( _, true ) => new TemplatingTestRunner( this._serviceProvider ),
-                    ( TestRunnerKind.Default, false ) => new AspectTestRunner( this._serviceProvider ),
-                    ( TestRunnerKind.DesignTime, false) => new DesignTimeTestRunner( this._serviceProvider )
+                    (_, true) => new TemplatingTestRunner( this._serviceProvider ),
+                    (TestRunnerKind.Default, false) => new AspectTestRunner( this._serviceProvider ),
+                    (TestRunnerKind.DesignTime, false) => new DesignTimeTestRunner( this._serviceProvider )
                 };
 
                 var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject() );
 
-             
                 var compilationStopwatch = Stopwatch.StartNew();
 
                 var testResult = await testRunner.RunTestAsync( testInput );

@@ -222,7 +222,7 @@ namespace Caravela.Framework.Impl.CompileTime
             CancellationToken cancellationToken )
         {
             var outputInfo = this.GetOutputPaths( compileTimeCompilation.AssemblyName! );
-            
+
             Logger.Instance?.Write( $"TryEmit( '{compileTimeCompilation.AssemblyName}' )" );
 
             try
@@ -312,21 +312,22 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( !emitResult.Success )
                 {
-                    Logger.Instance?.Write( $"TryEmit( '{compileTimeCompilation.AssemblyName}' ): failure: " +
-                                                      string.Join( Environment.NewLine, emitResult.Diagnostics ) );
-                    
+                    Logger.Instance?.Write(
+                        $"TryEmit( '{compileTimeCompilation.AssemblyName}' ): failure: " +
+                        string.Join( Environment.NewLine, emitResult.Diagnostics ) );
+
                     ReportDiagnostics( emitResult.Diagnostics.Where( d => d.Severity >= DiagnosticSeverity.Error ) );
 
                     DeleteOutputFiles();
 
                     return false;
                 }
-                
+
                 if ( textMapDirectory == null )
                 {
                     diagnosticSink.Report( emitResult.Diagnostics );
                 }
-                
+
                 Logger.Instance?.Write( $"TryEmit( '{compileTimeCompilation.AssemblyName}' ): success." );
 
                 return emitResult.Success;
@@ -334,7 +335,7 @@ namespace Caravela.Framework.Impl.CompileTime
             catch ( Exception e )
             {
                 Logger.Instance?.Write( e.ToString() );
-                
+
                 DeleteOutputFiles();
 
                 throw;
@@ -415,12 +416,12 @@ namespace Caravela.Framework.Impl.CompileTime
             out CompileTimeProject? project )
         {
             Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' )" );
-            
+
             // Look in in-memory cache.
             if ( this._cache.TryGetValue( projectHash, out project ) )
             {
                 Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' ): found in memory cache." );
-                
+
                 return true;
             }
 
@@ -428,14 +429,14 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( !File.Exists( outputPaths.Pe ) || !File.Exists( outputPaths.Manifest ) )
             {
                 Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' ): not found." );
-                
+
                 project = null;
 
                 return false;
             }
 
             Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' ): found on disk. Deserializing." );
-            
+
             // Deserialize the manifest.
             if ( CompileTimeProjectManifest.TryDeserialize( File.OpenRead( outputPaths.Manifest ), out var manifest ) )
             {
@@ -660,7 +661,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     // emitted and it does not need to be done a second time.
 
                     Logger.Instance?.Write( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' ): '{outputInfo.Pe}' already exists." );
-                    
+
                     return true;
                 }
                 else
