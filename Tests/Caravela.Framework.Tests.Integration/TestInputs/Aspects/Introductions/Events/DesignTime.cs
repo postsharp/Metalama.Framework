@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.Declarative
+namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.DesignTime
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {

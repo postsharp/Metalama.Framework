@@ -66,9 +66,11 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 TestRunnerBase testRunner = (testInput.Options.TestRunnerKind, this.TestText.Contains( "[TestTemplate]" )) switch
                 {
-                    (_, true) => new TemplatingTestRunner( this._serviceProvider ),
+                    (_, true) or (TestRunnerKind.Template, _) => new TemplatingTestRunner( this._serviceProvider ), 
                     (TestRunnerKind.Default, false) => new AspectTestRunner( this._serviceProvider ),
-                    (TestRunnerKind.DesignTime, false) => new DesignTimeTestRunner( this._serviceProvider )
+                    (TestRunnerKind.DesignTime, false) => new DesignTimeTestRunner( this._serviceProvider ),
+                    _ => throw new NotSupportedException()
+
                 };
 
                 var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject() );
