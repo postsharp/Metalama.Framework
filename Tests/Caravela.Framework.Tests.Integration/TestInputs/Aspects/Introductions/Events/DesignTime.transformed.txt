@@ -1,4 +1,4 @@
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.Declarative
+namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.DesignTime
 {
     partial class TargetClass
     {
