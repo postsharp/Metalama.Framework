@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                  this.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild )
             {
                 // There was an external build. Touch the files to re-run the analyzer.
-                DesignTimeLogger.Instance?.Write( $"Detected an external build for project '{this.ProjectOptions.AssemblyName}'." );
+                Logger.Instance?.Write( $"Detected an external build for project '{this.ProjectOptions.AssemblyName}'." );
 
                 var hasRelevantChange = false;
 
@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     if ( file.Value == null )
                     {
                         hasRelevantChange = true;
-                        DesignTimeLogger.Instance?.Write( $"Touching file '{file.Key}'." );
+                        Logger.Instance?.Write( $"Touching file '{file.Key}'." );
                         File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow );
                     }
                 }
@@ -173,7 +173,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             {
                 if ( this.Status == DesignTimeAspectPipelineStatus.Ready )
                 {
-                    DesignTimeLogger.Instance?.Write(
+                    Logger.Instance?.Write(
                         $"DesignTimeAspectPipeline.InvalidateCache('{newCompilation.AssemblyName}'): compile-time change detected." );
 
                     this.Status = DesignTimeAspectPipelineStatus.NeedsExternalBuild;
@@ -194,7 +194,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         {
             lock ( this._configureSync )
             {
-                DesignTimeLogger.Instance?.Write( $"DesignTimeAspectPipeline.Reset('{this.ProjectOptions.AssemblyName}')." );
+                Logger.Instance?.Write( $"DesignTimeAspectPipeline.Reset('{this.ProjectOptions.AssemblyName}')." );
 
                 this._lastKnownConfiguration = null;
                 this.Status = DesignTimeAspectPipelineStatus.Default;
@@ -226,7 +226,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     {
                         // A failure here means an error or a cache miss.
 
-                        DesignTimeLogger.Instance?.Write( $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}') failed." );
+                        Logger.Instance?.Write( $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}') failed." );
 
                         configuration = null;
 
@@ -234,7 +234,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     }
                     else
                     {
-                        DesignTimeLogger.Instance?.Write(
+                        Logger.Instance?.Write(
                             $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}') succeeded with a new configuration." );
 
                         this._lastKnownConfiguration = configuration;
@@ -252,7 +252,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
                     // We have a valid configuration and it is not outdated.
 
-                    DesignTimeLogger.Instance?.Write(
+                    Logger.Instance?.Write(
                         $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}') returned existing configuration." );
 
                     configuration = this._lastKnownConfiguration;

@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             try
             {
-                DesignTimeLogger.Instance?.Write( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{context.Compilation.AssemblyName}')." );
+                Logger.Instance?.Write( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{context.Compilation.AssemblyName}')." );
 
                 var syntaxTrees = context.ReportedDiagnostics
                     .Select( d => d.Location.SourceTree )
@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.DesignTime
             }
             catch ( Exception e )
             {
-                DesignTimeLogger.Instance?.Write( e.ToString() );
+                Logger.Instance?.Write( e.ToString() );
             }
         }
 
@@ -145,7 +145,7 @@ namespace Caravela.Framework.Impl.DesignTime
                     }
                 }
 
-                DesignTimeLogger.Instance?.Write(
+                Logger.Instance?.Write(
                     $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): {suppressionsCount} suppressions reported." );
             }
         }

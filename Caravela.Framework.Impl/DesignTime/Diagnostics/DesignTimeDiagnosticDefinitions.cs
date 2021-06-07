@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Compiler;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Serialization;
@@ -45,7 +46,12 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
 
         private DesignTimeDiagnosticDefinitions()
         {
-            CompilerServiceProvider.Initialize();
+            if ( !CaravelaCompilerInfo.IsActive )
+            {
+                CompilerServiceProvider.Initialize();
+            }
+            
+
             var userDefinedDescriptors = UserDiagnosticRegistrationService.GetInstance().GetSupportedDescriptors();
 
             // The file may contain system descriptors by mistake. We must remove them otherwise we will have some duplicate key issue.

@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.DesignTime.Refactoring;
 using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -151,7 +152,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             else
             {
                 // If we need a build, we only serve results from the cache.
-                DesignTimeLogger.Instance?.Write(
+                Logger.Instance?.Write(
                     $"DesignTimeAspectPipelineCache.GetDesignTimeResults('{compilation.AssemblyName}'): build required," +
                     $" returning from cache only. Cache size is {this._syntaxTreeResultCache.Count}" );
             }

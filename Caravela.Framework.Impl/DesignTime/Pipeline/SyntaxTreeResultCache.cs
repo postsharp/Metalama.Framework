@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.DesignTime.Diff;
 using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -133,7 +134,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
                     case SyntaxTreeChangeKind.Deleted:
                     case SyntaxTreeChangeKind.Changed:
-                        DesignTimeLogger.Instance?.Write( $"DesignTimeSyntaxTreeResultCache.InvalidateCache({change.FilePath}): removed from cache." );
+                        Logger.Instance?.Write( $"DesignTimeSyntaxTreeResultCache.InvalidateCache({change.FilePath}): removed from cache." );
                         this._syntaxTreeCache.TryRemove( change.FilePath, out _ );
 
                         break;
@@ -143,7 +144,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
         public void Clear()
         {
-            DesignTimeLogger.Instance?.Write( $"DesignTimeSyntaxTreeResultCache.Clear()." );
+            Logger.Instance?.Write( $"DesignTimeSyntaxTreeResultCache.Clear()." );
             this._syntaxTreeCache.Clear();
         }
     }

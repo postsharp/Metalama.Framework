@@ -139,7 +139,11 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var psi = new ProcessStartInfo( "dotnet", "build -t:WriteReferenceAssemblies" )
             {
-                WorkingDirectory = tempProjectDirectory, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true
+                // We cannot call dotnet.exe with a \\?\-prefixed path because MSBuild would fail.
+                WorkingDirectory = tempProjectDirectory, 
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true
             };
 
             var process = Process.Start( psi ).AssertNotNull();

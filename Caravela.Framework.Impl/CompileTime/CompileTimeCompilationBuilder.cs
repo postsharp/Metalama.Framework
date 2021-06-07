@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly IDirectoryOptions _directoryOptions;
         private readonly ICompileTimeCompilationBuilderSpy? _spy;
 
-        private static readonly string _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).VersionId;
+        private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
 
         public const string ResourceName = "Caravela.CompileTimeAssembly";
 
@@ -222,6 +222,8 @@ namespace Caravela.Framework.Impl.CompileTime
             CancellationToken cancellationToken )
         {
             var outputInfo = this.GetOutputPaths( compileTimeCompilation.AssemblyName! );
+            
+            Logger.Instance?.Write( $"TryEmit( '{compileTimeCompilation.AssemblyName}' )" );
 
             try
             {
@@ -230,6 +232,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 // Write the generated files to disk if we should.
                 if ( !Directory.Exists( outputInfo.Directory ) )
                 {
+                    Logger.Instance?.Write( $"Creating directory ( '{outputInfo.Directory}'." );
                     Directory.CreateDirectory( outputInfo.Directory );
                 }
 
@@ -309,19 +312,29 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( !emitResult.Success )
                 {
+                    Logger.Instance?.Write( $"TryEmit( '{compileTimeCompilation.AssemblyName}' ): failure: " +
+                                                      string.Join( Environment.NewLine, emitResult.Diagnostics ) );
+                    
                     ReportDiagnostics( emitResult.Diagnostics.Where( d => d.Severity >= DiagnosticSeverity.Error ) );
 
                     DeleteOutputFiles();
+
+                    return false;
                 }
-                else if ( textMapDirectory == null )
+                
+                if ( textMapDirectory == null )
                 {
                     diagnosticSink.Report( emitResult.Diagnostics );
                 }
+                
+                Logger.Instance?.Write( $"TryEmit( '{compileTimeCompilation.AssemblyName}' ): success." );
 
                 return emitResult.Success;
             }
-            catch
+            catch ( Exception e )
             {
+                Logger.Instance?.Write( e.ToString() );
+                
                 DeleteOutputFiles();
 
                 throw;
@@ -401,20 +414,28 @@ namespace Caravela.Framework.Impl.CompileTime
             ulong projectHash,
             out CompileTimeProject? project )
         {
+            Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' )" );
+            
             // Look in in-memory cache.
             if ( this._cache.TryGetValue( projectHash, out project ) )
             {
+                Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' ): found in memory cache." );
+                
                 return true;
             }
 
             // Look on disk.
             if ( !File.Exists( outputPaths.Pe ) || !File.Exists( outputPaths.Manifest ) )
             {
+                Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' ): not found." );
+                
                 project = null;
 
                 return false;
             }
 
+            Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' ): found on disk. Deserializing." );
+            
             // Deserialize the manifest.
             if ( CompileTimeProjectManifest.TryDeserialize( File.OpenRead( outputPaths.Manifest ), out var manifest ) )
             {
@@ -434,11 +455,16 @@ namespace Caravela.Framework.Impl.CompileTime
             }
             else
             {
+                Logger.Instance?.Write( $"Cannot deserialize '{outputPaths.Manifest}'." );
+
                 try
                 {
                     File.Delete( outputPaths.Manifest );
                 }
-                catch ( IOException ) { }
+                catch ( IOException e )
+                {
+                    Logger.Instance?.Write( $"Cannot delete '{outputPaths.Manifest}': {e.Message}" );
+                }
 
                 project = null;
 
@@ -455,11 +481,9 @@ namespace Caravela.Framework.Impl.CompileTime
             CancellationToken cancellationToken,
             out CompileTimeProject? project )
         {
-            StringBuilder hashLog = new();
-
             // Check the in-process cache.
             var (sourceHash, projectHash, compileTimeAssemblyName, outputPaths) =
-                this.GetPreCacheProjectInfo( runTimeCompilation, sourceTreesWithCompileTimeCode, referencedProjects, hashLog );
+                this.GetPreCacheProjectInfo( runTimeCompilation, sourceTreesWithCompileTimeCode, referencedProjects );
 
             if ( !this.TryGetCompileTimeProjectFromCache(
                 runTimeCompilation,
@@ -567,8 +591,6 @@ namespace Caravela.Framework.Impl.CompileTime
                         {
                             manifest.Serialize( manifestStream );
                         }
-
-                        File.WriteAllText( Path.Combine( outputPaths.Directory, "hashlog.txt" ), hashLog.ToString() );
                     }
                 }
 
@@ -582,7 +604,7 @@ namespace Caravela.Framework.Impl.CompileTime
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
             IReadOnlyList<CompileTimeProject> referencedProjects,
-            StringBuilder? log )
+            StringBuilder? log = null )
         {
             var sourceHash = ComputeSourceHash( sourceTreesWithCompileTimeCode, log );
             var projectHash = ComputeProjectHash( referencedProjects, sourceHash, log );
@@ -597,7 +619,8 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private OutputPaths GetOutputPaths( string compileTimeAssemblyName )
         {
-            var directory = Path.Combine( this._directoryOptions.CompileTimeProjectCacheDirectory, compileTimeAssemblyName );
+            // We cannot include the full assembly name in the path because we're hitting the max path length.
+            var directory = Path.Combine( this._directoryOptions.CompileTimeProjectCacheDirectory, HashUtilities.HashString( compileTimeAssemblyName ) );
             var pe = Path.Combine( directory, compileTimeAssemblyName + ".dll" );
             var pdb = Path.ChangeExtension( pe, ".pdb" );
             var manifest = Path.ChangeExtension( pe, ".manifest" );
@@ -618,6 +641,7 @@ namespace Caravela.Framework.Impl.CompileTime
             out string assemblyPath,
             out string sourceDirectory )
         {
+            Logger.Instance?.Write( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
             var compileTimeAssemblyName = GetCompileTimeAssemblyName( runTimeAssemblyName, referencedProjects, syntaxTreeHash );
 
             var outputInfo = this.GetOutputPaths( compileTimeAssemblyName );
@@ -635,6 +659,8 @@ namespace Caravela.Framework.Impl.CompileTime
                     // If the file already exists, given that it has a strong hash, it means that the assembly has already been 
                     // emitted and it does not need to be done a second time.
 
+                    Logger.Instance?.Write( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' ): '{outputInfo.Pe}' already exists." );
+                    
                     return true;
                 }
                 else
