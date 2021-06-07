@@ -56,7 +56,7 @@ namespace Caravela.TestFramework
             this.Logger.WriteLine( diagnostic.ToString() );
         }
 
-        protected abstract TestRunnerBase CreateTestRunner();
+        protected abstract TestRunnerBase CreateTestRunner( TestRunnerKind kind );
 
         private void WriteDiagnostics( IEnumerable<Diagnostic> diagnostics )
         {
@@ -77,20 +77,14 @@ namespace Caravela.TestFramework
         protected async Task<TestResult> GetTestResultAsync( string relativeTestPath )
         {
             var testSourceAbsolutePath = Path.Combine( this.TestInputsDirectory, relativeTestPath );
-
-            var testRunner = this.CreateTestRunner();
             var testSource = await File.ReadAllTextAsync( testSourceAbsolutePath );
-            var testResult = await testRunner.RunTestAsync( new TestInput( relativeTestPath, testSource ) );
+            var testInput = new TestInput( relativeTestPath, testSource );
+            var testRunner = this.CreateTestRunner( testInput.Options.TestRunnerKind );
+            var testResult = await testRunner.RunTestAsync( testInput );
 
             this.WriteDiagnostics( testResult.Diagnostics );
 
             return testResult;
-        }
-
-        protected async Task AssertTestSuccessful( string relativePathTest )
-        {
-            var result = await this.GetTestResultAsync( relativePathTest );
-            Assert.True( result.Success, result.ErrorMessage );
         }
 
         public static string? NormalizeString( string? s ) => s?.Trim().Replace( "\r", "" );

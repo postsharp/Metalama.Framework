@@ -3,6 +3,7 @@
 
 using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Tests.Integration.DesignTime;
 using Caravela.Framework.Tests.Integration.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
@@ -60,15 +61,20 @@ namespace Caravela.AspectWorkbench.ViewModels
             {
                 this.ErrorsDocument = new FlowDocument();
                 this.TransformedTargetDocument = null;
+                
+                var testInput = new TestInput( "interactive", this.TestText );
 
-                TestRunnerBase testRunner = this.TestText.Contains( "[TestTemplate]" )
-                    ? new TemplatingTestRunner( this._serviceProvider )
-                    : new AspectTestRunner( this._serviceProvider );
+
+                TestRunnerBase testRunner = ( testInput.Options.TestRunnerKind,  this.TestText.Contains( "[TestTemplate]" ) ) switch
+                {
+                    ( _, true ) => new TemplatingTestRunner( this._serviceProvider ),
+                    ( TestRunnerKind.Default, false ) => new AspectTestRunner( this._serviceProvider ),
+                    ( TestRunnerKind.DesignTime, false) => new DesignTimeTestRunner( this._serviceProvider )
+                };
 
                 var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject() );
 
-                var testInput = new TestInput( "interactive", this.TestText );
-
+             
                 var compilationStopwatch = Stopwatch.StartNew();
 
                 var testResult = await testRunner.RunTestAsync( testInput );

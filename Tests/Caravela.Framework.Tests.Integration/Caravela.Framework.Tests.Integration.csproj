@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="DesignTime" />
     <Folder Include="TestInputs\Aspects\Introductions\Fields\" />
   </ItemGroup>
 

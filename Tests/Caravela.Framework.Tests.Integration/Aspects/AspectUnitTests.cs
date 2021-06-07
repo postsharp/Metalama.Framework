@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Tests.Integration.DesignTime;
 using Caravela.TestFramework;
 using System.Threading.Tasks;
 using Xunit;
@@ -11,6 +12,13 @@ namespace Caravela.Framework.Tests.Integration.Aspects
     public class AspectUnitTests : UnitTestBase
     {
         public AspectUnitTests( ITestOutputHelper logger ) : base( logger ) { }
+
+        protected override TestRunnerBase CreateTestRunner( TestRunnerKind kind )
+            => kind switch
+            {
+                TestRunnerKind.Default => new AspectTestRunner( this.ServiceProvider, this.ProjectDirectory ),
+                TestRunnerKind.DesignTime => new DesignTimeTestRunner( this.ServiceProvider, this.ProjectDirectory )
+            };
 
         [Theory]
         [FromDirectory( @"Aspects\Order" )]
@@ -56,6 +64,6 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         [FromDirectory( @"Aspects\Applying" )]
         public Task Applying( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
-        protected override TestRunnerBase CreateTestRunner() => new AspectTestRunner( this.ServiceProvider, this.ProjectDirectory );
+        
     }
 }

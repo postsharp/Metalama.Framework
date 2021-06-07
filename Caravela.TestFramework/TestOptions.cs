@@ -19,5 +19,7 @@ namespace Caravela.TestFramework
         /// warnings and errors are included. 
         /// </summary>
         public bool IncludeAllSeverities { get; set; }
+        
+        public TestRunnerKind TestRunnerKind { get; set; }
     }
 }
