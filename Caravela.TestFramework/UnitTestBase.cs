@@ -12,11 +12,6 @@ using Xunit.Abstractions;
 
 namespace Caravela.TestFramework
 {
-    public static class FileExtensions
-    {
-        public const string TransformedCode = ".t.cs";
-        public const string Html = ".html";
-    }
     /// <summary>
     /// The base class for integration tests.
     /// </summary>

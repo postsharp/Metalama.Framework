@@ -21,7 +21,7 @@
 		<ProjectCapability Include="DynamicDependentFile" />
 		<ProjectCapability Include="DynamicFileNesting" />
 
-		<!-- You should define a nesting profile with the following content:
+		<!-- In Visual Studio, you should define a nesting profile with the following content:
 		
             {
                 "help": "https://go.microsoft.com/fwlink/?linkid=866610",
@@ -30,12 +30,14 @@
                         "extensionToExtension": {
                             "add": {
                                 ".t.cs": [ ".cs" ],
-                                ".html": [ ".cs" ]
+                                ".t.html": [ ".cs" ]
                             }
                         }
                     }
                 }
             }
+            
+            In Rider, go to the wheel icon of the Solution Explorer and choose File Nesting.
 		
 		-->
 	</ItemGroup>
