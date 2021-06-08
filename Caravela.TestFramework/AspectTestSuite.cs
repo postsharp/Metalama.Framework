@@ -6,6 +6,8 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -21,7 +23,7 @@ namespace Caravela.TestFramework
     /// This is useful to write only one test method per category of tests.
     /// </para>
     /// </remarks>
-    public abstract class UnitTestBase : IDisposable
+    public abstract class AspectTestSuite : IDisposable
     {
         protected ITestOutputHelper Logger { get; }
 
@@ -40,10 +42,10 @@ namespace Caravela.TestFramework
         protected string TestInputsDirectory { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UnitTestBase"/> class.
+        /// Initializes a new instance of the <see cref="AspectTestSuite"/> class.
         /// </summary>
         /// <param name="logger">The Xunit logger.</param>
-        protected UnitTestBase( ITestOutputHelper logger )
+        protected AspectTestSuite( ITestOutputHelper logger )
         {
             this.Logger = logger;
             this.ProjectDirectory = TestEnvironment.GetProjectDirectory( this.GetType().Assembly );
@@ -55,8 +57,21 @@ namespace Caravela.TestFramework
         {
             this.Logger.WriteLine( diagnostic.ToString() );
         }
+        
+        protected virtual IEnumerable<Assembly> GetRequiredAssemblies() => Enumerable.Empty<Assembly>();
 
-        protected abstract TestRunnerBase CreateTestRunner( TestRunnerKind kind );
+        protected virtual TestRunnerBase CreateTestRunner( TestRunnerKind kind )
+        {
+            var requiredAssemblies = this.GetRequiredAssemblies().Append( this.GetType().Assembly );
+                
+            return kind switch
+            {
+                TestRunnerKind.Default => new AspectTestRunner( this.ServiceProvider, this.ProjectDirectory, requiredAssemblies ),
+
+                // This exception is for end-users who would try to use the framework with a different test runner.
+                _ => throw new NotSupportedException( $"This kind of test of not supported." )
+            };
+        }
 
         private void WriteDiagnostics( IEnumerable<Diagnostic> diagnostics )
         {
@@ -109,9 +124,15 @@ namespace Caravela.TestFramework
             Assert.NotNull( testResult.TransformedTargetSourceText );
 
             var actualTransformedSourceText = NormalizeString( testResult.TransformedTargetSourceText!.ToString() );
+            
+            // If the expectation file does not exist, create it with some placeholder content.
+            if ( !File.Exists( expectedTransformedPath ) )
+            {
+                await File.WriteAllTextAsync( expectedTransformedPath, "// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code." );
+            }
 
-            // Get expectations.
-            var expectedNonNormalizedSourceText = File.Exists( expectedTransformedPath ) ? await File.ReadAllTextAsync( expectedTransformedPath ) : "";
+            // Read expectations from the file.
+            var expectedNonNormalizedSourceText = await File.ReadAllTextAsync( expectedTransformedPath );
             var expectedTransformedSourceText = NormalizeString( expectedNonNormalizedSourceText );
 
             // Update the file in obj/transformed if it is different.
@@ -138,6 +159,10 @@ namespace Caravela.TestFramework
             {
                 await File.WriteAllTextAsync( actualTransformedPath, actualTransformedSourceText );
             }
+            
+            this.Logger.WriteLine( "=== TRANSFORMED CODE ===" );
+            this.Logger.WriteLine( actualTransformedSourceText );
+            this.Logger.WriteLine( "========================" );
 
             // Write all diagnostics to the logger.
             foreach ( var diagnostic in testResult.Diagnostics )

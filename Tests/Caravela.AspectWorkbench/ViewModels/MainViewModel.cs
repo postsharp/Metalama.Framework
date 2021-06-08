@@ -115,8 +115,8 @@ namespace Caravela.AspectWorkbench.ViewModels
                     this.TransformedTargetDocument = await syntaxColorizer.WriteSyntaxColoring( testResult.TransformedTargetSourceText, null );
 
                     // Compare the output and shows the result.
-                    if ( UnitTestBase.NormalizeString( this.ExpectedOutputText ) ==
-                         UnitTestBase.NormalizeString( testResult.TransformedTargetSourceText.ToString() ) )
+                    if ( AspectTestSuite.NormalizeString( this.ExpectedOutputText ) ==
+                         AspectTestSuite.NormalizeString( testResult.TransformedTargetSourceText.ToString() ) )
                     {
                         errorsDocument.Blocks.Add(
                             new Paragraph( new Run( "The transformed target code is equal to expectations." ) { Foreground = Brushes.Green } ) );

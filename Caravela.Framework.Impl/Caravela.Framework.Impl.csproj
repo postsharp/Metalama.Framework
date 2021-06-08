@@ -3,23 +3,11 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  
+    <CaravelaCompilerDisablePackCustomization>True</CaravelaCompilerDisablePackCustomization>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\IsExternalInit.cs" Link="IsExternalInit.cs" />
-
-    <Compile Remove="CodeModel\Before\**" />
-
-    <Compile Remove="Serialization\Reflection\**" />
-
-    <None Remove="CodeModel\Before\**" />
-
-    <None Remove="Serialization\Reflection\**" />
-
-    <Compile Remove="build\**" />
-
-    <None Remove="build\**" />
     
     <!-- We have to embed the netstandard2.0 build of Caravela.Framework so we can reference it to create
          the compile-time assembly. See ReferenceAssemblyLocator                                           -->
@@ -33,11 +21,9 @@
     <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests" />
     <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration" />
     <InternalsVisibleTo Include="Caravela.Framework.CompilerAddIn" />
+    </ItemGroup>
     
-    <!--
-    <PackageReference Include="Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight" Version="$(CaravelaCompilerVersion)" />
-    <PackageReference Include="Caravela.CodeAnalysis.Workspaces.Lightweight.Common" Version="$(CaravelaCompilerVersion)" />
-    -->
+   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" />
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
@@ -51,6 +37,14 @@
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
     <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" />
     <ProjectReference Include="..\Build\Caravela.MemoTransformer\Caravela.MemoTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    
+    <!-- Reference PostSharp for obfuscation -->
+    <PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" PrivateAssets="all" Condition="'$(Obfuscate)' == 'True'" />
+    <ProjectReference Include="..\Build\Caravela.Obfuscator\Caravela.Obfuscator.csproj" ReferenceOutputAssembly="false" Condition="'$(Obfuscate)' == 'True'" />
+    
+    <!-- Reference Caravela.Compiler for [Memo] -->
+    <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" />
+    
   </ItemGroup>
   
   <!-- Obfuscation -->
@@ -62,24 +56,23 @@
     <PostSharpSearchPath>$(OutputPath)\netstandard2.0</PostSharpSearchPath>
   </PropertyGroup>
 
-  <ItemGroup>
-    <!-- Reference PostSharp for obfuscation -->
-    <PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" PrivateAssets="all" Condition="'$(Obfuscate)' == 'True'" />
-    
-    <!-- Reference Caravela.Compiler for [Memo] -->
-    <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" />
-    
-    <ProjectReference Include="..\Build\Caravela.Obfuscator\Caravela.Obfuscator.csproj" ReferenceOutputAssembly="false" Condition="'$(Obfuscate)' == 'True'" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Remove="CodeModel\Before\**" />
-    <EmbeddedResource Remove="Serialization\Reflection\**" />
-    <EmbeddedResource Remove="build\**" />
-  </ItemGroup>
-
   <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">
     <Error Condition="'$(Configuration)' == 'Release' AND '$(Obfuscate)' != 'True'" Text="Not allowed to create Release package without obfuscation, use '-p:Obfuscate=True'." />
   </Target>
+  
+ <PropertyGroup>
+   <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);CustomContentTarget</TargetsForTfmSpecificContentInPackage>
+ </PropertyGroup>
+ 
+ <Target Name="CustomContentTarget">
+   <ItemGroup>
+<!--     <TfmSpecificPackageFile Remove="abc.txt">-->
+<!--       <PackagePath>mycontent/$(TargetFramework)</PackagePath>-->
+<!--     </TfmSpecificPackageFile>-->
+<!--     <TfmSpecificPackageFile Include="Extensions/ext.txt" Condition="'$(TargetFramework)' == 'net46'">-->
+<!--       <PackagePath>net46content</PackagePath>-->
+<!--     </TfmSpecificPackageFile>  -->
+   </ItemGroup>
+ </Target>  
 
 </Project>

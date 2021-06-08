@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Serialization
     /// Serializes objects into Roslyn creation expressions that would create those objects. You can register additional serializers with an instance of this class
     /// to support additional types.
     /// </summary>
-    internal class SyntaxSerializationService
+    internal class SyntaxSerializationService : IService
     {
         // Set of serializers indexed by the real implementation type they are able to handle (e.g. CompileTimeMethodInfo). 
         private readonly ConcurrentDictionary<Type, ObjectSerializer> _serializerByInputType = new();

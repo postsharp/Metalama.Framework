@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Aspects
 {
-    public class DiagnosticTests : UnitTestBase
+    public class DiagnosticTests : AspectTestSuite
     {
         public DiagnosticTests( ITestOutputHelper logger ) : base( logger ) { }
 

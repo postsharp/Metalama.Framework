@@ -10,9 +10,9 @@ using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Aspects
 {
-    public class AspectUnitTests : UnitTestBase
+    public class AspectTests : AspectTestSuite
     {
-        public AspectUnitTests( ITestOutputHelper logger ) : base( logger ) { }
+        public AspectTests( ITestOutputHelper logger ) : base( logger ) { }
 
         protected override TestRunnerBase CreateTestRunner( TestRunnerKind kind )
             => kind switch

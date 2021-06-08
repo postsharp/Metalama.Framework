@@ -43,7 +43,8 @@ namespace Caravela.Framework.Tests.UnitTests
 
             var dependencies = new IAspectOrderingSource[]
             {
-                new AspectLayerOrderingSource( aspectTypes ), new AttributeAspectOrderingSource( compilation.RoslynCompilation )
+                new AspectLayerOrderingSource( aspectTypes ),
+                new AttributeAspectOrderingSource( compilation.RoslynCompilation, loader )
             };
 
             Assert.True(

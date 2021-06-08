@@ -7,12 +7,13 @@ using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Caravela.TestFramework
 {
     public static class TestCompilationFactory
     {
-        public static CSharpCompilation CreateEmptyCSharpCompilation( string? name = null, params Type[] additionalAssemblies )
+        public static CSharpCompilation CreateEmptyCSharpCompilation( string? name = null, params Assembly[] additionalAssemblies )
         {
             var standardLibraries = new[] { "netstandard" }
                 .Select( r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) )
@@ -27,8 +28,7 @@ namespace Caravela.TestFramework
                 .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
                 .AddReferences( standardLibraries )
                 .AddReferences(
-                    additionalAssemblies.Prepend( typeof(IAspect) )
-                        .Select( t => t.Assembly )
+                    additionalAssemblies.Prepend( typeof(IAspect).Assembly )
                         .Concat( systemLibraries )
                         .Distinct()
                         .Select( a => MetadataReference.CreateFromFile( a.Location ) ) );

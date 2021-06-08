@@ -5,6 +5,7 @@ using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
+using Caravela.TestFramework;
 using System;
 using System.Linq;
 using Xunit;
@@ -13,15 +14,25 @@ namespace Caravela.Framework.Tests.UnitTests
 {
     public class AttributeDeserializerTests : TestBase
     {
-        private static object? GetDeserializedProperty( string property, string value, string? dependentCode = null )
+        public AttributeDeserializerTests()
+        {
+            // For the ease of testing, we need the custom attributes and helper classes nested here to be considered to 
+            // belong to a system library so they can be shared between the compile-time code and the testing code.
+            this.ServiceProvider.ReplaceServiceForTest<SystemTypeResolver>( new HackedSystemTypeResolver( this.ServiceProvider ) );
+        }
+        
+        private object? GetDeserializedProperty( string property, string value, string? dependentCode = null )
         {
             var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestAttribute( {property} = {value} )]";
             var compilation = CreateCompilationModel( code, dependentCode );
-            AttributeDeserializer deserializer = new( new SystemTypeResolver() );
+            
+            using UnloadableCompileTimeDomain domain = new();
+            var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
+            
             var attribute = compilation.Attributes.Single();
             DiagnosticList diagnosticList = new();
 
-            if ( !deserializer.TryCreateAttribute( attribute, diagnosticList, out var deserializedAttribute ) )
+            if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticList, out var deserializedAttribute ) )
             {
                 throw new AssertionFailedException();
             }
@@ -32,17 +43,17 @@ namespace Caravela.Framework.Tests.UnitTests
         [Fact]
         public void TestPrimitiveTypes()
         {
-            Assert.Equal( 5, GetDeserializedProperty( nameof(TestAttribute.Int32Property), "5" ) );
-            Assert.Equal( "Zuzana", GetDeserializedProperty( nameof(TestAttribute.StringProperty), "\"Zuzana\"" ) );
-            Assert.Equal( new[] { 5 }, GetDeserializedProperty( nameof(TestAttribute.Int32ArrayProperty), "new[]{5}" ) );
+            Assert.Equal( 5, this.GetDeserializedProperty( nameof(TestAttribute.Int32Property), "5" ) );
+            Assert.Equal( "Zuzana", this.GetDeserializedProperty( nameof(TestAttribute.StringProperty), "\"Zuzana\"" ) );
+            Assert.Equal( new[] { 5 }, this.GetDeserializedProperty( nameof(TestAttribute.Int32ArrayProperty), "new[]{5}" ) );
         }
 
         [Fact]
         public void TestBoxedTypes()
         {
-            Assert.Equal( 5, GetDeserializedProperty( nameof(TestAttribute.ObjectProperty), "5" ) );
-            Assert.Equal( "Zuzana", GetDeserializedProperty( nameof(TestAttribute.ObjectProperty), "\"Zuzana\"" ) );
-            Assert.Equal( new[] { 5 }, GetDeserializedProperty( nameof(TestAttribute.ObjectProperty), "new[]{5}" ) );
+            Assert.Equal( 5, this.GetDeserializedProperty( nameof(TestAttribute.ObjectProperty), "5" ) );
+            Assert.Equal( "Zuzana", this.GetDeserializedProperty( nameof(TestAttribute.ObjectProperty), "\"Zuzana\"" ) );
+            Assert.Equal( new[] { 5 }, this.GetDeserializedProperty( nameof(TestAttribute.ObjectProperty), "new[]{5}" ) );
         }
 
         [Fact]
@@ -50,15 +61,15 @@ namespace Caravela.Framework.Tests.UnitTests
         {
             Assert.Equal(
                 TestEnum.A,
-                GetDeserializedProperty( nameof(TestAttribute.EnumProperty), "Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum.A" ) );
+                this.GetDeserializedProperty( nameof(TestAttribute.EnumProperty), "Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum.A" ) );
 
             Assert.Equal(
                 TestEnum.A,
-                GetDeserializedProperty( nameof(TestAttribute.ObjectProperty), "Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum.A" ) );
+                this.GetDeserializedProperty( nameof(TestAttribute.ObjectProperty), "Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum.A" ) );
 
             Assert.Equal(
                 new[] { TestEnum.A },
-                GetDeserializedProperty(
+                this.GetDeserializedProperty(
                     nameof(TestAttribute.EnumArrayProperty),
                     "new[]{Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum.A}" ) );
         }
@@ -66,23 +77,23 @@ namespace Caravela.Framework.Tests.UnitTests
         [Fact]
         public void TestTypes()
         {
-            Assert.Equal( typeof(int), GetDeserializedProperty( nameof(TestAttribute.TypeProperty), "typeof(int)" ) );
+            Assert.Equal( typeof(int), this.GetDeserializedProperty( nameof(TestAttribute.TypeProperty), "typeof(int)" ) );
 
             Assert.Equal(
                 typeof(TestEnum),
-                GetDeserializedProperty(
+                this.GetDeserializedProperty(
                     nameof(TestAttribute.TypeProperty),
                     "typeof(Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum)" ) );
 
             Assert.Equal(
                 new[] { typeof(TestEnum), typeof(int) },
-                GetDeserializedProperty(
+                this.GetDeserializedProperty(
                     nameof(TestAttribute.TypeArrayProperty),
                     "new[]{typeof(Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum),typeof(int)}" ) );
 
             Assert.Equal(
                 new[] { typeof(TestEnum), typeof(int) },
-                GetDeserializedProperty(
+                this.GetDeserializedProperty(
                     nameof(TestAttribute.ObjectArrayProperty),
                     "new[]{typeof(Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum),typeof(int)}" ) );
         }
@@ -91,24 +102,27 @@ namespace Caravela.Framework.Tests.UnitTests
         public void TestNonRunTimeType()
         {
             var dependentCode = "public class MyExternClass {} public enum MyExternEnum { A, B }";
-            var typeValue = GetDeserializedProperty( nameof(TestAttribute.TypeProperty), "typeof(MyExternClass)", dependentCode );
+            var typeValue = this.GetDeserializedProperty( nameof(TestAttribute.TypeProperty), "typeof(MyExternClass)", dependentCode );
             Assert.Equal( "MyExternClass", Assert.IsType<CompileTimeType>( typeValue ).FullName );
 
-            var objectValue = GetDeserializedProperty( nameof(TestAttribute.ObjectProperty), "MyExternEnum.B", dependentCode );
+            var objectValue = this.GetDeserializedProperty( nameof(TestAttribute.ObjectProperty), "MyExternEnum.B", dependentCode );
             Assert.Equal( 1, objectValue );
         }
 
         [Fact]
         public void TestParams()
         {
-            static object Deserialize( string args )
+            object Deserialize( string args )
             {
                 var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestParamsAttribute( {args} )]";
                 var compilation = CreateCompilationModel( code );
-                AttributeDeserializer deserializer = new( new SystemTypeResolver() );
+                
+                using UnloadableCompileTimeDomain domain = new();
+                var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
+                
                 var attribute = compilation.Attributes.Single();
 
-                if ( !deserializer.TryCreateAttribute( attribute, new DiagnosticList(), out var deserializedAttribute ) )
+                if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, new DiagnosticList(), out var deserializedAttribute ) )
                 {
                     throw new AssertionFailedException();
                 }
@@ -162,6 +176,14 @@ namespace Caravela.Framework.Tests.UnitTests
             public TestParamsAttribute( params Type[] p ) { this.Value = p; }
 
             public TestParamsAttribute( params object[] p ) { this.Value = p; }
+        }
+
+        class HackedSystemTypeResolver : SystemTypeResolver
+        {
+            public HackedSystemTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider ) { }
+
+            protected override bool IsStandardAssemblyName( string assemblyName )
+                => base.IsStandardAssemblyName( assemblyName ) || assemblyName == this.GetType().Assembly.GetName().Name;
         }
     }
 }

@@ -9,9 +9,9 @@ using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Highlighting
 {
-    public class HighlightingUnitTests : UnitTestBase
+    public class HighlightingTests : AspectTestSuite
     {
-        public HighlightingUnitTests( ITestOutputHelper logger ) : base( logger ) { }
+        public HighlightingTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
         [FromDirectory( @"Formatting" )]

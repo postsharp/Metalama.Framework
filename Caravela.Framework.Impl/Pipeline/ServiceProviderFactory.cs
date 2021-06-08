@@ -8,6 +8,8 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
+
+    
     public static class ServiceProviderFactory
     {
         private static ServiceProvider? _sharedInstance;
@@ -19,6 +21,7 @@ namespace Caravela.Framework.Impl.Pipeline
             serviceProvider.AddService( new ReferenceAssemblyLocator( serviceProvider ) );
             serviceProvider.AddService( new SymbolClassificationService( serviceProvider ) );
             serviceProvider.AddService( new SyntaxSerializationService() );
+            serviceProvider.AddService( new SystemTypeResolver( serviceProvider ) );
 
             if ( freeze )
             {

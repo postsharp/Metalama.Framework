@@ -1,7 +1,7 @@
 <Project>
-
     <!-- Include the package version in metadata. -->
-    <Target Name="AddAssemblyMetadata" BeforeTargets="GenerateAdditionalSources"
+    <Target Name="AddAssemblyMetadata" 
+            BeforeTargets="GenerateAdditionalSources"
             DependsOnTargets="RunResolvePackageDependencies">
         <ItemGroup>
             <!-- Add all package versions to metadata -->
@@ -10,7 +10,5 @@
                 <_Parameter2>%(PackageDefinitions.Version)</_Parameter2>
             </AssemblyAttribute>
         </ItemGroup>
-
     </Target>
-
 </Project>

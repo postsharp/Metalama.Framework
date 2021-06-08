@@ -8,9 +8,9 @@ using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Annotation
 {
-    public class AnnotationTriviaUnitTests : UnitTestBase
+    public class AnnotationTriviaAspectTests : AspectTestSuite
     {
-        public AnnotationTriviaUnitTests( ITestOutputHelper logger ) : base( logger ) { }
+        public AnnotationTriviaAspectTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
         [FromDirectory( @"Formatting" )]

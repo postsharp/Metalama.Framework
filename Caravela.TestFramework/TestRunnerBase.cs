@@ -6,7 +6,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,10 +19,16 @@ namespace Caravela.TestFramework
     /// </summary>
     public abstract class TestRunnerBase
     {
+        private readonly Assembly[] _additionalAssemblies;
+
         public IServiceProvider ServiceProvider { get; }
 
-        public TestRunnerBase( IServiceProvider serviceProvider, string? projectDirectory )
+        public TestRunnerBase( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<Assembly>? additionalAssemblies = null )
         {
+            this._additionalAssemblies = (additionalAssemblies ?? Enumerable.Empty<Assembly>())
+                .Append( typeof(TestRunnerBase).Assembly )
+                .ToArray();
+            
             this.ServiceProvider = serviceProvider;
             this.ProjectDirectory = projectDirectory;
         }
@@ -75,7 +83,7 @@ namespace Caravela.TestFramework
         /// <returns>A new project instance.</returns>
         public virtual Project CreateProject()
         {
-            var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null, typeof(TestRunnerBase) );
+            var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null, this._additionalAssemblies );
 
             var guid = Guid.NewGuid();
             var workspace1 = new AdhocWorkspace();

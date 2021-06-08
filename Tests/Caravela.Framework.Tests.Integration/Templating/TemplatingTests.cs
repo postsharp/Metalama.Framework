@@ -8,9 +8,9 @@ using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Templating
 {
-    public class TemplatingUnitTests : UnitTestBase
+    public class TemplatingTests : AspectTestSuite
     {
-        public TemplatingUnitTests( ITestOutputHelper logger ) : base( logger ) { }
+        public TemplatingTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
         [FromDirectory( @"Templating\Syntax" )]

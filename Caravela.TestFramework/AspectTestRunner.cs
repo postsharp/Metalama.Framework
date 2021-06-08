@@ -7,7 +7,9 @@ using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,7 +20,8 @@ namespace Caravela.TestFramework
     /// </summary>
     public class AspectTestRunner : TestRunnerBase
     {
-        public AspectTestRunner( IServiceProvider serviceProvider, string? projectDirectory = null ) : base( serviceProvider, projectDirectory ) { }
+        public AspectTestRunner( IServiceProvider serviceProvider, string? projectDirectory = null, IEnumerable<Assembly>? additionalAssemblies = null ) 
+            : base( serviceProvider, projectDirectory, additionalAssemblies ) { }
 
         /// <summary>
         /// Runs the aspect test with the given name and source.

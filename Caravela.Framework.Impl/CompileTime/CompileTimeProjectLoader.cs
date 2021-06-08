@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly IServiceProvider _serviceProvider;
         private readonly CompileTimeCompilationBuilder _builder;
         private readonly IAssemblyLocator? _runTimeAssemblyLocator;
-        private readonly SystemTypeResolver _systemTypeResolver = new();
+        private readonly SystemTypeResolver _systemTypeResolver;
 
         // Maps the identity of the run-time project to the compile-time project.
         private readonly Dictionary<AssemblyIdentity, CompileTimeProject?> _projects = new();
@@ -43,8 +43,8 @@ namespace Caravela.Framework.Impl.CompileTime
             this._serviceProvider = serviceProvider;
             this._builder = new CompileTimeCompilationBuilder( serviceProvider, domain );
             this._runTimeAssemblyLocator = serviceProvider.GetOptionalService<IAssemblyLocator>();
-
             this.AttributeDeserializer = new AttributeDeserializer( this );
+            this._systemTypeResolver = serviceProvider.GetService<SystemTypeResolver>();
         }
 
         /// <summary>

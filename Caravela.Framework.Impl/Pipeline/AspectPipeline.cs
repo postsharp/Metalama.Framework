@@ -86,7 +86,8 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var aspectOrderSources = new IAspectOrderingSource[]
             {
-                new AttributeAspectOrderingSource( compilation.Compilation ), new AspectLayerOrderingSource( aspectTypes )
+                new AttributeAspectOrderingSource( compilation.Compilation, loader ),
+                new AspectLayerOrderingSource( aspectTypes )
             };
 
             if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var sortedAspectLayers ) )

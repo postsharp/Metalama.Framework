@@ -1,0 +1,35 @@
+<Project>
+    <ItemGroup>
+        <!-- Defines an [assemblu:AssemblyMetadata]. This is required by the [FromDirectory] attrivute -->
+      <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+        <_Parameter1>ProjectDirectory</_Parameter1>
+        <_Parameter2>$(MSBuildProjectDirectory)</_Parameter2>
+      </AssemblyAttribute>
+</ItemGroup>      
+      <!-- Enable dynamic file nesting in Visual Studio -->
+    <ItemGroup>
+    		<ProjectCapability Include="DynamicDependentFile" />
+    		<ProjectCapability Include="DynamicFileNesting" />
+    
+    		<!-- In Visual Studio, you should define a nesting profile with the following content:
+    		
+                {
+                    "help": "https://go.microsoft.com/fwlink/?linkid=866610",
+                    "dependentFileProviders": {
+                        "add": {
+                            "extensionToExtension": {
+                                "add": {
+                                    ".t.cs": [ ".cs" ],
+                                    ".t.html": [ ".cs" ]
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                In Rider, go to the wheel icon of the Solution Explorer and choose File Nesting.
+    		
+    		-->
+    	</ItemGroup>
+    	
+</Project>
