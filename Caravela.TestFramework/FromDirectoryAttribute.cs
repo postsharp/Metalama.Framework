@@ -51,7 +51,8 @@ namespace Caravela.TestFramework
 
                 foreach ( var testPath in Directory.EnumerateFiles( dirPath, "*.cs" ) )
                 {
-                    if ( Path.GetFileName( testPath ).StartsWith( "_" ) )
+                    if ( Path.GetFileName( testPath ).StartsWith( "_", StringComparison.OrdinalIgnoreCase ) || 
+                         testPath.EndsWith( FileExtensions.TransformedCode, StringComparison.OrdinalIgnoreCase ) )
                     {
                         continue;
                     }

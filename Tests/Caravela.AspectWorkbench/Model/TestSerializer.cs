@@ -10,7 +10,7 @@ namespace Caravela.AspectWorkbench.Model
 {
     internal class TestSerializer
     {
-        private static string GetExpectedOutputFilePath( string testFilePath ) => Path.ChangeExtension( testFilePath, ".transformed.txt" );
+        private static string GetExpectedOutputFilePath( string testFilePath ) => Path.ChangeExtension( testFilePath, FileExtensions.TransformedCode );
 
         public static async Task<TemplateTest> LoadFromFileAsync( string filePath )
         {

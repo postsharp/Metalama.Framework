@@ -12,6 +12,11 @@ using Xunit.Abstractions;
 
 namespace Caravela.TestFramework
 {
+    public static class FileExtensions
+    {
+        public const string TransformedCode = ".t.cs";
+        public const string Html = ".html";
+    }
     /// <summary>
     /// The base class for integration tests.
     /// </summary>
@@ -104,7 +109,7 @@ namespace Caravela.TestFramework
 
             var expectedTransformedPath = Path.Combine(
                 Path.GetDirectoryName( sourceAbsolutePath )!,
-                Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".transformed.txt" );
+                Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.TransformedCode );
 
             Assert.NotNull( testResult.TransformedTargetSourceText );
 
@@ -120,7 +125,7 @@ namespace Caravela.TestFramework
                 "obj",
                 "transformed",
                 Path.GetDirectoryName( relativeTestPath ) ?? "",
-                Path.GetFileNameWithoutExtension( relativeTestPath ) + ".transformed.txt" );
+                Path.GetFileNameWithoutExtension( relativeTestPath ) + FileExtensions.TransformedCode );
 
             Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );
 
