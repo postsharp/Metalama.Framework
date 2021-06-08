@@ -18,4 +18,10 @@ namespace Caravela.Framework.Code
         [return: RunTimeOnly]
         ConstructorInfo ToConstructorInfo();
     }
+
+    public enum SignatureMatch
+    {
+        Exact,
+        Compatible
+    }
 }
