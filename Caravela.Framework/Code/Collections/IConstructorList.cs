@@ -27,7 +27,7 @@ namespace Caravela.Framework.Code.Collections
         IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<IType?>? argumentTypes = null, IReadOnlyList<RefKind?>? refKinds = null );
 
         /// <summary>
-        /// Gets a constructor that exactly matches the specified signature given using the <c>System.Reflection</c> API
+        /// Gets a constructor that exactly matches the specified signature given using the <c>System.Reflection</c> API.
         /// </summary>
         /// <param name="parameterTypes">List of parameter types.</param>
         /// <param name="refKinds">List of parameter reference kinds, or <c>null</c> if all parameters should be by-value.</param>
