@@ -26,6 +26,6 @@ namespace Caravela.Framework.Tests.Integration.Aspects
             await this.AssertTransformedSourceEqualAsync( path );
         }
 
-        protected override TestRunnerBase CreateTestRunner() => new AspectTestRunner( this.ServiceProvider, this.ProjectDirectory );
+        protected override TestRunnerBase CreateTestRunner( TestRunnerKind kind ) => new AspectTestRunner( this.ServiceProvider, this.ProjectDirectory );
     }
 }

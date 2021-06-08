@@ -10,10 +10,12 @@ namespace Caravela.Framework.Impl.Utilities
     {
         public static IDisposable WithGlobalLock( string name )
         {
+            Logger.Instance?.Write( $"Acquiring lock '{name}'." );
+
             var mutex = CreateGlobalMutex( name );
             mutex.WaitOne();
 
-            return new MutexHandle( mutex );
+            return new MutexHandle( mutex, name );
         }
 
         private static Mutex CreateGlobalMutex( string fullName )
@@ -26,14 +28,18 @@ namespace Caravela.Framework.Impl.Utilities
         private class MutexHandle : IDisposable
         {
             private readonly Mutex _mutex;
+            private readonly string _name;
 
-            public MutexHandle( Mutex mutex )
+            public MutexHandle( Mutex mutex, string name )
             {
                 this._mutex = mutex;
+                this._name = name;
             }
 
             public void Dispose()
             {
+                Logger.Instance?.Write( $"Acquiring lock '{this._name}'." );
+
                 this._mutex.ReleaseMutex();
                 this._mutex.Dispose();
             }

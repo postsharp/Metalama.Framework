@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public DeclarationFactory Factory { get; }
 
-        protected CompilationModel( PartialCompilation partialCompilation )
+        private CompilationModel( PartialCompilation partialCompilation )
         {
             this.PartialCompilation = partialCompilation;
             this.ReflectionMapper = ReflectionMapper.GetInstance( this.RoslynCompilation );
@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this.Factory = new DeclarationFactory( this );
 
             var allDeclarations =
-                this.PartialCompilation.Types.SelectManyRecursive<ISymbol>( s => s.GetContainedSymbols(), includeFirstLevel: true )
+                this.PartialCompilation.Types.SelectManyRecursive<ISymbol>( s => s.GetContainedSymbols(), includeFirstLevel: true, throwOnDuplicate: false )
                     .Concat( new[] { (ISymbol) this.PartialCompilation.Compilation.Assembly, this.PartialCompilation.Compilation.SourceModule } );
 
             var allAttributes = allDeclarations.SelectMany( c => c.GetAllAttributes() );

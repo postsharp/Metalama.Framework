@@ -14,9 +14,9 @@ namespace Caravela.Framework.Impl.Options
 
         public static readonly DefaultDirectoryOptions Instance = new();
 
-        public virtual string CompileTimeProjectCacheDirectory => TempPathHelper.GetTempPath( "CompileTimeProjectCache" );
+        public virtual string CompileTimeProjectCacheDirectory => TempPathHelper.GetTempPath( "CompileTime" );
 
-        public virtual string AssemblyLocatorCacheDirectory => TempPathHelper.GetTempPath( "AssemblyLocatorCache" );
+        public virtual string AssemblyLocatorCacheDirectory => TempPathHelper.GetTempPath( "AssemblyLocator" );
 
         public virtual string CrashReportDirectory => TempPathHelper.GetTempPath( "CrashReports" );
     }

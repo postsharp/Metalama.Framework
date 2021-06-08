@@ -113,7 +113,6 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         private TemplatingScope GetSymbolScope( ISymbol? symbol )
         {
-
             if ( symbol == null )
             {
                 return GetMoreSpecificScope( TemplatingScope.Both );
@@ -190,7 +189,6 @@ namespace Caravela.Framework.Impl.Templating
                     return TemplatingScope.Both;
                 }
             }
-
         }
 
         /// <summary>

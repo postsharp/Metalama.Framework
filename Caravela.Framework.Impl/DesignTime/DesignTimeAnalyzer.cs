@@ -4,7 +4,6 @@
 using Caravela.Compiler;
 using Caravela.Framework.Impl.DesignTime.Diagnostics;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
-using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Templating;
@@ -55,12 +54,12 @@ namespace Caravela.Framework.Impl.DesignTime
 
         private void AnalyzeCompilation( CompilationAnalysisContext context )
         {
-            DesignTimeLogger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}') started." );
+            Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeCompilation('{context.Compilation.AssemblyName}') started." );
 
             try { }
             catch ( Exception e )
             {
-                DesignTimeLogger.Instance?.Write( e.ToString() );
+                Logger.Instance?.Write( e.ToString() );
             }
         }
 
@@ -71,7 +70,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 // Execute the analysis that are not performed in the pipeline.
                 var buildOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
 
-                DesignTimeLogger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{context.SemanticModel.SyntaxTree.FilePath}')" );
+                Logger.Instance?.Write( $"DesignTimeAnalyzer.AnalyzeSemanticModel('{context.SemanticModel.SyntaxTree.FilePath}')" );
 
                 DebuggingHelper.AttachDebugger( buildOptions );
 
@@ -87,7 +86,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 // Report diagnostics from the pipeline.
                 foreach ( var result in syntaxTreeResults )
                 {
-                    DesignTimeLogger.Instance?.Write(
+                    Logger.Instance?.Write(
                         $"DesignTimeAnalyzer.AnalyzeSemanticModel('{context.SemanticModel.SyntaxTree.FilePath}'): {result.Diagnostics.Length} diagnostics reported on '{result.SyntaxTree.FilePath}'." );
 
                     DesignTimeDiagnosticHelper.ReportDiagnostics(
@@ -124,7 +123,7 @@ namespace Caravela.Framework.Impl.DesignTime
             }
             catch ( Exception e )
             {
-                DesignTimeLogger.Instance?.Write( e.ToString() );
+                Logger.Instance?.Write( e.ToString() );
             }
         }
     }

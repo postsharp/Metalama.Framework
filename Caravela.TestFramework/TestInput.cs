@@ -42,6 +42,11 @@ namespace Caravela.TestFramework
                         this.Options.IncludeAllSeverities = true;
 
                         break;
+
+                    case "DesignTime":
+                        this.Options.TestRunnerKind = TestRunnerKind.DesignTime;
+
+                        break;
                 }
             }
         }
@@ -57,5 +62,12 @@ namespace Caravela.TestFramework
         public string TestSource { get; }
 
         public TestOptions Options { get; } = new();
+    }
+
+    public enum TestRunnerKind
+    {
+        Default,
+        Template,
+        DesignTime
     }
 }

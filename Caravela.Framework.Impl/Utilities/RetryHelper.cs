@@ -32,6 +32,8 @@ namespace Caravela.Framework.Impl.Utilities
                 }
                 catch ( Exception e ) when ( i < maxAttempts && retryPredicate( e ) )
                 {
+                    Logger.Instance?.Write( $"RetryHelper caught '{e.Message}'. Retrying in {delay}." );
+
                     Thread.Sleep( TimeSpan.FromMilliseconds( delay ) );
                     delay *= 1.2;
                 }

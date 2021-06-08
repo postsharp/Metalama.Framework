@@ -16,6 +16,7 @@
 	  <Compile Include="..\Caravela.Framework.Impl\Utilities\AssemblyMetadataReader.cs" Link="Utilities\AssemblyMetadataReader.cs" />
 	  <Compile Include="..\Caravela.Framework.Impl\Utilities\RetryHelper.cs" Link="Utilities\RetryHelper.cs" />
 	  <Compile Include="..\Caravela.Framework.Impl\Utilities\TempPathHelper.cs" Link="Utilities\TempPathHelper.cs" />
+	  <Compile Include="..\Caravela.Framework.Impl\Utilities\Logger.cs" Link="Utilities\Logger.cs" />
 	</ItemGroup>
 
 

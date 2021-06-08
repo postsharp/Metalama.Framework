@@ -63,6 +63,14 @@ namespace Caravela.Framework.Code.Collections
             bool? isStatic = null,
             bool declaredOnly = true );
 
+        // TODO: Add this method:
+        // IMethod? OfExactSignature(
+        //     string name,
+        //     int genericParameterCount,
+        //     IReadOnlyList<Type> parameterTypes,
+        //     bool? isStatic = null,
+        //     bool declaredOnly = true );
+
         /// <summary>
         /// Gets a method that exactly matches the signature of the specified method.
         /// </summary>

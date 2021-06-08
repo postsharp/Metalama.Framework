@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     switch ( transformation )
                     {
                         case IMemberIntroduction memberIntroduction:
-                            // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything .
+                            // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
                             var introductionContext = new MemberIntroductionContext(
                                 diagnostics,
                                 new LinkerIntroductionNameProvider(),
@@ -90,8 +90,9 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                                 syntaxFactory,
                                 this.PipelineProperties.ServiceProvider );
 
-                            classDeclaration = classDeclaration.AddMembers(
-                                memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray() );
+                            var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray();
+
+                            classDeclaration = classDeclaration.AddMembers( introducedMembers );
 
                             break;
 

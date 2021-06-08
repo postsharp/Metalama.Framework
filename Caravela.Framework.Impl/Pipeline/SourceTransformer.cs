@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
             catch ( Exception e )
             {
-                var tempPath = TempPathHelper.GetTempPath( "CrashReports" );
+                var tempPath = DefaultDirectoryOptions.Instance.CrashReportDirectory;
 
                 RetryHelper.Retry(
                     () =>

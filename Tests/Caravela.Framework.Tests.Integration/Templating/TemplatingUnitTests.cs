@@ -44,6 +44,6 @@ namespace Caravela.Framework.Tests.Integration.Templating
         [FromDirectory( @"Templating\UnsupportedSyntax" )]
         public Task UnsupportedSyntax( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
-        protected override TestRunnerBase CreateTestRunner() => new TemplatingTestRunner( this.ServiceProvider, this.ProjectDirectory );
+        protected override TestRunnerBase CreateTestRunner( TestRunnerKind kind ) => new TemplatingTestRunner( this.ServiceProvider, this.ProjectDirectory );
     }
 }

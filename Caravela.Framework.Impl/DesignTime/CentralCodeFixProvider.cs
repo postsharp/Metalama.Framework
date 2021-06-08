@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.DesignTime.Utilities;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -22,7 +23,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public override Task RegisterCodeFixesAsync( CodeFixContext context )
         {
-            DesignTimeLogger.Instance?.Write( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync" );
+            Logger.Instance?.Write( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync" );
 
             context.RegisterCodeFix(
                 CodeAction.Create(

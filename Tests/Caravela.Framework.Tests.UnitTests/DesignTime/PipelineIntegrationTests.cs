@@ -20,11 +20,11 @@ using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Caravela.Framework.Tests.Integration.DesignTime
+namespace Caravela.Framework.Tests.UnitTests.DesignTime
 {
-    public class DesignTimePipelineTest
+    public class PipelineIntegrationTests
     {
-        public DesignTimePipelineTest( ITestOutputHelper logger )
+        public PipelineIntegrationTests( ITestOutputHelper logger )
         {
             this.Logger = logger;
         }
