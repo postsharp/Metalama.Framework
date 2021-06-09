@@ -79,24 +79,23 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 // Add members to the class.
                 foreach ( var transformation in transformationGroup.Transformations )
                 {
-                    switch ( transformation )
+                    if ( transformation is IMemberIntroduction memberIntroduction )
                     {
-                        case IMemberIntroduction memberIntroduction:
-                            // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything .
-                            var introductionContext = new MemberIntroductionContext(
-                                diagnostics,
-                                new LinkerIntroductionNameProvider(),
-                                lexicalScopeFactory.GetLexicalScope( memberIntroduction ),
-                                syntaxFactory,
-                                this.PipelineProperties.ServiceProvider );
+                        // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything .
+                        var introductionContext = new MemberIntroductionContext(
+                            diagnostics,
+                            new LinkerIntroductionNameProvider(),
+                            lexicalScopeFactory.GetLexicalScope( memberIntroduction ),
+                            syntaxFactory,
+                            this.PipelineProperties.ServiceProvider );
 
-                            classDeclaration = classDeclaration.AddMembers(
-                                memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray() );
+                        classDeclaration = classDeclaration.AddMembers(
+                            memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray() );
+                    }
 
-                            break;
-
-                        default:
-                            throw new AssertionFailedException();
+                    if ( transformation is IInterfaceImplementationIntroduction interfaceImplementation)
+                    {
+                        classDeclaration = classDeclaration.AddBaseListTypes( interfaceImplementation.GetIntroducedInterfaceImplementations().ToArray() );
                     }
                 }
 

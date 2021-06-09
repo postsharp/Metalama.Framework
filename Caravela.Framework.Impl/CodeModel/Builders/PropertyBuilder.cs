@@ -69,8 +69,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => throw new NotImplementedException();
 
-        // TODO: When an interface is introduced, explicit implementation should appear here.
-        public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => Array.Empty<IProperty>();
+        public IReadOnlyList<IProperty> ExplicitInterfaceImplementations { get; set; } = Array.Empty<IProperty>();
 
         public bool IsIndexer => this.Name == "Items";
 
@@ -171,11 +170,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     List<AttributeListSyntax>(), // TODO: Attributes.
                     GenerateModifierList(),
                     (TypeSyntax) syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
-                    null,
+                    this.ExplicitInterfaceImplementations.Count > 0
+                        ? ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                        : null,
                     Identifier( this.Name ),
                     GenerateAccessorList(),
                     null,
-                    null );
+                    null,
+                    MissingToken( SyntaxKind.SemicolonToken ) );
 
             return new[]
             {
@@ -279,6 +281,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public FieldOrPropertyInfo ToFieldOrPropertyInfo()
         {
             throw new NotImplementedException();
+        }
+
+        public void SetExplicitInterfaceImplementation( IProperty interfaceProperty )
+        {
+            this.ExplicitInterfaceImplementations = new[] { interfaceProperty };
         }
     }
 }

@@ -30,14 +30,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.AdviceFactory.IntroduceInterface(aspectBuilder.TargetDeclaration, typeof(IInterface));
         }
 
-        [Introduce]
+        [InterfaceMember]
         public int InterfaceMethod()
         {
             Console.WriteLine("This is introduced interface method.");
             return meta.Proceed();
         }
 
-        [Introduce]
+        [InterfaceMember]
         public event EventHandler? Event;
 
         //[Introduce]

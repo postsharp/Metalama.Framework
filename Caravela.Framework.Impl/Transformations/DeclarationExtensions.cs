@@ -58,6 +58,11 @@ namespace Caravela.Framework.Impl.Transformations
 
             AddAccessibilityTokens( member, tokens );
 
+            if ( member.IsNew )
+            {
+                tokens.Add( Token( SyntaxKind.NewKeyword ) );
+            }
+
             if ( member.IsStatic )
             {
                 tokens.Add( Token( SyntaxKind.StaticKeyword ) );
@@ -73,11 +78,42 @@ namespace Caravela.Framework.Impl.Transformations
                 tokens.Add( Token( SyntaxKind.VirtualKeyword ) );
             }
 
+            if ( member.IsOverride )
+            {
+                tokens.Add( Token( SyntaxKind.OverrideKeyword ) );
+            }
+
             return TokenList( tokens );
         }
 
         private static void AddAccessibilityTokens( IMemberOrNamedType member, List<SyntaxToken> tokens )
         {
+            // If the target is explicit interface implementation, skip accessibility modifiers.
+            switch ( member )
+            {
+                case IMethod method:
+                    if (method.ExplicitInterfaceImplementations.Count > 0)
+                    {
+                        return;
+                    }
+
+                    break;
+                case IProperty property:
+                    if ( property.ExplicitInterfaceImplementations.Count > 0 )
+                    {
+                        return;
+                    }
+
+                    break;
+                case IEvent @event:
+                    if ( @event.ExplicitInterfaceImplementations.Count > 0 )
+                    {
+                        return;
+                    }
+
+                    break;
+            }
+
             switch ( member.Accessibility )
             {
                 case Accessibility.Private:
@@ -124,9 +160,9 @@ namespace Caravela.Framework.Impl.Transformations
             return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( method.ReturnType.GetSymbol() );
         }
 
-        public static TypeSyntax GetSyntaxReturnType( this IProperty method )
+        public static TypeSyntax GetSyntaxReturnType( this IProperty property )
         {
-            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( method.Type.GetSymbol() );
+            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( property.Type.GetSymbol() );
         }
 
         public static TypeParameterListSyntax? GetSyntaxTypeParameterList( this IMethod method )

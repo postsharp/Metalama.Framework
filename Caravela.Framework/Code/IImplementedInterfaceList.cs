@@ -5,5 +5,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
 {
-    public interface IImplementedInterfaceList : IReadOnlyList<INamedType> { }
+    public interface IImplementedInterfaceList : IReadOnlyList<INamedType> 
+    {
+    }
 }
