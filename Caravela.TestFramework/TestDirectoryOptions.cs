@@ -6,20 +6,29 @@ using System.IO;
 
 namespace Caravela.TestFramework
 {
+    /// <summary>
+    /// Represent the content of the <c>caravelaTests.json</c> file.
+    /// </summary>
     public class TestDirectoryOptions : TestOptions
     {
+        /// <summary>
+        /// Gets or sets a value indicating whether the current directory contains tests.
+        /// </summary>
         public bool? Include { get; set; }
         
+        /// <summary>
+        /// Gets or sets a value indicating whether the current directory and all child directories should be excluded.
+        /// </summary>
         public bool? Exclude { get; set; }
         
-        public static TestDirectoryOptions ReadFile( string path )
+        internal static TestDirectoryOptions ReadFile( string path )
         {
             var json = File.ReadAllText( path );
             
             return JsonConvert.DeserializeObject<TestDirectoryOptions>( json )!;
         }
 
-        public override void ApplyDirectoryOptions( TestDirectoryOptions directoryOptions )
+        internal override void ApplyDirectoryOptions( TestDirectoryOptions directoryOptions )
         {
             base.ApplyDirectoryOptions( directoryOptions );
 

@@ -170,6 +170,9 @@ namespace Caravela.TestFramework
         /// </summary>
         public bool Success { get; private set; } = true;
 
+        /// <summary>
+        /// Gets the <see cref="System.Exception"/> in which the test resulted, if any.
+        /// </summary>
         public Exception? Exception { get; private set; }
 
         internal void SetFailed( string reason, Exception? exception = null )

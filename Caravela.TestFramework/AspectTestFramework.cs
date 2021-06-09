@@ -4,13 +4,13 @@
 using Caravela.TestFramework.XunitFramework;
 using System;
 using System.Reflection;
-using Xunit;
 using Xunit.Abstractions;
-
-[assembly: TestFramework( "Caravela.TestFramework.AspectTestFramework", "Caravela.TestFramework" )]
 
 namespace Caravela.TestFramework
 {
+    /// <summary>
+    /// Implementation of a Xunit test framework.
+    /// </summary>
     public class AspectTestFramework : ITestFramework, ISourceInformationProvider
     {
         void IDisposable.Dispose() { }

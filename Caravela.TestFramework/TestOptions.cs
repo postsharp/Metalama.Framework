@@ -33,9 +33,16 @@ namespace Caravela.TestFramework
         /// </summary>
         public string? TestRunnerFactoryType { get; set; }
 
+        /// <summary>
+        /// Gets the list of assembly names that should be included in the compilation.
+        /// </summary>
         public List<string> Assemblies { get; } = new List<string>();
 
-        public virtual void ApplyDirectoryOptions( TestDirectoryOptions directoryOptions )
+        /// <summary>
+        /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
+        /// that is not defined in the current object but defined in the argument.
+        /// </summary>
+        internal virtual void ApplyDirectoryOptions( TestDirectoryOptions directoryOptions )
         {
             if ( this.SkipReason == null )
             {
@@ -58,7 +65,10 @@ namespace Caravela.TestFramework
             }
         }
 
-        public void ApplySourceDirectives( string sourceCode )
+        /// <summary>
+        /// Parses <c>// @</c> directives from source code and apply them to the current object. 
+        /// </summary>
+        internal void ApplySourceDirectives( string sourceCode )
         {
             foreach ( Match? directive in _directivesRegex.Matches( sourceCode ) )
             {
@@ -94,6 +104,9 @@ namespace Caravela.TestFramework
             }
         }
 
+        /// <summary>
+        /// Apply all relevant options for a test, both from the source code and from the <c>caravelaTests.config</c> file. 
+        /// </summary>
         internal void ApplyOptions( string sourceCode, string path, TestDirectoryOptionsReader optionsReader )
         {
             this.ApplySourceDirectives( sourceCode );

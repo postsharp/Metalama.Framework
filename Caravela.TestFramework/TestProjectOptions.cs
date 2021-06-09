@@ -8,6 +8,9 @@ using System.IO;
 
 namespace Caravela.TestFramework
 {
+    /// <summary>
+    /// An implementation of <see cref="IProjectOptions"/> that can be used in tests.
+    /// </summary>
     public class TestProjectOptions : DefaultDirectoryOptions, IProjectOptions, IDisposable
     {
         public TestProjectOptions()

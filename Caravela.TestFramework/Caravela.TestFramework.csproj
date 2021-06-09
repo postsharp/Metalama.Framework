@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration" />
+    <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests" />
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
   </ItemGroup>
   
