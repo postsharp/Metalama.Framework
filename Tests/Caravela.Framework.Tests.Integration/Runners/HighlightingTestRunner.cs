@@ -11,6 +11,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using Xunit;
+using Xunit.Abstractions;
 
 // ReSharper disable StringLiteralTypo
 
@@ -152,7 +153,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             return result;
         }
 
-        public override void ExecuteAssertions( TestInput testInput, TestResult testResult )
+        public override void ExecuteAssertions( TestInput testInput, TestResult testResult, ITestOutputHelper logger )
         {
             Assert.NotNull( testInput.BaseDirectory );
             Assert.NotNull( testInput.RelativePath );

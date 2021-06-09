@@ -19,6 +19,8 @@ namespace Caravela.TestFramework.XunitFramework
             this._relativePath = relativePath;
         }
 
+        public string FullPath => Path.Combine( this._factory.BaseDirectory, this._relativePath );
+
         void IXunitSerializable.Deserialize( IXunitSerializationInfo info )
         {
             this._factory = new TestFactory( info.GetValue<string>( "basePath" ), info.GetValue<string>( "assemblyName" ) );
@@ -34,7 +36,7 @@ namespace Caravela.TestFramework.XunitFramework
 
         string ITestCase.DisplayName => Path.GetFileNameWithoutExtension( this._relativePath );
 
-        string ITestCase.SkipReason => TestInput.FromFile( this._factory.DirectoryOptionsReader, this._relativePath ).Options.SkipReason!;
+        public string? SkipReason => TestInput.FromFile( this._factory.DirectoryOptionsReader, this._relativePath ).Options.SkipReason!;
 
         ISourceInformation ITestCase.SourceInformation
         {

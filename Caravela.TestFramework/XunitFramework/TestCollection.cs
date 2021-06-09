@@ -19,7 +19,7 @@ namespace Caravela.TestFramework.XunitFramework
 
         void IXunitSerializable.Serialize( IXunitSerializationInfo info ) { }
 
-        ITypeInfo ITestCollection.CollectionDefinition => throw new NotImplementedException();
+        ITypeInfo ITestCollection.CollectionDefinition => null!;
 
         string ITestCollection.DisplayName => "All tests";
 

@@ -45,7 +45,9 @@ namespace Caravela.TestFramework.XunitFramework
         {
             var directoryOptionsReader = new TestDirectoryOptionsReader( this._factory.BaseDirectory );
 
-            foreach ( var collection in testCases.GroupBy( t => t.TestMethod.TestClass.TestCollection ) )
+            var collections = testCases.GroupBy( t => t.TestMethod.TestClass.TestCollection );
+
+            foreach ( var collection in collections )
             {
                 executionMessageSink.OnMessage( new TestCollectionStarting( collection, collection.Key ) );
 
@@ -82,13 +84,12 @@ namespace Caravela.TestFramework.XunitFramework
 
                                 var testStopwatch = Stopwatch.StartNew();
 
-                                var testOutput = new TestOutputHelper();
+                                var logger = new TestOutputHelper();
 
                                 try
                                 {
                                     using var testOptions = new TestProjectOptions();
                                     using var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
-                                    serviceProvider.AddService<ITestOutputWriter>( testOutput );
                                     var testInput = TestInput.FromFile( directoryOptionsReader, testCase.UniqueID );
                                     if ( testInput.Options.SkipReason != null )
                                     {
@@ -102,9 +103,9 @@ namespace Caravela.TestFramework.XunitFramework
                                     {
                                         var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider );
                                         var testResult = testRunner.RunTest( testInput );
-                                        testRunner.ExecuteAssertions( testInput, testResult );
+                                        testRunner.ExecuteAssertions( testInput, testResult, logger );
 
-                                        executionMessageSink.OnMessage( new TestPassed( test, testStopwatch.GetSeconds(), testOutput.ToString() ) );
+                                        executionMessageSink.OnMessage( new TestPassed( test, testStopwatch.GetSeconds(), logger.ToString() ) );
 
                                         testsRun++;
                                         typeTestsRun++;
@@ -132,7 +133,7 @@ namespace Caravela.TestFramework.XunitFramework
                                         new TestFailed(
                                             test,
                                             testStopwatch.GetSeconds(),
-                                            testOutput.ToString(),
+                                            logger.ToString(),
                                             failureInformation.ExceptionTypes,
                                             failureInformation.Messages,
                                             failureInformation.StackTraces,
@@ -140,7 +141,7 @@ namespace Caravela.TestFramework.XunitFramework
                                 }
                                 finally
                                 {
-                                    executionMessageSink.OnMessage( new TestFinished( test, testStopwatch.GetSeconds(), testOutput.ToString() ) );
+                                    executionMessageSink.OnMessage( new TestFinished( test, testStopwatch.GetSeconds(), logger.ToString() ) );
 
                                     executionMessageSink.OnMessage(
                                         new TestCaseFinished( testCase, testStopwatch.GetSeconds(), testsRun, testFailed, testSkipped ) );

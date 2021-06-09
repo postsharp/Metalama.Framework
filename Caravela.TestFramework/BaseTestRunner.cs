@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Caravela.TestFramework
 {
@@ -88,7 +89,7 @@ namespace Caravela.TestFramework
             return s == null ? null : CSharpSyntaxTree.ParseText( s ).GetRoot().NormalizeWhitespace().ToString().Replace( "\r", "" );
         }
 
-        public virtual async void ExecuteAssertions( TestInput testInput, TestResult testResult )
+        public virtual void ExecuteAssertions( TestInput testInput, TestResult testResult, ITestOutputHelper logger )
         {
             if ( this.ProjectDirectory == null )
             {
@@ -110,13 +111,13 @@ namespace Caravela.TestFramework
             // If the expectation file does not exist, create it with some placeholder content.
             if ( !File.Exists( expectedTransformedPath ) )
             {
-                await File.WriteAllTextAsync(
+                File.WriteAllText(
                     expectedTransformedPath,
                     "// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code." );
             }
 
             // Read expectations from the file.
-            var expectedNonNormalizedSourceText = await File.ReadAllTextAsync( expectedTransformedPath );
+            var expectedNonNormalizedSourceText = File.ReadAllText( expectedTransformedPath );
             var expectedTransformedSourceText = NormalizeString( expectedNonNormalizedSourceText );
 
             // Update the file in obj/transformed if it is different.
@@ -130,21 +131,20 @@ namespace Caravela.TestFramework
             Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );
 
             var storedTransformedSourceText =
-                File.Exists( actualTransformedPath ) ? NormalizeString( await File.ReadAllTextAsync( actualTransformedPath ) ) : null;
+                File.Exists( actualTransformedPath ) ? NormalizeString( File.ReadAllText( actualTransformedPath ) ) : null;
 
             if ( expectedTransformedSourceText == actualTransformedSourceText
                  && storedTransformedSourceText != expectedNonNormalizedSourceText )
             {
                 // Update the obj/transformed file to the non-normalized expected text, so that future call to update_transformed.txt
                 // does not overwrite any whitespace change.
-                await File.WriteAllTextAsync( actualTransformedPath, expectedNonNormalizedSourceText );
+                File.WriteAllText( actualTransformedPath, expectedNonNormalizedSourceText );
             }
             else if ( storedTransformedSourceText == null || storedTransformedSourceText != actualTransformedSourceText )
             {
-                await File.WriteAllTextAsync( actualTransformedPath, actualTransformedSourceText );
+                File.WriteAllText( actualTransformedPath, actualTransformedSourceText );
             }
 
-            var logger = this.ServiceProvider.GetService<ITestOutputWriter>();
             logger.WriteLine( "=== TRANSFORMED CODE ===" );
             logger.WriteLine( actualTransformedSourceText );
             logger.WriteLine( "========================" );

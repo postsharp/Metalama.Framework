@@ -2,10 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System.IO;
+using Xunit.Abstractions;
 
 namespace Caravela.TestFramework.XunitFramework
 {
-    internal class TestOutputHelper : ITestOutputWriter
+    internal class TestOutputHelper : ITestOutputHelper
     {
         public StringWriter StringWriter { get; } = new();
 

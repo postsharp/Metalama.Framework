@@ -3,4 +3,4 @@
 
 using Xunit;
 
-[assembly: TestFramework( "Caravela.TestFramework.AspectTestFramework", "Caravela.TestFramework" )]
+ // [assembly: TestFramework( "Caravela.TestFramework.AspectTestFramework", "Caravela.TestFramework" )]

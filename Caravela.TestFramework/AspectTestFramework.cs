@@ -3,6 +3,7 @@
 
 using Caravela.TestFramework.XunitFramework;
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using Xunit.Abstractions;
 
@@ -13,6 +14,11 @@ namespace Caravela.TestFramework
     /// </summary>
     public class AspectTestFramework : ITestFramework, ISourceInformationProvider
     {
+        public AspectTestFramework()
+        {
+            Debugger.Launch();
+        }
+        
         void IDisposable.Dispose() { }
 
         ISourceInformation ISourceInformationProvider.GetSourceInformation( ITestCase testCase ) => (ISourceInformation) testCase;

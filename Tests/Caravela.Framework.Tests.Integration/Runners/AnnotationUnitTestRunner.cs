@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Threading;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Runners
 {
@@ -58,7 +59,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             return result;
         }
 
-        public override void ExecuteAssertions( TestInput testInput, TestResult testResult )
+        public override void ExecuteAssertions( TestInput testInput, TestResult testResult, ITestOutputHelper logger )
         {
             // Annotation shouldn't do any code transformations.
             // Otherwise, highlighted spans don't match the actual code.

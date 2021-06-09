@@ -28,7 +28,7 @@ namespace Caravela.TestFramework.XunitFramework
 
         IEnumerable<IMethodInfo> ITypeInfo.GetMethods( bool includePrivateMethods ) => throw new NotImplementedException();
 
-        IAssemblyInfo ITypeInfo.Assembly => throw new NotImplementedException();
+        IAssemblyInfo ITypeInfo.Assembly => this._testFactory.AssemblyInfo;
 
         ITypeInfo ITypeInfo.BaseType => null!;
 
