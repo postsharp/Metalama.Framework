@@ -28,8 +28,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IParameterBuilder ReturnParameter
             => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
-                (PropertyBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this, -1 ),
-                (PropertyBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this, -1 ),
+                (PropertyBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this ),
+                (PropertyBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this ),
+                (EventBuilder _, _) => new EventReturnParameter( this ),
                 _ => throw new AssertionFailedException()
             };
 
@@ -64,8 +65,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 // TODO: Indexer parameters (need to have special IParameterList implementation that would mirror adding parameters to the indexer property).
                 // TODO: Events.
                 (IProperty property, MethodKind.PropertyGet) when property.Parameters.Count == 0 => new ParameterBuilderList(),
-                (IProperty property, MethodKind.PropertySet) when property.Parameters.Count == 0 => new ParameterBuilderList(
-                    new[] { new PropertySetValueParameter( this, 0 ) } ),
+                (IProperty property, MethodKind.PropertySet) when property.Parameters.Count == 0 => 
+                    new ParameterBuilderList(
+                        new[] { new PropertySetValueParameter( this, 0 ) } ),
+                (IEvent _, _) => 
+                    new ParameterBuilderList( 
+                        new[] { new EventValueParameter( this ) } ),
                 _ => throw new AssertionFailedException()
             };
 

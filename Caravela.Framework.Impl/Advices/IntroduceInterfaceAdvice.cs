@@ -81,8 +81,9 @@ namespace Caravela.Framework.Impl.Advices
 
                 if ( interfaceMemberAttribute != null )
                 {
-                    var isExplicit = (bool?) interfaceMemberAttribute.NamedArguments.Where( aa => aa.Key == nameof( InterfaceMemberAttribute.IsExplicit ) ).Select( aa => aa.Value ).LastOrDefault().Value;
-                    return new InterfaceMemberAttribute() { IsExplicit = isExplicit ?? false };
+                    var isExplicitValue = interfaceMemberAttribute.NamedArguments.Where( aa => aa.Key == nameof( InterfaceMemberAttribute.IsExplicit ) ).Select( aa => aa.Value ).LastOrDefault();
+                    var isExplicit = isExplicitValue.IsAssigned ? (bool)isExplicitValue.Value : false;
+                    return new InterfaceMemberAttribute() { IsExplicit = isExplicit };
                 }
                 else
                 {
@@ -285,6 +286,7 @@ namespace Caravela.Framework.Impl.Advices
             foreach (var interfaceSpec in this._introducedInterfaceTypes)
             {
                 var explicitImplementationBuilders = new List<MemberBuilder>();
+                var overrides = new List<OverriddenMember>();
                 var interfaceMemberMap = new Dictionary<IMember, IMember>();
                 var interfaceTargetMap = new Dictionary<IMember, (bool IsAspectInterfaceMember, IMember TargetMember, IMember ImplementationMember)>();
 
@@ -297,25 +299,61 @@ namespace Caravela.Framework.Impl.Advices
                         case IMethod interfaceMethod:
                             memberBuilder = this.GetImplMethodBuilder( interfaceMethod, memberSpec.IsExplicit );
                             interfaceMemberMap.Add( interfaceMethod, memberBuilder );
-                            interfaceTargetMap.Add(
-                                interfaceMethod,
-                                (memberSpec.AspectInterfaceTargetMember != null, memberSpec.AspectInterfaceTargetMember ?? memberSpec.TargetMember.AssertNotNull(), memberBuilder) );
+
+                            if ( memberSpec.IsExplicit )
+                            {
+                                interfaceTargetMap.Add(
+                                    interfaceMethod,
+                                    (memberSpec.AspectInterfaceTargetMember != null, memberSpec.AspectInterfaceTargetMember ?? memberSpec.TargetMember.AssertNotNull(), memberBuilder) );
+                            }
+                            else
+                            {
+                                overrides.Add(
+                                    memberSpec.AspectInterfaceTargetMember != null
+                                    ? new OverriddenMethod( this, (IMethod) memberBuilder, (IMethod) memberSpec.AspectInterfaceTargetMember, this.LinkerOptions )
+                                    : new RedirectedMethod( this, (IMethod) memberBuilder, (IMethod) memberSpec.TargetMember.AssertNotNull(), this.LinkerOptions ) );
+                            }
+
                             break;
 
                         case IProperty interfaceProperty:
                             memberBuilder = this.GetImplPropertyBuilder( interfaceProperty, memberSpec.IsExplicit );
                             interfaceMemberMap.Add( interfaceProperty, memberBuilder );
-                            interfaceTargetMap.Add(
-                                interfaceProperty,
-                                (memberSpec.AspectInterfaceTargetMember != null, memberSpec.AspectInterfaceTargetMember ?? memberSpec.TargetMember.AssertNotNull(), memberBuilder) );
+
+                            if ( memberSpec.IsExplicit )
+                            {
+                                interfaceTargetMap.Add(
+                                    interfaceProperty,
+                                    (memberSpec.AspectInterfaceTargetMember != null, memberSpec.AspectInterfaceTargetMember ?? memberSpec.TargetMember.AssertNotNull(), memberBuilder) );
+                            }
+                            else
+                            {
+                                overrides.Add(
+                                    memberSpec.AspectInterfaceTargetMember != null
+                                    ? new OverriddenProperty( this, (IProperty) memberBuilder, (IProperty) memberSpec.AspectInterfaceTargetMember, null, null, this.LinkerOptions )
+                                    : new RedirectedProperty( this, (IProperty) memberBuilder, (IProperty) memberSpec.TargetMember.AssertNotNull(), this.LinkerOptions ) );
+                            }
+
                             break;
 
                         case IEvent interfaceEvent:
                             memberBuilder = this.GetImplEventBuilder( interfaceEvent, memberSpec.IsExplicit );
                             interfaceMemberMap.Add( interfaceEvent, memberBuilder );
-                            interfaceTargetMap.Add(
-                                interfaceEvent,
-                                (memberSpec.AspectInterfaceTargetMember != null, memberSpec.AspectInterfaceTargetMember ?? memberSpec.TargetMember.AssertNotNull(), memberBuilder) );
+
+                            if ( memberSpec.IsExplicit )
+                            {
+                                interfaceTargetMap.Add(
+                                    interfaceEvent,
+                                    (memberSpec.AspectInterfaceTargetMember != null, memberSpec.AspectInterfaceTargetMember ?? memberSpec.TargetMember.AssertNotNull(), memberBuilder) );
+                            }
+                            else
+                            {
+                                overrides.Add(
+                                    memberSpec.AspectInterfaceTargetMember != null
+                                    ? new OverriddenEvent( this, (IEvent) memberBuilder, (IEvent) memberSpec.AspectInterfaceTargetMember, null, null, this.LinkerOptions )
+                                    : new RedirectedEvent( this, (IEvent) memberBuilder, (IEvent) memberSpec.TargetMember.AssertNotNull(), this.LinkerOptions ) );
+                            }
+
                             break;
 
                         default:
@@ -329,7 +367,8 @@ namespace Caravela.Framework.Impl.Advices
                     new IntroducedInterface( this, this.TargetDeclaration, interfaceSpec.InterfaceType, interfaceMemberMap, this.LinkerOptions ),
                     new IntroducedInterfaceImplementation( this, this.TargetDeclaration, interfaceSpec.InterfaceType, interfaceTargetMap, this.LinkerOptions ) );
 
-                result = result.WithTransformations( explicitImplementationBuilders.Cast<ITransformation>() );               
+                result = result.WithTransformations( explicitImplementationBuilders.Cast<ITransformation>() );
+                result = result.WithTransformations( overrides.Cast<ITransformation>() );
             }
 
             return result;
@@ -399,7 +438,21 @@ namespace Caravela.Framework.Impl.Advices
 
         private MemberBuilder GetImplEventBuilder( IEvent interfaceEvent, bool isExplicit )
         {
-            throw new NotImplementedException();
+            var builder = new EventBuilder(
+                this,
+                this.TargetDeclaration,
+                interfaceEvent.Name,
+                interfaceEvent.Adder == null && interfaceEvent.Remover == null,
+                this.LinkerOptions );
+
+            builder.EventType = interfaceEvent.EventType;
+
+            if ( isExplicit )
+            {
+                builder.SetExplicitInterfaceImplementation( interfaceEvent );
+            }
+
+            return builder;
         }
 
         private class IntroducedInterfaceSpecification

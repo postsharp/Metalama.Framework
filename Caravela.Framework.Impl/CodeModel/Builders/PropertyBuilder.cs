@@ -176,8 +176,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     Identifier( this.Name ),
                     GenerateAccessorList(),
                     null,
-                    null,
-                    MissingToken( SyntaxKind.SemicolonToken ) );
+                    null );
 
             return new[]
             {

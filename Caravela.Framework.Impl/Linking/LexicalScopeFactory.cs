@@ -57,11 +57,11 @@ namespace Caravela.Framework.Impl.Linking
                         return this.GetLexicalScope( overriddenDeclaration.OverriddenDeclaration );
                     }
 
-                case IInterfaceImplementationIntroduction interfaceIntroduction:
+                case IIntroducedInterfaceImplementation interfaceImplementation:
                     {
                         // Take the initial position of the target type.
                         var syntaxReference =
-                            interfaceIntroduction.ContainingDeclaration.GetSymbol()
+                            interfaceImplementation.TargetType.GetSymbol()
                                 .AssertNotNull()
                                 .DeclaringSyntaxReferences
                                 .Where( x => x.SyntaxTree == introduction.TargetSyntaxTree )

@@ -14,7 +14,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal class IntroducedInterface : IInterfaceImplementationIntroduction
+    internal class IntroducedInterface : IIntroducedInterface
     {
         public IDeclaration ContainingDeclaration => this.TargetType;
 

@@ -10,7 +10,7 @@ internal class TargetClass
         return (int)42;
     }
 
-    internal protected global::System.Int32 ProtectedInternal()
+    protected internal global::System.Int32 ProtectedInternal()
     {
         global::System.Console.WriteLine("This is introduced method.");
         return (int)42;

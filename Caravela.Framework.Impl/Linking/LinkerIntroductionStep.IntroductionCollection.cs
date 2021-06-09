@@ -58,7 +58,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            public void Add( IInterfaceImplementationIntroduction interfaceImplementationIntroduction, IEnumerable<BaseTypeSyntax> introducedInterfaces )
+            public void Add( IIntroducedInterface interfaceImplementationIntroduction, IEnumerable<BaseTypeSyntax> introducedInterfaces )
             {
                 var targetTypeSymbol = ((INamedType) interfaceImplementationIntroduction.ContainingDeclaration).GetSymbol();
 

@@ -132,8 +132,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                                     DefaultExpression( (TypeSyntax) syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ) )
                             }
                             : new StatementSyntax[0] ) ),
-                    null,
-                    MissingToken( SyntaxKind.SemicolonToken ) );
+                    null );
 
             return new[]
             {

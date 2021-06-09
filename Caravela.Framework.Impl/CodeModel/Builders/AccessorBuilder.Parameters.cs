@@ -76,9 +76,47 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             public override string Name => "value";
         }
 
+        private class EventValueParameter : ParameterBase
+        {
+            public EventValueParameter( AccessorBuilder accessor ) : base( accessor, 0 ) { }
+
+            public override IType ParameterType
+            {
+                get => ((EventBuilder) this.Accessor._containingDeclaration).EventType;
+                set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );
+            }
+
+            public override RefKind RefKind
+            {
+                get => RefKind.None;
+                set => throw new NotSupportedException( "Cannot directly change accessor's parameter reference kind." );
+            }
+
+            public override string Name => "value";
+        }
+
+        private class EventReturnParameter : ParameterBase
+        {
+            public EventReturnParameter( AccessorBuilder accessor ) : base( accessor, -1 ) { }
+
+            public override IType ParameterType
+            {
+                get => ((EventBuilder) this.Accessor._containingDeclaration).EventType;
+                set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );
+            }
+
+            public override RefKind RefKind
+            {
+                get => RefKind.None;
+                set => throw new NotSupportedException( "Cannot directly change accessor's parameter reference kind." );
+            }
+
+            public override string Name => throw new NotSupportedException( "Cannot get the name of a return parameter." );
+        }
+
         private class PropertyGetReturnParameter : ParameterBase
         {
-            public PropertyGetReturnParameter( AccessorBuilder accessor, int index ) : base( accessor, index ) { }
+            public PropertyGetReturnParameter( AccessorBuilder accessor ) : base( accessor, -1 ) { }
 
             public override IType ParameterType
             {
@@ -121,7 +159,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         private class VoidReturnParameter : ParameterBase
         {
-            public VoidReturnParameter( AccessorBuilder accessor, int index ) : base( accessor, index ) { }
+            public VoidReturnParameter( AccessorBuilder accessor ) : base( accessor, -1 ) { }
 
             [Memo]
             public override IType ParameterType

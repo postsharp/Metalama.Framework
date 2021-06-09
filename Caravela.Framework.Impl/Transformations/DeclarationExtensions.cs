@@ -165,6 +165,11 @@ namespace Caravela.Framework.Impl.Transformations
             return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( property.Type.GetSymbol() );
         }
 
+        public static TypeSyntax GetSyntaxReturnType( this IEvent property )
+        {
+            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( property.EventType.GetSymbol() );
+        }
+
         public static TypeParameterListSyntax? GetSyntaxTypeParameterList( this IMethod method )
         {
             // TODO: generics

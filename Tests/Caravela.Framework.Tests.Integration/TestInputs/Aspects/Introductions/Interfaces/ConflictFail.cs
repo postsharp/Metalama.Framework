@@ -27,7 +27,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 conflictBehavior: ConflictBehavior.Fail);
         }
 
-        [Introduce]
+        [InterfaceMember]
         public int InterfaceMethod()
         {
             Console.WriteLine("This is introduced interface method.");

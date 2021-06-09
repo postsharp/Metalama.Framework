@@ -93,7 +93,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                             memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray() );
                     }
 
-                    if ( transformation is IInterfaceImplementationIntroduction interfaceImplementation)
+                    if ( transformation is IIntroducedInterface interfaceImplementation)
                     {
                         classDeclaration = classDeclaration.AddBaseListTypes( interfaceImplementation.GetIntroducedInterfaceImplementations().ToArray() );
                     }

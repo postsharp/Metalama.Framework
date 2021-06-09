@@ -1,6 +1,7 @@
 [TestOutput]
 [NotifyPropertyChanged]
 class Car
+: global::System.ComponentModel.INotifyPropertyChanged
 {
     string? _make;
     double _power;
@@ -46,10 +47,19 @@ class Car
     }
 
 
-    public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
-
-    protected void OnPropertyChanged(global::System.String name)
+    protected void OnPropertyChanged(string name)
     {
         this.PropertyChanged?.Invoke(new global::System.ComponentModel.PropertyChangedEventArgs("name"));
+    }
+
+    private event global::System.ComponentModel.PropertyChangedEventHandler PropertyChanged
+    {
+        add
+        {
+        }
+
+        remove
+        {
+        }
     }
 }

@@ -19,7 +19,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal class IntroducedInterfaceImplementation : INonObservableTransformation, IMemberIntroduction
+    internal class IntroducedInterfaceImplementation : IIntroducedInterfaceImplementation
     {
         private readonly IReadOnlyDictionary<IMember, (bool IsAspectInterfaceMember, IMember TargetMember, IMember ExplicitImplementationMember)> _interfaceMemberMap;
 
@@ -61,6 +61,7 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 if ( !this._interfaceMemberMap.TryGetValue( interfaceMethod, out var implementationInfo ) )
                 {
+                    // This method was not explicitly introduced, an override was created for the introduced method.
                     continue;
                 }
 
@@ -82,6 +83,7 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 if ( !this._interfaceMemberMap.TryGetValue( interfaceProperty, out var implementationInfo ) )
                 {
+                    // This property was not explicitly introduced, an override was created for the introduced property.
                     continue;
                 }
 
@@ -103,6 +105,7 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 if ( !this._interfaceMemberMap.TryGetValue( interfaceEvent, out var implementationInfo ) )
                 {
+                    // This event was not explicitly introduced, an override was created for the introduced event.
                     continue;
                 }
 
@@ -143,8 +146,7 @@ namespace Caravela.Framework.Impl.Transformations
                         targetMethod.GetSyntaxParameterList(),
                         targetMethod.GetSyntaxConstraintClauses(),
                         methodBody,
-                        null,
-                        Token( SyntaxKind.SemicolonToken ) ),
+                        null ),
                     this.Advice.AspectLayerId,
                     IntroducedMemberSemantic.InterfaceImplementation,
                     this.LinkerOptions,
@@ -230,8 +232,7 @@ namespace Caravela.Framework.Impl.Transformations
                         Identifier( context.IntroductionNameProvider.GetInterfaceImplementationName( this.Advice.AspectLayerId, interfaceProperty ) ),
                         AccessorList( List( accessors ) ),
                         null,
-                        null,
-                        Token( SyntaxKind.SemicolonToken ) ),
+                        null ),
                     this.Advice.AspectLayerId,
                     IntroducedMemberSemantic.InterfaceImplementation,
                     this.LinkerOptions,
@@ -266,9 +267,16 @@ namespace Caravela.Framework.Impl.Transformations
 
             BlockSyntax? CreateAccessorBodyFromAspectInterfaceMember( MemberIntroductionContext context, IMethod explicitImplementationAccessor, IMethod aspectInterfaceAccessor )
             {
+                if ( targetProperty.IsAutoPropertyOrField)
+                {
+                    // Auto property -> empty body.
+                    return null;
+                }
+
                 using ( context.DiagnosticSink.WithDefaultScope( explicitImplementationProperty ) )
                 {
-                    var metaApi = MetaApi.ForMethod(
+                    var metaApi = MetaApi.ForFieldOrProperty(
+                        targetProperty,
                         explicitImplementationAccessor,
                         new MetaApiProperties(
                             context.DiagnosticSink,
@@ -326,9 +334,126 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-        private IntroducedMember CreateProxyEvent( in MemberIntroductionContext context, IEvent interfaceEvent, bool isAspectInterfaceMember, IEvent targetEvent, IEvent explicitImplementationMember )
+        private IntroducedMember CreateProxyEvent( in MemberIntroductionContext context, IEvent interfaceEvent, bool isAspectInterfaceMember, IEvent targetEvent, IEvent explicitImplementationEvent )
         {
-            throw new System.NotImplementedException();
+            var accessors = GetAccessors( context );
+
+            if ( targetEvent.Adder == null && targetEvent.Remover == null )
+            {
+                // Event field.
+                return
+                    new IntroducedMember(
+                        this,
+                        EventFieldDeclaration(
+                            List<AttributeListSyntax>(),
+                            targetEvent.GetSyntaxModifierList(),                            
+                            VariableDeclaration(
+                                targetEvent.GetSyntaxReturnType(),
+                                SingletonSeparatedList(
+                                    VariableDeclarator( Identifier( context.IntroductionNameProvider.GetInterfaceImplementationName( this.Advice.AspectLayerId, interfaceEvent ) ) ) ) ) ),
+                        this.Advice.AspectLayerId,
+                        IntroducedMemberSemantic.InterfaceImplementation,
+                        this.LinkerOptions,
+                        explicitImplementationEvent );
+            }
+            else
+            {
+                return
+                    new IntroducedMember(
+                        this,
+                        EventDeclaration(
+                            List<AttributeListSyntax>(),
+                            targetEvent.GetSyntaxModifierList(),
+                            targetEvent.GetSyntaxReturnType(),
+                            null,
+                            Identifier( context.IntroductionNameProvider.GetInterfaceImplementationName( this.Advice.AspectLayerId, interfaceEvent ) ),
+                            AccessorList( List( accessors ) ) ),
+                        this.Advice.AspectLayerId,
+                        IntroducedMemberSemantic.InterfaceImplementation,
+                        this.LinkerOptions,
+                        explicitImplementationEvent );
+            }
+
+            IReadOnlyList<AccessorDeclarationSyntax> GetAccessors( MemberIntroductionContext context )
+            {
+                return new AccessorDeclarationSyntax?[]
+                {
+                    targetEvent.Adder != null
+                    ? AccessorDeclaration(
+                        SyntaxKind.AddAccessorDeclaration,
+                        List<AttributeListSyntax>(),
+                        targetEvent.Adder.GetSyntaxModifierList(),
+                        isAspectInterfaceMember
+                            ? CreateAccessorBodyFromAspectInterfaceMember(context, targetEvent.Adder, explicitImplementationEvent.Adder.AssertNotNull())
+                            : CreateBodyFromTargetMember( SyntaxKind.AddAssignmentExpression ),
+                        null )
+                    : null,
+                    targetEvent.Remover != null
+                    ? AccessorDeclaration(
+                        SyntaxKind.RemoveAccessorDeclaration,
+                        List<AttributeListSyntax>(),
+                        targetEvent.Remover.GetSyntaxModifierList(),
+                        isAspectInterfaceMember
+                            ? CreateAccessorBodyFromAspectInterfaceMember(context, targetEvent.Remover, explicitImplementationEvent.Remover.AssertNotNull())
+                            : CreateBodyFromTargetMember( SyntaxKind.SubtractAssignmentExpression ),
+                        null )
+                    : null,
+                }.Where( a => a != null ).Cast<AccessorDeclarationSyntax>().ToArray();
+            }
+
+            BlockSyntax? CreateAccessorBodyFromAspectInterfaceMember( MemberIntroductionContext context, IMethod explicitImplementationAccessor, IMethod aspectInterfaceAccessor )
+            {
+                using ( context.DiagnosticSink.WithDefaultScope( explicitImplementationEvent ) )
+                {
+                    var metaApi = MetaApi.ForEvent(
+                        targetEvent,
+                        explicitImplementationAccessor,
+                        new MetaApiProperties(
+                            context.DiagnosticSink,
+                            aspectInterfaceAccessor.GetSymbol(),
+                            this.Advice.Options.Tags,
+                            this.Advice.AspectLayerId ) );
+
+                    var expansionContext = new TemplateExpansionContext(
+                        this.Advice.Aspect.Aspect,
+                        metaApi,
+                        explicitImplementationAccessor.Compilation,
+                        new LinkerOverrideMethodProceedImpl(
+                            this.Advice.AspectLayerId,
+                            explicitImplementationAccessor,
+                            LinkerAnnotationOrder.Default,
+                            context.SyntaxFactory ),
+                        context.LexicalScope,
+                        context.ServiceProvider.GetService<SyntaxSerializationService>(),
+                        (ICompilationElementFactory) explicitImplementationAccessor.Compilation.TypeFactory );
+
+                    var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( aspectInterfaceAccessor );
+
+                    if ( !templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out var newMethodBody ) )
+                    {
+                        // Template expansion error.
+                        return null;
+                    }
+
+                    return newMethodBody;
+                }
+            }
+
+            BlockSyntax CreateBodyFromTargetMember( SyntaxKind assignmentExpressionKind )
+            {
+                return
+                    Block(
+                        ExpressionStatement(
+                            AssignmentExpression(
+                                assignmentExpressionKind,
+                                CreateAccessTargetExpression(),
+                                IdentifierName( "value" ) ) ) );
+            }
+
+            ExpressionSyntax CreateAccessTargetExpression()
+            {
+                return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetEvent.Name ) );
+            }
         }
     }
 }
