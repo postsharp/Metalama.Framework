@@ -66,7 +66,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 // This is a dirty trick. We should read options from the directory instead.
                 if ( this.TestText.Contains( "[TestTemplate]" ) )
                 {
-                    testInput.Options.TestRunnerFactoryType = typeof(TemplatingTestRunnerFactory).FullName;
+                    testInput.Options.TestRunnerFactoryType = typeof(TemplatingTestRunnerFactory).AssemblyQualifiedName;
                 }
 
                 var testRunner = TestRunnerFactory.CreateTestRunner( testInput, this._serviceProvider );

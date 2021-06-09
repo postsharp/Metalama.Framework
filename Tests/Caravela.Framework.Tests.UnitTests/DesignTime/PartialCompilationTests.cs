@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.TestFramework;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +20,6 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
             using var buildOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
-            DesignTimeAspectPipeline pipeline = new( buildOptions, domain );
             var syntaxTree1 = compilation.SyntaxTrees.Single();
             var partialCompilation = PartialCompilation.CreatePartial( compilation, syntaxTree1 );
 

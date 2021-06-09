@@ -5,7 +5,7 @@ using Caravela.Framework.Impl.DesignTime.Diff;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
 
-namespace Caravela.Framework.Tests.Integration.DesignTime
+namespace Caravela.Framework.Tests.UnitTests.DesignTime
 {
     public class SyntaxTreeComparisonTests
     {

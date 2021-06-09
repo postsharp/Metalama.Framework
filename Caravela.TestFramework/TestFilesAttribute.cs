@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Caravela.TestFramework.XunitFramework;
 using System.Collections.Generic;
 using System.IO;
@@ -32,7 +35,7 @@ namespace Caravela.TestFramework
 
         public override IEnumerable<object[]> GetData( MethodInfo testMethod )
         {
-            TestDiscoverer discoverer = new TestDiscoverer( new ReflectionAssemblyInfo( testMethod.DeclaringType!.Assembly ) );
+            var discoverer = new TestDiscoverer( new ReflectionAssemblyInfo( testMethod.DeclaringType!.Assembly ) );
             
             foreach ( var testCase in discoverer.Discover( this._directory ) )
             {

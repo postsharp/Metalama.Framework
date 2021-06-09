@@ -13,7 +13,8 @@ namespace Caravela.TestFramework
 {
     internal class TestDirectoryOptionsReader
     {
-        private static ConditionalWeakTable<Assembly, TestDirectoryOptionsReader> _instances = new ConditionalWeakTable<Assembly, TestDirectoryOptionsReader>();
+        private static readonly ConditionalWeakTable<Assembly, TestDirectoryOptionsReader> _instances = new ConditionalWeakTable<Assembly, TestDirectoryOptionsReader>();
+
         public string ProjectDirectory { get; }
 
         private readonly ConcurrentDictionary<string, TestDirectoryOptions> _cache = new( StringComparer.OrdinalIgnoreCase );

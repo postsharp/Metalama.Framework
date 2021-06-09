@@ -17,7 +17,6 @@ using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Runners
 {
-
     internal class HighlightingTestRunner : BaseTestRunner
     {
         public HighlightingTestRunner( IServiceProvider serviceProvider, string? projectDirectory ) : base( serviceProvider, projectDirectory ) { }

@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 using System.Linq;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests
+namespace Caravela.Framework.Tests.UnitTests.DesignTime
 {
     public class StructuralSymbolComparerTests : TestBase
     {

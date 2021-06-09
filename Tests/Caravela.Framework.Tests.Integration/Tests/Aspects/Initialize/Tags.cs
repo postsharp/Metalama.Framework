@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.Tags
         public void BuildAspect(IAspectBuilder<IMethod> builder)
         {
             var options = AdviceOptions.Default.AddTag("Friend", "Bernard");
-            builder.AdviceFactory.OverrideMethod(builder.TargetDeclaration, nameof(OverrideMethod));
+            builder.AdviceFactory.OverrideMethod(builder.TargetDeclaration, nameof(OverrideMethod), options);
         }
 
         

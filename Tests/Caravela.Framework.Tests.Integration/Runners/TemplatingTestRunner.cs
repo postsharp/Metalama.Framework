@@ -27,7 +27,6 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.Integration.Runners
 {
-
     /// <summary>
     /// Executes template integration tests by compiling and expanding a template method in the input source file.
     /// </summary>
@@ -235,7 +234,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 new MetaApiProperties(
                     diagnostics,
                     templateMethod,
-                    ImmutableDictionary<string, object?>.Empty,
+                    ImmutableDictionary.Create<string, object?>().Add( "TestKey", "TestValue" ),
                     default ) );
 
             return new TemplateExpansionContext(

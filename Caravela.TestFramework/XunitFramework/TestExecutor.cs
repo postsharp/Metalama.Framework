@@ -14,12 +14,10 @@ namespace Caravela.TestFramework.XunitFramework
 {
     internal class TestExecutor : ITestFrameworkExecutor
     {
-        private readonly AssemblyName _assemblyName;
         private readonly TestFactory _factory;
 
         public TestExecutor( AssemblyName assemblyName )
         {
-            this._assemblyName = assemblyName;
             var assembly = Assembly.Load( assemblyName );
             var assemblyInfo = new ReflectionAssemblyInfo( assembly );
             TestDiscoverer discoverer = new( assemblyInfo );
@@ -91,6 +89,7 @@ namespace Caravela.TestFramework.XunitFramework
                                     using var testOptions = new TestProjectOptions();
                                     using var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
                                     var testInput = TestInput.FromFile( directoryOptionsReader, testCase.UniqueID );
+
                                     if ( testInput.Options.SkipReason != null )
                                     {
                                         executionMessageSink.OnMessage( new TestSkipped( test, testInput.Options.SkipReason ) );

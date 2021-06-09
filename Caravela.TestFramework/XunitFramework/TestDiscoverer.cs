@@ -97,7 +97,7 @@ namespace Caravela.TestFramework.XunitFramework
                     foreach ( var testPath in Directory.EnumerateFiles( directory, "*.cs" ) )
                     {
                         if ( testPath.EndsWith( "Directory.cs", StringComparison.OrdinalIgnoreCase ) 
-                         || testPath.EndsWith( FileExtensions.TransformedCode, StringComparison.OrdinalIgnoreCase ) )
+                             || testPath.EndsWith( FileExtensions.TransformedCode, StringComparison.OrdinalIgnoreCase ) )
                         {
                             continue;
                         }

@@ -18,13 +18,12 @@ namespace Caravela.TestFramework.XunitFramework
         public TestDirectoryOptionsReader DirectoryOptionsReader { get; }
 
         public TestFactory( string baseDirectory, string assemblyName ) 
-            : this( new TestDirectoryOptionsReader( baseDirectory ), LoadAssembly( assemblyName ))
-        {
-        }
+            : this( new TestDirectoryOptionsReader( baseDirectory ), LoadAssembly( assemblyName ) ) { }
 
         private static ReflectionAssemblyInfo LoadAssembly( string assemblyName )
         {
             var assembly = Assembly.Load( assemblyName );
+
             return new ReflectionAssemblyInfo( assembly );
         }
 

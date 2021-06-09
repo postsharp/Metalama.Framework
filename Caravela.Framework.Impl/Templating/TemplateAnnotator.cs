@@ -593,6 +593,40 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        public override SyntaxNode? VisitElementAccessExpression( ElementAccessExpressionSyntax node )
+        {
+            // In an element access (such as Tags[x]), the scope is given by the expression.
+            
+            var transformedExpression = this.Visit( node.Expression );
+            var scope = this.GetNodeScope( transformedExpression );
+
+            ScopeContext? context;
+            
+            if ( scope == TemplatingScope.CompileTimeOnly )
+            {
+                context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"element of the compile-time collection '{node.Expression}'" );
+            }
+            else if ( scope.IsDynamic() )
+            {
+                scope = TemplatingScope.Dynamic;
+                
+                context = ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, $"element of the run-time-only collection '{node.Expression}'" );
+            }
+            else
+            {
+                context = null;
+            }
+
+            BracketedArgumentListSyntax transformedArguments;
+
+            using ( this.WithScopeContext( context ) )
+            {
+                transformedArguments = this.Visit( node.ArgumentList );
+            }
+
+            return node.Update( transformedExpression, transformedArguments ).AddScopeAnnotation( scope );
+        }
+
         public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
         {
             // nameof() is always compile-time.
