@@ -21,9 +21,8 @@ namespace Caravela.Framework.Impl.CompileTime
             this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
         }
 
-        protected virtual bool IsStandardAssemblyName( string assemblyName ) 
-            => this._referenceAssemblyLocator.IsStandardAssemblyName( assemblyName );
-        
+        protected virtual bool IsStandardAssemblyName( string assemblyName ) => this._referenceAssemblyLocator.IsStandardAssemblyName( assemblyName );
+
         public Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock, CancellationToken cancellationToken )
         {
             Type? ReturnNullOrMock()
@@ -41,7 +40,7 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( typeSymbol.ContainingAssembly != null )
             {
                 var assemblyName = typeSymbol.ContainingAssembly.Name;
-                
+
                 // We load only system assemblies, not user assemblies loaded in the AppDomain.
                 if ( !this.IsStandardAssemblyName( assemblyName ) )
                 {

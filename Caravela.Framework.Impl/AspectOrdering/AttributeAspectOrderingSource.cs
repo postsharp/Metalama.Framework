@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
             return attributes.Select(
                     attribute =>
                     {
-                        if ( _attributeDeserializer.TryCreateAttribute<AspectOrderAttribute>(
+                        if ( this._attributeDeserializer.TryCreateAttribute<AspectOrderAttribute>(
                             attribute.attribute,
                             diagnosticAdder,
                             out var attributeInstance ) )

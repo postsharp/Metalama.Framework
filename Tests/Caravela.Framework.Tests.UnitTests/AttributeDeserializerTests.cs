@@ -20,15 +20,15 @@ namespace Caravela.Framework.Tests.UnitTests
             // belong to a system library so they can be shared between the compile-time code and the testing code.
             this.ServiceProvider.ReplaceServiceForTest<SystemTypeResolver>( new HackedSystemTypeResolver( this.ServiceProvider ) );
         }
-        
+
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null )
         {
             var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestAttribute( {property} = {value} )]";
             var compilation = CreateCompilationModel( code, dependentCode );
-            
+
             using UnloadableCompileTimeDomain domain = new();
             var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
-            
+
             var attribute = compilation.Attributes.Single();
             DiagnosticList diagnosticList = new();
 
@@ -61,11 +61,15 @@ namespace Caravela.Framework.Tests.UnitTests
         {
             Assert.Equal(
                 TestEnum.A,
-                this.GetDeserializedProperty( nameof(TestAttribute.EnumProperty), "Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum.A" ) );
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.EnumProperty),
+                    "Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum.A" ) );
 
             Assert.Equal(
                 TestEnum.A,
-                this.GetDeserializedProperty( nameof(TestAttribute.ObjectProperty), "Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum.A" ) );
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.ObjectProperty),
+                    "Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum.A" ) );
 
             Assert.Equal(
                 new[] { TestEnum.A },
@@ -116,10 +120,10 @@ namespace Caravela.Framework.Tests.UnitTests
             {
                 var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestParamsAttribute( {args} )]";
                 var compilation = CreateCompilationModel( code );
-                
+
                 using UnloadableCompileTimeDomain domain = new();
                 var loader = CompileTimeProjectLoader.Create( domain, this.ServiceProvider );
-                
+
                 var attribute = compilation.Attributes.Single();
 
                 if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, new DiagnosticList(), out var deserializedAttribute ) )
@@ -178,7 +182,7 @@ namespace Caravela.Framework.Tests.UnitTests
             public TestParamsAttribute( params object[] p ) { this.Value = p; }
         }
 
-        class HackedSystemTypeResolver : SystemTypeResolver
+        private class HackedSystemTypeResolver : SystemTypeResolver
         {
             public HackedSystemTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider ) { }
 

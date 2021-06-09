@@ -1,7 +1,7 @@
 <Project>
     <ItemGroup>
-      <!-- Exclude *.t.cs from the main compilation -->
-      <Compile Remove="$(MSBuildProjectDirectory)\**\*.t.cs" />
-      <None Include="$(MSBuildProjectDirectory)\**\*.t.cs" />
+        <!-- Exclude *.t.cs from the main compilation -->
+        <Compile Remove="$(MSBuildProjectDirectory)\**\*.t.cs" />
+        <None Include="$(MSBuildProjectDirectory)\**\*.t.cs" />
     </ItemGroup>
 </Project>

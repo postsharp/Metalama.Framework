@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
@@ -47,15 +46,14 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public ImmutableHashSet<string> SystemAssemblyNames { get; }
 
-        public bool IsSystemAssemblyName( string assemblyName ) 
-            => string.Equals( assemblyName, "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase ) 
-               || this.SystemAssemblyNames.Contains( assemblyName ); 
+        public bool IsSystemAssemblyName( string assemblyName )
+            => string.Equals( assemblyName, "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase )
+               || this.SystemAssemblyNames.Contains( assemblyName );
 
-        public bool IsStandardAssemblyName( string assemblyName ) 
-            => string.Equals( assemblyName, "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase ) 
-               || this.StandardAssemblyNames.Contains( assemblyName ); 
+        public bool IsStandardAssemblyName( string assemblyName )
+            => string.Equals( assemblyName, "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase )
+               || this.StandardAssemblyNames.Contains( assemblyName );
 
-        
         /// <summary>
         /// Gets the full path of all standard assemblies, including Caravela, Roslyn and .NET standard.
         /// </summary>

@@ -8,8 +8,6 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
-
-    
     public static class ServiceProviderFactory
     {
         private static ServiceProvider? _sharedInstance;

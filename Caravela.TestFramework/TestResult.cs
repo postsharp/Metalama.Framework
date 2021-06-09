@@ -17,26 +17,12 @@ namespace Caravela.TestFramework
     /// <summary>
     /// Represents the result of an integration test run.
     /// </summary>
-    public sealed class TestResult : IDiagnosticAdder
+    public class TestResult : IDiagnosticAdder
     {
-        private readonly TestInput _testInput;
+        public TestInput? Input { get; set; }
+
         private readonly List<Diagnostic> _diagnostics = new();
         private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TestResult"/> class.
-        /// </summary>
-        /// <param name="project"></param>
-        /// <param name="testName"></param>
-        /// <param name="templateDocument">The source code document of the template.</param>
-        /// <param name="initialCompilation"></param>
-        internal TestResult( Project project, TestInput testInput, Document templateDocument, Compilation initialCompilation )
-        {
-            this._testInput = testInput;
-            this.Project = project;
-            this.TemplateDocument = templateDocument;
-            this.InitialCompilation = initialCompilation;
-        }
 
         public void Report( Diagnostic diagnostic )
         {
@@ -54,19 +40,19 @@ namespace Caravela.TestFramework
         public string? ErrorMessage { get; private set; }
 
         /// <summary>
-        /// Gets the test project.
+        /// Gets or sets the test project.
         /// </summary>
-        public Project Project { get; }
+        public Project? Project { get; set; }
 
         /// <summary>
-        /// Gets the source code document of the template.
+        /// Gets or sets the source code document of the template.
         /// </summary>
-        public Document TemplateDocument { get; }
+        public Document? TemplateDocument { get; set; }
 
         /// <summary>
-        /// Gets the initial compilation of the test project.
+        /// Gets or sets the initial compilation of the test project.
         /// </summary>
-        public Compilation InitialCompilation { get; }
+        public Compilation? InitialCompilation { get; set; }
 
         /// <summary>
         /// Gets or sets the result compilation of the test project.
@@ -120,6 +106,13 @@ namespace Caravela.TestFramework
 
         internal void SetTransformedTarget( SyntaxNode syntaxNode )
         {
+            if ( this.InitialCompilation == null ||
+                 this.Input == null ||
+                 this.Project == null )
+            {
+                throw new InvalidOperationException( "The object has not bee properly initialized." );
+            }
+
             string? GetTextUnderDiagnostic( Diagnostic diagnostic )
             {
                 var syntaxTree = diagnostic.Location!.SourceTree;
@@ -150,7 +143,9 @@ namespace Caravela.TestFramework
             // Convert diagnostics into comments in the code.
             var comments =
                 this.Diagnostics
-                    .Where( d => this._testInput.Options.IncludeAllSeverities || d.Severity >= DiagnosticSeverity.Warning )
+                    .Where(
+                        d => this.Input.Options.IncludeAllSeverities.GetValueOrDefault()
+                             || d.Severity >= DiagnosticSeverity.Warning )
                     .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
                     .OrderByDescending( s => s )
                     .Select( SyntaxFactory.Comment )

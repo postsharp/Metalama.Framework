@@ -106,8 +106,6 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
-            
-
             private T? VisitTypeDeclaration<T>( T node )
                 where T : TypeDeclarationSyntax
             {
@@ -208,8 +206,6 @@ namespace Caravela.Framework.Impl.CompileTime
                     return (T) node.WithMembers( List( members ) ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
             }
-
-          
 
             private void CheckVirtualTemplateSignature( ISymbol templateSymbol, IEnumerable<ISymbol> typesInSignature )
             {

@@ -55,7 +55,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="TestInputs\Aspects\Introductions\Fields\" />
+    <EmbeddedResource Remove="TestInputs\**" />
   </ItemGroup>
 
   <Target Name="AddCustomAssemblyMetadaAttributes" BeforeTargets="CoreGenerateAssemblyInfo">

@@ -12,13 +12,14 @@ namespace Caravela.Framework.Impl.Pipeline
         private bool _frozen;
 
         public void ReplaceServiceForTest<T>( T service )
+            where T : IService
         {
             if ( this._frozen )
             {
                 throw new InvalidOperationException();
             }
 
-            this._services[ typeof(T) ] = service;
+            this._services[typeof(T)] = service;
         }
 
         public void AddService<T>( T service )

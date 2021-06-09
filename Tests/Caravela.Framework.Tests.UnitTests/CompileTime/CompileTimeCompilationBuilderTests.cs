@@ -209,7 +209,7 @@ class ReferencingClass
                     return referenceToSelf;
                 }
 
-                PortableExecutableReference indirectlyReferenced = CompileProject( indirectlyReferencedCode );
+                var indirectlyReferenced = CompileProject( indirectlyReferencedCode );
                 var directlyReferenced = CompileProject( directlyReferencedCode, indirectlyReferenced );
                 _ = CompileProject( referencingCode, directlyReferenced );
             }

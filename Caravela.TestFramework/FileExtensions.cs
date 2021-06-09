@@ -3,7 +3,7 @@
 
 namespace Caravela.TestFramework
 {
-    public static class FileExtensions
+    internal static class FileExtensions
     {
         public const string TransformedCode = ".t.cs";
         public const string Html = ".t.html";

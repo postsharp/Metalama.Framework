@@ -1,6 +1,6 @@
 <Project>
     <!-- Include the package version in metadata. -->
-    <Target Name="AddAssemblyMetadata" 
+    <Target Name="AddAssemblyMetadata"
             BeforeTargets="GenerateAdditionalSources"
             DependsOnTargets="RunResolvePackageDependencies">
         <ItemGroup>

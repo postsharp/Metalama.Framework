@@ -3,4 +3,4 @@
 
 using Xunit;
 
-[assembly: CollectionBehavior( DisableTestParallelization = true )]
+[assembly: TestFramework( "Caravela.TestFramework.AspectTestFramework", "Caravela.TestFramework" )]

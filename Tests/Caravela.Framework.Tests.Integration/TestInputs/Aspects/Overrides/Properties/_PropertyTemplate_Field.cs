@@ -1,4 +1,6 @@
-﻿// Ignored because not all declarations listed here are curretnly supported (the test should be be split into a few smaller ones).
+﻿// @Skipped
+
+// Ignored because not all declarations listed here are curretnly supported (the test should be be split into a few smaller ones).
 
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
