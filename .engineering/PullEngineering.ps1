@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 
 # Check that we are in the root of a GIT repository.
 If ( -Not ( Test-Path -Path ".\.git" ) ) {
-    throw "This script has to run in a GIT repository root!"
+    throw "This script has to run in a GIT repository root! Usage: Copy this file to the root of the repository and execute. The file deletes itself upon success."
 }
 
 # Update/initialize the engineering subtree.
@@ -28,9 +28,6 @@ If ( $LastExitCode -Ne 0 ) {
 # where a link file is replaced by a file containing the original target path.
 # Keep this clean-up part up to date, so that this script can be executed on any repository in any state.
 Remove-Item ".\.editorconfig"
-Remove-Item ".\Directory.Build.props"
-Remove-Item ".\Directory.Build.targets"
-Remove-Item ".\nuget.config"
 
 Get-ChildItem ".\" -Filter "*.sln.DotSettings" | 
 Foreach-Object {
@@ -38,14 +35,11 @@ Foreach-Object {
 }
 
 # Link files.
-Get-ChildItem ".\$EngineeringDirectory\linked\root\" | 
-Foreach-Object {
-    New-Item -Path ".\$($_.Name)" -ItemType SymbolicLink -Value $_.FullName
-}
+New-Item -Path ".\.editorconfig" -ItemType SymbolicLink -Value ".\$EngineeringDirectory\style\.editorconfig"
 
 Get-ChildItem ".\" -Filter "*.sln" | 
 Foreach-Object {
-    New-Item -Path "$($_.FullName).DotSettings" -ItemType SymbolicLink -Value ".\$EngineeringDirectory\linked\others\sln.DotSettings"
+    New-Item -Path "$($_.FullName).DotSettings" -ItemType SymbolicLink -Value ".\$EngineeringDirectory\style\sln.DotSettings"
 }
 
 # Remove the executed copy of this script.
