@@ -3,19 +3,21 @@
 
 using System;
 using System.Linq;
-using System.Reflection;
 
 namespace Caravela.TestFramework
 {
-    public static class TestRunnerFactory
+    /// <summary>
+    /// Instantiates a specific implementation of the  <see cref="BaseTestRunner"/> class.
+    /// </summary>
+    internal static class TestRunnerFactory
     {
         public static BaseTestRunner CreateTestRunner( TestInput testInput, IServiceProvider serviceProvider )
         {
-            var assemblies = testInput.Options.Assemblies.Select( Assembly.Load ).ToArray();
+            var metadataReferences = testInput.Options.References.Select( a => a.ToMetadataReference() ).ToArray();
 
             if ( string.IsNullOrEmpty( testInput.Options.TestRunnerFactoryType ) )
             {
-                return new AspectTestRunner( serviceProvider, testInput.BaseDirectory, assemblies );
+                return new AspectTestRunner( serviceProvider, testInput.ProjectDirectory, metadataReferences );
             }
             else
             {
@@ -32,7 +34,7 @@ namespace Caravela.TestFramework
 
                 var testRunnerFactory = (ITestRunnerFactory) Activator.CreateInstance( factoryType )!;
 
-                return testRunnerFactory.CreateTestRunner( serviceProvider, testInput.BaseDirectory, assemblies );
+                return testRunnerFactory.CreateTestRunner( serviceProvider, testInput.ProjectDirectory, metadataReferences );
             }
         }
     }

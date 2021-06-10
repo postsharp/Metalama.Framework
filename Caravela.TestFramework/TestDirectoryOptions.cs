@@ -12,11 +12,6 @@ namespace Caravela.TestFramework
     public class TestDirectoryOptions : TestOptions
     {
         /// <summary>
-        /// Gets or sets a value indicating whether the current directory contains tests.
-        /// </summary>
-        public bool? Include { get; set; }
-        
-        /// <summary>
         /// Gets or sets a value indicating whether the current directory and all child directories should be excluded.
         /// </summary>
         public bool? Exclude { get; set; }
@@ -32,9 +27,9 @@ namespace Caravela.TestFramework
         {
             base.ApplyDirectoryOptions( directoryOptions );
 
-            if ( this.Include == null )
+            if ( this.Exclude == null )
             {
-                this.Include = directoryOptions.Include;
+                this.Exclude = directoryOptions.Exclude;
             }
         }
     }

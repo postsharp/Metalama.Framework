@@ -5,8 +5,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.BaseClassImplicitInterfaceImplementation
 {

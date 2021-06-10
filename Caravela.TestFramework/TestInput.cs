@@ -25,7 +25,7 @@ namespace Caravela.TestFramework
         {
             this.TestName = testName;
             this.SourceCode = sourceCode;
-            this.BaseDirectory = directoryOptionsReader?.ProjectDirectory;
+            this.ProjectDirectory = directoryOptionsReader?.ProjectDirectory;
             this.RelativePath = relativePath;
             this.FullPath = fullPath;
 
@@ -62,12 +62,24 @@ namespace Caravela.TestFramework
         /// </summary>
         public string SourceCode { get; }
 
-        public string? BaseDirectory { get; }
+        /// <summary>
+        /// Gets the directory containing the project (<c>csproj</c>) file.
+        /// </summary>
+        public string? ProjectDirectory { get; }
 
+        /// <summary>
+        /// Gets the path of the current test file relatively to <see cref="ProjectDirectory"/>.
+        /// </summary>
         public string? RelativePath { get; }
 
+        /// <summary>
+        /// Gets the full path of the current test file.
+        /// </summary>
         public string? FullPath { get; }
 
+        /// <summary>
+        /// Gets the options of the current test.
+        /// </summary>
         public TestOptions Options { get; } = new();
     }
 }

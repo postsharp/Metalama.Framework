@@ -11,6 +11,9 @@ using Xunit.Sdk;
 
 namespace Caravela.TestFramework
 {
+    /// <summary>
+    /// Reads and caches the <c>caravelaTests.json</c> files.
+    /// </summary>
     internal class TestDirectoryOptionsReader
     {
         private static readonly ConditionalWeakTable<Assembly, TestDirectoryOptionsReader> _instances = new ConditionalWeakTable<Assembly, TestDirectoryOptionsReader>();

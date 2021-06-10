@@ -2,7 +2,6 @@
 using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programmatic

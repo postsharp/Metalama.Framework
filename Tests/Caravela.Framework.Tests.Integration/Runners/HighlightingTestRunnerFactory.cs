@@ -2,15 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.TestFramework;
+using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
-using System.Reflection;
 
 namespace Caravela.Framework.Tests.Integration.Runners
 {
     internal class HighlightingTestRunnerFactory : ITestRunnerFactory
     {
-        public BaseTestRunner CreateTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<Assembly>? requiredAssemblies )
-            => new HighlightingTestRunner( serviceProvider, projectDirectory );
+        public BaseTestRunner CreateTestRunner( IServiceProvider serviceProvider, string? projectDirectory, MetadataReference[] metadataReferences )
+            => new HighlightingTestRunner( serviceProvider, projectDirectory, metadataReferences );
     }
 }

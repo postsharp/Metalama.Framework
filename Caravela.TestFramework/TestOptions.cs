@@ -15,6 +15,8 @@ namespace Caravela.TestFramework
         private static readonly Regex _directivesRegex = new( "^// @(\\w+)" );
 
         public string? SkipReason { get; set; }
+
+        public bool IsSkipped => this.SkipReason != null;
         
         /// <summary>
         /// Gets or sets a value indicating whether the diagnostics of the compilation of the transformed target code should be included in the test result.
@@ -36,7 +38,7 @@ namespace Caravela.TestFramework
         /// <summary>
         /// Gets the list of assembly names that should be included in the compilation.
         /// </summary>
-        public List<string> Assemblies { get; } = new List<string>();
+        public List<TestAssemblyReference> References { get; } = new();
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -44,25 +46,13 @@ namespace Caravela.TestFramework
         /// </summary>
         internal virtual void ApplyDirectoryOptions( TestDirectoryOptions directoryOptions )
         {
-            if ( this.SkipReason == null )
-            {
-                this.SkipReason = directoryOptions.SkipReason;
-            }
+            this.SkipReason ??= directoryOptions.SkipReason;
 
-            if ( this.IncludeFinalDiagnostics == null )
-            {
-                this.IncludeFinalDiagnostics = directoryOptions.IncludeFinalDiagnostics;
-            }
+            this.IncludeFinalDiagnostics ??= directoryOptions.IncludeFinalDiagnostics;
 
-            if ( this.IncludeAllSeverities == null )
-            {
-                this.IncludeAllSeverities = directoryOptions.IncludeAllSeverities;
-            }
+            this.IncludeAllSeverities ??= directoryOptions.IncludeAllSeverities;
 
-            if ( this.TestRunnerFactoryType == null )
-            {
-                this.TestRunnerFactoryType = directoryOptions.TestRunnerFactoryType;
-            }
+            this.TestRunnerFactoryType ??= directoryOptions.TestRunnerFactoryType;
         }
 
         /// <summary>

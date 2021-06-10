@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
 

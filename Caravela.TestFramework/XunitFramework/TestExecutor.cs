@@ -41,12 +41,14 @@ namespace Caravela.TestFramework.XunitFramework
             IMessageSink executionMessageSink,
             ITestFrameworkExecutionOptions executionOptions )
         {
-            var directoryOptionsReader = new TestDirectoryOptionsReader( this._factory.BaseDirectory );
+            var directoryOptionsReader = new TestDirectoryOptionsReader( this._factory.ProjectDirectory );
 
             var collections = testCases.GroupBy( t => t.TestMethod.TestClass.TestCollection );
 
             foreach ( var collection in collections )
             {
+                var references = TestAssemblyReferenceReader.GetAssemblyReferences( collection.Key.TestAssembly.Assembly ).ToList();
+                
                 executionMessageSink.OnMessage( new TestCollectionStarting( collection, collection.Key ) );
 
                 executionMessageSink.OnMessage(
@@ -89,8 +91,9 @@ namespace Caravela.TestFramework.XunitFramework
                                     using var testOptions = new TestProjectOptions();
                                     using var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
                                     var testInput = TestInput.FromFile( directoryOptionsReader, testCase.UniqueID );
+                                    testInput.Options.References.AddRange( references );
 
-                                    if ( testInput.Options.SkipReason != null )
+                                    if ( testInput.Options.IsSkipped )
                                     {
                                         executionMessageSink.OnMessage( new TestSkipped( test, testInput.Options.SkipReason ) );
 

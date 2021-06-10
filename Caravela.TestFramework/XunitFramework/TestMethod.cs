@@ -27,7 +27,7 @@ namespace Caravela.TestFramework.XunitFramework
 
         IMethodInfo ITestMethod.Method => this;
 
-        ITestClass ITestMethod.TestClass => this._factory.GetTestType( Path.GetDirectoryName( this._relativePath )! );
+        ITestClass ITestMethod.TestClass => this._factory.GetTestType( Path.GetDirectoryName( this._relativePath ) );
 
         IEnumerable<IAttributeInfo> IMethodInfo.GetCustomAttributes( string assemblyQualifiedAttributeTypeName ) => Enumerable.Empty<IAttributeInfo>();
 

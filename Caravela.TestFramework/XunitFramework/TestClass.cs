@@ -12,12 +12,38 @@ namespace Caravela.TestFramework.XunitFramework
     internal class TestClass : ITypeInfo, ITestClass
     {
         private readonly TestFactory _testFactory;
-        private readonly string _relativePath;
+        private readonly string _name;
 
-        public TestClass( TestFactory factory, string relativePath )
+        public TestClass( TestFactory factory, string? relativePath )
         {
             this._testFactory = factory;
-            this._relativePath = relativePath;
+
+            // If the directory contains both files and subdirectories, we have to generate a class name with a "Tests" suffix.
+            
+            var directory = factory.ProjectDirectory;
+
+            if ( !string.IsNullOrEmpty( relativePath ) )
+            {
+                directory = Path.Combine( directory, relativePath );
+            }
+
+            if ( Directory.GetDirectories( directory ).Length > 0 && Directory.GetFiles( directory ).Length > 0 )
+            {
+                if ( string.IsNullOrEmpty( relativePath ) )
+                {
+                    this._name = "Tests";
+                }
+                else
+                {
+                    this._name = relativePath.Replace( Path.DirectorySeparatorChar, '.' ) + ".Tests";
+                }
+            }
+            else
+            {
+                this._name = relativePath?.Replace( Path.DirectorySeparatorChar, '.' ) ?? "Tests";
+            }
+
+            this._name = factory.ProjectName + "." + this._name;
         }
 
         IEnumerable<IAttributeInfo> ITypeInfo.GetCustomAttributes( string assemblyQualifiedAttributeTypeName ) => Enumerable.Empty<IAttributeInfo>();
@@ -44,7 +70,7 @@ namespace Caravela.TestFramework.XunitFramework
 
         bool ITypeInfo.IsValueType => false;
 
-        string ITypeInfo.Name => this._relativePath.Replace( Path.DirectorySeparatorChar, '.' );
+        string ITypeInfo.Name => this._name;
 
         void IXunitSerializable.Deserialize( IXunitSerializationInfo info ) => throw new NotImplementedException();
 

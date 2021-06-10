@@ -9,7 +9,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 
 namespace Caravela.TestFramework
@@ -19,8 +18,8 @@ namespace Caravela.TestFramework
     /// </summary>
     public class AspectTestRunner : BaseTestRunner
     {
-        public AspectTestRunner( IServiceProvider serviceProvider, string? projectDirectory = null, IEnumerable<Assembly>? additionalAssemblies = null )
-            : base( serviceProvider, projectDirectory, additionalAssemblies ) { }
+        public AspectTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences )
+            : base( serviceProvider, projectDirectory, metadataReferences ) { }
 
         /// <summary>
         /// Runs the aspect test with the given name and source.

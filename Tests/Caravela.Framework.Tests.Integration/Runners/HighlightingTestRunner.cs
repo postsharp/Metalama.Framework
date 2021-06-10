@@ -5,8 +5,10 @@ using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading;
@@ -19,7 +21,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
 {
     internal class HighlightingTestRunner : BaseTestRunner
     {
-        public HighlightingTestRunner( IServiceProvider serviceProvider, string? projectDirectory ) : base( serviceProvider, projectDirectory ) { }
+        public HighlightingTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences ) 
+            : base( serviceProvider, projectDirectory, metadataReferences ) { }
 
         protected override TestResult CreateTestResult() => new HighlightingTestResult();
 
@@ -154,12 +157,12 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
         public override void ExecuteAssertions( TestInput testInput, TestResult testResult, ITestOutputHelper logger )
         {
-            Assert.NotNull( testInput.BaseDirectory );
+            Assert.NotNull( testInput.ProjectDirectory );
             Assert.NotNull( testInput.RelativePath );
 
             Assert.True( testResult.Success, testResult.ErrorMessage );
 
-            var sourceAbsolutePath = Path.Combine( testInput.BaseDirectory!, testInput.RelativePath! );
+            var sourceAbsolutePath = Path.Combine( testInput.ProjectDirectory!, testInput.RelativePath! );
 
             var expectedHighlightedPath = Path.Combine(
                 Path.GetDirectoryName( sourceAbsolutePath )!,

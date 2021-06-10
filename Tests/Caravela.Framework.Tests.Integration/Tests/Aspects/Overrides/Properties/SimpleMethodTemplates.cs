@@ -1,6 +1,5 @@
 ﻿using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 using System;
 

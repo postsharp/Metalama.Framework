@@ -4,8 +4,10 @@
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
@@ -14,7 +16,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
 {
     internal partial class AnnotationUnitTestRunner : BaseTestRunner
     {
-        public AnnotationUnitTestRunner( IServiceProvider serviceProvider, string projectDirectory ) : base( serviceProvider, projectDirectory ) { }
+        public AnnotationUnitTestRunner( IServiceProvider serviceProvider, string projectDirectory, IEnumerable<MetadataReference> metadataReferences ) 
+            : base( serviceProvider, projectDirectory, metadataReferences ) { }
 
         public override TestResult RunTest( TestInput testInput )
         {

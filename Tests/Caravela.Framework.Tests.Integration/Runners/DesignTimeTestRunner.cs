@@ -6,7 +6,9 @@ using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
+using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
@@ -14,7 +16,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
 {
     internal class DesignTimeTestRunner : BaseTestRunner
     {
-        public DesignTimeTestRunner( IServiceProvider serviceProvider, string? projectDirectory = null ) : base( serviceProvider, projectDirectory ) { }
+        public DesignTimeTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences ) 
+            : base( serviceProvider, projectDirectory, metadataReferences ) { }
 
         public override TestResult RunTest( TestInput testInput )
         {

@@ -1,7 +1,6 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
 using Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.IntroductionAndOverride;
 using Caravela.TestFramework;
 

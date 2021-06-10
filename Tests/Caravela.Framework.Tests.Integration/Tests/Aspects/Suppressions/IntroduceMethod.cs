@@ -10,7 +10,6 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Eligibility;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.OverrideMethod
 {

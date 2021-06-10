@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using Xunit;
 using Xunit.Abstractions;
@@ -21,14 +20,14 @@ namespace Caravela.TestFramework
     /// </summary>
     public abstract class BaseTestRunner
     {
-        private readonly Assembly[] _additionalAssemblies;
+        private readonly MetadataReference[] _additionalAssemblies;
 
         public IServiceProvider ServiceProvider { get; }
 
-        public BaseTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<Assembly>? additionalAssemblies = null )
+        public BaseTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences )
         {
-            this._additionalAssemblies = (additionalAssemblies ?? Enumerable.Empty<Assembly>())
-                .Append( typeof(BaseTestRunner).Assembly )
+            this._additionalAssemblies = metadataReferences
+                .Append( MetadataReference.CreateFromFile( typeof(BaseTestRunner).Assembly.Location ) )
                 .ToArray();
 
             this.ServiceProvider = serviceProvider;

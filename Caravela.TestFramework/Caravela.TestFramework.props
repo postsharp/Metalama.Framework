@@ -1,9 +1,21 @@
 <Project>
+    <PropertyGroup>
+        <!-- This property, when set to True, excludes any .cs file in the project from the compilation except _Runner.cs itself. -->
+        <CaravelaTestAutoExclude Condition="'$(CaravelaTestAutoExclude)'==''">True</CaravelaTestAutoExclude>
+        <CaravelaTestGenerateDefaultRunner Condition="'$(CaravelaTestGenerateDefaultRunner)'==''">True</CaravelaTestGenerateDefaultRunner>
+    </PropertyGroup>
     <ItemGroup>
-        <!-- Defines an [assemblu:AssemblyMetadata]. This is required by the [FromDirectory] attrivute -->
         <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
             <_Parameter1>ProjectDirectory</_Parameter1>
             <_Parameter2>$(MSBuildProjectDirectory)</_Parameter2>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="Xunit.TestFrameworkAttribute">
+            <_Parameter1>Caravela.TestFramework.AspectTestFramework</_Parameter1>
+            <_Parameter2>Caravela.TestFramework</_Parameter2>
+        </AssemblyAttribute>
+         <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>ReferenceAssemblyList</_Parameter1>
+            <_Parameter2>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)assemblies.txt</_Parameter2>
         </AssemblyAttribute>
     </ItemGroup>
     <!-- Enable dynamic file nesting in Visual Studio -->

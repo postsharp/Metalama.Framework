@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
@@ -7,7 +6,7 @@ using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.Issue28709
 {
-      [CompileTime]
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]

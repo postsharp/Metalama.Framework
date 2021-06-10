@@ -19,7 +19,7 @@ namespace Caravela.TestFramework.XunitFramework
             this._relativePath = relativePath;
         }
 
-        public string FullPath => Path.Combine( this._factory.BaseDirectory, this._relativePath );
+        public string FullPath => Path.Combine( this._factory.ProjectDirectory, this._relativePath );
 
         void IXunitSerializable.Deserialize( IXunitSerializationInfo info )
         {
@@ -29,7 +29,7 @@ namespace Caravela.TestFramework.XunitFramework
 
         void IXunitSerializable.Serialize( IXunitSerializationInfo info )
         {
-            info.AddValue( "basePath", this._factory.BaseDirectory );
+            info.AddValue( "basePath", this._factory.ProjectDirectory );
             info.AddValue( "relativePath", this._relativePath );
             info.AddValue( "assemblyName", this._factory.AssemblyInfo.Name );
         }
@@ -54,7 +54,7 @@ namespace Caravela.TestFramework.XunitFramework
 
         string ISourceInformation.FileName
         {
-            get => Path.Combine( this._factory.BaseDirectory, this._relativePath );
+            get => Path.Combine( this._factory.ProjectDirectory, this._relativePath );
             set => throw new NotSupportedException();
         }
 

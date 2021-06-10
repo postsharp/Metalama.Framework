@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -46,7 +47,7 @@ namespace Caravela.TestFramework.XunitFramework
 
             if ( projectDirectoryAttribute == null )
             {
-                throw new InvalidOperationException( "The test assembly must have a single AssemblyMetadataAttribute with Key = \"ProjectDirectory\"." );
+                throw new InvalidOperationException( $"The assembly '{this._assembly.AssemblyPath}' must have a single AssemblyMetadataAttribute with Key = \"ProjectDirectory\"." );
             }
 
             var value = (string?) projectDirectoryAttribute.GetConstructorArguments().ElementAt( 1 );
@@ -61,15 +62,15 @@ namespace Caravela.TestFramework.XunitFramework
             return value;
         }
 
-        public List<TestCase> Discover( string subDirectory )
+        public List<TestCase> Discover( string subDirectory, ImmutableHashSet<string> excludedDirectories )
         {
             List<TestCase> testCases = new();
-            this.Discover( c => testCases.Add( c ), subDirectory );
+            this.Discover( c => testCases.Add( c ), subDirectory, false, excludedDirectories );
 
             return testCases;
         }
         
-        private void Discover( Action<TestCase> onTestCaseDiscovered, string? subDirectory )
+        private void Discover( Action<TestCase> onTestCaseDiscovered, string? subDirectory, bool isXUnitFrameworkDiscovery, ImmutableHashSet<string> excludedSubdirectories )
         {
             var baseDirectory = this.FindProjectDirectory();
             TestDirectoryOptionsReader reader = new( baseDirectory );
@@ -80,31 +81,47 @@ namespace Caravela.TestFramework.XunitFramework
                 var options = reader.GetDirectoryOptions( directory );
 
                 // If the directory is excluded, don't continue.
-                if ( options.Exclude.GetValueOrDefault() || _excludedDirectoryNames.Contains( Path.GetFileName( directory ) ) )
+                if ( options.Exclude.GetValueOrDefault() || 
+                     _excludedDirectoryNames.Contains( Path.GetFileName( directory ) ) )
                 {
                     return;
                 }
 
                 // Process children directories.
+                var runnerFileName = "_Runner.cs";
+
                 foreach ( var nestedDir in Directory.EnumerateDirectories( directory ) )
                 {
+                    if ( excludedSubdirectories.Contains( nestedDir ) )
+                    {
+                        continue;    
+                    }
+                    
+                    if ( !isXUnitFrameworkDiscovery )
+                    {
+                        // Don't include a directory that has a _Runner file.
+                        var runnerFile = Path.Combine( nestedDir, runnerFileName );
+
+                        if ( File.Exists( runnerFile ) )
+                        {
+                            continue;
+                        }
+                    }
+                    
                     AddTestsInDirectory( nestedDir );
                 }
 
                 // If the directory is included, index the files.
-                if ( options.Include.GetValueOrDefault() )
+                foreach ( var testPath in Directory.EnumerateFiles( directory, "*.cs" ) )
                 {
-                    foreach ( var testPath in Directory.EnumerateFiles( directory, "*.cs" ) )
+                    if ( Path.GetFileName( testPath ).Equals( runnerFileName, StringComparison.OrdinalIgnoreCase ) 
+                         || testPath.EndsWith( FileExtensions.TransformedCode, StringComparison.OrdinalIgnoreCase ) )
                     {
-                        if ( testPath.EndsWith( "Directory.cs", StringComparison.OrdinalIgnoreCase ) 
-                             || testPath.EndsWith( FileExtensions.TransformedCode, StringComparison.OrdinalIgnoreCase ) )
-                        {
-                            continue;
-                        }
-
-                        var testCase = new TestCase( factory, Path.GetRelativePath( baseDirectory, testPath ) );
-                        onTestCaseDiscovered( testCase );
+                        continue;
                     }
+
+                    var testCase = new TestCase( factory, Path.GetRelativePath( baseDirectory, testPath ) );
+                    onTestCaseDiscovered( testCase );
                 }
             }
 
@@ -113,7 +130,7 @@ namespace Caravela.TestFramework.XunitFramework
 
         void ITestFrameworkDiscoverer.Find( bool includeSourceInformation, IMessageSink discoveryMessageSink, ITestFrameworkDiscoveryOptions discoveryOptions )
         {
-            this.Discover( testCase => discoveryMessageSink.OnMessage( new TestCaseDiscoveryMessage( testCase ) ), null );
+            this.Discover( testCase => discoveryMessageSink.OnMessage( new TestCaseDiscoveryMessage( testCase ) ), null, true, ImmutableHashSet<string>.Empty );
             discoveryMessageSink.OnMessage( new DiscoveryCompleteMessage() );
         }
 
