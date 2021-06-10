@@ -12,6 +12,6 @@ namespace Caravela.Framework.Impl.Transformations
     {
         internal abstract string GetOverrideName( AspectLayerId aspectLayer, IMember overriddenDeclaration );
 
-        internal abstract string GetInterfaceImplementationName( AspectLayerId aspectLayer, IMember interfaceMember );
+        internal abstract string GetInterfaceProxyName( AspectLayerId aspectLayer, IMember interfaceMember );
     }
 }

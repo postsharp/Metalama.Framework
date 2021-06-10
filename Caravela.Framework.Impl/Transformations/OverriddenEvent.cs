@@ -51,17 +51,9 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var templateEventSymbol = this.TemplateEvent?.GetSymbol();
-
-            if (templateEventSymbol != null)
+            if (this.TemplateEvent?.IsEventField() == true)
             {
-                // TODO: partial events.
-                var eventDeclarationSyntax = templateEventSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
-
-                if ( eventDeclarationSyntax is VariableDeclaratorSyntax)
-                {
-                    throw new AssertionFailedException();
-                }
+                throw new AssertionFailedException();
             }
 
             using ( context.DiagnosticSink.WithDefaultScope( this.OverriddenDeclaration ) )

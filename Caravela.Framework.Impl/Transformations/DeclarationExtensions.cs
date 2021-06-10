@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -197,6 +198,25 @@ namespace Caravela.Framework.Impl.Transformations
         {
             // TODO: generics
             return List<TypeParameterConstraintClauseSyntax>();
+        }
+
+        public static bool IsEventField(this IEvent @event)
+        {
+            // TODO: 
+            var eventSymbol = @event.GetSymbol();
+
+            if ( eventSymbol != null )
+            {
+                // TODO: partial events.
+                var eventDeclarationSyntax = eventSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
+
+                if ( eventDeclarationSyntax is VariableDeclaratorSyntax )
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

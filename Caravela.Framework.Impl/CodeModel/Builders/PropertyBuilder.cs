@@ -243,10 +243,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         SyntaxKind.GetAccessorDeclaration,
                         List<AttributeListSyntax>(),
                         TokenList( tokens ),
+                        Token( SyntaxKind.GetKeyword ),
                         this.IsAutoPropertyOrField
                             ? null
                             : Block( ReturnStatement( DefaultExpression( (TypeSyntax) syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
-                        null );
+                        null,
+                        this.IsAutoPropertyOrField ? Token(SyntaxKind.SemicolonToken) : default );
             }
 
             AccessorDeclarationSyntax GenerateSetAccessor()
@@ -263,10 +265,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         this._hasInitOnlySetter ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
                         List<AttributeListSyntax>(),
                         TokenList( tokens ),
+                        this._hasInitOnlySetter ? Token(SyntaxKind.InitKeyword) : Token(SyntaxKind.SetKeyword),
                         this.IsAutoPropertyOrField
                             ? null
                             : Block(),
-                        null );
+                        null,
+                        this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
             }
         }
 

@@ -52,14 +52,5 @@ class Car
         this.PropertyChanged?.Invoke(new global::System.ComponentModel.PropertyChangedEventArgs("name"));
     }
 
-    private event global::System.ComponentModel.PropertyChangedEventHandler PropertyChanged
-    {
-        add
-        {
-        }
-
-        remove
-        {
-        }
-    }
+    public event global::System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 }

@@ -8,6 +8,8 @@ using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -300,33 +302,19 @@ namespace Caravela.Framework.Impl.Advices
                             memberBuilder = this.GetImplMethodBuilder( interfaceMethod, memberSpec.IsExplicit );
                             interfaceMemberMap.Add( interfaceMethod, memberBuilder );
 
-                            if ( memberSpec.IsExplicit )
-                            {
-                                interfaceTargetMap.Add(
-                                    interfaceMethod,
-                                    (memberSpec.AspectInterfaceTargetMember != null, memberSpec.AspectInterfaceTargetMember ?? memberSpec.TargetMember.AssertNotNull(), memberBuilder) );
-                            }
-                            else
-                            {
-                                overrides.Add(
-                                    memberSpec.AspectInterfaceTargetMember != null
-                                    ? new OverriddenMethod( this, (IMethod) memberBuilder, (IMethod) memberSpec.AspectInterfaceTargetMember, this.LinkerOptions )
-                                    : new RedirectedMethod( this, (IMethod) memberBuilder, (IMethod) memberSpec.TargetMember.AssertNotNull(), this.LinkerOptions ) );
-                            }
+                            overrides.Add(
+                                memberSpec.AspectInterfaceTargetMember != null
+                                ? new OverriddenMethod( this, (IMethod) memberBuilder, (IMethod) memberSpec.AspectInterfaceTargetMember, this.LinkerOptions )
+                                : new RedirectedMethod( this, (IMethod) memberBuilder, (IMethod) memberSpec.TargetMember.AssertNotNull(), this.LinkerOptions ) );
 
                             break;
 
                         case IProperty interfaceProperty:
-                            memberBuilder = this.GetImplPropertyBuilder( interfaceProperty, memberSpec.IsExplicit );
+                            var buildAutoProperty = ((IProperty?) memberSpec.AspectInterfaceTargetMember)?.IsAutoPropertyOrField == true;
+                            memberBuilder = this.GetImplPropertyBuilder( interfaceProperty, buildAutoProperty, memberSpec.IsExplicit );
                             interfaceMemberMap.Add( interfaceProperty, memberBuilder );
 
-                            if ( memberSpec.IsExplicit )
-                            {
-                                interfaceTargetMap.Add(
-                                    interfaceProperty,
-                                    (memberSpec.AspectInterfaceTargetMember != null, memberSpec.AspectInterfaceTargetMember ?? memberSpec.TargetMember.AssertNotNull(), memberBuilder) );
-                            }
-                            else
+                            if ( ((IProperty?) memberSpec.AspectInterfaceTargetMember)?.IsAutoPropertyOrField != true )
                             {
                                 overrides.Add(
                                     memberSpec.AspectInterfaceTargetMember != null
@@ -337,16 +325,12 @@ namespace Caravela.Framework.Impl.Advices
                             break;
 
                         case IEvent interfaceEvent:
-                            memberBuilder = this.GetImplEventBuilder( interfaceEvent, memberSpec.IsExplicit );
+                            var isEventField = memberSpec.AspectInterfaceTargetMember != null && ((IEvent) memberSpec.AspectInterfaceTargetMember).IsEventField();
+
+                            memberBuilder = this.GetImplEventBuilder( interfaceEvent, isEventField, memberSpec.IsExplicit );
                             interfaceMemberMap.Add( interfaceEvent, memberBuilder );
 
-                            if ( memberSpec.IsExplicit )
-                            {
-                                interfaceTargetMap.Add(
-                                    interfaceEvent,
-                                    (memberSpec.AspectInterfaceTargetMember != null, memberSpec.AspectInterfaceTargetMember ?? memberSpec.TargetMember.AssertNotNull(), memberBuilder) );
-                            }
-                            else
+                            if ( !isEventField )
                             {
                                 overrides.Add(
                                     memberSpec.AspectInterfaceTargetMember != null
@@ -364,8 +348,7 @@ namespace Caravela.Framework.Impl.Advices
                 }
 
                 result = result.WithTransformations(
-                    new IntroducedInterface( this, this.TargetDeclaration, interfaceSpec.InterfaceType, interfaceMemberMap, this.LinkerOptions ),
-                    new IntroducedInterfaceImplementation( this, this.TargetDeclaration, interfaceSpec.InterfaceType, interfaceTargetMap, this.LinkerOptions ) );
+                    new IntroducedInterface( this, this.TargetDeclaration, interfaceSpec.InterfaceType, interfaceMemberMap, this.LinkerOptions ) );
 
                 result = result.WithTransformations( explicitImplementationBuilders.Cast<ITransformation>() );
                 result = result.WithTransformations( overrides.Cast<ITransformation>() );
@@ -405,54 +388,66 @@ namespace Caravela.Framework.Impl.Advices
             {
                 methodBuilder.SetExplicitInterfaceImplementation( interfaceMethod );
             }
+            else
+            {
+                methodBuilder.Accessibility = Accessibility.Public;
+            }
 
             return methodBuilder;
         }
 
-        private MemberBuilder GetImplPropertyBuilder( IProperty interfaceProperty, bool isExplicit )
+        private MemberBuilder GetImplPropertyBuilder( IProperty interfaceProperty, bool isAutoProperty, bool isExplicit )
         {
-            var builder = new PropertyBuilder( 
+            var propertyBuilder = new PropertyBuilder( 
                 this, 
                 this.TargetDeclaration, 
                 interfaceProperty.Name,
                 interfaceProperty.Getter != null,
                 interfaceProperty.Setter != null,
-                interfaceProperty.IsAutoPropertyOrField,
+                !isExplicit && isAutoProperty,
                 interfaceProperty.Writeability == Writeability.InitOnly,
                 this.LinkerOptions );
 
-            builder.Type = interfaceProperty.Type;
+            propertyBuilder.Type = interfaceProperty.Type;
 
             foreach ( var interfaceParameter in interfaceProperty.Parameters )
             {
-                _ = builder.AddParameter( interfaceParameter.Name, interfaceParameter.ParameterType, interfaceParameter.RefKind, interfaceParameter.DefaultValue );
+                _ = propertyBuilder.AddParameter( interfaceParameter.Name, interfaceParameter.ParameterType, interfaceParameter.RefKind, interfaceParameter.DefaultValue );
             }
 
             if ( isExplicit )
             {
-                builder.SetExplicitInterfaceImplementation( interfaceProperty );
+                propertyBuilder.SetExplicitInterfaceImplementation( interfaceProperty );
+            }
+            else
+            {
+                propertyBuilder.Accessibility = Accessibility.Public;
             }
 
-            return builder;
+            return propertyBuilder;
         }
 
-        private MemberBuilder GetImplEventBuilder( IEvent interfaceEvent, bool isExplicit )
+        private MemberBuilder GetImplEventBuilder( IEvent interfaceEvent, bool isEventField, bool isExplicit )
         {
-            var builder = new EventBuilder(
+            var eventBuilder = new EventBuilder(
                 this,
                 this.TargetDeclaration,
                 interfaceEvent.Name,
-                interfaceEvent.Adder == null && interfaceEvent.Remover == null,
+                !isExplicit && isEventField, // We cannot build event fields with explicit interface impl.
                 this.LinkerOptions );
 
-            builder.EventType = interfaceEvent.EventType;
+            eventBuilder.EventType = interfaceEvent.EventType;
 
             if ( isExplicit )
             {
-                builder.SetExplicitInterfaceImplementation( interfaceEvent );
+                eventBuilder.SetExplicitInterfaceImplementation( interfaceEvent );
+            }
+            else
+            {
+                eventBuilder.Accessibility = Accessibility.Public;
             }
 
-            return builder;
+            return eventBuilder;
         }
 
         private class IntroducedInterfaceSpecification

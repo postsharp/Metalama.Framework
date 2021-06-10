@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -69,8 +70,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             var syntaxGenerator = this.Compilation.SyntaxGenerator;
 
+            if (this._isEventField && this.ExplicitInterfaceImplementations.Count > 0)
+            {
+                throw new AssertionFailedException();
+            }
+
             MemberDeclarationSyntax @event =
-                this._isEventField
+                this._isEventField && this.ExplicitInterfaceImplementations.Count == 0
                     ? EventFieldDeclaration(
                         List<AttributeListSyntax>(), // TODO: Attributes.
                         GenerateModifierList(),
@@ -89,8 +95,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                             ? ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                             : null,
                         Identifier( this.Name ),
-                        GenerateAccessorList()
-                        );
+                        GenerateAccessorList() );
+
+            if ( this._isEventField && this.ExplicitInterfaceImplementations.Count > 0)
+            {
+                // Add annotation to the explicit annotation that the linker should treat this an event field.
+                @event = @event.AddLinkerDeclarationFlags( LinkerDeclarationFlags.EventField );
+            }
 
             return new[]
             {

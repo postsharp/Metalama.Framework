@@ -12,10 +12,11 @@ using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
+// TODO: For reference purpose, delete afterwards.
 
 namespace Caravela.Framework.Impl.Transformations
 {
@@ -141,7 +142,7 @@ namespace Caravela.Framework.Impl.Transformations
                         targetMethod.GetSyntaxModifierList(),
                         targetMethod.GetSyntaxReturnType(),
                         null,
-                        Identifier( context.IntroductionNameProvider.GetInterfaceImplementationName( this.Advice.AspectLayerId, interfaceMethod ) ),
+                        Identifier( context.IntroductionNameProvider.GetInterfaceProxyName( this.Advice.AspectLayerId, interfaceMethod ) ),
                         targetMethod.GetSyntaxTypeParameterList(),
                         targetMethod.GetSyntaxParameterList(),
                         targetMethod.GetSyntaxConstraintClauses(),
@@ -151,7 +152,6 @@ namespace Caravela.Framework.Impl.Transformations
                     IntroducedMemberSemantic.InterfaceImplementation,
                     this.LinkerOptions,
                     implementationMethodBuilder );
-
 
             BlockSyntax CreateMethodBodyFromAspectInterfaceMember( MemberIntroductionContext context, IMethod explicitImplementationMethod, IMethod aspectInterfaceMethod )
             {
@@ -229,7 +229,7 @@ namespace Caravela.Framework.Impl.Transformations
                         targetProperty.GetSyntaxModifierList(),
                         targetProperty.GetSyntaxReturnType(),
                         null,
-                        Identifier( context.IntroductionNameProvider.GetInterfaceImplementationName( this.Advice.AspectLayerId, interfaceProperty ) ),
+                        Identifier( context.IntroductionNameProvider.GetInterfaceProxyName( this.Advice.AspectLayerId, interfaceProperty ) ),
                         AccessorList( List( accessors ) ),
                         null,
                         null ),
@@ -350,7 +350,7 @@ namespace Caravela.Framework.Impl.Transformations
                             VariableDeclaration(
                                 targetEvent.GetSyntaxReturnType(),
                                 SingletonSeparatedList(
-                                    VariableDeclarator( Identifier( context.IntroductionNameProvider.GetInterfaceImplementationName( this.Advice.AspectLayerId, interfaceEvent ) ) ) ) ) ),
+                                    VariableDeclarator( Identifier( context.IntroductionNameProvider.GetInterfaceProxyName( this.Advice.AspectLayerId, interfaceEvent ) ) ) ) ) ),
                         this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.InterfaceImplementation,
                         this.LinkerOptions,
@@ -366,7 +366,7 @@ namespace Caravela.Framework.Impl.Transformations
                             targetEvent.GetSyntaxModifierList(),
                             targetEvent.GetSyntaxReturnType(),
                             null,
-                            Identifier( context.IntroductionNameProvider.GetInterfaceImplementationName( this.Advice.AspectLayerId, interfaceEvent ) ),
+                            Identifier( context.IntroductionNameProvider.GetInterfaceProxyName( this.Advice.AspectLayerId, interfaceEvent ) ),
                             AccessorList( List( accessors ) ) ),
                         this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.InterfaceImplementation,

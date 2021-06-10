@@ -313,7 +313,7 @@ namespace Caravela.Framework.Impl.Linking
 
                     foreach ( var originalAccessor in propertyBodySource.AccessorList.Accessors )
                     {
-                        var symbol = semanticModel.GetDeclaredSymbol( originalAccessor ).AssertNotNull();
+                        var symbol = semanticModel.GetDeclaredSymbol( eventDeclaration ).AssertNotNull();
 
                         transformedAccessors.Add(
                             AccessorDeclaration(
@@ -571,15 +571,30 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private BlockSyntax GetRewrittenEventAccessorBody( SemanticModel semanticModel, AccessorDeclarationSyntax accessor, IMethodSymbol symbol )
+            private BlockSyntax GetRewrittenEventAccessorBody( SemanticModel semanticModel, AccessorDeclarationSyntax accessor, IEventSymbol eventSymbol )
             {
-                // Turn off warnings.
-                _ = this;
-                _ = semanticModel;
-                _ = accessor;
-                _ = symbol;
+                // Create inlining rewriter and inline calls into this method's body.
+                InliningRewriterBase inliningRewriter =
+                    accessor.Kind() switch
+                    {
+                        SyntaxKind.AddAccessorDeclaration => new EventInliningRewriter( this._analysisRegistry, semanticModel, eventSymbol, eventSymbol.AddMethod.AssertNotNull() ),
+                        SyntaxKind.RemoveAccessorDeclaration => new EventInliningRewriter( this._analysisRegistry, semanticModel, eventSymbol, eventSymbol.RemoveMethod.AssertNotNull() ),
+                        _ => throw new AssertionFailedException( $"{accessor.Kind()}" )
+                    };
 
-                throw new NotImplementedException();
+                if ( accessor.Body != null )
+                {
+                    return (BlockSyntax) inliningRewriter.VisitBlock( accessor.Body ).AssertNotNull();
+                }
+                else if ( accessor.ExpressionBody != null )
+                {
+                    // TODO: Correct trivia for the generated block body.
+                    return (BlockSyntax) inliningRewriter.VisitBlock( Block( ExpressionStatement( accessor.ExpressionBody.Expression ) ) ).AssertNotNull();
+                }
+                else
+                {
+                    throw new AssertionFailedException( $"{accessor}" );
+                }
             }
 
             private static MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method )
