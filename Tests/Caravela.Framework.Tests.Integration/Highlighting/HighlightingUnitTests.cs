@@ -29,7 +29,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
 
             var expectedHighlightedPath = Path.Combine(
                 Path.GetDirectoryName( sourceAbsolutePath )!,
-                Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".highlighted.html" );
+                Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.Html );
 
             var expectedHighlightedSource = await File.ReadAllTextAsync( expectedHighlightedPath );
 
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
                 "obj",
                 "highlighted",
                 Path.GetDirectoryName( relativeTestPath ) ?? "",
-                Path.GetFileNameWithoutExtension( relativeTestPath ) + ".highlighted.html" );
+                Path.GetFileNameWithoutExtension( relativeTestPath ) + FileExtensions.Html );
 
             var actualHighlightedSource = await File.ReadAllTextAsync( actualHighlightedPath );
 

@@ -64,7 +64,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
 
                 var highlightedTemplatePath = Path.Combine(
                     highlightedTemplateDirectory,
-                    Path.GetFileNameWithoutExtension( testInput.TestName ) + ".highlighted.html" );
+                    Path.GetFileNameWithoutExtension( testInput.TestName ) + FileExtensions.Html );
 
                 Directory.CreateDirectory( Path.GetDirectoryName( highlightedTemplatePath ) );
 

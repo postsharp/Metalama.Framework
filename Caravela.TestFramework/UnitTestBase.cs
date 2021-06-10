@@ -104,7 +104,7 @@ namespace Caravela.TestFramework
 
             var expectedTransformedPath = Path.Combine(
                 Path.GetDirectoryName( sourceAbsolutePath )!,
-                Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".transformed.txt" );
+                Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.TransformedCode );
 
             Assert.NotNull( testResult.TransformedTargetSourceText );
 
@@ -120,7 +120,7 @@ namespace Caravela.TestFramework
                 "obj",
                 "transformed",
                 Path.GetDirectoryName( relativeTestPath ) ?? "",
-                Path.GetFileNameWithoutExtension( relativeTestPath ) + ".transformed.txt" );
+                Path.GetFileNameWithoutExtension( relativeTestPath ) + FileExtensions.TransformedCode );
 
             Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );
 
