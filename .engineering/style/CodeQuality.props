@@ -1,19 +1,7 @@
 <Project>
 
-    <Import Project=".engineering-local\Versions.props" />
-    <Import Project=".engineering\referenced\Engineering.Versions.props" />
-    <Import Project=".engineering\referenced\Engineering.Directories.props" />
-    <Import Project=".engineering-local\Packaging.props" />
-    <Import Project=".engineering-local\Repo.Build.props" />
-
     <PropertyGroup>
         <ContinuousIntegrationBuild Condition="'$(TEAMCITY_VERSION)'!=''">true</ContinuousIntegrationBuild>
-    </PropertyGroup>
-
-    <!-- C# Compiler options-->
-    <PropertyGroup>
-        <LangVersion>latest</LangVersion>
-        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <!-- Code quality and documentation -->
@@ -39,31 +27,6 @@
         <Content Include="$(MSBuildThisFileDirectory)\.engineering\referenced\stylecop.json"
                  Condition="'$(EnforceCodeStyleInBuild)'=='True'"
                  Pack="false" />
-    </ItemGroup>
-
-    <!-- Assembly metadata -->
-    <ItemGroup>
-        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-            <_Parameter1>PackageVersion</_Parameter1>
-            <_Parameter2>$(Version)</_Parameter2>
-        </AssemblyAttribute>
-    </ItemGroup>
-
-    <!-- Source Link  -->
-    <PropertyGroup>
-        <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-
-        <!-- Embed source files that are not tracked by the source control manager in the PDB -->
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
-
-        <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
-        <DebugType Condition="'$(Configuration)'=='Debug'">embedded</DebugType>
-
-    </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All" />
     </ItemGroup>
 
 </Project>

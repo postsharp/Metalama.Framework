@@ -1,1 +1,14 @@
-C:/src/Caravela/Caravela-28588-engineering/.engineering/linked/root/Directory.Build.props
+<Project>
+
+    <Import Project=".engineering-local\Versions.props" />
+    <Import Project=".engineering\build\Engineering.Versions.props" />
+    <Import Project=".engineering\build\Engineering.Directories.props" />
+    <Import Project=".engineering-local\Packaging.props" />
+    <Import Project=".engineering-local\Repo.Build.props" />
+
+    <Import Project=".engineering\build\CompilerOptions.props" />
+    <Import Project=".engineering\style\CodeQuality.props" />
+    <Import Project=".engineering\build\AssemblyMetadata.props" />
+    <Import Project=".engineering\build\SourceLink.props" />
+
+</Project>

@@ -1,1 +1,5 @@
-C:/src/Caravela/Caravela-28588-engineering/.engineering/linked/root/Directory.Build.targets
+<Project>
+
+    <Import Project=".engineering\build\AssemblyMetadata.targets" />
+
+</Project>
