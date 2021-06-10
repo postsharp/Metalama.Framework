@@ -163,8 +163,6 @@ class ReferencingClass
 
             List<string> tempFiles = new();
 
-            PortableExecutableReference indirectlyReferenced;
-
             try
             {
                 using var isolatedTest = this.WithIsolatedTest();
@@ -211,7 +209,7 @@ class ReferencingClass
                     return referenceToSelf;
                 }
 
-                indirectlyReferenced = CompileProject( indirectlyReferencedCode );
+                var indirectlyReferenced = CompileProject( indirectlyReferencedCode );
                 var directlyReferenced = CompileProject( directlyReferencedCode, indirectlyReferenced );
                 _ = CompileProject( referencingCode, directlyReferenced );
             }

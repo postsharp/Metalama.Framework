@@ -19,11 +19,11 @@
     <ItemGroup>
       <None Update="Caravela.Framework.targets">
         <Pack>true</Pack>
-        <PackagePath>build</PackagePath>
+        <PackagePath>buildTransitive</PackagePath>
       </None>
       <None Update="Caravela.CompilerVisibleProperties.targets">
         <Pack>true</Pack>
-        <PackagePath>build</PackagePath>
+        <PackagePath>buildTransitive</PackagePath>
       </None>
     </ItemGroup>
     

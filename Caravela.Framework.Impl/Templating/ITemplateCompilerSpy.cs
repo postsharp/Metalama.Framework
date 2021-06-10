@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.Templating
     /// An interface that can be injected into the service provider to get callbacks from the <see cref="TemplateCompiler"/>
     /// class. For testing only.
     /// </summary>
-    public interface ITemplateCompilerSpy
+    public interface ITemplateCompilerSpy : IService
     {
         /// <summary>
         /// Method invoked by the <see cref="TemplateCompiler.TryAnnotate"/> method.

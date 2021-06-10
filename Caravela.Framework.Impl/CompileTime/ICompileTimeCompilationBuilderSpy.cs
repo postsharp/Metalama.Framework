@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// An interface that can be injected into the service provider to get callbacks from the <see cref="CompileTimeCompilationBuilder"/>
     /// class. For testing only.
     /// </summary>
-    public interface ICompileTimeCompilationBuilderSpy
+    public interface ICompileTimeCompilationBuilderSpy : IService
     {
         /// <summary>
         /// Method called by <see cref="CompileTimeCompilationBuilder.TryCreateCompileTimeCompilation"/>.

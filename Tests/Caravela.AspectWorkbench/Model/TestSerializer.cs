@@ -25,7 +25,7 @@ namespace Caravela.AspectWorkbench.Model
                 expectedOutput = File.ReadAllText( expectedOutputFilePath );
             }
 
-            return new TemplateTest { Input = new TestInput( testName, testSource ), ExpectedOutput = expectedOutput };
+            return new TemplateTest { Input = TestInput.FromSource( testName, testSource ), ExpectedOutput = expectedOutput };
         }
 
         public static async Task SaveToFileAsync( TemplateTest test, string filePath )
@@ -35,7 +35,7 @@ namespace Caravela.AspectWorkbench.Model
                 throw new InvalidOperationException( "Test input not set." );
             }
 
-            await File.WriteAllTextAsync( filePath, test.Input.TestSource );
+            await File.WriteAllTextAsync( filePath, test.Input.SourceCode );
 
             var expectedOutputFilePath = GetExpectedOutputFilePath( filePath );
             await File.WriteAllTextAsync( expectedOutputFilePath, test.ExpectedOutput );

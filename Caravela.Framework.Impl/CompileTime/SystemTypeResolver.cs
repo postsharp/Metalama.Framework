@@ -12,8 +12,17 @@ namespace Caravela.Framework.Impl.CompileTime
     /// <summary>
     /// An implementation of <see cref="ICompileTimeTypeResolver"/> that cannot be used for user-code attributes.
     /// </summary>
-    internal class SystemTypeResolver : ICompileTimeTypeResolver
+    internal class SystemTypeResolver : ICompileTimeTypeResolver, IService
     {
+        private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
+
+        public SystemTypeResolver( IServiceProvider serviceProvider )
+        {
+            this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
+        }
+
+        protected virtual bool IsStandardAssemblyName( string assemblyName ) => this._referenceAssemblyLocator.IsStandardAssemblyName( assemblyName );
+
         public Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock, CancellationToken cancellationToken )
         {
             Type? ReturnNullOrMock()
@@ -31,6 +40,12 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( typeSymbol.ContainingAssembly != null )
             {
                 var assemblyName = typeSymbol.ContainingAssembly.Name;
+
+                // We load only system assemblies, not user assemblies loaded in the AppDomain.
+                if ( !this.IsStandardAssemblyName( assemblyName ) )
+                {
+                    return null;
+                }
 
                 // We don't allow loading new assemblies to the AppDomain.
                 if ( AppDomain.CurrentDomain.GetAssemblies().All( a => a.GetName().Name != assemblyName ) )

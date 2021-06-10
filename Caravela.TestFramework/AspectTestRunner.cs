@@ -7,26 +7,27 @@ using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Caravela.TestFramework
 {
     /// <summary>
     /// Executes aspect integration tests by running the full aspect pipeline on the input source file.
     /// </summary>
-    public class AspectTestRunner : TestRunnerBase
+    public class AspectTestRunner : BaseTestRunner
     {
-        public AspectTestRunner( IServiceProvider serviceProvider, string? projectDirectory = null ) : base( serviceProvider, projectDirectory ) { }
+        public AspectTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences )
+            : base( serviceProvider, projectDirectory, metadataReferences ) { }
 
         /// <summary>
         /// Runs the aspect test with the given name and source.
         /// </summary>
         /// <returns>The result of the test execution.</returns>
-        public override async Task<TestResult> RunTestAsync( TestInput testInput )
+        public override TestResult RunTest( TestInput testInput )
         {
-            var testResult = await base.RunTestAsync( testInput );
+            var testResult = base.RunTest( testInput );
 
             using var buildOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
@@ -36,12 +37,12 @@ namespace Caravela.TestFramework
             pipeline.ServiceProvider.AddService<ICompileTimeCompilationBuilderSpy>( spy );
             pipeline.ServiceProvider.AddService<ITemplateCompilerSpy>( spy );
 
-            if ( pipeline.TryExecute( testResult, testResult.InitialCompilation, CancellationToken.None, out var resultCompilation, out _ ) )
+            if ( pipeline.TryExecute( testResult, testResult.InitialCompilation!, CancellationToken.None, out var resultCompilation, out _ ) )
             {
                 testResult.ResultCompilation = resultCompilation;
-                var syntaxRoot = await resultCompilation.SyntaxTrees.Single().GetRootAsync();
+                var syntaxRoot = resultCompilation.SyntaxTrees.Single().GetRoot();
 
-                if ( testInput.Options.IncludeFinalDiagnostics )
+                if ( testInput.Options.IncludeFinalDiagnostics.GetValueOrDefault() )
                 {
                     testResult.Report( resultCompilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
                 }

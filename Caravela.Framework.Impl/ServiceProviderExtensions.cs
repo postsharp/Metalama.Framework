@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl
     public static class ServiceProviderExtensions
     {
         public static T GetService<T>( this IServiceProvider serviceProvider )
-            where T : class
+            where T : class, IService
         {
             var service = (T?) serviceProvider.GetService( typeof(T) );
 

@@ -72,6 +72,40 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
+            public override SyntaxNode? VisitEnumDeclaration( EnumDeclarationSyntax node )
+            {
+                this._cancellationToken.ThrowIfCancellationRequested();
+
+                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+                var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
+
+                if ( scope == TemplatingScope.RunTimeOnly )
+                {
+                    return null;
+                }
+                else
+                {
+                    return base.VisitEnumDeclaration( node );
+                }
+            }
+
+            public override SyntaxNode? VisitDelegateDeclaration( DelegateDeclarationSyntax node )
+            {
+                this._cancellationToken.ThrowIfCancellationRequested();
+
+                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+                var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
+
+                if ( scope == TemplatingScope.RunTimeOnly )
+                {
+                    return null;
+                }
+                else
+                {
+                    return base.VisitDelegateDeclaration( node );
+                }
+            }
+
             private T? VisitTypeDeclaration<T>( T node )
                 where T : TypeDeclarationSyntax
             {

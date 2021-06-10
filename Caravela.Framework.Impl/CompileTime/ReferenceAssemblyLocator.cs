@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// Provides the location to the reference assemblies that are needed to create the compile-time projects.
     /// This is achieved by creating an MSBuild project and restoring it.
     /// </summary>
-    public class ReferenceAssemblyLocator
+    public class ReferenceAssemblyLocator : IService
     {
         private const string _frameworkAssemblyName = "Caravela.Framework";
         private readonly string _cacheDirectory;
@@ -45,6 +45,14 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Gets the name (without path and extension) of system assemblies (.NET Standard and Roslyn). 
         /// </summary>
         public ImmutableHashSet<string> SystemAssemblyNames { get; }
+
+        public bool IsSystemAssemblyName( string assemblyName )
+            => string.Equals( assemblyName, "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase )
+               || this.SystemAssemblyNames.Contains( assemblyName );
+
+        public bool IsStandardAssemblyName( string assemblyName )
+            => string.Equals( assemblyName, "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase )
+               || this.StandardAssemblyNames.Contains( assemblyName );
 
         /// <summary>
         /// Gets the full path of all standard assemblies, including Caravela, Roslyn and .NET standard.
