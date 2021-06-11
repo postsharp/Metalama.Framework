@@ -2,12 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using System;
 
 namespace Caravela.Framework.Eligibility
 {
     /// <summary>
     /// (Not implemented.)
     /// </summary>
+    [Obsolete( "Not implemented." )]
     public interface IEligible<in T>
         where T : class, IDeclaration
     {

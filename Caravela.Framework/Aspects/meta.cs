@@ -164,8 +164,8 @@ namespace Caravela.Framework.Aspects
         public static IDiagnosticSink Diagnostics => CurrentContext.Diagnostics;
 
         /// <summary>
-        /// Gets the dictionary of tags that were passed by the <see cref="IAspect{T}.BuildAspect"/> method using 
-        /// <see cref="AdviceOptions.Tags"/>.
+        /// Gets the dictionary of tags that were passed to the <see cref="IAdviceFactory"/> method by the <see cref="IAspect{T}.BuildAspect"/> method using the 
+        /// <see cref="AdviceOptions.Tags"/> option.
         /// </summary>
         public static IReadOnlyDictionary<string, object?> Tags => CurrentContext.Tags;
 
