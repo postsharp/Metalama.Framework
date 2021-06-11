@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
     {
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.AdviceFactory.IntroduceInterface(builder.TargetDeclaration, builder.TargetDeclaration.Compilation.TypeFactory.GetTypeByReflectionName("System.ComponentModel.INotifyPropertyChanged"));
+            builder.AdviceFactory.IntroduceInterface(builder.TargetDeclaration, typeof(INotifyPropertyChanged));
 
             foreach(var property in builder.TargetDeclaration.Properties)
             {
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
         [Introduce]
         protected virtual void OnPropertyChanged( string name )
         {
-            meta.RunTime(meta.This.PropertyChanged?.Invoke(meta.This, new PropertyChangedEventArgs(meta.Parameters[0].Name)));
+            meta.This.PropertyChanged?.Invoke(meta.This, new PropertyChangedEventArgs(meta.Parameters[0].Name));
         }
 
         [Template]

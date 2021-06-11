@@ -77,7 +77,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType)>
             InterfaceIsAlreadyIntroducedByTheAspect = new(
-                "CR0507",
+                "CR0508",
                 "Cannot introduce an interface was already introduced by the aspect.",
                 "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because it has already introduced an implementation of this interface. " +
                 "If interface introductions with shared .",

@@ -32,6 +32,9 @@ namespace Caravela.Framework.Impl.Transformations
 
                 case IEvent @event:
                     return GetMemberSyntaxModifierList( @event );
+
+                case IParameter parameter:
+                    return GetParameterSyntaxModifierList( parameter );
             }
 
             throw new AssertionFailedException();
@@ -82,6 +85,28 @@ namespace Caravela.Framework.Impl.Transformations
             if ( member.IsOverride )
             {
                 tokens.Add( Token( SyntaxKind.OverrideKeyword ) );
+            }
+
+            return TokenList( tokens );
+        }
+
+        private static SyntaxTokenList GetParameterSyntaxModifierList(IParameter parameter )
+        {
+            var tokens = new List<SyntaxToken>();
+
+            if (parameter.RefKind == Code.RefKind.In)
+            {
+                tokens.Add( Token( SyntaxKind.InKeyword ) );
+            }
+
+            if ( parameter.RefKind == Code.RefKind.Ref )
+            {
+                tokens.Add( Token( SyntaxKind.RefKeyword ) );
+            }
+
+            if ( parameter.RefKind == Code.RefKind.Out )
+            {
+                tokens.Add( Token( SyntaxKind.OutKeyword ) );
             }
 
             return TokenList( tokens );
@@ -188,8 +213,8 @@ namespace Caravela.Framework.Impl.Transformations
                     method.Parameters.Select(
                         p => Parameter(
                             List<AttributeListSyntax>(),
-                            TokenList(), // TODO: modifiers
-                            ParseTypeName( p.ParameterType.ToDisplayString() ),
+                            GetSyntaxModifierList(p),
+                            (TypeSyntax)LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(p.ParameterType.GetSymbol()),
                             Identifier( p.Name! ),
                             null ) ) ) );
         }

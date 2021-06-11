@@ -1,8 +1,6 @@
-
 [TestOutput]
 [NotifyPropertyChanged]
-class Car
-: global::System.ComponentModel.INotifyPropertyChanged
+class Car : global::System.ComponentModel.INotifyPropertyChanged
 {
     public string? Make
     {
@@ -26,7 +24,6 @@ class Car
     }
 
     private string? __Make__BackingField;
-
     public double Power
     {
         get
@@ -49,10 +46,9 @@ class Car
     }
 
     private double __Power__BackingField;
-
-    protected void OnPropertyChanged(string name)
+    protected void OnPropertyChanged(global::System.String name)
     {
-        this.PropertyChanged?.Invoke(new global::System.ComponentModel.PropertyChangedEventArgs("name"));
+        this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs("name"));
     }
 
     public event global::System.ComponentModel.PropertyChangedEventHandler PropertyChanged;

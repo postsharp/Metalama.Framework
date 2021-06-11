@@ -2,7 +2,7 @@
 [Retry]
 class Program
 {
-    private void IntroducedMethod1(string name)
+    private void IntroducedMethod1(global::System.String name)
     {
         this.IntroducedProperty = name;
     }

@@ -1,8 +1,6 @@
-
 [TestOutput]
 [NotifyPropertyChanged]
-internal class TargetClass
-: global::System.ComponentModel.INotifyPropertyChanged
+internal class TargetClass : global::System.ComponentModel.INotifyPropertyChanged
 {
     public int Property1
     {
@@ -23,7 +21,6 @@ internal class TargetClass
     }
 
     private int __Property1__BackingField;
-
     public int Property2
     {
         get
@@ -43,25 +40,10 @@ internal class TargetClass
     }
 
     private int __Property2__BackingField;
-
-    public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
-
     protected void OnPropertyChanged(global::System.String name)
     {
-        this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
+        this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs("name"));
     }
 
-    event global::System.ComponentModel.PropertyChangedEventHandler? global::System.ComponentModel.INotifyPropertyChanged.PropertyChanged
-    {
-        add
-        {
-            this.PropertyChanged += value;
-        }
-
-        remove
-        {
-            this.PropertyChanged -= value;
-        }
-    }
+    public event global::System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 }
-
