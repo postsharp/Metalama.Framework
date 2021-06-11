@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Accessibility = Caravela.Framework.Code.Accessibility;
+using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.Transformations
 {
@@ -90,21 +91,21 @@ namespace Caravela.Framework.Impl.Transformations
             return TokenList( tokens );
         }
 
-        private static SyntaxTokenList GetParameterSyntaxModifierList(IParameter parameter )
+        private static SyntaxTokenList GetParameterSyntaxModifierList( IParameter parameter )
         {
             var tokens = new List<SyntaxToken>();
 
-            if (parameter.RefKind == Code.RefKind.In)
+            if ( parameter.RefKind == RefKind.In )
             {
                 tokens.Add( Token( SyntaxKind.InKeyword ) );
             }
 
-            if ( parameter.RefKind == Code.RefKind.Ref )
+            if ( parameter.RefKind == RefKind.Ref )
             {
                 tokens.Add( Token( SyntaxKind.RefKeyword ) );
             }
 
-            if ( parameter.RefKind == Code.RefKind.Out )
+            if ( parameter.RefKind == RefKind.Out )
             {
                 tokens.Add( Token( SyntaxKind.OutKeyword ) );
             }
@@ -118,12 +119,13 @@ namespace Caravela.Framework.Impl.Transformations
             switch ( member )
             {
                 case IMethod method:
-                    if (method.ExplicitInterfaceImplementations.Count > 0)
+                    if ( method.ExplicitInterfaceImplementations.Count > 0 )
                     {
                         return;
                     }
 
                     break;
+
                 case IProperty property:
                     if ( property.ExplicitInterfaceImplementations.Count > 0 )
                     {
@@ -131,6 +133,7 @@ namespace Caravela.Framework.Impl.Transformations
                     }
 
                     break;
+
                 case IEvent @event:
                     if ( @event.ExplicitInterfaceImplementations.Count > 0 )
                     {
@@ -213,8 +216,8 @@ namespace Caravela.Framework.Impl.Transformations
                     method.Parameters.Select(
                         p => Parameter(
                             List<AttributeListSyntax>(),
-                            GetSyntaxModifierList(p),
-                            (TypeSyntax)LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(p.ParameterType.GetSymbol()),
+                            GetSyntaxModifierList( p ),
+                            (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( p.ParameterType.GetSymbol() ),
                             Identifier( p.Name! ),
                             null ) ) ) );
         }
@@ -225,7 +228,7 @@ namespace Caravela.Framework.Impl.Transformations
             return List<TypeParameterConstraintClauseSyntax>();
         }
 
-        public static bool IsEventField(this IEvent @event)
+        public static bool IsEventField( this IEvent @event )
         {
             // TODO: 
             var eventSymbol = @event.GetSymbol();

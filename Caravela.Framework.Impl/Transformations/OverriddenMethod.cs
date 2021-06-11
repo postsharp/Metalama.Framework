@@ -21,12 +21,12 @@ namespace Caravela.Framework.Impl.Transformations
     /// </summary>
     internal class OverriddenMethod : OverriddenMember
     {
-        public new IMethod OverriddenDeclaration => (IMethod)base.OverriddenDeclaration;
+        public new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 
         public IMethod TemplateMethod { get; }
 
         public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, IMethod templateMethod, AspectLinkerOptions? linkerOptions = null )
-            : base(advice, overriddenDeclaration, linkerOptions)
+            : base( advice, overriddenDeclaration, linkerOptions )
         {
             Invariant.Assert( templateMethod != null );
 

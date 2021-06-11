@@ -89,12 +89,12 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                             syntaxFactory,
                             this.PipelineProperties.ServiceProvider );
 
-                        var introducedMembers = memberIntroduction.GetIntroducedMembers(introductionContext).Select(m => m.Syntax).ToArray();
+                        var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray();
 
-                        classDeclaration = classDeclaration.AddMembers(introducedMembers);
+                        classDeclaration = classDeclaration.AddMembers( introducedMembers );
                     }
 
-                    if ( transformation is IIntroducedInterface interfaceImplementation)
+                    if ( transformation is IIntroducedInterface interfaceImplementation )
                     {
                         classDeclaration = classDeclaration.AddBaseListTypes( interfaceImplementation.GetIntroducedInterfaceImplementations().ToArray() );
                     }

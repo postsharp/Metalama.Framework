@@ -22,7 +22,8 @@ namespace Caravela.Framework.Impl.Transformations
 {
     internal class IntroducedInterfaceImplementation : IIntroducedInterfaceImplementation
     {
-        private readonly IReadOnlyDictionary<IMember, (bool IsAspectInterfaceMember, IMember TargetMember, IMember ExplicitImplementationMember)> _interfaceMemberMap;
+        private readonly IReadOnlyDictionary<IMember, (bool IsAspectInterfaceMember, IMember TargetMember, IMember ExplicitImplementationMember)>
+            _interfaceMemberMap;
 
         public IDeclaration ContainingDeclaration => this.TargetType;
 
@@ -43,8 +44,8 @@ namespace Caravela.Framework.Impl.Transformations
             IntroduceInterfaceAdvice introduceInterfaceAdvice,
             INamedType targetType,
             INamedType interfaceType,
-            IReadOnlyDictionary<IMember, (bool IsAspectInterfaceMember, IMember TargetMember, IMember ExplicitImplementationMember)> interfaceMemberMap ,
-            AspectLinkerOptions? linkerOptions)
+            IReadOnlyDictionary<IMember, (bool IsAspectInterfaceMember, IMember TargetMember, IMember ExplicitImplementationMember)> interfaceMemberMap,
+            AspectLinkerOptions? linkerOptions )
         {
             this.Advice = introduceInterfaceAdvice;
             this.TargetType = targetType;
@@ -71,7 +72,7 @@ namespace Caravela.Framework.Impl.Transformations
                     throw new AssertionFailedException();
                 }
 
-                introducedMembers.Add( 
+                introducedMembers.Add(
                     this.CreateProxyMethod(
                         context,
                         interfaceMethod,
@@ -110,7 +111,7 @@ namespace Caravela.Framework.Impl.Transformations
                     continue;
                 }
 
-                if ( implementationInfo.TargetMember is not IEvent targetEvent)
+                if ( implementationInfo.TargetMember is not IEvent targetEvent )
                 {
                     throw new AssertionFailedException();
                 }
@@ -127,12 +128,17 @@ namespace Caravela.Framework.Impl.Transformations
             return introducedMembers;
         }
 
-        private IntroducedMember CreateProxyMethod( in MemberIntroductionContext context, IMethod interfaceMethod, bool isAspectInterfaceMember, IMethod targetMethod, IMethod implementationMethodBuilder)
+        private IntroducedMember CreateProxyMethod(
+            in MemberIntroductionContext context,
+            IMethod interfaceMethod,
+            bool isAspectInterfaceMember,
+            IMethod targetMethod,
+            IMethod implementationMethodBuilder )
         {
             var methodBody =
                 isAspectInterfaceMember
-                ? CreateMethodBodyFromAspectInterfaceMember( context, implementationMethodBuilder, targetMethod )
-                : CreateMethodBodyFromTargetMember( context, targetMethod );
+                    ? CreateMethodBodyFromAspectInterfaceMember( context, implementationMethodBuilder, targetMethod )
+                    : CreateMethodBodyFromTargetMember( context, targetMethod );
 
             return
                 new IntroducedMember(
@@ -153,7 +159,10 @@ namespace Caravela.Framework.Impl.Transformations
                     this.LinkerOptions,
                     implementationMethodBuilder );
 
-            BlockSyntax CreateMethodBodyFromAspectInterfaceMember( MemberIntroductionContext context, IMethod explicitImplementationMethod, IMethod aspectInterfaceMethod )
+            BlockSyntax CreateMethodBodyFromAspectInterfaceMember(
+                MemberIntroductionContext context,
+                IMethod explicitImplementationMethod,
+                IMethod aspectInterfaceMethod )
             {
                 using ( context.DiagnosticSink.WithDefaultScope( explicitImplementationMethod ) )
                 {
@@ -194,30 +203,35 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 return
                     Block(
-                        targetMethod.ReturnType != targetMethod.Compilation.TypeFactory.GetTypeByReflectionType( typeof( void ) )
-                        ? ReturnStatement( GetInvocationExpression() )
-                        : ExpressionStatement( GetInvocationExpression() ) );
+                        targetMethod.ReturnType != targetMethod.Compilation.TypeFactory.GetTypeByReflectionType( typeof(void) )
+                            ? ReturnStatement( GetInvocationExpression() )
+                            : ExpressionStatement( GetInvocationExpression() ) );
 
                 ExpressionSyntax GetInvocationExpression()
                 {
                     return
                         InvocationExpression(
-                            GetInvocationTargetExpression(),
-                            ArgumentList( SeparatedList( targetMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) )
-                        .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkingOrder.Default ) );
+                                GetInvocationTargetExpression(),
+                                ArgumentList( SeparatedList( targetMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) )
+                            .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkingOrder.Default ) );
                 }
 
                 ExpressionSyntax GetInvocationTargetExpression()
                 {
                     return
                         targetMethod.IsStatic
-                        ? IdentifierName( targetMethod.Name )
-                        : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetMethod.Name ) );
+                            ? IdentifierName( targetMethod.Name )
+                            : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetMethod.Name ) );
                 }
             }
         }
 
-        private IntroducedMember CreateProxyProperty( in MemberIntroductionContext context, IProperty interfaceProperty, bool isAspectInterfaceMember, IProperty targetProperty, IProperty explicitImplementationProperty )
+        private IntroducedMember CreateProxyProperty(
+            in MemberIntroductionContext context,
+            IProperty interfaceProperty,
+            bool isAspectInterfaceMember,
+            IProperty targetProperty,
+            IProperty explicitImplementationProperty )
         {
             var accessors = GetAccessors( context );
 
@@ -241,33 +255,44 @@ namespace Caravela.Framework.Impl.Transformations
             IReadOnlyList<AccessorDeclarationSyntax> GetAccessors( MemberIntroductionContext context )
             {
                 return new AccessorDeclarationSyntax?[]
-                {
-                    targetProperty.Getter != null
-                    ? AccessorDeclaration(
-                        SyntaxKind.GetAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        targetProperty.Getter.GetSyntaxModifierList(),
-                        isAspectInterfaceMember 
-                            ? CreateAccessorBodyFromAspectInterfaceMember(context, targetProperty.Getter, explicitImplementationProperty.Getter.AssertNotNull()) 
-                            : CreateGetterBodyFromTargetMember(),
-                        null )
-                    : null,
-                    targetProperty.Setter != null
-                    ? AccessorDeclaration(
-                        targetProperty.Writeability != Writeability.InitOnly ? SyntaxKind.SetAccessorDeclaration : SyntaxKind.InitAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        targetProperty.Setter.GetSyntaxModifierList(),
-                        isAspectInterfaceMember
-                            ? CreateAccessorBodyFromAspectInterfaceMember(context, targetProperty.Setter, explicitImplementationProperty.Setter.AssertNotNull()) 
-                            : CreateSetterBodyFromTargetMember(),
-                        null )
-                    : null,
-                }.Where( a => a != null ).Cast<AccessorDeclarationSyntax>().ToArray();
+                    {
+                        targetProperty.Getter != null
+                            ? AccessorDeclaration(
+                                SyntaxKind.GetAccessorDeclaration,
+                                List<AttributeListSyntax>(),
+                                targetProperty.Getter.GetSyntaxModifierList(),
+                                isAspectInterfaceMember
+                                    ? CreateAccessorBodyFromAspectInterfaceMember(
+                                        context,
+                                        targetProperty.Getter,
+                                        explicitImplementationProperty.Getter.AssertNotNull() )
+                                    : CreateGetterBodyFromTargetMember(),
+                                null )
+                            : null,
+                        targetProperty.Setter != null
+                            ? AccessorDeclaration(
+                                targetProperty.Writeability != Writeability.InitOnly ? SyntaxKind.SetAccessorDeclaration : SyntaxKind.InitAccessorDeclaration,
+                                List<AttributeListSyntax>(),
+                                targetProperty.Setter.GetSyntaxModifierList(),
+                                isAspectInterfaceMember
+                                    ? CreateAccessorBodyFromAspectInterfaceMember(
+                                        context,
+                                        targetProperty.Setter,
+                                        explicitImplementationProperty.Setter.AssertNotNull() )
+                                    : CreateSetterBodyFromTargetMember(),
+                                null )
+                            : null
+                    }.Where( a => a != null )
+                    .Cast<AccessorDeclarationSyntax>()
+                    .ToArray();
             }
 
-            BlockSyntax? CreateAccessorBodyFromAspectInterfaceMember( MemberIntroductionContext context, IMethod explicitImplementationAccessor, IMethod aspectInterfaceAccessor )
+            BlockSyntax? CreateAccessorBodyFromAspectInterfaceMember(
+                MemberIntroductionContext context,
+                IMethod explicitImplementationAccessor,
+                IMethod aspectInterfaceAccessor )
             {
-                if ( targetProperty.IsAutoPropertyOrField)
+                if ( targetProperty.IsAutoPropertyOrField )
                 {
                     // Auto property -> empty body.
                     return null;
@@ -312,9 +337,7 @@ namespace Caravela.Framework.Impl.Transformations
             BlockSyntax CreateGetterBodyFromTargetMember()
             {
                 return
-                    Block(
-                        ReturnStatement(
-                            CreateAccessTargetExpression() ) );
+                    Block( ReturnStatement( CreateAccessTargetExpression() ) );
             }
 
             BlockSyntax CreateSetterBodyFromTargetMember()
@@ -334,7 +357,12 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-        private IntroducedMember CreateProxyEvent( in MemberIntroductionContext context, IEvent interfaceEvent, bool isAspectInterfaceMember, IEvent targetEvent, IEvent explicitImplementationEvent )
+        private IntroducedMember CreateProxyEvent(
+            in MemberIntroductionContext context,
+            IEvent interfaceEvent,
+            bool isAspectInterfaceMember,
+            IEvent targetEvent,
+            IEvent explicitImplementationEvent )
         {
             var accessors = GetAccessors( context );
 
@@ -346,11 +374,13 @@ namespace Caravela.Framework.Impl.Transformations
                         this,
                         EventFieldDeclaration(
                             List<AttributeListSyntax>(),
-                            targetEvent.GetSyntaxModifierList(),                            
+                            targetEvent.GetSyntaxModifierList(),
                             VariableDeclaration(
                                 targetEvent.GetSyntaxReturnType(),
                                 SingletonSeparatedList(
-                                    VariableDeclarator( Identifier( context.IntroductionNameProvider.GetInterfaceProxyName( this.Advice.AspectLayerId, interfaceEvent ) ) ) ) ) ),
+                                    VariableDeclarator(
+                                        Identifier(
+                                            context.IntroductionNameProvider.GetInterfaceProxyName( this.Advice.AspectLayerId, interfaceEvent ) ) ) ) ) ),
                         this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.InterfaceImplementation,
                         this.LinkerOptions,
@@ -377,31 +407,42 @@ namespace Caravela.Framework.Impl.Transformations
             IReadOnlyList<AccessorDeclarationSyntax> GetAccessors( MemberIntroductionContext context )
             {
                 return new AccessorDeclarationSyntax?[]
-                {
-                    targetEvent.Adder != null
-                    ? AccessorDeclaration(
-                        SyntaxKind.AddAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        targetEvent.Adder.GetSyntaxModifierList(),
-                        isAspectInterfaceMember
-                            ? CreateAccessorBodyFromAspectInterfaceMember(context, targetEvent.Adder, explicitImplementationEvent.Adder.AssertNotNull())
-                            : CreateBodyFromTargetMember( SyntaxKind.AddAssignmentExpression ),
-                        null )
-                    : null,
-                    targetEvent.Remover != null
-                    ? AccessorDeclaration(
-                        SyntaxKind.RemoveAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        targetEvent.Remover.GetSyntaxModifierList(),
-                        isAspectInterfaceMember
-                            ? CreateAccessorBodyFromAspectInterfaceMember(context, targetEvent.Remover, explicitImplementationEvent.Remover.AssertNotNull())
-                            : CreateBodyFromTargetMember( SyntaxKind.SubtractAssignmentExpression ),
-                        null )
-                    : null,
-                }.Where( a => a != null ).Cast<AccessorDeclarationSyntax>().ToArray();
+                    {
+                        targetEvent.Adder != null
+                            ? AccessorDeclaration(
+                                SyntaxKind.AddAccessorDeclaration,
+                                List<AttributeListSyntax>(),
+                                targetEvent.Adder.GetSyntaxModifierList(),
+                                isAspectInterfaceMember
+                                    ? CreateAccessorBodyFromAspectInterfaceMember(
+                                        context,
+                                        targetEvent.Adder,
+                                        explicitImplementationEvent.Adder.AssertNotNull() )
+                                    : CreateBodyFromTargetMember( SyntaxKind.AddAssignmentExpression ),
+                                null )
+                            : null,
+                        targetEvent.Remover != null
+                            ? AccessorDeclaration(
+                                SyntaxKind.RemoveAccessorDeclaration,
+                                List<AttributeListSyntax>(),
+                                targetEvent.Remover.GetSyntaxModifierList(),
+                                isAspectInterfaceMember
+                                    ? CreateAccessorBodyFromAspectInterfaceMember(
+                                        context,
+                                        targetEvent.Remover,
+                                        explicitImplementationEvent.Remover.AssertNotNull() )
+                                    : CreateBodyFromTargetMember( SyntaxKind.SubtractAssignmentExpression ),
+                                null )
+                            : null
+                    }.Where( a => a != null )
+                    .Cast<AccessorDeclarationSyntax>()
+                    .ToArray();
             }
 
-            BlockSyntax? CreateAccessorBodyFromAspectInterfaceMember( MemberIntroductionContext context, IMethod explicitImplementationAccessor, IMethod aspectInterfaceAccessor )
+            BlockSyntax? CreateAccessorBodyFromAspectInterfaceMember(
+                MemberIntroductionContext context,
+                IMethod explicitImplementationAccessor,
+                IMethod aspectInterfaceAccessor )
             {
                 using ( context.DiagnosticSink.WithDefaultScope( explicitImplementationEvent ) )
                 {

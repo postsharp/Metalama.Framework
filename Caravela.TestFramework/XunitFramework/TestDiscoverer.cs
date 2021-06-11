@@ -47,7 +47,8 @@ namespace Caravela.TestFramework.XunitFramework
 
             if ( projectDirectoryAttribute == null )
             {
-                throw new InvalidOperationException( $"The assembly '{this._assembly.AssemblyPath}' must have a single AssemblyMetadataAttribute with Key = \"ProjectDirectory\"." );
+                throw new InvalidOperationException(
+                    $"The assembly '{this._assembly.AssemblyPath}' must have a single AssemblyMetadataAttribute with Key = \"ProjectDirectory\"." );
             }
 
             var value = (string?) projectDirectoryAttribute.GetConstructorArguments().ElementAt( 1 );
@@ -69,8 +70,12 @@ namespace Caravela.TestFramework.XunitFramework
 
             return testCases;
         }
-        
-        private void Discover( Action<TestCase> onTestCaseDiscovered, string? subDirectory, bool isXUnitFrameworkDiscovery, ImmutableHashSet<string> excludedSubdirectories )
+
+        private void Discover(
+            Action<TestCase> onTestCaseDiscovered,
+            string? subDirectory,
+            bool isXUnitFrameworkDiscovery,
+            ImmutableHashSet<string> excludedSubdirectories )
         {
             var baseDirectory = this.FindProjectDirectory();
             TestDirectoryOptionsReader reader = new( baseDirectory );
@@ -81,7 +86,7 @@ namespace Caravela.TestFramework.XunitFramework
                 var options = reader.GetDirectoryOptions( directory );
 
                 // If the directory is excluded, don't continue.
-                if ( options.Exclude.GetValueOrDefault() || 
+                if ( options.Exclude.GetValueOrDefault() ||
                      _excludedDirectoryNames.Contains( Path.GetFileName( directory ) ) )
                 {
                     return;
@@ -94,9 +99,9 @@ namespace Caravela.TestFramework.XunitFramework
                 {
                     if ( excludedSubdirectories.Contains( nestedDir ) )
                     {
-                        continue;    
+                        continue;
                     }
-                    
+
                     if ( !isXUnitFrameworkDiscovery )
                     {
                         // Don't include a directory that has a _Runner file.
@@ -107,14 +112,14 @@ namespace Caravela.TestFramework.XunitFramework
                             continue;
                         }
                     }
-                    
+
                     AddTestsInDirectory( nestedDir );
                 }
 
                 // If the directory is included, index the files.
                 foreach ( var testPath in Directory.EnumerateFiles( directory, "*.cs" ) )
                 {
-                    if ( Path.GetFileName( testPath ).Equals( runnerFileName, StringComparison.OrdinalIgnoreCase ) 
+                    if ( Path.GetFileName( testPath ).Equals( runnerFileName, StringComparison.OrdinalIgnoreCase )
                          || testPath.EndsWith( FileExtensions.TransformedCode, StringComparison.OrdinalIgnoreCase ) )
                     {
                         continue;

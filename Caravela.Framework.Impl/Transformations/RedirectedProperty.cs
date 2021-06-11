@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.Transformations
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
                         this.OverriddenDeclaration.GetSyntaxReturnType(),
                         null,
-                        Identifier( context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration)),
+                        Identifier( context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration ) ),
                         AccessorList( List( GetAccessors() ) ),
                         null,
                         null ),
@@ -57,32 +57,34 @@ namespace Caravela.Framework.Impl.Transformations
             IReadOnlyList<AccessorDeclarationSyntax> GetAccessors()
             {
                 return new AccessorDeclarationSyntax?[]
-                {
-                    this.OverriddenDeclaration.Getter != null
-                    ? AccessorDeclaration(
-                        SyntaxKind.GetAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        this.OverriddenDeclaration.Getter.GetSyntaxModifierList(),
-                        CreateGetterBody(),
-                        null )
-                    : null,
-                    this.OverriddenDeclaration.Setter != null
-                    ? AccessorDeclaration(
-                        this.OverriddenDeclaration.Writeability != Writeability.InitOnly ? SyntaxKind.SetAccessorDeclaration : SyntaxKind.InitAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        this.OverriddenDeclaration.Setter.GetSyntaxModifierList(),
-                        CreateSetterBody(),
-                        null )
-                    : null,
-                }.Where( a => a != null ).Cast<AccessorDeclarationSyntax>().ToArray();
+                    {
+                        this.OverriddenDeclaration.Getter != null
+                            ? AccessorDeclaration(
+                                SyntaxKind.GetAccessorDeclaration,
+                                List<AttributeListSyntax>(),
+                                this.OverriddenDeclaration.Getter.GetSyntaxModifierList(),
+                                CreateGetterBody(),
+                                null )
+                            : null,
+                        this.OverriddenDeclaration.Setter != null
+                            ? AccessorDeclaration(
+                                this.OverriddenDeclaration.Writeability != Writeability.InitOnly
+                                    ? SyntaxKind.SetAccessorDeclaration
+                                    : SyntaxKind.InitAccessorDeclaration,
+                                List<AttributeListSyntax>(),
+                                this.OverriddenDeclaration.Setter.GetSyntaxModifierList(),
+                                CreateSetterBody(),
+                                null )
+                            : null
+                    }.Where( a => a != null )
+                    .Cast<AccessorDeclarationSyntax>()
+                    .ToArray();
             }
 
             BlockSyntax CreateGetterBody()
             {
                 return
-                    Block(
-                        ReturnStatement(
-                            CreateAccessTargetExpression() ) );
+                    Block( ReturnStatement( CreateAccessTargetExpression() ) );
             }
 
             BlockSyntax CreateSetterBody()
@@ -100,9 +102,9 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 return
                     this.OverriddenDeclaration.IsStatic
-                    ? IdentifierName( this.OverriddenDeclaration.Name )
-                    : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this.OverriddenDeclaration.Name ) )
-                    .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkingOrder.Default ) );
+                        ? IdentifierName( this.OverriddenDeclaration.Name )
+                        : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this.OverriddenDeclaration.Name ) )
+                            .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkingOrder.Default ) );
             }
         }
     }

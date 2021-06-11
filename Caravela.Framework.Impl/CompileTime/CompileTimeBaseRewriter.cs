@@ -106,13 +106,15 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 return @event
                     .WithAccessorList(
-                        @event.AccessorList.AssertNotNull().WithAccessors(
-                            List(
-                                @event.AccessorList.AssertNotNull().Accessors.Select(
-                                    x => x
-                                        .WithBody( null )
-                                        .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
-                                        .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
+                        @event.AccessorList.AssertNotNull()
+                            .WithAccessors(
+                                List(
+                                    @event.AccessorList.AssertNotNull()
+                                        .Accessors.Select(
+                                            x => x
+                                                .WithBody( null )
+                                                .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
+                                                .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
                     .NormalizeWhitespace()
                     .WithLeadingTrivia( @event.GetLeadingTrivia() )
                     .WithTrailingTrivia( LineFeed, LineFeed );
@@ -134,19 +136,21 @@ namespace Caravela.Framework.Impl.CompileTime
                         eventField.Declaration.Type,
                         null,
                         declarator.Identifier,
-                        AccessorList( List( new[]
-                        {
-                                AccessorDeclaration(
-                                    SyntaxKind.AddAccessorDeclaration,
-                                    List<AttributeListSyntax>(),
-                                    TokenList(),
-                                    ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) )),
-                                AccessorDeclaration(
-                                    SyntaxKind.RemoveAccessorDeclaration,
-                                    List<AttributeListSyntax>(),
-                                    TokenList(),
-                                    ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ))
-                        } ) ) );
+                        AccessorList(
+                            List(
+                                new[]
+                                {
+                                    AccessorDeclaration(
+                                        SyntaxKind.AddAccessorDeclaration,
+                                        List<AttributeListSyntax>(),
+                                        TokenList(),
+                                        ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) ),
+                                    AccessorDeclaration(
+                                        SyntaxKind.RemoveAccessorDeclaration,
+                                        List<AttributeListSyntax>(),
+                                        TokenList(),
+                                        ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
+                                } ) ) );
             }
         }
 

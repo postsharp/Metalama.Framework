@@ -43,10 +43,10 @@ namespace Caravela.Framework.Impl.CompileTime
         public SymbolClassifier( Compilation compilation, IServiceProvider serviceProvider )
         {
             this._compilation = compilation;
-            this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeAttribute ).FullName ).AssertNotNull();
-            this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeOnlyAttribute ).FullName ).AssertNotNull();
-            this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof( TemplateAttribute ).FullName ).AssertNotNull();
-            this._interfaceMemberAttribute = this._compilation.GetTypeByMetadataName( typeof( InterfaceMemberAttribute ).FullName ).AssertNotNull();
+            this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
+            this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeOnlyAttribute).FullName ).AssertNotNull();
+            this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
+            this._interfaceMemberAttribute = this._compilation.GetTypeByMetadataName( typeof(InterfaceMemberAttribute).FullName ).AssertNotNull();
             this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
         }
 

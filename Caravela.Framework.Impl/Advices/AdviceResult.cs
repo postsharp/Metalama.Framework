@@ -73,18 +73,18 @@ namespace Caravela.Framework.Impl.Advices
                 ImmutableArray<INonObservableTransformation>.Empty );
         }
 
-        public AdviceResult WithTransformations(params ITransformation[] transformations)
+        public AdviceResult WithTransformations( params ITransformation[] transformations )
         {
-            return this.WithTransformations( (IEnumerable<ITransformation>) transformations );
+            return this.WithTransformations( (IReadOnlyList<ITransformation>) transformations );
         }
 
-        public AdviceResult WithTransformations( IEnumerable<ITransformation> transformations )
+        public AdviceResult WithTransformations( IReadOnlyList<ITransformation> transformations )
         {
             return new(
                 this.Diagnostics,
                 this.ObservableTransformations.AddRange( transformations.OfType<IObservableTransformation>() ),
                 this.NonObservableTransformations.AddRange( transformations.OfType<INonObservableTransformation>() )
-                );
+            );
         }
 
         public AdviceResult WithDiagnostics( params Diagnostic[] diagnostics )

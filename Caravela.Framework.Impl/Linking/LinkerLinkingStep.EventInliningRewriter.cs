@@ -127,11 +127,18 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         MethodKind.EventAdd => calledEvent.AddMethod!,
                         MethodKind.EventRemove => calledEvent.RemoveMethod!,
-                        _ => throw new AssertionFailedException(),
+                        _ => throw new AssertionFailedException()
                     };
 
                 // Create the top-most inlining rewriter for the called method.
-                var innerRewriter = new EventInliningRewriter( this.AnalysisRegistry, this.SemanticModel, calledEvent, calledAccessor, returnVariableName, labelId );
+                var innerRewriter = new EventInliningRewriter(
+                    this.AnalysisRegistry,
+                    this.SemanticModel,
+                    calledEvent,
+                    calledAccessor,
+                    returnVariableName,
+                    labelId );
+
                 var declaration = (AccessorDeclarationSyntax) calledAccessor.DeclaringSyntaxReferences.Single().GetSyntax();
 
                 // Run the inlined method's body through the rewriter.

@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.Transformations
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
                         this.OverriddenDeclaration.GetSyntaxReturnType(),
                         null,
-                        Identifier( context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration)),
+                        Identifier( context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration ) ),
                         AccessorList( List( GetAccessors() ) ) ),
                     this.Advice.AspectLayerId,
                     IntroducedMemberSemantic.Override,
@@ -55,23 +55,25 @@ namespace Caravela.Framework.Impl.Transformations
             IReadOnlyList<AccessorDeclarationSyntax> GetAccessors()
             {
                 return new AccessorDeclarationSyntax?[]
-                {
-                    AccessorDeclaration(
-                        SyntaxKind.AddAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        this.OverriddenDeclaration.Adder.GetSyntaxModifierList(),
-                        CreateAccessorBody(SyntaxKind.AddAssignmentExpression),
-                        null ),
-                    AccessorDeclaration(
-                        SyntaxKind.RemoveAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        this.OverriddenDeclaration.Remover.GetSyntaxModifierList(),
-                        CreateAccessorBody(SyntaxKind.SubtractAssignmentExpression),
-                        null ),
-                }.Where( a => a != null ).Cast<AccessorDeclarationSyntax>().ToArray();
+                    {
+                        AccessorDeclaration(
+                            SyntaxKind.AddAccessorDeclaration,
+                            List<AttributeListSyntax>(),
+                            this.OverriddenDeclaration.Adder.GetSyntaxModifierList(),
+                            CreateAccessorBody( SyntaxKind.AddAssignmentExpression ),
+                            null ),
+                        AccessorDeclaration(
+                            SyntaxKind.RemoveAccessorDeclaration,
+                            List<AttributeListSyntax>(),
+                            this.OverriddenDeclaration.Remover.GetSyntaxModifierList(),
+                            CreateAccessorBody( SyntaxKind.SubtractAssignmentExpression ),
+                            null )
+                    }.Where( a => a != null )
+                    .Cast<AccessorDeclarationSyntax>()
+                    .ToArray();
             }
 
-            BlockSyntax CreateAccessorBody(SyntaxKind assignmentKind)
+            BlockSyntax CreateAccessorBody( SyntaxKind assignmentKind )
             {
                 return
                     Block(
@@ -86,9 +88,9 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 return
                     this.OverriddenDeclaration.IsStatic
-                    ? IdentifierName( this.OverriddenDeclaration.Name )
-                    : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this.OverriddenDeclaration.Name ) )
-                    .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkingOrder.Default ) );
+                        ? IdentifierName( this.OverriddenDeclaration.Name )
+                        : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this.OverriddenDeclaration.Name ) )
+                            .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkingOrder.Default ) );
             }
         }
     }

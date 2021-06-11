@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -102,7 +101,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     null,
                     this.Compilation.Factory.GetTypeByReflectionType( typeof(void) ).AssertNotNull(),
                     RefKind.None );
-        }        
+        }
 
         // TODO: #(28532) Implement properly.
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
@@ -120,7 +119,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     this.GetSyntaxModifierList(),
                     this.GetSyntaxReturnType(),
                     this.ExplicitInterfaceImplementations.Count > 0
-                        ? ExplicitInterfaceSpecifier( (NameSyntax)syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                        ? ExplicitInterfaceSpecifier(
+                            (NameSyntax) syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                         : null,
                     Identifier( this.Name ),
                     this.GetSyntaxTypeParameterList(),
@@ -128,13 +128,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     this.GetSyntaxConstraintClauses(),
                     Block(
                         List(
-                            !this.ReturnParameter.ParameterType.Is( typeof( void ) )
-                            ? new[]
-                            {
-                                ReturnStatement(
-                                    DefaultExpression( (TypeSyntax) syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ) )
-                            }
-                            : new StatementSyntax[0] ) ),
+                            !this.ReturnParameter.ParameterType.Is( typeof(void) )
+                                ? new[]
+                                {
+                                    ReturnStatement(
+                                        DefaultExpression( (TypeSyntax) syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ) )
+                                }
+                                : new StatementSyntax[0] ) ),
                     null );
 
             return new[]
@@ -147,7 +147,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override MemberDeclarationSyntax InsertPositionNode
             => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
 
-        public void SetExplicitInterfaceImplementation(IMethod interfaceMethod)
+        public void SetExplicitInterfaceImplementation( IMethod interfaceMethod )
         {
             this.ExplicitInterfaceImplementations = new[] { interfaceMethod };
         }

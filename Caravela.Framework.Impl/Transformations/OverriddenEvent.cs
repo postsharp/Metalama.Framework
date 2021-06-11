@@ -9,11 +9,9 @@ using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
@@ -51,7 +49,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            if (this.TemplateEvent?.IsEventField() == true)
+            if ( this.TemplateEvent?.IsEventField() == true )
             {
                 throw new AssertionFailedException();
             }
@@ -87,18 +85,18 @@ namespace Caravela.Framework.Impl.Transformations
                             AccessorList(
                                 List(
                                     new[]
-                                        {
-                                            AccessorDeclaration(
-                                                SyntaxKind.AddAccessorDeclaration,
-                                                List<AttributeListSyntax>(),
-                                                this.OverriddenDeclaration.Adder.AssertNotNull().GetSyntaxModifierList(),
-                                                addAccessorBody.AssertNotNull() ),
-                                            AccessorDeclaration(
-                                                SyntaxKind.RemoveAccessorDeclaration,
-                                                List<AttributeListSyntax>(),
-                                                this.OverriddenDeclaration.Remover.AssertNotNull().GetSyntaxModifierList(),
-                                                removeAccessorBody.AssertNotNull() )
-                                        } ) ) ),
+                                    {
+                                        AccessorDeclaration(
+                                            SyntaxKind.AddAccessorDeclaration,
+                                            List<AttributeListSyntax>(),
+                                            this.OverriddenDeclaration.Adder.AssertNotNull().GetSyntaxModifierList(),
+                                            addAccessorBody.AssertNotNull() ),
+                                        AccessorDeclaration(
+                                            SyntaxKind.RemoveAccessorDeclaration,
+                                            List<AttributeListSyntax>(),
+                                            this.OverriddenDeclaration.Remover.AssertNotNull().GetSyntaxModifierList(),
+                                            removeAccessorBody.AssertNotNull() )
+                                    } ) ) ),
                         this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.Override,
                         this.LinkerOptions,

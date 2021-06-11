@@ -6,17 +6,15 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Sdk;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class IntroduceInterfaceAdvice : Advice
+    internal partial class IntroduceInterfaceAdvice : Advice
     {
         private readonly List<(IMethod Method, InterfaceMemberAttribute Attribute)> _aspectInterfaceMethods;
         private readonly List<(IProperty Property, InterfaceMemberAttribute Attribute)> _aspectInterfaceProperties;
@@ -31,13 +29,16 @@ namespace Caravela.Framework.Impl.Advices
             INamedType targetType,
             string? layerName ) : base( aspect, targetType, layerName, null )
         {
-            this._aspectInterfaceMethods = new();
-            this._aspectInterfaceProperties = new();
-            this._aspectInterfaceEvents = new();
-            this._introducedInterfaceTypes = new();
+            this._aspectInterfaceMethods = new List<(IMethod Method, InterfaceMemberAttribute Attribute)>();
+            this._aspectInterfaceProperties = new List<(IProperty Property, InterfaceMemberAttribute Attribute)>();
+            this._aspectInterfaceEvents = new List<(IEvent Event, InterfaceMemberAttribute Attribute)>();
+            this._introducedInterfaceTypes = new List<IntroducedInterfaceSpecification>();
 
             // Initialize with interface the target type already implements.
-            this._introducedAndImplementedInterfaces = targetType.AllImplementedInterfaces.ToDictionary( x => x, x => (false, false), targetType.Compilation.InvariantComparer );
+            this._introducedAndImplementedInterfaces = targetType.AllImplementedInterfaces.ToDictionary(
+                x => x,
+                x => (false, false),
+                targetType.Compilation.InvariantComparer );
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
@@ -46,11 +47,9 @@ namespace Caravela.Framework.Impl.Advices
             var compilation = this.TargetDeclaration.Compilation;
             var aspectType = compilation.TypeFactory.GetTypeByReflectionName( aspectTypeName );
 
-            foreach (var aspectMethod in aspectType.Methods)
+            foreach ( var aspectMethod in aspectType.Methods )
             {
-                var interfaceMemberAttribute = GetInterfaceMemberAttribute( compilation, aspectMethod );
-
-                if ( interfaceMemberAttribute != null )
+                if ( TryGetInterfaceMemberAttribute( compilation, aspectMethod, out var interfaceMemberAttribute ) )
                 {
                     this._aspectInterfaceMethods.Add( (aspectMethod, interfaceMemberAttribute) );
                 }
@@ -58,9 +57,7 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var aspectProperty in aspectType.Properties )
             {
-                var interfaceMemberAttribute = GetInterfaceMemberAttribute( compilation, aspectProperty );
-
-                if ( interfaceMemberAttribute != null )
+                if ( TryGetInterfaceMemberAttribute( compilation, aspectProperty, out var interfaceMemberAttribute ) )
                 {
                     this._aspectInterfaceProperties.Add( (aspectProperty, interfaceMemberAttribute) );
                 }
@@ -68,40 +65,55 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var aspectEvent in aspectType.Events )
             {
-                var interfaceMemberAttribute = GetInterfaceMemberAttribute( compilation, aspectEvent );
-
-                if ( interfaceMemberAttribute != null )
+                if ( TryGetInterfaceMemberAttribute( compilation, aspectEvent, out var interfaceMemberAttribute ) )
                 {
                     this._aspectInterfaceEvents.Add( (aspectEvent, interfaceMemberAttribute) );
                 }
             }
 
-            InterfaceMemberAttribute? GetInterfaceMemberAttribute(ICompilation compilation, IMember member)
+            bool TryGetInterfaceMemberAttribute(
+                ICompilation compilation,
+                IMember member,
+                [NotNullWhen( true )] out InterfaceMemberAttribute? interfaceMemberAttribute )
             {
-                var interfaceMemberAttributeType = compilation.TypeFactory.GetTypeByReflectionType( typeof( InterfaceMemberAttribute ) );
-                var interfaceMemberAttribute = member.Attributes.SingleOrDefault( a => compilation.InvariantComparer.Equals( interfaceMemberAttributeType, a.Constructor.DeclaringType ) );
+                var interfaceMemberAttributeType = compilation.TypeFactory.GetTypeByReflectionType( typeof(InterfaceMemberAttribute) );
 
-                if ( interfaceMemberAttribute != null )
+                var interfaceMemberIAttribute = member.Attributes.SingleOrDefault(
+                    a => compilation.InvariantComparer.Equals( interfaceMemberAttributeType, a.Constructor.DeclaringType ) );
+
+                if ( interfaceMemberIAttribute != null )
                 {
-                    var isExplicitValue = interfaceMemberAttribute.NamedArguments.Where( aa => aa.Key == nameof( InterfaceMemberAttribute.IsExplicit ) ).Select( aa => aa.Value ).LastOrDefault();
-                    var isExplicit = isExplicitValue.IsAssigned ? (bool)isExplicitValue.Value : false;
-                    return new InterfaceMemberAttribute() { IsExplicit = isExplicit };
+                    var isExplicitValue = interfaceMemberIAttribute.NamedArguments.Where( aa => aa.Key == nameof(InterfaceMemberAttribute.IsExplicit) )
+                        .Select( aa => aa.Value )
+                        .LastOrDefault();
+
+                    var isExplicit = isExplicitValue.IsAssigned && (bool) isExplicitValue.Value!;
+                    interfaceMemberAttribute = new InterfaceMemberAttribute() { IsExplicit = isExplicit };
+
+                    return true;
                 }
                 else
                 {
-                    return null;
+                    interfaceMemberAttribute = null;
+
+                    return false;
                 }
             }
         }
 
-        public void AddInterfaceImplementation( INamedType interfaceType, ConflictBehavior conflictBehavior, IReadOnlyList<InterfaceMemberSpecification>? explicitMemberSpecification, IDiagnosticAdder diagnosticAdder, AdviceOptions? options )
+        public void AddInterfaceImplementation(
+            INamedType interfaceType,
+            ConflictBehavior conflictBehavior,
+            IReadOnlyList<InterfaceMemberSpecification>? explicitMemberSpecification,
+            IDiagnosticAdder diagnosticAdder,
+            AdviceOptions? options )
         {
             // Adding interfaces may run into three problems:
             //      1) Target type already implements the interface.
             //      2) Target type already implements an ancestor of the interface.
             //      3) The interface or it's ancestor was implemented by another IntroduceInterface call.
 
-            if (this._introducedAndImplementedInterfaces.TryGetValue(interfaceType, out var impl) && impl.IsIntroduced == true)
+            if ( this._introducedAndImplementedInterfaces.TryGetValue( interfaceType, out var impl ) && impl.IsIntroduced == true )
             {
                 // The aspect conflicts with itself, introducing the base interface after the derived interface.
                 diagnosticAdder.Report(
@@ -110,7 +122,7 @@ namespace Caravela.Framework.Impl.Advices
                         (this.Aspect.AspectClass.DisplayName, interfaceType, this.TargetDeclaration) ) );
             }
 
-            if (this._introducedAndImplementedInterfaces.ContainsKey(interfaceType))
+            if ( this._introducedAndImplementedInterfaces.ContainsKey( interfaceType ) )
             {
                 // Conflict on the introduced interface itself.
                 switch ( conflictBehavior )
@@ -121,10 +133,13 @@ namespace Caravela.Framework.Impl.Advices
                             AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateDiagnostic(
                                 this.TargetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.DisplayName, interfaceType, this.TargetDeclaration) ) );
+
                         return;
+
                     case ConflictBehavior.Ignore:
                         // Nothing to do.
                         return;
+
                     default:
                         throw new NotImplementedException();
                 }
@@ -138,7 +153,7 @@ namespace Caravela.Framework.Impl.Advices
                 switch ( conflictBehavior )
                 {
                     case ConflictBehavior.Fail:
-                        foreach (var conflictingInterface in conflictingAncestorInterfaces)
+                        foreach ( var conflictingInterface in conflictingAncestorInterfaces )
                         {
                             diagnosticAdder.Report(
                                 AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateDiagnostic(
@@ -147,17 +162,19 @@ namespace Caravela.Framework.Impl.Advices
                         }
 
                         return;
+
                     case ConflictBehavior.Ignore:
                         // Nothing to do.
                         break;
+
                     default:
                         throw new NotImplementedException();
                 }
             }
 
             var interfacesToIntroduce = new HashSet<INamedType>(
-                new[] { interfaceType }.Concat(interfaceType.AllImplementedInterfaces.Except( conflictingAncestorInterfaces )), 
-                this.TargetDeclaration.Compilation.InvariantComparer);
+                new[] { interfaceType }.Concat( interfaceType.AllImplementedInterfaces.Except( conflictingAncestorInterfaces ) ),
+                this.TargetDeclaration.Compilation.InvariantComparer );
 
             if ( explicitMemberSpecification == null )
             {
@@ -204,7 +221,8 @@ namespace Caravela.Framework.Impl.Advices
                         }
                         else
                         {
-                            memberSpecifications.Add( new MemberSpecification( interfaceMethod, null, matchingAspectMethod.Method, matchingAspectMethod.Attribute.IsExplicit ) );
+                            memberSpecifications.Add(
+                                new MemberSpecification( interfaceMethod, null, matchingAspectMethod.Method, matchingAspectMethod.Attribute.IsExplicit ) );
                         }
                     }
 
@@ -241,7 +259,12 @@ namespace Caravela.Framework.Impl.Advices
                         }
                         else
                         {
-                            memberSpecifications.Add( new MemberSpecification( interfaceProperty, null, matchingAspectProperty.Property, matchingAspectProperty.Attribute.IsExplicit ) );
+                            memberSpecifications.Add(
+                                new MemberSpecification(
+                                    interfaceProperty,
+                                    null,
+                                    matchingAspectProperty.Property,
+                                    matchingAspectProperty.Attribute.IsExplicit ) );
                         }
                     }
 
@@ -267,12 +290,15 @@ namespace Caravela.Framework.Impl.Advices
                         }
                         else
                         {
-                            memberSpecifications.Add( new MemberSpecification( interfaceEvent, null, matchingAspectEvent.Event, matchingAspectEvent.Attribute.IsExplicit ) );
+                            memberSpecifications.Add(
+                                new MemberSpecification( interfaceEvent, null, matchingAspectEvent.Event, matchingAspectEvent.Attribute.IsExplicit ) );
                         }
                     }
 
                     this._introducedAndImplementedInterfaces.Add( interfaceType, (true, default) );
-                    this._introducedInterfaceTypes.Add( new IntroducedInterfaceSpecification( interfaceType, memberSpecifications, conflictBehavior, options ) );
+
+                    this._introducedInterfaceTypes.Add(
+                        new IntroducedInterfaceSpecification( interfaceType, memberSpecifications, conflictBehavior, options ) );
                 }
             }
             else
@@ -285,7 +311,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             var result = AdviceResult.Create();
 
-            foreach (var interfaceSpec in this._introducedInterfaceTypes)
+            foreach ( var interfaceSpec in this._introducedInterfaceTypes )
             {
                 var explicitImplementationBuilders = new List<MemberBuilder>();
                 var overrides = new List<OverriddenMember>();
@@ -296,6 +322,7 @@ namespace Caravela.Framework.Impl.Advices
                 {
                     // Collect implemented interface members and add non-observable transformations.
                     MemberBuilder memberBuilder;
+
                     switch ( memberSpec.InterfaceMember )
                     {
                         case IMethod interfaceMethod:
@@ -304,8 +331,16 @@ namespace Caravela.Framework.Impl.Advices
 
                             overrides.Add(
                                 memberSpec.AspectInterfaceTargetMember != null
-                                ? new OverriddenMethod( this, (IMethod) memberBuilder, (IMethod) memberSpec.AspectInterfaceTargetMember, this.LinkerOptions )
-                                : new RedirectedMethod( this, (IMethod) memberBuilder, (IMethod) memberSpec.TargetMember.AssertNotNull(), this.LinkerOptions ) );
+                                    ? new OverriddenMethod(
+                                        this,
+                                        (IMethod) memberBuilder,
+                                        (IMethod) memberSpec.AspectInterfaceTargetMember,
+                                        this.LinkerOptions )
+                                    : new RedirectedMethod(
+                                        this,
+                                        (IMethod) memberBuilder,
+                                        (IMethod) memberSpec.TargetMember.AssertNotNull(),
+                                        this.LinkerOptions ) );
 
                             break;
 
@@ -318,14 +353,25 @@ namespace Caravela.Framework.Impl.Advices
                             {
                                 overrides.Add(
                                     memberSpec.AspectInterfaceTargetMember != null
-                                    ? new OverriddenProperty( this, (IProperty) memberBuilder, (IProperty) memberSpec.AspectInterfaceTargetMember, null, null, this.LinkerOptions )
-                                    : new RedirectedProperty( this, (IProperty) memberBuilder, (IProperty) memberSpec.TargetMember.AssertNotNull(), this.LinkerOptions ) );
+                                        ? new OverriddenProperty(
+                                            this,
+                                            (IProperty) memberBuilder,
+                                            (IProperty) memberSpec.AspectInterfaceTargetMember,
+                                            null,
+                                            null,
+                                            this.LinkerOptions )
+                                        : new RedirectedProperty(
+                                            this,
+                                            (IProperty) memberBuilder,
+                                            (IProperty) memberSpec.TargetMember.AssertNotNull(),
+                                            this.LinkerOptions ) );
                             }
 
                             break;
 
                         case IEvent interfaceEvent:
-                            var isEventField = memberSpec.AspectInterfaceTargetMember != null && ((IEvent) memberSpec.AspectInterfaceTargetMember).IsEventField();
+                            var isEventField = memberSpec.AspectInterfaceTargetMember != null
+                                               && ((IEvent) memberSpec.AspectInterfaceTargetMember).IsEventField();
 
                             memberBuilder = this.GetImplEventBuilder( interfaceEvent, isEventField, memberSpec.IsExplicit );
                             interfaceMemberMap.Add( interfaceEvent, memberBuilder );
@@ -334,8 +380,18 @@ namespace Caravela.Framework.Impl.Advices
                             {
                                 overrides.Add(
                                     memberSpec.AspectInterfaceTargetMember != null
-                                    ? new OverriddenEvent( this, (IEvent) memberBuilder, (IEvent) memberSpec.AspectInterfaceTargetMember, null, null, this.LinkerOptions )
-                                    : new RedirectedEvent( this, (IEvent) memberBuilder, (IEvent) memberSpec.TargetMember.AssertNotNull(), this.LinkerOptions ) );
+                                        ? new OverriddenEvent(
+                                            this,
+                                            (IEvent) memberBuilder,
+                                            (IEvent) memberSpec.AspectInterfaceTargetMember,
+                                            null,
+                                            null,
+                                            this.LinkerOptions )
+                                        : new RedirectedEvent(
+                                            this,
+                                            (IEvent) memberBuilder,
+                                            (IEvent) memberSpec.TargetMember.AssertNotNull(),
+                                            this.LinkerOptions ) );
                             }
 
                             break;
@@ -350,8 +406,8 @@ namespace Caravela.Framework.Impl.Advices
                 result = result.WithTransformations(
                     new IntroducedInterface( this, this.TargetDeclaration, interfaceSpec.InterfaceType, interfaceMemberMap, this.LinkerOptions ) );
 
-                result = result.WithTransformations( explicitImplementationBuilders.Cast<ITransformation>() );
-                result = result.WithTransformations( overrides.Cast<ITransformation>() );
+                result = result.WithTransformations( explicitImplementationBuilders.ToArray<ITransformation>() );
+                result = result.WithTransformations( overrides.ToArray<ITransformation>() );
             }
 
             return result;
@@ -366,7 +422,11 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var interfaceParameter in interfaceMethod.Parameters )
             {
-                _ = methodBuilder.AddParameter( interfaceParameter.Name, interfaceParameter.ParameterType, interfaceParameter.RefKind, interfaceParameter.DefaultValue );
+                _ = methodBuilder.AddParameter(
+                    interfaceParameter.Name,
+                    interfaceParameter.ParameterType,
+                    interfaceParameter.RefKind,
+                    interfaceParameter.DefaultValue );
             }
 
             foreach ( var interfaceGenericParameter in interfaceMethod.GenericParameters )
@@ -398,9 +458,9 @@ namespace Caravela.Framework.Impl.Advices
 
         private MemberBuilder GetImplPropertyBuilder( IProperty interfaceProperty, bool isAutoProperty, bool isExplicit )
         {
-            var propertyBuilder = new PropertyBuilder( 
-                this, 
-                this.TargetDeclaration, 
+            var propertyBuilder = new PropertyBuilder(
+                this,
+                this.TargetDeclaration,
                 interfaceProperty.Name,
                 interfaceProperty.Getter != null,
                 interfaceProperty.Setter != null,
@@ -412,7 +472,11 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var interfaceParameter in interfaceProperty.Parameters )
             {
-                _ = propertyBuilder.AddParameter( interfaceParameter.Name, interfaceParameter.ParameterType, interfaceParameter.RefKind, interfaceParameter.DefaultValue );
+                _ = propertyBuilder.AddParameter(
+                    interfaceParameter.Name,
+                    interfaceParameter.ParameterType,
+                    interfaceParameter.RefKind,
+                    interfaceParameter.DefaultValue );
             }
 
             if ( isExplicit )
@@ -448,44 +512,6 @@ namespace Caravela.Framework.Impl.Advices
             }
 
             return eventBuilder;
-        }
-
-        private class IntroducedInterfaceSpecification
-        {
-            public INamedType InterfaceType { get; }
-
-            public IReadOnlyList<MemberSpecification> MemberSpecifications { get; }
-
-            public ConflictBehavior ConflictBehavior { get; }
-
-            public AdviceOptions? Options { get; }
-
-            public IntroducedInterfaceSpecification( INamedType interfaceType, IReadOnlyList<MemberSpecification> memberSpecification, ConflictBehavior conflictBehavior, AdviceOptions? options )
-            {
-                this.InterfaceType = interfaceType;
-                this.MemberSpecifications = memberSpecification;
-                this.ConflictBehavior = conflictBehavior;
-                this.Options = options;
-            }
-        }
-
-        private struct MemberSpecification
-        {
-            public IMember InterfaceMember { get; }
-
-            public IMember? TargetMember { get; }
-
-            public IMember? AspectInterfaceTargetMember { get; }
-
-            public bool IsExplicit { get; }
-
-            public MemberSpecification(IMember interfaceMember, IMember? targetMember, IMember? aspectInterfaceMember, bool isExplicit )
-            {
-                this.InterfaceMember = interfaceMember;
-                this.TargetMember = targetMember;
-                this.AspectInterfaceTargetMember = aspectInterfaceMember;
-                this.IsExplicit = isExplicit;
-            }
         }
     }
 }

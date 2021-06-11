@@ -68,12 +68,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 // TODO: Indexer parameters (need to have special IParameterList implementation that would mirror adding parameters to the indexer property).
                 // TODO: Events.
                 (IProperty property, MethodKind.PropertyGet) when property.Parameters.Count == 0 => new ParameterBuilderList(),
-                (IProperty property, MethodKind.PropertySet) when property.Parameters.Count == 0 => 
-                    new ParameterBuilderList(
-                        new[] { new PropertySetValueParameter( this, 0 ) } ),
-                (IEvent _, _) => 
-                    new ParameterBuilderList( 
-                        new[] { new EventValueParameter( this ) } ),
+                (IProperty property, MethodKind.PropertySet) when property.Parameters.Count == 0 =>
+                    new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
+                (IEvent _, _) =>
+                    new ParameterBuilderList( new[] { new EventValueParameter( this ) } ),
                 _ => throw new AssertionFailedException()
             };
 

@@ -37,9 +37,9 @@ namespace Caravela.Framework.Impl.Transformations
 
             var body =
                 Block(
-                    this.OverriddenDeclaration.ReturnType != this.OverriddenDeclaration.Compilation.TypeFactory.GetTypeByReflectionType( typeof( void ) )
-                    ? ReturnStatement( GetInvocationExpression() )
-                    : ExpressionStatement( GetInvocationExpression() ) );
+                    this.OverriddenDeclaration.ReturnType != this.OverriddenDeclaration.Compilation.TypeFactory.GetTypeByReflectionType( typeof(void) )
+                        ? ReturnStatement( GetInvocationExpression() )
+                        : ExpressionStatement( GetInvocationExpression() ) );
 
             return new[]
             {
@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.Transformations
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
                         this.OverriddenDeclaration.GetSyntaxReturnType(),
                         null,
-                        Identifier( context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration)),
+                        Identifier( context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration ) ),
                         this.OverriddenDeclaration.GetSyntaxTypeParameterList(),
                         this.OverriddenDeclaration.GetSyntaxParameterList(),
                         this.OverriddenDeclaration.GetSyntaxConstraintClauses(),
@@ -66,17 +66,20 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 return
                     InvocationExpression(
-                        GetInvocationTargetExpression(),
-                        ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) )
-                    .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkingOrder.Default ) );
+                            GetInvocationTargetExpression(),
+                            ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) )
+                        .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkingOrder.Default ) );
             }
 
             ExpressionSyntax GetInvocationTargetExpression()
             {
                 return
                     this.OverriddenDeclaration.IsStatic
-                    ? IdentifierName( this.OverriddenDeclaration.Name )
-                    : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this.OverriddenDeclaration.Name ) );
+                        ? IdentifierName( this.OverriddenDeclaration.Name )
+                        : MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            ThisExpression(),
+                            IdentifierName( this.OverriddenDeclaration.Name ) );
             }
         }
     }

@@ -12,7 +12,7 @@ namespace Caravela.TestFramework.XunitFramework
     internal class TestFactory
     {
         public string ProjectDirectory { get; }
-        
+
         public string ProjectName { get; }
 
         private readonly ConcurrentDictionary<string, TestMethod> _methods = new();
@@ -20,7 +20,7 @@ namespace Caravela.TestFramework.XunitFramework
 
         public TestDirectoryOptionsReader DirectoryOptionsReader { get; }
 
-        public TestFactory( string baseDirectory, string assemblyName ) 
+        public TestFactory( string baseDirectory, string assemblyName )
             : this( new TestDirectoryOptionsReader( baseDirectory ), LoadAssembly( assemblyName ) ) { }
 
         private static ReflectionAssemblyInfo LoadAssembly( string assemblyName )
@@ -33,7 +33,7 @@ namespace Caravela.TestFramework.XunitFramework
         public TestFactory( TestDirectoryOptionsReader directoryOptionsReader, IAssemblyInfo assemblyInfo )
         {
             this.DirectoryOptionsReader = directoryOptionsReader;
-            
+
             this.ProjectDirectory = directoryOptionsReader.ProjectDirectory;
             this.ProjectName = Path.GetFileName( this.ProjectDirectory );
             this.Collection = new TestCollection( this );

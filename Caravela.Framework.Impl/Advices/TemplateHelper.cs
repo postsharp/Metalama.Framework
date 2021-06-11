@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Advices
             // We do the search against the Roslyn compilation because it is cheaper.
 
             var members = aspectType.GetSymbol().GetMembers( methodName ).ToList();
-            var expectedAttributeTypeSymbol = compilation.ReflectionMapper.GetTypeSymbol( typeof( TemplateAttribute ) );
+            var expectedAttributeTypeSymbol = compilation.ReflectionMapper.GetTypeSymbol( typeof(TemplateAttribute) );
 
             if ( members.Count != 1 )
             {
@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.Advices
             // We do the search against the Roslyn compilation because it is cheaper.
 
             var members = aspectType.GetSymbol().GetMembers( propertyName ).ToList();
-            var expectedAttributeTypeSymbol = compilation.ReflectionMapper.GetTypeSymbol( typeof( TemplateAttribute ) );
+            var expectedAttributeTypeSymbol = compilation.ReflectionMapper.GetTypeSymbol( typeof(TemplateAttribute) );
 
             if ( members.Count != 1 )
             {

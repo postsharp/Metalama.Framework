@@ -12,7 +12,7 @@ namespace Caravela.Framework.Aspects
     public sealed class InterfaceMemberAttribute : CompileTimeOnlyAttribute
     {
         /// <summary>
-        /// Gets a value indicating whether the interface member should be introduced explicitly.
+        /// Gets or sets a value indicating whether the interface member should be introduced explicitly.
         /// </summary>
         public bool IsExplicit { get; set; }
     }

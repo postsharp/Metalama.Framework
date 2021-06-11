@@ -194,9 +194,9 @@ namespace Caravela.Framework.Impl.Advices
         {
             var diagnosticList = new DiagnosticList();
 
-            var getTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, defaultGetTemplate, nameof( this.OverrideFieldOrPropertyAccessors ) );
+            var getTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, defaultGetTemplate, nameof(this.OverrideFieldOrPropertyAccessors) );
 
-            var setTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, setTemplate, nameof( this.OverrideFieldOrPropertyAccessors ) );
+            var setTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, setTemplate, nameof(this.OverrideFieldOrPropertyAccessors) );
 
             var advice = new IntroducePropertyAdvice(
                 this._aspect,
@@ -249,7 +249,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             var diagnosticList = new DiagnosticList();
 
-            if (!this._introduceInterfaceAdvices.TryGetValue(targetType, out var advice))
+            if ( !this._introduceInterfaceAdvices.TryGetValue( targetType, out var advice ) )
             {
                 this._introduceInterfaceAdvices[targetType] = advice = new IntroduceInterfaceAdvice( this._aspect, targetType, _layerName );
                 advice.Initialize( this._declarativeAdvices, diagnosticList );
@@ -270,7 +270,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             this.IntroduceInterface(
                 targetType,
-                (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( interfaceType ),                
+                (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( interfaceType ),
                 conflictBehavior,
                 options );
         }

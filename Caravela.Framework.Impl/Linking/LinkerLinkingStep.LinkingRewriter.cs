@@ -86,7 +86,7 @@ namespace Caravela.Framework.Impl.Linking
                         if ( !this._analysisRegistry.IsInlineable( lastOverrideSymbol ) )
                         {
                             // Body of the last (outermost) override is not inlineable. We need to emit a trampoline method.
-                            newMembers.Add( this.GetTransformedInlineableOverrideTarget( member, lastOverrideSymbol ) );
+                            newMembers.Add( GetTransformedInlineableOverrideTarget( member, lastOverrideSymbol ) );
                         }
                         else
                         {
@@ -159,9 +159,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-#pragma warning disable CA1822 // Mark members as static
-            private MemberDeclarationSyntax GetTransformedInlineableOverrideTarget( MemberDeclarationSyntax member, ISymbol lastOverrideSymbol )
-#pragma warning restore CA1822 // Mark members as static
+            private static MemberDeclarationSyntax GetTransformedInlineableOverrideTarget( MemberDeclarationSyntax member, ISymbol lastOverrideSymbol )
             {
                 switch ( member )
                 {
@@ -577,8 +575,16 @@ namespace Caravela.Framework.Impl.Linking
                 InliningRewriterBase inliningRewriter =
                     accessor.Kind() switch
                     {
-                        SyntaxKind.AddAccessorDeclaration => new EventInliningRewriter( this._analysisRegistry, semanticModel, eventSymbol, eventSymbol.AddMethod.AssertNotNull() ),
-                        SyntaxKind.RemoveAccessorDeclaration => new EventInliningRewriter( this._analysisRegistry, semanticModel, eventSymbol, eventSymbol.RemoveMethod.AssertNotNull() ),
+                        SyntaxKind.AddAccessorDeclaration => new EventInliningRewriter(
+                            this._analysisRegistry,
+                            semanticModel,
+                            eventSymbol,
+                            eventSymbol.AddMethod.AssertNotNull() ),
+                        SyntaxKind.RemoveAccessorDeclaration => new EventInliningRewriter(
+                            this._analysisRegistry,
+                            semanticModel,
+                            eventSymbol,
+                            eventSymbol.RemoveMethod.AssertNotNull() ),
                         _ => throw new AssertionFailedException( $"{accessor.Kind()}" )
                     };
 

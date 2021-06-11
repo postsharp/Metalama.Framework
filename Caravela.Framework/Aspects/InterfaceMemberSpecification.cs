@@ -9,7 +9,7 @@ namespace Caravela.Framework.Aspects
 {
     public class InterfaceMemberSpecification
     {
-        private InterfaceMemberSpecification() 
+        private InterfaceMemberSpecification()
         {
             throw new NotImplementedException();
         }
@@ -24,20 +24,22 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         public IMember ImplementationMember { get; }
 
-        [Obsolete("Not implemented.")]
-        public static InterfaceMemberSpecification Create<TInterfaceType, TReturnType>( Expression<Func<TInterfaceType, TReturnType>> expression, string aspectMemberName )
+        [Obsolete( "Not implemented." )]
+        public static InterfaceMemberSpecification Create<TInterfaceType, TReturnType>(
+            Expression<Func<TInterfaceType, TReturnType>> expression,
+            string aspectMemberName )
             => throw new NotImplementedException();
 
         [Obsolete( "Not implemented." )]
-        public static InterfaceMemberSpecification Create<TInterfaceType, TReturnType>( Expression<Func<TInterfaceType, TReturnType>> expression, IMember targetTypeMember )
+        public static InterfaceMemberSpecification Create<TInterfaceType, TReturnType>(
+            Expression<Func<TInterfaceType, TReturnType>> expression,
+            IMember targetTypeMember )
             => throw new NotImplementedException();
 
         [Obsolete( "Not implemented." )]
-        public static InterfaceMemberSpecification Create( IMember interfaceMember, string aspectMemberName )
-            => throw new NotImplementedException();
+        public static InterfaceMemberSpecification Create( IMember interfaceMember, string aspectMemberName ) => throw new NotImplementedException();
 
         [Obsolete( "Not implemented." )]
-        public static InterfaceMemberSpecification Create( IMember interfaceMember, IMember targetTypeMember)
-            => throw new NotImplementedException();
+        public static InterfaceMemberSpecification Create( IMember interfaceMember, IMember targetTypeMember ) => throw new NotImplementedException();
     }
 }

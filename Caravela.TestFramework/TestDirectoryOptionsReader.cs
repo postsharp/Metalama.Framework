@@ -16,7 +16,7 @@ namespace Caravela.TestFramework
     /// </summary>
     internal class TestDirectoryOptionsReader
     {
-        private static readonly ConditionalWeakTable<Assembly, TestDirectoryOptionsReader> _instances = new ConditionalWeakTable<Assembly, TestDirectoryOptionsReader>();
+        private static readonly ConditionalWeakTable<Assembly, TestDirectoryOptionsReader> _instances = new();
 
         public string ProjectDirectory { get; }
 
