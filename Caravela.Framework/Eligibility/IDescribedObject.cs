@@ -8,6 +8,7 @@ namespace Caravela.Framework.Eligibility
 {
     /// <summary>
     /// Encapsulates an arbitrary object and its optional human-readable description, as well as an <see cref="IFormatProvider"/>.
+    /// (Not implemented.)
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [InternalImplement]

@@ -3,6 +3,9 @@
 
 namespace Caravela.Framework.Eligibility
 {
+    /// <summary>
+    /// (Not implemented.)
+    /// </summary>
     public enum EligibilityValue
     {
         // Order matters. The less eligible first.

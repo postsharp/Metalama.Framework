@@ -22,6 +22,7 @@ namespace Caravela.Framework.Impl
         private readonly AdviceFactory _adviceFactory;
         private bool _skipped;
 
+        [Obsolete( "Not implemented." )]
         IProject IAspectLayerBuilder.Project => throw new NotImplementedException();
 
         IReadOnlyList<IAspectInstance> IAspectLayerBuilder.UpstreamAspects => throw new NotImplementedException();

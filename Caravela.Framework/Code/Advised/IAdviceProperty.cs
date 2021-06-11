@@ -1,0 +1,18 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+namespace Caravela.Framework.Code.Advised
+{
+    /// <summary>
+    /// Represents the property being overwritten or introduced. This interface extends <see cref="IProperty"/> but introduces
+    /// the <see cref="IHasRuntimeValue.Value"/> property, which allows you to read or write the property.
+    /// It also overrides the <see cref="Parameters"/> property to expose their <see cref="IHasRuntimeValue.Value"/> property.
+    /// </summary>
+    public interface IAdviceProperty : IProperty, IAdviceFieldOrProperty
+    {
+        /// <summary>
+        /// Gets the list of indexer parameters.
+        /// </summary>
+        new IAdviceParameterList Parameters { get; }
+    }
+}

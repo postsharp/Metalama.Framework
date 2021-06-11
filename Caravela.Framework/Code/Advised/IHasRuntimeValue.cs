@@ -1,10 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-namespace Caravela.Framework.Aspects
+using Caravela.Framework.Aspects;
+
+namespace Caravela.Framework.Code.Advised
 {
     /// <summary>
-    /// Something (like a parameter or a local variable) that has a value that can be read or assigned at run time.
+    /// Something that has a value that can be read or assigned at run time - typically an <see cref="IAdviceParameter"/>
+    /// or an <see cref="IAdviceFieldOrProperty"/>.
     /// </summary>
     [CompileTimeOnly]
     public interface IHasRuntimeValue

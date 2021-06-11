@@ -7,7 +7,7 @@ using System.Reflection;
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Base interface for <see cref="IMethod"/>, <see cref="IProperty"/> and <see cref="IEvent"/>, but not <see cref="INamedType"/>.
+    /// Base interface for <see cref="IMethod"/>, <see cref="IProperty"/> and <see cref="IEvent"/>, and <see cref="INamedType"/>.
     /// </summary>
     public interface IMemberOrNamedType : IDeclaration
     {

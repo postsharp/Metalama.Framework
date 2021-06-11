@@ -9,6 +9,7 @@ namespace Caravela.TestFramework
 {
     /// <summary>
     /// A set of test options, which can be included in the source text of tests using special comments like <c>// @IncludeFinalDiagnostics</c>.
+    /// This class is JSON-serializable.
     /// </summary>
     public class TestOptions
     {

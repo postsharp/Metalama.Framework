@@ -7,6 +7,9 @@ using System;
 
 namespace Caravela.Framework.Code
 {
+    /// <summary>
+    /// Provides extension methods for <see cref="IType"/>.
+    /// </summary>
     [CompileTimeOnly]
     public static class TypeExtensions
     {
@@ -47,11 +50,5 @@ namespace Caravela.Framework.Code
         [return: RunTimeOnly]
         [Obsolete( "Not implemented." )]
         public static dynamic Cast( this IType type, dynamic value ) => throw new NotImplementedException();
-    }
-
-    public enum SpecialType
-    {
-        None,
-        Void
     }
 }

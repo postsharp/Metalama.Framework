@@ -5,6 +5,9 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Eligibility
 {
+    /// <summary>
+    /// (Not implemented.)
+    /// </summary>
     public interface IEligible<in T>
         where T : class, IDeclaration
     {

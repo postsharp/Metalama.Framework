@@ -6,6 +6,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Sdk
 {
+    /// <summary>
+    /// Exposes the <see cref="ISymbol"/> from <see cref="IDeclaration"/>.
+    /// </summary>
     public static class CodeModelExtensions
     {
         public static ISymbol? GetSymbol( this IDeclaration declaration ) => ((ISdkDeclaration) declaration).Symbol;

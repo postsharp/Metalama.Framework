@@ -10,6 +10,12 @@ namespace Caravela.Framework.Aspects
     /// code. It can also be called from run-time code. See <see cref="CompileTimeOnlyAttribute"/> for declarations
     /// that cannot be called from run-time code.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// You can use this attribute on classes that must be included in the compile-time project and therefore made
+    /// available to your aspects.
+    /// </para>
+    /// </remarks>
     [AttributeUsage(
         AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate | AttributeTargets.Interface
         | AttributeTargets.Assembly )]

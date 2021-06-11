@@ -3,8 +3,14 @@
 
 namespace Caravela.Framework.Code
 {
+    /// <summary>
+    /// Kinds of parameters, such as <c>ref</c>, <c>in</c>, <c>out</c>...
+    /// </summary>
     public enum RefKind
     {
+        /// <summary>
+        /// A normal parameter passed by value.
+        /// </summary>
         None,
 
         /// <summary>

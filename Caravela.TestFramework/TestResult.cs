@@ -15,7 +15,7 @@ using System.Text.RegularExpressions;
 namespace Caravela.TestFramework
 {
     /// <summary>
-    /// Represents the result of an integration test run.
+    /// Represents the result of a test run.
     /// </summary>
     public class TestResult : IDiagnosticAdder
     {

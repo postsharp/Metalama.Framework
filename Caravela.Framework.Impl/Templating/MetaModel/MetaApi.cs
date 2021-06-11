@@ -2,8 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Aspects.AdvisedCode;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IDeclaration Declaration { get; }
 
-        public IMemberOrNamedType Member => this.Declaration as IMemberOrNamedType ?? throw this.CreateInvalidOperationException( nameof(this.Member) );
+        public IMember Member => this.Declaration as IMember ?? throw this.CreateInvalidOperationException( nameof(this.Member) );
 
         public IAdviceMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
 

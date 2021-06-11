@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects.AdvisedCode;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Aspects
         public static dynamic Proceed() => _proceedImplementation.Value ?? throw NewInvalidOperationException();
 
         /// <summary>
-        /// Coerces an <paramref name="expression"/> to be interpreted at compile time. This is typically used
+        /// Coerces an <paramref name="expression"/> to be interpreted as compile time. This is typically used
         /// to coerce expressions that can be either run-time or compile-time, such as a literal. Since ambiguous expressions are
         /// interpreted as run-time by default, this method allows to change that behavior.
         /// </summary>
@@ -69,28 +69,32 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets the method metadata, or the accessor if this is a template for a field, property or event.
         /// </summary>
-        /// <remarks>
-        /// To invoke the method, use <c>Invoke</c>.
-        /// e.g. <c>OverrideMethodContext.Method.Invoke(1, 2, 3);</c>.
-        /// </remarks>
         public static IAdviceMethod Method => CurrentContext.Method;
-
+        
         /// <summary>
-        /// Gets the target field or property, or null if the advice does not target a field or a property.
+        /// Gets the target property, or throws an exception if the advice does not target a property.
         /// </summary>
         public static IAdviceProperty Property => CurrentContext.Property;
 
+        /// <summary>
+        /// Gets the target field or property, or throws an exception if the advice does not target a field or a property.
+        /// </summary>
         public static IAdviceFieldOrProperty FieldOrProperty => CurrentContext.FieldOrProperty;
 
-        public static IMemberOrNamedType Member => CurrentContext.Member;
+        /// <summary>
+        /// Gets the target member (method, constructor, field, property or event, but not a nested type), or
+        /// throws an exception if the advice does not target member.
+        /// </summary>
+        public static IMember Member => CurrentContext.Member;
 
         /// <summary>
-        /// Gets the target event, or null if the advice does not target an event.
+        /// Gets the target event, or throws an exception if the advice does not target an event.
         /// </summary>
         public static IAdviceEvent Event => CurrentContext.Event;
 
         /// <summary>
-        /// Gets the list of parameters of <see cref="Method"/>.
+        /// Gets the list of parameters of the current <see cref="Method"/> or <see cref="Property"/>, or throws an
+        /// exception if the advice of the target is neither a method.
         /// </summary>
         public static IAdviceParameterList Parameters => CurrentContext.Parameters;
 
@@ -98,7 +102,8 @@ namespace Caravela.Framework.Aspects
         // IProject Project { get; }
 
         /// <summary>
-        /// Gets the code model of current type including the introductions of the current aspect type.
+        /// Gets the target type of the advice. If the advice is applied to a member, this property returns the declaring
+        /// type of the member.
         /// </summary>
         public static INamedType Type => CurrentContext.Type;
 
@@ -165,7 +170,7 @@ namespace Caravela.Framework.Aspects
         public static IReadOnlyDictionary<string, object?> Tags => CurrentContext.Tags;
 
         /// <summary>
-        /// Gets the list of aspect aspects that have required the current aspect.
+        /// Gets the list of aspect aspects that have required the current aspect. (Not implemented.)
         /// </summary>
         [Obsolete( "Not implemented." )]
         public static IReadOnlyList<IAspectInstance> UpstreamAspects => throw new NotImplementedException();

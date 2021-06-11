@@ -3,6 +3,10 @@
 
 namespace Caravela.Framework.Code.Builders
 {
+    /// <summary>
+    /// Allows to complete the construction of a parameter that has been created using e.g.
+    /// <see cref="IMethodBuilder.AddParameter(string,Caravela.Framework.Code.IType,Caravela.Framework.Code.RefKind,Caravela.Framework.Code.TypedConstant)"/>.
+    /// </summary>
     public interface IParameterBuilder : IParameter, IDeclarationBuilder
     {
         /// <remarks>

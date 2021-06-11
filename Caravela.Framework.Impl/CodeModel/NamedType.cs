@@ -184,7 +184,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => throw new NotImplementedException()
             };
 
-        public override DeclarationKind DeclarationKind => DeclarationKind.Type;
+        public override DeclarationKind DeclarationKind => DeclarationKind.NamedType;
 
         [Memo]
         public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.Factory.GetNamedType( this.TypeSymbol.BaseType );
