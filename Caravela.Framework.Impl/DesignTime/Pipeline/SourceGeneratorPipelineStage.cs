@@ -89,8 +89,9 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                             syntaxFactory,
                             this.PipelineProperties.ServiceProvider );
 
-                        classDeclaration = classDeclaration.AddMembers(
-                            memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray() );
+                        var introducedMembers = memberIntroduction.GetIntroducedMembers(introductionContext).Select(m => m.Syntax).ToArray();
+
+                        classDeclaration = classDeclaration.AddMembers(introducedMembers);
                     }
 
                     if ( transformation is IIntroducedInterface interfaceImplementation)

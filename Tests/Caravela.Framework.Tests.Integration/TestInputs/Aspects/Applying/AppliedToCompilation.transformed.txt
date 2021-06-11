@@ -1,4 +1,0 @@
-[TestOutput]
-internal class TargetClass
-{
-}

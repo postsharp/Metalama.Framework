@@ -2,7 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
@@ -43,8 +47,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
 
-        public dynamic Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
-
         [Memo]
         public IParameter ReturnParameter => new BuiltParameter( this.MethodBuilder.ReturnParameter, this.Compilation );
 
@@ -63,9 +65,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
 
-        public bool HasBase => throw new NotImplementedException();
-
-        public IMethodInvocation Base => throw new NotImplementedException();
+        [Memo]
+        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), false );
 
         public IMethod? OverriddenMethod => throw new NotImplementedException();
 

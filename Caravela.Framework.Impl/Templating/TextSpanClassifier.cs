@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override void VisitClassDeclaration( ClassDeclarationSyntax node )
         {
-            if ( node.GetScopeFromAnnotation() != SymbolDeclarationScope.RunTimeOnly )
+            if ( node.GetScopeFromAnnotation() != TemplatingScope.RunTimeOnly )
             {
                 this.Mark( node.Modifiers, TextSpanClassification.CompileTime );
                 this.Mark( node.Keyword, TextSpanClassification.CompileTime );
@@ -153,7 +153,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( this._isInTemplate )
             {
-                if ( node.GetScopeFromAnnotation().DynamicToCompileTimeOnly() == SymbolDeclarationScope.CompileTimeOnly )
+                if ( node.GetScopeFromAnnotation().GetValueOrDefault().DynamicToCompileTimeOnly() == TemplatingScope.CompileTimeOnly )
                 {
                     // This can be overwritten later in a child node.
                     this.Mark( node, TextSpanClassification.CompileTime );
@@ -262,7 +262,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override void VisitIfStatement( IfStatementSyntax node )
         {
-            if ( this._isInTemplate && node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+            if ( this._isInTemplate && node.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnly )
             {
                 this.Mark( TextSpan.FromBounds( node.IfKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanClassification.CompileTime );
                 this.Visit( node.Condition );
@@ -282,7 +282,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override void VisitForEachStatement( ForEachStatementSyntax node )
         {
-            if ( this._isInTemplate && node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+            if ( this._isInTemplate && node.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnly )
             {
                 this.Mark( TextSpan.FromBounds( node.ForEachKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanClassification.CompileTime );
                 this.Mark( node.Identifier, TextSpanClassification.CompileTimeVariable );

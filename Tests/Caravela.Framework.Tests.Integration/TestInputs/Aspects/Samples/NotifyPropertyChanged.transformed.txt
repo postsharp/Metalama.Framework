@@ -1,2 +1,0 @@
-// CompileTimeAspectPipeline.TryExecute failed. 
-// Error CR0504 on `TargetClass`: `The aspect 'NotifyPropertyChanged' cannot implicitly introduce interface 'TargetClass' into the type 'INotifyPropertyChanged' because it does not contain a declarative introduction (using [Introduce]) for the interface member 'INotifyPropertyChanged.PropertyChanged'.`

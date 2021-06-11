@@ -172,7 +172,7 @@ namespace Caravela.Framework.Impl.Transformations
                         new LinkerOverrideMethodProceedImpl(
                             this.Advice.AspectLayerId,
                             explicitImplementationMethod,
-                            LinkerAnnotationOrder.Default,
+                            LinkingOrder.Default,
                             context.SyntaxFactory ),
                         context.LexicalScope,
                         context.ServiceProvider.GetService<SyntaxSerializationService>(),
@@ -204,7 +204,7 @@ namespace Caravela.Framework.Impl.Transformations
                         InvocationExpression(
                             GetInvocationTargetExpression(),
                             ArgumentList( SeparatedList( targetMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) )
-                        .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkerAnnotationOrder.Default ) );
+                        .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkingOrder.Default ) );
                 }
 
                 ExpressionSyntax GetInvocationTargetExpression()
@@ -291,7 +291,7 @@ namespace Caravela.Framework.Impl.Transformations
                         new LinkerOverrideMethodProceedImpl(
                             this.Advice.AspectLayerId,
                             explicitImplementationAccessor,
-                            LinkerAnnotationOrder.Default,
+                            LinkingOrder.Default,
                             context.SyntaxFactory ),
                         context.LexicalScope,
                         context.ServiceProvider.GetService<SyntaxSerializationService>(),
@@ -421,7 +421,7 @@ namespace Caravela.Framework.Impl.Transformations
                         new LinkerOverrideMethodProceedImpl(
                             this.Advice.AspectLayerId,
                             explicitImplementationAccessor,
-                            LinkerAnnotationOrder.Default,
+                            LinkingOrder.Default,
                             context.SyntaxFactory ),
                         context.LexicalScope,
                         context.ServiceProvider.GetService<SyntaxSerializationService>(),

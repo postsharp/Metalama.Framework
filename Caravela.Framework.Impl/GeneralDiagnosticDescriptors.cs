@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
@@ -111,5 +112,10 @@ namespace Caravela.Framework.Impl
             InvalidCompileTimeProjectResource = new(
                 "CR0030", _category, "The compile-time project in assembly '{0}' is corrupted.", Error,
                 "The compile-time project resource file was corrupted." );
+
+        public static readonly DiagnosticDefinition<(ISymbol TemplateMethod, ISymbol[] RunTimeOnlyTypes)>
+            VirtualTemplateCannotReferenceRunTimeOnlyTypes = new(
+                "CR0031", _category, "The template '{0}' cannot be virtual because it references the following runtime-only types: {1}.", Error,
+                "A template cannot be virtual when it references run-time-only types." );
     }
 }

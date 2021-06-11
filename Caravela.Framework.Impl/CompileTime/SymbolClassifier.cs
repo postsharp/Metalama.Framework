@@ -21,15 +21,15 @@ namespace Caravela.Framework.Impl.CompileTime
         /// List of well-known types, for which the scope is overriden (i.e. this list takes precedence over any other rule).
         /// 'MembersOnly' means that the rule applies to the members of the type, but not to the type itself.
         /// </summary>
-        private static readonly Dictionary<string, (SymbolDeclarationScope Scope, bool MembersOnly)> _wellKnownRunTimeTypes =
-            new (Type Type, SymbolDeclarationScope Scope, bool MembersOnly)[]
+        private static readonly Dictionary<string, (TemplatingScope Scope, bool MembersOnly)> _wellKnownRunTimeTypes =
+            new (Type Type, TemplatingScope Scope, bool MembersOnly)[]
             {
-                (typeof(Console), SymbolDeclarationScope.RunTimeOnly, false),
-                (typeof(Process), SymbolDeclarationScope.RunTimeOnly, false),
-                (typeof(Thread), SymbolDeclarationScope.RunTimeOnly, false),
-                (typeof(AppDomain), SymbolDeclarationScope.RunTimeOnly, false),
-                (typeof(MemberInfo), SymbolDeclarationScope.RunTimeOnly, true),
-                (typeof(ParameterInfo), SymbolDeclarationScope.RunTimeOnly, true)
+                (typeof(Console), TemplatingScope.RunTimeOnly, false),
+                (typeof(Process), TemplatingScope.RunTimeOnly, false),
+                (typeof(Thread), TemplatingScope.RunTimeOnly, false),
+                (typeof(AppDomain), TemplatingScope.RunTimeOnly, false),
+                (typeof(MemberInfo), TemplatingScope.RunTimeOnly, true),
+                (typeof(ParameterInfo), TemplatingScope.RunTimeOnly, true)
             }.ToDictionary( t => t.Type.FullName, t => (t.Scope, t.MembersOnly) );
 
         private readonly Compilation _compilation;
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly INamedTypeSymbol _compileTimeOnlyAttribute;
         private readonly INamedTypeSymbol _templateAttribute;
         private readonly INamedTypeSymbol _interfaceMemberAttribute;
-        private readonly Dictionary<ISymbol, SymbolDeclarationScope?> _cacheFromAttributes = new( SymbolEqualityComparer.Default );
+        private readonly Dictionary<ISymbol, TemplatingScope?> _cacheFromAttributes = new( SymbolEqualityComparer.Default );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
         public SymbolClassifier( Compilation compilation, IServiceProvider serviceProvider )
@@ -50,61 +50,80 @@ namespace Caravela.Framework.Impl.CompileTime
             this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
         }
 
-        public bool IsTemplate( ISymbol symbol )
+        public TemplateMemberKind GetTemplateMemberKind( ISymbol symbol )
         {
             // Look for a [Template] attribute on the symbol.
-            if ( symbol.GetAttributes().Any( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._templateAttribute ) ) )
+            var templateAttribute = symbol
+                .GetAttributes()
+                .FirstOrDefault( this.IsTemplateAttribute );
+
+            if ( templateAttribute != null )
             {
-                return true;
+                return GetTemplateMemberKind( templateAttribute );
             }
 
             // Look for a [InterfaceMember] attribute on the symbol.
             if ( symbol.GetAttributes().Any( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._interfaceMemberAttribute ) ) )
             {
-                return true;
+                return TemplateMemberKind.InterfaceMember;
             }
 
             switch ( symbol )
             {
                 case IMethodSymbol { OverriddenMethod: { } overriddenMethod }:
                     // Look at the overriden method.
-                    return this.IsTemplate( overriddenMethod! );
+                    return this.GetTemplateMemberKind( overriddenMethod! );
 
                 case IPropertySymbol { OverriddenProperty: { } overriddenProperty }:
                     // Look at the overridden property.
-                    return this.IsTemplate( overriddenProperty! );
+                    return this.GetTemplateMemberKind( overriddenProperty! );
 
                 default:
-                    return false;
+                    return TemplateMemberKind.None;
             }
         }
 
-        private SymbolDeclarationScope? GetAttributeScope( AttributeData attribute )
+        private bool IsTemplateAttribute( AttributeData a ) => this._compilation.HasImplicitConversion( a.AttributeClass, this._templateAttribute );
+
+        private static TemplateMemberKind GetTemplateMemberKind( AttributeData templateAttribute )
+        {
+            switch ( templateAttribute.AttributeClass?.Name )
+            {
+                case nameof(IntroduceAttribute):
+                    return TemplateMemberKind.Introduction;
+
+                default:
+                    return TemplateMemberKind.Template;
+            }
+        }
+
+        private TemplatingScope? GetAttributeScope( AttributeData attribute )
         {
             if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeOnlyAttribute ) )
             {
-                return SymbolDeclarationScope.CompileTimeOnly;
+                return TemplatingScope.CompileTimeOnly;
             }
-
-            if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeAttribute ) )
+            else if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeAttribute ) )
             {
-                return SymbolDeclarationScope.Both;
+                return TemplatingScope.Both;
             }
-
-            return null;
+            else
+            {
+                return null;
+            }
         }
 
-        private SymbolDeclarationScope? GetAssemblyScope( IAssemblySymbol? assembly )
+        private TemplatingScope? GetAssemblyScope( IAssemblySymbol? assembly )
         {
             if ( assembly == null )
             {
                 return null;
             }
 
-            if ( assembly.Name == "System.Private.CoreLib" || this._referenceAssemblyLocator.SystemAssemblyNames.Contains( assembly.Name ) )
+            if ( this._referenceAssemblyLocator.IsSystemAssemblyName( assembly.Name ) )
             {
                 // .NET Standard, Roslyn, ...
-                return SymbolDeclarationScope.Both;
+                return TemplatingScope.Both;
             }
 
             var scopeFromAttributes = assembly.GetAttributes()
@@ -120,7 +139,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return null;
         }
 
-        public SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol )
+        public TemplatingScope GetTemplatingScope( ISymbol symbol )
         {
             // From well-known types.
             if ( TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
@@ -136,12 +155,12 @@ namespace Caravela.Framework.Impl.CompileTime
                 return scopeFromAssembly.Value;
             }
 
-            return this.GetScopeFromAttributes( symbol ) ?? SymbolDeclarationScope.RunTimeOnly;
+            return this.GetScopeFromAttributes( symbol ) ?? TemplatingScope.RunTimeOnly;
         }
 
-        private SymbolDeclarationScope? GetScopeFromAttributes( ISymbol symbol )
+        private TemplatingScope? GetScopeFromAttributes( ISymbol symbol )
         {
-            SymbolDeclarationScope? AddToCache( SymbolDeclarationScope? scope )
+            TemplatingScope? AddToCache( TemplatingScope? scope )
             {
                 this._cacheFromAttributes[symbol] = scope;
 
@@ -155,7 +174,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             // Add the symbol being processed to the cache temporarily to avoid an infinite recursion.
-            _ = AddToCache( SymbolDeclarationScope.Both );
+            _ = AddToCache( TemplatingScope.Both );
 
             // From attributes.
             var scopeFromAttributes = symbol
@@ -193,7 +212,7 @@ namespace Caravela.Framework.Impl.CompileTime
             switch ( symbol )
             {
                 case ITypeSymbol type when type.Name == "dynamic":
-                    return AddToCache( SymbolDeclarationScope.RunTimeOnly );
+                    return AddToCache( TemplatingScope.RunTimeOnly );
 
                 case ITypeSymbol type:
                     {
@@ -241,15 +260,15 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 case INamespaceSymbol:
                     // Namespace can be either run-time, build-time or both. We don't do more now but we may have to do it based on assemblies defining the namespace.
-                    return AddToCache( SymbolDeclarationScope.Both );
+                    return AddToCache( TemplatingScope.Both );
             }
 
             return AddToCache( null );
         }
 
-        internal static bool TryGetWellKnownScope( ISymbol symbol, bool isMember, out SymbolDeclarationScope scope )
+        internal static bool TryGetWellKnownScope( ISymbol symbol, bool isMember, out TemplatingScope scope )
         {
-            scope = SymbolDeclarationScope.Unknown;
+            scope = TemplatingScope.Unknown;
 
             switch ( symbol )
             {

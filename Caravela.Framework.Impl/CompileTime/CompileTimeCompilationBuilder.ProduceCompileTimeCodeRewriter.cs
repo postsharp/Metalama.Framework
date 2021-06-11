@@ -13,7 +13,6 @@ using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Editing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,7 +37,7 @@ namespace Caravela.Framework.Impl.CompileTime
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
-
+            private readonly ISymbolClassifier _symbolClassifier;
             private Context _currentContext;
 
             public bool Success { get; private set; } = true;
@@ -58,7 +57,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._diagnosticAdder = diagnosticAdder;
                 this._templateCompiler = templateCompiler;
                 this._cancellationToken = cancellationToken;
-                this._currentContext = new Context( SymbolDeclarationScope.Both, this );
+                this._symbolClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
+                this._currentContext = new Context( TemplatingScope.Both, this );
             }
 
             // TODO: assembly and module-level attributes?
@@ -72,6 +72,40 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
+            public override SyntaxNode? VisitEnumDeclaration( EnumDeclarationSyntax node )
+            {
+                this._cancellationToken.ThrowIfCancellationRequested();
+
+                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+                var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
+
+                if ( scope == TemplatingScope.RunTimeOnly )
+                {
+                    return null;
+                }
+                else
+                {
+                    return base.VisitEnumDeclaration( node );
+                }
+            }
+
+            public override SyntaxNode? VisitDelegateDeclaration( DelegateDeclarationSyntax node )
+            {
+                this._cancellationToken.ThrowIfCancellationRequested();
+
+                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+                var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
+
+                if ( scope == TemplatingScope.RunTimeOnly )
+                {
+                    return null;
+                }
+                else
+                {
+                    return base.VisitDelegateDeclaration( node );
+                }
+            }
+
             private T? VisitTypeDeclaration<T>( T node )
                 where T : TypeDeclarationSyntax
             {
@@ -79,9 +113,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 
-                var scope = this.SymbolClassifier.GetSymbolDeclarationScope( symbol );
+                var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
 
-                if ( scope == SymbolDeclarationScope.RunTimeOnly )
+                if ( scope == TemplatingScope.RunTimeOnly )
                 {
                     return null;
                 }
@@ -128,7 +162,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
 
                     // Add non-implemented members of IAspect and IEligible.
-                    SyntaxGenerator syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
+                    var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
                     var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces );
 
                     foreach ( var implementedInterface in allImplementedInterfaces )
@@ -178,36 +212,76 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
+            private void CheckVirtualTemplateSignature( ISymbol templateSymbol, IEnumerable<ISymbol> typesInSignature )
+            {
+                // Select run-time-only types.
+                var runTimeOnlyParameters =
+                    typesInSignature
+                        .Distinct( SymbolEqualityComparer.Default )
+                        .WhereNotNull()
+                        .Where( t => t is not IDynamicTypeSymbol )
+                        .Where( t => this._symbolClassifier.GetTemplatingScope( t ) == TemplatingScope.RunTimeOnly )
+                        .ToArray();
+
+                if ( runTimeOnlyParameters.Length > 0 )
+                {
+                    // If we have run-time-only types in the signature, we cannot replace the method body, and this is an error.
+
+                    this._diagnosticAdder.Report(
+                        GeneralDiagnosticDescriptors.VirtualTemplateCannotReferenceRunTimeOnlyTypes.CreateDiagnostic(
+                            templateSymbol.GetDiagnosticLocation(),
+                            (templateSymbol, runTimeOnlyParameters) ) );
+
+                    this.Success = false;
+                }
+            }
+
             private new IEnumerable<MethodDeclarationSyntax> VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
                 var methodSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
 
-                if ( methodSymbol != null && this.SymbolClassifier.IsTemplate( methodSymbol ) )
+                if ( methodSymbol == null || this.SymbolClassifier.GetTemplateMemberKind( methodSymbol ) == TemplateMemberKind.None )
                 {
-                    var success =
-                        this._templateCompiler.TryCompile(
-                            TemplateNameHelper.GetCompiledTemplateName( methodSymbol ),
-                            this._compileTimeCompilation,
-                            node,
-                            this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                            this._diagnosticAdder,
-                            this._cancellationToken,
-                            out _,
-                            out var transformedNode );
+                    yield return (MethodDeclarationSyntax) base.VisitMethodDeclaration( node ).AssertNotNull();
 
-                    if ( success )
+                    yield break;
+                }
+
+                var success =
+                    this._templateCompiler.TryCompile(
+                        TemplateNameHelper.GetCompiledTemplateName( methodSymbol ),
+                        this._compileTimeCompilation,
+                        node,
+                        this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                        this._diagnosticAdder,
+                        this._cancellationToken,
+                        out _,
+                        out var transformedNode );
+
+                if ( success )
+                {
+                    if ( !methodSymbol.IsVirtual && !methodSymbol.IsOverride && !methodSymbol.IsAbstract )
                     {
-                        yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
-                        yield return (MethodDeclarationSyntax) transformedNode.AssertNotNull();
+                        // The method can be deleted, i.e. it does not need to be inserted back in the member list.
                     }
                     else
                     {
-                        this.Success = false;
+                        // If the method is virtual/override, it cannot be removed.
+
+                        var runTimeOnlyParameters =
+                            methodSymbol.Parameters.Select( p => p.Type )
+                                .Prepend( methodSymbol.ReturnType );
+
+                        this.CheckVirtualTemplateSignature( methodSymbol, runTimeOnlyParameters );
+
+                        yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                     }
+
+                    yield return (MethodDeclarationSyntax) transformedNode.AssertNotNull();
                 }
                 else
                 {
-                    yield return (MethodDeclarationSyntax) base.VisitMethodDeclaration( node ).AssertNotNull();
+                    this.Success = false;
                 }
             }
 
@@ -215,163 +289,178 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var propertySymbol = (IPropertySymbol) this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
-                if ( this.SymbolClassifier.IsTemplate( propertySymbol ) )
+                if ( this.SymbolClassifier.GetTemplateMemberKind( propertySymbol ) == TemplateMemberKind.None )
                 {
-                    var success = true;
-                    SyntaxNode? transformedGetDeclaration = null;
-                    SyntaxNode? transformedSetDeclaration = null;
+                    yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
 
-                    // Compile accessors into templates.
-                    if ( !propertySymbol.IsAbstract )
+                    yield break;
+                }
+
+                var success = true;
+                SyntaxNode? transformedGetDeclaration = null;
+                SyntaxNode? transformedSetDeclaration = null;
+
+                // Compile accessors into templates.
+                if ( !propertySymbol.IsAbstract )
+                {
+                    if ( node.AccessorList != null )
                     {
-                        if ( node.AccessorList != null )
+                        var getAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration );
+
+                        var setAccessor = node.AccessorList.Accessors.SingleOrDefault(
+                            a => a.Kind() == SyntaxKind.SetAccessorDeclaration || a.Kind() == SyntaxKind.InitAccessorDeclaration );
+
+                        // Auto properties don't have bodies and so we don't need templates.
+
+                        if ( getAccessor != null && (getAccessor.Body != null || getAccessor.ExpressionBody != null) )
                         {
-                            var getAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration );
+                            success = success &&
+                                      this._templateCompiler.TryCompile(
+                                          TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
+                                          this._compileTimeCompilation,
+                                          getAccessor,
+                                          this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                          this._diagnosticAdder,
+                                          this._cancellationToken,
+                                          out _,
+                                          out transformedGetDeclaration );
+                        }
 
-                            var setAccessor = node.AccessorList.Accessors.SingleOrDefault(
-                                a => a.Kind() == SyntaxKind.SetAccessorDeclaration || a.Kind() == SyntaxKind.InitAccessorDeclaration );
+                        if ( setAccessor != null && (setAccessor.Body != null || setAccessor.ExpressionBody != null) )
+                        {
+                            success = success &&
+                                      this._templateCompiler.TryCompile(
+                                          TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
+                                          this._compileTimeCompilation,
+                                          setAccessor,
+                                          this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                          this._diagnosticAdder,
+                                          this._cancellationToken,
+                                          out _,
+                                          out transformedSetDeclaration );
+                        }
 
-                            // Auto properties don't have bodies and so we don't need templates.
-
-                            if ( getAccessor != null && (getAccessor.Body != null || getAccessor.ExpressionBody != null) )
-                            {
-                                success = success &&
-                                          this._templateCompiler.TryCompile(
-                                              TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
-                                              this._compileTimeCompilation,
-                                              getAccessor,
-                                              this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                              this._diagnosticAdder,
-                                              this._cancellationToken,
-                                              out _,
-                                              out transformedGetDeclaration );
-                            }
-
-                            if ( setAccessor != null && (setAccessor.Body != null || setAccessor.ExpressionBody != null) )
-                            {
-                                success = success &&
-                                          this._templateCompiler.TryCompile(
-                                              TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
-                                              this._compileTimeCompilation,
-                                              setAccessor,
-                                              this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                              this._diagnosticAdder,
-                                              this._cancellationToken,
-                                              out _,
-                                              out transformedSetDeclaration );
-                            }
-
-                            // Expression bodied property.
-                            if ( node is PropertyDeclarationSyntax { ExpressionBody: not null } propertyNode )
-                            {
-                                // TODO: Does this preserve trivia in expression body?
-                                success = success &&
-                                          this._templateCompiler.TryCompile(
-                                              TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
-                                              this._compileTimeCompilation,
-                                              AccessorDeclaration(
-                                                  SyntaxKind.GetAccessorDeclaration,
-                                                  List<AttributeListSyntax>(),
-                                                  TokenList(),
-                                                  propertyNode.ExpressionBody! ),
-                                              this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                              this._diagnosticAdder,
-                                              this._cancellationToken,
-                                              out _,
-                                              out transformedGetDeclaration );
-                            }
+                        // Expression bodied property.
+                        if ( node is PropertyDeclarationSyntax { ExpressionBody: not null } propertyNode )
+                        {
+                            // TODO: Does this preserve trivia in expression body?
+                            success = success &&
+                                      this._templateCompiler.TryCompile(
+                                          TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
+                                          this._compileTimeCompilation,
+                                          AccessorDeclaration(
+                                              SyntaxKind.GetAccessorDeclaration,
+                                              List<AttributeListSyntax>(),
+                                              TokenList(),
+                                              propertyNode.ExpressionBody! ),
+                                          this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                          this._diagnosticAdder,
+                                          this._cancellationToken,
+                                          out _,
+                                          out transformedGetDeclaration );
                         }
                     }
+                }
 
-                    if ( success )
+                if ( success )
+                {
+                    if ( !propertySymbol.IsVirtual && !propertySymbol.IsOverride && !propertySymbol.IsAbstract )
                     {
-                        yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
-
-                        if ( transformedGetDeclaration != null )
-                        {
-                            yield return (MemberDeclarationSyntax) transformedGetDeclaration;
-                        }
-
-                        if ( transformedSetDeclaration != null )
-                        {
-                            yield return (MemberDeclarationSyntax) transformedSetDeclaration;
-                        }
+                        // The property can be deleted, i.e. it does not need to be inserted back in the member list.
                     }
                     else
                     {
-                        this.Success = false;
+                        // If the property is virtual/override, it cannot be removed.
+
+                        var runTimeOnlyParameters =
+                            propertySymbol.Parameters.Select( p => p.Type )
+                                .Prepend( propertySymbol.Type );
+
+                        this.CheckVirtualTemplateSignature( propertySymbol, runTimeOnlyParameters );
+
+                        yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                    }
+
+                    if ( transformedGetDeclaration != null )
+                    {
+                        yield return (MemberDeclarationSyntax) transformedGetDeclaration;
+                    }
+
+                    if ( transformedSetDeclaration != null )
+                    {
+                        yield return (MemberDeclarationSyntax) transformedSetDeclaration;
                     }
                 }
                 else
                 {
-                    yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
+                    this.Success = false;
                 }
             }
 
-            private IEnumerable<MemberDeclarationSyntax> VisitEventDeclaration( EventDeclarationSyntax node )
+            private new IEnumerable<MemberDeclarationSyntax> VisitEventDeclaration( EventDeclarationSyntax node )
             {
                 var eventSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
-                if ( this.SymbolClassifier.IsTemplate( eventSymbol ) )
+                if ( this.SymbolClassifier.GetTemplateMemberKind( eventSymbol ) == TemplateMemberKind.None )
                 {
-                    var success = true;
-                    SyntaxNode? transformedAddDeclaration = null;
-                    SyntaxNode? transformedRemoveDeclaration = null;
+                    yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
 
-                    // Compile accessors into templates.
-                    if ( !eventSymbol.IsAbstract )
+                    yield break;
+                }
+
+                var success = true;
+                SyntaxNode? transformedAddDeclaration = null;
+                SyntaxNode? transformedRemoveDeclaration = null;
+
+                // Compile accessors into templates.
+                if ( !eventSymbol.IsAbstract )
+                {
+                    if ( node.AccessorList != null )
                     {
-                        if ( node.AccessorList != null )
-                        {
-                            var addAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.AddAccessorDeclaration );
-                            var removeAccessor = node.AccessorList.Accessors.SingleOrDefault(a => a.Kind() == SyntaxKind.RemoveAccessorDeclaration );
+                        var addAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.AddAccessorDeclaration );
+                        var removeAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.RemoveAccessorDeclaration );
 
-                            success = success &&
-                                      this._templateCompiler.TryCompile(
-                                          TemplateNameHelper.GetCompiledTemplateName( eventSymbol.AddMethod.AssertNotNull() ),
-                                          this._compileTimeCompilation,
-                                          addAccessor,
-                                          this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                          this._diagnosticAdder,
-                                          this._cancellationToken,
-                                          out _,
-                                          out transformedAddDeclaration );
+                        success = success &&
+                                  this._templateCompiler.TryCompile(
+                                      TemplateNameHelper.GetCompiledTemplateName( eventSymbol.AddMethod.AssertNotNull() ),
+                                      this._compileTimeCompilation,
+                                      addAccessor,
+                                      this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                      this._diagnosticAdder,
+                                      this._cancellationToken,
+                                      out _,
+                                      out transformedAddDeclaration );
 
-                            success = success &&
-                                      this._templateCompiler.TryCompile(
-                                          TemplateNameHelper.GetCompiledTemplateName( eventSymbol.RemoveMethod.AssertNotNull() ),
-                                          this._compileTimeCompilation,
-                                          removeAccessor,
-                                          this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                          this._diagnosticAdder,
-                                          this._cancellationToken,
-                                          out _,
-                                          out transformedRemoveDeclaration );
-                        }
+                        success = success &&
+                                  this._templateCompiler.TryCompile(
+                                      TemplateNameHelper.GetCompiledTemplateName( eventSymbol.RemoveMethod.AssertNotNull() ),
+                                      this._compileTimeCompilation,
+                                      removeAccessor,
+                                      this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                      this._diagnosticAdder,
+                                      this._cancellationToken,
+                                      out _,
+                                      out transformedRemoveDeclaration );
+                    }
+                }
+
+                if ( success )
+                {
+                    yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+
+                    if ( transformedAddDeclaration != null )
+                    {
+                        yield return (MemberDeclarationSyntax) transformedAddDeclaration;
                     }
 
-                    if ( success )
+                    if ( transformedRemoveDeclaration != null )
                     {
-                        yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
-
-                        if ( transformedAddDeclaration != null )
-                        {
-                            yield return (MemberDeclarationSyntax) transformedAddDeclaration;
-                        }
-
-                        if ( transformedRemoveDeclaration != null )
-                        {
-                            yield return (MemberDeclarationSyntax) transformedRemoveDeclaration;
-                        }
-                    }
-                    else
-                    {
-                        this.Success = false;
+                        yield return (MemberDeclarationSyntax) transformedRemoveDeclaration;
                     }
                 }
                 else
                 {
-                    yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
+                    this.Success = false;
                 }
             }
 
@@ -405,13 +494,14 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
             {
-                if ( this._currentContext.Scope != SymbolDeclarationScope.RunTimeOnly && node.IsNameOf() )
+                if ( this._currentContext.Scope != TemplatingScope.RunTimeOnly && node.IsNameOf() )
                 {
-                    var typeSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree )
-                        .GetSymbolInfo( node.ArgumentList.Arguments[0].Expression )
-                        .Symbol;
+                    var symbolInfo = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree )
+                        .GetSymbolInfo( node.ArgumentList.Arguments[0].Expression );
 
-                    if ( typeSymbol != null && this.SymbolClassifier.GetSymbolDeclarationScope( typeSymbol ) == SymbolDeclarationScope.RunTimeOnly )
+                    var typeSymbol = symbolInfo.Symbol ?? symbolInfo.CandidateSymbols.FirstOrDefault();
+
+                    if ( typeSymbol != null )
                     {
                         return SyntaxFactoryEx.LiteralExpression( typeSymbol.Name );
                     }
@@ -422,11 +512,11 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public override SyntaxNode? VisitTypeOfExpression( TypeOfExpressionSyntax node )
             {
-                if ( this._currentContext.Scope != SymbolDeclarationScope.RunTimeOnly )
+                if ( this._currentContext.Scope != TemplatingScope.RunTimeOnly )
                 {
                     var typeSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Type ).Symbol;
 
-                    if ( typeSymbol != null && this.SymbolClassifier.GetSymbolDeclarationScope( typeSymbol ) == SymbolDeclarationScope.RunTimeOnly )
+                    if ( typeSymbol != null && this.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
                     {
                         // We are in a compile-time-only block but we have a typeof to a run-time-only block. 
                         // This is a situation we can handle by rewriting the typeof to a call to CompileTimeType.CreateFromDocumentationId.
@@ -468,7 +558,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public override SyntaxToken VisitToken( SyntaxToken token ) => this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( token );
 
-            private Context WithScope( SymbolDeclarationScope scope )
+            private Context WithScope( TemplatingScope scope )
             {
                 this._currentContext = new Context( scope, this );
 
@@ -482,7 +572,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 private readonly ProduceCompileTimeCodeRewriter _parent;
                 private readonly Context _oldContext;
 
-                public Context( SymbolDeclarationScope scope, ProduceCompileTimeCodeRewriter parent )
+                public Context( TemplatingScope scope, ProduceCompileTimeCodeRewriter parent )
                 {
                     this.Scope = scope;
                     this._parent = parent;
@@ -491,7 +581,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     this._oldContext = parent._currentContext;
                 }
 
-                public SymbolDeclarationScope Scope { get; }
+                public TemplatingScope Scope { get; }
 
                 public void Dispose()
                 {

@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this._linkerAnnotation = linkerAnnotation;
         }
 
-        public RuntimeExpression CreateExpression( string? expressionText, Location? location ) => new( ThisExpression(), this._type );
+        public RuntimeExpression? CreateExpression( string? expressionText, Location? location = null ) => new( ThisExpression(), this._type );
 
         RuntimeExpression IDynamicReceiver.CreateMemberAccessExpression( string member )
             => new( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( Identifier( member ) ) )

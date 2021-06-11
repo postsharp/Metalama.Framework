@@ -82,8 +82,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     additionalResourcesBuilder.Add( resource );
                 }
 
-                if ( configuration.CompileTimeProject != null &&
-                     result.PartialCompilation.Compilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
+                if ( configuration.CompileTimeProject is { IsEmpty: false } )
                 {
                     additionalResourcesBuilder.Add( configuration.CompileTimeProject!.ToResource() );
                 }

@@ -2,7 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
@@ -21,7 +24,9 @@ namespace Caravela.Framework.Impl.CodeModel
         private readonly IFieldSymbol _symbol;
 
         [Memo]
-        private PropertyInvocation Invocation => new( this );
+        public IInvokerFactory<IPropertyInvoker> Invokers => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ) );
+
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
@@ -42,25 +47,9 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IMethod? Setter => new PseudoAccessor( this, AccessorSemantic.Set );
 
-        public dynamic Value
-        {
-            get => new FieldOrPropertyInvocation( this ).Value;
-            set => throw new InvalidOperationException();
-        }
-
-        public object GetValue( object? instance ) => this.Invocation.GetValue( instance );
-
-        public object SetValue( object? instance, object value ) => this.Invocation.SetValue( instance, value );
-
-        public bool HasBase => true;
-
-        IFieldOrPropertyInvocation IFieldOrProperty.Base => new PropertyInvocation( this ).Base;
-
         public PropertyInfo ToPropertyInfo() => throw new NotImplementedException();
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
-
-        public IPropertyInvocation Base => throw new NotImplementedException();
 
         RefKind IProperty.RefKind => RefKind.None;
 
@@ -68,18 +57,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public Writeability Writeability => this._symbol.IsReadOnly ? Writeability.ConstructorOnly : Writeability.All;
 
-        IParameterList IProperty.Parameters => ParameterList.Empty;
+        IParameterList IHasParameters.Parameters => ParameterList.Empty;
 
         public override bool IsAsync => false;
 
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => Array.Empty<IProperty>();
 
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
-
-        dynamic IPropertyInvocation.GetIndexerValue( dynamic? instance, params dynamic[] args ) => this.Invocation.GetIndexerValue( instance, args );
-
-        dynamic IPropertyInvocation.SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args )
-            => this.Invocation.SetIndexerValue( instance, value, args );
 
         MemberRef<IMemberOrNamedType> IReplaceMemberTransformation.ReplacedMember => new( this._symbol );
 

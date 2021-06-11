@@ -3,7 +3,7 @@
 
 using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Tests.Integration.Templating;
+using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Formatting;
@@ -61,23 +61,27 @@ namespace Caravela.AspectWorkbench.ViewModels
                 this.ErrorsDocument = new FlowDocument();
                 this.TransformedTargetDocument = null;
 
-                TestRunnerBase testRunner = this.TestText.Contains( "[TestTemplate]" )
-                    ? new TemplatingTestRunner( this._serviceProvider )
-                    : new AspectTestRunner( this._serviceProvider );
+                var testInput = TestInput.FromSource( "interactive", this.TestText );
+
+                // This is a dirty trick. We should read options from the directory instead.
+                if ( this.TestText.Contains( "[TestTemplate]" ) )
+                {
+                    testInput.Options.TestRunnerFactoryType = typeof(TemplatingTestRunnerFactory).AssemblyQualifiedName;
+                }
+
+                var testRunner = TestRunnerFactory.CreateTestRunner( testInput, this._serviceProvider );
 
                 var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject() );
 
-                var testInput = new TestInput( "interactive", this.TestText );
-
                 var compilationStopwatch = Stopwatch.StartNew();
 
-                var testResult = await testRunner.RunTestAsync( testInput );
+                var testResult = testRunner.RunTest( testInput );
                 compilationStopwatch.Stop();
 
                 if ( testResult.AnnotatedTemplateSyntax != null )
                 {
                     // Display the annotated syntax tree.
-                    var sourceText = await testResult.TemplateDocument.GetTextAsync();
+                    var sourceText = await testResult.TemplateDocument!.GetTextAsync();
                     var classifier = new TextSpanClassifier( sourceText, testRunner is TemplatingTestRunner );
                     classifier.Visit( testResult.AnnotatedTemplateSyntax );
                     var metaSpans = classifier.ClassifiedTextSpans;
@@ -109,8 +113,8 @@ namespace Caravela.AspectWorkbench.ViewModels
                     this.TransformedTargetDocument = await syntaxColorizer.WriteSyntaxColoring( testResult.TransformedTargetSourceText, null );
 
                     // Compare the output and shows the result.
-                    if ( UnitTestBase.NormalizeString( this.ExpectedOutputText ) ==
-                         UnitTestBase.NormalizeString( testResult.TransformedTargetSourceText.ToString() ) )
+                    if ( BaseTestRunner.NormalizeString( this.ExpectedOutputText ) ==
+                         BaseTestRunner.NormalizeString( testResult.TransformedTargetSourceText.ToString() ) )
                     {
                         errorsDocument.Blocks.Add(
                             new Paragraph( new Run( "The transformed target code is equal to expectations." ) { Foreground = Brushes.Green } ) );
@@ -167,7 +171,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
             var input = this._currentTest.Input ?? throw new InvalidOperationException( $"The {nameof(this._currentTest.Input)} property cannot be null." );
 
-            this.TestText = input.TestSource;
+            this.TestText = input.SourceCode;
             this.ExpectedOutputText = this._currentTest.ExpectedOutput;
             this.CompiledTemplateDocument = null;
             this.TransformedTargetDocument = null;
@@ -193,7 +197,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 this._currentTest = new TemplateTest();
             }
 
-            this._currentTest.Input = new TestInput( "interactive", this.TestText );
+            this._currentTest.Input = TestInput.FromSource( "interactive", this.TestText );
             this._currentTest.ExpectedOutput = this.ExpectedOutputText ?? string.Empty;
 
             this.CurrentPath = filePath;

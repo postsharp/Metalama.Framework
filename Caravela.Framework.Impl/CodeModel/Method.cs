@@ -2,7 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
@@ -15,7 +18,7 @@ using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal partial class Method : MethodBase, IMethod
+    internal class Method : MethodBase, IMethod
     {
         public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
@@ -44,18 +47,15 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsOpenGeneric => this.GenericArguments.Any( ga => ga is IGenericParameter ) || this.DeclaringType.IsOpenGeneric;
 
-        public object Invoke( object? instance, params object[] args ) => new MethodInvocation( this ).Invoke( instance, args );
-
-        public bool HasBase => true;
-
-        public IMethodInvocation Base => throw new NotImplementedException();
-
         public IMethod WithGenericArguments( params IType[] genericArguments )
         {
             var symbolWithGenericArguments = this.MethodSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() );
 
             return new Method( symbolWithGenericArguments, this.Compilation );
         }
+
+        [Memo]
+        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ) );
 
         public override bool IsReadOnly => this.MethodSymbol.IsReadOnly;
 

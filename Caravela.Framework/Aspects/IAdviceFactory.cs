@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Validation;
 using System;
 using System.Collections.Generic;
@@ -45,8 +46,8 @@ namespace Caravela.Framework.Aspects
 
         void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
-            string? getTemplate,
-            string? setTemplate,
+            string? getTemplate = null,
+            string? setTemplate = null,
             AdviceOptions? options = null );
 
         IFieldBuilder IntroduceField(

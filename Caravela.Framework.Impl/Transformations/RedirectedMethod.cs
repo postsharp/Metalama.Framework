@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = ((CompilationModel) this.TargetMethod.Compilation).SyntaxGenerator;
+            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
             var body =
                 Block(
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.Transformations
                     InvocationExpression(
                         GetInvocationTargetExpression(),
                         ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) )
-                    .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkerAnnotationOrder.Default ) );
+                    .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkingOrder.Default ) );
             }
 
             ExpressionSyntax GetInvocationTargetExpression()

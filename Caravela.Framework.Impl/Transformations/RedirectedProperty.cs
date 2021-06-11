@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = ((CompilationModel) this.TargetProperty.Compilation).SyntaxGenerator;
+            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
             return new[]
             {
@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration.IsStatic
                     ? IdentifierName( this.OverriddenDeclaration.Name )
                     : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this.OverriddenDeclaration.Name ) )
-                    .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkerAnnotationOrder.Default ) );
+                    .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkingOrder.Default ) );
             }
         }
     }

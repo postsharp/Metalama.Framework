@@ -137,7 +137,7 @@ namespace Caravela.Framework.Impl.Transformations
                     new LinkerOverridePropertyProceedImpl(
                         this.Advice.AspectLayerId,
                         accessor,
-                        LinkerAnnotationOrder.Default,
+                        LinkingOrder.Default,
                         context.SyntaxFactory ),
                     context.LexicalScope,
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
@@ -172,7 +172,7 @@ namespace Caravela.Framework.Impl.Transformations
                                     .AddLinkerAnnotation(
                                         new LinkerAnnotation(
                                             this.Advice.AspectLayerId,
-                                            LinkerAnnotationOrder.Default,
+                                            LinkingOrder.Default,
                                             LinkerAnnotationTargetKind.PropertySetAccessor ) ) ) );
 
                 case SyntaxKind.SetAccessorDeclaration:
@@ -186,7 +186,7 @@ namespace Caravela.Framework.Impl.Transformations
                                         .AddLinkerAnnotation(
                                             new LinkerAnnotation(
                                                 this.Advice.AspectLayerId,
-                                                LinkerAnnotationOrder.Default,
+                                                LinkingOrder.Default,
                                                 LinkerAnnotationTargetKind.PropertySetAccessor ) ),
                                     IdentifierName( "value" ) ) ) );
 

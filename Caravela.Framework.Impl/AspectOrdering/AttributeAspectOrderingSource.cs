@@ -13,10 +13,12 @@ namespace Caravela.Framework.Impl.AspectOrdering
     internal class AttributeAspectOrderingSource : IAspectOrderingSource
     {
         private readonly Compilation _compilation;
+        private readonly AttributeDeserializer _attributeDeserializer;
 
-        public AttributeAspectOrderingSource( Compilation compilation )
+        public AttributeAspectOrderingSource( Compilation compilation, CompileTimeProjectLoader loader )
         {
             this._compilation = compilation;
+            this._attributeDeserializer = loader.AttributeDeserializer;
         }
 
         public IEnumerable<AspectOrderSpecification> GetAspectOrderSpecification( IDiagnosticAdder diagnosticAdder )
@@ -34,7 +36,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
             return attributes.Select(
                     attribute =>
                     {
-                        if ( AttributeDeserializer.SystemTypes.TryCreateAttribute<AspectOrderAttribute>(
+                        if ( this._attributeDeserializer.TryCreateAttribute<AspectOrderAttribute>(
                             attribute.attribute,
                             diagnosticAdder,
                             out var attributeInstance ) )

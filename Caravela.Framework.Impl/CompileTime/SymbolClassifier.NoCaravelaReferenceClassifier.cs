@@ -20,9 +20,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
             }
 
-            public bool IsTemplate( ISymbol symbol ) => false;
+            public TemplateMemberKind GetTemplateMemberKind( ISymbol symbol ) => TemplateMemberKind.None;
 
-            public SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol )
+            public TemplatingScope GetTemplatingScope( ISymbol symbol )
             {
                 if ( SymbolClassifier.TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
                 {
@@ -31,8 +31,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 else
                 {
                     return this._referenceAssemblyLocator.StandardAssemblyNames.Contains( symbol.ContainingAssembly.Name )
-                        ? SymbolDeclarationScope.Both
-                        : SymbolDeclarationScope.RunTimeOnly;
+                        ? TemplatingScope.Both
+                        : TemplatingScope.RunTimeOnly;
                 }
             }
         }

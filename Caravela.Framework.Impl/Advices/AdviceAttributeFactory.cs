@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
@@ -131,7 +132,7 @@ namespace Caravela.Framework.Impl.Advices
                             case IEvent templateEvent:
                                 var introduceEventAdvice = new IntroduceEventAdvice(
                                     aspect,
-                                    (INamedType) aspectTargetDeclaration,
+                                    targetType,
                                     templateEvent,
                                     null,
                                     null,

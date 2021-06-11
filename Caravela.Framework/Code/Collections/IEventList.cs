@@ -1,0 +1,10 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+namespace Caravela.Framework.Code.Collections
+{
+    /// <summary>
+    /// Read-only list of <see cref="IEvent"/>.
+    /// </summary>
+    public interface IEventList : IMemberList<IEvent> { }
+}

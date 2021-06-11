@@ -2,10 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code.Invokers;
 using System.Collections.Generic;
 using System.Reflection;
-
-#pragma warning disable SA1623 // Property summary documentation should match accessors
 
 namespace Caravela.Framework.Code
 {
@@ -38,9 +37,9 @@ namespace Caravela.Framework.Code
         IMethod? Raiser { get; }
 
         /// <summary>
-        /// Allows invocation of the base event (<see langword="null" /> if the method was introduced by the current aspect).
+        /// Gets an object that allows to add or remove a handler to or from the current event. 
         /// </summary>
-        IEventInvocation? Base { get; }
+        IInvokerFactory<IEventInvoker> Invokers { get; }
 
         /// <summary>
         /// Gets a list of interface events this event explicitly implements.

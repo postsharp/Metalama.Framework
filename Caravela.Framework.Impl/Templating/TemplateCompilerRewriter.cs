@@ -45,14 +45,14 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
             IDiagnosticAdder diagnosticAdder,
             IServiceProvider serviceProvider,
+            SerializableTypes serializableTypes,
             CancellationToken cancellationToken ) : base( compileTimeCompilation )
         {
             this._templateName = templateName;
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
             this._cancellationToken = cancellationToken;
-            var syntaxSerializationService = serviceProvider.GetService<SyntaxSerializationService>();
-            this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( runTimeCompilation ) );
+            this._serializableTypes = serializableTypes;
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
             this._templateMemberClassifier = new TemplateMemberClassifier( runTimeCompilation, syntaxTreeAnnotationMap, serviceProvider );
         }
@@ -142,9 +142,12 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         protected override TransformationKind GetTransformationKind( SyntaxNode node )
         {
-            if ( !node.GetScopeFromAnnotation().MustBeTransformed() )
+            var scope = node.GetScopeFromAnnotation().GetValueOrDefault();
+
+            // Take a decision from the node if we can.
+            if ( scope != TemplatingScope.Both && scope != TemplatingScope.Unknown )
             {
-                return TransformationKind.None;
+                return scope.MustBeTransformed() ? TransformationKind.Transform : TransformationKind.None;
             }
 
             // Look for annotation on the parent, but stop at 'if' and 'foreach' statements,
@@ -153,7 +156,7 @@ namespace Caravela.Framework.Impl.Templating
                   parent != null;
                   parent = parent.Parent )
             {
-                if ( !parent.GetScopeFromAnnotation().MustBeTransformed() )
+                if ( !parent.GetScopeFromAnnotation().GetValueOrDefault().MustBeTransformed() )
                 {
                     return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax
                            || parent is SwitchSectionSyntax
@@ -314,6 +317,14 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     return this.MetaSyntaxFactory.IdentifierName1( IdentifierName( declaredSymbolNameLocal.Text ) );
                 }
+                else if ( identifierSymbol is IParameterSymbol parameterSymbol
+                          && SymbolEqualityComparer.Default.Equals( parameterSymbol.ContainingSymbol, this._rootTemplateSymbol ) )
+                {
+                    // We have a reference to a template parameter. Currently, only introductions can have template parameters, and these don't need
+                    // to be renamed.
+
+                    return base.TransformIdentifierName( node );
+                }
                 else
                 {
                     // That should not happen in a correct compilation because IdentifierName is used only for an identifier reference, not an identifier definition.
@@ -427,7 +438,8 @@ namespace Caravela.Framework.Impl.Templating
                 return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
             }
 
-            switch ( type.Name )
+            // ReSharper disable once ConstantConditionalAccessQualifier
+            switch ( type?.Name )
             {
                 case "dynamic":
                     if ( this._templateMemberClassifier.IsProceed( expression ) )
@@ -488,6 +500,9 @@ namespace Caravela.Framework.Impl.Templating
                                                         nameof(TemplateSyntaxFactory.BooleanKeyword) ) )
                                                 .AddArgumentListArguments( Argument( expression ) ) ) ) ),
                             Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateReferenceId( type ) ) ) ) );
+
+                case null:
+                    throw new AssertionFailedException( $"Cannot convert {expression} to a run-time value." );
 
                 default:
                     // Try to find a serializer for this type.
@@ -566,6 +581,17 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        protected override ExpressionSyntax TransformExpressionStatement( ExpressionStatementSyntax node )
+        {
+            var expression = this.Transform( node.Expression );
+
+            var toArrayStatementExpression = InvocationExpression(
+                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ToStatement) ),
+                ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
+
+            return toArrayStatementExpression;
+        }
+
         public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
         {
             var transformationKind = this.GetTransformationKind( node );
@@ -590,18 +616,38 @@ namespace Caravela.Framework.Impl.Templating
             if ( transformationKind != TransformationKind.Transform &&
                  node.ArgumentList.Arguments.Any( a => this._templateMemberClassifier.IsDynamicParameter( a ) ) )
             {
-                var transformedArguments = node.ArgumentList.Arguments.Select(
-                        a => this._templateMemberClassifier.IsDynamicParameter( a )
-                            ? Argument( this.CreateRunTimeExpression( a.Expression ) )
-                            : this.Visit( a )! )
-                    .ToArray();
+                // We are transforming a call to a compile-time method that accepts dynamic arguments.
+
+                SyntaxNode? LocalTransformArgument( ArgumentSyntax a )
+                {
+                    if ( this._templateMemberClassifier.IsDynamicParameter( a ) )
+                    {
+                        if ( a.GetScopeFromAnnotation() != TemplatingScope.RunTimeOnly )
+                        {
+                            return Argument( this.CreateRunTimeExpression( a.Expression ) );
+                        }
+                        else
+                        {
+                            return Argument( (ExpressionSyntax) this.Visit( a.Expression )! );
+                        }
+                    }
+                    else
+                    {
+                        return this.Visit( a );
+                    }
+                }
+
+                var transformedArguments = node.ArgumentList.Arguments.Select( syntax => LocalTransformArgument( syntax )! ).ToArray();
 
                 return node.Update(
                     (ExpressionSyntax) this.Visit( node.Expression )!,
                     ArgumentList( SeparatedList( transformedArguments )! ) );
             }
-
-            if ( this._templateMemberClassifier.IsProceed( node.Expression ) )
+            else if ( this._templateMemberClassifier.IsDynamicType( node.Expression ) )
+            {
+                // We are in an invocation like: `meta.This.Foo(...)`.
+            }
+            else if ( this._templateMemberClassifier.IsProceed( node.Expression ) )
             {
                 // We cannot call proceed in an unsupported statement.
                 this.Report( TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic( node.Expression.GetLocation(), "" ) );

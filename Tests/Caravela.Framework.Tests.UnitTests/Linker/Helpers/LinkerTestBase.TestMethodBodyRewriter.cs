@@ -48,7 +48,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     }
 
                     return callExpression.AddLinkerAnnotation(
-                        new LinkerAnnotation( new AspectLayerId( this._aspectName, this._layerName ), LinkerAnnotationOrder.Default ) );
+                        new LinkerAnnotation( new AspectLayerId( this._aspectName, this._layerName ), LinkingOrder.Default ) );
                 }
 
                 return base.VisitInvocationExpression( node );

@@ -3,7 +3,10 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -23,11 +26,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod? Setter => throw new NotImplementedException();
 
-        public bool HasBase => throw new NotImplementedException();
-
-        public IFieldOrPropertyInvocation Base => throw new NotImplementedException();
-
-        public dynamic Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        [Memo]
+        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
+            => new InvokerFactory<IFieldOrPropertyInvoker>( order => new FieldOrPropertyInvoker( this, order ), false );
 
         IType IFieldOrProperty.Type => throw new NotImplementedException();
 
@@ -44,16 +45,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic GetValue( dynamic? instance )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic SetValue( dynamic? instance, dynamic value )
         {
             throw new NotImplementedException();
         }

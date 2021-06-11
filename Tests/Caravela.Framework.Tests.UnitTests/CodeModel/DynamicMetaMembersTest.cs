@@ -46,30 +46,30 @@ class TargetCode
 
             // Test normal case.
             AssertEx.DynamicEquals(
-                toString.Invoke(
+                toString.Invokers.Final.Invoke(
                     new RuntimeExpression( (ExpressionSyntax) generator.ThisExpression() ),
                     new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( "x" ) ) ),
                 @"((global::TargetCode)(this)).ToString((global::System.String)(""x""))" );
 
             AssertEx.DynamicEquals(
-                toString.Invoke(
+                toString.Invokers.Final.Invoke(
                     new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( 42 ) ),
                     new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( 43 ) ) ),
                 @"((global::TargetCode)(42)).ToString((global::System.String)(43))" );
 
             // Test static call.
             AssertEx.DynamicEquals(
-                fooMethod.Invoke( null ),
+                fooMethod.Invokers.Final.Invoke( null ),
                 @"global::TargetCode.Foo()" );
 
             // Test exception related to the 'instance' parameter.
             AssertEx.ThrowsWithDiagnostic(
                 GeneralDiagnosticDescriptors.CannotProvideInstanceForStaticMember,
-                () => fooMethod.Invoke( new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( 42 ) ) ) );
+                () => fooMethod.Invokers.Final.Invoke( new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( 42 ) ) ) );
 
             AssertEx.ThrowsWithDiagnostic(
                 GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember,
-                () => toString.Invoke(
+                () => toString.Invokers.Final.Invoke(
                     null,
                     new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( "x" ) ) ) );
 
@@ -77,7 +77,7 @@ class TargetCode
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
             AssertEx.DynamicEquals(
-                byRefMethod.Invoke(
+                byRefMethod.Invokers.Final.Invoke(
                     null,
                     new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "x" ), intType, true ),
                     new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "y" ), intType, true ) ),
@@ -85,7 +85,7 @@ class TargetCode
 
             AssertEx.ThrowsWithDiagnostic(
                 GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter,
-                () => byRefMethod.Invoke(
+                () => byRefMethod.Invokers.Final.Invoke(
                     null,
                     new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "x" ) ),
                     new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "y" ) ) ) );
@@ -113,7 +113,7 @@ class TargetCode
             var method = nestedType.Methods.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof(int) )! );
 
             AssertEx.DynamicEquals(
-                method.Invoke( null ),
+                method.Invokers.Final.Invoke( null ),
                 @"global::TargetCode.Nested<global::System.String>.Foo<global::System.Int32>()" );
         }
 
@@ -133,12 +133,12 @@ class TargetCode
             var localFunction = compilation.DeclaredTypes.OfName( "TargetCode" ).Single().Methods.Single().LocalFunctions.Single();
 
             AssertEx.DynamicEquals(
-                localFunction.Invoke( null ),
+                localFunction.Invokers.Final.Invoke( null ),
                 @"Local()" );
 
             AssertEx.ThrowsWithDiagnostic(
                 GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction,
-                () => localFunction.Invoke( new RuntimeExpression( SyntaxFactory.ThisExpression() ) ) );
+                () => localFunction.Invokers.Final.Invoke( new RuntimeExpression( SyntaxFactory.ThisExpression() ) ) );
         }
 
         [Fact]
@@ -185,8 +185,11 @@ class TargetCode
             var property = type.Properties.OfName( "P" ).Single();
             RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression() );
 
-            AssertEx.DynamicEquals( property.GetValue( thisExpression ), @"((global::TargetCode)(this)).P" );
-            AssertEx.DynamicEquals( property.GetValue( property.GetValue( thisExpression ) ), @"((global::TargetCode)(this)).P.P" );
+            AssertEx.DynamicEquals( property.Invokers.Final.GetValue( thisExpression ), @"((global::TargetCode)(this)).P" );
+
+            AssertEx.DynamicEquals(
+                property.Invokers.Final.GetValue( property.Invokers.Final.GetValue( thisExpression ) ),
+                @"((global::TargetCode)(this)).P.P" );
         }
 
         [Fact]

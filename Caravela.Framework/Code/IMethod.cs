@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -10,7 +12,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a method, but not a constructor.
     /// </summary>
-    public interface IMethod : IMethodBase, IMethodInvocation
+    public interface IMethod : IMethodBase
     {
         /// <summary>
         /// Gets an object representing the method return type and custom attributes, or  <c>null</c> for methods that don't have return types: constructors and finalizers.
@@ -44,15 +46,9 @@ namespace Caravela.Framework.Code
         IMethod WithGenericArguments( params IType[] genericArguments );
 
         /// <summary>
-        /// Gets a value indicating whether the method existed before the current aspect was advice
-        /// (<see langword="false" /> if it was introduced by the current aspect).
+        /// Gets an object that allows to invoke the current method.
         /// </summary>
-        bool HasBase { get; }
-
-        /// <summary>
-        /// Gets an object that allows invocation of the base method (<see langword="base" /> if the method was introduced by the current aspect).
-        /// </summary>
-        IMethodInvocation Base { get; }
+        IInvokerFactory<IMethodInvoker> Invokers { get; }
 
         /// <summary>
         /// Gets the base method that is overridden by the current method.
@@ -60,7 +56,7 @@ namespace Caravela.Framework.Code
         IMethod? OverriddenMethod { get; }
 
         /// <summary>
-        /// Gets a list of interface methods this method explicitly implements.
+        /// Gets a list of interface methods that this method explicitly implements.
         /// </summary>
         IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; }
 

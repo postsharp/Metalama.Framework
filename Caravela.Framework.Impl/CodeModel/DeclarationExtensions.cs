@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public static DeclarationKind GetDeclarationKind( this ISymbol symbol )
             => symbol switch
             {
-                INamespaceSymbol => DeclarationKind.Compilation,
+                INamespaceSymbol => DeclarationKind.Namespace,
                 INamedTypeSymbol => DeclarationKind.Type,
                 IMethodSymbol method => method.MethodKind == MethodKind.Constructor || method.MethodKind == MethodKind.StaticConstructor
                     ? DeclarationKind.Constructor
@@ -39,6 +39,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 IParameterSymbol => DeclarationKind.Parameter,
                 IEventSymbol => DeclarationKind.Event,
                 ITypeSymbol => DeclarationKind.None,
+                IModuleSymbol => DeclarationKind.Compilation,
                 _ => throw new ArgumentException( nameof(symbol), $"Unexpected symbol: {symbol.GetType().Name}." )
             };
 

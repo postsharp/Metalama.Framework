@@ -2,11 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -23,8 +25,10 @@ namespace Caravela.Framework.Impl.CodeModel
             this._symbol = symbol;
         }
 
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
+
         [Memo]
-        private PropertyInvocation Invocation => new( this );
+        public IInvokerFactory<IPropertyInvoker> Invokers => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ) );
 
         public override ISymbol Symbol => this._symbol;
 
@@ -51,24 +55,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 
-        public object Value
-        {
-            get => new PropertyInvocation( this ).Value;
-            set => throw new InvalidOperationException();
-        }
-
-        public object GetValue( object? instance ) => this.Invocation.GetValue( instance );
-
-        public object SetValue( object? instance, object value ) => this.Invocation.SetValue( instance, value );
-
-        public object GetIndexerValue( object? instance, params object[] args ) => this.Invocation.GetIndexerValue( instance, args );
-
-        public object SetIndexerValue( object? instance, object value, params object[] args ) => this.Invocation.SetIndexerValue( instance, value, args );
-
-        public bool HasBase => true;
-
-        IFieldOrPropertyInvocation IFieldOrProperty.Base => this.Base;
-
         [Memo]
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations
             => this._symbol.ExplicitInterfaceImplementations.Select( p => this.Compilation.Factory.GetProperty( p ) ).ToList();
@@ -76,8 +62,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
-
-        public IPropertyInvocation Base => this.Invocation.Base;
 
         public override string ToString() => this._symbol.ToString();
 

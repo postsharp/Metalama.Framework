@@ -3,8 +3,11 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using System;
 using System.Collections.Generic;
@@ -42,9 +45,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsOpenGeneric => this._containingMember.DeclaringType.IsOpenGeneric;
 
-        public bool HasBase => false;
-
-        public IMethodInvocation Base => throw new InvalidOperationException();
+        [Memo]
+        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ) );
 
         public IMethod? OverriddenMethod => null;
 
@@ -114,8 +116,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public IDiagnosticLocation? DiagnosticLocation => this._containingMember.DiagnosticLocation;
 
         public ICompilation Compilation => this._containingMember.Compilation;
-
-        public dynamic Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 

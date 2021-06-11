@@ -51,7 +51,7 @@ namespace Caravela.Framework.Tests.UnitTests
             IEnumerable<MetadataReference>? additionalReferences = null,
             string? name = null )
         {
-            var additionalAssemblies = new[] { typeof(TestBase) };
+            var additionalAssemblies = new[] { typeof(TestBase).Assembly };
             var mainRoslynCompilation = TestCompilationFactory.CreateEmptyCSharpCompilation( name, additionalAssemblies );
 
             if ( code != null )
