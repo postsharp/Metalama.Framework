@@ -21,13 +21,13 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
             }
         }
 
-        [Introduce]
+        [InterfaceMember]
         public event PropertyChangedEventHandler? PropertyChanged;
         
         [Introduce]
         protected virtual void OnPropertyChanged( string name )
         {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs( name));
+            meta.RunTime(meta.This.PropertyChanged?.Invoke(meta.This, new PropertyChangedEventArgs(meta.Parameters[0].Name)));
         }
 
         [Template]
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
         {
             if ( value != meta.Property.Value )
             {
-                this.OnPropertyChanged( meta.Property.Name );
+                meta.This.OnPropertyChanged( meta.Property.Name );
                 var result = meta.Proceed();
             }
         }

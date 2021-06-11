@@ -1,11 +1,8 @@
-
 [TestOutput]
 [Retry]
 class Program
 {
-
-
-    private void IntroducedMethod1(global::System.String name)
+    private void IntroducedMethod1(string name)
     {
         this.MyEvent?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
         this.MyEvent(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
@@ -13,4 +10,3 @@ class Program
 
     private event global::System.ComponentModel.PropertyChangedEventHandler? MyEvent;
 }
-

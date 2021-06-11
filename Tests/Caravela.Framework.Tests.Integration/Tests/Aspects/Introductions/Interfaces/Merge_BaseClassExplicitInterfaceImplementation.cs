@@ -1,4 +1,6 @@
-﻿using Caravela.Framework.Aspects;
+﻿// @Skipped Case for interface merge conflict resolution, not implemented.
+
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;

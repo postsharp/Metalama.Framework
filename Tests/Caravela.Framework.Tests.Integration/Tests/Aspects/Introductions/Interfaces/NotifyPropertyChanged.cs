@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         [Introduce( ConflictBehavior = ConflictBehavior.Ignore )]
         protected void OnPropertyChanged(string name)
         {
-            meta.This.PropertyChanged?.Invoke(new PropertyChangedEventArgs(meta.Parameters[0].Name ));
+            meta.This.PropertyChanged?.Invoke(meta.This, new PropertyChangedEventArgs( meta.Parameters[0].Name ) );
         }
 
         [Template]

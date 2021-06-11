@@ -1,4 +1,6 @@
-﻿using Caravela.Framework.Aspects;
+﻿// @Skipped Case for interface merge conflict resolution, not implemented.
+
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
@@ -6,10 +8,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExistingImplicitInterfaceImplementation
+namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExistingExplicitInterfaceImplementation
 {
     /*
-     * When the target class already explicitly implements the introduced interface (or it's subinterface), the implicit implementation should be overridden.
+     * When the target class already explicitly implements the introduced interface (or it's subinterface), the explicit implementation should be overridden.
      */
 
     public interface ISubInterface
@@ -53,7 +55,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     [Introduction]
     public class TargetClass : ISubInterface
     {
-        public int SubInterfaceMethod()
+        int ISubInterface.SubInterfaceMethod()
         {
             Console.WriteLine("This is original interface method.");
             return 27;

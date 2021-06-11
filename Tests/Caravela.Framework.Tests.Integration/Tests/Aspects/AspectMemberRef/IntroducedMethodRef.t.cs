@@ -1,18 +1,14 @@
-
 [TestOutput]
 [Retry]
 class Program
 {
-
-
-    private void IntroducedMethod1(global::System.String name)
+    private void IntroducedMethod1(string name)
     {
         this.IntroducedMethod2("IntroducedMethod1");
     }
 
-    private void IntroducedMethod2(global::System.String name)
+    private void IntroducedMethod2(string name)
     {
         this.IntroducedMethod1("IntroducedMethod2");
     }
 }
-
