@@ -11,6 +11,11 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Validation
 {
+    /// <summary>
+    /// A custom attribute that means that the interface cannot be implemented by another assembly than
+    /// the one that declared it, except if the referencing assembly sees the internals of the declaring assembly.
+    /// (The enforcement of this attribute is not implemented.) 
+    /// </summary>
     [AttributeUsage( AttributeTargets.Interface )]
     public class InternalImplementAttribute : Attribute, IAspect<INamedType>
     {

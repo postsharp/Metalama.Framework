@@ -11,7 +11,7 @@ using System.Linq;
 namespace Caravela.Framework.Validation
 {
     /// <summary>
-    /// Means that an internal member can be referenced only by a specific type.
+    /// Means that an internal member can be referenced only by a specific type. (Not implemented.)
     /// </summary>
     [AttributeUsage( AttributeTargets.All & ~AttributeTargets.Assembly )]
     [Obsolete( "Not implemented." )]

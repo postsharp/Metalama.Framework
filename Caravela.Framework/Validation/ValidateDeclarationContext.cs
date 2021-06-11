@@ -8,6 +8,9 @@ using System;
 
 namespace Caravela.Framework.Validation
 {
+    /// <summary>
+    /// (Not implemented.)
+    /// </summary>
     [Obsolete( "Not implemented." )]
     public readonly struct ValidateDeclarationContext<T>
     {
