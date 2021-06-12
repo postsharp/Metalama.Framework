@@ -12,7 +12,9 @@ using Xunit.Sdk;
 namespace Caravela.TestFramework
 {
     /// <summary>
-    /// Provides test data to test theories by listing the test files in the current directory.
+    /// An implementation of <see cref="DataAttribute"/> that generates test cases from files in the current directory. To be used with <c>[Theory]</c>.
+    /// This attribute will not include subdirectories that contain a file named <c>_Runner.cs</c>, nor subdirectories that are covered by
+    /// another test method of the same class. It also takes into account the <c>caravelaTests.config</c> file.
     /// </summary>
     public sealed class CurrentDirectoryAttribute : DataAttribute
     {
@@ -24,8 +26,7 @@ namespace Caravela.TestFramework
         /// <summary>
         /// Initializes a new instance of the <see cref="CurrentDirectoryAttribute"/> class.
         /// </summary>
-        /// <param name="subdirectory">Optionally, the directory containing the tests to execute, relatively to the caller source directory.
-        /// If you use this parameter, you must pass the same value to the <see cref="TestSuite.RunTest"/> method.
+        /// <param name="subdirectory">Optionally, the directory containing the tests to execute, relatively to the directory of the caller source file.
         /// </param>
         public CurrentDirectoryAttribute( string? subdirectory = null, [CallerFilePath] string? callerPath = null )
         {

@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
@@ -174,7 +173,7 @@ namespace Caravela.Framework.Impl
                 _ => false
             };
 
-        public bool IsEligible( ISymbol symbol, EligibilityValue requiredEligibility )
+        public bool IsEligible( ISymbol symbol )
             => symbol switch
             {
                 // TODO: Map the symbol to a code model declaration (which requires a CompilationModel), then simply

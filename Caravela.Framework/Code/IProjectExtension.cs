@@ -2,14 +2,16 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Policies;
+using System;
 
 namespace Caravela.Framework.Code
 {
     /// <summary>
     /// Base interface for project configuration objects, which are a way for compile-time libraries
     /// to expose configuration objects that can be configured in a <see cref="IProjectPolicy"/>. 
-    /// Implementations must implement the Freezable pattern.
+    /// Implementations must implement the Freezable pattern. (Not implemented.)
     /// </summary>
+    [Obsolete( "Not implemented." )]
     public interface IProjectExtension
     {
         /// <summary>

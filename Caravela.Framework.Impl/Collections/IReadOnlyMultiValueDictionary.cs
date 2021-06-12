@@ -4,9 +4,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Caravela.Framework.Collections
+namespace Caravela.Framework.Impl.Collections
 {
-    public interface IReadOnlyMultiValueDictionary<TKey, out TValue> : IEnumerable<IGrouping<TKey, TValue>>
+    internal interface IReadOnlyMultiValueDictionary<TKey, out TValue> : IEnumerable<IGrouping<TKey, TValue>>
     {
         IReadOnlyList<TValue> GetByKey( TKey key );
 

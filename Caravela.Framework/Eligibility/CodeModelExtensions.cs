@@ -9,6 +9,9 @@ using System;
 
 namespace Caravela.Framework.Eligibility
 {
+    /// <summary>
+    /// (Not implemented.)
+    /// </summary>
     [Obsolete( "Not implemented." )]
     public static class CodeModelExtensions
     {

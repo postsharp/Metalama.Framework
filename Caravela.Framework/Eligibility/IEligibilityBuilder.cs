@@ -6,6 +6,9 @@ using System;
 
 namespace Caravela.Framework.Eligibility
 {
+    /// <summary>
+    /// (Not implemented.)
+    /// </summary>
     [InternalImplement]
     public interface IEligibilityBuilder
     {
@@ -25,6 +28,9 @@ namespace Caravela.Framework.Eligibility
         IEligibilityRule<object> Build();
     }
 
+    /// <summary>
+    /// (Not implemented.)
+    /// </summary>
     public interface IEligibilityBuilder<out T> : IEligibilityBuilder
     {
         /// <summary>

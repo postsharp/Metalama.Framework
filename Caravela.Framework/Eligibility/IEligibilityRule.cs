@@ -7,7 +7,7 @@ namespace Caravela.Framework.Eligibility
 {
     /// <summary>
     /// Encapsulates a predicate determining the eligibility of an object (typically a declaration or a type) for an
-    /// object extension (typically an aspect or aspect marker).
+    /// object extension (typically an aspect or aspect marker). (Not implemented.)
     /// </summary>
     /// <typeparam name="T">The type of object that the extension can be applied to.</typeparam>
     [Obsolete( "Not implemented." )]

@@ -6,6 +6,9 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Code.Collections
 {
+    /// <summary>
+    /// List of interfaces implemented by a named type.
+    /// </summary>
     public interface IImplementedInterfaceList : IReadOnlyList<INamedType>
     {
         /// <summary>

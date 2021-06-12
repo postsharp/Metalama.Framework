@@ -1,11 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Aspects.AdvisedCode
+namespace Caravela.Framework.Code.Advised
 {
     /// <summary>
     /// Represents the list of parameters of the method being overridden by the advice.

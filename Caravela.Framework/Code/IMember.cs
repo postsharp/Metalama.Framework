@@ -3,6 +3,9 @@
 
 namespace Caravela.Framework.Code
 {
+    /// <summary>
+    /// Base interface for <see cref="IMethod"/>, <see cref="IFieldOrProperty"/>, <see cref="IEvent"/>, but not <see cref="INamedType"/>.
+    /// </summary>
     public interface IMember : IMemberOrNamedType
     {
         /// <summary>

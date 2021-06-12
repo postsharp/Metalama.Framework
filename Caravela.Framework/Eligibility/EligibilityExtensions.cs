@@ -8,6 +8,9 @@ using System.Linq;
 
 namespace Caravela.Framework.Eligibility
 {
+    /// <summary>
+    /// (Not implemented.)
+    /// </summary>
     [Obsolete( "Not implemented." )]
     public static class EligibilityExtensions
     {

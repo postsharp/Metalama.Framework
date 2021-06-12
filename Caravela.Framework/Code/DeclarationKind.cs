@@ -6,7 +6,7 @@ using Caravela.Framework.Aspects;
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Kinds of a <see cref="IDeclaration"/>.
+    /// Kinds of <see cref="IDeclaration"/>.
     /// </summary>
     [CompileTimeOnly]
     public enum DeclarationKind
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// <see cref="INamedType"/>.
         /// </summary>
-        Type,
+        NamedType,
 
         /// <summary>
         /// <see cref="IMethod"/>.

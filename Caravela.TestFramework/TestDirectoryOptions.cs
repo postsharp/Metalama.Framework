@@ -7,7 +7,7 @@ using System.IO;
 namespace Caravela.TestFramework
 {
     /// <summary>
-    /// Represent the content of the <c>caravelaTests.json</c> file.
+    /// Represent the content of the <c>caravelaTests.json</c> file. This class is JSON-serializable.
     /// </summary>
     public class TestDirectoryOptions : TestOptions
     {

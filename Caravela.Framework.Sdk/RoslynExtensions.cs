@@ -8,21 +8,11 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Sdk
 {
+    /// <summary>
+    /// Provides extension methods that are useful when writing code using Caravela SDK.
+    /// </summary>
     public static class RoslynExtensions
     {
-        public static bool AnyBaseType( this INamedTypeSymbol type, Predicate<INamedTypeSymbol> predicate )
-        {
-            for ( var t = type; t != null; t = t.BaseType )
-            {
-                if ( predicate( t ) )
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         public static TCompilation ReplaceTrees<TCompilation>(
             this TCompilation compilation,
             Func<SyntaxTree, SyntaxTree?> replacer,
@@ -61,24 +51,6 @@ namespace Caravela.Framework.Sdk
                     return newRoot == null ? null : tree.WithRootAndOptions( newRoot, tree.Options );
                 },
                 trees );
-
-        public static IEnumerable<INamedTypeSymbol> GetTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetTypes();
-
-        private static IEnumerable<INamedTypeSymbol> GetTypes( this INamespaceSymbol ns )
-        {
-            foreach ( var type in ns.GetTypeMembers() )
-            {
-                yield return type;
-            }
-
-            foreach ( var namespaceMember in ns.GetNamespaceMembers() )
-            {
-                foreach ( var type in namespaceMember.GetTypes() )
-                {
-                    yield return type;
-                }
-            }
-        }
 
         public static object? GetValueSafe( this TypedConstant typedConstant )
             => typedConstant.Kind == TypedConstantKind.Array ? typedConstant.Values : typedConstant.Value;

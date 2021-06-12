@@ -7,6 +7,9 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Validation
 {
+    /// <summary>
+    /// (Not implemented.)
+    /// </summary>
     public interface IValidatorAdder
     {
         [Obsolete( "Not implemented." )]

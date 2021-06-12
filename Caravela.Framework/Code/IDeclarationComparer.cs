@@ -6,6 +6,10 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
 {
+    /// <summary>
+    /// Extends <see cref="IEqualityComparer{T}"/> with the method <see cref="Is(Caravela.Framework.Code.IType,Caravela.Framework.Code.IType)"/>,
+    /// which checks for type inheritance and not equality.
+    /// </summary>
     public interface IDeclarationComparer : IEqualityComparer<IType>, IEqualityComparer<IDeclaration>, IEqualityComparer<INamedType>
     {
         /// <summary>

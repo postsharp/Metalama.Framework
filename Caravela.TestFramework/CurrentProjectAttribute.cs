@@ -10,6 +10,11 @@ using Xunit.Sdk;
 
 namespace Caravela.TestFramework
 {
+    /// <summary>
+    /// An implementation of <see cref="DataAttribute"/> that generates test cases from files in the current project. To be used with <c>[Theory]</c>.
+    /// This attribute will not include subdirectories that contain a file named <c>_Runner.cs</c>.
+    /// It also takes into account the <c>caravelaTests.config</c> file.
+    /// </summary>
     public sealed class CurrentProjectAttribute : DataAttribute
     {
         public override IEnumerable<object[]> GetData( MethodInfo testMethod )

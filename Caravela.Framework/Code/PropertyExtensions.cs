@@ -3,6 +3,9 @@
 
 namespace Caravela.Framework.Code
 {
+    /// <summary>
+    /// Provides extension methods for <see cref="IProperty"/>.
+    /// </summary>
     public static class PropertyExtensions
     {
         // TODO: C# 10 ref fields: implement and update this documentation comment

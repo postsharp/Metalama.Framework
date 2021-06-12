@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects.AdvisedCode;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Validation;
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Aspects
 
         IDeclaration Declaration { get; }
 
-        IMemberOrNamedType Member { get; }
+        IMember Member { get; }
 
         /// <summary>
         /// Gets the method metadata, or the accessor if this is a template for a field, property or event.

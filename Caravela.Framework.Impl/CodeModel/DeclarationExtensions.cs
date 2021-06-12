@@ -6,7 +6,6 @@ using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -28,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => symbol switch
             {
                 INamespaceSymbol => DeclarationKind.Namespace,
-                INamedTypeSymbol => DeclarationKind.Type,
+                INamedTypeSymbol => DeclarationKind.NamedType,
                 IMethodSymbol method => method.MethodKind == MethodKind.Constructor || method.MethodKind == MethodKind.StaticConstructor
                     ? DeclarationKind.Constructor
                     : DeclarationKind.Method,

@@ -3,5 +3,8 @@
 
 namespace Caravela.Framework.Code.Builders
 {
+    /// <summary>
+    /// Allows to complete the construction of an field that has been created by an advice.
+    /// </summary>
     public interface IFieldBuilder : IFieldOrPropertyBuilder, IField { }
 }

@@ -1,10 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-
-namespace Caravela.Framework.Aspects.AdvisedCode
+namespace Caravela.Framework.Code.Advised
 {
+    /// <summary>
+    /// Represents the event being overwritten or introduced. This interface extends <see cref="IEvent"/> but overrides the <see cref="Adder"/>,
+    /// <see cref="Remover"/> and <see cref="Raiser"/> members to expose their <see cref="IAdviceMethod.Invoke"/> method.
+    /// </summary>
     public interface IAdviceEvent : IEvent
     {
         /// <summary>

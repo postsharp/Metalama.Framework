@@ -3,6 +3,8 @@
 
 using Caravela.Framework.Aspects;
 
+#pragma warning disable SA1623
+
 namespace Caravela.Framework.Code
 {
     /// <summary>
@@ -15,12 +17,24 @@ namespace Caravela.Framework.Code
         // Prevents creation of custom instances.
         private CodeDisplayFormat() { }
 
+        /// <summary>
+        /// Emits fully-qualified code references, including namespaces and aliases.
+        /// </summary>
         public static CodeDisplayFormat FullyQualified { get; } = new();
 
+        /// <summary>
+        /// Formats code references as in a C# error message.
+        /// </summary>
         public static CodeDisplayFormat DiagnosticMessage { get; } = new();
 
+        /// <summary>
+        /// Emits minimally-qualified code references.
+        /// </summary>
         public static CodeDisplayFormat MinimallyQualified { get; } = new();
 
+        /// <summary>
+        /// Formats code references as in a C# short error message.
+        /// </summary>
         public static CodeDisplayFormat ShortDiagnosticMessage { get; } = new();
     }
 }
