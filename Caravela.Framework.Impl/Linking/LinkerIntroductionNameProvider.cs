@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Linking
                     : $"__Override__{overriddenDeclaration.Name}__By__{cleanAspectName}";
         }
 
-        internal override string GetInterfaceImplementationName( AspectLayerId aspectLayer, IMember interfaceMember )
+        internal override string GetInterfaceProxyName( AspectLayerId aspectLayer, IMember interfaceMember )
         {
             var cleanAspectName = aspectLayer.AspectName.Replace( "_", "__" ).Replace( ".", "_" );
             var cleanLayerName = aspectLayer.LayerName?.Replace( "_", "__" ).Replace( ".", "_" );

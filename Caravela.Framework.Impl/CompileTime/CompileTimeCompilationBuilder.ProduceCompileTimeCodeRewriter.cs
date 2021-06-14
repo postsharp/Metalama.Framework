@@ -148,6 +148,11 @@ namespace Caravela.Framework.Impl.CompileTime
 
                                     break;
 
+                                case EventDeclarationSyntax @event:
+                                    members.AddRange( this.VisitEventDeclaration( @event ).AssertNoneNull() );
+
+                                    break;
+
                                 default:
                                     members.Add( (MemberDeclarationSyntax) this.Visit( member ).AssertNotNull() );
 
@@ -386,6 +391,73 @@ namespace Caravela.Framework.Impl.CompileTime
                     if ( transformedSetDeclaration != null )
                     {
                         yield return (MemberDeclarationSyntax) transformedSetDeclaration;
+                    }
+                }
+                else
+                {
+                    this.Success = false;
+                }
+            }
+
+            private new IEnumerable<MemberDeclarationSyntax> VisitEventDeclaration( EventDeclarationSyntax node )
+            {
+                var eventSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
+
+                if ( this.SymbolClassifier.GetTemplateMemberKind( eventSymbol ) == TemplateMemberKind.None )
+                {
+                    yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
+
+                    yield break;
+                }
+
+                var success = true;
+                SyntaxNode? transformedAddDeclaration = null;
+                SyntaxNode? transformedRemoveDeclaration = null;
+
+                // Compile accessors into templates.
+                if ( !eventSymbol.IsAbstract )
+                {
+                    if ( node.AccessorList != null )
+                    {
+                        var addAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.AddAccessorDeclaration );
+                        var removeAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.RemoveAccessorDeclaration );
+
+                        success = success &&
+                                  this._templateCompiler.TryCompile(
+                                      TemplateNameHelper.GetCompiledTemplateName( eventSymbol.AddMethod.AssertNotNull() ),
+                                      this._compileTimeCompilation,
+                                      addAccessor,
+                                      this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                      this._diagnosticAdder,
+                                      this._cancellationToken,
+                                      out _,
+                                      out transformedAddDeclaration );
+
+                        success = success &&
+                                  this._templateCompiler.TryCompile(
+                                      TemplateNameHelper.GetCompiledTemplateName( eventSymbol.RemoveMethod.AssertNotNull() ),
+                                      this._compileTimeCompilation,
+                                      removeAccessor,
+                                      this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                      this._diagnosticAdder,
+                                      this._cancellationToken,
+                                      out _,
+                                      out transformedRemoveDeclaration );
+                    }
+                }
+
+                if ( success )
+                {
+                    yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+
+                    if ( transformedAddDeclaration != null )
+                    {
+                        yield return (MemberDeclarationSyntax) transformedAddDeclaration;
+                    }
+
+                    if ( transformedRemoveDeclaration != null )
+                    {
+                        yield return (MemberDeclarationSyntax) transformedRemoveDeclaration;
                     }
                 }
                 else

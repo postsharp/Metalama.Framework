@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal interface IInterfaceImplementationIntroduction : ISyntaxTreeTransformation, IObservableTransformation
+    internal interface IIntroducedInterface : ISyntaxTreeTransformation, IObservableTransformation
     {
         IEnumerable<BaseTypeSyntax> GetIntroducedInterfaceImplementations();
     }

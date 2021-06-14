@@ -93,7 +93,7 @@ namespace Caravela.TestFramework
             {
                 throw new InvalidOperationException( "This method cannot be called when the test path is unknown." );
             }
-            
+
             // Compare the "Target" region of the transformed code to the expected output.
             // If the region is not found then compare the complete transformed code.
             var sourceAbsolutePath = testInput.FullPath;

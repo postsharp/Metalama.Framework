@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
         event EventHandler Event;
 
-        //int Property { get; set; }
+        int Property { get; set; }
     }
 
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
@@ -29,24 +29,23 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.AdviceFactory.IntroduceInterface(aspectBuilder.TargetDeclaration, (INamedType)aspectBuilder.TargetDeclaration.Compilation.TypeFactory.GetTypeByReflectionType(typeof(IInterface)));
         }
 
-        [Introduce]
+        [InterfaceMember]
         public int InterfaceMethod()
         {
             Console.WriteLine("This is introduced interface method.");
             return meta.Proceed();
         }
 
-        [Introduce]
+        [InterfaceMember]
         public event EventHandler? Event;
 
-        //[Introduce]
-        //public int Property { get; set; }
+        [InterfaceMember]
+        public int Property { get; set; }
     }
 
     [TestOutput]
     [Introduction]
     public partial class TargetClass
     {
-        // TODO: The output is currently incorrect.
     }
 }

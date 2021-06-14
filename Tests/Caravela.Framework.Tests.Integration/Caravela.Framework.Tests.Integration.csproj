@@ -51,20 +51,11 @@
     <ProjectReference Include="..\..\Caravela.Framework\Caravela.Framework.csproj" />
     <ProjectReference Include="..\..\Caravela.TestFramework\Caravela.TestFramework.csproj" />
   </ItemGroup>
-  
-  
 
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
   </ItemGroup>
-  
-  
 
-  <ItemGroup>
-    <None Include="Tests\Aspects\Samples\LogAndCache.t.cs" />
-  </ItemGroup>
-
-<Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
-
+  <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
   
 </Project>

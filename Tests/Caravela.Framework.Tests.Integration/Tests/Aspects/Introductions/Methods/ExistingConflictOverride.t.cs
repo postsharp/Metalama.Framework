@@ -20,7 +20,7 @@ internal class TargetClass : BaseClass
         return base.BaseMethod();
     }
 
-    public override static global::System.Int32 BaseMethod_Static()
+    public static override global::System.Int32 BaseMethod_Static()
     {
         global::System.Console.WriteLine("This is introduced method.");
         return global::Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictOverride.BaseClass.BaseMethod_Static();

@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.Advices
                 Error, _category );
 
         public static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember InterfaceMember)>
-            MissingDeclarativeInterfaceMemberIntroduction = new(
+            MissingDeclarativeInterfaceMember = new(
                 "CR0504",
                 "Declarative interface member introduction is missing.",
                 "The aspect '{0}' cannot implicitly introduce interface '{1}' into the type '{2}' because it" +
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember DeclarativeIntroduction,
                 IMember InterfaceMember)>
-            DeclarativeInterfaceMemberIntroductionDoesNotMatch = new(
+            DeclarativeInterfaceMemberDoesNotMatch = new(
                 "CR0505",
                 "Declarative interface member introduction does match interface member return type.",
                 "The aspect '{0}' cannot implicitly introduce interface '{1}' into the  type '{2}' because the introduced member '{3}'" +
@@ -66,6 +66,21 @@ namespace Caravela.Framework.Impl.Advices
                 "CR0506",
                 "Cannot use [Introduce] in an aspect that is applied to a declaration that is neither a type nor a type member.",
                 "The aspect '{0}' cannot introduce a {1} because it has been applied to a {2}, which is neither a type nor a type member.",
+                Error, _category );
+
+        public static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType)>
+            InterfaceIsAlreadyImplemented = new(
+                "CR0507",
+                "Cannot introduce an interface when the target type already implements it.",
+                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because it is already implemented and ConflictBehavior is set to Fail.",
+                Error, _category );
+
+        public static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType)>
+            InterfaceIsAlreadyIntroducedByTheAspect = new(
+                "CR0508",
+                "Cannot introduce an interface was already introduced by the aspect.",
+                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because it has already introduced an implementation of this interface. " +
+                "If interface introductions with shared .",
                 Error, _category );
     }
 }

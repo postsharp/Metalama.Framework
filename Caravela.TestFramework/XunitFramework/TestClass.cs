@@ -19,7 +19,7 @@ namespace Caravela.TestFramework.XunitFramework
             this._testFactory = factory;
 
             // If the directory contains both files and subdirectories, we have to generate a class name with a "Tests" suffix.
-            
+
             var directory = factory.ProjectDirectory;
 
             if ( !string.IsNullOrEmpty( relativePath ) )

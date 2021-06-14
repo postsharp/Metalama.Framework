@@ -21,6 +21,11 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <summary>
         /// Introduction advice.
         /// </summary>
-        Introduction
+        Introduction,
+
+        /// <summary>
+        /// Interface member.
+        /// </summary>
+        InterfaceMember
     }
 }

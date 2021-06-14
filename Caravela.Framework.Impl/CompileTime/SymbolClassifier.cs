@@ -36,6 +36,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly INamedTypeSymbol _compileTimeAttribute;
         private readonly INamedTypeSymbol _compileTimeOnlyAttribute;
         private readonly INamedTypeSymbol _templateAttribute;
+        private readonly INamedTypeSymbol _interfaceMemberAttribute;
         private readonly Dictionary<ISymbol, TemplatingScope?> _cacheFromAttributes = new( SymbolEqualityComparer.Default );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
@@ -45,6 +46,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
             this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeOnlyAttribute).FullName ).AssertNotNull();
             this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
+            this._interfaceMemberAttribute = this._compilation.GetTypeByMetadataName( typeof(InterfaceMemberAttribute).FullName ).AssertNotNull();
             this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
         }
 
@@ -58,6 +60,12 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( templateAttribute != null )
             {
                 return GetTemplateMemberKind( templateAttribute );
+            }
+
+            // Look for a [InterfaceMember] attribute on the symbol.
+            if ( symbol.GetAttributes().Any( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._interfaceMemberAttribute ) ) )
+            {
+                return TemplateMemberKind.InterfaceMember;
             }
 
             switch ( symbol )

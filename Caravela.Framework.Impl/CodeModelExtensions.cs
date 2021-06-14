@@ -45,6 +45,16 @@ namespace Caravela.Framework.Impl
             throw new ArgumentOutOfRangeException( nameof(method), "This is not a source symbol." );
         }
 
+        public static IPropertySymbol GetSymbol( this IProperty property )
+        {
+            if ( property is Property sourceProperty )
+            {
+                return (IPropertySymbol) sourceProperty.Symbol;
+            }
+
+            throw new ArgumentOutOfRangeException( nameof(property), "This is not a source symbol." );
+        }
+
         public static AttributeData GetAttributeData( this IAttribute attribute )
         {
             if ( attribute is Attribute attributeModel )

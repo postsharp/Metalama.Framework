@@ -89,5 +89,15 @@ namespace Caravela.Framework.Impl.CompileTime
 
             return node;
         }
+
+        public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
+        {
+            if ( this.GetTemplatingScope( node ) is TemplatingScope.CompileTimeOnly )
+            {
+                return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+            }
+
+            return node;
+        }
     }
 }

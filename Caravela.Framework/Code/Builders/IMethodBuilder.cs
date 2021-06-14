@@ -30,6 +30,8 @@ namespace Caravela.Framework.Code.Builders
         /// <returns>A <see cref="IParameterBuilder"/> that allows you to further build the new parameter.</returns>
         IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null );
 
+        // TODO: Add an overload for adding generic parameter which would initialize it with values for covariance/contravariance and constraints.
+
         /// <summary>
         /// Adds a generic parameter to the method.
         /// </summary>

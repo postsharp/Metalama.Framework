@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 {
     internal partial class AnnotationUnitTestRunner : BaseTestRunner
     {
-        public AnnotationUnitTestRunner( IServiceProvider serviceProvider, string projectDirectory, IEnumerable<MetadataReference> metadataReferences ) 
+        public AnnotationUnitTestRunner( IServiceProvider serviceProvider, string projectDirectory, IEnumerable<MetadataReference> metadataReferences )
             : base( serviceProvider, projectDirectory, metadataReferences ) { }
 
         public override TestResult RunTest( TestInput testInput )
