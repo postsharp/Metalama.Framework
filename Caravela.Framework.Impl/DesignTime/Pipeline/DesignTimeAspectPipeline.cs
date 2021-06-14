@@ -37,6 +37,12 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
         private AspectPipelineConfiguration? _lastKnownConfiguration;
 
+        /// <summary>
+        /// Gets an object that can be locked to get exclusive access to
+        /// the current instance.
+        /// </summary>
+        public object Sync { get; } = new();
+        
         public DesignTimeAspectPipelineStatus Status { get; private set; }
 
         // It's ok if we return an obsolete project in this case.

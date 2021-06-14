@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.Advices
             // Initialize with interface the target type already implements.
             this._introducedAndImplementedInterfaces = targetType.AllImplementedInterfaces.ToDictionary(
                 x => x,
-                x => (false, false),
+                _ => (false, false),
                 targetType.Compilation.InvariantComparer );
         }
 
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var aspectMethod in aspectType.Methods )
             {
-                if ( TryGetInterfaceMemberAttribute( compilation, aspectMethod, out var interfaceMemberAttribute ) )
+                if ( TryGetInterfaceMemberAttribute( aspectMethod, out var interfaceMemberAttribute ) )
                 {
                     this._aspectInterfaceMethods.Add( (aspectMethod, interfaceMemberAttribute) );
                 }
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var aspectProperty in aspectType.Properties )
             {
-                if ( TryGetInterfaceMemberAttribute( compilation, aspectProperty, out var interfaceMemberAttribute ) )
+                if ( TryGetInterfaceMemberAttribute( aspectProperty, out var interfaceMemberAttribute ) )
                 {
                     this._aspectInterfaceProperties.Add( (aspectProperty, interfaceMemberAttribute) );
                 }
@@ -65,14 +65,13 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var aspectEvent in aspectType.Events )
             {
-                if ( TryGetInterfaceMemberAttribute( compilation, aspectEvent, out var interfaceMemberAttribute ) )
+                if ( TryGetInterfaceMemberAttribute( aspectEvent, out var interfaceMemberAttribute ) )
                 {
                     this._aspectInterfaceEvents.Add( (aspectEvent, interfaceMemberAttribute) );
                 }
             }
 
             bool TryGetInterfaceMemberAttribute(
-                ICompilation compilation,
                 IMember member,
                 [NotNullWhen( true )] out InterfaceMemberAttribute? interfaceMemberAttribute )
             {
@@ -113,7 +112,7 @@ namespace Caravela.Framework.Impl.Advices
             //      2) Target type already implements an ancestor of the interface.
             //      3) The interface or it's ancestor was implemented by another IntroduceInterface call.
 
-            if ( this._introducedAndImplementedInterfaces.TryGetValue( interfaceType, out var impl ) && impl.IsIntroduced == true )
+            if ( this._introducedAndImplementedInterfaces.TryGetValue( interfaceType, out var impl ) && impl.IsIntroduced )
             {
                 // The aspect conflicts with itself, introducing the base interface after the derived interface.
                 diagnosticAdder.Report(
@@ -158,7 +157,7 @@ namespace Caravela.Framework.Impl.Advices
                             diagnosticAdder.Report(
                                 AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.DisplayName, interfaceType, this.TargetDeclaration) ) );
+                                    (this.Aspect.AspectClass.DisplayName, conflictingInterface, this.TargetDeclaration) ) );
                         }
 
                         return;
@@ -298,7 +297,6 @@ namespace Caravela.Framework.Impl.Advices
                 var explicitImplementationBuilders = new List<MemberBuilder>();
                 var overrides = new List<OverriddenMember>();
                 var interfaceMemberMap = new Dictionary<IMember, IMember>();
-                var interfaceTargetMap = new Dictionary<IMember, (bool IsAspectInterfaceMember, IMember TargetMember, IMember ImplementationMember)>();
 
                 foreach ( var memberSpec in interfaceSpec.MemberSpecifications )
                 {
