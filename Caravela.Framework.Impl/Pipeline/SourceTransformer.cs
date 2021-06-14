@@ -28,6 +28,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 using CompileTimeAspectPipeline pipeline = new(
                     projectOptions,
                     new CompileTimeDomain(),
+                    false,
                     null,
                     new CompilationAssemblyLocator( transformerContext.Compilation ) );
 

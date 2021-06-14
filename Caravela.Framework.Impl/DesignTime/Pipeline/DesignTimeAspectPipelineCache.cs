@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 projectOptions.ProjectId,
                 _ =>
                 {
-                    var pipeline = new DesignTimeAspectPipeline( projectOptions, this._domain );
+                    var pipeline = new DesignTimeAspectPipeline( projectOptions, this._domain, false );
                     pipeline.ExternalBuildStarted += this.OnExternalBuildStarted;
 
                     return pipeline;

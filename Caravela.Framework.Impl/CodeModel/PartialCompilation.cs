@@ -156,6 +156,7 @@ namespace Caravela.Framework.Impl.CodeModel
             return (types, trees);
         }
 
-        public override string ToString() => $"{{Assembly={this.Compilation.AssemblyName}, SyntaxTrees={this.SyntaxTrees.Count}/{this.Compilation.SyntaxTrees.Count()}}}";
+        public override string ToString()
+            => $"{{Assembly={this.Compilation.AssemblyName}, SyntaxTrees={this.SyntaxTrees.Count}/{this.Compilation.SyntaxTrees.Count()}}}";
     }
 }

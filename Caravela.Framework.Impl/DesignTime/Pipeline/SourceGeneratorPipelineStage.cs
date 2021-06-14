@@ -28,8 +28,8 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         public SourceGeneratorPipelineStage(
             CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            IAspectPipelineProperties properties )
-            : base( compileTimeProject, aspectLayers, properties ) { }
+            IServiceProvider serviceProvider )
+            : base( compileTimeProject, aspectLayers, serviceProvider ) { }
 
         /// <inheritdoc/>
         protected override PipelineStageResult GenerateCode(
@@ -87,7 +87,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                             new LinkerIntroductionNameProvider(),
                             lexicalScopeFactory.GetLexicalScope( memberIntroduction ),
                             syntaxFactory,
-                            this.PipelineProperties.ServiceProvider );
+                            this.ServiceProvider );
 
                         var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray();
 

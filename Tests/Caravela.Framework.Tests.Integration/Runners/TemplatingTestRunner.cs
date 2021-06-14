@@ -1,11 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
@@ -241,7 +243,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     diagnostics,
                     templateMethod,
                     ImmutableDictionary.Create<string, object?>().Add( "TestKey", "TestValue" ),
-                    default ) );
+                    default,
+                    new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ) ) );
 
             return new TemplateExpansionContext(
                 templateInstance,

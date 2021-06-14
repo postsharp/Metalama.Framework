@@ -76,7 +76,7 @@ namespace Caravela.Framework.Aspects
         /// Gets the method metadata, or the accessor if this is a template for a field, property or event.
         /// </summary>
         public static IAdviceMethod Method => CurrentContext.Method;
-        
+
         /// <summary>
         /// Gets the target property, or throws an exception if the advice does not target a property.
         /// </summary>

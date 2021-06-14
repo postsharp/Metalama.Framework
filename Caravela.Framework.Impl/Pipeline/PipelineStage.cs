@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Diagnostics;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
@@ -16,11 +17,11 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Gets the pipeline options.
         /// </summary>
-        public IAspectPipelineProperties PipelineProperties { get; }
+        public IServiceProvider ServiceProvider { get; }
 
-        protected PipelineStage( IAspectPipelineProperties pipelineProperties )
+        protected PipelineStage( IServiceProvider serviceProvider )
         {
-            this.PipelineProperties = pipelineProperties;
+            this.ServiceProvider = serviceProvider;
         }
 
         /// <summary>
