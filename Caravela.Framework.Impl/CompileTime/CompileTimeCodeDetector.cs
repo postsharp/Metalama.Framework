@@ -5,7 +5,7 @@ using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Immutable;
+using System;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -16,10 +16,8 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal static class CompileTimeCodeDetector
     {
-        public static ImmutableHashSet<string> Namespaces { get; } = ImmutableHashSet.Create(
-            "Caravela.Framework.Aspects",
-            "Caravela.Framework.Policies",
-            "Caravela.Framework.Eligibility" );
+        public const string Namespace = "Caravela.Framework";
+        private const string _excludedNamespace = "Caravela.Framework.RunTime";
 
         public static bool HasCompileTimeCode( SyntaxNode node ) => DetectCompileTimeVisitor.Instance.Visit( node );
 
@@ -27,7 +25,9 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             public static readonly DetectCompileTimeVisitor Instance = new();
 
-            public override bool VisitUsingDirective( UsingDirectiveSyntax node ) => Namespaces.Contains( node.Name.ToString() );
+            public override bool VisitUsingDirective( UsingDirectiveSyntax node )
+                => node.Name.ToString().StartsWith( Namespace, StringComparison.OrdinalIgnoreCase ) &&
+                   !node.Name.ToString().Equals( _excludedNamespace, StringComparison.Ordinal );
 
             public override bool VisitNamespaceDeclaration( NamespaceDeclarationSyntax node ) => node.ChildNodes().Any( this.Visit );
 

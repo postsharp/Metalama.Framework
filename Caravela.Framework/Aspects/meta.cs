@@ -45,6 +45,12 @@ namespace Caravela.Framework.Aspects
         public static dynamic Proceed() => _proceedImplementation.Value ?? throw NewInvalidOperationException();
 
         /// <summary>
+        /// Requests the debugger to break. If no debugger is attached to the current project, launch the JIT debugger dialog.
+        /// </summary>
+        [TemplateKeyword]
+        public static void DebugBreak() => CurrentContext.DebugBreak();
+
+        /// <summary>
         /// Coerces an <paramref name="expression"/> to be interpreted as compile time. This is typically used
         /// to coerce expressions that can be either run-time or compile-time, such as a literal. Since ambiguous expressions are
         /// interpreted as run-time by default, this method allows to change that behavior.
@@ -70,7 +76,7 @@ namespace Caravela.Framework.Aspects
         /// Gets the method metadata, or the accessor if this is a template for a field, property or event.
         /// </summary>
         public static IAdviceMethod Method => CurrentContext.Method;
-        
+
         /// <summary>
         /// Gets the target property, or throws an exception if the advice does not target a property.
         /// </summary>

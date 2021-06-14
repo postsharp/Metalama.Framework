@@ -90,5 +90,7 @@ namespace Caravela.Framework.Aspects
         IReadOnlyDictionary<string, object?> Tags { get; }
 
         IDiagnosticSink Diagnostics { get; }
+
+        void DebugBreak();
     }
 }

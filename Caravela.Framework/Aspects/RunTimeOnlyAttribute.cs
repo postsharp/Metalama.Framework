@@ -12,5 +12,5 @@ namespace Caravela.Framework.Aspects
     [AttributeUsage(
         AttributeTargets.ReturnValue | AttributeTargets.Property | AttributeTargets.Class |
         AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate )]
-    public class RunTimeOnlyAttribute : Attribute { }
+    public class RunTimeOnlyAttribute : ScopeAttribute { }
 }

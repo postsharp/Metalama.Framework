@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime.Pipeline
@@ -27,7 +26,6 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
     {
         private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineCache).Assembly.GetName().Name;
 
-        private readonly ConditionalWeakTable<Compilation, object> _sync = new();
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
         private readonly SyntaxTreeResultCache _syntaxTreeResultCache = new();
         private readonly CompileTimeDomain _domain;
@@ -58,7 +56,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 projectOptions.ProjectId,
                 _ =>
                 {
-                    var pipeline = new DesignTimeAspectPipeline( projectOptions, this._domain );
+                    var pipeline = new DesignTimeAspectPipeline( projectOptions, this._domain, false );
                     pipeline.ExternalBuildStarted += this.OnExternalBuildStarted;
 
                     return pipeline;
@@ -111,29 +109,27 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         {
             var pipeline = this.GetOrCreatePipeline( projectOptions );
 
-            // Update the cache.
-            var changes = pipeline.InvalidateCache( compilation );
-
-            if ( pipeline.Status == DesignTimeAspectPipelineStatus.Ready )
+            lock ( pipeline.Sync )
             {
-                this._syntaxTreeResultCache.InvalidateCache( changes );
-            }
-            else
-            {
-                // We don't invalidate the syntax tree results cache if the pipeline is broken, so we can serve old (outdated) results
-                // instead of nothing.
-            }
+                // Update the cache.
+                var changes = pipeline.InvalidateCache( compilation );
 
-            if ( pipeline.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
-            {
-                var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilation );
-
-                // Execute the pipeline if required, and update the cache.
-                if ( dirtySyntaxTrees.Count > 0 )
+                if ( pipeline.Status == DesignTimeAspectPipelineStatus.Ready )
                 {
-                    var lockable = this._sync.GetOrCreateValue( compilation );
+                    this._syntaxTreeResultCache.InvalidateCache( changes );
+                }
+                else
+                {
+                    // We don't invalidate the syntax tree results cache if the pipeline is broken, so we can serve old (outdated) results
+                    // instead of nothing.
+                }
 
-                    lock ( lockable )
+                if ( pipeline.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
+                {
+                    var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilation );
+
+                    // Execute the pipeline if required, and update the cache.
+                    if ( dirtySyntaxTrees.Count > 0 )
                     {
                         var partialCompilation = PartialCompilation.CreatePartial( compilation, dirtySyntaxTrees );
 
@@ -146,28 +142,28 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                         }
                     }
                 }
-            }
-            else
-            {
-                // If we need a build, we only serve results from the cache.
-                Logger.Instance?.Write(
-                    $"DesignTimeAspectPipelineCache.GetDesignTimeResults('{compilation.AssemblyName}'): build required," +
-                    $" returning from cache only. Cache size is {this._syntaxTreeResultCache.Count}" );
-            }
-
-            // Get the results from the cache. We don't need to check dependencies
-            var resultArrayBuilder = ImmutableArray.CreateBuilder<SyntaxTreeResult>( syntaxTrees.Count );
-
-            // Create the result.
-            foreach ( var syntaxTree in syntaxTrees )
-            {
-                if ( this._syntaxTreeResultCache.TryGetResult( syntaxTree, out var syntaxTreeResult ) )
+                else
                 {
-                    resultArrayBuilder.Add( syntaxTreeResult );
+                    // If we need a build, we only serve results from the cache.
+                    Logger.Instance?.Write(
+                        $"DesignTimeAspectPipelineCache.GetDesignTimeResults('{compilation.AssemblyName}'): build required," +
+                        $" returning from cache only. Cache size is {this._syntaxTreeResultCache.Count}" );
                 }
-            }
 
-            return resultArrayBuilder.ToImmutable();
+                // Get the results from the cache. We don't need to check dependencies
+                var resultArrayBuilder = ImmutableArray.CreateBuilder<SyntaxTreeResult>( syntaxTrees.Count );
+
+                // Create the result.
+                foreach ( var syntaxTree in syntaxTrees )
+                {
+                    if ( this._syntaxTreeResultCache.TryGetResult( syntaxTree, out var syntaxTreeResult ) )
+                    {
+                        resultArrayBuilder.Add( syntaxTreeResult );
+                    }
+                }
+
+                return resultArrayBuilder.ToImmutable();
+            }
         }
 
         private List<SyntaxTree> GetDirtySyntaxTrees( Compilation compilation )

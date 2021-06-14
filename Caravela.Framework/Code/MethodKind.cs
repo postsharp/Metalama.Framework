@@ -20,12 +20,12 @@ namespace Caravela.Framework.Code
         /// Instance constructor.
         /// </summary>
         Constructor,
-        
+
         /// <summary>
         /// Static constructor.
         /// </summary>
         StaticConstructor,
-        
+
         /// <summary>
         /// Finalizer (destructor).
         /// </summary>
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Code
         /// Property getter.
         /// </summary>
         PropertyGet,
-        
+
         /// <summary>
         /// Property setter.
         /// </summary>
@@ -45,12 +45,12 @@ namespace Caravela.Framework.Code
         /// Event adder.
         /// </summary>
         EventAdd,
-        
+
         /// <summary>
         /// Event remover.
         /// </summary>
         EventRemove,
-        
+
         /// <summary>
         /// Event raiser.
         /// </summary>
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Code
         /// Conversion operator.
         /// </summary>
         ConversionOperator,
-        
+
         /// <summary>
         /// Other operator.
         /// </summary>

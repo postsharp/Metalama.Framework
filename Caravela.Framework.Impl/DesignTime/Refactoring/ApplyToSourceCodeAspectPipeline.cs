@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             IProjectOptions projectOptions,
             CompileTimeDomain domain,
             AspectClass aspectClass,
-            ISymbol targetSymbol ) : base( projectOptions, domain )
+            ISymbol targetSymbol ) : base( projectOptions, domain, AspectExecutionScenario.ApplyToSourceCode, false )
         {
             this._source = new InteractiveAspectSource( aspectClass, targetSymbol );
         }
@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
                 SourceGeneratorPipelineStage => new CompileTimePipelineStage(
                     configuration.CompileTimeProject!,
                     configuration.Layers,
-                    stage.PipelineProperties ),
+                    stage.ServiceProvider ),
                 _ => stage
             };
 
@@ -86,9 +86,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             IReadOnlyList<OrderedAspectLayer> parts,
             CompileTimeProject compileTimeProject,
             CompileTimeProjectLoader compileTimeProjectLoader )
-            => new CompileTimePipelineStage( compileTimeProject, parts, this );
-
-        public override bool CanTransformCompilation => true;
+            => new CompileTimePipelineStage( compileTimeProject, parts, this.ServiceProvider );
 
         private class InteractiveAspectSource : IAspectSource
         {

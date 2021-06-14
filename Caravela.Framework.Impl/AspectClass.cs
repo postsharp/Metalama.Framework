@@ -210,6 +210,8 @@ namespace Caravela.Framework.Impl
                 // TODO: call IsEligible on the prototype
             };
 
+        public override string ToString() => this.FullName;
+
         private class AspectClassBuilder : IAspectClassBuilder, IAspectDependencyBuilder
         {
             private readonly AspectClass _parent;

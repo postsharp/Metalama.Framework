@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
@@ -37,12 +38,19 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
         private AspectPipelineConfiguration? _lastKnownConfiguration;
 
+        /// <summary>
+        /// Gets an object that can be locked to get exclusive access to
+        /// the current instance.
+        /// </summary>
+        public object Sync { get; } = new();
+
         public DesignTimeAspectPipelineStatus Status { get; private set; }
 
         // It's ok if we return an obsolete project in this case.
         public IReadOnlyList<AspectClass>? AspectClasses => this._lastKnownConfiguration?.AspectClasses;
 
-        public DesignTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain ) : base( projectOptions, domain )
+        public DesignTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain, bool isTest )
+            : base( projectOptions, domain, AspectExecutionScenario.DesignTime, isTest )
         {
             if ( projectOptions.BuildTouchFile != null )
             {
@@ -300,14 +308,12 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             return result;
         }
 
-        public override bool CanTransformCompilation => false;
-
         /// <inheritdoc/>
         private protected override HighLevelPipelineStage CreateStage(
             IReadOnlyList<OrderedAspectLayer> parts,
             CompileTimeProject compileTimeProject,
             CompileTimeProjectLoader compileTimeProjectLoader )
-            => new SourceGeneratorPipelineStage( compileTimeProject, parts, this );
+            => new SourceGeneratorPipelineStage( compileTimeProject, parts, this.ServiceProvider );
 
         protected override void Dispose( bool disposing )
         {

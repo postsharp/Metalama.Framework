@@ -291,7 +291,7 @@ Target.cs:
 
             // Build the project from the compile-time pipeline.
             using UnloadableCompileTimeDomain domain = new();
-            var compileTimeAspectPipeline = new CompileTimeAspectPipeline( projectOptions, domain );
+            var compileTimeAspectPipeline = new CompileTimeAspectPipeline( projectOptions, domain, true );
             DiagnosticList compileDiagnostics = new();
             Assert.True( compileTimeAspectPipeline.TryExecute( compileDiagnostics, compilation5, CancellationToken.None, out _, out _ ) );
 

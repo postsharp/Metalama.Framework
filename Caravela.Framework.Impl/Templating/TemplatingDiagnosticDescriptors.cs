@@ -161,13 +161,13 @@ namespace Caravela.Framework.Impl.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol Declaration, string[] Namespaces)>
+        internal static readonly DiagnosticDefinition<(ISymbol Declaration, string Namespace)>
             CompileTimeCodeNeedsNamespaceImport
                 = new(
                     "CR0119",
                     "The declaration contains compile-time code but it does not import the proper namespaces.",
-                    "The compile-time declaration '{0}' contains compile-time code but it does not explicitly import any of the following namespaces: {1}. "
-                    + "This may cause an inconsistent design-time experience. Import one of these namespaces explicitly.",
+                    "The compile-time declaration '{0}' contains compile-time code but it does not explicitly import the '{1}' namespaces. "
+                    + "This may cause an inconsistent design-time experience. Import this namespace explicitly.",
                     _category,
                     Error );
 
