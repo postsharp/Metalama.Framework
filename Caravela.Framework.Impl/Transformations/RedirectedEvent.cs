@@ -15,7 +15,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 namespace Caravela.Framework.Impl.Transformations
 {
     /// <summary>
-    /// Property override, which calls another property without template expansion.
+    /// Represents an event override, which redirects to accessors of another event without requiring template expansion.
     /// </summary>
     internal class RedirectedEvent : OverriddenMember
     {

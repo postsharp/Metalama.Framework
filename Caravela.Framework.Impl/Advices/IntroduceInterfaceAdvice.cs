@@ -187,18 +187,9 @@ namespace Caravela.Framework.Impl.Advices
 
                     foreach ( var interfaceMethod in introducedInterface.Methods )
                     {
-                        var matchingAspectMethod = this._aspectInterfaceMethods
-                            .SingleOrDefault(
-                                am =>
-                                    am.Method.Name == interfaceMethod.Name
-                                    && am.Method.GenericParameters.Count == interfaceMethod.GenericParameters.Count
-                                    && am.Method.Parameters.Count == interfaceMethod.Parameters.Count
-                                    && am.Method.Parameters
-                                        .Select( ( p, i ) => (p, i) )
-                                        .All(
-                                            amp =>
-                                                compilation.InvariantComparer.Equals( amp.p.ParameterType, interfaceMethod.Parameters[amp.i].ParameterType )
-                                                && amp.p.RefKind == interfaceMethod.Parameters[amp.i].RefKind ) );
+                        var matchingAspectMethod = 
+                            this._aspectInterfaceMethods
+                            .SingleOrDefault( am => am.Method.SignatureEquals( interfaceMethod ) );
 
                         if ( matchingAspectMethod.Method == null )
                         {
@@ -228,17 +219,9 @@ namespace Caravela.Framework.Impl.Advices
 
                     foreach ( var interfaceProperty in introducedInterface.Properties )
                     {
-                        var matchingAspectProperty = this._aspectInterfaceProperties
-                            .SingleOrDefault(
-                                ap =>
-                                    ap.Property.Name == interfaceProperty.Name
-                                    && ap.Property.Parameters.Count == interfaceProperty.Parameters.Count
-                                    && ap.Property.Parameters
-                                        .Select( ( p, i ) => (p, i) )
-                                        .All(
-                                            app =>
-                                                compilation.InvariantComparer.Equals( app.p.ParameterType, interfaceProperty.Parameters[app.i].ParameterType )
-                                                && app.p.RefKind == interfaceProperty.Parameters[app.i].RefKind ) );
+                        var matchingAspectProperty =
+                            this._aspectInterfaceProperties
+                            .SingleOrDefault( ap => ap.Property.SignatureEquals( interfaceProperty ) );
 
                         if ( matchingAspectProperty.Property == null )
                         {
@@ -270,8 +253,7 @@ namespace Caravela.Framework.Impl.Advices
 
                     foreach ( var interfaceEvent in introducedInterface.Events )
                     {
-                        var matchingAspectEvent = this._aspectInterfaceEvents
-                            .SingleOrDefault( ae => ae.Event.Name == interfaceEvent.Name );
+                        var matchingAspectEvent = this._aspectInterfaceEvents.SingleOrDefault( ae => ae.Event.Name == interfaceEvent.Name );
 
                         if ( matchingAspectEvent.Event == null )
                         {
@@ -431,6 +413,7 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var interfaceGenericParameter in interfaceMethod.GenericParameters )
             {
+                // TODO: Move this initialization into a second overload of add generic parameter.
                 var genericParameterBuilder = methodBuilder.AddGenericParameter( interfaceGenericParameter.Name );
                 genericParameterBuilder.IsContravariant = interfaceGenericParameter.IsContravariant;
                 genericParameterBuilder.IsCovariant = interfaceGenericParameter.IsCovariant;

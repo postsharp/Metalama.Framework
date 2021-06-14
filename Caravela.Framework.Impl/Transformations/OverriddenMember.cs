@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -49,7 +50,12 @@ namespace Caravela.Framework.Impl.Transformations
 
                 if ( memberSymbol != null )
                 {
-                    return memberSymbol.DeclaringSyntaxReferences.Select( x => (MemberDeclarationSyntax) x.GetSyntax() ).First();
+                    var syntaxReference = (MemberDeclarationSyntax?)memberSymbol.DeclaringSyntaxReferences.OrderBy(dsr=>dsr.SyntaxTree.FilePath, StringComparer.Ordinal).FirstOrDefault().GetSyntax();
+
+                    if ( syntaxReference != null )
+                    {
+                        return syntaxReference;
+                    }
                 }
 
                 var typeSymbol = ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol;

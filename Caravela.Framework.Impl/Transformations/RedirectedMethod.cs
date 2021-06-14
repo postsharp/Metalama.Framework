@@ -15,7 +15,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 namespace Caravela.Framework.Impl.Transformations
 {
     /// <summary>
-    /// Method override, which calls another method.
+    /// Represents a method override, which redirects to another method without requiring template expansion.
     /// </summary>
     internal class RedirectedMethod : OverriddenMember
     {
