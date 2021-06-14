@@ -1,10 +1,7 @@
-
 [TestOutput]
 [Retry]
 class Program
 {
-
-
     private void IntroducedMethod1(global::System.String name)
     {
         this.IntroducedMethod2("IntroducedMethod1");
@@ -15,4 +12,3 @@ class Program
         this.IntroducedMethod1("IntroducedMethod2");
     }
 }
-

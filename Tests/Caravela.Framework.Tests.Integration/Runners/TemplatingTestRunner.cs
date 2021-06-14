@@ -49,7 +49,11 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
         /// </summary>
         /// <param name="testAnalyzers">A list of analyzers to invoke on the test source.</param>
-        public TemplatingTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences, IEnumerable<CSharpSyntaxVisitor> testAnalyzers ) 
+        public TemplatingTestRunner(
+            IServiceProvider serviceProvider,
+            string? projectDirectory,
+            IEnumerable<MetadataReference> metadataReferences,
+            IEnumerable<CSharpSyntaxVisitor> testAnalyzers )
             : base(
                 serviceProvider,
                 projectDirectory,

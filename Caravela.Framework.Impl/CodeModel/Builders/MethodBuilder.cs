@@ -87,8 +87,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
-        // TODO: When an interface is introduced, explicit implementation should appear here.
-        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; set; } = Array.Empty<IMethod>();
 
         public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, AspectLinkerOptions? linkerOptions )
             : base( parentAdvice, targetType, name )
@@ -114,21 +113,29 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
-            var method = (MethodDeclarationSyntax)
-                syntaxGenerator.MethodDeclaration(
-                    this.Name,
-                    this.Parameters.AsBuilderList.Select( p => ((ParameterBuilder) p).ToDeclarationSyntax() ),
-                    this.GenericParameters.AsBuilderList.Select( p => p.Name ),
-                    syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ),
-                    this.Accessibility.ToRoslynAccessibility(),
-                    this.ToDeclarationModifiers(),
-                    !this.ReturnParameter.ParameterType.Is( typeof(void) )
-                        ? new[]
-                        {
-                            ReturnStatement(
-                                DefaultExpression( (TypeSyntax) syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ) )
-                        }
-                        : null );
+            var method =
+                MethodDeclaration(
+                    List<AttributeListSyntax>(),
+                    this.GetSyntaxModifierList(),
+                    this.GetSyntaxReturnType(),
+                    this.ExplicitInterfaceImplementations.Count > 0
+                        ? ExplicitInterfaceSpecifier(
+                            (NameSyntax) syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                        : null,
+                    Identifier( this.Name ),
+                    this.GetSyntaxTypeParameterList(),
+                    this.GetSyntaxParameterList(),
+                    this.GetSyntaxConstraintClauses(),
+                    Block(
+                        List(
+                            !this.ReturnParameter.ParameterType.Is( typeof(void) )
+                                ? new[]
+                                {
+                                    ReturnStatement(
+                                        DefaultExpression( (TypeSyntax) syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ) )
+                                }
+                                : new StatementSyntax[0] ) ),
+                    null );
 
             return new[]
             {
@@ -139,5 +146,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         // TODO: Temporary
         public override MemberDeclarationSyntax InsertPositionNode
             => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
+
+        public void SetExplicitInterfaceImplementation( IMethod interfaceMethod )
+        {
+            this.ExplicitInterfaceImplementations = new[] { interfaceMethod };
+        }
     }
 }

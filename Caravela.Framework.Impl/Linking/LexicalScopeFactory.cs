@@ -5,7 +5,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,11 +56,11 @@ namespace Caravela.Framework.Impl.Linking
                         return this.GetLexicalScope( overriddenDeclaration.OverriddenDeclaration );
                     }
 
-                case IInterfaceImplementationIntroduction interfaceIntroduction:
+                case IIntroducedInterfaceImplementation interfaceImplementation:
                     {
                         // Take the initial position of the target type.
                         var syntaxReference =
-                            interfaceIntroduction.ContainingDeclaration.GetSymbol()
+                            interfaceImplementation.TargetType.GetSymbol()
                                 .AssertNotNull()
                                 .DeclaringSyntaxReferences
                                 .Where( x => x.SyntaxTree == introduction.TargetSyntaxTree )

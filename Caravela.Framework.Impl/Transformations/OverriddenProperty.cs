@@ -9,7 +9,6 @@ using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -18,21 +17,15 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal class OverriddenProperty : INonObservableTransformation, IMemberIntroduction, IOverriddenDeclaration
+    internal class OverriddenProperty : OverriddenMember
     {
-        public Advice Advice { get; }
-
-        IDeclaration IOverriddenDeclaration.OverriddenDeclaration => this.OverriddenDeclaration;
-
-        public IProperty OverriddenDeclaration { get; }
+        public new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
 
         public IProperty? TemplateProperty { get; }
 
         public IMethod? GetTemplateMethod { get; }
 
         public IMethod? SetTemplateMethod { get; }
-
-        public AspectLinkerOptions? LinkerOptions { get; }
 
         public OverriddenProperty(
             Advice advice,
@@ -41,6 +34,7 @@ namespace Caravela.Framework.Impl.Transformations
             IMethod? getTemplateMethod,
             IMethod? setTemplateMethod,
             AspectLinkerOptions? linkerOptions = null )
+            : base( advice, overriddenDeclaration, linkerOptions )
         {
             Invariant.Assert( advice != null );
             Invariant.Assert( overriddenDeclaration != null );
@@ -49,21 +43,12 @@ namespace Caravela.Framework.Impl.Transformations
             Invariant.Assert( templateProperty != null || getTemplateMethod != null || setTemplateMethod != null );
             Invariant.Assert( !(templateProperty != null && (getTemplateMethod != null || setTemplateMethod != null)) );
 
-            this.Advice = advice;
-            this.OverriddenDeclaration = overriddenDeclaration;
             this.TemplateProperty = templateProperty;
             this.GetTemplateMethod = getTemplateMethod;
             this.SetTemplateMethod = setTemplateMethod;
-            this.LinkerOptions = linkerOptions;
         }
 
-        // TODO: Temporary
-        public SyntaxTree TargetSyntaxTree
-            => this.OverriddenDeclaration is ISyntaxTreeTransformation introduction
-                ? introduction.TargetSyntaxTree
-                : ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
-
-        public IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             using ( context.DiagnosticSink.WithDefaultScope( this.OverriddenDeclaration ) )
             {
@@ -223,24 +208,6 @@ namespace Caravela.Framework.Impl.Transformations
                     // TODO: Full qualification.
                     return IdentifierName( this.OverriddenDeclaration.Name );
                 }
-            }
-        }
-
-        public MemberDeclarationSyntax InsertPositionNode
-        {
-            get
-            {
-                // TODO: Select a good syntax reference if there are multiple (partial class, partial method).
-                var propertySymbol = (this.OverriddenDeclaration as Property)?.Symbol;
-
-                if ( propertySymbol != null )
-                {
-                    return propertySymbol.DeclaringSyntaxReferences.Select( x => (PropertyDeclarationSyntax) x.GetSyntax() ).First();
-                }
-
-                var typeSymbol = ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol;
-
-                return typeSymbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
             }
         }
     }

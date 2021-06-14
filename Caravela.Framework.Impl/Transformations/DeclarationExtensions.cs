@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Accessibility = Caravela.Framework.Code.Accessibility;
+using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.Transformations
 {
@@ -31,6 +33,9 @@ namespace Caravela.Framework.Impl.Transformations
 
                 case IEvent @event:
                     return GetMemberSyntaxModifierList( @event );
+
+                case IParameter parameter:
+                    return GetParameterSyntaxModifierList( parameter );
             }
 
             throw new AssertionFailedException();
@@ -58,6 +63,11 @@ namespace Caravela.Framework.Impl.Transformations
 
             AddAccessibilityTokens( member, tokens );
 
+            if ( member.IsNew )
+            {
+                tokens.Add( Token( SyntaxKind.NewKeyword ) );
+            }
+
             if ( member.IsStatic )
             {
                 tokens.Add( Token( SyntaxKind.StaticKeyword ) );
@@ -73,11 +83,66 @@ namespace Caravela.Framework.Impl.Transformations
                 tokens.Add( Token( SyntaxKind.VirtualKeyword ) );
             }
 
+            if ( member.IsOverride )
+            {
+                tokens.Add( Token( SyntaxKind.OverrideKeyword ) );
+            }
+
+            return TokenList( tokens );
+        }
+
+        private static SyntaxTokenList GetParameterSyntaxModifierList( IParameter parameter )
+        {
+            var tokens = new List<SyntaxToken>();
+
+            if ( parameter.RefKind == RefKind.In )
+            {
+                tokens.Add( Token( SyntaxKind.InKeyword ) );
+            }
+
+            if ( parameter.RefKind == RefKind.Ref )
+            {
+                tokens.Add( Token( SyntaxKind.RefKeyword ) );
+            }
+
+            if ( parameter.RefKind == RefKind.Out )
+            {
+                tokens.Add( Token( SyntaxKind.OutKeyword ) );
+            }
+
             return TokenList( tokens );
         }
 
         private static void AddAccessibilityTokens( IMemberOrNamedType member, List<SyntaxToken> tokens )
         {
+            // If the target is explicit interface implementation, skip accessibility modifiers.
+            switch ( member )
+            {
+                case IMethod method:
+                    if ( method.ExplicitInterfaceImplementations.Count > 0 )
+                    {
+                        return;
+                    }
+
+                    break;
+
+                case IProperty property:
+                    if ( property.ExplicitInterfaceImplementations.Count > 0 )
+                    {
+                        return;
+                    }
+
+                    break;
+
+                case IEvent @event:
+                    if ( @event.ExplicitInterfaceImplementations.Count > 0 )
+                    {
+                        return;
+                    }
+
+                    break;
+            }
+
             switch ( member.Accessibility )
             {
                 case Accessibility.Private:
@@ -124,9 +189,14 @@ namespace Caravela.Framework.Impl.Transformations
             return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( method.ReturnType.GetSymbol() );
         }
 
-        public static TypeSyntax GetSyntaxReturnType( this IProperty method )
+        public static TypeSyntax GetSyntaxReturnType( this IProperty property )
         {
-            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( method.Type.GetSymbol() );
+            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( property.Type.GetSymbol() );
+        }
+
+        public static TypeSyntax GetSyntaxReturnType( this IEvent property )
+        {
+            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( property.EventType.GetSymbol() );
         }
 
         public static TypeParameterListSyntax? GetSyntaxTypeParameterList( this IMethod method )
@@ -146,8 +216,8 @@ namespace Caravela.Framework.Impl.Transformations
                     method.Parameters.Select(
                         p => Parameter(
                             List<AttributeListSyntax>(),
-                            TokenList(), // TODO: modifiers
-                            ParseTypeName( p.ParameterType.ToDisplayString() ),
+                            GetSyntaxModifierList( p ),
+                            (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( p.ParameterType.GetSymbol() ),
                             Identifier( p.Name! ),
                             null ) ) ) );
         }
@@ -156,6 +226,25 @@ namespace Caravela.Framework.Impl.Transformations
         {
             // TODO: generics
             return List<TypeParameterConstraintClauseSyntax>();
+        }
+
+        public static bool IsEventField( this IEvent @event )
+        {
+            // TODO: 
+            var eventSymbol = @event.GetSymbol();
+
+            if ( eventSymbol != null )
+            {
+                // TODO: partial events.
+                var eventDeclarationSyntax = eventSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
+
+                if ( eventDeclarationSyntax is VariableDeclaratorSyntax )
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

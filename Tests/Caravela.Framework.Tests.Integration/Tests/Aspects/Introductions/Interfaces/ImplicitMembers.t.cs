@@ -7,25 +7,42 @@ public class TargetClass
 
     public global::System.Int32 InterfaceMethod()
     {
-        global::System.Console.WriteLine("This is introduced interface method.");
+        global::System.Console.WriteLine("This is introduced interface member.");
         return default(global::System.Int32);
     }
 
-    public event global::System.EventHandler Event; global::System.Int32 global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers.IInterface.InterfaceMethod()
+    public global::System.Int32 Property
     {
-        return this.InterfaceMethod();
+        get
+        {
+            global::System.Console.WriteLine("This is introduced interface member.");
+            return (int)42;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine("This is introduced interface member.");
+        }
     }
 
-    event global::System.EventHandler global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers.IInterface.Event
+    public global::System.Int32 AutoProperty
+    {
+        get;
+        set;
+    }
+
+    public event global::System.EventHandler Event
     {
         add
         {
-            this.Event += value;
+            global::System.Console.WriteLine("This is introduced interface member.");
         }
 
         remove
         {
-            this.Event -= value;
+            global::System.Console.WriteLine("This is introduced interface member.");
         }
     }
+
+    public event global::System.EventHandler EventField;
 }

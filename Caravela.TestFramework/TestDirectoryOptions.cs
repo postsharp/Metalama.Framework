@@ -15,11 +15,11 @@ namespace Caravela.TestFramework
         /// Gets or sets a value indicating whether the current directory and all child directories should be excluded.
         /// </summary>
         public bool? Exclude { get; set; }
-        
+
         internal static TestDirectoryOptions ReadFile( string path )
         {
             var json = File.ReadAllText( path );
-            
+
             return JsonConvert.DeserializeObject<TestDirectoryOptions>( json )!;
         }
 

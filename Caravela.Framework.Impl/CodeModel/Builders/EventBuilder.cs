@@ -7,6 +7,7 @@ using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Invokers;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -67,14 +68,19 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         IMethod? IEvent.Raiser => this.Raiser;
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
-        public IReadOnlyList<IEvent> ExplicitInterfaceImplementations => Array.Empty<IEvent>();
+        public IReadOnlyList<IEvent> ExplicitInterfaceImplementations { get; set; } = Array.Empty<IEvent>();
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
-            var @event =
-                this._isEventField
+            if ( this._isEventField && this.ExplicitInterfaceImplementations.Count > 0 )
+            {
+                throw new AssertionFailedException();
+            }
+
+            MemberDeclarationSyntax @event =
+                this._isEventField && this.ExplicitInterfaceImplementations.Count == 0
                     ? EventFieldDeclaration(
                         List<AttributeListSyntax>(), // TODO: Attributes.
                         GenerateModifierList(),
@@ -85,7 +91,22 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                                 {
                                     VariableDeclarator( Identifier( this.Name ), null, null ) // TODO: Initializer.
                                 } ) ) )
-                    : throw new NotImplementedException();
+                    : EventDeclaration(
+                        List<AttributeListSyntax>(), // TODO: Attributes.
+                        GenerateModifierList(),
+                        (TypeSyntax) syntaxGenerator.TypeExpression( this.EventType.GetSymbol() ),
+                        this.ExplicitInterfaceImplementations.Count > 0
+                            ? ExplicitInterfaceSpecifier(
+                                (NameSyntax) syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                            : null,
+                        Identifier( this.Name ),
+                        GenerateAccessorList() );
+
+            if ( this._isEventField && this.ExplicitInterfaceImplementations.Count > 0 )
+            {
+                // Add annotation to the explicit annotation that the linker should treat this an event field.
+                @event = @event.AddLinkerDeclarationFlags( LinkerDeclarationFlags.EventField );
+            }
 
             return new[]
             {
@@ -116,12 +137,47 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
                 return TokenList( tokens );
             }
+
+            AccessorListSyntax GenerateAccessorList()
+            {
+                switch (this.Adder, this.Remover)
+                {
+                    case (not null, not null):
+                        return AccessorList(
+                            List( new[] { GenerateAccessor( SyntaxKind.AddAccessorDeclaration ), GenerateAccessor( SyntaxKind.RemoveAccessorDeclaration ) } ) );
+
+                    case (not null, null):
+                        return AccessorList( List( new[] { GenerateAccessor( SyntaxKind.AddAccessorDeclaration ) } ) );
+
+                    case (null, not null):
+                        return AccessorList( List( new[] { GenerateAccessor( SyntaxKind.RemoveAccessorDeclaration ) } ) );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+            AccessorDeclarationSyntax GenerateAccessor( SyntaxKind accessorDeclarationKind )
+            {
+                return
+                    AccessorDeclaration(
+                        accessorDeclarationKind,
+                        List<AttributeListSyntax>(),
+                        TokenList(),
+                        Block(),
+                        null );
+            }
         }
 
         [return: RunTimeOnly]
         public EventInfo ToEventInfo()
         {
             throw new NotImplementedException();
+        }
+
+        public void SetExplicitInterfaceImplementation( IEvent interfaceEvent )
+        {
+            this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
         }
     }
 }

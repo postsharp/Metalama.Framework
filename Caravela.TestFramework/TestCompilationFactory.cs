@@ -37,8 +37,8 @@ namespace Caravela.TestFramework
 
             return CreateEmptyCSharpCompilation( name, allReferences );
         }
-        
-        public static CSharpCompilation CreateEmptyCSharpCompilation( string? name, IEnumerable<MetadataReference> metadataReferences ) 
+
+        public static CSharpCompilation CreateEmptyCSharpCompilation( string? name, IEnumerable<MetadataReference> metadataReferences )
             => CSharpCompilation.Create( name ?? "test_" + Guid.NewGuid() )
                 .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
                 .AddReferences( metadataReferences );

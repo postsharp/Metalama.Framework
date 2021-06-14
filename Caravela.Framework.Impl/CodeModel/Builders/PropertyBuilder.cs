@@ -71,8 +71,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => throw new NotImplementedException();
 
-        // TODO: When an interface is introduced, explicit implementation should appear here.
-        public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => Array.Empty<IProperty>();
+        public IReadOnlyList<IProperty> ExplicitInterfaceImplementations { get; set; } = Array.Empty<IProperty>();
 
         public bool IsIndexer => this.Name == "Items";
 
@@ -153,7 +152,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     List<AttributeListSyntax>(), // TODO: Attributes.
                     GenerateModifierList(),
                     (TypeSyntax) syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
-                    null,
+                    this.ExplicitInterfaceImplementations.Count > 0
+                        ? ExplicitInterfaceSpecifier(
+                            (NameSyntax) syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                        : null,
                     Identifier( this.Name ),
                     GenerateAccessorList(),
                     null,
@@ -224,10 +226,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         SyntaxKind.GetAccessorDeclaration,
                         List<AttributeListSyntax>(),
                         TokenList( tokens ),
+                        Token( SyntaxKind.GetKeyword ),
                         this.IsAutoPropertyOrField
                             ? null
                             : Block( ReturnStatement( DefaultExpression( (TypeSyntax) syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
-                        null );
+                        null,
+                        this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
             }
 
             AccessorDeclarationSyntax GenerateSetAccessor()
@@ -244,10 +248,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         this._hasInitOnlySetter ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
                         List<AttributeListSyntax>(),
                         TokenList( tokens ),
+                        this._hasInitOnlySetter ? Token( SyntaxKind.InitKeyword ) : Token( SyntaxKind.SetKeyword ),
                         this.IsAutoPropertyOrField
                             ? null
                             : Block(),
-                        null );
+                        null,
+                        this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
             }
         }
 
@@ -261,6 +267,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public FieldOrPropertyInfo ToFieldOrPropertyInfo()
         {
             throw new NotImplementedException();
+        }
+
+        public void SetExplicitInterfaceImplementation( IProperty interfaceProperty )
+        {
+            this.ExplicitInterfaceImplementations = new[] { interfaceProperty };
         }
     }
 }

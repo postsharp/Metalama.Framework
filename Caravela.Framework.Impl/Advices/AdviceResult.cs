@@ -3,7 +3,9 @@
 
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -69,6 +71,20 @@ namespace Caravela.Framework.Impl.Advices
                 ImmutableArray.Create( diagnostics ),
                 ImmutableArray<IObservableTransformation>.Empty,
                 ImmutableArray<INonObservableTransformation>.Empty );
+        }
+
+        public AdviceResult WithTransformations( params ITransformation[] transformations )
+        {
+            return this.WithTransformations( (IReadOnlyList<ITransformation>) transformations );
+        }
+
+        public AdviceResult WithTransformations( IReadOnlyList<ITransformation> transformations )
+        {
+            return new(
+                this.Diagnostics,
+                this.ObservableTransformations.AddRange( transformations.OfType<IObservableTransformation>() ),
+                this.NonObservableTransformations.AddRange( transformations.OfType<INonObservableTransformation>() )
+            );
         }
 
         public AdviceResult WithDiagnostics( params Diagnostic[] diagnostics )

@@ -103,7 +103,7 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             // Visit all interface introductions.
-            foreach ( var interfaceIntroduction in allTransformations.OfType<IInterfaceImplementationIntroduction>() )
+            foreach ( var interfaceIntroduction in allTransformations.OfType<IIntroducedInterface>() )
             {
                 var introducedInterfaces = interfaceIntroduction.GetIntroducedInterfaceImplementations();
 

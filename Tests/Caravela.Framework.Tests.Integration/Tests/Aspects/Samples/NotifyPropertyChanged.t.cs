@@ -1,67 +1,55 @@
-
 [TestOutput]
 [NotifyPropertyChanged]
-internal class TargetClass
-: global::System.ComponentModel.INotifyPropertyChanged
+class Car : global::System.ComponentModel.INotifyPropertyChanged
 {
-    public int Property1
+    public string? Make
     {
         get
         {
-            return this.__Property1__BackingField;
+            return this.__Make__BackingField;
         }
 
         set
         {
-            if (value != this.Property1)
+            var value = value;
+            if (value != this.Make)
             {
-                this.OnPropertyChanged("Property1");
-                global::System.Int32 result;
-                this.__Property1__BackingField = value;
+                this.OnPropertyChanged("Make");
+                global::System.String dummy;
+                this.__Make__BackingField = value;
             }
+
+            return;
         }
     }
 
-    private int __Property1__BackingField;
-
-    public int Property2
+    private string? __Make__BackingField;
+    public double Power
     {
         get
         {
-            return this.__Property2__BackingField;
+            return this.__Power__BackingField;
         }
 
         set
         {
-            if (value != this.Property2)
+            var value = value;
+            if (value != this.Power)
             {
-                this.OnPropertyChanged("Property2");
-                global::System.Int32 result;
-                this.__Property2__BackingField = value;
+                this.OnPropertyChanged("Power");
+                global::System.Double dummy;
+                this.__Power__BackingField = value;
             }
+
+            return;
         }
     }
 
-    private int __Property2__BackingField;
-
-    public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
-
+    private double __Power__BackingField;
     protected void OnPropertyChanged(global::System.String name)
     {
         this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
     }
 
-    event global::System.ComponentModel.PropertyChangedEventHandler? global::System.ComponentModel.INotifyPropertyChanged.PropertyChanged
-    {
-        add
-        {
-            this.PropertyChanged += value;
-        }
-
-        remove
-        {
-            this.PropertyChanged -= value;
-        }
-    }
+    public event global::System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 }
-

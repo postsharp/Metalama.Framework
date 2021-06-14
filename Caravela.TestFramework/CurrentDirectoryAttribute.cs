@@ -22,7 +22,7 @@ namespace Caravela.TestFramework
         /// Gets the root directory of test files for the current test methods.
         /// </summary>
         public string Directory { get; }
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CurrentDirectoryAttribute"/> class.
         /// </summary>
@@ -41,9 +41,9 @@ namespace Caravela.TestFramework
         public override IEnumerable<object[]> GetData( MethodInfo testMethod )
         {
             var discoverer = new TestDiscoverer( new ReflectionAssemblyInfo( testMethod.DeclaringType!.Assembly ) );
-            
+
             var excludedDirectories = ImmutableHashSet<string>.Empty;
-            
+
             // Look at other methods to see if they cover specific subdirectories. It means that that they should be excluded from the current set.
             foreach ( var method in testMethod.DeclaringType.GetMethods( BindingFlags.Public | BindingFlags.Instance ) )
             {
@@ -59,7 +59,7 @@ namespace Caravela.TestFramework
                     excludedDirectories = excludedDirectories.Add( testFilesAttribute.Directory );
                 }
             }
-            
+
             foreach ( var testCase in discoverer.Discover( this.Directory, excludedDirectories ) )
             {
                 if ( testCase.SkipReason == null )

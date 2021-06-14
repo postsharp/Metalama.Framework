@@ -48,7 +48,7 @@ namespace Caravela.TestFramework.XunitFramework
             foreach ( var collection in collections )
             {
                 var references = TestAssemblyReferenceReader.GetAssemblyReferences( collection.Key.TestAssembly.Assembly ).ToList();
-                
+
                 executionMessageSink.OnMessage( new TestCollectionStarting( collection, collection.Key ) );
 
                 executionMessageSink.OnMessage(

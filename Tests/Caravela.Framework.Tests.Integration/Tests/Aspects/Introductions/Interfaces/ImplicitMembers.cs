@@ -17,28 +17,61 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
         event EventHandler Event;
 
-        //int Property { get; set; }
+        event EventHandler EventField;
+
+        int Property { get; set; }
+
+        int AutoProperty { get; set; }
     }
 
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
         public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
         {
-            aspectBuilder.AdviceFactory.IntroduceInterface(aspectBuilder.TargetDeclaration, (INamedType)aspectBuilder.TargetDeclaration.Compilation.TypeFactory.GetTypeByReflectionType(typeof(IInterface)));
+            aspectBuilder.AdviceFactory.IntroduceInterface(aspectBuilder.TargetDeclaration, typeof(IInterface));
         }
 
-        [Introduce]
+        [InterfaceMember]
         public int InterfaceMethod()
         {
-            Console.WriteLine("This is introduced interface method.");
+            Console.WriteLine("This is introduced interface member.");
             return meta.Proceed();
         }
 
-        [Introduce]
-        public event EventHandler? Event;
+        [InterfaceMember]
+        public event EventHandler? Event
+        {
+            add
+            {
+                Console.WriteLine("This is introduced interface member.");
+            }
 
-        //[Introduce]
-        //public int Property { get; set; }
+            remove
+            {
+                Console.WriteLine("This is introduced interface member.");
+            }
+        }
+
+        [InterfaceMember]
+        public event EventHandler? EventField;
+
+        [InterfaceMember]
+        public int Property
+        {
+            get
+            {
+                Console.WriteLine("This is introduced interface member.");
+                return 42;
+            }
+
+            set
+            {
+                Console.WriteLine("This is introduced interface member.");
+            }
+        }
+
+        [InterfaceMember]
+        public int AutoProperty { get; set; }
     }
 
     [TestOutput]

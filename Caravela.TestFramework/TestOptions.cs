@@ -18,7 +18,7 @@ namespace Caravela.TestFramework
         public string? SkipReason { get; set; }
 
         public bool IsSkipped => this.SkipReason != null;
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the diagnostics of the compilation of the transformed target code should be included in the test result.
         /// This is useful when diagnostic suppression is being tested.
@@ -81,14 +81,15 @@ namespace Caravela.TestFramework
                         this.IncludeAllSeverities = true;
 
                         break;
-                    
+
                     case "Skipped":
                         this.SkipReason = "Skipped by directive in source code.";
-                        
+
                         break;
 
                     case "DesignTime":
-                        this.TestRunnerFactoryType = "Caravela.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory, Caravela.Framework.Tests.Integration";
+                        this.TestRunnerFactoryType =
+                            "Caravela.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory, Caravela.Framework.Tests.Integration";
 
                         break;
                 }
