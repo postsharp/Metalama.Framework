@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Compiler;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
@@ -9,6 +10,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -77,6 +79,14 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;
 
         IDiagnosticSink IMetaApi.Diagnostics => this._common.Diagnostics;
+
+        public void DebugBreak()
+        {
+            if ( CaravelaCompilerInfo.IsActive )
+            {
+                Debugger.Launch();
+            }
+        }
 
         public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
 

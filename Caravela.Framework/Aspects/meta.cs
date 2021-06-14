@@ -45,6 +45,12 @@ namespace Caravela.Framework.Aspects
         public static dynamic Proceed() => _proceedImplementation.Value ?? throw NewInvalidOperationException();
 
         /// <summary>
+        /// Requests the debugger to break. If no debugger is attached to the current project, launch the JIT debugger dialog.
+        /// </summary>
+        [TemplateKeyword]
+        public static void DebugBreak() => CurrentContext.DebugBreak();
+
+        /// <summary>
         /// Coerces an <paramref name="expression"/> to be interpreted as compile time. This is typically used
         /// to coerce expressions that can be either run-time or compile-time, such as a literal. Since ambiguous expressions are
         /// interpreted as run-time by default, this method allows to change that behavior.
