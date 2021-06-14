@@ -187,9 +187,9 @@ namespace Caravela.Framework.Impl.Advices
 
                     foreach ( var interfaceMethod in introducedInterface.Methods )
                     {
-                        var matchingAspectMethod = 
+                        var matchingAspectMethod =
                             this._aspectInterfaceMethods
-                            .SingleOrDefault( am => am.Method.SignatureEquals( interfaceMethod ) );
+                                .SingleOrDefault( am => am.Method.SignatureEquals( interfaceMethod ) );
 
                         if ( matchingAspectMethod.Method == null )
                         {
@@ -221,7 +221,7 @@ namespace Caravela.Framework.Impl.Advices
                     {
                         var matchingAspectProperty =
                             this._aspectInterfaceProperties
-                            .SingleOrDefault( ap => ap.Property.SignatureEquals( interfaceProperty ) );
+                                .SingleOrDefault( ap => ap.Property.SignatureEquals( interfaceProperty ) );
 
                         if ( matchingAspectProperty.Property == null )
                         {

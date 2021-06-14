@@ -21,7 +21,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 {
     internal class HighlightingTestRunner : BaseTestRunner
     {
-        public HighlightingTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences ) 
+        public HighlightingTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences )
             : base( serviceProvider, projectDirectory, metadataReferences ) { }
 
         protected override TestResult CreateTestResult() => new HighlightingTestResult();

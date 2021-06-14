@@ -50,7 +50,10 @@ namespace Caravela.Framework.Impl.Transformations
 
                 if ( memberSymbol != null )
                 {
-                    var syntaxReference = (MemberDeclarationSyntax?)memberSymbol.DeclaringSyntaxReferences.OrderBy(dsr=>dsr.SyntaxTree.FilePath, StringComparer.Ordinal).FirstOrDefault().GetSyntax();
+                    var syntaxReference = (MemberDeclarationSyntax?) memberSymbol.DeclaringSyntaxReferences
+                        .OrderBy( dsr => dsr.SyntaxTree.FilePath, StringComparer.Ordinal )
+                        .FirstOrDefault()
+                        .GetSyntax();
 
                     if ( syntaxReference != null )
                     {

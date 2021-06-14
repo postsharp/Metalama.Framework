@@ -10,7 +10,7 @@ namespace Caravela.Framework.Aspects
     public sealed class InterfaceMemberSpecification
     {
 #pragma warning disable IDE0051 // Remove unused private members
-        private InterfaceMemberSpecification(IMember interfaceMember, IMember implementationMember)
+        private InterfaceMemberSpecification( IMember interfaceMember, IMember implementationMember )
 #pragma warning restore IDE0051 // Remove unused private members
         {
             throw new NotImplementedException();
