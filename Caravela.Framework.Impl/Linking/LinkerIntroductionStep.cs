@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             var diagnostics = new UserDiagnosticSink( input.CompileTimeProject );
             var nameProvider = new LinkerIntroductionNameProvider();
-            var lexicalScopeHelper = new LexicalScopeFactory( input.CompilationModel );
+            var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
             var introducedCollection = new IntroductionCollection();
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
             var syntaxFactory = ReflectionMapper.GetInstance( input.CompilationModel.RoslynCompilation );
@@ -93,7 +93,7 @@ namespace Caravela.Framework.Impl.Linking
                 var introductionContext = new MemberIntroductionContext(
                     diagnostics,
                     nameProvider,
-                    lexicalScopeHelper.GetLexicalScope( memberIntroduction ),
+                    lexicalScopeFactory,
                     syntaxFactory,
                     this._serviceProvider );
 

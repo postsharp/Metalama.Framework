@@ -14,11 +14,11 @@ namespace Caravela.Framework.Impl.Linking
     {
         public ISymbol Symbol { get; }
 
-        public LinkerAnnotationTargetKind TargetKind { get; }
+        public AspectReferenceTargetKind TargetKind { get; }
 
         public AspectLayerId? AspectLayer { get; }
 
-        public SymbolVersion( ISymbol symbol, AspectLayerId? aspectLayer, LinkerAnnotationTargetKind targetKind )
+        public SymbolVersion( ISymbol symbol, AspectLayerId? aspectLayer, AspectReferenceTargetKind targetKind )
         {
             this.Symbol = symbol;
             this.AspectLayer = aspectLayer;

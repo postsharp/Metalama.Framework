@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -47,8 +46,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         throw new ArgumentException( $"unsupported link() tag {tag}" );
                     }
 
-                    return callExpression.AddLinkerAnnotation(
-                        new LinkerAnnotation( new AspectLayerId( this._aspectName, this._layerName ), LinkingOrder.Default ) );
+                    return callExpression.WithAspectReferenceAnnotation(
+                        new AspectReferenceSpecification( new AspectLayerId( this._aspectName, this._layerName ), AspectReferenceOrder.Default ) );
                 }
 
                 return base.VisitInvocationExpression( node );

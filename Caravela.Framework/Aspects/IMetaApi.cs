@@ -92,5 +92,11 @@ namespace Caravela.Framework.Aspects
         IDiagnosticSink Diagnostics { get; }
 
         void DebugBreak();
+
+        /// <summary>
+        /// Invoke the next version of the target declaration.
+        /// </summary>
+        /// <returns></returns>
+        dynamic? Proceed();
     }
 }

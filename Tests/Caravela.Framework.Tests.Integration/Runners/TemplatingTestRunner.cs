@@ -253,7 +253,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 new LinkerOverrideMethodProceedImpl(
                     default,
                     targetMethod,
-                    LinkingOrder.Default,
+                    AspectReferenceOrder.Default,
                     compilation.Factory ),
                 lexicalScope,
                 this._syntaxSerializationService,

@@ -5,7 +5,6 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -68,7 +67,7 @@ namespace Caravela.Framework.Impl.Transformations
                     InvocationExpression(
                             GetInvocationTargetExpression(),
                             ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) )
-                        .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkingOrder.Default ) );
+                        .WithAspectReferenceAnnotation( new AspectReferenceSpecification( this.Advice.AspectLayerId, AspectReferenceOrder.Default ) );
             }
 
             ExpressionSyntax GetInvocationTargetExpression()

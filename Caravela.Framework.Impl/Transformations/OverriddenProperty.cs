@@ -5,7 +5,6 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
@@ -18,7 +17,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal class OverriddenProperty : OverriddenMember
+    internal sealed class OverriddenProperty : OverriddenMember
     {
         public new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
 
@@ -66,14 +65,14 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration.Getter != null
                         ? getTemplateMethod != null
                             ? this.ExpandAccessorTemplate( context, getTemplateMethod, this.OverriddenDeclaration.Getter )
-                            : this.GetIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration )
+                            : this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration )
                         : null;
 
                 var setAccessorBody =
                     this.OverriddenDeclaration.Setter != null
                         ? setTemplateMethod != null
                             ? this.ExpandAccessorTemplate( context, setTemplateMethod, this.OverriddenDeclaration.Setter )
-                            : this.GetIdentityAccessorBody( setAccessorDeclarationKind )
+                            : this.CreateIdentityAccessorBody( setAccessorDeclarationKind )
                         : null;
 
                 var overrides = new[]
@@ -122,6 +121,16 @@ namespace Caravela.Framework.Impl.Transformations
         {
             using ( context.DiagnosticSink.WithDefaultScope( accessor ) )
             {
+                var proceedExpression = new DynamicExpression(
+                    accessor.MethodKind switch
+                    {
+                        MethodKind.PropertyGet => this.CreateGetExpression(),
+                        MethodKind.PropertySet => this.CreateSetExpression(),
+                        _ => throw new AssertionFailedException(),
+                    },
+                    this.OverriddenDeclaration.Type,
+                    false );
+
                 var metaApi = MetaApi.ForFieldOrProperty(
                     this.OverriddenDeclaration,
                     accessor,
@@ -130,18 +139,14 @@ namespace Caravela.Framework.Impl.Transformations
                         accessorTemplate.GetSymbol(),
                         this.Advice.Options.Tags,
                         this.Advice.AspectLayerId,
-                        context.ServiceProvider.GetService<AspectPipelineDescription>() ) );
+                        context.ServiceProvider.GetService<AspectPipelineDescription>(),
+                        proceedExpression ) );
 
                 var expansionContext = new TemplateExpansionContext(
                     this.Advice.Aspect.Aspect,
                     metaApi,
                     this.OverriddenDeclaration.Compilation,
-                    new LinkerOverridePropertyProceedImpl(
-                        this.Advice.AspectLayerId,
-                        accessor,
-                        LinkingOrder.Default,
-                        context.SyntaxFactory ),
-                    context.LexicalScope,
+                    context.LexicalScopeProvider.GetLexicalScope( accessor ),
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
                     (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
 
@@ -162,55 +167,33 @@ namespace Caravela.Framework.Impl.Transformations
         /// </summary>
         /// <param name="accessorDeclarationKind"></param>
         /// <returns></returns>
-        private BlockSyntax? GetIdentityAccessorBody( SyntaxKind accessorDeclarationKind )
+        private BlockSyntax? CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind )
         {
             switch ( accessorDeclarationKind )
             {
                 case SyntaxKind.GetAccessorDeclaration:
-                    return
-                        Block(
-                            ReturnStatement(
-                                GetPropertyAccessExpression()
-                                    .AddLinkerAnnotation(
-                                        new LinkerAnnotation(
-                                            this.Advice.AspectLayerId,
-                                            LinkingOrder.Default,
-                                            LinkerAnnotationTargetKind.PropertySetAccessor ) ) ) );
+                    return Block( ReturnStatement( this.CreateGetExpression() ) );
 
                 case SyntaxKind.SetAccessorDeclaration:
-                case SyntaxKind.InitAccessorDeclaration:
-                    return
-                        Block(
-                            ExpressionStatement(
-                                AssignmentExpression(
-                                    SyntaxKind.SimpleAssignmentExpression,
-                                    GetPropertyAccessExpression()
-                                        .AddLinkerAnnotation(
-                                            new LinkerAnnotation(
-                                                this.Advice.AspectLayerId,
-                                                LinkingOrder.Default,
-                                                LinkerAnnotationTargetKind.PropertySetAccessor ) ),
-                                    IdentifierName( "value" ) ) ) );
+                    return Block( ExpressionStatement( this.CreateSetExpression() ) );
 
                 default:
                     throw new AssertionFailedException();
             }
+        }
 
-            ExpressionSyntax GetPropertyAccessExpression()
-            {
-                if ( !this.OverriddenDeclaration.IsStatic )
-                {
-                    return MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        ThisExpression(),
-                        IdentifierName( this.OverriddenDeclaration.Name ) );
-                }
-                else
-                {
-                    // TODO: Full qualification.
-                    return IdentifierName( this.OverriddenDeclaration.Name );
-                }
-            }
+        private ExpressionSyntax CreateGetExpression()
+        {
+            return this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertyGetAccessor );
+        }
+
+        private ExpressionSyntax CreateSetExpression()
+        {
+            return
+                AssignmentExpression(
+                    SyntaxKind.SimpleAssignmentExpression,
+                    this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertySetAccessor ),
+                    IdentifierName( "value" ) );
         }
     }
 }

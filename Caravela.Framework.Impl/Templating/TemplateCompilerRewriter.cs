@@ -442,16 +442,6 @@ namespace Caravela.Framework.Impl.Templating
             switch ( type?.Name )
             {
                 case "dynamic":
-                    if ( this._templateMemberClassifier.IsProceed( expression ) )
-                    {
-                        this.Report(
-                            TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic(
-                                this._syntaxTreeAnnotationMap.GetLocation( expression ),
-                                "" ) );
-
-                        return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
-                    }
-
                     var invocation = InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
@@ -646,13 +636,6 @@ namespace Caravela.Framework.Impl.Templating
             else if ( this._templateMemberClassifier.IsDynamicType( node.Expression ) )
             {
                 // We are in an invocation like: `meta.This.Foo(...)`.
-            }
-            else if ( this._templateMemberClassifier.IsProceed( node.Expression ) )
-            {
-                // We cannot call proceed in an unsupported statement.
-                this.Report( TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic( node.Expression.GetLocation(), "" ) );
-
-                return LiteralExpression( SyntaxKind.NullLiteralExpression );
             }
             else if ( this._templateMemberClassifier.IsRunTimeMethod( node.Expression ) )
             {
@@ -1141,92 +1124,11 @@ namespace Caravela.Framework.Impl.Templating
             return ForEachStatement( node.Type, node.Identifier, node.Expression, statement );
         }
 
-        public override SyntaxNode VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
-        {
-            var proceedAssignments =
-                node.Declaration.Variables
-                    .Where( n => n.Initializer != null && this._templateMemberClassifier.IsProceed( n.Initializer.Value ) )
-                    .ToList();
-
-            if ( proceedAssignments.Count == 0 )
-            {
-                return base.VisitLocalDeclarationStatement( node );
-            }
-            else if ( proceedAssignments.Count > 1 )
-            {
-                throw new AssertionFailedException();
-            }
-            else
-            {
-                // Special processing of the `var result = meta.Proceed()` statement.
-
-                // Transform the variable identifier.
-                var returnVariableIdentifier = this.Transform( proceedAssignments[0].Identifier )!;
-
-                var callCreateSyntaxType = InvocationExpression(
-                    MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        ParenthesizedExpression(
-                            CastFromDynamic(
-                                this.MetaSyntaxFactory.Type( typeof(IProceedImpl) ),
-                                proceedAssignments[0].Initializer!.Value ) ),
-                        IdentifierName( nameof(IProceedImpl.CreateTypeSyntax) ) ),
-                    ArgumentList() );
-
-                var variableDeclarator = this.MetaSyntaxFactory.VariableDeclarator( returnVariableIdentifier );
-
-                var variableDeclaration = this.MetaSyntaxFactory.VariableDeclaration(
-                    callCreateSyntaxType,
-                    this.MetaSyntaxFactory.SeparatedList2<VariableDeclaratorSyntax>( new[] { variableDeclarator } ) );
-
-                var localDeclarationStatement = this.MetaSyntaxFactory.LocalDeclarationStatement( variableDeclaration );
-
-                var callProceed = InvocationExpression(
-                    MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        ParenthesizedExpression(
-                            CastFromDynamic(
-                                this.MetaSyntaxFactory.Type( typeof(IProceedImpl) ),
-                                proceedAssignments[0].Initializer!.Value ) ),
-                        IdentifierName( nameof(IProceedImpl.CreateAssignStatement) ) ),
-                    ArgumentList( SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[] { Argument( returnVariableIdentifier ) } ) ) );
-
-                var createBlock = this.MetaSyntaxFactory.Block( localDeclarationStatement, callProceed );
-
-                createBlock = this.DeepIndent( createBlock );
-
-                // Annotate the block for removal.
-                return InvocationExpression(
-                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.WithFlattenBlockAnnotation) ),
-                    ArgumentList( SingletonSeparatedList( Argument( createBlock ) ) ) );
-            }
-        }
-
         public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
         {
-            if ( node.Expression != null && this._templateMemberClassifier.IsProceed( node.Expression ) )
-            {
-                var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression );
-
-                if ( expressionType == null )
-                {
-                    // We need the expression type.
-                    throw new AssertionFailedException( "The type of the return expression was not found." );
-                }
-
-                return InvocationExpression(
-                    MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        ParenthesizedExpression( CastFromDynamic( this.MetaSyntaxFactory.Type( typeof(IProceedImpl) ), node.Expression ) ),
-                        IdentifierName( nameof(IProceedImpl.CreateReturnStatement) ) ),
-                    ArgumentList() );
-            }
-            else
-            {
-                return InvocationExpression(
-                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.TemplateReturnStatement) ) )
-                    .AddArgumentListArguments( Argument( this.Transform( node.Expression ) ) );
-            }
+            return InvocationExpression(
+                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.TemplateReturnStatement ) ) )
+                .AddArgumentListArguments( Argument( this.Transform( node.Expression ) ) );
         }
 
         public override SyntaxNode VisitIdentifierName( IdentifierNameSyntax node )

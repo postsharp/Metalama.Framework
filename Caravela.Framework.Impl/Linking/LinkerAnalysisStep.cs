@@ -27,15 +27,19 @@ namespace Caravela.Framework.Impl.Linking
 
             foreach ( var syntaxTree in input.IntermediateCompilation.SyntaxTrees )
             {
-                foreach ( var referencingNode in syntaxTree.GetRoot().GetAnnotatedNodes( LinkerAnnotationExtensions.AnnotationKind ) )
+                foreach ( var referencingNode in syntaxTree.GetRoot().GetAnnotatedNodes( AspectReferenceAnnotationExtensions.AnnotationKind ) )
                 {
-                    var linkerAnnotation = referencingNode.GetLinkerAnnotation().AssertNotNull();
+                    if (!referencingNode.TryGetAspectReference( out var linkerAnnotation ))
+                    {
+                        throw new AssertionFailedException();
+                    }
+
                     AspectLayerId? targetLayerId;
 
                     // Determine which version of the semantic is being invoked.
                     switch ( linkerAnnotation.Order )
                     {
-                        case LinkingOrder.Base: // TODO:
+                        case AspectReferenceOrder.Base: // TODO:
                             var currentLayerIndex = Array.IndexOf( layersId, linkerAnnotation.AspectLayerId );
                             Invariant.Assert( currentLayerIndex >= 0 );
 
@@ -43,17 +47,17 @@ namespace Caravela.Framework.Impl.Linking
 
                             break;
 
-                        case LinkingOrder.Original: // Original
+                        case AspectReferenceOrder.Original: // Original
                             targetLayerId = null;
 
                             break;
 
-                        case LinkingOrder.Final:
+                        case AspectReferenceOrder.Final:
                             targetLayerId = layersId[layersId.Length - 1];
 
                             break;
 
-                        case LinkingOrder.Default: // Next one.
+                        case AspectReferenceOrder.Default: // Next one.
                             targetLayerId = linkerAnnotation.AspectLayerId;
 
                             break;

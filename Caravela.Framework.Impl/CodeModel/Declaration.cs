@@ -74,8 +74,10 @@ namespace Caravela.Framework.Impl.CodeModel
                 syntaxReference.GetSyntax() switch
                 {
                     MethodDeclarationSyntax methodDeclaration => methodDeclaration.Body,
+                    AccessorDeclarationSyntax accessorDeclaration => accessorDeclaration.Body,
                     PropertyDeclarationSyntax _ => null,
                     EventDeclarationSyntax _ => null,
+                    VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } => null,
                     _ => throw new AssertionFailedException()
                 };
 

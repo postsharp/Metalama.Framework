@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -18,9 +17,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     internal class ThisTypeDynamicReceiver : IDynamicReceiver
     {
         private readonly INamedType _type;
-        private readonly LinkerAnnotation _linkerAnnotation;
+        private readonly AspectReferenceSpecification _linkerAnnotation;
 
-        public ThisTypeDynamicReceiver( INamedType type, LinkerAnnotation linkerAnnotation )
+        public ThisTypeDynamicReceiver( INamedType type, AspectReferenceSpecification linkerAnnotation )
         {
             this._type = type;
             this._linkerAnnotation = linkerAnnotation;
@@ -33,6 +32,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                             SyntaxKind.SimpleMemberAccessExpression,
                             (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this._type.GetSymbol() ),
                             SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
-                        .AddLinkerAnnotation( this._linkerAnnotation ) );
+                        .WithAspectReferenceAnnotation( this._linkerAnnotation ) );
     }
 }

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
@@ -136,22 +137,22 @@ namespace Caravela.Framework.Impl.Linking
             switch ( symbol )
             {
                 case IMethodSymbol { AssociatedSymbol: null }:
-                    return this.HasSingleReference( symbol, aspectLayerId, LinkerAnnotationTargetKind.Self );
+                    return this.HasSingleReference( symbol, aspectLayerId, AspectReferenceTargetKind.Self );
 
                 case IPropertySymbol propertySymbol:
-                    return this.HasSingleReference( propertySymbol, aspectLayerId, LinkerAnnotationTargetKind.PropertyGetAccessor )
-                           && this.HasSingleReference( propertySymbol, aspectLayerId, LinkerAnnotationTargetKind.PropertySetAccessor );
+                    return this.HasSingleReference( propertySymbol, aspectLayerId, AspectReferenceTargetKind.PropertyGetAccessor )
+                           && this.HasSingleReference( propertySymbol, aspectLayerId, AspectReferenceTargetKind.PropertySetAccessor );
 
                 case IEventSymbol eventSymbol:
-                    return this.HasSingleReference( eventSymbol, aspectLayerId, LinkerAnnotationTargetKind.EventAddAccessor )
-                           && this.HasSingleReference( eventSymbol, aspectLayerId, LinkerAnnotationTargetKind.EventRemoveAccessor );
+                    return this.HasSingleReference( eventSymbol, aspectLayerId, AspectReferenceTargetKind.EventAddAccessor )
+                           && this.HasSingleReference( eventSymbol, aspectLayerId, AspectReferenceTargetKind.EventRemoveAccessor );
 
                 default:
                     throw new NotSupportedException( $"{symbol}" );
             }
         }
 
-        private bool HasSingleReference( ISymbol symbol, AspectLayerId? aspectLayerId, LinkerAnnotationTargetKind targetKind )
+        private bool HasSingleReference( ISymbol symbol, AspectLayerId? aspectLayerId, AspectReferenceTargetKind targetKind )
         {
             if ( !this._symbolVersionReferenceCounts.TryGetValue( new SymbolVersion( symbol, aspectLayerId, targetKind ), out var counter ) )
             {
@@ -204,7 +205,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <param name="referencedSymbol">Symbol of the reference method (usually the original declaration).</param>
         /// <param name="referenceAnnotation">Annotation on the referencing node.</param>
         /// <returns>Symbol of the introduced declaration visible to the context method (previous aspect layer that transformed this declaration).</returns>
-        public ISymbol ResolveSymbolReference( ISymbol contextSymbol, ISymbol referencedSymbol, LinkerAnnotation referenceAnnotation )
+        public ISymbol ResolveSymbolReference( ISymbol contextSymbol, ISymbol referencedSymbol, AspectReferenceSpecification referenceAnnotation )
         {
             // TODO: Other things than methods.
             var overrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );

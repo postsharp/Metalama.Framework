@@ -3,15 +3,14 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    internal class LexicalScopeFactory
+    internal sealed class LexicalScopeFactory : ITemplateLexicalScopeProvider
     {
         private readonly CompilationModel _compilation;
         private readonly Dictionary<IDeclaration, TemplateLexicalScope> _scopes;
@@ -28,9 +27,20 @@ namespace Caravela.Framework.Impl.Linking
             {
                 switch ( declaration )
                 {
-                    case Declaration sourceCodeElement:
-                        this._scopes[sourceCodeElement] = lexicalScope = new TemplateLexicalScope( sourceCodeElement.LookupSymbols() );
+                    case Method { ContainingDeclaration: Event } sourceAccessor:
+                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( sourceAccessor.LookupSymbols() );
+                        break;
 
+                    case Method { ContainingDeclaration: Property } sourceAccessor:
+                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( sourceAccessor.LookupSymbols() );
+                        break;
+
+                    case Method sourceMethod:
+                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( sourceMethod.LookupSymbols() );
+                        break;
+
+                    case IMethod { ContainingDeclaration: MemberBuilder { DeclaringType: NamedType containingType } _ }:
+                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( containingType.LookupSymbols() );
                         break;
 
                     default:
@@ -41,76 +51,6 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             return lexicalScope;
-        }
-
-        public TemplateLexicalScope GetLexicalScope( IMemberIntroduction introduction )
-        {
-            // TODO: This will need to be changed for other transformations than methods.
-
-            switch ( introduction )
-            {
-                case IOverriddenDeclaration overriddenDeclaration:
-                    {
-                        // When we have an IOverriddenDeclaration, we know which symbol will be overwritten, so we take its lexical scope.
-                        // All overrides of these same symbol will share the same scope.
-                        return this.GetLexicalScope( overriddenDeclaration.OverriddenDeclaration );
-                    }
-
-                case IIntroducedInterfaceImplementation interfaceImplementation:
-                    {
-                        // Take the initial position of the target type.
-                        var syntaxReference =
-                            interfaceImplementation.TargetType.GetSymbol()
-                                .AssertNotNull()
-                                .DeclaringSyntaxReferences
-                                .Where( x => x.SyntaxTree == introduction.TargetSyntaxTree )
-                                .Single();
-
-                        var typeDeclSyntax = (BaseTypeDeclarationSyntax) syntaxReference.GetSyntax();
-
-                        var semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
-
-                        var symbols = semanticModel.LookupSymbols( typeDeclSyntax.OpenBraceToken.SpanStart );
-
-                        return new TemplateLexicalScope( symbols );
-                    }
-
-                case IDeclaration declaration:
-                    {
-                        // We have a member introduction.
-                        if ( !this._scopes.TryGetValue( declaration, out var lexicalScope ) )
-                        {
-                            // The lexical scope should be taken from the insertion point.
-
-                            var semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( introduction.TargetSyntaxTree );
-
-                            int lookupPosition;
-
-                            switch ( introduction.InsertPositionNode )
-                            {
-                                case TypeDeclarationSyntax type:
-                                    // The lookup position is inside the type.
-                                    lookupPosition = type.CloseBraceToken.SpanStart - 1;
-
-                                    break;
-
-                                default:
-                                    // The lookup position is after the member.
-                                    lookupPosition = introduction.InsertPositionNode.Span.End + 1;
-
-                                    break;
-                            }
-
-                            this._scopes[declaration] = lexicalScope =
-                                new TemplateLexicalScope( semanticModel.LookupSymbols( lookupPosition ) );
-                        }
-
-                        return lexicalScope;
-                    }
-
-                default:
-                    throw new AssertionFailedException();
-            }
         }
     }
 }

@@ -53,9 +53,7 @@ namespace Caravela.Framework.Impl.Linking
                     _ => node.Left
                 };
 
-                var annotation = eventAccessNode.GetLinkerAnnotation();
-
-                if ( annotation == null )
+                if ( !eventAccessNode.TryGetAspectReference( out var annotation ) )
                 {
                     return base.VisitAssignmentExpression( node );
                 }
@@ -66,7 +64,7 @@ namespace Caravela.Framework.Impl.Linking
                 var resolvedSymbol = (IEventSymbol) this.AnalysisRegistry.ResolveSymbolReference(
                     this.ContextBodyMethod,
                     targetEventSymbol,
-                    annotation.AssertNotNull() );
+                    annotation );
 
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {

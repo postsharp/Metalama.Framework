@@ -41,9 +41,8 @@ namespace Caravela.Framework.Impl.Linking
                 //   return <annotated_method_call>;
 
                 // TODO: out, ref parameters.
-                var annotation = node.GetLinkerAnnotation();
 
-                if ( annotation == null )
+                if ( !node.TryGetAspectReference( out var annotation ) )
                 {
                     // Normal invocation.
                     return node;
@@ -58,7 +57,7 @@ namespace Caravela.Framework.Impl.Linking
                 var resolvedSymbol = (IMethodSymbol) this.AnalysisRegistry.ResolveSymbolReference(
                     this.ContextMember,
                     calleeSymbol,
-                    annotation.AssertNotNull() );
+                    annotation );
 
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {
@@ -79,9 +78,7 @@ namespace Caravela.Framework.Impl.Linking
                 //   <variable> = <annotated_method_call>;
                 //   _ = <annotated_method_call>;
 
-                var annotation = node.Right.GetLinkerAnnotation();
-
-                if ( annotation == null )
+                if ( !node.Right.TryGetAspectReference(out var annotation ) )
                 {
                     return base.VisitAssignmentExpression( node );
                 }
@@ -95,7 +92,7 @@ namespace Caravela.Framework.Impl.Linking
                 var resolvedSymbol = (IMethodSymbol) this.AnalysisRegistry.ResolveSymbolReference(
                     this.ContextMember,
                     calleeSymbol,
-                    annotation.AssertNotNull() );
+                    annotation );
 
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {
@@ -119,9 +116,7 @@ namespace Caravela.Framework.Impl.Linking
                 // Supports inlining in form:
                 //    <annotated_method_call>;
 
-                var annotation = node.Expression.GetLinkerAnnotation();
-
-                if ( annotation == null )
+                if ( !node.Expression.TryGetAspectReference(out var annotation) )
                 {
                     return base.VisitExpressionStatement( node );
                 }
@@ -135,7 +130,7 @@ namespace Caravela.Framework.Impl.Linking
                 var resolvedSymbol = (IMethodSymbol) this.AnalysisRegistry.ResolveSymbolReference(
                     this.ContextMember,
                     calleeSymbol,
-                    annotation.AssertNotNull() );
+                    annotation );
 
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {

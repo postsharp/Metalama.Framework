@@ -85,7 +85,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                         var introductionContext = new MemberIntroductionContext(
                             diagnostics,
                             new LinkerIntroductionNameProvider(),
-                            lexicalScopeFactory.GetLexicalScope( memberIntroduction ),
+                            lexicalScopeFactory,
                             syntaxFactory,
                             this.ServiceProvider );
 

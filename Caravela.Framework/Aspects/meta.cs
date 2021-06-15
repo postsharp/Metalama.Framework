@@ -26,8 +26,6 @@ namespace Caravela.Framework.Aspects
     {
         private static readonly AsyncLocal<IMetaApi?> _currentContext = new();
 
-        private static readonly AsyncLocal<object?> _proceedImplementation = new();
-
         private static IMetaApi CurrentContext => _currentContext.Value ?? throw NewInvalidOperationException();
 
         private static InvalidOperationException NewInvalidOperationException()
@@ -39,10 +37,9 @@ namespace Caravela.Framework.Aspects
         /// logic is invoked (as a method call or inlining) is considered an implementation detail.
         /// </summary>
         /// <returns></returns>
-        [Proceed]
         [TemplateKeyword]
         [return: RunTimeOnly]
-        public static dynamic Proceed() => _proceedImplementation.Value ?? throw NewInvalidOperationException();
+        public static dynamic? Proceed() => CurrentContext.Proceed() ?? throw NewInvalidOperationException();
 
         /// <summary>
         /// Requests the debugger to break. If no debugger is attached to the current project, launch the JIT debugger dialog.
@@ -191,10 +188,9 @@ namespace Caravela.Framework.Aspects
         [TemplateKeyword]
         public static void Comment( params string?[] lines ) => throw NewInvalidOperationException();
 
-        internal static IDisposable WithContext( IMetaApi current, object proceedImpl )
+        internal static IDisposable WithContext( IMetaApi current )
         {
             _currentContext.Value = current;
-            _proceedImplementation.Value = proceedImpl;
 
             return new InitializeCookie();
         }
@@ -204,7 +200,6 @@ namespace Caravela.Framework.Aspects
             public void Dispose()
             {
                 _currentContext.Value = null;
-                _proceedImplementation.Value = null;
             }
         }
     }

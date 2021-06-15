@@ -6,10 +6,12 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
 {
@@ -65,6 +67,33 @@ namespace Caravela.Framework.Impl.Transformations
 
                 return typeSymbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
             }
+        }
+
+        protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind )
+        {
+            ExpressionSyntax expression;
+            if ( !this.OverriddenDeclaration.IsStatic )
+            {
+                expression = MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    ThisExpression(),
+                    IdentifierName( this.OverriddenDeclaration.Name ) );
+            }
+            else
+            {
+                // TODO: Full qualification.
+                expression =
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.OverriddenDeclaration.DeclaringType.GetSymbol() ),
+                        IdentifierName( this.OverriddenDeclaration.Name ) );
+            }
+
+            return expression
+                .WithAspectReferenceAnnotation(
+                    this.Advice.AspectLayerId,
+                    AspectReferenceOrder.Default,
+                    referenceTargetKind );
         }
     }
 }

@@ -12,7 +12,7 @@ using System.Linq;
 namespace Caravela.Framework.Impl.Templating
 {
     /// <summary>
-    /// Provides methods that tests for classifications of template members, for instance <see cref="IsRunTimeMethod(ISymbol)"/> or <see cref="IsProceed(SyntaxNode)"/>.
+    /// Provides methods that tests for classifications of template members, for instance <see cref="IsRunTimeMethod(ISymbol)"/>.
     /// </summary>
     internal class TemplateMemberClassifier
     {
@@ -82,25 +82,6 @@ namespace Caravela.Framework.Impl.Templating
                     return false;
                 }
             }
-        }
-
-        /// <summary>
-        /// Determines if a symbol represents a call to <c>meta.Proceed()</c>.
-        /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        public bool IsProceed( SyntaxNode node )
-        {
-            // TODO: This class and usages must be removed.
-
-            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
-
-            if ( symbol == null )
-            {
-                return false;
-            }
-
-            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(ProceedAttribute) );
         }
 
 #pragma warning disable CA1822 // Static anyway.

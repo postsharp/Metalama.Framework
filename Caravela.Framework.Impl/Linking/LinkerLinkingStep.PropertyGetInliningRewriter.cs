@@ -45,9 +45,7 @@ namespace Caravela.Framework.Impl.Linking
                 // Supported form of inlining:
                 // <variable> = <annotated_property_access>;
 
-                var annotation = node.Right.GetLinkerAnnotation();
-
-                if ( annotation == null )
+                if ( node.Right.TryGetAspectReference( out var annotation) )
                 {
                     return base.VisitAssignmentExpression( node );
                 }
@@ -58,7 +56,7 @@ namespace Caravela.Framework.Impl.Linking
                 var resolvedSymbol = (IPropertySymbol) this.AnalysisRegistry.ResolveSymbolReference(
                     this.ContextBodyMethod,
                     targetPropertySymbol,
-                    annotation.AssertNotNull() );
+                    annotation );
 
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {
@@ -98,9 +96,7 @@ namespace Caravela.Framework.Impl.Linking
                 // Supported form of inlining:
                 // return <annotated_property_access>;
 
-                var annotation = node.GetLinkerAnnotation();
-
-                if ( annotation == null )
+                if ( !node.TryGetAspectReference(out var annotation) )
                 {
                     return node;
                 }
@@ -111,7 +107,7 @@ namespace Caravela.Framework.Impl.Linking
                 var resolvedSymbol = (IPropertySymbol) this.AnalysisRegistry.ResolveSymbolReference(
                     this.ContextBodyMethod,
                     targetPropertySymbol,
-                    annotation.AssertNotNull() );
+                    annotation );
 
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {

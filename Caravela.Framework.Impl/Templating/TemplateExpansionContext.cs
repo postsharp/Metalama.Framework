@@ -24,7 +24,6 @@ namespace Caravela.Framework.Impl.Templating
             object templateInstance,
             MetaApi metaApi,
             ICompilation compilation,
-            IProceedImpl proceedImpl,
             TemplateLexicalScope lexicalScope,
             SyntaxSerializationService syntaxSerializationService,
             ICompilationElementFactory syntaxFactory )
@@ -32,7 +31,6 @@ namespace Caravela.Framework.Impl.Templating
             this.TemplateInstance = templateInstance;
             this.MetaApi = metaApi;
             this.Compilation = compilation;
-            this.ProceedImplementation = proceedImpl;
             this.SyntaxSerializationService = syntaxSerializationService;
             this.SyntaxFactory = syntaxFactory;
             this.LexicalScope = lexicalScope;
@@ -41,8 +39,6 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public object TemplateInstance { get; }
-
-        public IProceedImpl ProceedImplementation { get; }
 
         public ICompilation Compilation { get; }
 

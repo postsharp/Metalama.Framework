@@ -91,10 +91,8 @@ namespace Caravela.Framework.Impl.Linking
             {
                 // Expected form for inlining:
                 // return <annotated_node>;
-
-                var linkerAnnotation = node.Expression?.GetLinkerAnnotation();
-
-                if ( linkerAnnotation != null )
+                
+                if ( node.Expression?.TryGetAspectReference( out _ ) != true )
                 {
                     // This is an annotated member access, by letting the derived class to visit this, 
                     // we will either get the block with the inlined target body or access to the correct member/base member.

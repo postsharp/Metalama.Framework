@@ -6,7 +6,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Linking;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -52,7 +51,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public ICompilation Compilation { get; }
 
-        private ThisInstanceDynamicReceiver GetThisOrBase( string expressionName, LinkerAnnotation linkerAnnotation )
+        private ThisInstanceDynamicReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
         {
             return this._type switch
             {
@@ -67,13 +66,15 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             };
         }
 
-        public dynamic This => this.GetThisOrBase( "meta.This", new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Default ) );
+        public dynamic This => this.GetThisOrBase( "meta.This", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Default ) );
 
-        public dynamic Base => this.GetThisOrBase( "meta.Base", new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Base ) );
+        public dynamic Base => this.GetThisOrBase( "meta.Base", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
-        public dynamic ThisStatic => new ThisTypeDynamicReceiver( this.Type, new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Default ) );
+        public dynamic ThisStatic => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Default ) );
 
-        public dynamic BaseStatic => new ThisTypeDynamicReceiver( this.Type, new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Base ) );
+        public dynamic BaseStatic => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
+
+        public dynamic? Proceed() => this._common.ProceedExpression;
 
         public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;
 

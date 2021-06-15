@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-namespace Caravela.Framework.Impl.Linking
+namespace Caravela.Framework.Impl
 {
-    internal enum LinkingOrder
+    internal enum AspectReferenceOrder
     {
         /// <summary>
         /// Calls the semantic in the state it is after the current aspect has been applied.
