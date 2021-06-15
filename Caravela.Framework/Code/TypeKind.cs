@@ -12,42 +12,42 @@ namespace Caravela.Framework.Code
         /// Array.
         /// </summary>
         Array,
-        
+
         /// <summary>
         /// Class.
         /// </summary>
         Class,
-        
+
         /// <summary>
         /// Delegate.
         /// </summary>
         Delegate,
-        
+
         /// <summary>
         /// <c>dynamic</c>.
         /// </summary>
         Dynamic,
-        
+
         /// <summary>
         /// Enum.
         /// </summary>
         Enum,
-        
+
         /// <summary>
         /// Generic parameter.
         /// </summary>
         GenericParameter,
-        
+
         /// <summary>
         /// Interface.
         /// </summary>
         Interface,
-        
+
         /// <summary>
         /// Unmanaged pointer.
         /// </summary>
         Pointer,
-        
+
         /// <summary>
         /// Struct.
         /// </summary>

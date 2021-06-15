@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
@@ -172,7 +173,8 @@ namespace Caravela.Framework.Impl.Transformations
                             context.DiagnosticSink,
                             aspectInterfaceMethod.GetSymbol(),
                             this.Advice.Options.Tags,
-                            this.Advice.AspectLayerId ) );
+                            this.Advice.AspectLayerId,
+                            context.ServiceProvider.GetService<AspectPipelineDescription>() ) );
 
                     var expansionContext = new TemplateExpansionContext(
                         this.Advice.Aspect.Aspect,
@@ -307,7 +309,8 @@ namespace Caravela.Framework.Impl.Transformations
                             context.DiagnosticSink,
                             aspectInterfaceAccessor.GetSymbol(),
                             this.Advice.Options.Tags,
-                            this.Advice.AspectLayerId ) );
+                            this.Advice.AspectLayerId,
+                            context.ServiceProvider.GetService<AspectPipelineDescription>() ) );
 
                     var expansionContext = new TemplateExpansionContext(
                         this.Advice.Aspect.Aspect,
@@ -453,7 +456,8 @@ namespace Caravela.Framework.Impl.Transformations
                             context.DiagnosticSink,
                             aspectInterfaceAccessor.GetSymbol(),
                             this.Advice.Options.Tags,
-                            this.Advice.AspectLayerId ) );
+                            this.Advice.AspectLayerId,
+                            context.ServiceProvider.GetService<AspectPipelineDescription>() ) );
 
                     var expansionContext = new TemplateExpansionContext(
                         this.Advice.Aspect.Aspect,

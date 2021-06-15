@@ -12,7 +12,7 @@ namespace Caravela.Framework.Code
         /// Not a special type.
         /// </summary>
         None,
-        
+
         /// <summary>
         /// <c>void</c>.
         /// </summary>

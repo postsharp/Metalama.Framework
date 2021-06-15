@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -77,6 +78,16 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;
 
         IDiagnosticSink IMetaApi.Diagnostics => this._common.Diagnostics;
+
+        public void DebugBreak()
+        {
+            if ( this._common.PipelineDescription.ExecutionScenario == AspectExecutionScenario.CompileTime )
+            {
+                Debugger.Launch();
+            }
+        }
+
+        public AspectExecutionScenario ExecutionScenario => this._common.PipelineDescription.ExecutionScenario;
 
         public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
 

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
@@ -23,10 +24,13 @@ namespace Caravela.Framework.Impl.Pipeline
         public CompileTimeAspectPipeline(
             IProjectOptions projectOptions,
             CompileTimeDomain domain,
+            bool isTest,
             IDirectoryOptions? directoryOptions = null,
             IAssemblyLocator? assemblyLocator = null ) : base(
             projectOptions,
             domain,
+            AspectExecutionScenario.CompileTime,
+            isTest,
             directoryOptions,
             assemblyLocator )
         {
@@ -110,8 +114,6 @@ namespace Caravela.Framework.Impl.Pipeline
             IReadOnlyList<OrderedAspectLayer> parts,
             CompileTimeProject compileTimeProject,
             CompileTimeProjectLoader compileTimeProjectLoader )
-            => new CompileTimePipelineStage( compileTimeProject, parts, this );
-
-        public override bool CanTransformCompilation => true;
+            => new CompileTimePipelineStage( compileTimeProject, parts, this.ServiceProvider );
     }
 }

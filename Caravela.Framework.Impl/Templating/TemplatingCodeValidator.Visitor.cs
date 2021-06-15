@@ -201,7 +201,7 @@ namespace Caravela.Framework.Impl.Templating
                         this.Report(
                             TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateDiagnostic(
                                 declaredSymbol.GetDiagnosticLocation(),
-                                (declaredSymbol, CompileTimeCodeDetector.Namespaces.ToArray()) ) );
+                                (declaredSymbol, CompileTimeCodeDetector.Namespace) ) );
                     }
 
                     var context = new ScopeCookie( this, scope, declaredSymbol );

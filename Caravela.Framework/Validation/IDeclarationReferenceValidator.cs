@@ -7,6 +7,10 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Validation
 {
+    /// <summary>
+    /// (Not implemented.)
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     [Obsolete( "Not implemented." )]
     public interface IDeclarationReferenceValidator<T>
         where T : IDeclaration
