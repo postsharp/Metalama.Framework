@@ -75,6 +75,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 {
                     MethodDeclarationSyntax methodDeclaration => methodDeclaration.Body,
                     PropertyDeclarationSyntax _ => null,
+                    EventDeclarationSyntax _ => null,
                     _ => throw new AssertionFailedException()
                 };
 

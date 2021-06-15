@@ -1,6 +1,4 @@
-// @DesignTime
-
-#pragma warning disable CS0067
+﻿#pragma warning disable CS0067
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
@@ -8,21 +6,10 @@ using Caravela.Framework.Eligibility;
 using Caravela.TestFramework;
 using System;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.DesignTime
+namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.DeclarativeEvent
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void BuildAspect(IAspectBuilder<INamedType> builder)
-        {
-        }
-
-        public void BuildEligibility(IEligibilityBuilder<INamedType> builder) 
-        { 
-        }
-
-        [Introduce]
-        public event EventHandler? EventField;
-
         [Introduce]
         public event EventHandler? Event
         {
@@ -33,14 +20,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
             remove 
             { 
-                Console.WriteLine("Original add accessor."); 
+                Console.WriteLine("Original remove accessor."); 
             }
         }
     }
 
     [TestOutput]
     [Introduction]
-    internal partial class TargetClass
+    internal class TargetClass
     {
     }
 }

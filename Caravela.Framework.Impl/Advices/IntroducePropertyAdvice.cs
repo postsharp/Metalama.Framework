@@ -25,8 +25,8 @@ namespace Caravela.Framework.Impl.Advices
         public IntroducePropertyAdvice(
             AspectInstance aspect,
             INamedType targetDeclaration,
-            IProperty? templateProperty,
             string? explicitName,
+            IProperty? templateProperty,
             IMethod? getTemplateMethod,
             IMethod? setTemplateMethod,
             IntroductionScope scope,

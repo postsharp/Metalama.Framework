@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             switch ( this._overriddenDeclaration.MethodKind )
             {
-                case MethodKind.PropertyGet:
+                case MethodKind.EventAdd:
                     // Emit `xxx = <original_event_access> += value`.
                     return
                         ExpressionStatement(
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Linking
                                     this.CreateOriginalEventAccess(),
                                     IdentifierName( "value" ) ) ) );
 
-                case MethodKind.PropertySet:
+                case MethodKind.EventRemove:
                     // Emit `xxx = <original_event_access> -= value`.
                     return
                         ExpressionStatement(

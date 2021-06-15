@@ -627,6 +627,7 @@ namespace Caravela.Framework.Impl.Linking
                 BasePropertyDeclarationSyntax propertyDeclaration,
                 IPropertySymbol propertySymbol )
             {
+                // TODO: Move initializer
                 return FieldDeclaration(
                     List<AttributeListSyntax>(),
                     GetModifiers( propertySymbol ),

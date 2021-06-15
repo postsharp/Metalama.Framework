@@ -44,10 +44,14 @@ namespace Caravela.Framework.Impl.Linking
             public override SyntaxNode? VisitAssignmentExpression( AssignmentExpressionSyntax node )
             {
                 // Supported form of inlining:
+                // <variable> = <annotated_property_access> += value;
                 // <annotated_property_access> += value;
-                // <annotated_property_access> -= value;
 
-                var eventAccessNode = node.Left;
+                var eventAccessNode = node.Right switch
+                {
+                    AssignmentExpressionSyntax innerAssignment => innerAssignment.Left,
+                    _ => node.Left
+                };
 
                 var annotation = eventAccessNode.GetLinkerAnnotation();
 

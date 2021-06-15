@@ -124,7 +124,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.Advice.Aspect.Aspect,
                     metaApi,
                     this.OverriddenDeclaration.Compilation,
-                    new LinkerOverridePropertyProceedImpl(
+                    new LinkerOverrideEventProceedImpl(
                         this.Advice.AspectLayerId,
                         accessor,
                         LinkingOrder.Default,
