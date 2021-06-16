@@ -126,16 +126,13 @@ namespace Caravela.TestFramework
                 return syntaxTree?.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
             }
 
-            // Find notes annotated with [TestOutput] and choose the first one. If there is none, the test output is the whole tree
+            // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
             // passed to this method.
             var outputNodes =
                 syntaxNode
                     .DescendantNodesAndSelf( _ => true )
                     .OfType<MemberDeclarationSyntax>()
-                    .Where(
-                        m => m.AttributeLists
-                            .SelectMany( list => list.Attributes )
-                            .Any( a => a.Name.ToString().Contains( "TestOutput" ) ) )
+                    .Where( m => m.GetLeadingTrivia().ToString().Contains( "<target>" ) )
                     .ToList();
 
             var outputNode = outputNodes.FirstOrDefault() ?? syntaxNode;
@@ -158,7 +155,7 @@ namespace Caravela.TestFramework
 
             // Format the output code.
 
-            var outputNodeWithComments = outputNode.WithLeadingTrivia( outputNode.GetLeadingTrivia().AddRange( comments ) );
+            var outputNodeWithComments = outputNode.WithLeadingTrivia( comments );
             var formattedOutput = Formatter.Format( outputNodeWithComments, this.Project.Solution.Workspace );
 
             this.TransformedTargetSyntax = outputNodeWithComments;

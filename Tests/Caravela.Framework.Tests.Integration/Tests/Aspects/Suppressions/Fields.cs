@@ -34,7 +34,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.Fields
         
     }
 
-    [TestOutput]
+    // <target>
     internal class TargetClass
     {
         

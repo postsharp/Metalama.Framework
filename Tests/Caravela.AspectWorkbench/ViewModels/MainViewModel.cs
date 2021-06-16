@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.AspectWorkbench.Model;
+using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
@@ -62,6 +63,11 @@ namespace Caravela.AspectWorkbench.ViewModels
                 this.TransformedTargetDocument = null;
 
                 var testInput = TestInput.FromSource( "interactive", this.TestText );
+
+                testInput.Options.References.AddRange( 
+                    TestCompilationFactory.GetMetadataReferences()
+                        .Select( 
+                            r => new TestAssemblyReference { Path = r.FilePath } ) );
 
                 // This is a dirty trick. We should read options from the directory instead.
                 if ( this.TestText.Contains( "[TestTemplate]" ) )

@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.SerializationE
         }
     }
 
-    [TestOutput]
+    // <target>
     class TargetCode
     {
         int Method(int a)

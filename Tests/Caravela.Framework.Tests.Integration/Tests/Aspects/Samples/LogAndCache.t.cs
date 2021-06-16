@@ -1,4 +1,4 @@
-[TestOutput]
+// <target>
 class TargetCode
 {
     [Log]

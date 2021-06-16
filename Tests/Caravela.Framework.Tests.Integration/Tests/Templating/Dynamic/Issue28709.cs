@@ -23,7 +23,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.Issue28709
     
     // Placeholder implementation of a cache because the hosted try.postsharp.net does not allow for MemoryCache.
 
-    [TestOutput]
+    // <target>
     class TargetCode
     {
         static int Method(int a, int b, out int c )

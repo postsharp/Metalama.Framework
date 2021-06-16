@@ -1,4 +1,4 @@
-[TestOutput]
+// <target>
 [Introduction]
 internal static class TargetClass
 {

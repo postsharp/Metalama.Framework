@@ -48,7 +48,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         }
     }
 
-    [TestOutput]
+    // <target>
     [Introduction]
     public class TargetClass : BaseClass
     {

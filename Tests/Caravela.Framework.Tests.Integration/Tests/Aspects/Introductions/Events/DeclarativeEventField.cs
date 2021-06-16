@@ -22,7 +22,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         public event EventHandler? Event;
     }
 
-    [TestOutput]
+    // <target>
     [Introduction]
     internal class TargetClass
     {

@@ -38,7 +38,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
         
             }
     
-    [TestOutput]
+    // <target>
     internal class TargetClass
     {
         [SuppressWarning]

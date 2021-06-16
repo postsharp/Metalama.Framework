@@ -23,8 +23,13 @@ namespace Caravela.Framework.Impl.Templating
             public TypeSyntax Type( Type type ) => this._reflectionMapper.GetTypeSyntax( type );
 
 #pragma warning disable CA1822 // Mark members as static
-            public TypeSyntax Type( ITypeSymbol type ) => (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( type );
-
+            public TypeSyntax Type( ITypeSymbol type )
+                => type switch
+                {
+                    IArrayTypeSymbol arrayType => (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.ArrayTypeExpression(
+                        LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( arrayType.ElementType ) ),
+                    _ => (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( type )
+                };
             public ExpressionSyntax NamespaceOrType( INamespaceOrTypeSymbol type )
                 => (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( type );
 #pragma warning restore CA1822 // Mark members as static

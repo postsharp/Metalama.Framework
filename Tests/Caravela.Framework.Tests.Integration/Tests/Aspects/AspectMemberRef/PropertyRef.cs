@@ -18,8 +18,8 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.PropertyRe
     
     class Program
     {
+        // <target>
         [Retry(Property = 10)]
-        [TestOutput]
         static int Foo()
         {
             return 0;

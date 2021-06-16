@@ -11,7 +11,7 @@ using Caravela.TestFramework;
 namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache
 {
 
-    [TestOutput]
+    // <target>
     class TargetCode
     {
  

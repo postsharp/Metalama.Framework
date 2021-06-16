@@ -1,4 +1,4 @@
-[TestOutput]
+// <target>
 internal class TargetClass
 {
     [Skipped]

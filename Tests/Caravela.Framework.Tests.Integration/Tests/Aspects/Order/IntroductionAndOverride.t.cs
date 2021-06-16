@@ -1,4 +1,4 @@
-[TestOutput]
+// <target>
 [First]
 [Second]
 [Third]

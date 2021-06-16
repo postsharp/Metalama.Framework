@@ -1,5 +1,4 @@
 [Retry]
-[TestOutput]
 static int Foo(int a)
 {
     global::System.Console.WriteLine("a");

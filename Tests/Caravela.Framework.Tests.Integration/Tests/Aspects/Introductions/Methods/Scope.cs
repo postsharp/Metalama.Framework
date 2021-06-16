@@ -69,7 +69,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Scop
         }
     }
 
-    [TestOutput]
+    // <target>
     [Introduction]
     internal class TargetClass
     {

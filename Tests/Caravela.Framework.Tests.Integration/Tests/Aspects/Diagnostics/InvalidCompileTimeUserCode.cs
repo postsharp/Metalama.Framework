@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.InvalidCompil
         }
     }
 
-    [TestOutput]
+    // <target>
     internal class TargetClass
     {
         [Error]

@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.SkipWithoutEr
         }
     }
 
-    [TestOutput]
+    // <target>
     internal class TargetClass
     {
         [Skipped]

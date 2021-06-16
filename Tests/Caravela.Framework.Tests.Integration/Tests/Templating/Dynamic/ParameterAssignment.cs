@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.ParameterAssig
         }
     }
 
-    [TestOutput]
+    // <target>
     class TargetCode
     {
         int Method(out int a)

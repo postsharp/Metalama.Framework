@@ -1,5 +1,4 @@
 [Retry(Property = 10)]
-[TestOutput]
 static int Foo()
 {
     global::System.Console.WriteLine(10);

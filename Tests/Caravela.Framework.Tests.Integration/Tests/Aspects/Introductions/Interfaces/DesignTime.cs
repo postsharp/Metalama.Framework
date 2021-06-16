@@ -43,7 +43,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         public int Property { get; set; }
     }
 
-    [TestOutput]
+    // <target>
     [Introduction]
     public partial class TargetClass
     {

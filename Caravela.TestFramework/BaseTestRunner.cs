@@ -18,7 +18,7 @@ namespace Caravela.TestFramework
     /// <summary>
     /// An abstract class for all template-base tests.
     /// </summary>
-    public abstract class BaseTestRunner
+    public abstract partial class BaseTestRunner
     {
         private readonly MetadataReference[] _additionalAssemblies;
 
@@ -58,6 +58,8 @@ namespace Caravela.TestFramework
                 new[] { syntaxTree },
                 project.MetadataReferences,
                 (CSharpCompilationOptions?) project.CompilationOptions );
+            
+            this.ValidateCustomAttributes( initialCompilation );
 
             var testResult = this.CreateTestResult();
             testResult.Project = project;
@@ -80,6 +82,19 @@ namespace Caravela.TestFramework
             }
 
             return testResult;
+        }
+
+
+        private void ValidateCustomAttributes( Compilation compilation )
+        {
+            // We want to validate that the custom attributes are properly resolved because unresolved attributes are
+            // a frequent source of errors and confusion. In a production execution context, we would get a compilation error, so that would be ok.
+            ValidateAttributesVisitor visitor = new( compilation );
+
+            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            {
+                visitor.Visit( syntaxTree.GetRoot(  ) );
+            }
         }
 
         public static string? NormalizeString( string? s )
@@ -143,9 +158,12 @@ namespace Caravela.TestFramework
                 File.WriteAllText( actualTransformedPath, actualTransformedSourceText );
             }
 
-            logger.WriteLine( "=== TRANSFORMED CODE ===" );
+            logger.WriteLine( "Expected output file: " + expectedTransformedPath );
+            logger.WriteLine( "Actual output file: " + actualTransformedPath );
+            logger.WriteLine( "" );
+            logger.WriteLine( "=== ACTUAL OUTPUT ===" );
             logger.WriteLine( actualTransformedSourceText );
-            logger.WriteLine( "========================" );
+            logger.WriteLine( "=====================" );
 
             // Write all diagnostics to the logger.
             foreach ( var diagnostic in testResult.Diagnostics )
@@ -162,7 +180,7 @@ namespace Caravela.TestFramework
         /// Creates a new project that is used to compile the test source.
         /// </summary>
         /// <returns>A new project instance.</returns>
-        public virtual Project CreateProject()
+        public Project CreateProject()
         {
             var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null, this._additionalAssemblies );
 

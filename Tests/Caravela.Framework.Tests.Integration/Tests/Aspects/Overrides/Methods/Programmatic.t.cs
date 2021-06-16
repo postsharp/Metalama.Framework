@@ -1,4 +1,4 @@
-[TestOutput]
+// <target>
 [Override]
 internal class TargetClass
 {

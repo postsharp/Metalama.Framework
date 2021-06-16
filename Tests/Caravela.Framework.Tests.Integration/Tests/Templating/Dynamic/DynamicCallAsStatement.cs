@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicCallAsS
         }
     }
 
-    [TestOutput]
+    // <target>
     class TargetCode
     {
         int Method(int a)

@@ -1,6 +1,6 @@
 // Warning CS0169 on `x`: `The field 'TargetClass.x' is never used`
 
-[TestOutput]
+// <target>
 internal class TargetClass
 {
 

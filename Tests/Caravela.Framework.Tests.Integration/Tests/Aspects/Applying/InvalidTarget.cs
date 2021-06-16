@@ -13,7 +13,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Applying.InvalidTarget
         
             }
 
-    [TestOutput]
+    // <target>
     internal class TargetClass
     {
         [Introduction]

@@ -58,7 +58,7 @@ namespace Caravela.TestFramework
 
             var fullPath = Path.Combine( directory, relativePath );
 
-            this._logger.WriteLine( "Test file: " + fullPath );
+            this._logger.WriteLine( "Test input file: " + fullPath );
             var projectRelativePath = Path.GetRelativePath( directoryOptionsReader.ProjectDirectory, fullPath );
 
             var testInput = TestInput.FromFile( directoryOptionsReader, projectRelativePath );

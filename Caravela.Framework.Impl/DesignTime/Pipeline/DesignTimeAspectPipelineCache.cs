@@ -107,6 +107,11 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             IProjectOptions projectOptions,
             CancellationToken cancellationToken )
         {
+            if ( !projectOptions.IsFrameworkEnabled )
+            {
+                return ImmutableArray<SyntaxTreeResult>.Empty;
+            }
+            
             var pipeline = this.GetOrCreatePipeline( projectOptions );
 
             lock ( pipeline.Sync )

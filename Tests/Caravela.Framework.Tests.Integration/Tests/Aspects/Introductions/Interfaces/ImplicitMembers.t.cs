@@ -1,4 +1,4 @@
-[TestOutput]
+// <target>
 [Introduction]
 public class TargetClass
 : global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers.IInterface

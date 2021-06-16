@@ -1,4 +1,4 @@
-[TestOutput]
+// <target>
 [Introduction]
 internal class TargetClass : DerivedClass
 {

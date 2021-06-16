@@ -1,6 +1,6 @@
 // Warning CS0219 on `x`: `The variable 'x' is assigned but its value is never used`
 
-[TestOutput]
+// <target>
 [SuppressWarning]
 internal class TargetClass
 {

@@ -26,7 +26,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicPropert
         }
     }
 
-    [TestOutput]
+    // <target>
     class TargetCode
     {
         int Method(int a)

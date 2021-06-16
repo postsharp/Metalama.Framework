@@ -1,4 +1,4 @@
-[TestOutput]
+// <target>
 internal class TargetClass
 {
     private int _field;

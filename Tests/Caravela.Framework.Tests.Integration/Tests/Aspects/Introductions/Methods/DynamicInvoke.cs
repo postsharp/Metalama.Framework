@@ -41,7 +41,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Dyna
         }
     }
 
-    [TestOutput]
+    // <target>
     [Introduction]
     internal class TargetClass
     {

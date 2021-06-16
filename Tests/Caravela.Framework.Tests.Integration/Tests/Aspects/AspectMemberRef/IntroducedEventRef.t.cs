@@ -1,4 +1,4 @@
-[TestOutput]
+// <target>
 [Retry]
 class Program
 {

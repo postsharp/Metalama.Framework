@@ -23,7 +23,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
     
     public class RunTimeOnlyClass {}
 
-    [TestOutput]
+    // <target>
     [Introduction]
     internal class TargetClass
     {

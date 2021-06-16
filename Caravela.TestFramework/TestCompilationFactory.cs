@@ -18,6 +18,16 @@ namespace Caravela.TestFramework
     internal static class TestCompilationFactory
     {
         public static CSharpCompilation CreateEmptyCSharpCompilation( string? name, IEnumerable<Assembly> additionalAssemblies )
+            => CreateEmptyCSharpCompilation( name, GetMetadataReferences( additionalAssemblies ) );
+
+        public static CSharpCompilation CreateEmptyCSharpCompilation( string? name, IEnumerable<MetadataReference> metadataReferences )
+        {
+            return CSharpCompilation.Create( name ?? "test_" + Guid.NewGuid() )
+                .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
+                .AddReferences( metadataReferences );
+        }
+
+        public static IEnumerable<PortableExecutableReference> GetMetadataReferences( IEnumerable<Assembly>? additionalAssemblies = null )
         {
             var standardLibraries = new[] { "netstandard" }
                 .Select( r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) )
@@ -27,20 +37,13 @@ namespace Caravela.TestFramework
                 .Where(
                     a => !a.IsDynamic && a.FullName != null && a.FullName.StartsWith( "System", StringComparison.Ordinal )
                          && !string.IsNullOrEmpty( a.Location ) )
-                .Concat( additionalAssemblies )
                 .Prepend( typeof(IAspect).Assembly )
+                .Concat( additionalAssemblies ?? Enumerable.Empty<Assembly>() )
                 .Distinct()
                 .Select( a => MetadataReference.CreateFromFile( a.Location ) )
                 .ToList();
 
-            var allReferences = standardLibraries.Concat( systemLibraries );
-
-            return CreateEmptyCSharpCompilation( name, allReferences );
+            return standardLibraries.Concat( systemLibraries ).ToList();
         }
-
-        public static CSharpCompilation CreateEmptyCSharpCompilation( string? name, IEnumerable<MetadataReference> metadataReferences )
-            => CSharpCompilation.Create( name ?? "test_" + Guid.NewGuid() )
-                .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
-                .AddReferences( metadataReferences );
     }
 }
