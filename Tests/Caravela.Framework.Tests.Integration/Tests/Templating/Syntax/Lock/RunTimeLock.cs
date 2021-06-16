@@ -7,7 +7,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lock.RunTimeLoc
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             lock (meta.This)
             {

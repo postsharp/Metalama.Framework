@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Combined.ForEac
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             foreach (var p in meta.Parameters)
             {
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Combined.ForEac
                 }
             }
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
             return result;
         }
     }

@@ -7,7 +7,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Tuples.RunTimeT
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var t = (1, 2, 3);
             Console.WriteLine(t.Item3);

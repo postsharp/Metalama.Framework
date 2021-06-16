@@ -7,7 +7,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Tuples.CompileT
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             (int, string) anonymT = meta.CompileTime((4, ""));
             Console.WriteLine(anonymT.Item1);

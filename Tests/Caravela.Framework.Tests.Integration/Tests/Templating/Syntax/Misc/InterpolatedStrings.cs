@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.ChangeMe
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             // Neutral
             var neutral = $"Zero={0,-5:x}";

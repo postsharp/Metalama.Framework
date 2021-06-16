@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.RunTime
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             if ( meta.Parameters[0].Value is IEnumerable a )
             {

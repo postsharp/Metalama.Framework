@@ -78,6 +78,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     PropertyDeclarationSyntax _ => null,
                     EventDeclarationSyntax _ => null,
                     VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } => null,
+                    BaseTypeDeclarationSyntax _ => null,
                     _ => throw new AssertionFailedException()
                 };
 

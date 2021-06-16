@@ -7,14 +7,14 @@ namespace Caravela.Framework.Tests.Integration.PatternMatching.RelationalOperato
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
-          // Compile time
-          var a1 = meta.Parameters.Count is >= 0 and < 5;
-          meta.Comment("a1 = " + a1 );  
+            // Compile time
+            var a1 = meta.Parameters.Count is >= 0 and < 5;
+            meta.Comment("a1 = " + a1 );  
           
-          // Run-time
-          var a2 = meta.Parameters[0].Value is >= 0 and < 5;
+            // Run-time
+            var a2 = meta.Parameters[0].Value is >= 0 and < 5;
                     
             return meta.Proceed();
         }

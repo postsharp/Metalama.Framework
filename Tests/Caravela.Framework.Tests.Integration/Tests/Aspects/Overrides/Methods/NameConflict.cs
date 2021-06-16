@@ -9,7 +9,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
 {
     public class InnerOverrideAttribute : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             int i = 27;
             return meta.Proceed();
@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
 
     public class OuterOverrideAttribute : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             int i = 42;
             return meta.Proceed();

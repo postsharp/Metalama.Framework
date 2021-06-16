@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.NameCla
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var PI = 3.14d;
             Console.WriteLine(PI);

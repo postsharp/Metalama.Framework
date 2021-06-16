@@ -8,14 +8,14 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForTests.UseFor
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             for (int i = 0; i < meta.Parameters.Count; i++)
             {
                 Console.WriteLine(meta.Parameters[i].Name);
             }
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
             return result;
         }
     }

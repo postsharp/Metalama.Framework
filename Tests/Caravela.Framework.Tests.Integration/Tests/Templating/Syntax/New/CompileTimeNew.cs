@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.CompileTime
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var o = meta.CompileTime(new StringBuilder());
             o.Append("x");

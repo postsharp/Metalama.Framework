@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.Fo
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             int i = meta.CompileTime(0);
             foreach (var p in meta.Parameters)
@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.Fo
 
             Console.WriteLine(i);
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
             return result;
         }
     }

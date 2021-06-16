@@ -21,7 +21,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.ForEachSt
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var runTimeObject = new RunTimeClass();
             var compileTimeObject = new CompileTimeClass();

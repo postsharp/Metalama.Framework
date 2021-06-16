@@ -7,7 +7,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.CompileTi
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var i = meta.CompileTime(0);
             while (i < meta.Method.Name.Length)
@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.CompileTi
 
             Console.WriteLine("Test result = " + i);
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
             return result;
         }
     }

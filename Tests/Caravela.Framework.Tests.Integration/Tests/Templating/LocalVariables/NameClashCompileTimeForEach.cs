@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.NameCla
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             foreach (var p in meta.Parameters)
             {

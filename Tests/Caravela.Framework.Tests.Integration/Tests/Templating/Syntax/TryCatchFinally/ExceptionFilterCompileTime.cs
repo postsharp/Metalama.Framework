@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             int a = meta.Parameters.Count;
             int b = 0;

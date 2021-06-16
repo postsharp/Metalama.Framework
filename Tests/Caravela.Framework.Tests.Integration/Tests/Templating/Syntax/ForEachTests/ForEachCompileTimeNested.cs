@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.Fo
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             IEnumerable<int> array = meta.CompileTime(Enumerable.Range(1, 2));
 
@@ -25,7 +25,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.Fo
                 }
             }
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
             return result;
         }
     }

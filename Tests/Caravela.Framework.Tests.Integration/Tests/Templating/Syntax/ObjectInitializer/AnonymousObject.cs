@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Anon
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var x = new
             {
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Anon
             Console.WriteLine(x.Count);
             Console.WriteLine(y.Count);
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
             return result;
         }
     }

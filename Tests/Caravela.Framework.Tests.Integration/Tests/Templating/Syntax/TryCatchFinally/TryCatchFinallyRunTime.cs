@@ -10,13 +10,13 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
-        var x = meta.CompileTime(0);
+            var x = meta.CompileTime(0);
             try
             {
                 Console.WriteLine("try");
-                dynamic result = meta.Proceed();
+                dynamic? result = meta.Proceed();
                 Console.WriteLine("success");
                 return result;
             }

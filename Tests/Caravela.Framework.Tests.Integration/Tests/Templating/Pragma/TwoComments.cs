@@ -6,7 +6,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Pragma.TwoComments
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             meta.Comment("Oops 1", null, "Oops 2");
             meta.Comment("Oops 3", null, "Oops 4");

@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfMetho
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             int b = meta.CompileTime(0);
 

@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.Compile
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var p = meta.Parameters.Where(a => a.Name.Length > 8).Count();
             Console.WriteLine(p);

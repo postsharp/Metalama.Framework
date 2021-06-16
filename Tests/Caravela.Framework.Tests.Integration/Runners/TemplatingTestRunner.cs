@@ -6,7 +6,6 @@ using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
@@ -237,6 +236,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
             // ReSharper disable once SuspiciousTypeConversion.Global
             var lexicalScope = new TemplateLexicalScope( ((Declaration) targetMethod).LookupSymbols() );
 
+            var proceedExpression =
+                new DynamicExpression(
+                    SyntaxFactory.DefaultExpression(
+                        (TypeSyntax)LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetMethod.ReturnType.GetSymbol() ) ),
+                    targetMethod.ReturnType,
+                    false);
+
             var metaApi = MetaApi.ForMethod(
                 targetMethod,
                 new MetaApiProperties(
@@ -244,17 +250,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     templateMethod,
                     ImmutableDictionary.Create<string, object?>().Add( "TestKey", "TestValue" ),
                     default,
-                    new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ) ) );
+                    new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ),
+                    proceedExpression ) );
 
             return new TemplateExpansionContext(
                 templateInstance,
                 metaApi,
                 compilation,
-                new LinkerOverrideMethodProceedImpl(
-                    default,
-                    targetMethod,
-                    AspectReferenceOrder.Default,
-                    compilation.Factory ),
                 lexicalScope,
                 this._syntaxSerializationService,
                 compilation.Factory );

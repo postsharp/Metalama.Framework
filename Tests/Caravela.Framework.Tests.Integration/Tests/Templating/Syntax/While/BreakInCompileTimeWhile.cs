@@ -7,7 +7,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.BreakInCo
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             
             var i = meta.CompileTime(0);
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.BreakInCo
 
             Console.WriteLine("Test result = " + i);
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
             return result;
         }
     }

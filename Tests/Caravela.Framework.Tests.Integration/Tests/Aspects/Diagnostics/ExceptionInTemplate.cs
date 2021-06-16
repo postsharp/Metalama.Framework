@@ -4,7 +4,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ExceptionInTe
 {
     class Aspect : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             var a = meta.CompileTime(0);
             var b = 1 / a;

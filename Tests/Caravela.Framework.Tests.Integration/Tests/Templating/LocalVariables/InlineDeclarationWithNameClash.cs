@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.InlineD
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             Dictionary<string,string> d = new();
             d.TryGetValue( "", out var a );

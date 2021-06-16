@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.Tags
 
         
         [Template]
-        private dynamic OverrideMethod()
+        private dynamic? OverrideMethod()
         {
             Console.WriteLine( (string?) meta.Tags["Friend"] );
             return meta.Proceed();

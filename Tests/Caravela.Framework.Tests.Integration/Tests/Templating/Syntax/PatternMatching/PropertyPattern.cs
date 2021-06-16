@@ -8,15 +8,15 @@ namespace Caravela.Framework.Tests.Integration.PatternMatching.PropertyPattern
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
-          // Compile time
-          var ct = meta.CompileTime(new object());
-          var a1 = ct is IParameter { Index: var index } p && p.DefaultValue.IsNull && index > 0;
-          meta.Comment("a1 = " + a1 );  
+            // Compile time
+            var ct = meta.CompileTime(new object());
+            var a1 = ct is IParameter { Index: var index } p && p.DefaultValue.IsNull && index > 0;
+            meta.Comment("a1 = " + a1 );  
           
-          // Run-time
-          var a2 = meta.Parameters[0].Value is >= 0 and < 5;
+            // Run-time
+            var a2 = meta.Parameters[0].Value is >= 0 and < 5;
                     
             return meta.Proceed();
         }

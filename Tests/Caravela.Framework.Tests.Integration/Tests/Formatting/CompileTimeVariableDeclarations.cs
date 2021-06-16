@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.Declarati
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic?emplate()
         {
             var compiletimeClassInstance = new CompileTimeClass();
 

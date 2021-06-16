@@ -11,13 +11,13 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.RunTimeSwitchEx
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var x = DateTime.Now.DayOfWeek switch
             {
-             DayOfWeek.Monday => "Spaghetti",
-             DayOfWeek.Tuesday => "Salad",
-             _ => "McDonald"
+                DayOfWeek.Monday => "Spaghetti",
+                DayOfWeek.Tuesday => "Salad",
+                _ => "McDonald"
             };
             
             object o = new ();

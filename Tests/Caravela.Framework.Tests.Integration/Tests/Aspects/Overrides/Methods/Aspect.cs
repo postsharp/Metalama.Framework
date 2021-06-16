@@ -8,7 +8,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple
 
     public class OverrideAttribute : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             Console.WriteLine("This is the overriding method.");
             return meta.Proceed();

@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Comp
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var x = meta.CompileTime( new
             {
@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Comp
 
             Console.WriteLine(x.Arg0);
             
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
             return result;
         }
     }

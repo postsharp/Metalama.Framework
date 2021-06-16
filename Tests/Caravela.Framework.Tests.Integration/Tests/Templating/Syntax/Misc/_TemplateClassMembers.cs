@@ -15,18 +15,18 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TemplateC
         }
 
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
 
             Console.WriteLine(this.Format(result));
 
             return result;
         }
 
-        public override string Format(object o)
+        public override string? Format(object? o)
         {
-            return string.Format(FormatString, o);
+            return o == null ? null : string.Format(FormatString, o);
         }
     }
 
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TemplateC
 
         public string FormatString { get; set; }
 
-        public abstract string Format(object o);
+        public abstract string? Format(object? o);
     }
 
     class TargetCode

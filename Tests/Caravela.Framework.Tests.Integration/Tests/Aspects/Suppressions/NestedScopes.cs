@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
         }
         
         [Template]
-        public dynamic Override()
+        public dynamic? Override()
         {
 #if !TESTRUNNER // Disable the warning in the main build, not during tests. (1)
 #pragma warning disable CS0219

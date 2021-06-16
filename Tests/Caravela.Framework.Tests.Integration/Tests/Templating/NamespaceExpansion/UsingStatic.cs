@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
         class Aspect
         {
             [TestTemplate]
-            dynamic Template()
+            dynamic? Template()
             {
                 Console.Write(PI);
                 Console.Write(Max(0, 1));

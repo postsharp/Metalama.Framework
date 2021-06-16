@@ -45,7 +45,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
             set
             {
                 Console.WriteLine("Set");
-                dynamic discard = meta.Proceed();
+                meta.Proceed();
             }
         }
 
@@ -60,7 +60,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
         public void SetPropertyTemplate(int value)
         {
             Console.WriteLine("Set");
-            dynamic discard = meta.Proceed();
+            meta.Proceed();
         }
     }
 

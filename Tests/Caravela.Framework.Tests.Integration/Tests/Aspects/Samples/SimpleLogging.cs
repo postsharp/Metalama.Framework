@@ -7,13 +7,13 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Samples.SimpleLogging
 {
     public class LogAttribute : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             Console.WriteLine(meta.Method.ToDisplayString() + " started.");
 
             try
             {
-                dynamic result = meta.Proceed();
+                dynamic? result = meta.Proceed();
 
                 Console.WriteLine(meta.Method.ToDisplayString() + " succeeded.");
                 return result;

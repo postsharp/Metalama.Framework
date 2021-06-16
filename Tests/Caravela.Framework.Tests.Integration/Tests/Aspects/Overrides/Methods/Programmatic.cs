@@ -17,7 +17,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programm
        
 
         [Template]
-        public dynamic Template()
+        public dynamic? Template()
         {
             Console.WriteLine("This is the overriding method.");
             return meta.Proceed();

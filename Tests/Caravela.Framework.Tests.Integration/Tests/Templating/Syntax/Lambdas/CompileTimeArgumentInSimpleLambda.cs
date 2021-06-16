@@ -8,9 +8,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.CompileSimpleLa
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
-            Action<object> action = a => Console.WriteLine(a.ToString());
+            Action<object?> action = a => Console.WriteLine(a?.ToString());
 
             var result = meta.CompileTime(1);
 

@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.Alias
         class Aspect
         {
             [TestTemplate]
-            dynamic Template()
+            dynamic? Template()
             {
                 Console.Write(MyMath.PI);
 

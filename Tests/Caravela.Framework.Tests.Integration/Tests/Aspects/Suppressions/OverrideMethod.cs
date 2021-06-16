@@ -23,7 +23,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMet
         }
         
         [Template]
-        public dynamic Override()
+        public dynamic? Override()
         {
             int a = 0;
             return meta.Proceed();
