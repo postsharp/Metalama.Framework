@@ -69,11 +69,11 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     this.ProjectDirectory,
                     "obj",
                     "highlighted",
-                    Path.GetDirectoryName( testInput.TestName ) ?? "" );
+                    Path.GetDirectoryName( testInput.RelativePath )! );
 
                 var highlightedTemplatePath = Path.Combine(
                     highlightedTemplateDirectory,
-                    Path.GetFileNameWithoutExtension( testInput.TestName ) + FileExtensions.Html );
+                    testInput.TestName + FileExtensions.Html );
 
                 Directory.CreateDirectory( Path.GetDirectoryName( highlightedTemplatePath ) );
 
@@ -180,8 +180,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 Path.GetDirectoryName( sourceAbsolutePath )!,
                 Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.Html );
 
+            Assert.True( File.Exists( expectedHighlightedPath ), $"The file '{expectedHighlightedPath}' does not exist." );
             var expectedHighlightedSource = File.ReadAllText( expectedHighlightedPath );
-
             Assert.Equal( expectedHighlightedSource, ((HighlightingTestResult) testResult).OutputHtml );
         }
     }
