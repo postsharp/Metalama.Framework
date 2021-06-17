@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.Advices
 
             public IMember? TargetMember { get; }
 
-            public IMember? AspectInterfaceTargetMember { get; }
+            public IMember? AspectInterfaceMember { get; }
 
             public bool IsExplicit { get; }
 
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 this.InterfaceMember = interfaceMember;
                 this.TargetMember = targetMember;
-                this.AspectInterfaceTargetMember = aspectInterfaceMember;
+                this.AspectInterfaceMember = aspectInterfaceMember;
                 this.IsExplicit = isExplicit;
             }
         }

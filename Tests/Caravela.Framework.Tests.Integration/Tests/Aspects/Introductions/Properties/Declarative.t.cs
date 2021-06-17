@@ -1,7 +1,6 @@
-    === TRANSFORMED CODE ===
-    [TestOutput]
-    [Introduction]
-    internal class TargetClass
+[TestOutput]
+[Introduction]
+internal class TargetClass
 {
     public global::System.Int32 IntroducedProperty_Auto
     {
@@ -17,15 +16,20 @@
     }
 
     private global::System.Int32 __IntroducedProperty_Auto__BackingField;
-    public global::System.Int32 IntroducedProperty_Auto_Static
+    public static global::System.Int32 IntroducedProperty_Auto_Static
     {
         get
         {
-            return this.__IntroducedProperty_Auto_Static__BackingField;
+            return __IntroducedProperty_Auto_Static__BackingField;
+        }
+
+        set
+        {
+            __IntroducedProperty_Auto_Static__BackingField = value;
         }
     }
 
-    private readonly global::System.Int32 __IntroducedProperty_Auto_Static__BackingField;
+    private static global::System.Int32 __IntroducedProperty_Auto_Static__BackingField;
     public global::System.Int32 IntroducedProperty_Accessors
     {
         get

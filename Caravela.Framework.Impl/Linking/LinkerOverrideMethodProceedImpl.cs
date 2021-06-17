@@ -89,18 +89,19 @@ namespace Caravela.Framework.Impl.Linking
                         : IdentifierName( this._overriddenDeclaration.Name ),
                     ArgumentList( 
                         SeparatedList( 
-                            this._overriddenDeclaration.Parameters.Select( x => 
-                            Argument( 
-                                null,
-                                x.RefKind switch
-                                {
-                                    RefKind.None => default,
-                                    RefKind.In => default,
-                                    RefKind.Ref => Token( SyntaxKind.RefKeyword),
-                                    RefKind.Out => Token( SyntaxKind.OutKeyword ),
-                                    _ => throw new AssertionFailedException(),
-                                },
-                                IdentifierName( x.Name! ) ) ) ) ) );
+                            this._overriddenDeclaration.Parameters.Select(
+                                x => 
+                                    Argument( 
+                                        null,
+                                        x.RefKind switch
+                                        {
+                                            RefKind.None => default,
+                                            RefKind.In => default,
+                                            RefKind.Ref => Token( SyntaxKind.RefKeyword ),
+                                            RefKind.Out => Token( SyntaxKind.OutKeyword ),
+                                            _ => throw new AssertionFailedException(),
+                                        },
+                                        IdentifierName( x.Name! ) ) ) ) ) );
 
             invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, this._order ) );
 

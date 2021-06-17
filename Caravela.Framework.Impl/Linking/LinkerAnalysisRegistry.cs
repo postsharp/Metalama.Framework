@@ -179,6 +179,18 @@ namespace Caravela.Framework.Impl.Linking
             return introducedMember.Semantic == IntroducedMemberSemantic.Override;
         }
 
+        public ISymbol? GetOverrideTarget(ISymbol overrideSymbol)
+        {
+            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( overrideSymbol );
+
+            if ( introducedMember == null )
+            {
+                return null;
+            }
+
+            return this._introductionRegistry.GetOverrideTarget( introducedMember );
+        }
+
         /// <summary>
         /// Gets the last (outermost) override of the method.
         /// </summary>

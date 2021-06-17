@@ -812,7 +812,6 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-
         /// <summary>
         /// Generates a run-time block from expression.
         /// </summary>
@@ -842,7 +841,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <summary>
         /// Generates a run-time block.
         /// </summary>
-        /// <param name="createMetaStatements">Function that returns meta statements</param>
+        /// <param name="createMetaStatements">Function that returns meta statements.</param>
         /// <param name="generateExpression"><c>true</c> if the returned <see cref="SyntaxNode"/> must be an
         /// expression (in this case, a delegate invocation is returned), or <c>false</c> if it can be a statement
         /// (in this case, a return statement is returned).</param>
@@ -908,7 +907,6 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
         }
-
 
         /// <summary>
         /// Transforms a list of <see cref="StatementSyntax"/> of the source template into a list of <see cref="StatementSyntax"/> for the compiled
