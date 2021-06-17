@@ -32,4 +32,12 @@ internal class TargetClass
         Console.WriteLine($"This is the original method {x} {y}.");
         return x + y;
     }
+
+    [Override]
+    public static void TargetMethod_Static()
+    {
+        global::System.Console.WriteLine("This is the overriding method.");
+        Console.WriteLine("This is the original static method.");
+        return;
+    }
 }

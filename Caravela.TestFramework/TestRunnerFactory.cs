@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using Xunit.Abstractions;
 
 namespace Caravela.TestFramework
 {
@@ -11,13 +12,13 @@ namespace Caravela.TestFramework
     /// </summary>
     internal static class TestRunnerFactory
     {
-        public static BaseTestRunner CreateTestRunner( TestInput testInput, IServiceProvider serviceProvider )
+        public static BaseTestRunner CreateTestRunner( TestInput testInput, IServiceProvider serviceProvider, ITestOutputHelper? logger )
         {
             var metadataReferences = testInput.Options.References.Select( a => a.ToMetadataReference() ).ToArray();
 
             if ( string.IsNullOrEmpty( testInput.Options.TestRunnerFactoryType ) )
             {
-                return new AspectTestRunner( serviceProvider, testInput.ProjectDirectory, metadataReferences );
+                return new AspectTestRunner( serviceProvider, testInput.ProjectDirectory, metadataReferences, logger );
             }
             else
             {
@@ -34,7 +35,7 @@ namespace Caravela.TestFramework
 
                 var testRunnerFactory = (ITestRunnerFactory) Activator.CreateInstance( factoryType )!;
 
-                return testRunnerFactory.CreateTestRunner( serviceProvider, testInput.ProjectDirectory, metadataReferences );
+                return testRunnerFactory.CreateTestRunner( serviceProvider, testInput.ProjectDirectory, metadataReferences, logger );
             }
         }
     }

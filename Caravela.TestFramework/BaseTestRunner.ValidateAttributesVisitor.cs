@@ -14,7 +14,7 @@ namespace Caravela.TestFramework
         {
             private readonly Compilation _compilation;
 
-            public ValidateAttributesVisitor( Compilation compilation ) 
+            public ValidateAttributesVisitor( Compilation compilation )
             {
                 this._compilation = compilation;
             }
@@ -26,7 +26,9 @@ namespace Caravela.TestFramework
 
                 if ( symbol.Symbol == null )
                 {
-                    Assert.True( false, $"The custom attribute '{node}' cannot be resolved. Check that you are importing the correct namespaces and assemblies." );
+                    Assert.True(
+                        false,
+                        $"The custom attribute '{node}' cannot be resolved. Check that you are importing the correct namespaces and assemblies." );
                 }
             }
         }

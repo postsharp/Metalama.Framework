@@ -9,7 +9,7 @@
         <CompilerVisibleProperty Include="DebugCaravelaIde" />
         <CompilerVisibleProperty Include="CaravelaProjectId" />
         <CompilerVisibleProperty Include="CaravelaBuildTouchFile" />
-        <CompilerVisibleProperty Include="CaravelaEnabled"/>
+        <CompilerVisibleProperty Include="CaravelaEnabled" />
         <CompilerVisibleProperty Include="AssemblyName" />
     </ItemGroup>
 

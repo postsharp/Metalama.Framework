@@ -1,4 +1,4 @@
-﻿// @Skipped Case for interface merge conflict resolution, not implemented.
+﻿// @Skipped(Case for interface merge conflict resolution, not implemented.)
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;

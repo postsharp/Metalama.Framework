@@ -16,8 +16,12 @@ namespace Caravela.Framework.Tests.Integration.Runners
 {
     internal partial class AnnotationUnitTestRunner : BaseTestRunner
     {
-        public AnnotationUnitTestRunner( IServiceProvider serviceProvider, string projectDirectory, IEnumerable<MetadataReference> metadataReferences )
-            : base( serviceProvider, projectDirectory, metadataReferences ) { }
+        public AnnotationUnitTestRunner(
+            IServiceProvider serviceProvider,
+            string projectDirectory,
+            IEnumerable<MetadataReference> metadataReferences,
+            ITestOutputHelper? logger )
+            : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
         public override TestResult RunTest( TestInput testInput )
         {
@@ -26,7 +30,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var testSourceRootWithAddedTrivia = triviaAdder.Visit( tree.GetRoot() );
             var testSourceWithAddedTrivia = testSourceRootWithAddedTrivia!.ToFullString();
 
-            var testInputWithAddedTrivia = TestInput.FromSource( testInput.TestName, testSourceWithAddedTrivia );
+            var testInputWithAddedTrivia = TestInput.FromSource( testSourceWithAddedTrivia, testInput.FullPath );
 
             var result = base.RunTest( testInputWithAddedTrivia );
 
@@ -62,7 +66,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             return result;
         }
 
-        public override void ExecuteAssertions( TestInput testInput, TestResult testResult, ITestOutputHelper logger )
+        public override void ExecuteAssertions( TestInput testInput, TestResult testResult )
         {
             // Annotation shouldn't do any code transformations.
             // Otherwise, highlighted spans don't match the actual code.

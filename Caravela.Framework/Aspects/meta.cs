@@ -45,7 +45,7 @@ namespace Caravela.Framework.Aspects
         public static dynamic Proceed() => _proceedImplementation.Value ?? throw NewInvalidOperationException();
 
         /// <summary>
-        /// Requests the debugger to break. If no debugger is attached to the current project, launch the JIT debugger dialog.
+        /// Requests the debugger to break, if any debugger is attached to the current process.
         /// </summary>
         [TemplateKeyword]
         public static void DebugBreak() => CurrentContext.DebugBreak();

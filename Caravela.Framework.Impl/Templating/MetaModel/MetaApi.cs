@@ -81,9 +81,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public void DebugBreak()
         {
-            if ( this._common.PipelineDescription.ExecutionScenario == AspectExecutionScenario.CompileTime )
+            if ( Debugger.IsAttached )
             {
-                Debugger.Launch();
+                Debugger.Break();
             }
         }
 

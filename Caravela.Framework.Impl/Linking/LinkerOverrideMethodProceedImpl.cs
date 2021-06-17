@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -78,6 +79,9 @@ namespace Caravela.Framework.Impl.Linking
         {
             // Emit `OriginalMethod( a, b, c )` where `a, b, c` is the canonical list of arguments.
             // TODO: generics, static methods, consider explicit, modifiers interfaces and other special methods.
+            var arguments = this._overriddenDeclaration.Parameters
+                .Select( x => Argument( IdentifierName( x.Name! ) ).WithRefKindKeyword( SyntaxFactoryEx.RefKindToken( x.RefKind ) ) );
+
             var invocation =
                 InvocationExpression(
                     !this._overriddenDeclaration.IsStatic
@@ -86,7 +90,7 @@ namespace Caravela.Framework.Impl.Linking
                             ThisExpression(),
                             IdentifierName( this._overriddenDeclaration.Name ) )
                         : IdentifierName( this._overriddenDeclaration.Name ),
-                    ArgumentList( SeparatedList( this._overriddenDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ) ) ) );
+                    ArgumentList( SeparatedList( arguments ) ) );
 
             invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, this._order ) );
 

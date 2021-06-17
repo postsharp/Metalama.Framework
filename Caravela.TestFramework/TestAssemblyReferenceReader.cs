@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 
 namespace Caravela.TestFramework
 {
@@ -49,7 +48,7 @@ namespace Caravela.TestFramework
         private static string FilterReference( string projectDirectory, string path )
         {
             path = Path.Combine( projectDirectory, path );
-            
+
             var directory = Path.GetDirectoryName( path )!;
             var leafDirectory = Path.GetFileName( directory );
 

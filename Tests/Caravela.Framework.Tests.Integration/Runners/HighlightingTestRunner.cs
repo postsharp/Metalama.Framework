@@ -21,8 +21,12 @@ namespace Caravela.Framework.Tests.Integration.Runners
 {
     internal class HighlightingTestRunner : BaseTestRunner
     {
-        public HighlightingTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences )
-            : base( serviceProvider, projectDirectory, metadataReferences ) { }
+        public HighlightingTestRunner(
+            IServiceProvider serviceProvider,
+            string? projectDirectory,
+            IEnumerable<MetadataReference> metadataReferences,
+            ITestOutputHelper? logger )
+            : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
         protected override TestResult CreateTestResult() => new HighlightingTestResult();
 
@@ -74,7 +78,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 Directory.CreateDirectory( Path.GetDirectoryName( highlightedTemplatePath ) );
 
                 var sourceText = result.TemplateDocument.GetTextAsync().Result;
-                var classifier = new TextSpanClassifier( sourceText );
+                var classifier = new TextSpanClassifier( sourceText, detectRegion: true );
                 classifier.Visit( result.AnnotatedTemplateSyntax );
 
                 var textWriter = new StringWriter();
@@ -108,6 +112,11 @@ namespace Caravela.Framework.Tests.Integration.Runners
 {
     font-style: italic;
 }
+
+.legend 
+{
+    margin-top: 100px;
+}
 " );
 
                 textWriter.WriteLine( "</style>" );
@@ -123,10 +132,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
                         textWriter.Write( sourceText.GetSubText( new TextSpan( i, classifiedSpan.Span.Start - i ) ) );
                     }
 
-                    textWriter.Write(
-                        $"<span class='caravelaClassification_{classifiedSpan.Classification}'>"
-                        + WebUtility.HtmlEncode( sourceText.GetSubText( classifiedSpan.Span ).ToString() )
-                        + "</span>" );
+                    if ( classifiedSpan.Classification != TextSpanClassification.Excluded )
+                    {
+                        textWriter.Write(
+                            $"<span class='caravelaClassification_{classifiedSpan.Classification}'>"
+                            + WebUtility.HtmlEncode( sourceText.GetSubText( classifiedSpan.Span ).ToString() )
+                            + "</span>" );
+                    }
 
                     i = classifiedSpan.Span.End;
                 }
@@ -136,9 +148,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     textWriter.Write( sourceText.GetSubText( i ) );
                 }
 
-                textWriter.WriteLine();
-                textWriter.WriteLine();
-                textWriter.WriteLine( "Legend:" );
+                textWriter.WriteLine( "</pre>" );
+                textWriter.WriteLine( "<p class='legend'>Legend:</p>" );
+                textWriter.WriteLine( "<pre>" );
 
                 foreach ( var classification in Enum.GetValues( typeof(TextSpanClassification) ) )
                 {
@@ -155,7 +167,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             return result;
         }
 
-        public override void ExecuteAssertions( TestInput testInput, TestResult testResult, ITestOutputHelper logger )
+        public override void ExecuteAssertions( TestInput testInput, TestResult testResult )
         {
             Assert.NotNull( testInput.ProjectDirectory );
             Assert.NotNull( testInput.RelativePath );

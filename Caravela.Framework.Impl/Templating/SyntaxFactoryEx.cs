@@ -1,8 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -49,5 +51,14 @@ namespace Caravela.Framework.Impl.Templating
         public static StatementSyntax EmptyStatement
             => SyntaxFactory.ExpressionStatement( SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) ) )
                 .WithSemicolonToken( SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
+
+        public static SyntaxToken RefKindToken( RefKind refKind )
+            => refKind switch
+            {
+                RefKind.In => SyntaxFactory.Token( SyntaxKind.InKeyword ),
+                RefKind.Out => SyntaxFactory.Token( SyntaxKind.OutKeyword ),
+                RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
+                _ => default
+            };
     }
 }

@@ -29,14 +29,14 @@ namespace Caravela.TestFramework
             if ( Process.GetCurrentProcess().ProcessName.StartsWith( "ResharperTestRunner", StringComparison.OrdinalIgnoreCase ) )
             {
                 messageSink.Trace( $"Resharper detected. Using the legacy test runner." );
-                
+
                 this._implementation = new XunitTestFramework( messageSink );
             }
             else
             {
                 messageSink.Trace( $"Resharper NOT detected. Using the customized test runner." );
-                
-                this._implementation = new AspectTestFrameworkVsImpl(messageSink);
+
+                this._implementation = new AspectTestFrameworkVsImpl( messageSink );
             }
         }
 

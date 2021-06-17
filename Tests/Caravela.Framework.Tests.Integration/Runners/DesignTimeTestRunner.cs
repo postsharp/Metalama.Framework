@@ -11,13 +11,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Runners
 {
     internal class DesignTimeTestRunner : BaseTestRunner
     {
-        public DesignTimeTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences )
-            : base( serviceProvider, projectDirectory, metadataReferences ) { }
+        public DesignTimeTestRunner(
+            IServiceProvider serviceProvider,
+            string? projectDirectory,
+            IEnumerable<MetadataReference> metadataReferences,
+            ITestOutputHelper? logger )
+            : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
         public override TestResult RunTest( TestInput testInput )
         {

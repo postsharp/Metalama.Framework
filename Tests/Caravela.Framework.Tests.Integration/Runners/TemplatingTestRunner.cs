@@ -25,6 +25,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Runners
 {
@@ -41,11 +42,16 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
         /// </summary>
-        public TemplatingTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences ) : this(
+        public TemplatingTestRunner(
+            IServiceProvider serviceProvider,
+            string? projectDirectory,
+            IEnumerable<MetadataReference> metadataReferences,
+            ITestOutputHelper? logger ) : this(
             serviceProvider,
             projectDirectory,
             metadataReferences,
-            Array.Empty<CSharpSyntaxVisitor>() ) { }
+            Array.Empty<CSharpSyntaxVisitor>(),
+            logger ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
@@ -55,11 +61,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
             IServiceProvider serviceProvider,
             string? projectDirectory,
             IEnumerable<MetadataReference> metadataReferences,
-            IEnumerable<CSharpSyntaxVisitor> testAnalyzers )
+            IEnumerable<CSharpSyntaxVisitor> testAnalyzers,
+            ITestOutputHelper? logger )
             : base(
                 serviceProvider,
                 projectDirectory,
-                metadataReferences )
+                metadataReferences,
+                logger )
         {
             this._testAnalyzers = testAnalyzers;
         }

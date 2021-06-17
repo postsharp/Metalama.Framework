@@ -91,7 +91,7 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        private void SetLocalSymbolScope( ISymbol symbol, TemplatingScope scope, SyntaxToken identifier )
+        private void SetLocalSymbolScope( ISymbol symbol, TemplatingScope scope )
         {
             if ( this._localScopes.TryGetValue( symbol, out _ ) )
             {
@@ -99,11 +99,6 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             this._localScopes.Add( symbol, scope );
-
-            if ( scope == TemplatingScope.CompileTimeOnly && identifier.Kind() != SyntaxKind.None )
-            {
-                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.VariableIsCompileTime, identifier, symbol );
-            }
         }
 
         /// <summary>
@@ -435,7 +430,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( symbol != null )
             {
-                this.SetLocalSymbolScope( symbol, scope, default );
+                this.SetLocalSymbolScope( symbol, scope );
             }
 
             // Anonymous objects are currently run-time-only unless they are in a compile-time-only scope -- until we implement more complex rules.
@@ -852,7 +847,7 @@ namespace Caravela.Framework.Impl.Templating
 
             var forEachScope = this.GetNodeScope( annotatedExpression ).ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
 
-            this.SetLocalSymbolScope( local, forEachScope, node.Identifier );
+            this.SetLocalSymbolScope( local, forEachScope );
 
             this.RequireLoopScope( node.Expression, forEachScope, "foreach" );
 
@@ -945,7 +940,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( symbol != null )
             {
-                this.SetLocalSymbolScope( symbol, scope, node.Identifier );
+                this.SetLocalSymbolScope( symbol, scope );
 
                 if ( scope == TemplatingScope.CompileTimeOnly )
                 {
@@ -1027,7 +1022,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // Mark the local variable symbol.
-            this.SetLocalSymbolScope( local, localScope, node.Identifier );
+            this.SetLocalSymbolScope( local, localScope );
 
             var transformedIdentifier = node.Identifier;
 

@@ -115,11 +115,16 @@ namespace Caravela.Framework.Impl.DesignTime
                 }
 
                 // Perform additional analysis not done by the design-time pipeline.
-                TemplatingCodeValidator.Validate(
-                    context.SemanticModel,
-                    context.ReportDiagnostic,
-                    DesignTimeAspectPipelineCache.Instance.GetOrCreatePipeline( buildOptions ),
-                    context.CancellationToken );
+                var pipeline = DesignTimeAspectPipelineCache.Instance.GetOrCreatePipeline( buildOptions );
+
+                if ( pipeline != null )
+                {
+                    TemplatingCodeValidator.Validate(
+                        context.SemanticModel,
+                        context.ReportDiagnostic,
+                        pipeline,
+                        context.CancellationToken );
+                }
             }
             catch ( Exception e )
             {

@@ -80,7 +80,7 @@ namespace Caravela.TestFramework.XunitFramework
             ImmutableHashSet<string> excludedSubdirectories )
         {
             this._messageSink?.Trace( $"Discovering tests in directory '{subDirectory}'." );
-            
+
             var baseDirectory = this.FindProjectDirectory();
             TestDirectoryOptionsReader reader = new( baseDirectory );
             TestFactory factory = new( reader, this._assembly );
@@ -92,17 +92,17 @@ namespace Caravela.TestFramework.XunitFramework
                 {
                     return;
                 }
-                
+
                 var options = reader.GetDirectoryOptions( directory );
-                
+
                 // If the directory is excluded, don't continue.
                 if ( options.Exclude.GetValueOrDefault() )
                 {
                     this._messageSink?.Trace( $"Child directory '{directory}' excluded because of the Exclude option." );
-                    
+
                     return;
                 }
-                
+
                 this._messageSink?.Trace( $"Processing directory '{directory}'." );
 
                 // If the directory is included, index the files.
@@ -117,19 +117,19 @@ namespace Caravela.TestFramework.XunitFramework
                     }
 
                     this._messageSink?.Trace( $"Including the file '{testPath}'" );
-                    
+
                     var testCase = new TestCase( factory, Path.GetRelativePath( baseDirectory, testPath ) );
                     onTestCaseDiscovered( testCase );
                 }
 
                 // Process children directories.
-                
+
                 foreach ( var nestedDir in Directory.EnumerateDirectories( directory ) )
                 {
                     if ( excludedSubdirectories.Contains( nestedDir ) )
                     {
                         this._messageSink?.Trace( $"Child directory '{nestedDir}' excluded because it is covered by other tests." );
-                        
+
                         continue;
                     }
 
@@ -141,7 +141,7 @@ namespace Caravela.TestFramework.XunitFramework
                         if ( File.Exists( runnerFile ) )
                         {
                             this._messageSink?.Trace( $"Child directory '{nestedDir}' excluded it contains '{runnerFileName}'." );
-                            
+
                             continue;
                         }
                     }

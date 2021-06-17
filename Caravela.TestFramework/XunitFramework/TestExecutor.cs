@@ -18,6 +18,8 @@ namespace Caravela.TestFramework.XunitFramework
 
         public TestExecutor( AssemblyName assemblyName, IMessageSink messageSink )
         {
+            _ = messageSink;
+            
             var assembly = Assembly.Load( assemblyName );
             var assemblyInfo = new ReflectionAssemblyInfo( assembly );
             TestDiscoverer discoverer = new( assemblyInfo );
@@ -104,9 +106,9 @@ namespace Caravela.TestFramework.XunitFramework
                                     }
                                     else
                                     {
-                                        var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider );
+                                        var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, logger );
                                         var testResult = testRunner.RunTest( testInput );
-                                        testRunner.ExecuteAssertions( testInput, testResult, logger );
+                                        testRunner.ExecuteAssertions( testInput, testResult );
 
                                         executionMessageSink.OnMessage( new TestPassed( test, testStopwatch.GetSeconds(), logger.ToString() ) );
 

@@ -58,7 +58,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 return true;
             }
-            
+
             try
             {
                 if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
@@ -90,13 +90,13 @@ namespace Caravela.Framework.Impl.Pipeline
 
                     return false;
                 }
-          
+
                 // Add managed resources.
                 foreach ( var resource in result.Resources )
                 {
                     additionalResourcesBuilder.Add( resource );
                 }
-          
+
                 if ( configuration.CompileTimeProject is { IsEmpty: false } )
                 {
                     additionalResourcesBuilder.Add( configuration.CompileTimeProject!.ToResource() );

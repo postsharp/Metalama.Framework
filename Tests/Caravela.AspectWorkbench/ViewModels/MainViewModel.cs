@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.AspectWorkbench.Model;
-using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
@@ -62,12 +61,11 @@ namespace Caravela.AspectWorkbench.ViewModels
                 this.ErrorsDocument = new FlowDocument();
                 this.TransformedTargetDocument = null;
 
-                var testInput = TestInput.FromSource( "interactive", this.TestText );
+                var testInput = TestInput.FromSource( this.TestText, this.CurrentPath );
 
-                testInput.Options.References.AddRange( 
+                testInput.Options.References.AddRange(
                     TestCompilationFactory.GetMetadataReferences()
-                        .Select( 
-                            r => new TestAssemblyReference { Path = r.FilePath } ) );
+                        .Select( r => new TestAssemblyReference { Path = r.FilePath } ) );
 
                 // This is a dirty trick. We should read options from the directory instead.
                 if ( this.TestText.Contains( "[TestTemplate]" ) )
@@ -75,7 +73,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                     testInput.Options.TestRunnerFactoryType = typeof(TemplatingTestRunnerFactory).AssemblyQualifiedName;
                 }
 
-                var testRunner = TestRunnerFactory.CreateTestRunner( testInput, this._serviceProvider );
+                var testRunner = TestRunnerFactory.CreateTestRunner( testInput, this._serviceProvider, null );
 
                 var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject() );
 
@@ -203,7 +201,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 this._currentTest = new TemplateTest();
             }
 
-            this._currentTest.Input = TestInput.FromSource( "interactive", this.TestText );
+            this._currentTest.Input = TestInput.FromSource( this.TestText, filePath );
             this._currentTest.ExpectedOutput = this.ExpectedOutputText ?? string.Empty;
 
             this.CurrentPath = filePath;

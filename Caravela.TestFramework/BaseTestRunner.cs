@@ -24,7 +24,11 @@ namespace Caravela.TestFramework
 
         public IServiceProvider ServiceProvider { get; }
 
-        public BaseTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences )
+        public BaseTestRunner(
+            IServiceProvider serviceProvider,
+            string? projectDirectory,
+            IEnumerable<MetadataReference> metadataReferences,
+            ITestOutputHelper? logger )
         {
             this._additionalAssemblies = metadataReferences
                 .Append( MetadataReference.CreateFromFile( typeof(BaseTestRunner).Assembly.Location ) )
@@ -32,12 +36,15 @@ namespace Caravela.TestFramework
 
             this.ServiceProvider = serviceProvider;
             this.ProjectDirectory = projectDirectory;
+            this.Logger = logger;
         }
 
         /// <summary>
         /// Gets the project directory, or <c>null</c> if it is unknown.
         /// </summary>
         public string? ProjectDirectory { get; }
+
+        public ITestOutputHelper? Logger { get; }
 
         protected virtual TestResult CreateTestResult() => new();
 
@@ -50,7 +57,10 @@ namespace Caravela.TestFramework
         {
             // Source.
             var project = this.CreateProject().WithParseOptions( CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER" ) );
-            var testDocument = project.AddDocument( "Test.cs", SourceText.From( testInput.SourceCode, Encoding.UTF8 ), filePath: "Test.cs" );
+            var sourceFileName = testInput.TestName + ".cs";
+            var testDocument = project.AddDocument( sourceFileName, SourceText.From( testInput.SourceCode, Encoding.UTF8 ), filePath: sourceFileName );
+            project = testDocument.Project;
+
             var syntaxTree = testDocument.GetSyntaxTreeAsync().Result!;
 
             var initialCompilation = CSharpCompilation.Create(
@@ -58,8 +68,15 @@ namespace Caravela.TestFramework
                 new[] { syntaxTree },
                 project.MetadataReferences,
                 (CSharpCompilationOptions?) project.CompilationOptions );
-            
-            this.ValidateCustomAttributes( initialCompilation );
+
+            foreach ( var includedFile in testInput.Options.IncludedFiles )
+            {
+                var includedFullPath = Path.Combine( Path.GetDirectoryName( testInput.FullPath )!, includedFile );
+                var includedText = File.ReadAllText( includedFullPath );
+                initialCompilation = initialCompilation.AddSyntaxTrees( CSharpSyntaxTree.ParseText( includedText, null, includedFullPath ) );
+            }
+
+            ValidateCustomAttributes( initialCompilation );
 
             var testResult = this.CreateTestResult();
             testResult.Project = project;
@@ -84,8 +101,7 @@ namespace Caravela.TestFramework
             return testResult;
         }
 
-
-        private void ValidateCustomAttributes( Compilation compilation )
+        private static void ValidateCustomAttributes( Compilation compilation )
         {
             // We want to validate that the custom attributes are properly resolved because unresolved attributes are
             // a frequent source of errors and confusion. In a production execution context, we would get a compilation error, so that would be ok.
@@ -93,7 +109,7 @@ namespace Caravela.TestFramework
 
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
-                visitor.Visit( syntaxTree.GetRoot(  ) );
+                visitor.Visit( syntaxTree.GetRoot() );
             }
         }
 
@@ -102,7 +118,7 @@ namespace Caravela.TestFramework
             return s == null ? null : CSharpSyntaxTree.ParseText( s ).GetRoot().NormalizeWhitespace().ToString().Replace( "\r", "" );
         }
 
-        public virtual void ExecuteAssertions( TestInput testInput, TestResult testResult, ITestOutputHelper logger )
+        public virtual void ExecuteAssertions( TestInput testInput, TestResult testResult )
         {
             if ( this.ProjectDirectory == null )
             {
@@ -158,17 +174,21 @@ namespace Caravela.TestFramework
                 File.WriteAllText( actualTransformedPath, actualTransformedSourceText );
             }
 
-            logger.WriteLine( "Expected output file: " + expectedTransformedPath );
-            logger.WriteLine( "Actual output file: " + actualTransformedPath );
-            logger.WriteLine( "" );
-            logger.WriteLine( "=== ACTUAL OUTPUT ===" );
-            logger.WriteLine( actualTransformedSourceText );
-            logger.WriteLine( "=====================" );
-
-            // Write all diagnostics to the logger.
-            foreach ( var diagnostic in testResult.Diagnostics )
+            if ( this.Logger != null )
             {
-                logger.WriteLine( diagnostic.ToString() );
+                var logger = this.Logger!;
+                logger.WriteLine( "Expected output file: " + expectedTransformedPath );
+                logger.WriteLine( "Actual output file: " + actualTransformedPath );
+                logger.WriteLine( "" );
+                logger.WriteLine( "=== ACTUAL OUTPUT ===" );
+                logger.WriteLine( actualTransformedSourceText );
+                logger.WriteLine( "=====================" );
+
+                // Write all diagnostics to the logger.
+                foreach ( var diagnostic in testResult.Diagnostics )
+                {
+                    logger.WriteLine( diagnostic.ToString() );
+                }
             }
 
             Assert.Equal( expectedTransformedSourceText, actualTransformedSourceText );
