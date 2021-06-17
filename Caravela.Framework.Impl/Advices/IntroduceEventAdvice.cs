@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,9 +18,6 @@ namespace Caravela.Framework.Impl.Advices
     internal class IntroduceEventAdvice : IntroduceMemberAdvice<EventBuilder>
     {
         private readonly IMethod? _addTemplateMethod;
-
-        // ReSharper disable once NotAccessedField.Local
-        // ReSharper disable once IDE0052
         private readonly IMethod? _removeTemplateMethod;
 
         public new IEvent? TemplateMember => (IEvent?) base.TemplateMember;
@@ -29,8 +27,8 @@ namespace Caravela.Framework.Impl.Advices
         public IntroduceEventAdvice(
             AspectInstance aspect,
             INamedType targetDeclaration,
-            IEvent? eventTemplate,
             string? explicitName,
+            IEvent? eventTemplate,
             IMethod? addTemplateMethod,
             IMethod? removeTemplateMethod,
             IntroductionScope scope,
@@ -66,7 +64,16 @@ namespace Caravela.Framework.Impl.Advices
         {
             // TODO: Override transformations.
 
-            return AdviceResult.Create( this.MemberBuilder );
+            if ( this.TemplateMember!= null && IsEventField( this.TemplateMember ) )
+            {
+                return AdviceResult.Create( this.MemberBuilder );
+            }
+            else
+            {
+                return AdviceResult.Create(
+                    this.MemberBuilder,
+                    new OverriddenEvent( this, this.MemberBuilder, this.TemplateMember, this._addTemplateMethod, this._removeTemplateMethod, this.LinkerOptions ) );
+            }
         }
 
         private static bool IsEventField( IEvent templateEvent )

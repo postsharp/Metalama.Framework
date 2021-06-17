@@ -2,6 +2,16 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 {
     partial class TargetClass
     {
-        public event global::System.EventHandler Event;
+        public event global::System.EventHandler EventField;
+        public event global::System.EventHandler Event
+        {
+            add
+            {
+            }
+
+            remove
+            {
+            }
+        }
     }
 }

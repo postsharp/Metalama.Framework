@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.Advices
 
             if ( members.Count != 1 )
             {
-                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMethod.CreateException( (aspectType, methodName) );
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (aspectType, methodName) );
             }
 
             var method = members.OfType<IMethodSymbol>().Single();
@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Advices
 
             if ( members.Count != 1 )
             {
-                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMethod.CreateException( (aspectType, propertyName) );
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (aspectType, propertyName) );
             }
 
             var property = members.OfType<IPropertySymbol>().Single();
@@ -92,6 +92,43 @@ namespace Caravela.Framework.Impl.Advices
             }
 
             return compilation.Factory.GetProperty( property );
+        }
+
+        public static IEvent? GetTemplateEvent(
+            this INamedType aspectType,
+            CompilationModel compilation,
+            string eventName,
+            string adviceName,
+            [DoesNotReturnIf( true )] bool throwIfMissing = true )
+        {
+            // We do the search against the Roslyn compilation because it is cheaper.
+
+            var members = aspectType.GetSymbol().GetMembers( eventName ).ToList();
+            var expectedAttributeTypeSymbol = compilation.ReflectionMapper.GetTypeSymbol( typeof( TemplateAttribute ) );
+
+            if ( members.Count != 1 )
+            {
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (aspectType, eventName) );
+            }
+
+            var @event = members.OfType<IEventSymbol>().Single();
+
+            if ( !@event.SelectRecursive( m => m.OverriddenEvent, includeThis: true )
+                .SelectMany( m => m.GetAttributes() )
+                .Any( a => a.AttributeClass?.Equals( expectedAttributeTypeSymbol, SymbolEqualityComparer.Default ) ?? false ) )
+            {
+                if ( throwIfMissing )
+                {
+                    throw GeneralDiagnosticDescriptors.TemplateMemberMissesAttribute.CreateException(
+                        (DeclarationKind.Property, @event, expectedAttributeTypeSymbol, adviceName) );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            return compilation.Factory.GetEvent( @event );
         }
     }
 }

@@ -82,6 +82,15 @@ namespace Caravela.Framework.Aspects
 
         IEventBuilder IntroduceEvent(
             INamedType targetType,
+            string name,
+            string eventTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AdviceOptions? options = null );
+
+        IEventBuilder IntroduceEvent(
+            INamedType targetType,
+            string name,
             string addTemplate,
             string removeTemplate,
             string? invokeTemplate = null,

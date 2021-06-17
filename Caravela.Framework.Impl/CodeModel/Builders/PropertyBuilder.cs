@@ -150,7 +150,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             var property =
                 PropertyDeclaration(
                     List<AttributeListSyntax>(), // TODO: Attributes.
-                    GenerateModifierList(),
+                    this.GetSyntaxModifierList(),
                     (TypeSyntax) syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
                     this.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier(
@@ -165,33 +165,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this )
             };
-
-            SyntaxTokenList GenerateModifierList()
-            {
-                // Modifiers for property.
-                var tokens = new List<SyntaxToken>();
-
-                this.Accessibility.AddTokens( tokens );
-
-                if ( this.IsAbstract )
-                {
-                    tokens.Add( Token( SyntaxKind.AbstractKeyword ) );
-                }
-
-                if ( this.IsSealed )
-                {
-                    tokens.Add( Token( SyntaxKind.SealedKeyword ) );
-                }
-
-                if ( this.IsOverride )
-                {
-                    tokens.Add( Token( SyntaxKind.OverrideKeyword ) );
-                }
-
-                this.RefKind.AddReturnValueTokens( tokens );
-
-                return TokenList( tokens );
-            }
 
             AccessorListSyntax GenerateAccessorList()
             {
