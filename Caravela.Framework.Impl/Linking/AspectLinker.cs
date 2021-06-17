@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -27,6 +28,8 @@ namespace Caravela.Framework.Impl.Linking
         {
             // First step. Adds all transformations to the compilation, resulting in intermediate compilation.
             var introductionStepOutput = new LinkerIntroductionStep( this._serviceProvider ).Execute( this._input );
+
+            var trees = introductionStepOutput.IntermediateCompilation.SyntaxTrees.ToList();
 
             // Second step. Count references to modified methods on semantic models of intermediate compilation and analyze method bodies.
             var analysisStepOutput = LinkerAnalysisStep.Instance.Execute( introductionStepOutput );

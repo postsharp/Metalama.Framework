@@ -720,7 +720,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
-            if ( node.Body == null )
+            if ( node.Body == null && node.ExpressionBody == null )
             {
                 // Not supported or incomplete syntax.
                 return node;
@@ -730,7 +730,10 @@ namespace Caravela.Framework.Impl.Templating
 
             // TODO: templates may support build-time parameters, which must to the compiled template method.
 
-            var body = (BlockSyntax) this.BuildRunTimeBlock( node.Body, false );
+            var body = 
+                node.Body != null
+                ? (BlockSyntax) this.BuildRunTimeBlock( node.Body, false )
+                : (BlockSyntax) this.BuildRunTimeBlock( node.ExpressionBody.AssertNotNull().Expression, false );
             var result = this.CreateTemplateMethod( node, body );
 
             this.Unindent( 3 );
@@ -740,7 +743,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode VisitAccessorDeclaration( AccessorDeclarationSyntax node )
         {
-            if ( node.Body == null )
+            if ( node.Body == null && node.ExpressionBody == null )
             {
                 // Not supported or incomplete syntax.
                 return node;
@@ -750,12 +753,27 @@ namespace Caravela.Framework.Impl.Templating
 
             // TODO: templates may support build-time parameters, which must to the compiled template method.
 
-            var body = (BlockSyntax) this.BuildRunTimeBlock( node.Body, false );
+            var body =
+                node.Body != null
+                ? (BlockSyntax) this.BuildRunTimeBlock( node.Body, false )
+                : (BlockSyntax) this.BuildRunTimeBlock( node.ExpressionBody.AssertNotNull().Expression, false );
 
             var result = this.CreateTemplateMethod( node, body );
 
             this.Unindent( 3 );
 
+            return result;
+        }
+
+        public override SyntaxNode VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+        {
+            this.Indent( 3 );
+
+            var body = (BlockSyntax) this.BuildRunTimeBlock( node.ExpressionBody.AssertNotNull().Expression, false );
+
+            var result = this.CreateTemplateMethod( node, body );
+
+            this.Unindent( 3 );
             return result;
         }
 
@@ -794,6 +812,20 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+
+        /// <summary>
+        /// Generates a run-time block from expression.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="generateExpression"><c>true</c> if the returned <see cref="SyntaxNode"/> must be an
+        /// expression (in this case, a delegate invocation is returned), or <c>false</c> if it can be a statement
+        /// (in this case, a return statement is returned).</param>
+        /// <returns></returns>
+        private SyntaxNode BuildRunTimeBlock( ExpressionSyntax node, bool generateExpression )
+        {
+            return this.BuildRunTimeBlock( () => this.ToMetaStatements( ReturnStatement( node ) ), generateExpression );
+        }
+
         /// <summary>
         /// Generates a run-time block.
         /// </summary>
@@ -804,10 +836,23 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         private SyntaxNode BuildRunTimeBlock( BlockSyntax node, bool generateExpression )
         {
+            return this.BuildRunTimeBlock( () => this.ToMetaStatements( node.Statements ).ToList(), generateExpression );
+        }
+
+        /// <summary>
+        /// Generates a run-time block.
+        /// </summary>
+        /// <param name="createMetaStatements">Function that returns meta statements</param>
+        /// <param name="generateExpression"><c>true</c> if the returned <see cref="SyntaxNode"/> must be an
+        /// expression (in this case, a delegate invocation is returned), or <c>false</c> if it can be a statement
+        /// (in this case, a return statement is returned).</param>
+        /// <returns></returns>
+        private SyntaxNode BuildRunTimeBlock( Func<List<StatementSyntax>> createMetaStatements, bool generateExpression )
+        {
             using ( this.WithMetaContext( MetaContext.CreateForRunTimeBlock( this._currentMetaContext, $"__s{++this._nextStatementListId}" ) ) )
             {
                 // List<StatementOrTrivia> statements = new List<StatementOrTrivia>();
-                var listType = this.MetaSyntaxFactory.Type( typeof(List<StatementOrTrivia>) );
+                var listType = this.MetaSyntaxFactory.Type( typeof( List<StatementOrTrivia> ) );
 
                 this._currentMetaContext!.Statements.Add(
                     LocalDeclarationStatement(
@@ -819,13 +864,11 @@ namespace Caravela.Framework.Impl.Templating
                         .NormalizeWhitespace()
                         .WithLeadingTrivia( this.GetIndentation() ) );
 
-                // It is important to call ToList to ensure proper ordering of nodes.
-                var metaStatements = this.ToMetaStatements( node.Statements ).ToList();
-                this._currentMetaContext.Statements.AddRange( metaStatements );
+                this._currentMetaContext.Statements.AddRange( createMetaStatements() );
 
                 // TemplateSyntaxFactory.ToStatementArray( __s1 )
                 var toArrayStatementExpression = InvocationExpression(
-                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ToStatementArray) ),
+                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.ToStatementArray ) ),
                     ArgumentList( SingletonSeparatedList( Argument( IdentifierName( this._currentMetaContext.StatementListVariableName ) ) ) ) );
 
                 if ( generateExpression )
@@ -841,8 +884,8 @@ namespace Caravela.Framework.Impl.Templating
                             InvocationExpression(
                                 ObjectCreationExpression(
                                         this.MetaSyntaxFactory.GenericType(
-                                            typeof(Func<>),
-                                            ArrayType( this.MetaSyntaxFactory.Type( typeof(StatementSyntax) ) )
+                                            typeof( Func<> ),
+                                            ArrayType( this.MetaSyntaxFactory.Type( typeof( StatementSyntax ) ) )
                                                 .WithRankSpecifiers(
                                                     SingletonList(
                                                         ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) ) )
@@ -865,6 +908,7 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
         }
+
 
         /// <summary>
         /// Transforms a list of <see cref="StatementSyntax"/> of the source template into a list of <see cref="StatementSyntax"/> for the compiled

@@ -171,7 +171,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 // Modifiers for property.
                 var tokens = new List<SyntaxToken>();
 
-                this.Accessibility.AddTokens( tokens );
+                if ( this.ExplicitInterfaceImplementations.Count == 0 )
+                {
+                    this.Accessibility.AddTokens( tokens );
+                }
 
                 if ( this.IsAbstract )
                 {
