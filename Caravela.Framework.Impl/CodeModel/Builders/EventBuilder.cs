@@ -9,7 +9,6 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -17,7 +16,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {

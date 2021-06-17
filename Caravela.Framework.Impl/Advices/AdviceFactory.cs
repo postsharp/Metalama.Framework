@@ -221,14 +221,14 @@ namespace Caravela.Framework.Impl.Advices
             string? invokeTemplate,
             AdviceOptions? options = null )
         {
-            if (invokeTemplate != null)
+            if ( invokeTemplate != null )
             {
                 throw GeneralDiagnosticDescriptors.UnsupportedFeature.CreateException( $"Invoker overrides." );
             }
 
             var diagnosticList = new DiagnosticList();
-            var addTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, addTemplate, nameof( this.OverrideEventAccessors ) );
-            var removeTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, removeTemplate, nameof( this.OverrideEventAccessors ) );
+            var addTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, addTemplate, nameof(this.OverrideEventAccessors) );
+            var removeTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, removeTemplate, nameof(this.OverrideEventAccessors) );
 
             var advice = new OverrideEventAdvice(
                 this._aspect,
@@ -255,7 +255,7 @@ namespace Caravela.Framework.Impl.Advices
             AdviceOptions? options = null )
         {
             var diagnosticList = new DiagnosticList();
-            var templateEvent = this._aspectType.GetTemplateEvent( this._compilation, eventTemplate, nameof( this.IntroduceProperty ) );
+            var templateEvent = this._aspectType.GetTemplateEvent( this._compilation, eventTemplate, nameof(this.IntroduceProperty) );
 
             var advice = new IntroduceEventAdvice(
                 this._aspect,
@@ -289,8 +289,8 @@ namespace Caravela.Framework.Impl.Advices
             AdviceOptions? options = null )
         {
             var diagnosticList = new DiagnosticList();
-            var addTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, addTemplate, nameof( this.OverrideEventAccessors ) );
-            var removeTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, removeTemplate, nameof( this.OverrideEventAccessors ) );
+            var addTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, addTemplate, nameof(this.OverrideEventAccessors) );
+            var removeTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, removeTemplate, nameof(this.OverrideEventAccessors) );
 
             var advice = new IntroduceEventAdvice(
                 this._aspect,
