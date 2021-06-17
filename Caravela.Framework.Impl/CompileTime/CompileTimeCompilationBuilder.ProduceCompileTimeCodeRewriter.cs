@@ -316,51 +316,49 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         if ( getAccessor != null && (getAccessor.Body != null || getAccessor.ExpressionBody != null) )
                         {
-                            success = success &&
-                                      this._templateCompiler.TryCompile(
-                                          TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
-                                          this._compileTimeCompilation,
-                                          getAccessor,
-                                          this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                          this._diagnosticAdder,
-                                          this._cancellationToken,
-                                          out _,
-                                          out transformedGetDeclaration );
+                            success =
+                                success &&
+                                this._templateCompiler.TryCompile(
+                                    TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
+                                    this._compileTimeCompilation,
+                                    getAccessor,
+                                    this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                    this._diagnosticAdder,
+                                    this._cancellationToken,
+                                    out _,
+                                    out transformedGetDeclaration );
                         }
 
                         if ( setAccessor != null && (setAccessor.Body != null || setAccessor.ExpressionBody != null) )
                         {
-                            success = success &&
-                                      this._templateCompiler.TryCompile(
-                                          TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
-                                          this._compileTimeCompilation,
-                                          setAccessor,
-                                          this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                          this._diagnosticAdder,
-                                          this._cancellationToken,
-                                          out _,
-                                          out transformedSetDeclaration );
+                            success =
+                                success &&
+                                this._templateCompiler.TryCompile(
+                                    TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
+                                    this._compileTimeCompilation,
+                                    setAccessor,
+                                    this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                    this._diagnosticAdder,
+                                    this._cancellationToken,
+                                    out _,
+                                    out transformedSetDeclaration );
                         }
-
+                    }
+                    else if ( node is PropertyDeclarationSyntax { ExpressionBody: not null } propertyNode )
+                    {
                         // Expression bodied property.
-                        if ( node is PropertyDeclarationSyntax { ExpressionBody: not null } propertyNode )
-                        {
-                            // TODO: Does this preserve trivia in expression body?
-                            success = success &&
-                                      this._templateCompiler.TryCompile(
-                                          TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
-                                          this._compileTimeCompilation,
-                                          AccessorDeclaration(
-                                              SyntaxKind.GetAccessorDeclaration,
-                                              List<AttributeListSyntax>(),
-                                              TokenList(),
-                                              propertyNode.ExpressionBody! ),
-                                          this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                          this._diagnosticAdder,
-                                          this._cancellationToken,
-                                          out _,
-                                          out transformedGetDeclaration );
-                        }
+                        // TODO: Does this preserve trivia in expression body?
+                        success =
+                            success &&
+                            this._templateCompiler.TryCompile(
+                                TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
+                                this._compileTimeCompilation,
+                                propertyNode,
+                                this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                this._diagnosticAdder,
+                                this._cancellationToken,
+                                out _,
+                                out transformedGetDeclaration );
                     }
                 }
 

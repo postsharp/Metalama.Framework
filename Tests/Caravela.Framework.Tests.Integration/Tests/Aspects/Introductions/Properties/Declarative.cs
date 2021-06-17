@@ -7,20 +7,11 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.D
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-       
-        
-        
-       
+        [Introduce]
+        public int IntroducedProperty_Auto { get; set; }
 
-        // TODO: Indexers.    
-
-        //[IntroduceProperty]
-        //public int IntroducedProperty_Auto { get; set; }
-
-
-        // TODO: Introduction of auto properties.
-        //[IntroduceProperty]
-        //public static int IntroducedProperty_Auto_Static { get; }
+        [Introduce]
+        public static int IntroducedProperty_Auto_Static { get; set; }
 
         [Introduce]
         public int IntroducedProperty_Accessors
