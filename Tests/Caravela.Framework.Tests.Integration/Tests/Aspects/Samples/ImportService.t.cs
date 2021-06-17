@@ -14,6 +14,6 @@ class TargetClass
     private readonly IFormatProvider? __FormatProvider__BackingField;
     public string? Format(object? o)
     {
-        return ((ICustomFormatter)this.FormatProvider.GetFormat(typeof(ICustomFormatter)))?.Format(null, o, this.FormatProvider);
+        return ((ICustomFormatter?)this.FormatProvider?.GetFormat(typeof(ICustomFormatter)))?.Format(null, o, this.FormatProvider);
     }
 }

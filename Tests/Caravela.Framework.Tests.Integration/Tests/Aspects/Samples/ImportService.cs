@@ -9,7 +9,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.ImportServi
     class ImportServiceAspect : OverrideFieldOrPropertyAspect
     {
 
-        public override dynamic OverrideProperty
+        public override dynamic? OverrideProperty
         {
             get
             {
@@ -33,7 +33,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.ImportServi
 
         public string? Format(object? o)
         {
-            return ((ICustomFormatter)this.FormatProvider.GetFormat(typeof(ICustomFormatter)))?.Format(null, o, this.FormatProvider);
+            return ((ICustomFormatter?)this.FormatProvider?.GetFormat(typeof(ICustomFormatter)))?.Format(null, o, this.FormatProvider);
         }
     }
 }
