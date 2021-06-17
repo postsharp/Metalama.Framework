@@ -4,7 +4,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -26,15 +25,11 @@ namespace Caravela.Framework.Impl.Transformations
         public RedirectedEvent( Advice advice, IEvent overriddenDeclaration, IEvent targetEvent, AspectLinkerOptions? linkerOptions = null )
             : base( advice, overriddenDeclaration, linkerOptions )
         {
-            Invariant.Assert( targetEvent != null );
-
             this.TargetEvent = targetEvent;
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
-
             return new[]
             {
                 new IntroducedMember(
@@ -54,7 +49,7 @@ namespace Caravela.Framework.Impl.Transformations
 
             IReadOnlyList<AccessorDeclarationSyntax> GetAccessors()
             {
-                return new AccessorDeclarationSyntax?[]
+                return new[]
                     {
                         AccessorDeclaration(
                             SyntaxKind.AddAccessorDeclaration,
@@ -69,7 +64,6 @@ namespace Caravela.Framework.Impl.Transformations
                             CreateAccessorBody( SyntaxKind.SubtractAssignmentExpression ),
                             null )
                     }.Where( a => a != null )
-                    .Cast<AccessorDeclarationSyntax>()
                     .ToArray();
             }
 

@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Transformations
                     var syntaxReference = (MemberDeclarationSyntax?) memberSymbol.DeclaringSyntaxReferences
                         .OrderBy( dsr => dsr.SyntaxTree.FilePath, StringComparer.Ordinal )
                         .FirstOrDefault()
-                        .GetSyntax();
+                        ?.GetSyntax();
 
                     if ( syntaxReference != null )
                     {

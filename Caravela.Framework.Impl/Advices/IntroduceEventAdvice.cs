@@ -20,6 +20,7 @@ namespace Caravela.Framework.Impl.Advices
         private readonly IMethod? _addTemplateMethod;
         private readonly IMethod? _removeTemplateMethod;
 
+        // ReSharper disable once MemberCanBePrivate.Global
         public new IEvent? TemplateMember => (IEvent?) base.TemplateMember;
 
         public IEventBuilder Builder => this.MemberBuilder;
@@ -64,7 +65,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             // TODO: Override transformations.
 
-            if ( this.TemplateMember!= null && IsEventField( this.TemplateMember ) )
+            if ( this.TemplateMember != null && IsEventField( this.TemplateMember ) )
             {
                 return AdviceResult.Create( this.MemberBuilder );
             }
@@ -72,7 +73,13 @@ namespace Caravela.Framework.Impl.Advices
             {
                 return AdviceResult.Create(
                     this.MemberBuilder,
-                    new OverriddenEvent( this, this.MemberBuilder, this.TemplateMember, this._addTemplateMethod, this._removeTemplateMethod, this.LinkerOptions ) );
+                    new OverriddenEvent(
+                        this,
+                        this.MemberBuilder,
+                        this.TemplateMember,
+                        this._addTemplateMethod,
+                        this._removeTemplateMethod,
+                        this.LinkerOptions ) );
             }
         }
 

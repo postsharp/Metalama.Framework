@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
-            var aspectTypeName = this.Aspect.AspectClass.AspectType.FullName;
+            var aspectTypeName = this.Aspect.AspectClass.AspectType.FullName.AssertNotNull();
             var compilation = this.TargetDeclaration.Compilation;
             var aspectType = compilation.TypeFactory.GetTypeByReflectionName( aspectTypeName );
 
