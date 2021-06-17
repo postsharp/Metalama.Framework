@@ -179,7 +179,7 @@ namespace Caravela.Framework.Impl.Linking
             return introducedMember.Semantic == IntroducedMemberSemantic.Override;
         }
 
-        public ISymbol? GetOverrideTarget(ISymbol overrideSymbol)
+        public ISymbol? GetOverrideTarget( ISymbol overrideSymbol )
         {
             var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( overrideSymbol );
 

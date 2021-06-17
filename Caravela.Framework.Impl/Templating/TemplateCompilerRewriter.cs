@@ -730,10 +730,11 @@ namespace Caravela.Framework.Impl.Templating
 
             // TODO: templates may support build-time parameters, which must to the compiled template method.
 
-            var body = 
+            var body =
                 node.Body != null
-                ? (BlockSyntax) this.BuildRunTimeBlock( node.Body, false )
-                : (BlockSyntax) this.BuildRunTimeBlock( node.ExpressionBody.AssertNotNull().Expression, false );
+                    ? (BlockSyntax) this.BuildRunTimeBlock( node.Body, false )
+                    : (BlockSyntax) this.BuildRunTimeBlock( node.ExpressionBody.AssertNotNull().Expression, false );
+
             var result = this.CreateTemplateMethod( node, body );
 
             this.Unindent( 3 );
@@ -755,8 +756,8 @@ namespace Caravela.Framework.Impl.Templating
 
             var body =
                 node.Body != null
-                ? (BlockSyntax) this.BuildRunTimeBlock( node.Body, false )
-                : (BlockSyntax) this.BuildRunTimeBlock( node.ExpressionBody.AssertNotNull().Expression, false );
+                    ? (BlockSyntax) this.BuildRunTimeBlock( node.Body, false )
+                    : (BlockSyntax) this.BuildRunTimeBlock( node.ExpressionBody.AssertNotNull().Expression, false );
 
             var result = this.CreateTemplateMethod( node, body );
 
@@ -774,6 +775,7 @@ namespace Caravela.Framework.Impl.Templating
             var result = this.CreateTemplateMethod( node, body );
 
             this.Unindent( 3 );
+
             return result;
         }
 
@@ -851,7 +853,7 @@ namespace Caravela.Framework.Impl.Templating
             using ( this.WithMetaContext( MetaContext.CreateForRunTimeBlock( this._currentMetaContext, $"__s{++this._nextStatementListId}" ) ) )
             {
                 // List<StatementOrTrivia> statements = new List<StatementOrTrivia>();
-                var listType = this.MetaSyntaxFactory.Type( typeof( List<StatementOrTrivia> ) );
+                var listType = this.MetaSyntaxFactory.Type( typeof(List<StatementOrTrivia>) );
 
                 this._currentMetaContext!.Statements.Add(
                     LocalDeclarationStatement(
@@ -867,7 +869,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 // TemplateSyntaxFactory.ToStatementArray( __s1 )
                 var toArrayStatementExpression = InvocationExpression(
-                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.ToStatementArray ) ),
+                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ToStatementArray) ),
                     ArgumentList( SingletonSeparatedList( Argument( IdentifierName( this._currentMetaContext.StatementListVariableName ) ) ) ) );
 
                 if ( generateExpression )
@@ -883,8 +885,8 @@ namespace Caravela.Framework.Impl.Templating
                             InvocationExpression(
                                 ObjectCreationExpression(
                                         this.MetaSyntaxFactory.GenericType(
-                                            typeof( Func<> ),
-                                            ArrayType( this.MetaSyntaxFactory.Type( typeof( StatementSyntax ) ) )
+                                            typeof(Func<>),
+                                            ArrayType( this.MetaSyntaxFactory.Type( typeof(StatementSyntax) ) )
                                                 .WithRankSpecifiers(
                                                     SingletonList(
                                                         ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) ) )

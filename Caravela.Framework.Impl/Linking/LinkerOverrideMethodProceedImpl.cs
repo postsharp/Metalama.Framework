@@ -87,11 +87,11 @@ namespace Caravela.Framework.Impl.Linking
                             ThisExpression(),
                             IdentifierName( this._overriddenDeclaration.Name ) )
                         : IdentifierName( this._overriddenDeclaration.Name ),
-                    ArgumentList( 
-                        SeparatedList( 
+                    ArgumentList(
+                        SeparatedList(
                             this._overriddenDeclaration.Parameters.Select(
-                                x => 
-                                    Argument( 
+                                x =>
+                                    Argument(
                                         null,
                                         x.RefKind switch
                                         {
@@ -99,7 +99,7 @@ namespace Caravela.Framework.Impl.Linking
                                             RefKind.In => default,
                                             RefKind.Ref => Token( SyntaxKind.RefKeyword ),
                                             RefKind.Out => Token( SyntaxKind.OutKeyword ),
-                                            _ => throw new AssertionFailedException(),
+                                            _ => throw new AssertionFailedException()
                                         },
                                         IdentifierName( x.Name! ) ) ) ) ) );
 

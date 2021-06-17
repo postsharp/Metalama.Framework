@@ -55,15 +55,15 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 var propertyName = context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration );
 
-                var getTemplateMethod = 
-                    this.TemplateProperty != null && !this.TemplateProperty.IsAutoPropertyOrField 
-                    ? this.TemplateProperty.Getter 
-                    : this.GetTemplateMethod;
+                var getTemplateMethod =
+                    this.TemplateProperty != null && !this.TemplateProperty.IsAutoPropertyOrField
+                        ? this.TemplateProperty.Getter
+                        : this.GetTemplateMethod;
 
-                var setTemplateMethod = 
-                    this.TemplateProperty != null && !this.TemplateProperty.IsAutoPropertyOrField 
-                    ? this.TemplateProperty.Setter 
-                    : this.SetTemplateMethod;
+                var setTemplateMethod =
+                    this.TemplateProperty != null && !this.TemplateProperty.IsAutoPropertyOrField
+                        ? this.TemplateProperty.Setter
+                        : this.SetTemplateMethod;
 
                 var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly
                     ? SyntaxKind.InitAccessorDeclaration

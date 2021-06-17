@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.Linking
                     }
                 }
 
-                if (introducedMember.Introduction is MemberBuilder builder )
+                if ( introducedMember.Introduction is MemberBuilder builder )
                 {
                     this._builderLookup[builder] = introducedMember;
                 }
@@ -117,27 +117,28 @@ namespace Caravela.Framework.Impl.Linking
 
         public ISymbol? GetOverrideTarget( LinkerIntroducedMember overrideIntroducedMember )
         {
-            if (overrideIntroducedMember == null)
+            if ( overrideIntroducedMember == null )
             {
                 return null;
             }
 
-            if (!this._overrideTargetMap.TryGetValue(overrideIntroducedMember, out var overrideTarget))
+            if ( !this._overrideTargetMap.TryGetValue( overrideIntroducedMember, out var overrideTarget ) )
             {
                 return null;
             }
 
-            if (overrideTarget is Declaration originalDeclaration)
+            if ( overrideTarget is Declaration originalDeclaration )
             {
                 return originalDeclaration.GetSymbol();
             }
-            else if (overrideTarget is BuiltMember builtMember)
+            else if ( overrideTarget is BuiltMember builtMember )
             {
                 var builder = builtMember.Builder;
                 var introducedBuilder = this._builderLookup[builder];
                 var intermediateSyntaxTree = this._introducedTreeMap[((ISyntaxTreeTransformation) builder).TargetSyntaxTree];
                 var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
                 var intermediateSemanticModel = this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree );
+
                 return intermediateSemanticModel.GetDeclaredSymbol( intermediateNode );
             }
             else

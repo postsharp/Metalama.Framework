@@ -7,7 +7,7 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal partial class IntroduceInterfaceAdvice
     {
-        private struct MemberSpecification
+        private readonly struct MemberSpecification
         {
             public IMember InterfaceMember { get; }
 

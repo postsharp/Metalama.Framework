@@ -316,7 +316,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         if ( getAccessor != null && (getAccessor.Body != null || getAccessor.ExpressionBody != null) )
                         {
-                            success = 
+                            success =
                                 success &&
                                 this._templateCompiler.TryCompile(
                                     TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
@@ -331,7 +331,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         if ( setAccessor != null && (setAccessor.Body != null || setAccessor.ExpressionBody != null) )
                         {
-                            success = 
+                            success =
                                 success &&
                                 this._templateCompiler.TryCompile(
                                     TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
