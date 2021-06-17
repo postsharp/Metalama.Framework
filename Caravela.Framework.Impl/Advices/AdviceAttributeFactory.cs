@@ -115,8 +115,8 @@ namespace Caravela.Framework.Impl.Advices
                                 var introducePropertyAdvice = new IntroducePropertyAdvice(
                                     aspect,
                                     targetType,
-                                    templateProperty,
                                     null,
+                                    templateProperty,
                                     null,
                                     null,
                                     scope,
@@ -133,8 +133,8 @@ namespace Caravela.Framework.Impl.Advices
                                 var introduceEventAdvice = new IntroduceEventAdvice(
                                     aspect,
                                     targetType,
-                                    templateEvent,
                                     null,
+                                    templateEvent,
                                     null,
                                     null,
                                     scope,

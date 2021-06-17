@@ -4,7 +4,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -33,8 +32,6 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
-
             return new[]
             {
                 new IntroducedMember(
@@ -56,7 +53,7 @@ namespace Caravela.Framework.Impl.Transformations
 
             IReadOnlyList<AccessorDeclarationSyntax> GetAccessors()
             {
-                return new AccessorDeclarationSyntax?[]
+                return new[]
                     {
                         this.OverriddenDeclaration.Getter != null
                             ? AccessorDeclaration(
@@ -77,7 +74,7 @@ namespace Caravela.Framework.Impl.Transformations
                                 null )
                             : null
                     }.Where( a => a != null )
-                    .Cast<AccessorDeclarationSyntax>()
+                    .AssertNoneNull()
                     .ToArray();
             }
 

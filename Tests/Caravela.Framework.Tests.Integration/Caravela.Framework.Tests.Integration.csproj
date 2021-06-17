@@ -12,15 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Tests\Aspects\Overrides\Properties\ExpressionTemplate.t.cs" />
-    <Compile Remove="Tests\Aspects\Samples\ImportFromServiceLocator.t.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Tests\Aspects\Samples\Dirty.t.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
 <!--    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" /> -->
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
@@ -63,10 +54,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Tests\Aspects\Overrides\Properties\ExpressionTemplate.t.cs" />
   </ItemGroup>
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
