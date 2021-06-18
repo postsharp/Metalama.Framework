@@ -1,1 +1,2 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+// TestTemplateCompiler.TryCompile failed. 
+// Error CR0104 on `result`: `The expression 'result' is run-time but it is expected to be compile-time because the expression appears in a compile-time expression 'this.Format'.`

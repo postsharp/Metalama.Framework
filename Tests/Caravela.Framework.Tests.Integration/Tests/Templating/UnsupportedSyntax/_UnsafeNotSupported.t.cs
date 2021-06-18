@@ -1,1 +1,2 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+// The initial compilation failed. 
+// Error CS0227 on `unsafe`: `Unsafe code may only appear if compiling with /unsafe`

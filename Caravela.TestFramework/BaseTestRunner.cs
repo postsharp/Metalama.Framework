@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -20,6 +21,8 @@ namespace Caravela.TestFramework
     /// </summary>
     public abstract partial class BaseTestRunner
     {
+        private static readonly Regex _spaceRegex = new( " +", RegexOptions.Compiled );
+        private static readonly Regex _newLineRegex = new( "[\n|\r]+", RegexOptions.Compiled );
         private readonly MetadataReference[] _additionalAssemblies;
 
         public IServiceProvider ServiceProvider { get; }
@@ -62,9 +65,9 @@ namespace Caravela.TestFramework
             var sourceFileName = testInput.TestName + ".cs";
             var mainDocument = project.AddDocument( sourceFileName, SourceText.From( testInput.SourceCode, Encoding.UTF8 ), filePath: sourceFileName );
             project = mainDocument.Project;
-            
+
             var syntaxTree = mainDocument.GetSyntaxTreeAsync().Result!;
-            
+
             testResult.AddInputDocument( mainDocument );
 
             var initialCompilation = CSharpCompilation.Create(
@@ -77,7 +80,7 @@ namespace Caravela.TestFramework
             {
                 var includedFullPath = Path.Combine( Path.GetDirectoryName( testInput.FullPath )!, includedFile );
                 var includedText = File.ReadAllText( includedFullPath );
-                
+
                 var includedDocument = project.AddDocument( includedFile, SourceText.From( includedText, Encoding.UTF8 ), filePath: includedFullPath );
                 project = mainDocument.Project;
 
@@ -122,13 +125,18 @@ namespace Caravela.TestFramework
             }
         }
 
-        public static string? NormalizeTestOutput( string? s ) 
-            => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot() );
+        public static string? NormalizeTestOutput( string? s ) => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot() );
 
-        public static string? NormalizeTestOutput( SyntaxNode syntaxNode ) 
-            => syntaxNode.NormalizeWhitespace().ToFullString().Replace( "\r", "" );
+        public static string? NormalizeTestOutput( SyntaxNode syntaxNode )
+        {
+            var s = syntaxNode.NormalizeWhitespace().ToFullString();
 
-        
+            s = _newLineRegex.Replace( s, "\n" );
+            s = _spaceRegex.Replace( s, " " );
+
+            return s;
+        }
+
         public virtual void ExecuteAssertions( TestInput testInput, TestResult testResult )
         {
             if ( this.ProjectDirectory == null )
@@ -143,7 +151,6 @@ namespace Caravela.TestFramework
             var expectedTransformedPath = Path.Combine(
                 Path.GetDirectoryName( sourceAbsolutePath )!,
                 Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.TransformedCode );
-
 
             var actualTransformedSourceText = NormalizeTestOutput( testResult.GetConsolidatedTestOutput() );
 
