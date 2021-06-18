@@ -34,7 +34,7 @@ namespace Caravela.TestFramework
                 
                 if ( originalSyntaxTree.AnnotatedSyntaxRoot == null )
                 {
-                    originalSyntaxTree.AnnotatedSyntaxRoot = annotatedSyntaxRoot.SyntaxTree.GetRoot();
+                    originalSyntaxTree.AnnotatedSyntaxRoot = sourceSyntaxRoot.SyntaxTree.GetRoot();
                 }
 
                 originalSyntaxTree.AnnotatedSyntaxRoot = originalSyntaxTree.AnnotatedSyntaxRoot.ReplaceNode( sourceSyntaxRoot, annotatedSyntaxRoot );

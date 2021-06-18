@@ -260,6 +260,12 @@ namespace Caravela.TestFramework
                 Path.GetDirectoryName( testInput.RelativePath ) ?? "",
                 Path.GetFileNameWithoutExtension( testSyntaxTree.InputDocument.FilePath ) + FileExtensions.Html );
 
+            if ( testSyntaxTree.AnnotatedSyntaxRoot == null )
+            {
+                // The tree has not been annotated, so there is nothing to write.
+                return;
+            }
+
             testSyntaxTree.OutputHtmlPath = htmlPath;
 
             var htmlDirectory = Path.GetDirectoryName( htmlPath );
