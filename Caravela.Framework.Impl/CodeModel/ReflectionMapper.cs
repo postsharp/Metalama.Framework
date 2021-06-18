@@ -94,7 +94,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             if ( type.IsGenericParameter )
             {
-                return this.GetNamedTypeSymbol( type.DeclaringType, Array.Empty<Type>() ).TypeParameters[type.GenericParameterPosition];
+                return this.GetNamedTypeSymbol( type.DeclaringType.AssertNotNull(), Array.Empty<Type>() ).TypeParameters[type.GenericParameterPosition];
             }
 
             if ( type is CompileTimeType compileTimeType )
@@ -161,7 +161,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
             else
             {
-                return this.GetNamedTypeSymbolByMetadataName( type.FullName );
+                return this.GetNamedTypeSymbolByMetadataName( type.FullName.AssertNotNull() );
             }
         }
     }

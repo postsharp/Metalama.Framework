@@ -43,7 +43,13 @@ namespace Caravela.Framework.Impl.Advices
         public override AdviceResult ToResult( ICompilation compilation )
         {
             return AdviceResult.Create(
-                new OverriddenEvent( this, this.TargetDeclaration, this.TemplateEvent, this.AddTemplateMethod, this.RemoveTemplateMethod, this.LinkerOptions ) );
+                new OverriddenEvent(
+                    this,
+                    this.TargetDeclaration,
+                    this.TemplateEvent,
+                    this.AddTemplateMethod,
+                    this.RemoveTemplateMethod,
+                    this.LinkerOptions ) );
         }
     }
 }

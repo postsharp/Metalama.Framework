@@ -3,8 +3,10 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,8 +26,10 @@ namespace Caravela.Framework.Impl.Linking
         private readonly Compilation _intermediateCompilation;
         private readonly Dictionary<string, LinkerIntroducedMember> _introducedMemberLookup;
         private readonly Dictionary<IDeclaration, List<LinkerIntroducedMember>> _overrideMap;
+        private readonly Dictionary<LinkerIntroducedMember, IDeclaration> _overrideTargetMap;
         private readonly Dictionary<ISymbol, IDeclaration> _overrideTargetsByOriginalSymbolName;
         private readonly Dictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
+        private readonly Dictionary<IDeclaration, LinkerIntroducedMember> _builderLookup;
 
         public LinkerIntroductionRegistry(
             CompilationModel finalCompilationModel,
@@ -37,7 +41,9 @@ namespace Caravela.Framework.Impl.Linking
             this._introducedMemberLookup = introducedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
             this._introducedTreeMap = introducedTreeMap;
             this._overrideMap = new Dictionary<IDeclaration, List<LinkerIntroducedMember>>( finalCompilationModel.InvariantComparer );
+            this._overrideTargetMap = new Dictionary<LinkerIntroducedMember, IDeclaration>();
             this._overrideTargetsByOriginalSymbolName = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );
+            this._builderLookup = new Dictionary<IDeclaration, LinkerIntroducedMember>();
 
             foreach ( var introducedMember in introducedMembers )
             {
@@ -48,12 +54,18 @@ namespace Caravela.Framework.Impl.Linking
                         this._overrideMap[overrideTransformation.OverriddenDeclaration] = overrideList = new List<LinkerIntroducedMember>();
                     }
 
+                    this._overrideTargetMap[introducedMember] = overrideTransformation.OverriddenDeclaration;
                     overrideList.Add( introducedMember );
 
                     if ( overrideTransformation.OverriddenDeclaration is Declaration declaration )
                     {
                         this._overrideTargetsByOriginalSymbolName[declaration.Symbol] = declaration;
                     }
+                }
+
+                if ( introducedMember.Introduction is MemberBuilder builder )
+                {
+                    this._builderLookup[builder] = introducedMember;
                 }
             }
         }
@@ -100,6 +112,38 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     return Array.Empty<LinkerIntroducedMember>();
                 }
+            }
+        }
+
+        public ISymbol? GetOverrideTarget( LinkerIntroducedMember overrideIntroducedMember )
+        {
+            if ( overrideIntroducedMember == null )
+            {
+                return null;
+            }
+
+            if ( !this._overrideTargetMap.TryGetValue( overrideIntroducedMember, out var overrideTarget ) )
+            {
+                return null;
+            }
+
+            if ( overrideTarget is Declaration originalDeclaration )
+            {
+                return originalDeclaration.GetSymbol();
+            }
+            else if ( overrideTarget is BuiltMember builtMember )
+            {
+                var builder = builtMember.Builder;
+                var introducedBuilder = this._builderLookup[builder];
+                var intermediateSyntaxTree = this._introducedTreeMap[((ISyntaxTreeTransformation) builder).TargetSyntaxTree];
+                var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
+                var intermediateSemanticModel = this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree );
+
+                return intermediateSemanticModel.GetDeclaredSymbol( intermediateNode );
+            }
+            else
+            {
+                throw new AssertionFailedException();
             }
         }
 

@@ -71,6 +71,14 @@ namespace Caravela.Framework.Impl.Utilities
 
                     break;
 
+                case (IFieldSymbol fieldX, IFieldSymbol fieldY):
+                    if ( !FieldEquals( fieldX, fieldY, this._options ) )
+                    {
+                        return false;
+                    }
+
+                    break;
+
                 case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY):
                     if ( !NamedTypeEquals( namedTypeX, namedTypeY, this._options ) )
                     {
@@ -206,6 +214,16 @@ namespace Caravela.Framework.Impl.Utilities
         private static bool EventEquals( IEventSymbol eventX, IEventSymbol eventY, StructuralSymbolComparerOptions options )
         {
             if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( eventX.Name, eventY.Name ) )
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool FieldEquals( IFieldSymbol fieldX, IFieldSymbol fieldY, StructuralSymbolComparerOptions options )
+        {
+            if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( fieldX.Name, fieldY.Name ) )
             {
                 return false;
             }
@@ -382,6 +400,14 @@ namespace Caravela.Framework.Impl.Utilities
 
                     break;
 
+                case IFieldSymbol field:
+                    if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) )
+                    {
+                        h = HashCode.Combine( h, field.Name );
+                    }
+
+                    break;
+
                 case IEventSymbol @event:
                     if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) )
                     {
@@ -411,7 +437,7 @@ namespace Caravela.Framework.Impl.Utilities
 
                 case IArrayTypeSymbol arrayType:
                     h = HashCode.Combine( h, arrayType.Rank, GetHashCode( arrayType.ElementType, StructuralSymbolComparerOptions.Type ) );
-
+                    
                     break;
 
                 case IDynamicTypeSymbol:

@@ -7,19 +7,29 @@ using System.Linq.Expressions;
 
 namespace Caravela.Framework.Aspects
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     public sealed class InterfaceMemberSpecification
     {
 #pragma warning disable IDE0051 // Remove unused private members
+
+        // ReSharper disable UnusedParameter.Local
+
         private InterfaceMemberSpecification( IMember interfaceMember, IMember implementationMember )
 #pragma warning restore IDE0051 // Remove unused private members
         {
             throw new NotImplementedException();
         }
 
+        // ReSharper enable UnusedParameter.Local
+
+        // ReSharper disable once UnassignedGetOnlyAutoProperty
+
         /// <summary>
         /// Gets the member of the interface to be implemented.
         /// </summary>
         public IMember InterfaceMember { get; }
+
+        // ReSharper disable once UnassignedGetOnlyAutoProperty
 
         /// <summary>
         /// Gets the implementation member, i.e. either a callable member of the target type or member of the aspect marked with [Introduce] or [InterfaceMember].

@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
-            var aspectTypeName = this.Aspect.AspectClass.AspectType.FullName;
+            var aspectTypeName = this.Aspect.AspectClass.AspectType.FullName.AssertNotNull();
             var compilation = this.TargetDeclaration.Compilation;
             var aspectType = compilation.TypeFactory.GetTypeByReflectionName( aspectTypeName );
 
@@ -310,11 +310,11 @@ namespace Caravela.Framework.Impl.Advices
                             interfaceMemberMap.Add( interfaceMethod, memberBuilder );
 
                             overrides.Add(
-                                memberSpec.AspectInterfaceTargetMember != null
+                                memberSpec.AspectInterfaceMember != null
                                     ? new OverriddenMethod(
                                         this,
                                         (IMethod) memberBuilder,
-                                        (IMethod) memberSpec.AspectInterfaceTargetMember,
+                                        (IMethod) memberSpec.AspectInterfaceMember,
                                         this.LinkerOptions )
                                     : new RedirectedMethod(
                                         this,
@@ -325,18 +325,24 @@ namespace Caravela.Framework.Impl.Advices
                             break;
 
                         case IProperty interfaceProperty:
-                            var buildAutoProperty = ((IProperty?) memberSpec.AspectInterfaceTargetMember)?.IsAutoPropertyOrField == true;
-                            memberBuilder = this.GetImplPropertyBuilder( interfaceProperty, buildAutoProperty, memberSpec.IsExplicit );
+                            var buildAutoProperty = ((IProperty?) memberSpec.AspectInterfaceMember)?.IsAutoPropertyOrField == true;
+
+                            memberBuilder = this.GetImplPropertyBuilder(
+                                interfaceProperty,
+                                (IProperty?) memberSpec.TargetMember ?? (IProperty) memberSpec.AspectInterfaceMember.AssertNotNull(),
+                                buildAutoProperty,
+                                memberSpec.IsExplicit );
+
                             interfaceMemberMap.Add( interfaceProperty, memberBuilder );
 
-                            if ( ((IProperty?) memberSpec.AspectInterfaceTargetMember)?.IsAutoPropertyOrField != true )
+                            if ( ((IProperty?) memberSpec.AspectInterfaceMember)?.IsAutoPropertyOrField != true )
                             {
                                 overrides.Add(
-                                    memberSpec.AspectInterfaceTargetMember != null
+                                    memberSpec.AspectInterfaceMember != null
                                         ? new OverriddenProperty(
                                             this,
                                             (IProperty) memberBuilder,
-                                            (IProperty) memberSpec.AspectInterfaceTargetMember,
+                                            (IProperty) memberSpec.AspectInterfaceMember,
                                             null,
                                             null,
                                             this.LinkerOptions )
@@ -350,8 +356,8 @@ namespace Caravela.Framework.Impl.Advices
                             break;
 
                         case IEvent interfaceEvent:
-                            var isEventField = memberSpec.AspectInterfaceTargetMember != null
-                                               && ((IEvent) memberSpec.AspectInterfaceTargetMember).IsEventField();
+                            var isEventField = memberSpec.AspectInterfaceMember != null
+                                               && ((IEvent) memberSpec.AspectInterfaceMember).IsEventField();
 
                             memberBuilder = this.GetImplEventBuilder( interfaceEvent, isEventField, memberSpec.IsExplicit );
                             interfaceMemberMap.Add( interfaceEvent, memberBuilder );
@@ -359,11 +365,11 @@ namespace Caravela.Framework.Impl.Advices
                             if ( !isEventField )
                             {
                                 overrides.Add(
-                                    memberSpec.AspectInterfaceTargetMember != null
+                                    memberSpec.AspectInterfaceMember != null
                                         ? new OverriddenEvent(
                                             this,
                                             (IEvent) memberBuilder,
-                                            (IEvent) memberSpec.AspectInterfaceTargetMember,
+                                            (IEvent) memberSpec.AspectInterfaceMember,
                                             null,
                                             null,
                                             this.LinkerOptions )
@@ -437,14 +443,14 @@ namespace Caravela.Framework.Impl.Advices
             return methodBuilder;
         }
 
-        private MemberBuilder GetImplPropertyBuilder( IProperty interfaceProperty, bool isAutoProperty, bool isExplicit )
+        private MemberBuilder GetImplPropertyBuilder( IProperty interfaceProperty, IProperty targetProperty, bool isAutoProperty, bool isExplicit )
         {
             var propertyBuilder = new PropertyBuilder(
                 this,
                 this.TargetDeclaration,
                 interfaceProperty.Name,
-                interfaceProperty.Getter != null,
-                interfaceProperty.Setter != null,
+                interfaceProperty.Getter != null || (!isExplicit && targetProperty.Getter != null),
+                interfaceProperty.Setter != null || (!isExplicit && targetProperty.Setter != null),
                 !isExplicit && isAutoProperty,
                 interfaceProperty.Writeability == Writeability.InitOnly,
                 this.LinkerOptions );
@@ -467,6 +473,16 @@ namespace Caravela.Framework.Impl.Advices
             else
             {
                 propertyBuilder.Accessibility = Accessibility.Public;
+
+                if ( propertyBuilder.Getter != null )
+                {
+                    propertyBuilder.Getter.Accessibility = targetProperty.Getter.AssertNotNull().Accessibility;
+                }
+
+                if ( propertyBuilder.Setter != null )
+                {
+                    propertyBuilder.Setter.Accessibility = targetProperty.Setter.AssertNotNull().Accessibility;
+                }
             }
 
             return propertyBuilder;

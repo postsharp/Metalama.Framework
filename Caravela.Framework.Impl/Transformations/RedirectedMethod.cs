@@ -32,8 +32,6 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
-
             var body =
                 Block(
                     this.OverriddenDeclaration.ReturnType != this.OverriddenDeclaration.Compilation.TypeFactory.GetTypeByReflectionType( typeof(void) )

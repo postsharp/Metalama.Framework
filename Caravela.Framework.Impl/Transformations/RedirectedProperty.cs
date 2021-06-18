@@ -32,8 +32,6 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
-
             return new[]
             {
                 new IntroducedMember(
@@ -55,7 +53,7 @@ namespace Caravela.Framework.Impl.Transformations
 
             IReadOnlyList<AccessorDeclarationSyntax> GetAccessors()
             {
-                return new AccessorDeclarationSyntax?[]
+                return new[]
                     {
                         this.OverriddenDeclaration.Getter != null
                             ? AccessorDeclaration(
@@ -76,7 +74,7 @@ namespace Caravela.Framework.Impl.Transformations
                                 null )
                             : null
                     }.Where( a => a != null )
-                    .Cast<AccessorDeclarationSyntax>()
+                    .AssertNoneNull()
                     .ToArray();
             }
 

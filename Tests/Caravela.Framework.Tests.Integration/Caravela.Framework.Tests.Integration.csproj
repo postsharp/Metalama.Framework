@@ -12,14 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Tests\Aspects\Introductions\Events\DeclarativeEvent.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\DeclarativeEventField - Copy - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\DeclarativeEventField - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Interfaces\ExplicitMembers.t.cs" />
-    <Compile Remove="Tests\Aspects\Overrides\Events\Simple.t.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
 <!--    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" /> -->
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
@@ -62,18 +54,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Tests\Aspects\Introductions\Events\DeclarativeEvent.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\DeclarativeEventField - Copy - Copy.t.cs">
-      <DependentUpon>DeclarativeEventField - Copy.t.cs</DependentUpon>
-    </None>
-    <None Include="Tests\Aspects\Introductions\Events\DeclarativeEventField - Copy.t.cs">
-      <DependentUpon>DeclarativeEventField.t.cs</DependentUpon>
-    </None>
-    <None Include="Tests\Aspects\Introductions\Interfaces\ExplicitMembers.t.cs" />
-    <None Include="Tests\Aspects\Overrides\Events\Simple.t.cs" />
   </ItemGroup>
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />

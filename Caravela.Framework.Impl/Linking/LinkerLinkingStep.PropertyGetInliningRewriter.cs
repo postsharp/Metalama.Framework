@@ -58,12 +58,17 @@ namespace Caravela.Framework.Impl.Linking
                     targetPropertySymbol,
                     annotation );
 
+                var overrideTargetSymbol =
+                    this.AnalysisRegistry.IsOverride( this.ContextBodyMethod )
+                        ? this.AnalysisRegistry.GetOverrideTarget( this.ContextBodyMethod )
+                        : this.ContextBodyMethod;
+
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {
                     // Inline the accessor body.
                     return this.GetInlinedBody( resolvedSymbol, GetAssignmentVariableName( node.Left ) );
                 }
-                else
+                else if ( overrideTargetSymbol != null && StructuralSymbolComparer.Default.Equals( overrideTargetSymbol, targetPropertySymbol ) )
                 {
                     // Replace with invocation of the correct override.
 
@@ -89,6 +94,10 @@ namespace Caravela.Framework.Impl.Linking
                             throw new NotImplementedException( $"Cannot inline {node.Right}." );
                     }
                 }
+                else
+                {
+                    return node;
+                }
             }
 
             protected override SyntaxNode? VisitReturnedExpression( ExpressionSyntax node )
@@ -109,12 +118,17 @@ namespace Caravela.Framework.Impl.Linking
                     targetPropertySymbol,
                     annotation );
 
+                var overrideTargetSymbol =
+                    this.AnalysisRegistry.IsOverride( this.ContextBodyMethod )
+                        ? this.AnalysisRegistry.GetOverrideTarget( this.ContextBodyMethod )
+                        : this.ContextBodyMethod;
+
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {
                     // Inline the accessor body.
                     return this.GetInlinedBody( resolvedSymbol, null );
                 }
-                else
+                else if ( overrideTargetSymbol != null && StructuralSymbolComparer.Default.Equals( overrideTargetSymbol, targetPropertySymbol ) )
                 {
                     // Replace with invocation of the correct override.
 
@@ -131,6 +145,10 @@ namespace Caravela.Framework.Impl.Linking
                         default:
                             throw new NotImplementedException( $"Cannot inline {node}." );
                     }
+                }
+                else
+                {
+                    return node;
                 }
             }
 
