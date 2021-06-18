@@ -82,43 +82,49 @@ namespace Caravela.AspectWorkbench.ViewModels
                 var testResult = testRunner.RunTest( testInput );
                 compilationStopwatch.Stop();
 
-                if ( testResult.AnnotatedTemplateSyntax != null )
+                var testSyntaxTree = testResult.SyntaxTrees.First();
+
+                var annotatedTemplateSyntax = testSyntaxTree.AnnotatedSyntaxRoot;
+                if ( annotatedTemplateSyntax != null )
                 {
                     // Display the annotated syntax tree.
-                    var sourceText = await testResult.TemplateDocument!.GetTextAsync();
+                    var sourceText = await testResult.SyntaxTrees.First().InputDocument.GetTextAsync();
                     var classifier = new TextSpanClassifier( sourceText, testRunner is TemplatingTestRunner );
-                    classifier.Visit( testResult.AnnotatedTemplateSyntax );
+                    classifier.Visit( annotatedTemplateSyntax );
                     var metaSpans = classifier.ClassifiedTextSpans;
 
                     this.ColoredTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( sourceText, metaSpans );
                 }
 
-                if ( testResult.TransformedTemplateSyntax != null )
+                var errorsDocument = new FlowDocument();
+
+                
+                var transformedTemplateSyntax = testSyntaxTree.OutputCompileTimeSyntaxRoot;
+                if ( transformedTemplateSyntax != null )
                 {
-                    this.CompiledTemplatePath = testResult.TransformedTemplatePath;
+                    // this.CompiledTemplatePath = testResult.TransformedTemplatePath;
 
                     // Render the transformed tree.
                     var project3 = testRunner.CreateProject();
-                    var document3 = project3.AddDocument( "name.cs", testResult.TransformedTemplateSyntax );
+                    var document3 = project3.AddDocument( "name.cs", transformedTemplateSyntax );
                     var optionSet = (await document3.GetOptionsAsync()).WithChangedOption( FormattingOptions.IndentationSize, 4 );
 
-                    var formattedTransformedSyntaxRoot = Formatter.Format( testResult.TransformedTemplateSyntax, project3.Solution.Workspace, optionSet );
+                    var formattedTransformedSyntaxRoot = Formatter.Format( transformedTemplateSyntax, project3.Solution.Workspace, optionSet );
                     var text4 = formattedTransformedSyntaxRoot.GetText( Encoding.UTF8 );
                     var spanMarker = new TextSpanClassifier( text4 );
                     spanMarker.Visit( formattedTransformedSyntaxRoot );
                     this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
                 }
 
-                var errorsDocument = new FlowDocument();
-
-                if ( testResult.TransformedTargetSourceText != null )
+            
+                if ( testSyntaxTree.OutputRunTimeSourceText != null )
                 {
                     // Display the transformed code.
-                    this.TransformedTargetDocument = await syntaxColorizer.WriteSyntaxColoring( testResult.TransformedTargetSourceText, null );
+                    this.TransformedTargetDocument = await syntaxColorizer.WriteSyntaxColoring( testSyntaxTree.OutputRunTimeSourceText, null );
 
                     // Compare the output and shows the result.
-                    if ( BaseTestRunner.NormalizeString( this.ExpectedOutputText ) ==
-                         BaseTestRunner.NormalizeString( testResult.TransformedTargetSourceText.ToString() ) )
+                    if ( BaseTestRunner.NormalizeTestOutput( this.ExpectedOutputText ) ==
+                         BaseTestRunner.NormalizeTestOutput( testSyntaxTree.OutputRunTimeSourceText.ToString() ) )
                     {
                         errorsDocument.Blocks.Add(
                             new Paragraph( new Run( "The transformed target code is equal to expectations." ) { Foreground = Brushes.Green } ) );

@@ -55,13 +55,18 @@ namespace Caravela.TestFramework
         /// <returns></returns>
         public virtual TestResult RunTest( TestInput testInput )
         {
+            var testResult = this.CreateTestResult();
+
             // Source.
             var project = this.CreateProject().WithParseOptions( CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER" ) );
             var sourceFileName = testInput.TestName + ".cs";
-            var testDocument = project.AddDocument( sourceFileName, SourceText.From( testInput.SourceCode, Encoding.UTF8 ), filePath: sourceFileName );
-            project = testDocument.Project;
+            var mainDocument = project.AddDocument( sourceFileName, SourceText.From( testInput.SourceCode, Encoding.UTF8 ), filePath: sourceFileName );
+            project = mainDocument.Project;
+            
+            var syntaxTree = mainDocument.GetSyntaxTreeAsync().Result!;
+            
+            testResult.AddInputDocument( mainDocument );
 
-            var syntaxTree = testDocument.GetSyntaxTreeAsync().Result!;
 
             var initialCompilation = CSharpCompilation.Create(
                 "test",
@@ -73,16 +78,21 @@ namespace Caravela.TestFramework
             {
                 var includedFullPath = Path.Combine( Path.GetDirectoryName( testInput.FullPath )!, includedFile );
                 var includedText = File.ReadAllText( includedFullPath );
-                initialCompilation = initialCompilation.AddSyntaxTrees( CSharpSyntaxTree.ParseText( includedText, null, includedFullPath ) );
+                
+                var includedDocument = project.AddDocument( includedFile, SourceText.From( includedText, Encoding.UTF8 ), filePath: includedFullPath );
+                project = mainDocument.Project;
+
+                testResult.AddInputDocument( includedDocument );
+
+                var includedSyntaxTree = CSharpSyntaxTree.ParseText( includedText, null, includedFullPath );
+                initialCompilation = initialCompilation.AddSyntaxTrees( includedSyntaxTree );
             }
 
             ValidateCustomAttributes( initialCompilation );
 
-            var testResult = this.CreateTestResult();
             testResult.Project = project;
-            testResult.Input = testInput;
-            testResult.TemplateDocument = testDocument;
-            testResult.InitialCompilation = initialCompilation;
+            testResult.TestInput = testInput;
+            testResult.InputCompilation = initialCompilation;
 
             if ( this.ReportInvalidInputCompilation )
             {
@@ -113,9 +123,9 @@ namespace Caravela.TestFramework
             }
         }
 
-        public static string? NormalizeString( string? s )
+        public static string? NormalizeTestOutput( string? s )
         {
-            return s == null ? null : CSharpSyntaxTree.ParseText( s ).GetRoot().NormalizeWhitespace().ToString().Replace( "\r", "" );
+            return s == null ? null : CSharpSyntaxTree.ParseText( s ).GetRoot().NormalizeWhitespace().ToFullString().Replace( "\r", "" );
         }
 
         public virtual void ExecuteAssertions( TestInput testInput, TestResult testResult )
@@ -133,9 +143,11 @@ namespace Caravela.TestFramework
                 Path.GetDirectoryName( sourceAbsolutePath )!,
                 Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.TransformedCode );
 
-            Assert.NotNull( testResult.TransformedTargetSourceText );
+            var firstTestTree = testResult.SyntaxTrees.First();
+            Assert.NotNull( firstTestTree.OutputRunTimeSourceText );
+            Assert.NotNull( firstTestTree.OutputRunTimeSyntaxRoot );
 
-            var actualTransformedSourceText = NormalizeString( testResult.TransformedTargetSourceText!.ToString() );
+            var actualTransformedSourceText = NormalizeTestOutput( firstTestTree.OutputRunTimeSourceText!.ToString() );
 
             // If the expectation file does not exist, create it with some placeholder content.
             if ( !File.Exists( expectedTransformedPath ) )
@@ -147,7 +159,7 @@ namespace Caravela.TestFramework
 
             // Read expectations from the file.
             var expectedNonNormalizedSourceText = File.ReadAllText( expectedTransformedPath );
-            var expectedTransformedSourceText = NormalizeString( expectedNonNormalizedSourceText );
+            var expectedTransformedSourceText = NormalizeTestOutput( expectedNonNormalizedSourceText );
 
             // Update the file in obj/transformed if it is different.
             var actualTransformedPath = Path.Combine(
@@ -160,7 +172,7 @@ namespace Caravela.TestFramework
             Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );
 
             var storedTransformedSourceText =
-                File.Exists( actualTransformedPath ) ? NormalizeString( File.ReadAllText( actualTransformedPath ) ) : null;
+                File.Exists( actualTransformedPath ) ? NormalizeTestOutput( File.ReadAllText( actualTransformedPath ) ) : null;
 
             if ( expectedTransformedSourceText == actualTransformedSourceText
                  && storedTransformedSourceText != expectedNonNormalizedSourceText )

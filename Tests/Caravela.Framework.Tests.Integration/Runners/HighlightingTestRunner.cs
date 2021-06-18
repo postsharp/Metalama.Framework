@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using Xunit;
@@ -39,12 +40,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 return result;
             }
 
-            var templateSyntaxRoot = result.TemplateDocument!.GetSyntaxRootAsync().Result!;
-            var templateSemanticModel = result.TemplateDocument.GetSemanticModelAsync().Result!;
+            var templateDocument = result.SyntaxTrees.Single().InputDocument;
+            var templateSyntaxRoot = templateDocument.GetSyntaxRootAsync().Result!;
+            var templateSemanticModel = templateDocument.GetSemanticModelAsync().Result!;
 
             DiagnosticList diagnostics = new();
 
-            var templateCompiler = new TemplateCompiler( this.ServiceProvider, result.InitialCompilation! );
+            var templateCompiler = new TemplateCompiler( this.ServiceProvider, result.InputCompilation! );
 
             var templateCompilerSuccess = templateCompiler.TryAnnotate(
                 templateSyntaxRoot,
@@ -61,7 +63,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 return result;
             }
 
-            result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
+            result.SyntaxTrees.Single().AnnotatedSyntaxRoot = annotatedTemplateSyntax;
 
             if ( this.ProjectDirectory != null )
             {
@@ -77,9 +79,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
                 Directory.CreateDirectory( Path.GetDirectoryName( highlightedTemplatePath ) );
 
-                var sourceText = result.TemplateDocument.GetTextAsync().Result;
+                var sourceText = templateDocument.GetTextAsync().Result;
                 var classifier = new TextSpanClassifier( sourceText, detectRegion: true );
-                classifier.Visit( result.AnnotatedTemplateSyntax );
+                classifier.Visit( annotatedTemplateSyntax );
 
                 var textWriter = new StringWriter();
                 textWriter.WriteLine( "<html>" );

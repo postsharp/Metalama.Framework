@@ -46,9 +46,9 @@ namespace Caravela.TestFramework
         /// </summary>
         public List<string> IncludedFiles { get; } = new();
 
-        public bool WriteFormattedHtml { get; set; }
+        public bool? WriteFormattedHtml { get; set; }
 
-        public bool AddHtmlTitles { get; set; }
+        public bool? AddHtmlTitles { get; set; }
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -63,6 +63,14 @@ namespace Caravela.TestFramework
             this.IncludeAllSeverities ??= directoryOptions.IncludeAllSeverities;
 
             this.TestRunnerFactoryType ??= directoryOptions.TestRunnerFactoryType;
+
+            this.WriteFormattedHtml ??= directoryOptions.WriteFormattedHtml;
+
+            this.AddHtmlTitles ??= directoryOptions.AddHtmlTitles;
+            
+            this.IncludedFiles.AddRange( directoryOptions.IncludedFiles );
+            
+            this.References.AddRange( directoryOptions.References );
         }
 
         /// <summary>

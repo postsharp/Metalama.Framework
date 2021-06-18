@@ -86,8 +86,10 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 return testResult;
             }
 
-            var templateSyntaxRoot = testResult.TemplateDocument!.GetSyntaxRootAsync().Result!;
-            var templateSemanticModel = testResult.TemplateDocument.GetSemanticModelAsync().Result!;
+            var testSyntaxTree = testResult.SyntaxTrees.Single();
+            var templateDocument = testSyntaxTree.InputDocument;
+            var templateSyntaxRoot = templateDocument.GetSyntaxRootAsync().Result!;
+            var templateSemanticModel = templateDocument.GetSemanticModelAsync().Result!;
 
             foreach ( var testAnalyzer in this._testAnalyzers )
             {
@@ -119,20 +121,11 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 Assert.Equal( templateSyntaxRoot.ToString(), annotatedTemplateSyntax.ToString() );
             }
 
-            testResult.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
-            testResult.TransformedTemplateSyntax = transformedTemplateSyntax;
-
-            if ( !templateCompilerSuccess )
-            {
-                testResult.SetFailed( "TestTemplateCompiler.TryCompile failed." );
-
-                return testResult;
-            }
+            testSyntaxTree.AnnotatedSyntaxRoot = annotatedTemplateSyntax;
 
             // Write the transformed code to disk.
-            var transformedTemplateText = testResult.TransformedTemplateSyntax!.SyntaxTree.GetText();
             var transformedTemplatePath = Path.Combine( GeneratedDirectoryPath, Path.ChangeExtension( testInput.TestName, ".cs" ) );
-            testResult.TransformedTemplatePath = transformedTemplatePath;
+            var transformedTemplateText = transformedTemplateSyntax!.SyntaxTree.GetText();
             Directory.CreateDirectory( Path.GetDirectoryName( transformedTemplatePath ) );
 
             using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
@@ -140,8 +133,20 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 transformedTemplateText.Write( textWriter );
             }
 
+
+            // Report the result to the test.
+            testSyntaxTree.SetCompileTimeCode( transformedTemplateSyntax, transformedTemplatePath );
+
+            if ( !templateCompilerSuccess )
+            {
+                testResult.SetFailed( "TestTemplateCompiler.TryCompile failed." );
+
+                return testResult;
+            }
+            
+
             // Create a SyntaxTree that maps to the file we have just written.
-            var oldTransformedTemplateSyntaxTree = testResult.TransformedTemplateSyntax.SyntaxTree;
+            var oldTransformedTemplateSyntaxTree = transformedTemplateSyntax.SyntaxTree;
 
             var newTransformedTemplateSyntaxTree = CSharpSyntaxTree.Create(
                 (CSharpSyntaxNode) oldTransformedTemplateSyntaxTree.GetRoot(),
@@ -180,12 +185,12 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var compiledAspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
                 var compiledTemplateMethod = compiledAspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
 
-                var templateMethod = testResult.InitialCompilation!.Assembly.GetTypes().Single( t => t.Name == "Aspect" ).GetMembers( "Template" ).Single();
+                var templateMethod = testResult.InputCompilation!.Assembly.GetTypes().Single( t => t.Name == "Aspect" ).GetMembers( "Template" ).Single();
 
                 Invariant.Assert( compiledTemplateMethod != null );
                 var driver = new TemplateDriver( null!, templateMethod, compiledTemplateMethod );
 
-                var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InitialCompilation );
+                var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InputCompilation );
                 var expansionContext = this.CreateTemplateExpansionContext( assembly, compilationModel, templateMethod );
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult, out var output );
@@ -199,7 +204,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     return testResult;
                 }
 
-                testResult.SetTransformedTarget( output! );
+                testSyntaxTree.SetRunTimeCode( output! );
             }
             catch ( Exception e )
             {

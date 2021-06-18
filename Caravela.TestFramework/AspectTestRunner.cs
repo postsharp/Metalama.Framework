@@ -12,7 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
+using System.Text;
 using System.Threading;
 using Xunit.Abstractions;
 
@@ -46,101 +46,141 @@ namespace Caravela.TestFramework
             pipeline.ServiceProvider.AddService<ICompileTimeCompilationBuilderSpy>( spy );
             pipeline.ServiceProvider.AddService<ITemplateCompilerSpy>( spy );
 
-            if ( pipeline.TryExecute( testResult, testResult.InitialCompilation!, CancellationToken.None, out var resultCompilation, out _ ) )
+            if ( pipeline.TryExecute( testResult, testResult.InputCompilation!, CancellationToken.None, out var resultCompilation, out _ ) )
             {
-                testResult.ResultCompilation = resultCompilation;
-                var syntaxRoot = resultCompilation.SyntaxTrees.First().GetRoot();
+                testResult.OutputCompilation = resultCompilation;
 
                 if ( testInput.Options.IncludeFinalDiagnostics.GetValueOrDefault() )
                 {
                     testResult.Report( resultCompilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
                 }
-
-                testResult.SetTransformedTarget( syntaxRoot );
+                
+                testResult.SetTransformedCompilation( resultCompilation );
             }
             else
             {
                 testResult.SetFailed( "CompileTimeAspectPipeline.TryExecute failed." );
             }
 
-            if ( testInput.Options.WriteFormattedHtml )
+            if ( testInput.Options.WriteFormattedHtml.GetValueOrDefault() )
             {
-                var htmlPath = Path.Combine(
-                    this.ProjectDirectory!,
-                    "obj",
-                    "highlighted",
-                    Path.GetDirectoryName( testInput.RelativePath ) ?? "",
-                    Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.Html );
-
-                var htmlDirectory = Path.GetDirectoryName( htmlPath );
-
-                if ( !Directory.Exists( htmlDirectory ) )
+                foreach ( var syntaxTree in testResult.SyntaxTrees )
                 {
-                    Directory.CreateDirectory( htmlDirectory );
+                    this.WriteHtml( testInput, syntaxTree );
                 }
-
-                this.Logger?.WriteLine( "HTML output file: " + htmlPath );
-
-                var sourceText = testResult.TemplateDocument!.GetTextAsync().Result;
-                var classifier = new TextSpanClassifier( sourceText, detectRegion: true );
-                classifier.Visit( testResult.AnnotatedTemplateSyntax );
-
-                using var textWriter = File.CreateText( htmlPath );
-                textWriter.Write( "<pre><code class=\"lang-csharp\">" );
-
-                var i = 0;
-
-                foreach ( var classifiedSpan in classifier.ClassifiedTextSpans )
-                {
-                    // Write the text between the previous span and the current one.
-                    if ( i < classifiedSpan.Span.Start )
-                    {
-                        var textBefore = sourceText.GetSubText( new TextSpan( i, classifiedSpan.Span.Start - i ) ).ToString();
-                        textWriter.Write( textBefore );
-                    }
-
-                    var spanText = sourceText.GetSubText( classifiedSpan.Span ).ToString();
-
-                    if ( classifiedSpan.Classification != TextSpanClassification.Excluded )
-                    {
-                        textWriter.Write( $"<span class='caravelaClassification_{classifiedSpan.Classification}'" );
-
-                        if ( testInput.Options.AddHtmlTitles )
-                        {
-                            var title = classifiedSpan.Classification switch
-                            {
-                                TextSpanClassification.Dynamic => "Dynamic member",
-                                TextSpanClassification.CompileTime => "Compile-time code",
-                                TextSpanClassification.RunTime => "Run-time code",
-                                TextSpanClassification.TemplateKeyword => "Special member",
-                                TextSpanClassification.CompileTimeVariable => "Compile-time variable",
-                                _ => null
-                            };
-
-                            if ( title != null )
-                            {
-                                textWriter.Write( $" title='{title}'" );
-                            }
-                        }
-
-                        textWriter.Write( ">" );
-                        textWriter.Write( WebUtility.HtmlEncode( spanText ) );
-                        textWriter.Write( "</span>" );
-                    }
-
-                    i = classifiedSpan.Span.End;
-                }
-
-                // Write the remaining text.
-                if ( i < sourceText.Length )
-                {
-                    textWriter.Write( sourceText.GetSubText( i ) );
-                }
-
-                textWriter.WriteLine( "</code></pre>" );
             }
 
             return testResult;
+        }
+
+        private void WriteHtml( TestInput testInput, TestSyntaxTree testSyntaxTree )
+        {
+            var htmlPath = Path.Combine(
+                this.ProjectDirectory!,
+                "obj",
+                "highlighted",
+                Path.GetDirectoryName( testInput.RelativePath ) ?? "",
+                Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.Html );
+
+            var htmlDirectory = Path.GetDirectoryName( htmlPath );
+
+            if (!Directory.Exists( htmlDirectory ))
+            {
+                Directory.CreateDirectory( htmlDirectory );
+            }
+
+            this.Logger?.WriteLine( "HTML output file: " + htmlPath );
+
+            var sourceText = testSyntaxTree.InputDocument.GetTextAsync().Result; 
+            var classifier = new TextSpanClassifier( sourceText, detectRegion: true );
+            classifier.Visit( testSyntaxTree.AnnotatedSyntaxRoot );
+
+            using var textWriter = File.CreateText( htmlPath );
+            textWriter.Write( "<pre><code class=\"lang-csharp\">" );
+
+            var i = 0;
+
+            foreach (var classifiedSpan in classifier.ClassifiedTextSpans)
+            {
+                // Write the text between the previous span and the current one.
+                if (i < classifiedSpan.Span.Start)
+                {
+                    var textBefore = sourceText.GetSubText( new TextSpan( i, classifiedSpan.Span.Start - i ) ).ToString();
+                    textWriter.Write( HtmlEncode( textBefore ) );
+                }
+
+                var spanText = sourceText.GetSubText( classifiedSpan.Span ).ToString();
+
+                if (classifiedSpan.Classification != TextSpanClassification.Excluded)
+                {
+                    textWriter.Write( $"<span class='caravelaClassification_{classifiedSpan.Classification}'" );
+
+                    if (testInput.Options.AddHtmlTitles.GetValueOrDefault())
+                    {
+                        var title = classifiedSpan.Classification switch
+                        {
+                            TextSpanClassification.Dynamic => "Dynamic member",
+                            TextSpanClassification.CompileTime => "Compile-time code",
+                            TextSpanClassification.RunTime => "Run-time code",
+                            TextSpanClassification.TemplateKeyword => "Special member",
+                            TextSpanClassification.CompileTimeVariable => "Compile-time variable",
+                            _ => null
+                        };
+
+                        if (title != null)
+                        {
+                            textWriter.Write( $" title='{title}'" );
+                        }
+                    }
+
+                    textWriter.Write( ">" );
+                    textWriter.Write( HtmlEncode( spanText ) );
+                    textWriter.Write( "</span>" );
+                }
+
+                i = classifiedSpan.Span.End;
+            }
+
+            // Write the remaining text.
+            if (i < sourceText.Length)
+            {
+                textWriter.Write( HtmlEncode( sourceText.GetSubText( i ).ToString() ) );
+            }
+
+            textWriter.WriteLine( "</code></pre>" );
+        }
+
+        private static string HtmlEncode( string s )
+        {
+            var stringBuilder = new StringBuilder( s.Length );
+
+            foreach ( var c in s )
+            {
+                switch ( c )
+                {
+                    case '<':
+                        stringBuilder.Append( "&lt;" );
+
+                        break;
+
+                    case '>':
+                        stringBuilder.Append( "&gt;" );
+
+                        break;
+
+                    case '&':
+                        stringBuilder.Append( "&amp;" );
+
+                        break;
+
+                    default:
+                        stringBuilder.Append( c );
+
+                        break;
+                }
+            }
+
+            return stringBuilder.ToString();
         }
 
         // We don't want the base class to report errors in the input compilation because the pipeline does.

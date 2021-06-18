@@ -40,6 +40,18 @@ namespace Caravela.TestFramework
             {
                 this.Options.ApplySourceDirectives( sourceCode );
             }
+
+            if ( fullPath != null )
+            {
+                // Find companion files.
+                foreach ( var companionFile in Directory.EnumerateFiles( Path.GetDirectoryName( fullPath ), Path.GetFileNameWithoutExtension( fullPath ) + ".*.cs" ) )
+                {
+                    if ( !companionFile.EndsWith( ".t.cs", StringComparison.OrdinalIgnoreCase ) )
+                    {
+                        this.Options.IncludedFiles.Add( companionFile );
+                    }
+                }
+            }
         }
 
         private static string? FindProjectDirectory( string? directory )

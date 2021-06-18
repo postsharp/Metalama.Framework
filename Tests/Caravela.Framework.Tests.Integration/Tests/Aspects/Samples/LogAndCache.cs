@@ -52,7 +52,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogA
         {
             // Builds the caching string.
             var stringBuilder = meta.CompileTime(new StringBuilder());
-            stringBuilder.Append(meta.Type.ToString());
+            stringBuilder.Append(meta.NamedType.ToString());
             stringBuilder.Append('.');
             stringBuilder.Append(meta.Method.Name);
             stringBuilder.Append('(');

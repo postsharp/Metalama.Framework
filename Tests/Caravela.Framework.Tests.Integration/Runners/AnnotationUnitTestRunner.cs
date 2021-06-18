@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
@@ -39,12 +40,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 return result;
             }
 
-            var templateSyntaxRoot = result.TemplateDocument!.GetSyntaxRootAsync().Result!;
-            var templateSemanticModel = result.TemplateDocument.GetSemanticModelAsync().Result!;
+            var templateDocument = result.SyntaxTrees.Single().InputDocument;
+            var templateSyntaxRoot = templateDocument.GetSyntaxRootAsync().Result!;
+            var templateSemanticModel = templateDocument.GetSemanticModelAsync().Result!;
 
             DiagnosticList diagnostics = new();
 
-            TemplateCompiler templateCompiler = new( this.ServiceProvider, result.InitialCompilation! );
+            TemplateCompiler templateCompiler = new( this.ServiceProvider, result.InputCompilation! );
 
             var templateCompilerSuccess = templateCompiler.TryAnnotate(
                 templateSyntaxRoot,
@@ -61,7 +63,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 return result;
             }
 
-            result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
+            result.SyntaxTrees.Single().AnnotatedSyntaxRoot = annotatedTemplateSyntax;
 
             return result;
         }
@@ -70,7 +72,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
         {
             // Annotation shouldn't do any code transformations.
             // Otherwise, highlighted spans don't match the actual code.
-            Assert.Equal( testResult.TemplateDocument!.GetSyntaxRootAsync().Result!.ToString(), testResult.AnnotatedTemplateSyntax !.ToString() );
+            var testSyntaxTree = testResult.SyntaxTrees.Single();
+            Assert.Equal( testSyntaxTree.InputSyntaxTree.GetRoot().ToString(), testSyntaxTree.AnnotatedSyntaxRoot !.ToString() );
         }
     }
 }

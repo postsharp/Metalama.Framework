@@ -27,5 +27,12 @@ namespace Caravela.Framework.Aspects
         /// Gets the aspect type.
         /// </summary>
         IAspectClass AspectClass { get; }
+        
+        /// <summary>
+        /// Gets a value indicating whether the current aspect instance has been skipped. This value is <c>true</c> if
+        /// the aspect evaluation resulted in an error or if the <see cref="IAspect{T}.BuildAspect"/> method invoked
+        /// <see cref="IAspectBuilder.SkipAspect"/>.
+        /// </summary>
+        bool IsSkipped { get; }
     }
 }

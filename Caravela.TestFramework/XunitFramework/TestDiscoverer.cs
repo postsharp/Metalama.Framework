@@ -110,8 +110,18 @@ namespace Caravela.TestFramework.XunitFramework
 
                 foreach ( var testPath in Directory.EnumerateFiles( directory, "*.cs" ) )
                 {
-                    if ( Path.GetFileName( testPath ).Equals( runnerFileName, StringComparison.OrdinalIgnoreCase )
-                         || testPath.EndsWith( FileExtensions.TransformedCode, StringComparison.OrdinalIgnoreCase ) )
+                    var fileName = Path.GetFileName( testPath );
+                    var firstDotPosition = fileName.IndexOf( '.' );
+                    var extension = fileName.Substring( firstDotPosition );
+
+                    if ( extension != ".cs" )
+                    {
+                        // Skipping.
+                        
+                        continue;
+                    }
+
+                    if ( Path.GetFileName( testPath ).Equals( runnerFileName, StringComparison.OrdinalIgnoreCase ) )
                     {
                         continue;
                     }

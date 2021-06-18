@@ -14,14 +14,58 @@ using System.Text.RegularExpressions;
 
 namespace Caravela.TestFramework
 {
+    public sealed class TestSyntaxTree
+    {
+        public Document InputDocument { get; }
+        
+        public SyntaxTree InputSyntaxTree { get; }
+        
+        public SyntaxNode? OutputRunTimeSyntaxRoot { get; private set; }
+        
+        public SourceText? OutputRunTimeSourceText { get; private set; }
+        
+        public SyntaxNode? OutputCompileTimeSyntaxRoot { get; private set; }
+        
+        public SourceText? OutputCompileTimeSourceText { get; private set; }
+        
+        public SyntaxNode? AnnotatedSyntaxRoot { get; internal set; }
+
+        public string OutputCompileTimePath { get; private  set; }
+
+        internal void SetCompileTimeCode( SyntaxNode? syntaxNode, string transformedTemplatePath )
+        {
+            if ( syntaxNode != null )
+            {
+                var formattedOutput = Formatter.Format( syntaxNode, this.InputDocument.Project.Solution.Workspace );
+                this.OutputCompileTimeSyntaxRoot = syntaxNode;
+                this.OutputCompileTimeSourceText = formattedOutput.GetText();
+                this.OutputCompileTimePath = transformedTemplatePath;
+            }
+        }
+
+        internal void SetRunTimeCode(SyntaxNode syntaxNode )
+        {
+            var formattedOutput = Formatter.Format( syntaxNode, this.InputDocument.Project.Solution.Workspace );
+            this.OutputRunTimeSyntaxRoot = syntaxNode;
+            this.OutputRunTimeSourceText = formattedOutput.GetText();
+        }
+
+        internal TestSyntaxTree( Document document )
+        {
+            this.InputDocument = document;
+            this.InputSyntaxTree = document.GetSyntaxTreeAsync().Result!;
+        }
+    }
+    
     /// <summary>
     /// Represents the result of a test run.
     /// </summary>
     public class TestResult : IDiagnosticAdder
     {
-        public TestInput? Input { get; set; }
+        public TestInput? TestInput { get; set; }
 
         private readonly List<Diagnostic> _diagnostics = new();
+        private readonly List<TestSyntaxTree> _syntaxTrees = new();
         private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
 
         public void Report( Diagnostic diagnostic )
@@ -34,6 +78,8 @@ namespace Caravela.TestFramework
         /// </summary>
         public IReadOnlyList<Diagnostic> Diagnostics => this._diagnostics;
 
+        public IReadOnlyList<TestSyntaxTree> SyntaxTrees => this._syntaxTrees;
+
         /// <summary>
         /// Gets the primary error message emitted during test run.
         /// </summary>
@@ -45,41 +91,20 @@ namespace Caravela.TestFramework
         public Project? Project { get; set; }
 
         /// <summary>
-        /// Gets or sets the source code document of the template.
-        /// </summary>
-        public Document? TemplateDocument { get; set; }
-
-        /// <summary>
         /// Gets or sets the initial compilation of the test project.
         /// </summary>
-        public Compilation? InitialCompilation { get; set; }
+        public Compilation? InputCompilation { get; set; }
 
         /// <summary>
         /// Gets or sets the result compilation of the test project.
         /// </summary>
-        public Compilation? ResultCompilation { get; set; }
+        public Compilation? OutputCompilation { get; set; }
 
-        /// <summary>
-        /// Gets or sets the root <see cref="SyntaxNode"/> of the template annotated with template annotations from <see cref="AnnotationExtensions"/>.
-        /// </summary>
-        internal SyntaxNode? AnnotatedTemplateSyntax { get; set; }
 
-        /// <summary>
-        /// Gets the root <see cref="SyntaxNode"/> of the transformed syntax tree of the template.
-        /// </summary>
-        public SyntaxNode? TransformedTemplateSyntax { get; internal set; }
-
-        public string? TransformedTemplatePath { get; internal set; }
-
-        /// <summary>
-        /// Gets the root <see cref="SyntaxNode"/> of the transformed syntax tree of the target declaration.
-        /// </summary>
-        public SyntaxNode? TransformedTargetSyntax { get; private set; }
-
-        /// <summary>
-        /// Gets the transformed <see cref="SourceText"/> of the target declaration.
-        /// </summary>
-        public SourceText? TransformedTargetSourceText { get; private set; }
+        public void AddInputDocument( Document document )
+        {
+            this._syntaxTrees.Add( new TestSyntaxTree( document ) );
+        }
 
         private static string CleanMessage( string text )
         {
@@ -104,10 +129,10 @@ namespace Caravela.TestFramework
             return string.Join( Environment.NewLine, lines );
         }
 
-        internal void SetTransformedTarget( SyntaxNode syntaxNode )
+        internal void SetTransformedCompilation( Compilation runTimeCompilation )
         {
-            if ( this.InitialCompilation == null ||
-                 this.Input == null ||
+            if ( this.InputCompilation == null ||
+                 this.TestInput == null ||
                  this.Project == null )
             {
                 throw new InvalidOperationException( "The object has not bee properly initialized." );
@@ -120,46 +145,55 @@ namespace Caravela.TestFramework
                 if ( syntaxTree == null )
                 {
                     // If we don't have the a SyntaxTree, find it from the input compilation.
-                    syntaxTree = this.InitialCompilation.SyntaxTrees.SingleOrDefault( t => t.FilePath == diagnostic.Location.GetLineSpan().Path );
+                    syntaxTree = this.InputCompilation.SyntaxTrees.SingleOrDefault( t => t.FilePath == diagnostic.Location.GetLineSpan().Path );
                 }
 
                 return syntaxTree?.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
             }
 
-            // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
-            // passed to this method.
-            var outputNodes =
-                syntaxNode
-                    .DescendantNodesAndSelf( _ => true )
-                    .OfType<MemberDeclarationSyntax>()
-                    .Where( m => m.GetLeadingTrivia().ToString().Contains( "<target>" ) )
-                    .ToList();
-
-            var outputNode = outputNodes.FirstOrDefault() ?? syntaxNode;
-
-            // Convert diagnostics into comments in the code.
-            var comments =
-                this.Diagnostics
-                    .Where(
-                        d => this.Input.Options.IncludeAllSeverities.GetValueOrDefault()
-                             || d.Severity >= DiagnosticSeverity.Warning )
-                    .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
-                    .OrderByDescending( s => s )
-                    .Select( SyntaxFactory.Comment )
-                    .ToList();
-
-            if ( comments.Any() )
+            var i = -1;
+            
+            foreach ( var syntaxTree in runTimeCompilation.SyntaxTrees )
             {
-                comments.Add( SyntaxFactory.LineFeed );
+                i++;
+                
+                var syntaxNode = syntaxTree.GetRoot();
+
+                // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
+                // passed to this method.
+                var outputNodes =
+                    syntaxNode
+                        .DescendantNodesAndSelf( _ => true )
+                        .OfType<MemberDeclarationSyntax>()
+                        .Where( m => m.GetLeadingTrivia().ToString().Contains( "<target>" ) )
+                        .ToList();
+
+                var outputNode = outputNodes.FirstOrDefault() ?? syntaxNode;
+
+                // Convert diagnostics into comments in the code.
+                if ( i == 0 )
+                {
+                    var comments =
+                        this.Diagnostics
+                            .Where(
+                                d => this.TestInput.Options.IncludeAllSeverities.GetValueOrDefault()
+                                     || d.Severity >= DiagnosticSeverity.Warning )
+                            .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
+                            .OrderByDescending( s => s )
+                            .Select( SyntaxFactory.Comment )
+                            .ToList();
+
+                    if ( comments.Any() )
+                    {
+                        comments.Add( SyntaxFactory.LineFeed );
+                        outputNode = outputNode.WithLeadingTrivia( comments );
+                    }
+                }
+
+                // Format the output code.
+                this.SyntaxTrees[i].SetRunTimeCode( outputNode );
+                
             }
-
-            // Format the output code.
-
-            var outputNodeWithComments = outputNode.WithLeadingTrivia( comments );
-            var formattedOutput = Formatter.Format( outputNodeWithComments, this.Project.Solution.Workspace );
-
-            this.TransformedTargetSyntax = outputNodeWithComments;
-            this.TransformedTargetSourceText = formattedOutput.GetText();
         }
 
         /// <summary>
@@ -187,9 +221,12 @@ namespace Caravela.TestFramework
                 SyntaxFactory.ExpressionStatement( SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) ) )
                     .WithSemicolonToken( SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
 
-            this.SetTransformedTarget(
-                emptyStatement
-                    .WithLeadingTrivia( SyntaxFactory.Comment( $"// {reason} \n" ) ) );
+            this.SyntaxTrees.First()
+                .SetRunTimeCode(
+                    emptyStatement
+                        .WithLeadingTrivia( SyntaxFactory.Comment( $"// {reason} \n" ) ) );
+
         }
+
     }
 }

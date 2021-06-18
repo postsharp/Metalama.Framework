@@ -32,14 +32,14 @@ namespace Caravela.Framework.Tests.Integration.Runners
             using var domain = new UnloadableCompileTimeDomain();
 
             var pipeline = new DesignTimeAspectPipeline( buildOptions, domain, true );
-            var pipelineResult = pipeline.Execute( PartialCompilation.CreateComplete( testResult.InitialCompilation! ), CancellationToken.None );
+            var pipelineResult = pipeline.Execute( PartialCompilation.CreateComplete( testResult.InputCompilation! ), CancellationToken.None );
 
             testResult.Report( pipelineResult.Diagnostics.ReportedDiagnostics );
 
             if ( pipelineResult.Success )
             {
                 var introducedSyntaxTree = pipelineResult.IntroducedSyntaxTrees.SingleOrDefault();
-                testResult.SetTransformedTarget( introducedSyntaxTree?.GeneratedSyntaxTree.GetRoot() ?? SyntaxFactoryEx.EmptyStatement );
+                testResult.SyntaxTrees.Single().SetRunTimeCode( introducedSyntaxTree?.GeneratedSyntaxTree.GetRoot() ?? SyntaxFactoryEx.EmptyStatement );
             }
             else
             {

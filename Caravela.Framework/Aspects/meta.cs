@@ -111,7 +111,7 @@ namespace Caravela.Framework.Aspects
         /// Gets the target type of the advice. If the advice is applied to a member, this property returns the declaring
         /// type of the member.
         /// </summary>
-        public static INamedType Type => CurrentContext.Type;
+        public static INamedType NamedType => CurrentContext.Type;
 
         /// <summary>
         /// Gets the code model of the whole compilation.

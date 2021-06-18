@@ -13,7 +13,6 @@ namespace Caravela.TestFramework
         private class Spy : ICompileTimeCompilationBuilderSpy, ITemplateCompilerSpy
         {
             private readonly TestResult _testResult;
-            private SyntaxNode? _annotatedSyntaxRoot;
 
             public Spy( TestResult testResult )
             {
@@ -22,18 +21,23 @@ namespace Caravela.TestFramework
 
             public void ReportCompileTimeCompilation( Compilation compilation )
             {
-                this._testResult.TransformedTemplateSyntax = compilation.SyntaxTrees.First().GetRoot();
+                this._testResult.SetTransformedCompilation( compilation );
             }
 
             public void ReportAnnotatedSyntaxNode( SyntaxNode sourceSyntaxRoot, SyntaxNode annotatedSyntaxRoot )
             {
-                if ( this._annotatedSyntaxRoot == null )
+                var originalSyntaxTree =
+                    this._testResult.SyntaxTrees
+                        .Select( ( item, index ) => (item, index) )
+                        .Single( x => x.item.InputSyntaxTree == sourceSyntaxRoot.SyntaxTree )
+                        .item;
+                
+                if ( originalSyntaxTree.AnnotatedSyntaxRoot == null )
                 {
-                    this._annotatedSyntaxRoot = sourceSyntaxRoot.SyntaxTree.GetRoot();
+                    originalSyntaxTree.AnnotatedSyntaxRoot = annotatedSyntaxRoot.SyntaxTree.GetRoot(  );
                 }
 
-                this._annotatedSyntaxRoot = this._annotatedSyntaxRoot.ReplaceNode( sourceSyntaxRoot, annotatedSyntaxRoot );
-                this._testResult.AnnotatedTemplateSyntax = this._annotatedSyntaxRoot;
+                originalSyntaxTree.AnnotatedSyntaxRoot = originalSyntaxTree.AnnotatedSyntaxRoot.ReplaceNode( sourceSyntaxRoot, annotatedSyntaxRoot );
             }
         }
     }
