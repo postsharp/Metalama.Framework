@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
+#pragma warning disable CS0169
+
 namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.ImportService
 {
     class ImportServiceAspect : OverrideFieldOrPropertyAspect
