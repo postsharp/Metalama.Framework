@@ -49,6 +49,8 @@ namespace Caravela.TestFramework
         public bool? WriteFormattedHtml { get; set; }
 
         public bool? AddHtmlTitles { get; set; }
+        
+        public bool? ReportErrorMessage { get; set; }
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -67,6 +69,8 @@ namespace Caravela.TestFramework
             this.WriteFormattedHtml ??= directoryOptions.WriteFormattedHtml;
 
             this.AddHtmlTitles ??= directoryOptions.AddHtmlTitles;
+
+            this.ReportErrorMessage ??= directoryOptions.ReportErrorMessage;
             
             this.IncludedFiles.AddRange( directoryOptions.IncludedFiles );
             

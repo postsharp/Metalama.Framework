@@ -29,12 +29,12 @@ namespace Caravela.TestFramework
                 var originalSyntaxTree =
                     this._testResult.SyntaxTrees
                         .Select( ( item, index ) => (item, index) )
-                        .Single( x => x.item.InputSyntaxTree == sourceSyntaxRoot.SyntaxTree )
+                        .Single( x => x.item.InputSyntaxTree.FilePath == sourceSyntaxRoot.SyntaxTree.FilePath )
                         .item;
                 
                 if ( originalSyntaxTree.AnnotatedSyntaxRoot == null )
                 {
-                    originalSyntaxTree.AnnotatedSyntaxRoot = annotatedSyntaxRoot.SyntaxTree.GetRoot(  );
+                    originalSyntaxTree.AnnotatedSyntaxRoot = annotatedSyntaxRoot.SyntaxTree.GetRoot();
                 }
 
                 originalSyntaxTree.AnnotatedSyntaxRoot = originalSyntaxTree.AnnotatedSyntaxRoot.ReplaceNode( sourceSyntaxRoot, annotatedSyntaxRoot );

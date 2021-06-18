@@ -44,11 +44,13 @@ namespace Caravela.TestFramework
             if ( fullPath != null )
             {
                 // Find companion files.
-                foreach ( var companionFile in Directory.EnumerateFiles( Path.GetDirectoryName( fullPath ), Path.GetFileNameWithoutExtension( fullPath ) + ".*.cs" ) )
+                var directory = Path.GetDirectoryName( fullPath )!;
+
+                foreach ( var companionFile in Directory.EnumerateFiles( directory, Path.GetFileNameWithoutExtension( fullPath ) + ".*.cs" ) )
                 {
                     if ( !companionFile.EndsWith( ".t.cs", StringComparison.OrdinalIgnoreCase ) )
                     {
-                        this.Options.IncludedFiles.Add( companionFile );
+                        this.Options.IncludedFiles.Add( Path.GetRelativePath( directory, companionFile ) );
                     }
                 }
             }

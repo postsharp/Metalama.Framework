@@ -27,6 +27,8 @@ namespace Caravela.TestFramework
 
         public string OutputCompileTimePath { get; private set; }
 
+        public string? OutputHtmlPath { get; set; }
+
         internal void SetCompileTimeCode( SyntaxNode? syntaxNode, string transformedTemplatePath )
         {
             if ( syntaxNode != null )

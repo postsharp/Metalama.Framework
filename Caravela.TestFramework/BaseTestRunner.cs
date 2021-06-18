@@ -1,7 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
@@ -60,7 +62,8 @@ namespace Caravela.TestFramework
         {
             var testResult = this.CreateTestResult();
 
-            // Source.
+            // Source. Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
+            // which is more difficult to test.
             var project = this.CreateProject().WithParseOptions( CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER" ) );
             var sourceFileName = testInput.TestName + ".cs";
             var mainDocument = project.AddDocument( sourceFileName, SourceText.From( testInput.SourceCode, Encoding.UTF8 ), filePath: sourceFileName );
@@ -78,15 +81,16 @@ namespace Caravela.TestFramework
 
             foreach ( var includedFile in testInput.Options.IncludedFiles )
             {
-                var includedFullPath = Path.Combine( Path.GetDirectoryName( testInput.FullPath )!, includedFile );
+                var includedFullPath = Path.GetFullPath( Path.Combine( Path.GetDirectoryName( testInput.FullPath )!, includedFile ) );
                 var includedText = File.ReadAllText( includedFullPath );
+                var includedFileName = Path.GetFileName( includedFullPath );
 
-                var includedDocument = project.AddDocument( includedFile, SourceText.From( includedText, Encoding.UTF8 ), filePath: includedFullPath );
+                var includedDocument = project.AddDocument( includedFileName, SourceText.From( includedText, Encoding.UTF8 ), filePath: includedFileName );
                 project = mainDocument.Project;
 
                 testResult.AddInputDocument( includedDocument );
 
-                var includedSyntaxTree = CSharpSyntaxTree.ParseText( includedText, null, includedFullPath );
+                var includedSyntaxTree = includedDocument.GetSyntaxTreeAsync().Result;
                 initialCompilation = initialCompilation.AddSyntaxTrees( includedSyntaxTree );
             }
 
@@ -152,7 +156,9 @@ namespace Caravela.TestFramework
                 Path.GetDirectoryName( sourceAbsolutePath )!,
                 Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.TransformedCode );
 
-            var actualTransformedSourceText = NormalizeTestOutput( testResult.GetConsolidatedTestOutput() );
+            var consolidatedTestOutput = testResult.GetConsolidatedTestOutput();
+            var actualTransformedNonNormalizedText = consolidatedTestOutput.ToFullString();
+            var actualTransformedNormalizedSourceText = NormalizeTestOutput( consolidatedTestOutput );
 
             // If the expectation file does not exist, create it with some placeholder content.
             if ( !File.Exists( expectedTransformedPath ) )
@@ -179,16 +185,16 @@ namespace Caravela.TestFramework
             var storedTransformedSourceText =
                 File.Exists( actualTransformedPath ) ? NormalizeTestOutput( File.ReadAllText( actualTransformedPath ) ) : null;
 
-            if ( expectedTransformedSourceText == actualTransformedSourceText
+            if ( expectedTransformedSourceText == actualTransformedNormalizedSourceText
                  && storedTransformedSourceText != expectedNonNormalizedSourceText )
             {
                 // Update the obj/transformed file to the non-normalized expected text, so that future call to update_transformed.txt
                 // does not overwrite any whitespace change.
                 File.WriteAllText( actualTransformedPath, expectedNonNormalizedSourceText );
             }
-            else if ( storedTransformedSourceText == null || storedTransformedSourceText != actualTransformedSourceText )
+            else if ( storedTransformedSourceText == null || storedTransformedSourceText != actualTransformedNormalizedSourceText )
             {
-                File.WriteAllText( actualTransformedPath, actualTransformedSourceText );
+                File.WriteAllText( actualTransformedPath, actualTransformedNonNormalizedText );
             }
 
             if ( this.Logger != null )
@@ -198,7 +204,7 @@ namespace Caravela.TestFramework
                 logger.WriteLine( "Actual output file: " + actualTransformedPath );
                 logger.WriteLine( "" );
                 logger.WriteLine( "=== ACTUAL OUTPUT ===" );
-                logger.WriteLine( actualTransformedSourceText );
+                logger.WriteLine( actualTransformedNonNormalizedText );
                 logger.WriteLine( "=====================" );
 
                 // Write all diagnostics to the logger.
@@ -208,7 +214,7 @@ namespace Caravela.TestFramework
                 }
             }
 
-            Assert.Equal( expectedTransformedSourceText, actualTransformedSourceText );
+            Assert.Equal( expectedTransformedSourceText, actualTransformedNormalizedSourceText );
         }
 
         protected virtual bool ReportInvalidInputCompilation => true;
@@ -233,5 +239,132 @@ namespace Caravela.TestFramework
 
             return project;
         }
+
+        protected void WriteHtml( TestInput testInput, TestResult testResult )
+        {
+            foreach ( var syntaxTree in testResult.SyntaxTrees )
+            {
+                this.WriteHtml( testInput, syntaxTree );
+            }
+        }
+
+        protected virtual void WriteHtmlProlog( TextWriter writer ) { }
+        protected virtual void WriteHtmlEpilogue( TextWriter writer ) { }
+
+        private void WriteHtml( TestInput testInput, TestSyntaxTree testSyntaxTree )
+        {
+            var htmlPath = Path.Combine(
+                this.ProjectDirectory!,
+                "obj",
+                "highlighted",
+                Path.GetDirectoryName( testInput.RelativePath ) ?? "",
+                Path.GetFileNameWithoutExtension( testSyntaxTree.InputDocument.FilePath ) + FileExtensions.Html );
+
+            testSyntaxTree.OutputHtmlPath = htmlPath;
+
+            var htmlDirectory = Path.GetDirectoryName( htmlPath );
+
+            if ( !Directory.Exists( htmlDirectory ) )
+            {
+                Directory.CreateDirectory( htmlDirectory );
+            }
+
+            this.Logger?.WriteLine( "HTML output file: " + htmlPath );
+
+            var sourceText = testSyntaxTree.InputDocument.GetTextAsync().Result;
+            var classifier = new TextSpanClassifier( sourceText, detectRegion: true );
+            classifier.Visit( testSyntaxTree.AnnotatedSyntaxRoot );
+
+            using var textWriter = File.CreateText( htmlPath );
+            
+            this.WriteHtmlProlog( textWriter );
+            textWriter.Write( "<pre><code class=\"lang-csharp\">" );
+
+            var i = 0;
+
+            foreach ( var classifiedSpan in classifier.ClassifiedTextSpans )
+            {
+                // Write the text between the previous span and the current one.
+                if ( i < classifiedSpan.Span.Start )
+                {
+                    var textBefore = sourceText.GetSubText( new TextSpan( i, classifiedSpan.Span.Start - i ) ).ToString();
+                    textWriter.Write( HtmlEncode( textBefore ) );
+                }
+
+                var spanText = sourceText.GetSubText( classifiedSpan.Span ).ToString();
+
+                if ( classifiedSpan.Classification != TextSpanClassification.Excluded )
+                {
+                    textWriter.Write( $"<span class='caravelaClassification_{classifiedSpan.Classification}'" );
+
+                    if ( testInput.Options.AddHtmlTitles.GetValueOrDefault() )
+                    {
+                        var title = classifiedSpan.Classification switch
+                        {
+                            TextSpanClassification.Dynamic => "Dynamic member",
+                            TextSpanClassification.CompileTime => "Compile-time code",
+                            TextSpanClassification.RunTime => "Run-time code",
+                            TextSpanClassification.TemplateKeyword => "Special member",
+                            TextSpanClassification.CompileTimeVariable => "Compile-time variable",
+                            _ => null
+                        };
+
+                        if ( title != null )
+                        {
+                            textWriter.Write( $" title='{title}'" );
+                        }
+                    }
+
+                    textWriter.Write( ">" );
+                    textWriter.Write( HtmlEncode( spanText ) );
+                    textWriter.Write( "</span>" );
+                }
+
+                i = classifiedSpan.Span.End;
+            }
+
+            // Write the remaining text.
+            if ( i < sourceText.Length )
+            {
+                textWriter.Write( HtmlEncode( sourceText.GetSubText( i ).ToString() ) );
+            }
+
+            textWriter.WriteLine( "</code></pre>" );
+            this.WriteHtmlEpilogue( textWriter );
+        }
+
+        private static string HtmlEncode( string s )
+        {
+            var stringBuilder = new StringBuilder( s.Length );
+
+            foreach ( var c in s )
+            {
+                switch ( c )
+                {
+                    case '<':
+                        stringBuilder.Append( "&lt;" );
+
+                        break;
+
+                    case '>':
+                        stringBuilder.Append( "&gt;" );
+
+                        break;
+
+                    case '&':
+                        stringBuilder.Append( "&amp;" );
+
+                        break;
+
+                    default:
+                        stringBuilder.Append( c );
+
+                        break;
+                }
+            }
+
+            return stringBuilder.ToString();
+        }
+
     }
 }

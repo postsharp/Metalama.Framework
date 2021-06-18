@@ -125,14 +125,24 @@ namespace Caravela.TestFramework
 
         public CompilationUnitSyntax GetConsolidatedTestOutput()
         {
+            if ( this.TestInput == null )
+            {
+                throw new InvalidOperationException();
+            }
+            
             var consolidatedCompilationUnit = SyntaxFactory.CompilationUnit();
 
             // Adding the syntax.
             if ( this.Success && this.SyntaxTrees.Any() )
             {
                 var syntaxTree = this.SyntaxTrees.First();
+
+                if ( syntaxTree.OutputRunTimeSyntaxRoot == null )
+                {
+                    throw new InvalidOperationException();
+                }
             
-                var syntaxNode = syntaxTree.OutputRunTimeSyntaxRoot;
+                var syntaxNode = syntaxTree.OutputRunTimeSyntaxRoot!;
 
                 // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
                 // passed to this method.
@@ -176,9 +186,9 @@ namespace Caravela.TestFramework
             // Adding the diagnostics as trivia.
             List<SyntaxTrivia> comments = new();
 
-            if ( !this.Success )
+            if ( !this.Success && this.TestInput!.Options.ReportErrorMessage.GetValueOrDefault() )
             {
-                comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} " ) );
+                comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
             }
 
             comments.AddRange(
@@ -186,7 +196,7 @@ namespace Caravela.TestFramework
                     .Where(
                         d => this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
                              || d.Severity >= DiagnosticSeverity.Warning )
-                    .Select( d => $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`" )
+                    .Select( d => $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
                     .OrderByDescending( s => s )
                     .Select( SyntaxFactory.Comment )
                     .ToList() );
