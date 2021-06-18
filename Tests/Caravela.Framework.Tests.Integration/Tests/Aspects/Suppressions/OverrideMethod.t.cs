@@ -1,6 +1,4 @@
 // Warning CS0219 on `x`: `The variable 'x' is assigned but its value is never used`
-
-// <target>
 internal class TargetClass
 {
 #pragma warning disable CS0219
@@ -10,9 +8,8 @@ internal class TargetClass
         this.__Override__M2__By__Caravela_Framework_Tests_Integration_Aspects_Suppressions_IntroduceMethod_SuppressWarningAttribute(m);
     }
 #pragma warning restore CS0219
+
 #pragma warning disable CS0219
-
-
     private void __Override__M2__By__Caravela_Framework_Tests_Integration_Aspects_Suppressions_IntroduceMethod_SuppressWarningAttribute(global::System.String m)
     {
         int a = 0;

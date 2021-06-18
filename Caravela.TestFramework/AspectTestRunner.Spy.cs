@@ -21,7 +21,7 @@ namespace Caravela.TestFramework
 
             public void ReportCompileTimeCompilation( Compilation compilation )
             {
-                this._testResult.SetTransformedCompilation( compilation );
+                this._testResult.SetOutputCompilation( compilation );
             }
 
             public void ReportAnnotatedSyntaxNode( SyntaxNode sourceSyntaxRoot, SyntaxNode annotatedSyntaxRoot )

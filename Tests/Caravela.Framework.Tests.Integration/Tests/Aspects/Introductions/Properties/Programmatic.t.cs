@@ -1,9 +1,6 @@
-// <target>
 [Introduction]
 internal class TargetClass
 {
-
-
     public global::System.Int32 Property
     {
         get

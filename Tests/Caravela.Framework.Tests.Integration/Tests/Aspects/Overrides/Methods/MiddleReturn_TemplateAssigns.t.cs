@@ -1,4 +1,3 @@
-// <target>
 internal class TargetClass
 {
     [Override]
@@ -7,12 +6,11 @@ internal class TargetClass
         global::System.Console.WriteLine("Begin override.");
         global::Caravela.Framework.Aspects.__Void result;
         Console.WriteLine("Begin target.");
-
         if (x == 0)
             goto __aspect_return_1;
         Console.WriteLine("End target.");
-    __aspect_return_1:
-        ;
+        __aspect_return_1:
+            ;
         global::System.Console.WriteLine("End override.");
         return;
     }
@@ -23,7 +21,6 @@ internal class TargetClass
         global::System.Console.WriteLine("Begin override.");
         global::System.Int32 result;
         Console.WriteLine("Begin target.");
-
         if (x == 0)
         {
             result = 42;
@@ -33,8 +30,8 @@ internal class TargetClass
         Console.WriteLine("End target.");
         result = x;
         goto __aspect_return_1;
-    __aspect_return_1:
-        ;
+        __aspect_return_1:
+            ;
         global::System.Console.WriteLine("End override.");
         return (int)result;
     }

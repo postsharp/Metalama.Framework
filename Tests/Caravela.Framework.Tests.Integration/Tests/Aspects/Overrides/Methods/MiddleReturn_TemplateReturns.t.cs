@@ -1,4 +1,3 @@
-// <target>
 internal class TargetClass
 {
     [Override]
@@ -6,15 +5,14 @@ internal class TargetClass
     {
         global::System.Console.WriteLine("Override.");
         Console.WriteLine("Begin target.");
-
         if (x == 0)
         {
             goto __aspect_return_1;
         }
 
         Console.WriteLine("End target.");
-    __aspect_return_1:
-        ;
+        __aspect_return_1:
+            ;
         return;
     }
 
@@ -23,14 +21,12 @@ internal class TargetClass
     {
         global::System.Console.WriteLine("Override.");
         Console.WriteLine("Begin target.");
-
         if (x == 0)
         {
             return 42;
         }
 
         Console.WriteLine("End target.");
-
         return x;
     }
 }

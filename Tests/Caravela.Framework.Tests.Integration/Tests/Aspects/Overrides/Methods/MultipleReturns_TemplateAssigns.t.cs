@@ -1,4 +1,3 @@
-// <target>
 internal class TargetClass
 {
     [Override]
@@ -18,8 +17,8 @@ internal class TargetClass
 
         if (x > 0)
             goto __aspect_return_1;
-    __aspect_return_1:
-        ;
+        __aspect_return_1:
+            ;
         global::System.Console.WriteLine("End override.");
         return;
     }
@@ -48,8 +47,8 @@ internal class TargetClass
 
         result = 0;
         goto __aspect_return_1;
-    __aspect_return_1:
-        ;
+        __aspect_return_1:
+            ;
         global::System.Console.WriteLine("End override.");
         return (int)result;
     }

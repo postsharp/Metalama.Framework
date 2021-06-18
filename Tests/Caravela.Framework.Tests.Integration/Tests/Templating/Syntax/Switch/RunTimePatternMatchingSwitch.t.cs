@@ -1,5 +1,6 @@
+int Method(int a)
 {
-    var o = new object();
+    var o = new object ();
     switch (o)
     {
         case global::System.Collections.Generic.IEnumerable<global::System.Object> a_1 when global::System.Linq.Enumerable.Any(a_1):

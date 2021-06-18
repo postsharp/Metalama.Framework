@@ -1,10 +1,6 @@
-
-// <target>
 [Introduction]
 internal class TargetClass
 {
-
-
     public global::Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.DeclarativeRunTimeOnly.RunTimeOnlyClass? IntroducedProperty_Accessors
     {
         get
@@ -19,4 +15,3 @@ internal class TargetClass
         }
     }
 }
-

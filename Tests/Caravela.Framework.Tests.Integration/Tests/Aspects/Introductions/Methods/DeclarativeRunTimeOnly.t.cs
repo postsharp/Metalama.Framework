@@ -1,4 +1,3 @@
-// <target>
 [Introduction]
 internal class TargetClass
 {

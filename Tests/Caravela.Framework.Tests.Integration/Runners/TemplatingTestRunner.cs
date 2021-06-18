@@ -191,7 +191,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var driver = new TemplateDriver( null!, templateMethod, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InputCompilation );
-                var expansionContext = this.CreateTemplateExpansionContext( assembly, compilationModel, templateMethod );
+                var (expansionContext, targetMethod ) = this.CreateTemplateExpansionContext( assembly, compilationModel, templateMethod );
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult, out var output );
 
@@ -204,7 +204,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     return testResult;
                 }
 
-                testSyntaxTree.SetRunTimeCode( output! );
+                testSyntaxTree.SetRunTimeCode( targetMethod.WithBody( output! ) );
             }
             catch ( Exception e )
             {
@@ -218,7 +218,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             return testResult;
         }
 
-        private TemplateExpansionContext CreateTemplateExpansionContext( Assembly assembly, CompilationModel compilation, ISymbol templateMethod )
+        private (TemplateExpansionContext,MethodDeclarationSyntax) CreateTemplateExpansionContext( Assembly assembly, CompilationModel compilation, ISymbol templateMethod )
         {
             var roslynCompilation = compilation.RoslynCompilation;
 
@@ -233,7 +233,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             var roslynTargetType = roslynCompilation.Assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
 
-            var roslynTargetMethod = (BaseMethodDeclarationSyntax) roslynTargetType.GetMembers()
+            var roslynTargetMethod = (MethodDeclarationSyntax) roslynTargetType.GetMembers()
                 .Single( m => m.Name == "Method" )
                 .DeclaringSyntaxReferences
                 .Select( r => (CSharpSyntaxNode) r.GetSyntax() )
@@ -259,7 +259,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     default,
                     new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ) ) );
 
-            return new TemplateExpansionContext(
+            return (new TemplateExpansionContext(
                 templateInstance,
                 metaApi,
                 compilation,
@@ -270,7 +270,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     compilation.Factory ),
                 lexicalScope,
                 this._syntaxSerializationService,
-                compilation.Factory );
+                compilation.Factory ), roslynTargetMethod);
         }
     }
 }

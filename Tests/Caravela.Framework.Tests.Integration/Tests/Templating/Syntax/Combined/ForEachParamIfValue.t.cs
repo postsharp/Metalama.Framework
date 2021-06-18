@@ -1,3 +1,4 @@
+string Method(object a, object b)
 {
     if (a == null)
     {

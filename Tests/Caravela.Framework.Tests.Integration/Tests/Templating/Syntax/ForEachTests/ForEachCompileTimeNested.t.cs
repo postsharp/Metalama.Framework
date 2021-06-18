@@ -1,3 +1,4 @@
+int Method(int a, int b)
 {
     if (a <= 1)
     {

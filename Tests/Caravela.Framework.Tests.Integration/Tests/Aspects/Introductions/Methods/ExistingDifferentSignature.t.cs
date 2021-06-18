@@ -1,4 +1,3 @@
-// <target>
 [Introduction]
 internal class TargetClass
 {
@@ -6,7 +5,6 @@ internal class TargetClass
     {
         return x;
     }
-
 
     public global::System.Int32 ExistingMethod()
     {

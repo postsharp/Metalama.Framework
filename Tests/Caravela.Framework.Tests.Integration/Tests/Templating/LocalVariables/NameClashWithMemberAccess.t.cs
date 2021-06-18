@@ -1,3 +1,4 @@
+int Method(int a)
 {
     var WriteLine = 0;
     global::System.Console.WriteLine(WriteLine);

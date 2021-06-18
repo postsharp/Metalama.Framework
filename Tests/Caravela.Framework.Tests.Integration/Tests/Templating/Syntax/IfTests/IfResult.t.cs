@@ -1,3 +1,4 @@
+string Method(object a)
 {
     global::System.String result;
     result = this.Method(a);

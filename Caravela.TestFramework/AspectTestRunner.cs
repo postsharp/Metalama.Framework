@@ -55,7 +55,7 @@ namespace Caravela.TestFramework
                     testResult.Report( resultCompilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
                 }
                 
-                testResult.SetTransformedCompilation( resultCompilation );
+                testResult.SetOutputCompilation( resultCompilation );
             }
             else
             {

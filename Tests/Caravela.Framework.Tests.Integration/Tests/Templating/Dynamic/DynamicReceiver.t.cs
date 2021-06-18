@@ -1,3 +1,4 @@
+int Method(int a)
 {
     this.MyMethod();
     this.MyMethod().More();

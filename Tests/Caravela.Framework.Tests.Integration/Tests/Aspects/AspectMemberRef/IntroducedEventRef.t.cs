@@ -1,4 +1,3 @@
-// <target>
 [Retry]
 class Program
 {

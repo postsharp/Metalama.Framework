@@ -67,7 +67,6 @@ namespace Caravela.TestFramework
             
             testResult.AddInputDocument( mainDocument );
 
-
             var initialCompilation = CSharpCompilation.Create(
                 "test",
                 new[] { syntaxTree },
@@ -123,11 +122,13 @@ namespace Caravela.TestFramework
             }
         }
 
-        public static string? NormalizeTestOutput( string? s )
-        {
-            return s == null ? null : CSharpSyntaxTree.ParseText( s ).GetRoot().NormalizeWhitespace().ToFullString().Replace( "\r", "" );
-        }
+        public static string? NormalizeTestOutput( string? s ) 
+            => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot() );
 
+        public static string? NormalizeTestOutput( SyntaxNode syntaxNode ) 
+            => syntaxNode.NormalizeWhitespace().ToFullString().Replace( "\r", "" );
+
+        
         public virtual void ExecuteAssertions( TestInput testInput, TestResult testResult )
         {
             if ( this.ProjectDirectory == null )
@@ -143,11 +144,8 @@ namespace Caravela.TestFramework
                 Path.GetDirectoryName( sourceAbsolutePath )!,
                 Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.TransformedCode );
 
-            var firstTestTree = testResult.SyntaxTrees.First();
-            Assert.NotNull( firstTestTree.OutputRunTimeSourceText );
-            Assert.NotNull( firstTestTree.OutputRunTimeSyntaxRoot );
 
-            var actualTransformedSourceText = NormalizeTestOutput( firstTestTree.OutputRunTimeSourceText!.ToString() );
+            var actualTransformedSourceText = NormalizeTestOutput( testResult.GetConsolidatedTestOutput() );
 
             // If the expectation file does not exist, create it with some placeholder content.
             if ( !File.Exists( expectedTransformedPath ) )

@@ -1,4 +1,3 @@
-// <target>
 internal class TargetClass
 {
     [Override]
@@ -17,8 +16,8 @@ internal class TargetClass
 
         if (x > 0)
             goto __aspect_return_1;
-    __aspect_return_1:
-        ;
+        __aspect_return_1:
+            ;
         return;
     }
 
@@ -38,7 +37,6 @@ internal class TargetClass
 
         if (x > 0)
             return -1;
-
         return 0;
     }
 }

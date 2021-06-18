@@ -1,5 +1,3 @@
-
-// <target>
 [Introduction]
 internal class TargetClass
 {
@@ -15,7 +13,6 @@ internal class TargetClass
         this.OverrideVoid();
     }
 
-
     public void IntroduceVoid()
     {
         global::System.Console.WriteLine("Introduced");
@@ -27,4 +24,3 @@ internal class TargetClass
         return (int)0;
     }
 }
-

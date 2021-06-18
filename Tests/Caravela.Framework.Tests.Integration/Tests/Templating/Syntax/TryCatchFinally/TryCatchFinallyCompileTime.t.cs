@@ -1,3 +1,4 @@
+int Method(int a)
 {
     try
     {

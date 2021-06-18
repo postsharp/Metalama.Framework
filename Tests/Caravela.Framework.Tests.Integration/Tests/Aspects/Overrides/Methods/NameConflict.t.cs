@@ -1,4 +1,3 @@
-// <target>
 internal class TargetClass
 {
     [InnerOverride]

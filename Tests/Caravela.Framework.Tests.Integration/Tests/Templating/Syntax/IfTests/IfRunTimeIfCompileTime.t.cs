@@ -1,3 +1,4 @@
+void Method(object a)
 {
     if (a == null)
     {
