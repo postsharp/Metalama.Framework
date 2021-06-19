@@ -90,7 +90,7 @@ namespace Caravela.TestFramework
 
                 testResult.AddInputDocument( includedDocument );
 
-                var includedSyntaxTree = includedDocument.GetSyntaxTreeAsync().Result;
+                var includedSyntaxTree = includedDocument.GetSyntaxTreeAsync().Result!;
                 initialCompilation = initialCompilation.AddSyntaxTrees( includedSyntaxTree );
             }
 
@@ -249,6 +249,7 @@ namespace Caravela.TestFramework
         }
 
         protected virtual void WriteHtmlProlog( TextWriter writer ) { }
+
         protected virtual void WriteHtmlEpilogue( TextWriter writer ) { }
 
         private void WriteHtml( TestInput testInput, TestSyntaxTree testSyntaxTree )
@@ -282,7 +283,7 @@ namespace Caravela.TestFramework
             classifier.Visit( testSyntaxTree.AnnotatedSyntaxRoot );
 
             using var textWriter = File.CreateText( htmlPath );
-            
+
             this.WriteHtmlProlog( textWriter );
             textWriter.Write( "<pre><code class=\"lang-csharp\">" );
 
@@ -371,6 +372,5 @@ namespace Caravela.TestFramework
 
             return stringBuilder.ToString();
         }
-
     }
 }

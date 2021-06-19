@@ -108,7 +108,7 @@ namespace Caravela.Framework.Impl
                 catch ( InvalidUserCodeException e )
                 {
                     aspectInstance.Skip();
-                    
+
                     return
                         new AspectInstanceResult(
                             false,

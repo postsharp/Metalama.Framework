@@ -10,7 +10,7 @@
             AfterTargets="Build">
         <WriteLinesToFile File='$(IntermediateOutputPath)assemblies.txt' Overwrite='true'
                           Lines='@(ReferencePathWithRefAssemblies)' />
-                          <!--
+        <!--
         <WriteLinesToFile File='$(IntermediateOutputPath)assemblies.txt' Overwrite='false'
                           Lines='$(OutputPath)\$(AssemblyName).dll' />
                           -->
@@ -77,14 +77,14 @@ namespace $(RootNamespace)
             SourceFiles="@(_AcceptTestOutput)"
             DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
-    
+
     <Target Name="AcceptTestHtml">
-            <ItemGroup>
-                <_AcceptTestOutput Include="obj\\highlighted\**\*.html" />
-            </ItemGroup>
-            <Copy
-                SourceFiles="@(_AcceptTestOutput)"
-                DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')" />
-        </Target>
+        <ItemGroup>
+            <_AcceptTestOutput Include="obj\\highlighted\**\*.html" />
+        </ItemGroup>
+        <Copy
+            SourceFiles="@(_AcceptTestOutput)"
+            DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')" />
+    </Target>
 
 </Project>

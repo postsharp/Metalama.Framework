@@ -46,10 +46,21 @@ namespace Caravela.TestFramework
         /// </summary>
         public List<string> IncludedFiles { get; } = new();
 
+        /// <summary>
+        /// Gets or sets a value indicating whether HTML of syntax-highlighted files should be produced. If <c>true</c>, these files
+        /// are created to the <c>obj/highlighted</c> directory.
+        /// </summary>
         public bool? WriteFormattedHtml { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether titles (tooltips) should be added to HTML files.
+        /// </summary>
         public bool? AddHtmlTitles { get; set; }
-        
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the <see cref="TestResult.ErrorMessage"/> should be added to
+        /// the test output.
+        /// </summary>
         public bool? ReportErrorMessage { get; set; }
 
         /// <summary>
@@ -71,9 +82,9 @@ namespace Caravela.TestFramework
             this.AddHtmlTitles ??= directoryOptions.AddHtmlTitles;
 
             this.ReportErrorMessage ??= directoryOptions.ReportErrorMessage;
-            
+
             this.IncludedFiles.AddRange( directoryOptions.IncludedFiles );
-            
+
             this.References.AddRange( directoryOptions.References );
         }
 

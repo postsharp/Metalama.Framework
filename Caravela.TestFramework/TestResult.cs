@@ -26,10 +26,7 @@ namespace Caravela.TestFramework
         private readonly List<TestSyntaxTree> _syntaxTrees = new();
         private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
 
-        public void Report( Diagnostic diagnostic )
-        {
-            this._diagnostics.Add( diagnostic );
-        }
+        void IDiagnosticAdder.Report( Diagnostic diagnostic ) => this._diagnostics.Add( diagnostic );
 
         /// <summary>
         /// Gets the list of diagnostics emitted during test run.
@@ -58,10 +55,17 @@ namespace Caravela.TestFramework
         /// </summary>
         public Compilation? OutputCompilation { get; set; }
 
-        public void AddInputDocument( Document document )
-        {
-            this._syntaxTrees.Add( new TestSyntaxTree( document ) );
-        }
+        /// <summary>
+        /// Gets a value indicating whether the test run succeeded.
+        /// </summary>
+        public bool Success { get; private set; } = true;
+
+        /// <summary>
+        /// Gets the <see cref="System.Exception"/> in which the test resulted, if any.
+        /// </summary>
+        public Exception? Exception { get; private set; }
+
+        internal void AddInputDocument( Document document ) => this._syntaxTrees.Add( new TestSyntaxTree( document ) );
 
         private static string CleanMessage( string text )
         {
@@ -108,6 +112,25 @@ namespace Caravela.TestFramework
             }
         }
 
+        internal void SetFailed( string reason, Exception? exception = null )
+        {
+            if ( this._frozen )
+            {
+                throw new InvalidOperationException( "The test result can no longer be modified." );
+            }
+
+            this._frozen = true;
+
+            this.Exception = exception;
+            this.Success = false;
+            this.ErrorMessage = reason;
+
+            if ( exception != null )
+            {
+                this.ErrorMessage += Environment.NewLine + exception;
+            }
+        }
+
         private string? GetTextUnderDiagnostic( Diagnostic diagnostic )
         {
             var syntaxTree = diagnostic.Location!.SourceTree;
@@ -123,13 +146,17 @@ namespace Caravela.TestFramework
             return text;
         }
 
+        /// <summary>
+        /// Gets the content of the <c>.t.cs</c> file, i.e. the output transformed code with comments
+        /// for diagnostics.
+        /// </summary>
         public CompilationUnitSyntax GetConsolidatedTestOutput()
         {
             if ( this.TestInput == null )
             {
                 throw new InvalidOperationException();
             }
-            
+
             var consolidatedCompilationUnit = SyntaxFactory.CompilationUnit();
 
             // Adding the syntax.
@@ -141,7 +168,7 @@ namespace Caravela.TestFramework
                 {
                     throw new InvalidOperationException();
                 }
-            
+
                 var syntaxNode = syntaxTree.OutputRunTimeSyntaxRoot!;
 
                 // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
@@ -181,7 +208,6 @@ namespace Caravela.TestFramework
                         throw new AssertionFailedException( $"Don't know how to add a {outputNode.Kind()} to the compilation unit." );
                 }
             }
-        
 
             // Adding the diagnostics as trivia.
             List<SyntaxTrivia> comments = new();
@@ -204,35 +230,6 @@ namespace Caravela.TestFramework
             consolidatedCompilationUnit = consolidatedCompilationUnit.WithLeadingTrivia( comments );
 
             return consolidatedCompilationUnit;
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the test run succeeded.
-        /// </summary>
-        public bool Success { get; private set; } = true;
-
-        /// <summary>
-        /// Gets the <see cref="System.Exception"/> in which the test resulted, if any.
-        /// </summary>
-        public Exception? Exception { get; private set; }
-
-        internal void SetFailed( string reason, Exception? exception = null )
-        {
-            if ( this._frozen )
-            {
-                throw new InvalidOperationException( "The test result can no longer be modified." );
-            }
-
-            this._frozen = true;
-
-            this.Exception = exception;
-            this.Success = false;
-            this.ErrorMessage = reason;
-
-            if ( exception != null )
-            {
-                this.ErrorMessage += Environment.NewLine + exception;
-            }
         }
     }
 }

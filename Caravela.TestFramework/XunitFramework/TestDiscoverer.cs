@@ -117,7 +117,7 @@ namespace Caravela.TestFramework.XunitFramework
                     if ( extension != ".cs" )
                     {
                         // Skipping.
-                        
+
                         continue;
                     }
 

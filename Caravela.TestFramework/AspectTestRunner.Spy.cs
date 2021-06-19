@@ -31,7 +31,7 @@ namespace Caravela.TestFramework
                         .Select( ( item, index ) => (item, index) )
                         .Single( x => x.item.InputSyntaxTree.FilePath == sourceSyntaxRoot.SyntaxTree.FilePath )
                         .item;
-                
+
                 if ( originalSyntaxTree.AnnotatedSyntaxRoot == null )
                 {
                     originalSyntaxTree.AnnotatedSyntaxRoot = sourceSyntaxRoot.SyntaxTree.GetRoot();

@@ -35,7 +35,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             {
                 return result;
             }
-            
+
             var templateDocument = result.SyntaxTrees.Single().InputDocument;
             var templateSyntaxRoot = templateDocument.GetSyntaxRootAsync().Result!;
             var templateSemanticModel = templateDocument.GetSemanticModelAsync().Result!;
@@ -60,7 +60,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             }
 
             result.SyntaxTrees.Single().AnnotatedSyntaxRoot = annotatedTemplateSyntax;
-            
+
             this.WriteHtml( testInput, result );
 
             return result;
@@ -84,7 +84,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             var htmlPath = testResult.SyntaxTrees.Single().OutputHtmlPath!;
             var htmlContent = File.ReadAllText( htmlPath );
-            
+
             Assert.Equal( expectedHighlightedSource, htmlContent );
         }
 

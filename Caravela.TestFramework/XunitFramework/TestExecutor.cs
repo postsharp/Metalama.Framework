@@ -19,7 +19,7 @@ namespace Caravela.TestFramework.XunitFramework
         public TestExecutor( AssemblyName assemblyName, IMessageSink messageSink )
         {
             _ = messageSink;
-            
+
             var assembly = Assembly.Load( assemblyName );
             var assemblyInfo = new ReflectionAssemblyInfo( assembly );
             TestDiscoverer discoverer = new( assemblyInfo );

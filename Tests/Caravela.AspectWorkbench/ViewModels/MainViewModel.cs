@@ -85,6 +85,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 var testSyntaxTree = testResult.SyntaxTrees.First();
 
                 var annotatedTemplateSyntax = testSyntaxTree.AnnotatedSyntaxRoot;
+
                 if ( annotatedTemplateSyntax != null )
                 {
                     // Display the annotated syntax tree.
@@ -98,8 +99,8 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 var errorsDocument = new FlowDocument();
 
-                
                 var transformedTemplateSyntax = testSyntaxTree.OutputCompileTimeSyntaxRoot;
+
                 if ( transformedTemplateSyntax != null )
                 {
                     // this.CompiledTemplatePath = testResult.TransformedTemplatePath;
@@ -116,7 +117,6 @@ namespace Caravela.AspectWorkbench.ViewModels
                     this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
                 }
 
-            
                 if ( testSyntaxTree.OutputRunTimeSourceText != null )
                 {
                     // Display the transformed code.

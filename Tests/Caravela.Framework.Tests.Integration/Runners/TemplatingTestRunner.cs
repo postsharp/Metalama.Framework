@@ -133,7 +133,6 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 transformedTemplateText.Write( textWriter );
             }
 
-
             // Report the result to the test.
             testSyntaxTree.SetCompileTimeCode( transformedTemplateSyntax, transformedTemplatePath );
 
@@ -143,7 +142,6 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
                 return testResult;
             }
-            
 
             // Create a SyntaxTree that maps to the file we have just written.
             var oldTransformedTemplateSyntaxTree = transformedTemplateSyntax.SyntaxTree;
@@ -191,7 +189,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var driver = new TemplateDriver( null!, templateMethod, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InputCompilation );
-                var (expansionContext, targetMethod ) = this.CreateTemplateExpansionContext( assembly, compilationModel, templateMethod );
+                var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( assembly, compilationModel, templateMethod );
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult, out var output );
 
@@ -218,7 +216,10 @@ namespace Caravela.Framework.Tests.Integration.Runners
             return testResult;
         }
 
-        private (TemplateExpansionContext,MethodDeclarationSyntax) CreateTemplateExpansionContext( Assembly assembly, CompilationModel compilation, ISymbol templateMethod )
+        private (TemplateExpansionContext Context, MethodDeclarationSyntax TargetMethod) CreateTemplateExpansionContext(
+            Assembly assembly,
+            CompilationModel compilation,
+            ISymbol templateMethod )
         {
             var roslynCompilation = compilation.RoslynCompilation;
 
@@ -260,17 +261,17 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ) ) );
 
             return (new TemplateExpansionContext(
-                templateInstance,
-                metaApi,
-                compilation,
-                new LinkerOverrideMethodProceedImpl(
-                    default,
-                    targetMethod,
-                    LinkingOrder.Default,
-                    compilation.Factory ),
-                lexicalScope,
-                this._syntaxSerializationService,
-                compilation.Factory ), roslynTargetMethod);
+                        templateInstance,
+                        metaApi,
+                        compilation,
+                        new LinkerOverrideMethodProceedImpl(
+                            default,
+                            targetMethod,
+                            LinkingOrder.Default,
+                            compilation.Factory ),
+                        lexicalScope,
+                        this._syntaxSerializationService,
+                        compilation.Factory ), roslynTargetMethod);
         }
     }
 }
