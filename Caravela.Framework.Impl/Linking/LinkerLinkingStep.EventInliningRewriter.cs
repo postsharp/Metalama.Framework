@@ -44,10 +44,14 @@ namespace Caravela.Framework.Impl.Linking
             public override SyntaxNode? VisitAssignmentExpression( AssignmentExpressionSyntax node )
             {
                 // Supported form of inlining:
+                // <variable> = <annotated_property_access> += value;
                 // <annotated_property_access> += value;
-                // <annotated_property_access> -= value;
 
-                var eventAccessNode = node.Left;
+                var eventAccessNode = node.Right switch
+                {
+                    AssignmentExpressionSyntax innerAssignment => innerAssignment.Left,
+                    _ => node.Left
+                };
 
                 var annotation = eventAccessNode.GetLinkerAnnotation();
 
@@ -64,12 +68,17 @@ namespace Caravela.Framework.Impl.Linking
                     targetEventSymbol,
                     annotation.AssertNotNull() );
 
+                var overrideTargetSymbol =
+                    this.AnalysisRegistry.IsOverride( this.ContextBodyMethod )
+                        ? this.AnalysisRegistry.GetOverrideTarget( this.ContextBodyMethod )
+                        : this.ContextBodyMethod;
+
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {
                     // Inline the accessor body.
                     return this.GetInlinedBody( resolvedSymbol, null );
                 }
-                else
+                else if ( overrideTargetSymbol != null && StructuralSymbolComparer.Default.Equals( overrideTargetSymbol, targetEventSymbol ) )
                 {
                     // Replace with invocation of the correct override.
 
@@ -110,6 +119,10 @@ namespace Caravela.Framework.Impl.Linking
                         default:
                             throw new NotImplementedException( $"Cannot inline {node.Right}." );
                     }
+                }
+                else
+                {
+                    return node;
                 }
             }
 

@@ -21,7 +21,21 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         }
 
         [Introduce]
-        public event EventHandler? Event;
+        public event EventHandler? EventField;
+
+        [Introduce]
+        public event EventHandler? Event
+        {
+            add 
+            { 
+                Console.WriteLine("Original add accessor."); 
+            }
+
+            remove 
+            { 
+                Console.WriteLine("Original add accessor."); 
+            }
+        }
     }
 
     // <target>

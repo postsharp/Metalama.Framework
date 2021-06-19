@@ -9,7 +9,6 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -17,7 +16,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -83,7 +81,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 this._isEventField && this.ExplicitInterfaceImplementations.Count == 0
                     ? EventFieldDeclaration(
                         List<AttributeListSyntax>(), // TODO: Attributes.
-                        GenerateModifierList(),
+                        this.GetSyntaxModifierList(),
                         VariableDeclaration(
                             (TypeSyntax) syntaxGenerator.TypeExpression( this.EventType.GetSymbol() ),
                             SeparatedList(
@@ -93,7 +91,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                                 } ) ) )
                     : EventDeclaration(
                         List<AttributeListSyntax>(), // TODO: Attributes.
-                        GenerateModifierList(),
+                        this.GetSyntaxModifierList(),
                         (TypeSyntax) syntaxGenerator.TypeExpression( this.EventType.GetSymbol() ),
                         this.ExplicitInterfaceImplementations.Count > 0
                             ? ExplicitInterfaceSpecifier(
@@ -112,31 +110,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 new IntroducedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this )
             };
-
-            SyntaxTokenList GenerateModifierList()
-            {
-                // Modifiers for event.
-                var tokens = new List<SyntaxToken>();
-
-                this.Accessibility.AddTokens( tokens );
-
-                if ( this.IsAbstract )
-                {
-                    tokens.Add( Token( SyntaxKind.AbstractKeyword ) );
-                }
-
-                if ( this.IsSealed )
-                {
-                    tokens.Add( Token( SyntaxKind.SealedKeyword ) );
-                }
-
-                if ( this.IsOverride )
-                {
-                    tokens.Add( Token( SyntaxKind.OverrideKeyword ) );
-                }
-
-                return TokenList( tokens );
-            }
 
             AccessorListSyntax GenerateAccessorList()
             {

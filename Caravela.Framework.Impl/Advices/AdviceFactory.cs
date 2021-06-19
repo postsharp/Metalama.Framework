@@ -94,7 +94,6 @@ namespace Caravela.Framework.Impl.Advices
         {
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
-
             var templateProperty = this._aspectType.GetTemplateProperty( this._compilation, defaultTemplate, nameof(this.OverrideFieldOrProperty) );
 
             var advice = new OverrideFieldOrPropertyAdvice(
@@ -121,9 +120,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
-
             var getTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, getTemplate, nameof(this.OverrideFieldOrPropertyAccessors) );
-
             var setTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, setTemplate, nameof(this.OverrideFieldOrPropertyAccessors) );
 
             var advice = new OverrideFieldOrPropertyAdvice(
@@ -165,8 +162,8 @@ namespace Caravela.Framework.Impl.Advices
             var advice = new IntroducePropertyAdvice(
                 this._aspect,
                 targetType,
-                templateProperty,
                 null,
+                templateProperty,
                 null,
                 null,
                 scope,
@@ -193,16 +190,14 @@ namespace Caravela.Framework.Impl.Advices
             AdviceOptions? options = null )
         {
             var diagnosticList = new DiagnosticList();
-
             var getTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, defaultGetTemplate, nameof(this.OverrideFieldOrPropertyAccessors) );
-
             var setTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, setTemplate, nameof(this.OverrideFieldOrPropertyAccessors) );
 
             var advice = new IntroducePropertyAdvice(
                 this._aspect,
                 targetType,
-                null,
                 name,
+                null,
                 getTemplateMethod,
                 setTemplateMethod,
                 scope,
@@ -226,11 +221,66 @@ namespace Caravela.Framework.Impl.Advices
             string? invokeTemplate,
             AdviceOptions? options = null )
         {
-            throw new NotImplementedException();
+            if ( invokeTemplate != null )
+            {
+                throw GeneralDiagnosticDescriptors.UnsupportedFeature.CreateException( $"Invoker overrides." );
+            }
+
+            var diagnosticList = new DiagnosticList();
+            var addTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, addTemplate, nameof(this.OverrideEventAccessors) );
+            var removeTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, removeTemplate, nameof(this.OverrideEventAccessors) );
+
+            var advice = new OverrideEventAdvice(
+                this._aspect,
+                targetDeclaration,
+                null,
+                addTemplateMethod,
+                removeTemplateMethod,
+                _layerName,
+                options );
+
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            ThrowOnErrors( diagnosticList );
+            this._advices.Add( advice );
+
+            this._diagnosticAdder.Report( diagnosticList );
         }
 
         public IEventBuilder IntroduceEvent(
             INamedType targetType,
+            string name,
+            string eventTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AdviceOptions? options = null )
+        {
+            var diagnosticList = new DiagnosticList();
+            var templateEvent = this._aspectType.GetTemplateEvent( this._compilation, eventTemplate, nameof(this.IntroduceProperty) );
+
+            var advice = new IntroduceEventAdvice(
+                this._aspect,
+                targetType,
+                name,
+                templateEvent,
+                null,
+                null,
+                scope,
+                conflictBehavior,
+                _layerName,
+                options );
+
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            ThrowOnErrors( diagnosticList );
+            this._advices.Add( advice );
+
+            this._diagnosticAdder.Report( diagnosticList );
+
+            return advice.Builder;
+        }
+
+        public IEventBuilder IntroduceEvent(
+            INamedType targetType,
+            string name,
             string addTemplate,
             string removeTemplate,
             string? invokeTemplate = null,
@@ -238,7 +288,29 @@ namespace Caravela.Framework.Impl.Advices
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AdviceOptions? options = null )
         {
-            throw new NotImplementedException();
+            var diagnosticList = new DiagnosticList();
+            var addTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, addTemplate, nameof(this.OverrideEventAccessors) );
+            var removeTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, removeTemplate, nameof(this.OverrideEventAccessors) );
+
+            var advice = new IntroduceEventAdvice(
+                this._aspect,
+                targetType,
+                name,
+                null,
+                addTemplateMethod,
+                removeTemplateMethod,
+                scope,
+                conflictBehavior,
+                _layerName,
+                options );
+
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            ThrowOnErrors( diagnosticList );
+            this._advices.Add( advice );
+
+            this._diagnosticAdder.Report( diagnosticList );
+
+            return advice.Builder;
         }
 
         public void IntroduceInterface(

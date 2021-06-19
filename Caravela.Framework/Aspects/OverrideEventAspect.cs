@@ -8,9 +8,9 @@ using System;
 namespace Caravela.Framework.Aspects
 {
     /// <summary>
-    /// A base aspect that overrides the implementation of a method.
+    /// A base aspect that overrides the implementation of an event.
     /// </summary>
-    [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field )]
+    [AttributeUsage( AttributeTargets.Event )]
     public abstract class OverrideEventAspect : Attribute, IAspect<IEvent>
     {
         public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Aspects
                 builder.TargetDeclaration,
                 nameof(this.OverrideAdd),
                 nameof(this.OverrideRemove),
-                nameof(this.OverrideInvoke) );
+                null );
         }
 
         [Template]
@@ -31,8 +31,9 @@ namespace Caravela.Framework.Aspects
         [Template]
         public abstract void OverrideRemove( dynamic handler );
 
-        [Template]
-        public abstract void OverrideInvoke( dynamic handler );
+        // TODO: Add this back after invoke overrides are implemented.
+        // [Template]
+        // public abstract void OverrideInvoke( dynamic handler );
 
         public virtual void BuildEligibility( IEligibilityBuilder<IEvent> builder )
         {

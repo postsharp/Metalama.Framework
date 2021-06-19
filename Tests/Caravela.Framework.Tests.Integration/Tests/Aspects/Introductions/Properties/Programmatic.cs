@@ -9,29 +9,26 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
     {
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            //{
-            //    var advice = aspectBuilder.AdviceFactory.IntroduceProperty(aspectBuilder.TargetDeclaration, nameof(AutoProperty));
-            //    advice.Builder.Accessibility = Accessibility.Public;
-            //}
-
             {
-                var property = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, nameof(Property));
-                property.Accessibility = Accessibility.Public;
+                var propertyBuilder = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, nameof(AutoProperty));
+                propertyBuilder.Accessibility = Accessibility.Public;
             }
 
             {
-                var property = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, "PropertyFromAccessors", nameof(GetPropertyTemplate), nameof(SetPropertyTemplate) );
-                property.Accessibility = Accessibility.Public;
+                var propertyBuilder = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, nameof(Property));
+                propertyBuilder.Accessibility = Accessibility.Public;
+            }
+
+            {
+                var propertyBuilder = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, "PropertyFromAccessors", nameof(GetPropertyTemplate), nameof(SetPropertyTemplate) );
+                propertyBuilder.Accessibility = Accessibility.Public;
             }
 
             // TODO: Expression bodied template.
         }
 
-       
-        
-        
-        //[Template]
-        //public int AutoProperty { get; set; }
+        [Template]
+        public int AutoProperty { get; set; }
 
         [Template]
         public int Property

@@ -39,4 +39,30 @@ internal class TargetClass
         Console.WriteLine("This is the original static method.");
         return;
     }
+
+    [Override]
+    public void TargetMethod_Out(out int x)
+    {
+        global::System.Console.WriteLine("This is the overriding method.");
+        Console.WriteLine("This is the original method.");
+        x = 42;
+        return;
+    }
+
+    [Override]
+    public void TargetMethod_Ref(ref int x)
+    {
+        global::System.Console.WriteLine("This is the overriding method.");
+        Console.WriteLine("This is the original method.");
+        x = 42;
+        return;
+    }
+
+    [Override]
+    public void TargetMethod_In(in int x)
+    {
+        global::System.Console.WriteLine("This is the overriding method.");
+        Console.WriteLine("This is the original method.");
+        return;
+    }
 }

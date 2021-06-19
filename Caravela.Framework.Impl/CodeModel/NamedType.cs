@@ -77,6 +77,7 @@ namespace Caravela.Framework.Impl.CodeModel
                             _ => default
                         } ) );
 
+        [Memo]
         public IFieldList Fields
             => new FieldList(
                 this,
@@ -84,7 +85,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select(
                         m => m switch
                         {
-                            IFieldSymbol p => new MemberRef<IField>( p ),
+                            IFieldSymbol { CanBeReferencedByName: true } p => new MemberRef<IField>( p ),
                             _ => default
                         } ) );
 
