@@ -196,15 +196,15 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 // TODO: Attributes.
                 return
                     AccessorDeclaration(
-                        SyntaxKind.GetAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        TokenList( tokens ),
-                        Token( SyntaxKind.GetKeyword ),
-                        this.IsAutoPropertyOrField
-                            ? null
-                            : Block( ReturnStatement( DefaultExpression( (TypeSyntax) syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
-                        null,
-                        this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default )
+                            SyntaxKind.GetAccessorDeclaration,
+                            List<AttributeListSyntax>(),
+                            TokenList( tokens ),
+                            Token( SyntaxKind.GetKeyword ),
+                            this.IsAutoPropertyOrField
+                                ? null
+                                : Block( ReturnStatement( DefaultExpression( (TypeSyntax) syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
+                            null,
+                            this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default )
                         .NormalizeWhitespace();
             }
 

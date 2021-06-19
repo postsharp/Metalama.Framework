@@ -188,7 +188,7 @@ namespace Caravela.Framework.Impl.Linking
                                             Token( SyntaxKind.SemicolonToken ) ) ) )
                                 .AssertNotNull(),
                         AccessorDeclarationSyntax _ when calledProperty.IsAbstract == false
-                            => Block( ReturnStatement( GetImplicitBackingFieldAccessExpression( calledProperty ) ) ).NormalizeWhitespace( ),
+                            => Block( ReturnStatement( GetImplicitBackingFieldAccessExpression( calledProperty ) ) ).NormalizeWhitespace(),
                         _ => throw new NotSupportedException() // TODO: Auto-properties.
                     };
 

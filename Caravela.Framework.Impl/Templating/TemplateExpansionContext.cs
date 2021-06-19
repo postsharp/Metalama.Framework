@@ -71,9 +71,9 @@ namespace Caravela.Framework.Impl.Templating
 
             // TODO: validate the returnExpression according to the method's return type.
             return ReturnStatement(
-                 Token( SyntaxKind.ReturnKeyword  ).WithLeadingTrivia( Whitespace( " " ) ),
+                Token( SyntaxKind.ReturnKeyword ).WithLeadingTrivia( Whitespace( " " ) ),
                 CastExpression( ParseTypeName( this.MetaApi.Method.ReturnType.ToDisplayString() ), returnExpression ),
-                 Token( SyntaxKind.SemicolonToken ));
+                Token( SyntaxKind.SemicolonToken ) );
         }
 
         public UserDiagnosticSink DiagnosticSink => this.MetaApi.Diagnostics;

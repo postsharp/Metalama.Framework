@@ -84,12 +84,13 @@ namespace Caravela.Framework.Impl.Linking
                     // Emit `{ <original_property_access> = value; return; }`.
                     return
                         Block(
-                            ExpressionStatement(
-                                AssignmentExpression(
-                                    SyntaxKind.SimpleAssignmentExpression,
-                                    this.CreateOriginalPropertyAccess( LinkerAnnotationTargetKind.PropertySetAccessor ),
-                                    IdentifierName( "value" ) ) ),
-                            ReturnStatement() ).NormalizeWhitespace();
+                                ExpressionStatement(
+                                    AssignmentExpression(
+                                        SyntaxKind.SimpleAssignmentExpression,
+                                        this.CreateOriginalPropertyAccess( LinkerAnnotationTargetKind.PropertySetAccessor ),
+                                        IdentifierName( "value" ) ) ),
+                                ReturnStatement() )
+                            .NormalizeWhitespace();
 
                 default:
                     throw new AssertionFailedException( $"{this._overriddenDeclaration.MethodKind}" );

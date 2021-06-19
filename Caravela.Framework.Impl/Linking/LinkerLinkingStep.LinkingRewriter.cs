@@ -276,10 +276,11 @@ namespace Caravela.Framework.Impl.Linking
                             propertyBodySource.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration )
                             ?? AccessorDeclaration(
                                 SyntaxKind.GetKeyword,
-                                Block( ReturnStatement(
-                                           Token( SyntaxKind.ReturnKeyword  ).WithLeadingTrivia( Whitespace( " " ) ),
-                                           propertyDeclaration.ExpressionBody.AssertNotNull().Expression ,
-                                       Token( SyntaxKind.SemicolonToken )) ));
+                                Block(
+                                    ReturnStatement(
+                                        Token( SyntaxKind.ReturnKeyword ).WithLeadingTrivia( Whitespace( " " ) ),
+                                        propertyDeclaration.ExpressionBody.AssertNotNull().Expression,
+                                        Token( SyntaxKind.SemicolonToken ) ) ) );
 
                         transformedAccessors.Add(
                             AccessorDeclaration(
@@ -390,7 +391,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 return method
                     .WithBody( GetBody() )
-                    .NormalizeWhitespace( )
+                    .NormalizeWhitespace()
                     .WithLeadingTrivia( method.GetLeadingTrivia() )
                     .WithTrailingTrivia( method.GetTrailingTrivia() );
 

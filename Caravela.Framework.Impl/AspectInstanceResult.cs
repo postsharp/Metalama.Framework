@@ -17,8 +17,6 @@ namespace Caravela.Framework.Impl
 
         public IReadOnlyList<IAspectSource> AspectSources { get; }
 
-        public bool IsSkipped { get; }
-
         public AspectInstanceResult(
             bool success,
             ImmutableUserDiagnosticList diagnostics,
