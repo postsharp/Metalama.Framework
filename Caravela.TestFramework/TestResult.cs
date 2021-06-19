@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Formatting;
 using PostSharp.Patterns;
 using System;
 using System.Collections.Generic;
@@ -228,6 +229,11 @@ namespace Caravela.TestFramework
                     .ToList() );
 
             consolidatedCompilationUnit = consolidatedCompilationUnit.WithLeadingTrivia( comments );
+
+            if ( this.TestInput.Options.FormatOutput.GetValueOrDefault( true ) )
+            {
+                consolidatedCompilationUnit = (CompilationUnitSyntax) Formatter.Format( consolidatedCompilationUnit, this.Project!.Solution.Workspace );
+            }
 
             return consolidatedCompilationUnit;
         }

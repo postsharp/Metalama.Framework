@@ -1,1 +1,4 @@
-{ "ReportErrorMessage": true }
+{
+ "ReportErrorMessage": true,
+ "FormatOutput": false
+ }

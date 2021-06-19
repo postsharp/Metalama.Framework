@@ -64,6 +64,11 @@ namespace Caravela.TestFramework
         public bool? ReportErrorMessage { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the output <c>t.cs</c> file should be formatted. The default behavior is <c>true</c>.
+        /// </summary>
+        public bool? FormatOutput { get; set; }
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
@@ -82,6 +87,8 @@ namespace Caravela.TestFramework
             this.AddHtmlTitles ??= directoryOptions.AddHtmlTitles;
 
             this.ReportErrorMessage ??= directoryOptions.ReportErrorMessage;
+
+            this.FormatOutput ??= directoryOptions.FormatOutput;
 
             this.IncludedFiles.AddRange( directoryOptions.IncludedFiles );
 
