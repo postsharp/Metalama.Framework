@@ -25,7 +25,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.ImportServi
         }
     }
 
-    [TestOutput]
+    // <target>
     class TargetClass
     {
         private readonly IServiceProvider? _serviceProvider;

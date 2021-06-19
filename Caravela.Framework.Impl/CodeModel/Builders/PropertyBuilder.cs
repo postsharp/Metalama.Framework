@@ -204,7 +204,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                             ? null
                             : Block( ReturnStatement( DefaultExpression( (TypeSyntax) syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
                         null,
-                        this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
+                        this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default )
+                        .NormalizeWhitespace();
             }
 
             AccessorDeclarationSyntax GenerateSetAccessor()

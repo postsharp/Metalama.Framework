@@ -172,11 +172,23 @@ namespace Caravela.Framework.Impl.Linking
                         AccessorDeclarationSyntax
                             { Body: not null } accessorDecl => (BlockSyntax) innerRewriter.VisitBlock( accessorDecl.Body! ).AssertNotNull(),
                         AccessorDeclarationSyntax { ExpressionBody: not null } accessorDecl
-                            => (BlockSyntax) innerRewriter.Visit( Block( ReturnStatement( accessorDecl.ExpressionBody!.Expression ) ) ).AssertNotNull(),
+                            => (BlockSyntax) innerRewriter.Visit(
+                                    Block(
+                                        ReturnStatement(
+                                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
+                                            accessorDecl.ExpressionBody!.Expression,
+                                            Token( SyntaxKind.SemicolonToken ) ) ) )
+                                .AssertNotNull(),
                         ArrowExpressionClauseSyntax { Expression: not null } arrowExprClause
-                            => (BlockSyntax) innerRewriter.Visit( Block( ReturnStatement( arrowExprClause.Expression! ) ) ).AssertNotNull(),
+                            => (BlockSyntax) innerRewriter.Visit(
+                                    Block(
+                                        ReturnStatement(
+                                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
+                                            arrowExprClause.Expression!,
+                                            Token( SyntaxKind.SemicolonToken ) ) ) )
+                                .AssertNotNull(),
                         AccessorDeclarationSyntax _ when calledProperty.IsAbstract == false
-                            => Block( ReturnStatement( GetImplicitBackingFieldAccessExpression( calledProperty ) ) ),
+                            => Block( ReturnStatement( GetImplicitBackingFieldAccessExpression( calledProperty ) ) ).NormalizeWhitespace( ),
                         _ => throw new NotSupportedException() // TODO: Auto-properties.
                     };
 

@@ -89,7 +89,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                             syntaxFactory,
                             this.ServiceProvider );
 
-                        var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray();
+                        var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax.NormalizeWhitespace( ) ).ToArray();
 
                         classDeclaration = classDeclaration.AddMembers( introducedMembers );
                     }

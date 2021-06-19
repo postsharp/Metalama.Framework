@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.Linking
                 case MethodKind.PropertyGet:
                     // Emit `return <original_property_access>;`.
                     return
-                        ReturnStatement( this.CreateOriginalPropertyAccess( LinkerAnnotationTargetKind.PropertyGetAccessor ) );
+                        ReturnStatement( this.CreateOriginalPropertyAccess( LinkerAnnotationTargetKind.PropertyGetAccessor ) ).NormalizeWhitespace();
 
                 case MethodKind.PropertySet:
                     // Emit `{ <original_property_access> = value; return; }`.
@@ -89,7 +89,7 @@ namespace Caravela.Framework.Impl.Linking
                                     SyntaxKind.SimpleAssignmentExpression,
                                     this.CreateOriginalPropertyAccess( LinkerAnnotationTargetKind.PropertySetAccessor ),
                                     IdentifierName( "value" ) ) ),
-                            ReturnStatement() );
+                            ReturnStatement() ).NormalizeWhitespace();
 
                 default:
                     throw new AssertionFailedException( $"{this._overriddenDeclaration.MethodKind}" );

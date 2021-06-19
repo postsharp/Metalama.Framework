@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
         }
     }
 
-    [TestOutput]
+    // <target>
     internal class TargetClass
     {
         private HashSet<EventHandler> handlers = new HashSet<EventHandler>();

@@ -4,6 +4,8 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Linking;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Transformations
@@ -55,7 +57,7 @@ namespace Caravela.Framework.Impl.Transformations
             IDeclaration? declaration )
         {
             this.Introduction = introduction;
-            this.Syntax = syntax;
+            this.Syntax = syntax.NormalizeWhitespace();
             this.AspectLayerId = aspectLayerId;
             this.Semantic = semantic;
             this.LinkerOptions = linkerOptions;

@@ -1,17 +1,14 @@
-[TestOutput]
 [Introduction]
-internal class TargetClass
-{
-    public event global::System.EventHandler Event
+    internal class TargetClass
     {
-        add
-        {
-            global::System.Console.WriteLine("Original add accessor.");
-        }
 
-        remove
-        {
-            global::System.Console.WriteLine("Original remove accessor.");
-        }
+
+public event global::System.EventHandler Event
+{add    {
+        global::System.Console.WriteLine("Original add accessor.");
     }
-}
+
+remove    {
+        global::System.Console.WriteLine("Original remove accessor.");
+    }
+}    }
