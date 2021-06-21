@@ -163,7 +163,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                     // Add non-implemented members of IAspect and IEligible.
                     var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
-                    var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces );
+                    var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces, throwOnDuplicate: false );
 
                     foreach ( var implementedInterface in allImplementedInterfaces )
                     {
@@ -185,7 +185,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                     var newMethod = MethodDeclaration(
                                             default,
                                             default,
-                                            (TypeSyntax) syntaxGenerator.TypeExpression( method.ReturnType ),
+                                            syntaxGenerator.TypeExpression( method.ReturnType ),
                                             ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.TypeExpression( implementedInterface ) ),
                                             Identifier( method.Name ),
                                             default,
@@ -195,7 +195,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                                         p => Parameter(
                                                             default,
                                                             default,
-                                                            (TypeSyntax) syntaxGenerator.TypeExpression( p.Type ),
+                                                            syntaxGenerator.TypeExpression( p.Type ),
                                                             Identifier( p.Name ),
                                                             default ) ) ) ),
                                             default,

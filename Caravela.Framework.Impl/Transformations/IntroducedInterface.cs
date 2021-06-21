@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.Transformations
                 return new[]
                 {
                     (BaseTypeSyntax) SimpleBaseType(
-                        (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.InterfaceType.GetSymbol() ) )
+                        LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.InterfaceType.GetSymbol() ) )
                 };
             }
             else

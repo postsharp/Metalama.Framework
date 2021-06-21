@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.Linking
         TypeSyntax IProceedImpl.CreateTypeSyntax()
         {
             // TODO: Introduced types?
-            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(
+            return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(
                 (ITypeSymbol) ((NamedType) this.ContainingEvent.EventType).Symbol );
         }
 

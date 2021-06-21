@@ -207,7 +207,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     throw GeneralDiagnosticDescriptors.CannotProvideInstanceForStaticMember.CreateException( declaration );
                 }
 
-                return (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( declaration.DeclaringType!.GetSymbol() );
+                return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( declaration.DeclaringType!.GetSymbol() );
             }
 
             if ( instance == null )

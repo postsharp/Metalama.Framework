@@ -6,9 +6,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
+using Microsoft.CodeAnalysis.Simplification;
 using PostSharp.Patterns;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -232,7 +234,15 @@ namespace Caravela.TestFramework
 
             if ( this.TestInput.Options.FormatOutput.GetValueOrDefault( true ) )
             {
-                consolidatedCompilationUnit = (CompilationUnitSyntax) Formatter.Format( consolidatedCompilationUnit, this.Project!.Solution.Workspace );
+                var outputDocument =
+                 this.Project!.RemoveDocuments( this.Project.DocumentIds.ToImmutableArray() )
+                    .AddDocument( this.TestInput.TestName, consolidatedCompilationUnit );
+
+                var simplifiedDocument = Simplifier.ReduceAsync( outputDocument ).Result;
+                var simplifiedSyntaxRoot = simplifiedDocument.GetSyntaxRootAsync().Result!;
+                
+                consolidatedCompilationUnit = (CompilationUnitSyntax) Formatter.Format( simplifiedSyntaxRoot, this.Project!.Solution.Workspace );
+                
             }
 
             return consolidatedCompilationUnit;

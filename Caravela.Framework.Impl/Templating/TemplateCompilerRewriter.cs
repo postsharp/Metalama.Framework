@@ -12,6 +12,7 @@ using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -1305,6 +1306,11 @@ namespace Caravela.Framework.Impl.Templating
             return base.VisitIdentifierName( node );
         }
 
+        private ExpressionSyntax AddCallToSimplifierAnnotations( ExpressionSyntax expression ) => InvocationExpression(
+            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember(
+                nameof(TemplateSyntaxFactory.AddSimplifierAnnotations)),
+            ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
+
         /// <summary>
         /// Transforms a type or namespace so that it is fully qualified, but return <c>false</c> if the input <paramref name="node"/>
         /// is not a type or namespace.
@@ -1322,7 +1328,7 @@ namespace Caravela.Framework.Impl.Templating
                     var nameExpression = LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( namespaceOrType );
 
                     transformedNode = this.GetTransformationKind( node ) == TransformationKind.Transform
-                        ? this.Transform( nameExpression )
+                        ? this.AddCallToSimplifierAnnotations( this.Transform( nameExpression ) )
                         : nameExpression;
 
                     return true;
@@ -1344,6 +1350,18 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return base.VisitQualifiedName( node );
             }
+        }
+
+        protected override ExpressionSyntax TransformQualifiedName( QualifiedNameSyntax node )
+        {
+            var transformed = base.TransformQualifiedName( node );
+
+            if ( node.HasAnnotation( Simplifier.Annotation ) )
+            {
+                transformed = this.AddCallToSimplifierAnnotations( transformed );
+            }
+
+            return transformed;
         }
 
         public override SyntaxNode VisitAliasQualifiedName( AliasQualifiedNameSyntax node )

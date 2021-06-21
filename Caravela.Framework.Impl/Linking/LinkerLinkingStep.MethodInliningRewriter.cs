@@ -234,7 +234,7 @@ namespace Caravela.Framework.Impl.Linking
                         if ( originalSymbol.IsStatic )
                         {
                             return memberAccess.Update(
-                                (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( methodSymbol.ContainingType ),
+                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( methodSymbol.ContainingType ),
                                 memberAccess.OperatorToken,
                                 IdentifierName( methodSymbol.Name ) );
                         }
@@ -265,7 +265,7 @@ namespace Caravela.Framework.Impl.Linking
                         // TODO: Do this properly.
                         return MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( methodSymbol.ContainingType ),
+                            LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( methodSymbol.ContainingType ),
                             IdentifierName( methodSymbol.Name ) );
                     }
                     else

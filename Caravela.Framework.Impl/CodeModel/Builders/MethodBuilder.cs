@@ -132,7 +132,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                                 ? new[]
                                 {
                                     ReturnStatement(
-                                        DefaultExpression( (TypeSyntax) syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ) )
+                                        DefaultExpression( syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ) )
                                 }
                                 : new StatementSyntax[0] ) ),
                     null );

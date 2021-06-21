@@ -26,13 +26,13 @@ namespace Caravela.Framework.Impl.Templating
             public TypeSyntax Type( ITypeSymbol type )
                 => type switch
                 {
-                    IArrayTypeSymbol arrayType => (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.ArrayTypeExpression(
+                    IArrayTypeSymbol arrayType => LanguageServiceFactory.CSharpSyntaxGenerator.ArrayTypeExpression(
                         LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( arrayType.ElementType ) ),
                     _ => (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( type )
                 };
 
             public ExpressionSyntax NamespaceOrType( INamespaceOrTypeSymbol type )
-                => (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( type );
+                => LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( type );
 #pragma warning restore CA1822 // Mark members as static
 
             public TypeSyntax GenericType( Type type, params TypeSyntax[] genericParameters )

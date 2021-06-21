@@ -129,16 +129,23 @@ namespace Caravela.TestFramework
             }
         }
 
-        public static string? NormalizeTestOutput( string? s ) => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot() );
+        public static string? NormalizeTestOutput( string? s, bool preserveFormatting ) => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting );
 
-        public static string? NormalizeTestOutput( SyntaxNode syntaxNode )
+        private static string? NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting )
         {
-            var s = syntaxNode.NormalizeWhitespace().ToFullString();
+            if ( preserveFormatting )
+            {
+                return syntaxNode.ToFullString().Replace( "\r\n", "\n" );
+            }
+            else
+            {
+                var s = syntaxNode.NormalizeWhitespace().ToFullString();
 
-            s = _newLineRegex.Replace( s, "\n" );
-            s = _spaceRegex.Replace( s, " " );
+                s = _newLineRegex.Replace( s, "\n" );
+                s = _spaceRegex.Replace( s, " " );
 
-            return s;
+                return s;
+            }
         }
 
         public virtual void ExecuteAssertions( TestInput testInput, TestResult testResult )
@@ -148,6 +155,8 @@ namespace Caravela.TestFramework
                 throw new InvalidOperationException( "This method cannot be called when the test path is unknown." );
             }
 
+            var formatCode = testInput.Options.FormatOutput.GetValueOrDefault( true );
+            
             // Compare the "Target" region of the transformed code to the expected output.
             // If the region is not found then compare the complete transformed code.
             var sourceAbsolutePath = testInput.FullPath;
@@ -158,7 +167,7 @@ namespace Caravela.TestFramework
 
             var consolidatedTestOutput = testResult.GetConsolidatedTestOutput();
             var actualTransformedNonNormalizedText = consolidatedTestOutput.ToFullString();
-            var actualTransformedNormalizedSourceText = NormalizeTestOutput( consolidatedTestOutput );
+            var actualTransformedNormalizedSourceText = NormalizeTestOutput( consolidatedTestOutput, formatCode );
 
             // If the expectation file does not exist, create it with some placeholder content.
             if ( !File.Exists( expectedTransformedPath ) )
@@ -170,7 +179,7 @@ namespace Caravela.TestFramework
 
             // Read expectations from the file.
             var expectedNonNormalizedSourceText = File.ReadAllText( expectedTransformedPath );
-            var expectedTransformedSourceText = NormalizeTestOutput( expectedNonNormalizedSourceText );
+            var expectedTransformedSourceText = NormalizeTestOutput( expectedNonNormalizedSourceText, formatCode );
 
             // Update the file in obj/transformed if it is different.
             var actualTransformedPath = Path.Combine(
@@ -183,10 +192,11 @@ namespace Caravela.TestFramework
             Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );
 
             var storedTransformedSourceText =
-                File.Exists( actualTransformedPath ) ? NormalizeTestOutput( File.ReadAllText( actualTransformedPath ) ) : null;
+                File.Exists( actualTransformedPath ) ? NormalizeTestOutput( File.ReadAllText( actualTransformedPath ), formatCode ) : null;
 
             if ( expectedTransformedSourceText == actualTransformedNormalizedSourceText
-                 && storedTransformedSourceText != expectedNonNormalizedSourceText )
+                 && storedTransformedSourceText != expectedNonNormalizedSourceText
+                 && !formatCode )
             {
                 // Update the obj/transformed file to the non-normalized expected text, so that future call to update_transformed.txt
                 // does not overwrite any whitespace change.

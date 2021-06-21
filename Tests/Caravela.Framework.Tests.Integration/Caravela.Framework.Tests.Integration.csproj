@@ -56,6 +56,10 @@
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Tests\TestFramework\Formatting\Introductions.t.cs" />
+  </ItemGroup>
+
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
   
 </Project>

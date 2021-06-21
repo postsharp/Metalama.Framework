@@ -181,22 +181,22 @@ namespace Caravela.Framework.Impl.Transformations
 
         public static TypeSyntax GetSyntaxType( this IType type )
         {
-            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( type.GetSymbol() );
+            return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( type.GetSymbol() );
         }
 
         public static TypeSyntax GetSyntaxReturnType( this IMethod method )
         {
-            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( method.ReturnType.GetSymbol() );
+            return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( method.ReturnType.GetSymbol() );
         }
 
         public static TypeSyntax GetSyntaxReturnType( this IProperty property )
         {
-            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( property.Type.GetSymbol() );
+            return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( property.Type.GetSymbol() );
         }
 
         public static TypeSyntax GetSyntaxReturnType( this IEvent property )
         {
-            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( property.EventType.GetSymbol() );
+            return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( property.EventType.GetSymbol() );
         }
 
         public static TypeParameterListSyntax? GetSyntaxTypeParameterList( this IMethod method )
@@ -217,7 +217,7 @@ namespace Caravela.Framework.Impl.Transformations
                         p => Parameter(
                             List<AttributeListSyntax>(),
                             GetSyntaxModifierList( p ),
-                            (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( p.ParameterType.GetSymbol() ),
+                            LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( p.ParameterType.GetSymbol() ),
                             Identifier( p.Name! ),
                             null ) ) ) );
         }

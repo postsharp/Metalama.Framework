@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             // TODO: Introduced types?
-            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(
+            return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(
                 (ITypeSymbol) ((NamedType) this._overriddenDeclaration.ReturnType).Symbol );
         }
 
