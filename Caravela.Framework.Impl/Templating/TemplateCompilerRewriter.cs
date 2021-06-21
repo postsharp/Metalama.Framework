@@ -1306,10 +1306,11 @@ namespace Caravela.Framework.Impl.Templating
             return base.VisitIdentifierName( node );
         }
 
-        private ExpressionSyntax AddCallToSimplifierAnnotations( ExpressionSyntax expression ) => InvocationExpression(
-            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember(
-                nameof(TemplateSyntaxFactory.AddSimplifierAnnotations)),
-            ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
+        private ExpressionSyntax AddCallToSimplifierAnnotations( ExpressionSyntax expression )
+            => InvocationExpression(
+                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember(
+                    nameof(TemplateSyntaxFactory.AddSimplifierAnnotations) ),
+                ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
 
         /// <summary>
         /// Transforms a type or namespace so that it is fully qualified, but return <c>false</c> if the input <paramref name="node"/>
