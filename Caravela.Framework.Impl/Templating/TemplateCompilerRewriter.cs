@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression )
-            => CastExpression( targetType, CastExpression( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), expression ) );
+            => CastExpression( targetType, CastExpression( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), ParenthesizedExpression( expression ) ) );
 
         private static string NormalizeSpace( string statementComment )
         {
@@ -453,11 +453,7 @@ namespace Caravela.Framework.Impl.Templating
                         return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
                     }
 
-                    var invocation = InvocationExpression(
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            ParenthesizedExpression( CastFromDynamic( this.MetaSyntaxFactory.Type( typeof(IDynamicExpression) ), expression ) ),
-                            IdentifierName( nameof(IDynamicExpression.CreateExpression) ) ) );
+                    ArgumentListSyntax arguments;
 
                     if ( this._templateMemberClassifier.GetMetaMemberKind( expression ) == MetaMemberKind.This )
                     {
@@ -465,10 +461,17 @@ namespace Caravela.Framework.Impl.Templating
                         var expressionText = SyntaxFactoryEx.LiteralExpression( expression.ToString() );
                         var location = this._templateMetaSyntaxFactory.Location( this._syntaxTreeAnnotationMap.GetLocation( expression ) );
 
-                        invocation = invocation.WithArgumentList( ArgumentList( SeparatedList( new[] { Argument( expressionText ), Argument( location ) } ) ) );
+                        arguments = ArgumentList( SeparatedList( new[] { Argument( expressionText ), Argument( location ) } ) );
+                    }
+                    else
+                    {
+                        arguments = ArgumentList();
                     }
 
-                    return invocation;
+                    return ConditionalAccessExpression(
+                        ParenthesizedExpression( CastFromDynamic( this.MetaSyntaxFactory.Type( typeof(IDynamicExpression) ), expression ) ),
+                        InvocationExpression( MemberBindingExpression( IdentifierName( nameof(IDynamicExpression.CreateExpression) ) ) )
+                            .WithArgumentList( arguments ) );
 
                 case "String":
                     return CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind.StringLiteralExpression );
