@@ -11,5 +11,6 @@ namespace Caravela.Framework.Policies
     /// (Not implemented.)
     /// </summary>
     [Obsolete( "Not implemented." )]
+    [CompileTimeOnly]
     public interface ITypePolicyBuilder : IAspectBuilder<INamedType> { }
 }

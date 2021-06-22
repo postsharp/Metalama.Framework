@@ -147,6 +147,43 @@ namespace Caravela.Framework.Impl.Templating
             where T : SyntaxNode
             => node.WithAdditionalAnnotations( Simplifier.Annotation );
 
+        public static ExpressionSyntax RenderInterpolatedString( InterpolatedStringExpressionSyntax interpolatedString )
+        {
+            List<InterpolatedStringContentSyntax> contents = new( interpolatedString.Contents.Count );
+
+            foreach ( var content in interpolatedString.Contents )
+            {
+                switch ( content )
+                {
+                    case InterpolatedStringTextSyntax text:
+                        var previousIndex = contents.Count - 1;
+
+                        if ( contents.Count > 0 && contents[previousIndex] is InterpolatedStringTextSyntax previousText )
+                        {
+                            // If we have two adjacent text tokens, we need to merge them, otherwise reformatting will add a white space.
+                            
+                            var appendedText = previousText.TextToken.Text + text.TextToken.Text;
+
+                            contents[previousIndex] = previousText.WithTextToken(
+                                SyntaxFactory.Token( default, SyntaxKind.InterpolatedStringTextToken, appendedText, appendedText, default ) );
+                        }
+                        else
+                        {
+                            contents.Add( text );
+                        }
+                        
+                        break;
+                    
+                    case InterpolationSyntax interpolation:
+                        contents.Add( interpolation );
+
+                        break;
+                }
+            }
+
+            return interpolatedString.WithContents( SyntaxFactory.List( contents ) );
+        }
+
         private class InitializeCookie : IDisposable
         {
             public void Dispose()

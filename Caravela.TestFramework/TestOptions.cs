@@ -147,6 +147,11 @@ namespace Caravela.TestFramework
                         this.AddHtmlTitles = true;
 
                         break;
+                    
+                    case "FormatOutput":
+                        this.FormatOutput = true;
+                        
+                        break;
                 }
             }
         }

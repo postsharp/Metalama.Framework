@@ -9,6 +9,7 @@ namespace Caravela.Framework.Aspects
     /// Represents the metadata of an aspect class.
     /// </summary>
     [InternalImplement]
+    [CompileTimeOnly]
     public interface IAspectClass
     {
         /// <summary>

@@ -1085,7 +1085,7 @@ namespace Caravela.Framework.Impl.Templating
 
             this.Indent();
 
-            var result = InvocationExpression( this.MetaSyntaxFactory.SyntaxFactoryMethod( nameof(InterpolatedStringExpression) ) )
+            var createInterpolatedString = InvocationExpression( this.MetaSyntaxFactory.SyntaxFactoryMethod( nameof(InterpolatedStringExpression) ) )
                 .WithArgumentList(
                     ArgumentList(
                         SeparatedList<ArgumentSyntax>(
@@ -1097,12 +1097,16 @@ namespace Caravela.Framework.Impl.Templating
                                     .WithLeadingTrivia( this.GetIndentation() ),
                                 Token( SyntaxKind.CommaToken ).WithTrailingTrivia( GetLineBreak() ),
                                 Argument( this.Transform( node.StringEndToken ) ).WithLeadingTrivia( this.GetIndentation() )
-                            } ) ) )
+                            } ) ) );
+
+            var callRender = InvocationExpression(
+                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RenderInterpolatedString) ),
+                    ArgumentList( SingletonSeparatedList( Argument( createInterpolatedString ) ) ) )
                 .NormalizeWhitespace();
 
             this.Unindent();
 
-            return result;
+            return callRender;
         }
 
         public override SyntaxNode VisitSwitchStatement( SwitchStatementSyntax node )

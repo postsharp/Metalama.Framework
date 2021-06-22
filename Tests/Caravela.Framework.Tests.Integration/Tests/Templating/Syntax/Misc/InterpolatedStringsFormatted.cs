@@ -1,10 +1,11 @@
+// @FormatOutput
+
 using System;
 using System.Linq;
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 
-// TODO: Change the namespace
-namespace Caravela.Framework.Tests.Integration.Templating.InterpolatedString
+namespace Caravela.Framework.Tests.Integration.Templating.InterpolatedStringFormatted
 {
     class Aspect
     {
