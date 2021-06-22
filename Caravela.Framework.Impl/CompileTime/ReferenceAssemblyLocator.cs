@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             this.StandardAssemblyNames = this.CaravelaImplementationAssemblyNames
                 .Concat( _frameworkAssemblyName )
-                .Concat( this.SystemAssemblyPaths )
+                .Concat( this.SystemAssemblyPaths.Select( Path.GetFileNameWithoutExtension ) )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
             // Make sure all necessary assemblies are loaded in the current AppDomain.

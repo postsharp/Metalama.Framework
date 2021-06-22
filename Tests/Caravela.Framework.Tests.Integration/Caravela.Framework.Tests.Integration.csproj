@@ -57,6 +57,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Tests\Aspects\Initialize\Constructor.t.cs" />
     <None Include="Tests\Templating\Syntax\Misc\InterpolatedStringsFormatted.t.cs" />
     <None Include="Tests\TestFramework\Formatting\Introductions.t.cs" />
   </ItemGroup>
