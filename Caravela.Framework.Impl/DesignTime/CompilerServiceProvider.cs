@@ -44,17 +44,26 @@ namespace Caravela.Framework.Impl.DesignTime
 
             var directory = Path.Combine( Path.GetTempPath(), "Caravela", "Logs" );
 
-            RetryHelper.Retry(
-                () =>
-                {
-                    if ( !Directory.Exists( directory ) )
+            try
+            {
+                RetryHelper.Retry(
+                    () =>
                     {
-                        Directory.CreateDirectory( directory );
-                    }
-                } );
+                        if ( !Directory.Exists( directory ) )
+                        {
+                            Directory.CreateDirectory( directory );
+                        }
+                    } );
+                
+                var textWriter = File.CreateText(
+                    Path.Combine( directory, $"Caravela.{Process.GetCurrentProcess().ProcessName}.{pid}.log" ) );
 
-            var textWriter = File.CreateText( Path.Combine( directory, $"Caravela.Framework.DesignTime.{Process.GetCurrentProcess().ProcessName}.{pid}.log" ) );
-            Logger.Initialize( textWriter );
+                Logger.Initialize( textWriter );
+            }
+            catch
+            {
+                // Don't fail if we cannot initialize the log.
+            }
         }
 
         public Version Version { get; }

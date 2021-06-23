@@ -26,13 +26,13 @@ this.__Property__BackingField=value;    }
 }
 private int __Property__BackingField;
         [Log]
-        public string Field {get    {
+        public string? Field {get    {
     return this.__Field__BackingField;
     }
 
 set    {
         global::System.Console.WriteLine("Assigning Caravela.Framework.Tests.Integration.Aspects.Initialize.TwoIAspectImplementations.TargetCode.Field.set");
-        global::System.String _;
+        global::System.String? _;
 this.__Field__BackingField=value;    }
 }
-private string __Field__BackingField;    }
+private string? __Field__BackingField;    }

@@ -2,6 +2,8 @@ using System;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
 
+#pragma warning disable CS0169, CS8618
+
 namespace Caravela.Framework.Tests.Integration.Tests.Templating.Dynamic.Issue28742
 {
     

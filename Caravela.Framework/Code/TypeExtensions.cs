@@ -54,7 +54,7 @@ namespace Caravela.Framework.Code
         /// <param name="value">Must be explicitly cast to <c>object</c> otherwise the C# compiler will emit an error.</param>
         /// <returns></returns>
         [return: RunTimeOnly]
-        public static dynamic? Cast( this IType type, object value ) => type.Compilation.TypeFactory.Cast( type, value );
+        public static dynamic? Cast( this IType type, object? value ) => type.Compilation.TypeFactory.Cast( type, value );
 
         /// <summary>
         /// Generates the <c>default(T)</c> syntax for the type.

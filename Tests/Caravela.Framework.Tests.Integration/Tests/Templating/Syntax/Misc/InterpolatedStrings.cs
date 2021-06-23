@@ -3,6 +3,8 @@ using System.Linq;
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 
+#pragma warning disable CS0169
+
 // TODO: Change the namespace
 namespace Caravela.Framework.Tests.Integration.Templating.InterpolatedString
 {

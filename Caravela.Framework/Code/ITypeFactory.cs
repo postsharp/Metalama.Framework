@@ -58,6 +58,6 @@ namespace Caravela.Framework.Code
         /// <returns></returns>
         dynamic? DefaultValue( IType type );
 
-        dynamic? Cast( IType type, object value );
+        dynamic? Cast( IType type, object? value );
     }
 }

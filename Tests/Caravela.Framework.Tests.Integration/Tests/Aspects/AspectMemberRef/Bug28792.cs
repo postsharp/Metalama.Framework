@@ -25,7 +25,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.AspectMembersRef.Bu
         }
 
         [Template]
-        dynamic OverrideProperty
+        dynamic? OverrideProperty
         {
             get
             {

@@ -56,6 +56,6 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.TwoIAspectImpl
         public int Property { get; set; }
 
         [Log]
-        public string Field { get; set; }
+        public string? Field { get; set; }
     }
 }

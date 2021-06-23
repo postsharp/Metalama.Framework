@@ -134,7 +134,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         dynamic? ITypeFactory.DefaultValue( IType type ) => new DefaultDynamicExpression( type );
 
-        dynamic? ITypeFactory.Cast( IType type, object value ) => new CastDynamicExpression( type, value );
+        dynamic? ITypeFactory.Cast( IType type, object? value ) => new CastDynamicExpression( type, value );
 
         internal IAttribute GetAttribute( AttributeBuilder attributeBuilder )
             => (IAttribute) this._cache.GetOrAdd(

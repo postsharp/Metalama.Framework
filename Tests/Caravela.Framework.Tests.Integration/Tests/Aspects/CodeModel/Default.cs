@@ -20,7 +20,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.CodeModel.Default
     {
        
         [Override]
-        public TargetClass TargetMethod_Void(object o, decimal d, St s)
+        public TargetClass? TargetMethod_Void(object o, decimal d, St s)
         {
             return null;
         }
