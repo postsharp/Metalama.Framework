@@ -6,11 +6,10 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
+using System.Linq;
 using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
@@ -21,10 +20,12 @@ namespace Caravela.Framework.Tests.Integration.Runners
 {
     internal class HighlightingTestRunner : BaseTestRunner
     {
-        public HighlightingTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences )
-            : base( serviceProvider, projectDirectory, metadataReferences ) { }
-
-        protected override TestResult CreateTestResult() => new HighlightingTestResult();
+        public HighlightingTestRunner(
+            IServiceProvider serviceProvider,
+            string? projectDirectory,
+            IEnumerable<MetadataReference> metadataReferences,
+            ITestOutputHelper? logger )
+            : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
         public override TestResult RunTest( TestInput testInput )
         {
@@ -35,12 +36,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 return result;
             }
 
-            var templateSyntaxRoot = result.TemplateDocument!.GetSyntaxRootAsync().Result!;
-            var templateSemanticModel = result.TemplateDocument.GetSemanticModelAsync().Result!;
+            var templateDocument = result.SyntaxTrees.Single().InputDocument;
+            var templateSyntaxRoot = templateDocument.GetSyntaxRootAsync().Result!;
+            var templateSemanticModel = templateDocument.GetSemanticModelAsync().Result!;
 
             DiagnosticList diagnostics = new();
 
-            var templateCompiler = new TemplateCompiler( this.ServiceProvider, result.InitialCompilation! );
+            var templateCompiler = new TemplateCompiler( this.ServiceProvider, result.InputCompilation! );
 
             var templateCompilerSuccess = templateCompiler.TryAnnotate(
                 templateSyntaxRoot,
@@ -57,33 +59,43 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 return result;
             }
 
-            result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
+            result.SyntaxTrees.Single().AnnotatedSyntaxRoot = annotatedTemplateSyntax;
 
-            if ( this.ProjectDirectory != null )
-            {
-                var highlightedTemplateDirectory = Path.Combine(
-                    this.ProjectDirectory,
-                    "obj",
-                    "highlighted",
-                    Path.GetDirectoryName( testInput.TestName ) ?? "" );
+            this.WriteHtml( testInput, result );
 
-                var highlightedTemplatePath = Path.Combine(
-                    highlightedTemplateDirectory,
-                    Path.GetFileNameWithoutExtension( testInput.TestName ) + FileExtensions.Html );
+            return result;
+        }
 
-                Directory.CreateDirectory( Path.GetDirectoryName( highlightedTemplatePath ) );
+        public override void ExecuteAssertions( TestInput testInput, TestResult testResult )
+        {
+            Assert.NotNull( testInput.ProjectDirectory );
+            Assert.NotNull( testInput.RelativePath );
 
-                var sourceText = result.TemplateDocument.GetTextAsync().Result;
-                var classifier = new TextSpanClassifier( sourceText );
-                classifier.Visit( result.AnnotatedTemplateSyntax );
+            Assert.True( testResult.Success, testResult.ErrorMessage );
 
-                var textWriter = new StringWriter();
-                textWriter.WriteLine( "<html>" );
-                textWriter.WriteLine( "<head>" );
-                textWriter.WriteLine( "<style>" );
+            var sourceAbsolutePath = Path.Combine( testInput.ProjectDirectory!, testInput.RelativePath! );
 
-                textWriter.WriteLine(
-                    @"
+            var expectedHighlightedPath = Path.Combine(
+                Path.GetDirectoryName( sourceAbsolutePath )!,
+                Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.Html );
+
+            Assert.True( File.Exists( expectedHighlightedPath ), $"The file '{expectedHighlightedPath}' does not exist." );
+            var expectedHighlightedSource = File.ReadAllText( expectedHighlightedPath );
+
+            var htmlPath = testResult.SyntaxTrees.Single().OutputHtmlPath!;
+            var htmlContent = File.ReadAllText( htmlPath );
+
+            Assert.Equal( expectedHighlightedSource, htmlContent );
+        }
+
+        protected override void WriteHtmlProlog( TextWriter textWriter )
+        {
+            textWriter.WriteLine( "<html>" );
+            textWriter.WriteLine( "<head>" );
+            textWriter.WriteLine( "<style>" );
+
+            textWriter.WriteLine(
+                @"
 .caravelaClassification_CompileTime,
 .caravelaClassification_Conflict,
 .caravelaClassification_TemplateKeyword,
@@ -108,69 +120,30 @@ namespace Caravela.Framework.Tests.Integration.Runners
 {
     font-style: italic;
 }
+
+.legend 
+{
+    margin-top: 100px;
+}
 " );
 
-                textWriter.WriteLine( "</style>" );
-                textWriter.WriteLine( "</head>" );
-                textWriter.WriteLine( "<body><pre>" );
-
-                var i = 0;
-
-                foreach ( var classifiedSpan in classifier.ClassifiedTextSpans )
-                {
-                    if ( i < classifiedSpan.Span.Start )
-                    {
-                        textWriter.Write( sourceText.GetSubText( new TextSpan( i, classifiedSpan.Span.Start - i ) ) );
-                    }
-
-                    textWriter.Write(
-                        $"<span class='caravelaClassification_{classifiedSpan.Classification}'>"
-                        + WebUtility.HtmlEncode( sourceText.GetSubText( classifiedSpan.Span ).ToString() )
-                        + "</span>" );
-
-                    i = classifiedSpan.Span.End;
-                }
-
-                if ( i < sourceText.Length )
-                {
-                    textWriter.Write( sourceText.GetSubText( i ) );
-                }
-
-                textWriter.WriteLine();
-                textWriter.WriteLine();
-                textWriter.WriteLine( "Legend:" );
-
-                foreach ( var classification in Enum.GetValues( typeof(TextSpanClassification) ) )
-                {
-                    textWriter.WriteLine( $"<span class='{classification}'>{classification}</span>" );
-                }
-
-                textWriter.WriteLine( "</pre></body>" );
-                textWriter.WriteLine( "</html>" );
-
-                File.WriteAllText( highlightedTemplatePath, textWriter.ToString() );
-                ((HighlightingTestResult) result).OutputHtml = textWriter.ToString();
-            }
-
-            return result;
+            textWriter.WriteLine( "</style>" );
+            textWriter.WriteLine( "</head>" );
+            textWriter.WriteLine( "<body>" );
         }
 
-        public override void ExecuteAssertions( TestInput testInput, TestResult testResult, ITestOutputHelper logger )
+        protected override void WriteHtmlEpilogue( TextWriter textWriter )
         {
-            Assert.NotNull( testInput.ProjectDirectory );
-            Assert.NotNull( testInput.RelativePath );
+            textWriter.WriteLine( "<p class='legend'>Legend:</p>" );
+            textWriter.WriteLine( "<pre>" );
 
-            Assert.True( testResult.Success, testResult.ErrorMessage );
+            foreach ( var classification in Enum.GetValues( typeof(TextSpanClassification) ) )
+            {
+                textWriter.WriteLine( $"<span class='{classification}'>{classification}</span>" );
+            }
 
-            var sourceAbsolutePath = Path.Combine( testInput.ProjectDirectory!, testInput.RelativePath! );
-
-            var expectedHighlightedPath = Path.Combine(
-                Path.GetDirectoryName( sourceAbsolutePath )!,
-                Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.Html );
-
-            var expectedHighlightedSource = File.ReadAllText( expectedHighlightedPath );
-
-            Assert.Equal( expectedHighlightedSource, ((HighlightingTestResult) testResult).OutputHtml );
+            textWriter.WriteLine( "</pre></body>" );
+            textWriter.WriteLine( "</html>" );
         }
     }
 }

@@ -12,6 +12,7 @@ namespace Caravela.Framework.Aspects
     /// method.
     /// </summary>
     [InternalImplement]
+    [CompileTimeOnly]
     public interface IAspectDependencyBuilder
     {
         [Obsolete( "Not implemented." )]

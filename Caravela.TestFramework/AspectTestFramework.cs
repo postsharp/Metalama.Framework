@@ -18,13 +18,25 @@ namespace Caravela.TestFramework
 
         public AspectTestFramework( IMessageSink messageSink )
         {
+            const string debugEnvironmentVariable = "DebugCaravelaTestFramework";
+
+            if ( !string.IsNullOrEmpty( Environment.GetEnvironmentVariable( debugEnvironmentVariable ) ) )
+            {
+                messageSink.Trace( $"Environment variable '{debugEnvironmentVariable}' detected. Attaching debugger." );
+                Debugger.Launch();
+            }
+
             if ( Process.GetCurrentProcess().ProcessName.StartsWith( "ResharperTestRunner", StringComparison.OrdinalIgnoreCase ) )
             {
+                messageSink.Trace( $"Resharper detected. Using the legacy test runner." );
+
                 this._implementation = new XunitTestFramework( messageSink );
             }
             else
             {
-                this._implementation = new AspectTestFrameworkVsImpl();
+                messageSink.Trace( $"Resharper NOT detected. Using the customized test runner." );
+
+                this._implementation = new AspectTestFrameworkVsImpl( messageSink );
             }
         }
 

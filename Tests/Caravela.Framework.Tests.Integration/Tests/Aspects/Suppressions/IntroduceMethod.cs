@@ -34,7 +34,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.OverrideMeth
         }
     }
     
-    [TestOutput]
+    // <target>
     [SuppressWarning]
     internal class TargetClass
     {

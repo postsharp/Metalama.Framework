@@ -1,9 +1,6 @@
-[TestOutput]
 [Introduction]
 internal static class TargetClass
 {
-
-
     public static global::System.Int32 DefaultScope()
     {
         global::System.Console.WriteLine("This is introduced method.");

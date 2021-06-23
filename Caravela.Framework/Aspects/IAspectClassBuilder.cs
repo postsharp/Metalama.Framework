@@ -11,6 +11,7 @@ namespace Caravela.Framework.Aspects
     /// the aspect class, i.e. those that do not depend on the aspect instance state.
     /// </summary>
     [InternalImplement]
+    [CompileTimeOnly]
     public interface IAspectClassBuilder
     {
         /// <summary>

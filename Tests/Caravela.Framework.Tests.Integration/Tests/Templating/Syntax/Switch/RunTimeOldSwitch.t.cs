@@ -1,3 +1,4 @@
+int Method(int a)
 {
     int i = 1;
     switch (i)

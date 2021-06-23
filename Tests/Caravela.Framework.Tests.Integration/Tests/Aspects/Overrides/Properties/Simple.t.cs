@@ -1,8 +1,6 @@
-[TestOutput]
 internal class TargetClass
 {
     private int _field;
-
     [Override]
     public int Property
     {

@@ -37,6 +37,8 @@ namespace Caravela.TestFramework
 
         public ImmutableArray<object> PlugIns => ImmutableArray<object>.Empty;
 
+        public bool IsFrameworkEnabled => true;
+
         public void Dispose()
         {
             if ( Directory.Exists( this.CompileTimeProjectCacheDirectory ) )

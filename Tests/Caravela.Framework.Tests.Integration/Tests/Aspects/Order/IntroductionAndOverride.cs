@@ -111,7 +111,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
         }
     }
 
-    [TestOutput]
+    // <target>
     [First]
     [Second]
     [Third]

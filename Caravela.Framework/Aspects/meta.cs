@@ -45,7 +45,7 @@ namespace Caravela.Framework.Aspects
         public static dynamic Proceed() => _proceedImplementation.Value ?? throw NewInvalidOperationException();
 
         /// <summary>
-        /// Requests the debugger to break. If no debugger is attached to the current project, launch the JIT debugger dialog.
+        /// Requests the debugger to break, if any debugger is attached to the current process.
         /// </summary>
         [TemplateKeyword]
         public static void DebugBreak() => CurrentContext.DebugBreak();
@@ -111,7 +111,7 @@ namespace Caravela.Framework.Aspects
         /// Gets the target type of the advice. If the advice is applied to a member, this property returns the declaring
         /// type of the member.
         /// </summary>
-        public static INamedType Type => CurrentContext.Type;
+        public static INamedType NamedType => CurrentContext.Type;
 
         /// <summary>
         /// Gets the code model of the whole compilation.

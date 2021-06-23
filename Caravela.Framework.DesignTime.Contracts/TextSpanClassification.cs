@@ -47,6 +47,11 @@ namespace Caravela.Framework.DesignTime.Contracts
         /// <summary>
         /// A text span has several categories (not implemented).
         /// </summary>
-        Conflict
+        Conflict,
+
+        /// <summary>
+        /// An excluded region, which should not be written to the output file (used for HTML generation).
+        /// </summary>
+        Excluded
     }
 }

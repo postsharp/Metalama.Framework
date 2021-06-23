@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl
             };
         }
 
-        private AspectInstanceResult EvaluateAspect<T>( T targetDeclaration, AspectInstance aspect, CancellationToken cancellationToken )
+        private AspectInstanceResult EvaluateAspect<T>( T targetDeclaration, AspectInstance aspectInstance, CancellationToken cancellationToken )
             where T : class, IDeclaration
         {
             static AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            if ( aspect.Aspect is not IAspect<T> aspectOfT )
+            if ( aspectInstance.Aspect is not IAspect<T> aspectOfT )
             {
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
 
@@ -80,13 +80,13 @@ namespace Caravela.Framework.Impl
                 return CreateResultForError( diagnostic );
             }
 
-            var diagnosticSink = new UserDiagnosticSink( aspect.AspectClass.Project, targetDeclaration );
+            var diagnosticSink = new UserDiagnosticSink( aspectInstance.AspectClass.Project, targetDeclaration );
 
             using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
             {
                 var declarativeAdvices =
                     this._declarativeAdviceAttributes
-                        .Select( x => CreateDeclarativeAdvice( aspect, diagnosticSink, targetDeclaration, x.Attribute, x.Member ) )
+                        .Select( x => CreateDeclarativeAdvice( aspectInstance, diagnosticSink, targetDeclaration, x.Attribute, x.Member ) )
                         .WhereNotNull()
                         .ToArray();
 
@@ -97,7 +97,7 @@ namespace Caravela.Framework.Impl
                     diagnosticSink,
                     declarativeAdvices,
                     compilationModel.Factory.GetNamedType( this.AspectType ),
-                    aspect );
+                    aspectInstance );
 
                 var aspectBuilder = new AspectBuilder<T>( targetDeclaration, diagnosticSink, declarativeAdvices, adviceFactory, cancellationToken );
 
@@ -107,6 +107,8 @@ namespace Caravela.Framework.Impl
                 }
                 catch ( InvalidUserCodeException e )
                 {
+                    aspectInstance.Skip();
+
                     return
                         new AspectInstanceResult(
                             false,
@@ -123,7 +125,14 @@ namespace Caravela.Framework.Impl
                     return CreateResultForError( diagnostic );
                 }
 
-                return aspectBuilder.ToResult();
+                var aspectResult = aspectBuilder.ToResult();
+
+                if ( !aspectResult.Success )
+                {
+                    aspectInstance.Skip();
+                }
+
+                return aspectResult;
             }
         }
 

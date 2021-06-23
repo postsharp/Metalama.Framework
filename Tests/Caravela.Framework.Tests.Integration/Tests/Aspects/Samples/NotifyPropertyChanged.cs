@@ -49,7 +49,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
         }
     }
 
-    [TestOutput]
+    // <target>
     [NotifyPropertyChanged]
     class Car
     {

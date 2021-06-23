@@ -54,7 +54,17 @@ namespace Caravela.Framework.Impl.Serialization
                 return true;
             }
 
-            var id = type.GetDocumentationCommentId().AssertNotNull();
+            if ( type is IArrayTypeSymbol arrayType )
+            {
+                return this.IsSerializable( arrayType.ElementType, diagnosticLocation, diagnosticAdder );
+            }
+
+            var id = type.GetDocumentationCommentId();
+
+            if ( id == null )
+            {
+                throw new AssertionFailedException( $"Cannot get a documentation id for {type}." );
+            }
 
             if ( this._serializableTypes.Contains( id ) )
             {

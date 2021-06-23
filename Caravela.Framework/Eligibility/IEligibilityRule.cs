@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using System;
 
 namespace Caravela.Framework.Eligibility
@@ -11,6 +12,7 @@ namespace Caravela.Framework.Eligibility
     /// </summary>
     /// <typeparam name="T">The type of object that the extension can be applied to.</typeparam>
     [Obsolete( "Not implemented." )]
+    [CompileTimeOnly]
     public interface IEligibilityRule<in T>
     {
         /// <summary>

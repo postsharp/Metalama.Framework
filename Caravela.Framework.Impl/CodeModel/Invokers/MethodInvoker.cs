@@ -6,7 +6,6 @@ using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Invokers
@@ -30,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             }
 
             var name = this._method.GenericArguments.Any()
-                ? (SimpleNameSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.GenericName(
+                ? LanguageServiceFactory.CSharpSyntaxGenerator.GenericName(
                     this._method.Name,
                     this._method.GenericArguments.Select( a => a.GetSymbol() ) )
                 : SyntaxFactory.IdentifierName( this._method.Name );

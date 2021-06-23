@@ -199,7 +199,7 @@ Target.cs:
                 assemblyName );
 
             using DesignTimeAspectPipelineCache cache = new( new UnloadableCompileTimeDomain() );
-            var pipeline = cache.GetOrCreatePipeline( projectOptions );
+            var pipeline = cache.GetOrCreatePipeline( projectOptions )!;
 
             // First execution of the pipeline.
             var results = cache.GetSyntaxTreeResults( compilation, projectOptions );

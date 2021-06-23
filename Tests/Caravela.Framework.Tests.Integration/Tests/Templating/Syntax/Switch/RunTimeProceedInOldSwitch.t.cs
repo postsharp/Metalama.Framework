@@ -1,3 +1,4 @@
+int Method(int a)
 {
     int i = 1;
     switch (i)
@@ -6,10 +7,10 @@
             global::System.Console.WriteLine("0");
             break;
         case 1:
-            {
-                global::System.Int32 x;
-                x = this.Method(a);
-            }
+        {
+            global::System.Int32 x;
+            x = this.Method(a);
+        }
 
             break;
     }

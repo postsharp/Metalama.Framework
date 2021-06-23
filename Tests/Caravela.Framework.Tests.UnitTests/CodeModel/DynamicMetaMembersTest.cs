@@ -3,9 +3,9 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using Xunit;
 
@@ -47,14 +47,14 @@ class TargetCode
             // Test normal case.
             AssertEx.DynamicEquals(
                 toString.Invokers.Final.Invoke(
-                    new RuntimeExpression( (ExpressionSyntax) generator.ThisExpression() ),
-                    new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( "x" ) ) ),
+                    new RuntimeExpression( generator.ThisExpression() ),
+                    new RuntimeExpression( generator.LiteralExpression( "x" ) ) ),
                 @"((global::TargetCode)(this)).ToString((global::System.String)(""x""))" );
 
             AssertEx.DynamicEquals(
                 toString.Invokers.Final.Invoke(
-                    new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( 42 ) ),
-                    new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( 43 ) ) ),
+                    new RuntimeExpression( generator.LiteralExpression( 42 ) ),
+                    new RuntimeExpression( generator.LiteralExpression( 43 ) ) ),
                 @"((global::TargetCode)(42)).ToString((global::System.String)(43))" );
 
             // Test static call.
@@ -63,15 +63,15 @@ class TargetCode
                 @"global::TargetCode.Foo()" );
 
             // Test exception related to the 'instance' parameter.
-            AssertEx.ThrowsWithDiagnostic(
-                GeneralDiagnosticDescriptors.CannotProvideInstanceForStaticMember,
-                () => fooMethod.Invokers.Final.Invoke( new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( 42 ) ) ) );
+            AssertEx.DynamicEquals(
+                fooMethod.Invokers.Final.Invoke( new RuntimeExpression( SyntaxFactoryEx.Null ) ),
+                @"global::TargetCode.Foo()" );
 
             AssertEx.ThrowsWithDiagnostic(
                 GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember,
                 () => toString.Invokers.Final.Invoke(
                     null,
-                    new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( "x" ) ) ) );
+                    new RuntimeExpression( generator.LiteralExpression( "x" ) ) ) );
 
             // Test in/out.
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
@@ -79,16 +79,16 @@ class TargetCode
             AssertEx.DynamicEquals(
                 byRefMethod.Invokers.Final.Invoke(
                     null,
-                    new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "x" ), intType, true ),
-                    new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "y" ), intType, true ) ),
+                    new RuntimeExpression( generator.IdentifierName( "x" ), intType, true ),
+                    new RuntimeExpression( generator.IdentifierName( "y" ), intType, true ) ),
                 @"global::TargetCode.ByRef(out x, ref y)" );
 
             AssertEx.ThrowsWithDiagnostic(
                 GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter,
                 () => byRefMethod.Invokers.Final.Invoke(
                     null,
-                    new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "x" ) ),
-                    new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "y" ) ) ) );
+                    new RuntimeExpression( generator.IdentifierName( "x" ) ),
+                    new RuntimeExpression( generator.IdentifierName( "y" ) ) ) );
         }
 
         [Fact]

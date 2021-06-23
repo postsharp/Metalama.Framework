@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -36,7 +37,7 @@ namespace Caravela.AspectWorkbench.CodeEditor
                             typeof(meta).Assembly,
                             typeof(TemplateSyntaxFactory).Assembly,
                             typeof(TestTemplateAttribute).Assembly,
-                            typeof(TestOutputAttribute).Assembly
+                            typeof(TestTemplateCompiler).Assembly
                         } ) );
 
             return host;

@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
@@ -16,8 +17,12 @@ namespace Caravela.Framework.Tests.Integration.Runners
 {
     internal partial class AnnotationUnitTestRunner : BaseTestRunner
     {
-        public AnnotationUnitTestRunner( IServiceProvider serviceProvider, string projectDirectory, IEnumerable<MetadataReference> metadataReferences )
-            : base( serviceProvider, projectDirectory, metadataReferences ) { }
+        public AnnotationUnitTestRunner(
+            IServiceProvider serviceProvider,
+            string projectDirectory,
+            IEnumerable<MetadataReference> metadataReferences,
+            ITestOutputHelper? logger )
+            : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
         public override TestResult RunTest( TestInput testInput )
         {
@@ -26,7 +31,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var testSourceRootWithAddedTrivia = triviaAdder.Visit( tree.GetRoot() );
             var testSourceWithAddedTrivia = testSourceRootWithAddedTrivia!.ToFullString();
 
-            var testInputWithAddedTrivia = TestInput.FromSource( testInput.TestName, testSourceWithAddedTrivia );
+            var testInputWithAddedTrivia = TestInput.FromSource( testSourceWithAddedTrivia, testInput.FullPath );
 
             var result = base.RunTest( testInputWithAddedTrivia );
 
@@ -35,12 +40,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 return result;
             }
 
-            var templateSyntaxRoot = result.TemplateDocument!.GetSyntaxRootAsync().Result!;
-            var templateSemanticModel = result.TemplateDocument.GetSemanticModelAsync().Result!;
+            var templateDocument = result.SyntaxTrees.Single().InputDocument;
+            var templateSyntaxRoot = templateDocument.GetSyntaxRootAsync().Result!;
+            var templateSemanticModel = templateDocument.GetSemanticModelAsync().Result!;
 
             DiagnosticList diagnostics = new();
 
-            TemplateCompiler templateCompiler = new( this.ServiceProvider, result.InitialCompilation! );
+            TemplateCompiler templateCompiler = new( this.ServiceProvider, result.InputCompilation! );
 
             var templateCompilerSuccess = templateCompiler.TryAnnotate(
                 templateSyntaxRoot,
@@ -57,16 +63,17 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 return result;
             }
 
-            result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
+            result.SyntaxTrees.Single().AnnotatedSyntaxRoot = annotatedTemplateSyntax;
 
             return result;
         }
 
-        public override void ExecuteAssertions( TestInput testInput, TestResult testResult, ITestOutputHelper logger )
+        public override void ExecuteAssertions( TestInput testInput, TestResult testResult )
         {
             // Annotation shouldn't do any code transformations.
             // Otherwise, highlighted spans don't match the actual code.
-            Assert.Equal( testResult.TemplateDocument!.GetSyntaxRootAsync().Result!.ToString(), testResult.AnnotatedTemplateSyntax !.ToString() );
+            var testSyntaxTree = testResult.SyntaxTrees.Single();
+            Assert.Equal( testSyntaxTree.InputSyntaxTree.GetRoot().ToString(), testSyntaxTree.AnnotatedSyntaxRoot !.ToString() );
         }
     }
 }

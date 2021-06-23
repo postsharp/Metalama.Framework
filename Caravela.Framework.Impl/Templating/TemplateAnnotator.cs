@@ -91,7 +91,7 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        private void SetLocalSymbolScope( ISymbol symbol, TemplatingScope scope, SyntaxToken identifier )
+        private void SetLocalSymbolScope( ISymbol symbol, TemplatingScope scope )
         {
             if ( this._localScopes.TryGetValue( symbol, out _ ) )
             {
@@ -99,11 +99,6 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             this._localScopes.Add( symbol, scope );
-
-            if ( scope == TemplatingScope.CompileTimeOnly && identifier.Kind() != SyntaxKind.None )
-            {
-                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.VariableIsCompileTime, identifier, symbol );
-            }
         }
 
         /// <summary>
@@ -435,7 +430,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( symbol != null )
             {
-                this.SetLocalSymbolScope( symbol, scope, default );
+                this.SetLocalSymbolScope( symbol, scope );
             }
 
             // Anonymous objects are currently run-time-only unless they are in a compile-time-only scope -- until we implement more complex rules.
@@ -588,7 +583,16 @@ namespace Caravela.Framework.Impl.Templating
                     scope = this.GetNodeScope( transformedExpression );
                 }
 
-                return node.Update( transformedExpression, node.OperatorToken, transformedName )
+                // If both sides of the member are template keywords, display the . as a template keyword too.
+                var transformedOperatorToken = node.OperatorToken;
+
+                if ( transformedExpression.GetColorFromAnnotation() == TextSpanClassification.TemplateKeyword &&
+                     transformedName.GetColorFromAnnotation() == TextSpanClassification.TemplateKeyword )
+                {
+                    transformedOperatorToken = transformedOperatorToken.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
+                }
+
+                return node.Update( transformedExpression, transformedOperatorToken, transformedName )
                     .AddScopeAnnotation( scope );
             }
         }
@@ -711,17 +715,19 @@ namespace Caravela.Framework.Impl.Templating
 
                     var argumentType = parameter?.Type ?? this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type;
 
-                    ArgumentSyntax transformedArgument;
+                    ExpressionSyntax transformedArgumentValue;
 
-                    // dynamic or dynamic[]
+                    // Transform the argument value.
                     if ( expressionScope.IsDynamic() || this._templateMemberClassifier.IsDynamicType( argumentType ) )
                     {
+                        // dynamic or dynamic[]
+
                         using ( this.WithScopeContext(
                             ScopeContext.CreatePreferredRunTimeScope(
                                 this._currentScopeContext,
                                 $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString()}'" ) ) )
                         {
-                            transformedArgument = (ArgumentSyntax) this.VisitArgument( argument )!;
+                            transformedArgumentValue = this.Visit( argument.Expression )!;
                         }
                     }
                     else if ( expressionScope.IsRunTime() )
@@ -731,7 +737,7 @@ namespace Caravela.Framework.Impl.Templating
                                 this._currentScopeContext,
                                 $"argument of the run-time method '{node.Expression}'" ) ) )
                         {
-                            transformedArgument = (ArgumentSyntax) this.VisitArgument( argument )!;
+                            transformedArgumentValue = this.Visit( argument.Expression )!;
                         }
                     }
                     else
@@ -739,11 +745,15 @@ namespace Caravela.Framework.Impl.Templating
                         using ( this.WithScopeContext(
                             ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a compile-time expression '{node.Expression}'" ) ) )
                         {
-                            transformedArgument = (ArgumentSyntax) this.VisitArgument( argument )!;
+                            transformedArgumentValue = this.Visit( argument.Expression )!;
                         }
                     }
 
-                    transformedArgument = transformedArgument.WithTriviaFrom( argument );
+                    // The scope of the argument itself copies the scope of the method.
+                    var transformedArgument = argument.WithExpression( transformedArgumentValue )
+                        .WithTriviaFrom( argument )
+                        .AddScopeAnnotation( expressionScope );
+
                     transformedArguments.Add( transformedArgument );
                 }
 
@@ -852,7 +862,7 @@ namespace Caravela.Framework.Impl.Templating
 
             var forEachScope = this.GetNodeScope( annotatedExpression ).ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
 
-            this.SetLocalSymbolScope( local, forEachScope, node.Identifier );
+            this.SetLocalSymbolScope( local, forEachScope );
 
             this.RequireLoopScope( node.Expression, forEachScope, "foreach" );
 
@@ -945,7 +955,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( symbol != null )
             {
-                this.SetLocalSymbolScope( symbol, scope, node.Identifier );
+                this.SetLocalSymbolScope( symbol, scope );
 
                 if ( scope == TemplatingScope.CompileTimeOnly )
                 {
@@ -1027,7 +1037,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // Mark the local variable symbol.
-            this.SetLocalSymbolScope( local, localScope, node.Identifier );
+            this.SetLocalSymbolScope( local, localScope );
 
             var transformedIdentifier = node.Identifier;
 
@@ -1110,9 +1120,16 @@ namespace Caravela.Framework.Impl.Templating
             return node;
         }
 
-        public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
+        private T? VisitMemberDeclaration<T>( T node, Func<T, SyntaxNode?> callBase )
+            where T : SyntaxNode
         {
             var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node )!;
+
+            if ( symbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } )
+            {
+                // We have an accessor, but we need the property or the event.
+                symbol = associatedSymbol;
+            }
 
             if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) != TemplateMemberKind.None )
             {
@@ -1121,7 +1138,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 try
                 {
-                    return base.VisitMethodDeclaration( node )!.AddIsTemplateAnnotation();
+                    return (T) callBase( node )!.AddIsTemplateAnnotation();
                 }
                 finally
                 {
@@ -1130,9 +1147,21 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                return base.VisitMethodDeclaration( node );
+                return (T?) callBase( node );
             }
         }
+
+        public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
+            => this.VisitMemberDeclaration( node, n => base.VisitMethodDeclaration( n ) );
+
+        public override SyntaxNode? VisitAccessorDeclaration( AccessorDeclarationSyntax node )
+            => this.VisitMemberDeclaration( node, n => base.VisitAccessorDeclaration( n ) );
+
+        public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+            => this.VisitMemberDeclaration( node, n => base.VisitPropertyDeclaration( n ) );
+
+        public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
+            => this.VisitMemberDeclaration( node, n => base.VisitEventDeclaration( n ) );
 
         private static bool IsMutatingUnaryOperator( SyntaxToken token ) => token.Kind() is SyntaxKind.PlusPlusToken or SyntaxKind.MinusMinusToken;
 

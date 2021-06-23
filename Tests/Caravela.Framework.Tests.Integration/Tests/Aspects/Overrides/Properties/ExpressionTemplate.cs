@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
         }
     }
 
-    [TestOutput]
+    // <target>
     public class Target
     {
         [Test]

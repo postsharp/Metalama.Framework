@@ -6,6 +6,7 @@ namespace Caravela.Framework.Aspects
     /// <summary>
     /// Enumerates the scenarios in which an aspect or a template can be executed.
     /// </summary>
+    [CompileTimeOnly]
     public enum AspectExecutionScenario
     {
         /// <summary>

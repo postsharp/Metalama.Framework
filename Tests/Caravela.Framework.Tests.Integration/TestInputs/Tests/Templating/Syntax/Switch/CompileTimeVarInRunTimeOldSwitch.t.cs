@@ -1,0 +1,2 @@
+// TestTemplateCompiler.TryCompile failed. 
+// Error CR0108 on `compileTimeVar`: `Cannot set the compile-time variable 'compileTimeVar' here because it is part of a block whose execution depends on the run-time condition 'switch ( i )'. Move the assignment out of the run-time-conditional block.`

@@ -16,7 +16,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Applying.AppliedToCompilat
     }
 
 
-    [TestOutput]
+    // <target>
     internal class TargetClass
     {
     }

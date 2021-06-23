@@ -4,12 +4,17 @@
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using System;
+using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Runners
 {
     internal class HighlightingTestRunnerFactory : ITestRunnerFactory
     {
-        public BaseTestRunner CreateTestRunner( IServiceProvider serviceProvider, string? projectDirectory, MetadataReference[] metadataReferences )
-            => new HighlightingTestRunner( serviceProvider, projectDirectory, metadataReferences );
+        public BaseTestRunner CreateTestRunner(
+            IServiceProvider serviceProvider,
+            string? projectDirectory,
+            MetadataReference[] metadataReferences,
+            ITestOutputHelper? logger )
+            => new HighlightingTestRunner( serviceProvider, projectDirectory, metadataReferences, logger );
     }
 }

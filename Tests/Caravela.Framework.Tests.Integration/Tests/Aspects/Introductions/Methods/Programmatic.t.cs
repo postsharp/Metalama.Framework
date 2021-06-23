@@ -1,9 +1,6 @@
-[TestOutput]
 [Introduction]
 internal class TargetClass
 {
-
-
     public global::System.Object IntroducedMethod_Parameters(global::System.Int32 x, global::System.Int32 y)
     {
         global::System.Console.WriteLine("This is introduced method.");

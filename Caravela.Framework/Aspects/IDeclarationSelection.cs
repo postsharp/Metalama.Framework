@@ -15,6 +15,7 @@ namespace Caravela.Framework.Aspects
     /// <typeparam name="TDeclaration"></typeparam>
     [Obsolete( "Not implemented." )]
     [InternalImplement]
+    [CompileTimeOnly]
     public interface IDeclarationSelection<TDeclaration>
         where TDeclaration : class, IDeclaration
     {

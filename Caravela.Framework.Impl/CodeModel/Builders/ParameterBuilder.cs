@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
-            return (ParameterSyntax) syntaxGenerator.ParameterDeclaration(
+            return syntaxGenerator.ParameterDeclaration(
                 this.Name,
                 syntaxGenerator.TypeExpression( this.ParameterType.GetSymbol() ),
                 this.DefaultValue.ToExpressionSyntax( this.Compilation ),

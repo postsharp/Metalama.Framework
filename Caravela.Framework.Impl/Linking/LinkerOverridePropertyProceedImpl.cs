@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.Linking
         TypeSyntax IProceedImpl.CreateTypeSyntax()
         {
             // TODO: Introduced types?
-            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( (ITypeSymbol) ((NamedType) this.ContainingProperty.Type).Symbol );
+            return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( (ITypeSymbol) ((NamedType) this.ContainingProperty.Type).Symbol );
         }
 
         StatementSyntax IProceedImpl.CreateAssignStatement( SyntaxToken returnValueLocalName )
@@ -78,18 +78,19 @@ namespace Caravela.Framework.Impl.Linking
                 case MethodKind.PropertyGet:
                     // Emit `return <original_property_access>;`.
                     return
-                        ReturnStatement( this.CreateOriginalPropertyAccess( LinkerAnnotationTargetKind.PropertyGetAccessor ) );
+                        ReturnStatement( this.CreateOriginalPropertyAccess( LinkerAnnotationTargetKind.PropertyGetAccessor ) ).NormalizeWhitespace();
 
                 case MethodKind.PropertySet:
                     // Emit `{ <original_property_access> = value; return; }`.
                     return
                         Block(
-                            ExpressionStatement(
-                                AssignmentExpression(
-                                    SyntaxKind.SimpleAssignmentExpression,
-                                    this.CreateOriginalPropertyAccess( LinkerAnnotationTargetKind.PropertySetAccessor ),
-                                    IdentifierName( "value" ) ) ),
-                            ReturnStatement() );
+                                ExpressionStatement(
+                                    AssignmentExpression(
+                                        SyntaxKind.SimpleAssignmentExpression,
+                                        this.CreateOriginalPropertyAccess( LinkerAnnotationTargetKind.PropertySetAccessor ),
+                                        IdentifierName( "value" ) ) ),
+                                ReturnStatement() )
+                            .NormalizeWhitespace();
 
                 default:
                     throw new AssertionFailedException( $"{this._overriddenDeclaration.MethodKind}" );

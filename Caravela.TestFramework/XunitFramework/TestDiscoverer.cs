@@ -17,10 +17,12 @@ namespace Caravela.TestFramework.XunitFramework
     {
         private static readonly HashSet<string> _excludedDirectoryNames = new( StringComparer.OrdinalIgnoreCase ) { "bin", "obj" };
         private readonly IAssemblyInfo _assembly;
+        private readonly IMessageSink? _messageSink;
 
-        public TestDiscoverer( IAssemblyInfo assembly )
+        public TestDiscoverer( IAssemblyInfo assembly, IMessageSink? messageSink = null )
         {
             this._assembly = assembly;
+            this._messageSink = messageSink;
 
             var attrib = assembly.GetCustomAttributes( typeof(TargetFrameworkAttribute) ).FirstOrDefault();
 
@@ -77,28 +79,67 @@ namespace Caravela.TestFramework.XunitFramework
             bool isXUnitFrameworkDiscovery,
             ImmutableHashSet<string> excludedSubdirectories )
         {
+            this._messageSink?.Trace( $"Discovering tests in directory '{subDirectory}'." );
+
             var baseDirectory = this.FindProjectDirectory();
             TestDirectoryOptionsReader reader = new( baseDirectory );
             TestFactory factory = new( reader, this._assembly );
 
             void AddTestsInDirectory( string directory )
             {
-                var options = reader.GetDirectoryOptions( directory );
-
-                // If the directory is excluded, don't continue.
-                if ( options.Exclude.GetValueOrDefault() ||
-                     _excludedDirectoryNames.Contains( Path.GetFileName( directory ) ) )
+                // Skip bin, obj.
+                if ( _excludedDirectoryNames.Contains( Path.GetFileName( directory ) ) )
                 {
                     return;
                 }
 
-                // Process children directories.
+                var options = reader.GetDirectoryOptions( directory );
+
+                // If the directory is excluded, don't continue.
+                if ( options.Exclude.GetValueOrDefault() )
+                {
+                    this._messageSink?.Trace( $"Child directory '{directory}' excluded because of the Exclude option." );
+
+                    return;
+                }
+
+                this._messageSink?.Trace( $"Processing directory '{directory}'." );
+
+                // If the directory is included, index the files.
                 var runnerFileName = "_Runner.cs";
+
+                foreach ( var testPath in Directory.EnumerateFiles( directory, "*.cs" ) )
+                {
+                    var fileName = Path.GetFileName( testPath );
+                    var firstDotPosition = fileName.IndexOf( '.' );
+                    var extension = fileName.Substring( firstDotPosition );
+
+                    if ( extension != ".cs" )
+                    {
+                        // Skipping.
+
+                        continue;
+                    }
+
+                    if ( Path.GetFileName( testPath ).Equals( runnerFileName, StringComparison.OrdinalIgnoreCase ) )
+                    {
+                        continue;
+                    }
+
+                    this._messageSink?.Trace( $"Including the file '{testPath}'" );
+
+                    var testCase = new TestCase( factory, Path.GetRelativePath( baseDirectory, testPath ) );
+                    onTestCaseDiscovered( testCase );
+                }
+
+                // Process children directories.
 
                 foreach ( var nestedDir in Directory.EnumerateDirectories( directory ) )
                 {
                     if ( excludedSubdirectories.Contains( nestedDir ) )
                     {
+                        this._messageSink?.Trace( $"Child directory '{nestedDir}' excluded because it is covered by other tests." );
+
                         continue;
                     }
 
@@ -109,24 +150,13 @@ namespace Caravela.TestFramework.XunitFramework
 
                         if ( File.Exists( runnerFile ) )
                         {
+                            this._messageSink?.Trace( $"Child directory '{nestedDir}' excluded it contains '{runnerFileName}'." );
+
                             continue;
                         }
                     }
 
                     AddTestsInDirectory( nestedDir );
-                }
-
-                // If the directory is included, index the files.
-                foreach ( var testPath in Directory.EnumerateFiles( directory, "*.cs" ) )
-                {
-                    if ( Path.GetFileName( testPath ).Equals( runnerFileName, StringComparison.OrdinalIgnoreCase )
-                         || testPath.EndsWith( FileExtensions.TransformedCode, StringComparison.OrdinalIgnoreCase ) )
-                    {
-                        continue;
-                    }
-
-                    var testCase = new TestCase( factory, Path.GetRelativePath( baseDirectory, testPath ) );
-                    onTestCaseDiscovered( testCase );
                 }
             }
 

@@ -13,6 +13,7 @@ namespace Caravela.Framework.Eligibility
     /// (Not implemented.)
     /// </summary>
     [Obsolete( "Not implemented." )]
+    [CompileTimeOnly]
     public static class CodeModelExtensions
     {
         public static EligibilityValue GetEligibility<T>( this IDeclaration declaration )

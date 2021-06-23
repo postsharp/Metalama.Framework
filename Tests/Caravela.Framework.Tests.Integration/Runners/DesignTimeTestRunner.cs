@@ -11,13 +11,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Runners
 {
     internal class DesignTimeTestRunner : BaseTestRunner
     {
-        public DesignTimeTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences )
-            : base( serviceProvider, projectDirectory, metadataReferences ) { }
+        public DesignTimeTestRunner(
+            IServiceProvider serviceProvider,
+            string? projectDirectory,
+            IEnumerable<MetadataReference> metadataReferences,
+            ITestOutputHelper? logger )
+            : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
         public override TestResult RunTest( TestInput testInput )
         {
@@ -27,14 +32,14 @@ namespace Caravela.Framework.Tests.Integration.Runners
             using var domain = new UnloadableCompileTimeDomain();
 
             var pipeline = new DesignTimeAspectPipeline( buildOptions, domain, true );
-            var pipelineResult = pipeline.Execute( PartialCompilation.CreateComplete( testResult.InitialCompilation! ), CancellationToken.None );
+            var pipelineResult = pipeline.Execute( PartialCompilation.CreateComplete( testResult.InputCompilation! ), CancellationToken.None );
 
             testResult.Report( pipelineResult.Diagnostics.ReportedDiagnostics );
 
             if ( pipelineResult.Success )
             {
                 var introducedSyntaxTree = pipelineResult.IntroducedSyntaxTrees.SingleOrDefault();
-                testResult.SetTransformedTarget( introducedSyntaxTree?.GeneratedSyntaxTree.GetRoot() ?? SyntaxFactoryEx.EmptyStatement );
+                testResult.SyntaxTrees.Single().SetRunTimeCode( introducedSyntaxTree?.GeneratedSyntaxTree.GetRoot() ?? SyntaxFactoryEx.EmptyStatement );
             }
             else
             {

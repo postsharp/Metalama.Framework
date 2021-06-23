@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -50,6 +51,14 @@ namespace Caravela.Framework.Impl.Pipeline
             [NotNullWhen( true )] out Compilation? outputCompilation,
             [NotNullWhen( true )] out IReadOnlyList<ResourceDescription>? additionalResources )
         {
+            if ( !this.ProjectOptions.IsFrameworkEnabled )
+            {
+                outputCompilation = compilation;
+                additionalResources = Array.Empty<ResourceDescription>();
+
+                return true;
+            }
+
             try
             {
                 if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
@@ -62,6 +71,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
+                // Initialize the pipeline and generate the compile-time project.
                 if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )
                 {
                     outputCompilation = null;
@@ -70,6 +80,9 @@ namespace Caravela.Framework.Impl.Pipeline
                     return false;
                 }
 
+                List<ResourceDescription> additionalResourcesBuilder = new();
+
+                // Execute the pipeline.
                 if ( !this.TryExecute( partialCompilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
                 {
                     outputCompilation = null;
@@ -79,8 +92,6 @@ namespace Caravela.Framework.Impl.Pipeline
                 }
 
                 // Add managed resources.
-                List<ResourceDescription> additionalResourcesBuilder = new();
-
                 foreach ( var resource in result.Resources )
                 {
                     additionalResourcesBuilder.Add( resource );

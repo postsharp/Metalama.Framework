@@ -51,8 +51,14 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         /// </summary>
         /// <param name="projectOptions"></param>
         /// <returns></returns>
-        internal DesignTimeAspectPipeline GetOrCreatePipeline( IProjectOptions projectOptions )
-            => this._pipelinesByProjectId.GetOrAdd(
+        internal DesignTimeAspectPipeline? GetOrCreatePipeline( IProjectOptions projectOptions )
+        {
+            if ( !projectOptions.IsFrameworkEnabled )
+            {
+                return null;
+            }
+
+            return this._pipelinesByProjectId.GetOrAdd(
                 projectOptions.ProjectId,
                 _ =>
                 {
@@ -61,6 +67,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
                     return pipeline;
                 } );
+        }
 
         private void OnExternalBuildStarted( object sender, EventArgs e )
         {
@@ -72,6 +79,11 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         public IEnumerable<AspectClass> GetEligibleAspects( ISymbol symbol, IProjectOptions projectOptions, CancellationToken cancellationToken )
         {
             var pipeline = this.GetOrCreatePipeline( projectOptions );
+
+            if ( pipeline == null )
+            {
+                yield break;
+            }
 
             var classes = pipeline.AspectClasses;
 
@@ -108,6 +120,11 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             CancellationToken cancellationToken )
         {
             var pipeline = this.GetOrCreatePipeline( projectOptions );
+
+            if ( pipeline == null )
+            {
+                return ImmutableArray<SyntaxTreeResult>.Empty;
+            }
 
             lock ( pipeline.Sync )
             {
@@ -198,6 +215,13 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             [NotNullWhen( true )] out Compilation? outputCompilation )
         {
             var designTimePipeline = this.GetOrCreatePipeline( projectOptions );
+
+            if ( designTimePipeline == null )
+            {
+                outputCompilation = null;
+
+                return false;
+            }
 
             // TODO: use partial compilation (it does not seem to work).
             var partialCompilation = PartialCompilation.CreateComplete( inputCompilation );

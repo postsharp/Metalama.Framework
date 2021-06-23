@@ -29,15 +29,15 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 if ( this._parent.Count == 0 )
                 {
                     var valueType = this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(ValueType) ).GetSymbol();
-                    expression = SyntaxFactory.DefaultExpression( (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( valueType ) );
+                    expression = SyntaxFactory.DefaultExpression( LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( valueType ) );
                 }
                 else
                 {
-                    expression = (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TupleExpression(
+                    expression = LanguageServiceFactory.CSharpSyntaxGenerator.TupleExpression(
                         this._parent._parameters.Select(
                             p =>
                                 p.IsOut()
-                                    ? LanguageServiceFactory.CSharpSyntaxGenerator.DefaultExpression( p.ParameterType.GetSymbol() )
+                                    ? (SyntaxNode) LanguageServiceFactory.CSharpSyntaxGenerator.DefaultExpression( p.ParameterType.GetSymbol() )
                                     : SyntaxFactory.IdentifierName( p.Name ) ) );
                 }
 

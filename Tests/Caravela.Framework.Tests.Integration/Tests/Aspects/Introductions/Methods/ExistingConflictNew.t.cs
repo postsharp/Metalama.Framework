@@ -1,4 +1,3 @@
-[TestOutput]
 [Introduction]
 internal class TargetClass : DerivedClass
 {
@@ -16,7 +15,6 @@ internal class TargetClass : DerivedClass
     {
         return 27;
     }
-
 
     public new global::System.Int32 BaseClassMethod()
     {

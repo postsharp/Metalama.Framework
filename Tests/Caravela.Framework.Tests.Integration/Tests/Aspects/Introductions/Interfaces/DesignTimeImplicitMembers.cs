@@ -74,7 +74,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         }
     }
 
-    [TestOutput]
+    // <target>
     [Introduction]
     public partial class TargetClass
     {

@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using System;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -18,12 +19,17 @@ namespace Caravela.Framework.Impl.Templating
     /// </summary>
     public sealed partial class TextSpanClassifier : CSharpSyntaxWalker
     {
-        private readonly ClassifiedTextSpanCollection _classifiedTextSpans = new();
         private readonly SourceText _sourceText;
         private readonly bool _processAllTypes;
         private readonly string _sourceString;
         private readonly MarkAllChildrenWalker _markAllChildrenWalker;
+        private readonly bool _detectRegion;
+        private readonly ClassifiedTextSpanCollection _classifiedTextSpans = new();
         private bool _isInTemplate;
+        private bool _isInCompileTimeType;
+        private int _excludedRegionStart;
+        private bool _isInExcludedRegion;
+        private bool _isRecursiveCall;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextSpanClassifier"/> class and specifies a backward-compatibility flag.
@@ -31,8 +37,10 @@ namespace Caravela.Framework.Impl.Templating
         /// <param name="sourceText"></param>
         /// <param name="visitUnmarkedTypes">This is for backward compatibility with AspectWorkbench because
         /// test aspect classes are not marked at compile time.</param>
-        public TextSpanClassifier( SourceText sourceText, bool processAllTypes = false ) : base( SyntaxWalkerDepth.Token )
+        public TextSpanClassifier( SourceText sourceText, bool processAllTypes = false, bool detectRegion = false )
+            : base( detectRegion ? SyntaxWalkerDepth.Trivia : SyntaxWalkerDepth.Token )
         {
+            this._detectRegion = detectRegion;
             this._sourceText = sourceText;
             this._processAllTypes = processAllTypes;
             this._sourceString = sourceText.ToString();
@@ -49,24 +57,73 @@ namespace Caravela.Framework.Impl.Templating
                 _ => false
             };
 
-        public override void VisitClassDeclaration( ClassDeclarationSyntax node )
+        public override void Visit( SyntaxNode? node )
+        {
+            if ( node == null )
+            {
+                return;
+            }
+
+            var isRecursiveCall = this._isRecursiveCall;
+            this._isRecursiveCall = true;
+
+            if ( !isRecursiveCall )
+            {
+                // This is the top-level call.
+                this._isInExcludedRegion = this._detectRegion && node.ToFullString().Contains( "// <aspect>" );
+            }
+
+            try
+            {
+                base.Visit( node );
+
+                if ( !isRecursiveCall && this._isInExcludedRegion && this._excludedRegionStart != node.Span.End )
+                {
+                    this.Mark( TextSpan.FromBounds( this._excludedRegionStart, node.Span.End ), TextSpanClassification.Excluded );
+                }
+            }
+            finally
+            {
+                this._isRecursiveCall = isRecursiveCall;
+            }
+        }
+
+        private void VisitType<T>( T node, Action<T> visitBase )
+            where T : TypeDeclarationSyntax
         {
             if ( node.GetScopeFromAnnotation() != TemplatingScope.RunTimeOnly )
             {
-                this.Mark( node.Modifiers, TextSpanClassification.CompileTime );
-                this.Mark( node.Keyword, TextSpanClassification.CompileTime );
-                this.Mark( node.OpenBraceToken, TextSpanClassification.CompileTime );
-                this.Mark( node.CloseBraceToken, TextSpanClassification.CompileTime );
-                this.Mark( node.ConstraintClauses, TextSpanClassification.CompileTime );
-                this.Mark( node.Identifier, TextSpanClassification.CompileTime );
-                this.Mark( node.BaseList, TextSpanClassification.CompileTime );
-                base.VisitClassDeclaration( node );
+                var oldIsInCompileTimeType = this._isInCompileTimeType;
+
+                this._isInCompileTimeType = true;
+
+                try
+                {
+                    this.Mark( node.Modifiers, TextSpanClassification.CompileTime );
+                    this.Mark( node.Keyword, TextSpanClassification.CompileTime );
+                    this.Mark( node.OpenBraceToken, TextSpanClassification.CompileTime );
+                    this.Mark( node.CloseBraceToken, TextSpanClassification.CompileTime );
+                    this.Mark( node.ConstraintClauses, TextSpanClassification.CompileTime );
+                    this.Mark( node.Identifier, TextSpanClassification.CompileTime );
+                    this.Mark( node.BaseList, TextSpanClassification.CompileTime );
+                    visitBase( node );
+                }
+                finally
+                {
+                    this._isInCompileTimeType = oldIsInCompileTimeType;
+                }
             }
-            else if ( this._processAllTypes )
+            else if ( this._processAllTypes || this._detectRegion )
             {
-                base.VisitClassDeclaration( node );
+                visitBase( node );
             }
         }
+
+        public override void VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitType( node, n => base.VisitClassDeclaration( n ) );
+
+        public override void VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitType( node, n => base.VisitStructDeclaration( n ) );
+
+        public override void VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitType( node, n => base.VisitRecordDeclaration( n ) );
 
         public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
@@ -93,7 +150,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 this._isInTemplate = false;
             }
-            else
+            else if ( this._isInCompileTimeType )
             {
                 this.Mark( node, TextSpanClassification.CompileTime );
             }
@@ -101,7 +158,10 @@ namespace Caravela.Framework.Impl.Templating
 
         private void VisitMember( SyntaxNode node )
         {
-            this.Mark( node, TextSpanClassification.CompileTime );
+            if ( this._isInCompileTimeType )
+            {
+                this.Mark( node, TextSpanClassification.CompileTime );
+            }
         }
 
         public override void VisitFieldDeclaration( FieldDeclarationSyntax node )
@@ -135,6 +195,8 @@ namespace Caravela.Framework.Impl.Templating
                     this.Mark( token, colorFromAnnotation );
                 }
             }
+
+            base.VisitToken( token );
         }
 
         public override void VisitVariableDeclarator( VariableDeclaratorSyntax node )
@@ -304,6 +366,52 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             this.Visit( statement );
+        }
+
+        public override void VisitTrivia( SyntaxTrivia trivia )
+        {
+            var text = trivia.ToString();
+
+            if ( text.Contains( "// <aspect>" ) )
+            {
+                if ( this._isInExcludedRegion )
+                {
+                    // We have to exclude the trivia itself including the linebreaks but not the indentation.
+                    // We assume the trivia is a leading one.
+                    int regionStart;
+                    var lastTrivia = trivia.Token.LeadingTrivia.Last();
+
+                    if ( lastTrivia.Kind() == SyntaxKind.WhitespaceTrivia )
+                    {
+                        // This is indentation. We don't want to skip.
+                        regionStart = lastTrivia.SpanStart;
+                    }
+                    else
+                    {
+                        // No indentation.
+                        regionStart = lastTrivia.Span.End;
+                    }
+
+                    this.Mark( TextSpan.FromBounds( this._excludedRegionStart, regionStart ), TextSpanClassification.Excluded );
+                    this._isInExcludedRegion = false;
+                }
+            }
+            else if ( text.Contains( "// </aspect>" ) )
+            {
+                if ( !this._isInExcludedRegion )
+                {
+                    this._isInExcludedRegion = true;
+
+                    if ( trivia.Token.TrailingTrivia.IndexOf( trivia ) > 0 )
+                    {
+                        this._excludedRegionStart = trivia.Token.TrailingTrivia.First().SpanStart;
+                    }
+                    else
+                    {
+                        this._excludedRegionStart = trivia.Token.LeadingTrivia.First().SpanStart;
+                    }
+                }
+            }
         }
     }
 }

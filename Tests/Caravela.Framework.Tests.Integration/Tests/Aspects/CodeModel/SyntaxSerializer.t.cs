@@ -1,10 +1,15 @@
-[TestOutput]
 internal class TargetClass
 {
-    public TargetClass(int x) { }
+    public TargetClass(int x)
+    {
+    }
 
     public int Field;
-    public int Property { get; set; }
+    public int Property
+    {
+        get;
+        set;
+    }
 
     [Override]
     public void TargetMethod_Void(int x)

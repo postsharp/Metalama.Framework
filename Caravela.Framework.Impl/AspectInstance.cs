@@ -23,6 +23,10 @@ namespace Caravela.Framework.Impl
 
         public AspectClass AspectClass { get; }
 
+        public bool IsSkipped { get; private set; }
+
+        internal void Skip() { this.IsSkipped = true; }
+
         IAspectClass IAspectInstance.AspectClass => this.AspectClass;
 
         internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass )

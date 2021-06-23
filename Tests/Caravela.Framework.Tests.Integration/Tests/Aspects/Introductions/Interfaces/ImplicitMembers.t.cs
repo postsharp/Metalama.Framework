@@ -1,10 +1,6 @@
-[TestOutput]
 [Introduction]
-public class TargetClass
-: global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers.IInterface
+public class TargetClass : global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers.IInterface
 {
-
-
     public global::System.Int32 InterfaceMethod()
     {
         global::System.Console.WriteLine("This is introduced interface member.");

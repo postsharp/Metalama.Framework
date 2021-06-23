@@ -1,15 +1,14 @@
-[TestOutput]
 public class Target
+    {
+        [Test]
+        public int Foo()
 {
-    [Test]
-    public int Foo()
-    {
-        return default;
-    }
-
-    [Test]
-    public void Bar()
-    {
-        return;
-    }
+    return default;
 }
+
+        [Test]
+        public void Bar()
+{
+    return;
+}
+    }

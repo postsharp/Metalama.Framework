@@ -1,4 +1,3 @@
-[TestOutput]
 internal class TargetClass
 {
     [Override]
@@ -18,7 +17,6 @@ internal class TargetClass
     }
 
     private int __AutoProperty__BackingField;
-
     [Override]
     public static int Static_AutoProperty
     {
@@ -36,7 +34,6 @@ internal class TargetClass
     }
 
     private static int __Static_AutoProperty__BackingField;
-
     [Override]
     public int AutoProperty_Init
     {
@@ -54,7 +51,6 @@ internal class TargetClass
     }
 
     private int __AutoProperty_Init__BackingField;
-
     [Override]
     public int AutoProperty_GetOnly
     {
@@ -65,7 +61,6 @@ internal class TargetClass
     }
 
     private readonly int __AutoProperty_GetOnly__BackingField;
-
     [Override]
     public int Property
     {

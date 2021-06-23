@@ -437,7 +437,7 @@ namespace Caravela.Framework.Impl.Utilities
 
                 case IArrayTypeSymbol arrayType:
                     h = HashCode.Combine( h, arrayType.Rank, GetHashCode( arrayType.ElementType, StructuralSymbolComparerOptions.Type ) );
-                    
+
                     break;
 
                 case IDynamicTypeSymbol:

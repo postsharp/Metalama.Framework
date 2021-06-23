@@ -1,4 +1,3 @@
-[TestOutput]
 [First]
 [Second]
 [Third]
@@ -33,7 +32,6 @@ internal class TargetClass
         }
     }
 
-
     public void IntroducedMethod3()
     {
         try
@@ -50,8 +48,8 @@ internal class TargetClass
                 global::System.Console.Write("This is overridden by the second aspect.");
             }
 
-        __aspect_return_1:
-            ;
+            __aspect_return_1:
+                ;
             return;
         }
         finally

@@ -10,13 +10,20 @@ namespace Caravela.TestFramework
 {
     internal class AspectTestFrameworkVsImpl : ITestFramework, ISourceInformationProvider
     {
+        private readonly IMessageSink _messageSink;
+
+        public AspectTestFrameworkVsImpl( IMessageSink messageSink )
+        {
+            this._messageSink = messageSink;
+        }
+
         void IDisposable.Dispose() { }
 
         ISourceInformation ISourceInformationProvider.GetSourceInformation( ITestCase testCase ) => (ISourceInformation) testCase;
 
-        ITestFrameworkDiscoverer ITestFramework.GetDiscoverer( IAssemblyInfo assembly ) => new TestDiscoverer( assembly );
+        ITestFrameworkDiscoverer ITestFramework.GetDiscoverer( IAssemblyInfo assembly ) => new TestDiscoverer( assembly, this._messageSink );
 
-        ITestFrameworkExecutor ITestFramework.GetExecutor( AssemblyName assemblyName ) => new TestExecutor( assemblyName );
+        ITestFrameworkExecutor ITestFramework.GetExecutor( AssemblyName assemblyName ) => new TestExecutor( assemblyName, this._messageSink );
 
         ISourceInformationProvider ITestFramework.SourceInformationProvider
         {

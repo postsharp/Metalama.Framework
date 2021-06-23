@@ -22,8 +22,8 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.MethodRef
     
     class Program
     {
+        // <target>
         [Retry]
-        [TestOutput]
         static int Foo(int a)
         {
             return 0;

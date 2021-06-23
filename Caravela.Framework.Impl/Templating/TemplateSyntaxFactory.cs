@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -141,6 +142,64 @@ namespace Caravela.Framework.Impl.Templating
         public static SyntaxToken GetUniqueIdentifier( string hint ) => SyntaxFactory.Identifier( ExpansionContext.LexicalScope.GetUniqueIdentifier( hint ) );
 
         public static ExpressionSyntax Serialize<T>( T? o ) => ExpansionContext.SyntaxSerializationService.Serialize( o, ExpansionContext.SyntaxFactory );
+
+        public static T AddSimplifierAnnotations<T>( T node )
+            where T : SyntaxNode
+            => node.WithAdditionalAnnotations( Simplifier.Annotation );
+
+        public static ExpressionSyntax RenderInterpolatedString( InterpolatedStringExpressionSyntax interpolatedString )
+        {
+            List<InterpolatedStringContentSyntax> contents = new( interpolatedString.Contents.Count );
+
+            foreach ( var content in interpolatedString.Contents )
+            {
+                switch ( content )
+                {
+                    case InterpolatedStringTextSyntax text:
+                        var previousIndex = contents.Count - 1;
+
+                        if ( contents.Count > 0 && contents[previousIndex] is InterpolatedStringTextSyntax previousText )
+                        {
+                            // If we have two adjacent text tokens, we need to merge them, otherwise reformatting will add a white space.
+
+                            var appendedText = previousText.TextToken.Text + text.TextToken.Text;
+
+                            contents[previousIndex] = previousText.WithTextToken(
+                                SyntaxFactory.Token( default, SyntaxKind.InterpolatedStringTextToken, appendedText, appendedText, default ) );
+                        }
+                        else
+                        {
+                            contents.Add( text );
+                        }
+
+                        break;
+
+                    case InterpolationSyntax interpolation:
+                        contents.Add( interpolation );
+
+                        break;
+                }
+            }
+
+            return interpolatedString.WithContents( SyntaxFactory.List( contents ) );
+        }
+
+        public static ExpressionSyntax ConditionalExpression( ExpressionSyntax condition, ExpressionSyntax whenTrue, ExpressionSyntax whenFalse )
+        {
+            // We try simplify the conditional expression when the result is known when the template is expanded.
+
+            switch ( condition.Kind() )
+            {
+                case SyntaxKind.TrueLiteralExpression:
+                    return whenTrue;
+
+                case SyntaxKind.FalseLiteralExpression:
+                    return whenFalse;
+
+                default:
+                    return SyntaxFactory.ConditionalExpression( condition, whenTrue, whenFalse );
+            }
+        }
 
         private class InitializeCookie : IDisposable
         {

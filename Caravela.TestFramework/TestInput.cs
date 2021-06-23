@@ -40,9 +40,62 @@ namespace Caravela.TestFramework
             {
                 this.Options.ApplySourceDirectives( sourceCode );
             }
+
+            if ( fullPath != null )
+            {
+                // Find companion files.
+                var directory = Path.GetDirectoryName( fullPath )!;
+
+                foreach ( var companionFile in Directory.EnumerateFiles( directory, Path.GetFileNameWithoutExtension( fullPath ) + ".*.cs" ) )
+                {
+                    if ( !companionFile.EndsWith( ".t.cs", StringComparison.OrdinalIgnoreCase ) )
+                    {
+                        this.Options.IncludedFiles.Add( Path.GetRelativePath( directory, companionFile ) );
+                    }
+                }
+            }
         }
 
-        public static TestInput FromSource( string testName, string sourceCode ) => new( testName, sourceCode );
+        private static string? FindProjectDirectory( string? directory )
+        {
+            if ( directory == null )
+            {
+                return null;
+            }
+
+            if ( Directory.GetFiles( directory, "*.csproj" ).Length > 0 )
+            {
+                return directory;
+            }
+            else
+            {
+                var parentDirectory = Path.GetDirectoryName( directory );
+
+                return FindProjectDirectory( parentDirectory );
+            }
+        }
+
+        public static TestInput FromSource( string sourceCode, string? path )
+        {
+            if ( path != null )
+            {
+                var projectDirectory = FindProjectDirectory( Path.GetDirectoryName( path ) );
+
+                if ( projectDirectory != null )
+                {
+                    var directoryOptionsReader = new TestDirectoryOptionsReader( projectDirectory );
+
+                    return new TestInput(
+                        Path.GetFileNameWithoutExtension( path ),
+                        sourceCode,
+                        directoryOptionsReader,
+                        Path.GetRelativePath( projectDirectory, path ),
+                        path );
+                }
+            }
+
+            return new TestInput( "interactive", sourceCode );
+        }
 
         internal static TestInput FromFile( TestDirectoryOptionsReader directoryOptionsReader, string relativePath )
         {

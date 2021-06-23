@@ -1,0 +1,56 @@
+<html>
+<head>
+<style>
+
+.caravelaClassification_CompileTime,
+.caravelaClassification_Conflict,
+.caravelaClassification_TemplateKeyword,
+.caravelaClassification_Dynamic,
+.caravelaClassification_CompileTimeVariable
+{
+    background-color: rgba(50,50,90,0.1);
+}
+
+.caravelaClassification_TemplateKeyword
+{
+    color: rgb(250, 0, 250) !important;
+    font-weight: bold;
+}
+
+.caravelaClassification_Dynamic
+{
+    text-decoration: underline;
+}
+
+.caravelaClassification_CompileTimeVariable
+{
+    font-style: italic;
+}
+
+.legend 
+{
+    margin-top: 100px;
+}
+
+</style>
+</head>
+<body><pre>
+    class RunTimeClass
+    {
+        <span class='caravelaClassification_CompileTime'>public void RunTimeMethod()</span>
+        <span class='caravelaClassification_CompileTime'>{</span>
+        <span class='caravelaClassification_CompileTime'>}</span>
+    }
+</pre>
+<p class='legend'>Legend:</p>
+<pre>
+<span class='Default'>Default</span>
+<span class='RunTime'>RunTime</span>
+<span class='CompileTime'>CompileTime</span>
+<span class='Dynamic'>Dynamic</span>
+<span class='CompileTimeVariable'>CompileTimeVariable</span>
+<span class='TemplateKeyword'>TemplateKeyword</span>
+<span class='Conflict'>Conflict</span>
+<span class='Excluded'>Excluded</span>
+</pre></body>
+</html>

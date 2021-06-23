@@ -54,7 +54,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
         }
     }
 
-    [TestOutput]
+    // <target>
     [Introduction]
     internal class TargetClass
     {

@@ -41,6 +41,8 @@ namespace Caravela.Framework.Impl.Options
 
         public ImmutableArray<object> PlugIns { get; }
 
+        public bool IsFrameworkEnabled => this.GetBooleanOption( "CaravelaEnabled", true );
+
         private bool GetBooleanOption( string name, bool defaultValue = false )
         {
             if ( this._source.TryGetValue( $"build_property.{name}", out var flagString ) && bool.TryParse( flagString, out var flagValue ) )

@@ -1,0 +1,5 @@
+{
+    // a1 = False
+    var a2 = a is >= 0 and < 5;
+    return this.Method(a);
+}

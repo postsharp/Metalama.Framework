@@ -276,7 +276,11 @@ namespace Caravela.Framework.Impl.Linking
                             propertyBodySource.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration )
                             ?? AccessorDeclaration(
                                 SyntaxKind.GetKeyword,
-                                Block( ReturnStatement( propertyDeclaration.ExpressionBody.AssertNotNull().Expression ) ) );
+                                Block(
+                                    ReturnStatement(
+                                        Token( SyntaxKind.ReturnKeyword ).WithLeadingTrivia( Whitespace( " " ) ),
+                                        propertyDeclaration.ExpressionBody.AssertNotNull().Expression,
+                                        Token( SyntaxKind.SemicolonToken ) ) ) );
 
                         transformedAccessors.Add(
                             AccessorDeclaration(
@@ -387,6 +391,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 return method
                     .WithBody( GetBody() )
+                    .NormalizeWhitespace()
                     .WithLeadingTrivia( method.GetLeadingTrivia() )
                     .WithTrailingTrivia( method.GetTrailingTrivia() );
 
@@ -629,11 +634,12 @@ namespace Caravela.Framework.Impl.Linking
             {
                 // TODO: Move initializer
                 return FieldDeclaration(
-                    List<AttributeListSyntax>(),
-                    GetModifiers( propertySymbol ),
-                    VariableDeclaration(
-                        propertyDeclaration.Type,
-                        SingletonSeparatedList( VariableDeclarator( GetImplicitBackingFieldName( propertySymbol ) ) ) ) );
+                        List<AttributeListSyntax>(),
+                        GetModifiers( propertySymbol ),
+                        VariableDeclaration(
+                            propertyDeclaration.Type,
+                            SingletonSeparatedList( VariableDeclarator( GetImplicitBackingFieldName( propertySymbol ) ) ) ) )
+                    .NormalizeWhitespace();
 
                 static SyntaxTokenList GetModifiers( IPropertySymbol propertySymbol )
                 {

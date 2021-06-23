@@ -131,15 +131,6 @@ namespace Caravela.Framework.Impl.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<ISymbol>
-            VariableIsCompileTime
-                = new(
-                    "CR0116",
-                    "Cannot use a meta member in the current context",
-                    "The variable '{0}' is compile-time Info.",
-                    _category,
-                    Info );
-
         internal static readonly DiagnosticDefinition<(ISymbol DeclaringSymbol, ISymbol ReferencedSymbol)>
             CannotReferenceCompileTimeOnly
                 = new(

@@ -1,4 +1,3 @@
-[TestOutput]
 [Retry]
 class Program
 {

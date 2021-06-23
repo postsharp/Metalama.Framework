@@ -8,6 +8,8 @@ using Microsoft.CodeAnalysis;
 using System;
 using static Caravela.Framework.Diagnostics.Severity;
 
+#pragma warning disable SA1118
+
 namespace Caravela.Framework.Impl
 {
     internal static class GeneralDiagnosticDescriptors
@@ -41,10 +43,6 @@ namespace Caravela.Framework.Impl
 
         public static readonly DiagnosticDefinition<(IDeclaration Member, int ArgumentsCount)> MemberRequiresAtLeastNArguments =
             new( "CR0013", _category, "Member '{0}' requires at least {1} arguments.", Error, "Member requires more arguments." );
-
-        public static readonly DiagnosticDefinition<IMemberOrNamedType> CannotProvideInstanceForStaticMember =
-            new( "CR0014", _category, "Member {0} is static, but has been used with a non-null instance.", Error,
-                 "Cannot provide instance for a static member." );
 
         public static readonly DiagnosticDefinition<IMemberOrNamedType> MustProvideInstanceForInstanceMember =
             new( "CR0015", _category, "Member {0} is not static, but has been used with a null instance.", Error,

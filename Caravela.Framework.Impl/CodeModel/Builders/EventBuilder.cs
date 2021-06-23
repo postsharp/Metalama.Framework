@@ -83,7 +83,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         List<AttributeListSyntax>(), // TODO: Attributes.
                         this.GetSyntaxModifierList(),
                         VariableDeclaration(
-                            (TypeSyntax) syntaxGenerator.TypeExpression( this.EventType.GetSymbol() ),
+                            syntaxGenerator.TypeExpression( this.EventType.GetSymbol() ),
                             SeparatedList(
                                 new[]
                                 {
@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     : EventDeclaration(
                         List<AttributeListSyntax>(), // TODO: Attributes.
                         this.GetSyntaxModifierList(),
-                        (TypeSyntax) syntaxGenerator.TypeExpression( this.EventType.GetSymbol() ),
+                        syntaxGenerator.TypeExpression( this.EventType.GetSymbol() ),
                         this.ExplicitInterfaceImplementations.Count > 0
                             ? ExplicitInterfaceSpecifier(
                                 (NameSyntax) syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )

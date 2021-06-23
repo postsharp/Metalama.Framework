@@ -5,6 +5,7 @@ using Caravela.TestFramework.XunitFramework;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Xunit.Sdk;
@@ -60,7 +61,7 @@ namespace Caravela.TestFramework
                 }
             }
 
-            foreach ( var testCase in discoverer.Discover( this.Directory, excludedDirectories ) )
+            foreach ( var testCase in discoverer.Discover( this.Directory, excludedDirectories ).OrderBy( t => t.FullPath ) )
             {
                 if ( testCase.SkipReason == null )
                 {

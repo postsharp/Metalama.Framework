@@ -20,11 +20,11 @@ namespace Caravela.TestFramework
     /// </summary>
     public abstract class TestSuite
     {
-        private readonly ITestOutputHelper _logger;
+        protected ITestOutputHelper Logger { get; }
 
         protected TestSuite( ITestOutputHelper logger )
         {
-            this._logger = logger;
+            this.Logger = logger;
         }
 
         protected virtual string GetDirectory( string callerMemberName )
@@ -58,14 +58,14 @@ namespace Caravela.TestFramework
 
             var fullPath = Path.Combine( directory, relativePath );
 
-            this._logger.WriteLine( "Test file: " + fullPath );
+            this.Logger.WriteLine( "Test input file: " + fullPath );
             var projectRelativePath = Path.GetRelativePath( directoryOptionsReader.ProjectDirectory, fullPath );
 
             var testInput = TestInput.FromFile( directoryOptionsReader, projectRelativePath );
             testInput.Options.References.AddRange( TestAssemblyReferenceReader.GetAssemblyReferences( new ReflectionAssemblyInfo( this.GetType().Assembly ) ) );
-            var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider );
+            var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, this.Logger );
             var testResult = testRunner.RunTest( testInput );
-            testRunner.ExecuteAssertions( testInput, testResult, this._logger );
+            testRunner.ExecuteAssertions( testInput, testResult );
         }
     }
 }
