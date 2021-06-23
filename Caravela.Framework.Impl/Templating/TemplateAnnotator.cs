@@ -712,7 +712,7 @@ namespace Caravela.Framework.Impl.Templating
                     if ( expressionScope.IsDynamic() || this._templateMemberClassifier.IsDynamicType( argumentType ) )
                     {
                         // dynamic or dynamic[]
-                        
+
                         using ( this.WithScopeContext(
                             ScopeContext.CreatePreferredRunTimeScope(
                                 this._currentScopeContext,
@@ -739,9 +739,12 @@ namespace Caravela.Framework.Impl.Templating
                             transformedArgumentValue = this.Visit( argument.Expression )!;
                         }
                     }
-                    
+
                     // The scope of the argument itself copies the scope of the method.
-                    var transformedArgument = argument.WithExpression( transformedArgumentValue ).WithTriviaFrom( argument ).AddScopeAnnotation( expressionScope );
+                    var transformedArgument = argument.WithExpression( transformedArgumentValue )
+                        .WithTriviaFrom( argument )
+                        .AddScopeAnnotation( expressionScope );
+
                     transformedArguments.Add( transformedArgument );
                 }
 
@@ -1108,9 +1111,16 @@ namespace Caravela.Framework.Impl.Templating
             return node;
         }
 
-        public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
+        private T? VisitMemberDeclaration<T>( T node, Func<T, SyntaxNode?> callBase )
+            where T : SyntaxNode
         {
             var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node )!;
+
+            if ( symbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } )
+            {
+                // We have an accessor, but we need the property or the event.
+                symbol = associatedSymbol;
+            }
 
             if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) != TemplateMemberKind.None )
             {
@@ -1119,7 +1129,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 try
                 {
-                    return base.VisitMethodDeclaration( node )!.AddIsTemplateAnnotation();
+                    return (T) callBase( node )!.AddIsTemplateAnnotation();
                 }
                 finally
                 {
@@ -1128,9 +1138,21 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                return base.VisitMethodDeclaration( node );
+                return (T?) callBase( node );
             }
         }
+
+        public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
+            => this.VisitMemberDeclaration( node, n => base.VisitMethodDeclaration( n ) );
+
+        public override SyntaxNode? VisitAccessorDeclaration( AccessorDeclarationSyntax node ) 
+            => this.VisitMemberDeclaration( node, n => base.VisitAccessorDeclaration( n ) );
+
+        public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+            => this.VisitMemberDeclaration( node, n => base.VisitPropertyDeclaration( n ) );
+
+        public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
+            => this.VisitMemberDeclaration( node, n => base.VisitEventDeclaration( n ) );
 
         private static bool IsMutatingUnaryOperator( SyntaxToken token ) => token.Kind() is SyntaxKind.PlusPlusToken or SyntaxKind.MinusMinusToken;
 
