@@ -129,7 +129,8 @@ namespace Caravela.TestFramework
             }
         }
 
-        public static string? NormalizeTestOutput( string? s, bool preserveFormatting ) => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting );
+        public static string? NormalizeTestOutput( string? s, bool preserveFormatting )
+            => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting );
 
         private static string? NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting )
         {
@@ -156,7 +157,7 @@ namespace Caravela.TestFramework
             }
 
             var formatCode = testInput.Options.FormatOutput.GetValueOrDefault( true );
-            
+
             // Compare the "Target" region of the transformed code to the expected output.
             // If the region is not found then compare the complete transformed code.
             var sourceAbsolutePath = testInput.FullPath;

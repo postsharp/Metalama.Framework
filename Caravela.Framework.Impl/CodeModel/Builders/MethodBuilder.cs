@@ -131,8 +131,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                             !this.ReturnParameter.ParameterType.Is( typeof(void) )
                                 ? new[]
                                 {
-                                    ReturnStatement(
-                                        DefaultExpression( syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ) )
+                                    ReturnStatement( DefaultExpression( syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ) )
                                 }
                                 : new StatementSyntax[0] ) ),
                     null );

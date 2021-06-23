@@ -161,7 +161,7 @@ namespace Caravela.Framework.Impl.Templating
                         if ( contents.Count > 0 && contents[previousIndex] is InterpolatedStringTextSyntax previousText )
                         {
                             // If we have two adjacent text tokens, we need to merge them, otherwise reformatting will add a white space.
-                            
+
                             var appendedText = previousText.TextToken.Text + text.TextToken.Text;
 
                             contents[previousIndex] = previousText.WithTextToken(
@@ -171,9 +171,9 @@ namespace Caravela.Framework.Impl.Templating
                         {
                             contents.Add( text );
                         }
-                        
+
                         break;
-                    
+
                     case InterpolationSyntax interpolation:
                         contents.Add( interpolation );
 
@@ -187,15 +187,15 @@ namespace Caravela.Framework.Impl.Templating
         public static ExpressionSyntax ConditionalExpression( ExpressionSyntax condition, ExpressionSyntax whenTrue, ExpressionSyntax whenFalse )
         {
             // We try simplify the conditional expression when the result is known when the template is expanded.
-            
+
             switch ( condition.Kind() )
             {
                 case SyntaxKind.TrueLiteralExpression:
                     return whenTrue;
-                
+
                 case SyntaxKind.FalseLiteralExpression:
                     return whenFalse;
-                
+
                 default:
                     return SyntaxFactory.ConditionalExpression( condition, whenTrue, whenFalse );
             }

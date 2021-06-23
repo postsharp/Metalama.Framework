@@ -240,7 +240,7 @@ namespace Caravela.TestFramework
 
                 var simplifiedDocument = Simplifier.ReduceAsync( outputDocument ).Result;
                 var simplifiedSyntaxRoot = simplifiedDocument.GetSyntaxRootAsync().Result!;
-                
+
                 consolidatedCompilationUnit = (CompilationUnitSyntax) Formatter.Format( simplifiedSyntaxRoot, this.Project!.Solution.Workspace );
             }
 

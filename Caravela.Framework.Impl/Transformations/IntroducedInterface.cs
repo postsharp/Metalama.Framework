@@ -50,8 +50,7 @@ namespace Caravela.Framework.Impl.Transformations
                 // The type already implements the interface itself.
                 return new[]
                 {
-                    (BaseTypeSyntax) SimpleBaseType(
-                        LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.InterfaceType.GetSymbol() ) )
+                    (BaseTypeSyntax) SimpleBaseType( LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.InterfaceType.GetSymbol() ) )
                 };
             }
             else

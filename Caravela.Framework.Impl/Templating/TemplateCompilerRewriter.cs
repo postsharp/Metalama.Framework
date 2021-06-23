@@ -1315,8 +1315,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private ExpressionSyntax AddCallToSimplifierAnnotations( ExpressionSyntax expression )
             => InvocationExpression(
-                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember(
-                    nameof(TemplateSyntaxFactory.AddSimplifierAnnotations) ),
+                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddSimplifierAnnotations) ),
                 ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
 
         /// <summary>
@@ -1405,13 +1404,7 @@ namespace Caravela.Framework.Impl.Templating
             return InvocationExpression(
                 this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ConditionalExpression) ),
                 ArgumentList(
-                    SeparatedList(
-                        new[]
-                        {
-                            Argument( transformedCondition ),
-                            Argument( transformedWhenTrue ),
-                            Argument( transformedWhenFalse )
-                        } ) ) );
+                    SeparatedList( new[] { Argument( transformedCondition ), Argument( transformedWhenTrue ), Argument( transformedWhenFalse ) } ) ) );
         }
     }
 }

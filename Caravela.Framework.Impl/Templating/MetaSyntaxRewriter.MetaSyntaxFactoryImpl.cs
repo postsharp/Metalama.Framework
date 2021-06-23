@@ -31,8 +31,7 @@ namespace Caravela.Framework.Impl.Templating
                     _ => (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( type )
                 };
 
-            public ExpressionSyntax NamespaceOrType( INamespaceOrTypeSymbol type )
-                => LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( type );
+            public ExpressionSyntax NamespaceOrType( INamespaceOrTypeSymbol type ) => LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( type );
 #pragma warning restore CA1822 // Mark members as static
 
             public TypeSyntax GenericType( Type type, params TypeSyntax[] genericParameters )

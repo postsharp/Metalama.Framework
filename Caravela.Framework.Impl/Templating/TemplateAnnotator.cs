@@ -1145,7 +1145,7 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
             => this.VisitMemberDeclaration( node, n => base.VisitMethodDeclaration( n ) );
 
-        public override SyntaxNode? VisitAccessorDeclaration( AccessorDeclarationSyntax node ) 
+        public override SyntaxNode? VisitAccessorDeclaration( AccessorDeclarationSyntax node )
             => this.VisitMemberDeclaration( node, n => base.VisitAccessorDeclaration( n ) );
 
         public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )

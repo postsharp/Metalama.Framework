@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Templating
                 decimal s => LiteralExpression( s ),
                 _ => throw new ArgumentOutOfRangeException()
             };
-        
+
         public static LiteralExpressionSyntax LiteralExpression( string? s )
             => s == null ? Null : SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );
 
