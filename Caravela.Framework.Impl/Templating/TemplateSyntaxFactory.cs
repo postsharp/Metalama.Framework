@@ -184,6 +184,23 @@ namespace Caravela.Framework.Impl.Templating
             return interpolatedString.WithContents( SyntaxFactory.List( contents ) );
         }
 
+        public static ExpressionSyntax ConditionalExpression( ExpressionSyntax condition, ExpressionSyntax whenTrue, ExpressionSyntax whenFalse )
+        {
+            // We try simplify the conditional expression when the result is known when the template is expanded.
+            
+            switch ( condition.Kind() )
+            {
+                case SyntaxKind.TrueLiteralExpression:
+                    return whenTrue;
+                
+                case SyntaxKind.FalseLiteralExpression:
+                    return whenFalse;
+                
+                default:
+                    return SyntaxFactory.ConditionalExpression( condition, whenTrue, whenFalse );
+            }
+        }
+
         private class InitializeCookie : IDisposable
         {
             public void Dispose()

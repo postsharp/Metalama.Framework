@@ -1395,5 +1395,23 @@ namespace Caravela.Framework.Impl.Templating
                 return base.VisitGenericName( node );
             }
         }
+
+        protected override ExpressionSyntax TransformConditionalExpression( ConditionalExpressionSyntax node )
+        {
+            var transformedCondition = this.Transform( node.Condition );
+            var transformedWhenTrue = this.Transform( node.WhenTrue );
+            var transformedWhenFalse = this.Transform( node.WhenFalse );
+
+            return InvocationExpression(
+                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ConditionalExpression) ),
+                ArgumentList(
+                    SeparatedList(
+                        new[]
+                        {
+                            Argument( transformedCondition ),
+                            Argument( transformedWhenTrue ),
+                            Argument( transformedWhenFalse )
+                        } ) ) );
+        }
     }
 }
