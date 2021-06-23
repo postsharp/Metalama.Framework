@@ -50,5 +50,14 @@ namespace Caravela.Framework.Code
         IPointerType MakePointerType( IType pointedType );
 
         IType GetSpecialType( SpecialType specialType );
+
+        /// <summary>
+        /// Gets a run-time value that corresponds to the default value of a specified type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        dynamic? DefaultValue( IType type );
+
+        dynamic? Cast( IType type, object value );
     }
 }

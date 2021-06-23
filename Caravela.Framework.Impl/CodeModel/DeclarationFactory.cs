@@ -6,6 +6,7 @@ using Caravela.Framework.Code.Types;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Serialization;
+using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -130,6 +131,10 @@ namespace Caravela.Framework.Impl.CodeModel
                 SpecialType.Void => this._voidType ??= this.GetTypeByReflectionType( typeof(void) ),
                 _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
             };
+
+        dynamic? ITypeFactory.DefaultValue( IType type ) => new DefaultDynamicExpression( type );
+
+        dynamic? ITypeFactory.Cast( IType type, object value ) => new CastDynamicExpression( type, value );
 
         internal IAttribute GetAttribute( AttributeBuilder attributeBuilder )
             => (IAttribute) this._cache.GetOrAdd(

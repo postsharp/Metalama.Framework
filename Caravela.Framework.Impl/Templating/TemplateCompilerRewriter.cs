@@ -626,7 +626,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     if ( this._templateMemberClassifier.IsDynamicParameter( a ) )
                     {
-                        if ( a.GetScopeFromAnnotation() != TemplatingScope.RunTimeOnly )
+                        if ( a.Expression.GetScopeFromAnnotation() != TemplatingScope.RunTimeOnly )
                         {
                             return Argument( this.CreateRunTimeExpression( a.Expression ) );
                         }

@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Linq;
@@ -62,9 +63,9 @@ class TargetCode
                 @"global::TargetCode.Foo()" );
 
             // Test exception related to the 'instance' parameter.
-            AssertEx.ThrowsWithDiagnostic(
-                GeneralDiagnosticDescriptors.CannotProvideInstanceForStaticMember,
-                () => fooMethod.Invokers.Final.Invoke( new RuntimeExpression( generator.LiteralExpression( 42 ) ) ) );
+            AssertEx.DynamicEquals(
+                fooMethod.Invokers.Final.Invoke( new RuntimeExpression( SyntaxFactoryEx.Null ) ),
+                @"global::TargetCode.Foo()" );
 
             AssertEx.ThrowsWithDiagnostic(
                 GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember,

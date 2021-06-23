@@ -706,17 +706,19 @@ namespace Caravela.Framework.Impl.Templating
 
                     var argumentType = parameter?.Type ?? this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type;
 
-                    ArgumentSyntax transformedArgument;
+                    ExpressionSyntax transformedArgumentValue;
 
-                    // dynamic or dynamic[]
+                    // Transform the argument value.
                     if ( expressionScope.IsDynamic() || this._templateMemberClassifier.IsDynamicType( argumentType ) )
                     {
+                        // dynamic or dynamic[]
+                        
                         using ( this.WithScopeContext(
                             ScopeContext.CreatePreferredRunTimeScope(
                                 this._currentScopeContext,
                                 $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString()}'" ) ) )
                         {
-                            transformedArgument = (ArgumentSyntax) this.VisitArgument( argument )!;
+                            transformedArgumentValue = this.Visit( argument.Expression )!;
                         }
                     }
                     else if ( expressionScope.IsRunTime() )
@@ -726,7 +728,7 @@ namespace Caravela.Framework.Impl.Templating
                                 this._currentScopeContext,
                                 $"argument of the run-time method '{node.Expression}'" ) ) )
                         {
-                            transformedArgument = (ArgumentSyntax) this.VisitArgument( argument )!;
+                            transformedArgumentValue = this.Visit( argument.Expression )!;
                         }
                     }
                     else
@@ -734,11 +736,12 @@ namespace Caravela.Framework.Impl.Templating
                         using ( this.WithScopeContext(
                             ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a compile-time expression '{node.Expression}'" ) ) )
                         {
-                            transformedArgument = (ArgumentSyntax) this.VisitArgument( argument )!;
+                            transformedArgumentValue = this.Visit( argument.Expression )!;
                         }
                     }
-
-                    transformedArgument = transformedArgument.WithTriviaFrom( argument );
+                    
+                    // The scope of the argument itself copies the scope of the method.
+                    var transformedArgument = argument.WithExpression( transformedArgumentValue ).WithTriviaFrom( argument ).AddScopeAnnotation( expressionScope );
                     transformedArguments.Add( transformedArgument );
                 }
 
