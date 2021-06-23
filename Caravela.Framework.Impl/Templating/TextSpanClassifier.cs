@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using System;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -25,6 +26,7 @@ namespace Caravela.Framework.Impl.Templating
         private readonly bool _detectRegion;
         private readonly ClassifiedTextSpanCollection _classifiedTextSpans = new();
         private bool _isInTemplate;
+        private bool _isInCompileTimeType;
         private int _excludedRegionStart;
         private bool _isInExcludedRegion;
         private bool _isRecursiveCall;
@@ -86,24 +88,42 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public override void VisitClassDeclaration( ClassDeclarationSyntax node )
+        private void VisitType<T>( T node, Action<T> visitBase )
+            where T : TypeDeclarationSyntax
         {
             if ( node.GetScopeFromAnnotation() != TemplatingScope.RunTimeOnly )
             {
-                this.Mark( node.Modifiers, TextSpanClassification.CompileTime );
-                this.Mark( node.Keyword, TextSpanClassification.CompileTime );
-                this.Mark( node.OpenBraceToken, TextSpanClassification.CompileTime );
-                this.Mark( node.CloseBraceToken, TextSpanClassification.CompileTime );
-                this.Mark( node.ConstraintClauses, TextSpanClassification.CompileTime );
-                this.Mark( node.Identifier, TextSpanClassification.CompileTime );
-                this.Mark( node.BaseList, TextSpanClassification.CompileTime );
-                base.VisitClassDeclaration( node );
+                var oldIsInCompileTimeType = this._isInCompileTimeType;
+
+                this._isInCompileTimeType = true;
+
+                try
+                {
+                    this.Mark( node.Modifiers, TextSpanClassification.CompileTime );
+                    this.Mark( node.Keyword, TextSpanClassification.CompileTime );
+                    this.Mark( node.OpenBraceToken, TextSpanClassification.CompileTime );
+                    this.Mark( node.CloseBraceToken, TextSpanClassification.CompileTime );
+                    this.Mark( node.ConstraintClauses, TextSpanClassification.CompileTime );
+                    this.Mark( node.Identifier, TextSpanClassification.CompileTime );
+                    this.Mark( node.BaseList, TextSpanClassification.CompileTime );
+                    visitBase( node );
+                }
+                finally
+                {
+                    this._isInCompileTimeType = oldIsInCompileTimeType;
+                }
             }
             else if ( this._processAllTypes || this._detectRegion )
             {
-                base.VisitClassDeclaration( node );
+                visitBase( node );
             }
         }
+
+        public override void VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitType( node, n => base.VisitClassDeclaration( n ) );
+
+        public override void VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitType( node, n => base.VisitStructDeclaration( n ) );
+
+        public override void VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitType( node, n => base.VisitRecordDeclaration( n ) );
 
         public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
@@ -130,7 +150,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 this._isInTemplate = false;
             }
-            else
+            else if ( this._isInCompileTimeType )
             {
                 this.Mark( node, TextSpanClassification.CompileTime );
             }
@@ -138,7 +158,10 @@ namespace Caravela.Framework.Impl.Templating
 
         private void VisitMember( SyntaxNode node )
         {
-            this.Mark( node, TextSpanClassification.CompileTime );
+            if ( this._isInCompileTimeType )
+            {
+                this.Mark( node, TextSpanClassification.CompileTime );
+            }
         }
 
         public override void VisitFieldDeclaration( FieldDeclarationSyntax node )

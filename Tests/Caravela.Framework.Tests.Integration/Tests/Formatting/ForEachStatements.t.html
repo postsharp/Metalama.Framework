@@ -45,7 +45,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.ForEachSt
 {
     class RunTimeClass
     {
-        <span class='caravelaClassification_CompileTime'>public IEnumerable&lt;int&gt; runTimeEnumerable;</span>
+        public IEnumerable&lt;int&gt; runTimeEnumerable;
     }
 
     [CompileTimeOnly]
@@ -74,7 +74,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.ForEachSt
                 <span class='caravelaClassification_RunTime'>x.ToString();</span>
             <span class='caravelaClassification_RunTime'>}</span>
 
-            <span class='caravelaClassification_RunTime'>return </span><span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.</span><span class='caravelaClassification_TemplateKeyword'>Proceed</span><span class='caravelaClassification_CompileTime'>()</span><span class='caravelaClassification_RunTime'>;</span>
+            <span class='caravelaClassification_RunTime'>return </span><span class='caravelaClassification_TemplateKeyword'>meta.Proceed</span><span class='caravelaClassification_CompileTime'>()</span><span class='caravelaClassification_RunTime'>;</span>
         <span class='caravelaClassification_CompileTime'>}</span>
     <span class='caravelaClassification_CompileTime'>}
 </span>}

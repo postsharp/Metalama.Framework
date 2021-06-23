@@ -34,17 +34,17 @@
 
 </style>
 </head>
-<body>
-<pre><code class="lang-csharp">using Caravela.TestFramework;
+<body><pre>
+using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStatements.RunTimeIfCondition
 {
     class RunTimeClass
     {
-        public void RunTimeMethod()
-        {
-        }
+        <span class='caravelaClassification_CompileTime'>public void RunTimeMethod()</span>
+        <span class='caravelaClassification_CompileTime'>{</span>
+        <span class='caravelaClassification_CompileTime'>}</span>
     }
 
     [CompileTimeOnly]
@@ -79,11 +79,11 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
                 <span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.Method.ToString();</span>
             <span class='caravelaClassification_RunTime'>}</span>
 
-            <span class='caravelaClassification_RunTime'>return </span><span class='caravelaClassification_TemplateKeyword'>meta.Proceed</span><span class='caravelaClassification_CompileTime'>()</span><span class='caravelaClassification_RunTime'>;</span>
+            <span class='caravelaClassification_RunTime'>return </span><span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.</span><span class='caravelaClassification_TemplateKeyword'>Proceed</span><span class='caravelaClassification_CompileTime'>()</span><span class='caravelaClassification_RunTime'>;</span>
         <span class='caravelaClassification_CompileTime'>}</span>
     <span class='caravelaClassification_CompileTime'>}
 </span>}
-</code></pre>
+</pre>
 <p class='legend'>Legend:</p>
 <pre>
 <span class='Default'>Default</span>

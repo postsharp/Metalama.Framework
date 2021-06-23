@@ -34,8 +34,8 @@
 
 </style>
 </head>
-<body>
-<pre><code class="lang-csharp">#pragma warning disable CS0219
+<body><pre>
+#pragma warning disable CS0219
 
 using System;
 using Caravela.TestFramework;
@@ -45,9 +45,9 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.Declarati
 {
     class RuntimeClass
     {
-        public void RunTimeMethod()
-        {
-        }
+        <span class='caravelaClassification_CompileTime'>public void RunTimeMethod()</span>
+        <span class='caravelaClassification_CompileTime'>{</span>
+        <span class='caravelaClassification_CompileTime'>}</span>
     }
 
     [CompileTime]
@@ -60,17 +60,17 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.Declarati
 
             <span class='caravelaClassification_RunTime'>int scalar = 0;</span>
             <span class='caravelaClassification_RunTime'>int[] array = new int[10];</span>
-            <span class='caravelaClassification_RunTime'>object @object = "";</span>
-            <span class='caravelaClassification_RunTime'>string @string = "";</span>
+            <span class='caravelaClassification_RunTime'>object @object = &quot;&quot;;</span>
+            <span class='caravelaClassification_RunTime'>string @string = &quot;&quot;;</span>
             <span class='caravelaClassification_RunTime'>Action action = runTimeClassInstance.RunTimeMethod;</span>
             <span class='caravelaClassification_RunTime'>(int, byte) tuple = (0, 1);</span>
             <span class='caravelaClassification_RunTime'>Tuple&lt;int, byte&gt; generic = new Tuple&lt;int, byte&gt;(2, 3);</span>
 
-            <span class='caravelaClassification_RunTime'>return </span><span class='caravelaClassification_TemplateKeyword'>meta.Proceed</span><span class='caravelaClassification_CompileTime'>()</span><span class='caravelaClassification_RunTime'>;</span>
+            <span class='caravelaClassification_RunTime'>return </span><span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.</span><span class='caravelaClassification_TemplateKeyword'>Proceed</span><span class='caravelaClassification_CompileTime'>()</span><span class='caravelaClassification_RunTime'>;</span>
         <span class='caravelaClassification_CompileTime'>}</span>
     <span class='caravelaClassification_CompileTime'>}
 </span>}
-</code></pre>
+</pre>
 <p class='legend'>Legend:</p>
 <pre>
 <span class='Default'>Default</span>

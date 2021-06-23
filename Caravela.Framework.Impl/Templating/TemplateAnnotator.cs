@@ -583,7 +583,16 @@ namespace Caravela.Framework.Impl.Templating
                     scope = this.GetNodeScope( transformedExpression );
                 }
 
-                return node.Update( transformedExpression, node.OperatorToken, transformedName )
+                // If both sides of the member are template keywords, display the . as a template keyword too.
+                var transformedOperatorToken = node.OperatorToken;
+
+                if ( transformedExpression.GetColorFromAnnotation() == TextSpanClassification.TemplateKeyword &&
+                     transformedName.GetColorFromAnnotation() == TextSpanClassification.TemplateKeyword )
+                {
+                    transformedOperatorToken = transformedOperatorToken.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
+                }
+
+                return node.Update( transformedExpression, transformedOperatorToken, transformedName )
                     .AddScopeAnnotation( scope );
             }
         }
