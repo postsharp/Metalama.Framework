@@ -26,6 +26,11 @@ namespace Caravela.Framework.Impl.Linking
         private readonly IReadOnlyDictionary<ISymbol, MemberAnalysisResult> _methodBodyInfos;
         private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
 
+        internal IReadOnlyList<AspectReferenceHandle> GetAspectReferences( ISymbol symbol, AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self )
+        {
+            throw new NotImplementedException();
+        }
+
         public LinkerAnalysisRegistry(
             LinkerIntroductionRegistry introductionRegistry,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
@@ -84,7 +89,7 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         /// <param name="symbol">Method symbol.</param>
         /// <returns><c>True</c> if the method body can be inlined, otherwise <c>false</c>.</returns>
-        public bool IsInlineable( ISymbol symbol )
+        public bool IsNotInlineable( ISymbol symbol )
         {
             // TODO: Inlineability also depends on parameters passed. 
             //       Method/indexer is inlineable if only if:
@@ -132,6 +137,11 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
+        internal bool IsNotDiscardable( IMethodSymbol symbol )
+        {
+            throw new NotImplementedException();
+        }
+
         private bool HasSingleReference( ISymbol symbol, AspectLayerId? aspectLayerId )
         {
             switch ( symbol )
@@ -161,6 +171,11 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             return counter <= 1;
+        }
+
+        internal IReadOnlyList<AspectReferenceHandle> GetContainedAspectReferences( IMethodSymbol symbol )
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -211,88 +226,6 @@ namespace Caravela.Framework.Impl.Linking
         }
 
         /// <summary>
-        /// Resolves an annotated symbol referenced by an introduced method body, while respecting aspect layer ordering.
-        /// </summary>
-        /// <param name="contextSymbol">Symbol of the method body which contains the reference.</param>
-        /// <param name="referencedSymbol">Symbol of the reference method (usually the original declaration).</param>
-        /// <param name="referenceAnnotation">Annotation on the referencing node.</param>
-        /// <returns>Symbol of the introduced declaration visible to the context method (previous aspect layer that transformed this declaration).</returns>
-        public ISymbol ResolveSymbolReference( ISymbol contextSymbol, ISymbol referencedSymbol, AspectReferenceSpecification referenceAnnotation )
-        {
-            // TODO: Other things than methods.
-            var overrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
-            var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (o.AspectLayerId, Index: i) ).ToReadOnlyList();
-            var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceAnnotation.AspectLayerId ).Index;
-
-            // TODO: Optimize.
-            var previousLayerOverride = (
-                from o in overrides
-                join oal in indexedLayers
-                    on o.AspectLayerId equals oal.AspectLayerId
-                where oal.Index < annotationLayerIndex
-                orderby oal.Index
-                select o
-            ).LastOrDefault();
-
-            if ( previousLayerOverride == null )
-            {
-                if ( referencedSymbol is IMethodSymbol methodSymbol )
-                {
-                    if ( methodSymbol.OverriddenMethod != null )
-                    {
-                        return methodSymbol.OverriddenMethod;
-                    }
-                    else if ( TryGetHiddenSymbol( methodSymbol, out var hiddenSymbol ) )
-                    {
-                        return hiddenSymbol;
-                    }
-                }
-                else if ( referencedSymbol is IPropertySymbol propertySymbol )
-                {
-                    var overridenAccessor = propertySymbol.GetMethod?.OverriddenMethod ?? propertySymbol.SetMethod?.OverriddenMethod;
-
-                    if ( overridenAccessor != null )
-                    {
-                        return overridenAccessor.AssociatedSymbol.AssertNotNull();
-                    }
-                    else if ( TryGetHiddenSymbol( propertySymbol, out var hiddenSymbol ) )
-                    {
-                        return hiddenSymbol;
-                    }
-                }
-
-                return referencedSymbol;
-            }
-
-            return this._introductionRegistry.GetSymbolForIntroducedMember( previousLayerOverride );
-        }
-
-        private static bool TryGetHiddenSymbol( ISymbol symbol, [NotNullWhen( true )] out ISymbol? hiddenSymbol )
-        {
-            var currentType = symbol.ContainingType.BaseType;
-
-            while ( currentType != null )
-            {
-                // TODO: Optimize - lookup by name first instead of equating all members.
-                foreach ( var member in currentType.GetMembers() )
-                {
-                    if ( StructuralSymbolComparer.Signature.Equals( symbol, member ) )
-                    {
-                        hiddenSymbol = (IMethodSymbol) member;
-
-                        return true;
-                    }
-                }
-
-                currentType = currentType.BaseType;
-            }
-
-            hiddenSymbol = null;
-
-            return false;
-        }
-
-        /// <summary>
         /// Determines whether the method has a simple return control flow (i.e. if return is replaced by assignment, the control flow graph does not change).
         /// </summary>
         /// <param name="methodSymbol">Symbol.</param>
@@ -306,6 +239,11 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             return result.HasSimpleReturnControlFlow;
+        }
+
+        internal ISymbol GetPreviousOverride( ISymbol mainSymbol )
+        {
+            throw new NotImplementedException();
         }
     }
 }

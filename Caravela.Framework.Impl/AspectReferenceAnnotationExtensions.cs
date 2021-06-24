@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl
         /// <param name="order">Version of the target semantic in relation to the aspect layer.</param>
         /// <param name="targetKind">Target kind. For example self or property get accessor.</param>
         /// <returns>Annotated syntax node.</returns>
-        public static T WithAspectReferenceAnnotation<T>( this T node, AspectLayerId aspectLayerId, AspectReferenceOrder order, AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self )
+        public static T WithAspectReferenceAnnotation<T>( this T node, AspectLayerId aspectLayerId, AspectReferenceOrder order, AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self, AspectReferenceFlags flags = AspectReferenceFlags.None    )
             where T : SyntaxNode
         {
             return node.WithAdditionalAnnotations( new SyntaxAnnotation( AnnotationKind, new AspectReferenceSpecification( aspectLayerId, order, targetKind ).ToString() ) );

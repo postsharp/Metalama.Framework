@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.Linking
                         ? this.AnalysisRegistry.GetOverrideTarget( this.ContextBodyMethod )
                         : this.ContextBodyMethod;
 
-                if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
+                if ( this.AnalysisRegistry.IsNotInlineable( resolvedSymbol ) )
                 {
                     // Inline the accessor body.
                     return this.GetInlinedBody( resolvedSymbol, GetAssignmentVariableName( node.Left ) );
@@ -123,7 +123,7 @@ namespace Caravela.Framework.Impl.Linking
                         ? this.AnalysisRegistry.GetOverrideTarget( this.ContextBodyMethod )
                         : this.ContextBodyMethod;
 
-                if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
+                if ( this.AnalysisRegistry.IsNotInlineable( resolvedSymbol ) )
                 {
                     // Inline the accessor body.
                     return this.GetInlinedBody( resolvedSymbol, null );

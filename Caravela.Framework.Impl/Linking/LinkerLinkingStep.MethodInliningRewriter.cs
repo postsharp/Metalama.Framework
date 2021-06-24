@@ -57,9 +57,9 @@ namespace Caravela.Framework.Impl.Linking
                 var resolvedSymbol = (IMethodSymbol) this.AnalysisRegistry.ResolveSymbolReference(
                     this.ContextMember,
                     targetMethodSymbol,
-                    annotation.AssertNotNull() );
+                    annotation );
 
-                if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
+                if ( this.AnalysisRegistry.IsNotInlineable( resolvedSymbol ) )
                 {
                     // Inline the method body.
                     return this.GetInlinedMethodBody( resolvedSymbol, null );
@@ -96,14 +96,14 @@ namespace Caravela.Framework.Impl.Linking
                 var resolvedSymbol = (IMethodSymbol) this.AnalysisRegistry.ResolveSymbolReference(
                     this.ContextMember,
                     targetMethodSymbol,
-                    annotation.AssertNotNull() );
+                    annotation );
 
                 var overrideTargetSymbol =
                     this.AnalysisRegistry.IsOverride( this.ContextBodyMethod )
                         ? this.AnalysisRegistry.GetOverrideTarget( this.ContextBodyMethod )
                         : this.ContextBodyMethod;
 
-                if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
+                if ( this.AnalysisRegistry.IsNotInlineable( resolvedSymbol ) )
                 {
                     // Inline the method body.
                     return this.GetInlinedMethodBody( resolvedSymbol, GetAssignmentVariableName( node.Left ) );
@@ -143,14 +143,14 @@ namespace Caravela.Framework.Impl.Linking
                 var resolvedSymbol = (IMethodSymbol) this.AnalysisRegistry.ResolveSymbolReference(
                     this.ContextMember,
                     targetMethodSymbol,
-                    annotation.AssertNotNull() );
+                    annotation );
 
                 var overrideTargetSymbol =
                     this.AnalysisRegistry.IsOverride( this.ContextBodyMethod )
                         ? this.AnalysisRegistry.GetOverrideTarget( this.ContextBodyMethod )
                         : this.ContextBodyMethod;
 
-                if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
+                if ( this.AnalysisRegistry.IsNotInlineable( resolvedSymbol ) )
                 {
                     // Inline the method body.
                     return this.GetInlinedMethodBody( resolvedSymbol, null );

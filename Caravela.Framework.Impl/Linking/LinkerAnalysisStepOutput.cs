@@ -14,11 +14,13 @@ namespace Caravela.Framework.Impl.Linking
         public LinkerAnalysisStepOutput(
             ImmutableUserDiagnosticList diagnostics,
             PartialCompilation intermediateCompilation,
-            LinkerAnalysisRegistry analysisRegistry )
+            LinkerAnalysisRegistry analysisRegistry,
+            AspectReferenceResolver referenceResolver )
         {
             this.Diagnostics = diagnostics;
             this.IntermediateCompilation = intermediateCompilation;
             this.AnalysisRegistry = analysisRegistry;
+            this.ReferenceResolver = referenceResolver;
         }
 
         /// <summary>
@@ -35,5 +37,7 @@ namespace Caravela.Framework.Impl.Linking
         /// Gets the analysis registry.
         /// </summary>
         public LinkerAnalysisRegistry AnalysisRegistry { get; }
+
+        public AspectReferenceResolver ReferenceResolver { get; }
     }
 }

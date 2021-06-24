@@ -25,14 +25,21 @@ namespace Caravela.Framework.Impl
         /// </summary>
         public AspectReferenceTargetKind TargetKind { get; }
 
+        /// <summary>
+        /// Gets a value indicating flags available to the linker on the reference.
+        /// </summary>
+        public AspectReferenceFlags Flags { get; }
+
         public AspectReferenceSpecification(
             AspectLayerId aspectLayerId,
             AspectReferenceOrder order,
-            AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self )
+            AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self,
+            AspectReferenceFlags flags = AspectReferenceFlags.None )
         {
             this.AspectLayerId = aspectLayerId;
             this.Order = order;
             this.TargetKind = targetKind;
+            this.Flags = flags;
         }
 
         public static AspectReferenceSpecification FromString( string str )
@@ -47,12 +54,17 @@ namespace Caravela.Framework.Impl
 
             Invariant.Assert( parseSuccess2 );
 
-            return new AspectReferenceSpecification( AspectLayerId.FromString( parts[0] ), order, targetKind );
+            var parseSuccess3 = Enum.TryParse<AspectReferenceFlags>( parts[3], out var flags );
+
+            Invariant.Assert( parseSuccess3 );
+
+            return new AspectReferenceSpecification( AspectLayerId.FromString( parts[0] ), order, targetKind, flags );
         }
 
         public override string ToString()
         {
-            return $"{this.AspectLayerId.FullName}${this.Order}${this.TargetKind}";
+            // TODO: Cache strings.
+            return $"{this.AspectLayerId.FullName}${this.Order}${this.TargetKind}${this.Flags}";
         }
     }
 }

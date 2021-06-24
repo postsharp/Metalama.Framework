@@ -192,7 +192,7 @@ namespace Caravela.Framework.Impl.Linking
 
             var analysisRegistry = new LinkerAnalysisRegistry( input.IntroductionRegistry, input.OrderedAspectLayers, referenceCounters, methodBodyInfos );
 
-            return new LinkerAnalysisStepOutput( input.Diagnostics, input.IntermediateCompilation, analysisRegistry );
+            return new LinkerAnalysisStepOutput( input.Diagnostics, input.IntermediateCompilation, analysisRegistry, new AspectReferenceResolver( input.IntroductionRegistry, input.OrderedAspectLayers ) );
         }
 
         private static void AnalyzeMethodBody( Dictionary<ISymbol, MemberAnalysisResult> methodBodyInfos, IMethodSymbol symbol )
