@@ -16,7 +16,8 @@ namespace Caravela.Framework.Aspects
     // ReSharper disable once InconsistentNaming
 
     /// <summary>
-    /// Exposes the meta-model and the meta-functions to a template method.
+    /// The entry point for the meta model, which can be used in templates to inspect the target code or access other
+    /// features of the template language.
     /// </summary>
     [CompileTimeOnly]
     [TemplateKeyword]

@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.AspectWorkbench.Model;
-using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;

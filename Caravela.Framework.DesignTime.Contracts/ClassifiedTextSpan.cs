@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis.Text;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.DesignTime.Contracts
 {
@@ -19,14 +20,19 @@ namespace Caravela.Framework.DesignTime.Contracts
         /// Gets the classification of <see cref="Span"/>.
         /// </summary>
         public TextSpanClassification Classification { get; }
+        
+        public ImmutableDictionary<string, string> Tags { get; }
+
+        public bool HasTagOrClassification => this.Classification != TextSpanClassification.Default || !this.Tags.IsEmpty;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClassifiedTextSpan"/> struct.
         /// </summary>
-        public ClassifiedTextSpan( TextSpan span, TextSpanClassification classification )
+        public ClassifiedTextSpan( TextSpan span, TextSpanClassification classification, ImmutableDictionary<string, string>? tags )
         {
             this.Span = span;
             this.Classification = classification;
+            this.Tags = tags ?? ImmutableDictionary<string, string>.Empty;
         }
     }
 }

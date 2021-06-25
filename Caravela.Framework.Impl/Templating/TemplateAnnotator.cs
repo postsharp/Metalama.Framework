@@ -357,6 +357,11 @@ namespace Caravela.Framework.Impl.Templating
         [return: NotNullIfNotNull( "node" )]
         private SyntaxNode? DefaultVisitImpl( SyntaxNode? node )
         {
+            if ( node == null )
+            {
+                return null;
+            }
+            
             this._cancellationToken.ThrowIfCancellationRequested();
 
             // Adds annotations to the children node.

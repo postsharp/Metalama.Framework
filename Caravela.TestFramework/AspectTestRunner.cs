@@ -17,7 +17,7 @@ namespace Caravela.TestFramework
     /// <summary>
     /// Executes aspect integration tests by running the full aspect pipeline on the input source file.
     /// </summary>
-    public partial class AspectTestRunner : BaseTestRunner
+    public class AspectTestRunner : BaseTestRunner
     {
         public AspectTestRunner(
             IServiceProvider serviceProvider,
@@ -58,7 +58,7 @@ namespace Caravela.TestFramework
                 testResult.SetFailed( "CompileTimeAspectPipeline.TryExecute failed." );
             }
 
-            if ( testInput.Options.WriteFormattedHtml.GetValueOrDefault() )
+            if ( testInput.Options.WriteHtml.GetValueOrDefault() )
             {
                 this.WriteHtml( testInput, testResult );
             }

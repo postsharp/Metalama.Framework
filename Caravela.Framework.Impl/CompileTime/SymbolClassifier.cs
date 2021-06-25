@@ -139,8 +139,83 @@ namespace Caravela.Framework.Impl.CompileTime
             return null;
         }
 
-        public TemplatingScope GetTemplatingScope( ISymbol symbol )
+        public TemplatingScope GetTemplatingScope( ISymbol symbol ) => this.GetTemplatingScope( symbol, 0 );
+
+        private TemplatingScope GetTemplatingScope( ISymbol symbol, int recursion )
         {
+            if ( recursion > 32 )
+            {
+                throw new AssertionFailedException();
+            }
+
+            switch ( symbol )
+            {
+                case ITypeParameterSymbol:
+                    return TemplatingScope.Both;
+                    
+                case IErrorTypeSymbol:
+                    return TemplatingScope.Unknown;
+
+                case IArrayTypeSymbol array:
+                    return this.GetTemplatingScope( array.ElementType, recursion + 1 );
+
+                case IPointerTypeSymbol pointer:
+                    return this.GetTemplatingScope( pointer.PointedAtType, recursion + 1 );
+
+                case INamedTypeSymbol { IsGenericType: true, IsUnboundGenericType: false } namedType when namedType.OriginalDefinition != namedType:
+                    {
+                        List<TemplatingScope> scopes = new( namedType.TypeArguments.Length + 1 );
+                        var declarationScope = this.GetTemplatingScope( namedType.OriginalDefinition, recursion + 1 );
+                        scopes.Add( declarationScope );
+                        scopes.AddRange( namedType.TypeArguments.Select( arg => this.GetTemplatingScope( arg, recursion + 1 ) ) );
+
+                        var compileTimeOnlyCount = 0;
+                        var runtimeCount = 0;
+
+                        foreach ( var scope in scopes )
+                        {
+                            switch ( scope )
+                            {
+                                case TemplatingScope.RunTimeOnly:
+                                    runtimeCount++;
+
+                                    break;
+
+                                case TemplatingScope.CompileTimeOnly:
+                                    compileTimeOnlyCount++;
+
+                                    break;
+
+                                case TemplatingScope.Both:
+                                    break;
+
+                                case TemplatingScope.Unknown:
+                                    return TemplatingScope.Unknown;
+
+                                default:
+                                    throw new AssertionFailedException( $"Unexpected scope: {scope}." );
+                            }
+                        }
+
+                        if ( runtimeCount > 0 && compileTimeOnlyCount > 0 )
+                        {
+                            return TemplatingScope.Conflict;
+                        }
+                        else if ( runtimeCount > 0 )
+                        {
+                            return TemplatingScope.RunTimeOnly;
+                        }
+                        else if ( compileTimeOnlyCount > 0 )
+                        {
+                            return TemplatingScope.CompileTimeOnly;
+                        }
+                        else
+                        {
+                            return TemplatingScope.Both;
+                        }
+                    }
+            }
+
             // From well-known types.
             if ( TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
             {

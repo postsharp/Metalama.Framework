@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    internal sealed partial class SyntaxTreeAnnotationMap
+    internal sealed partial class SyntaxTreeAnnotationMap 
     {
         /// <summary>
         /// A <see cref="CSharpSyntaxRewriter"/> that adds annotations.

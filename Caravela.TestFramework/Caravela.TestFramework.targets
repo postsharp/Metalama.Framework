@@ -80,11 +80,24 @@ namespace $(RootNamespace)
 
     <Target Name="AcceptTestHtml">
         <ItemGroup>
-            <_AcceptTestOutput Include="obj\\highlighted\**\*.html" />
+            <_AcceptTestOutput Include="obj\\html\**\*.cs.html" />
         </ItemGroup>
         <Copy
             SourceFiles="@(_AcceptTestOutput)"
             DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
+    
+    
+      <Target Name="_ResolveCopyLocalNuGetPkgXmls" AfterTargets="ResolveReferences">
+        <ItemGroup>
+        <!--
+         https://stackoverflow.com/a/65432020/74435
+         Copy XML files from all PackageReferences to output dir.
+         We need this to build the HTML titles when the option is enabled.
+         -->
+          <ReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths->'%(RootDir)%(Directory)%(Filename).xml')"
+          Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)'!='' and Exists('%(RootDir)%(Directory)%(Filename).xml')" />
+        </ItemGroup>
+      </Target>
 
 </Project>

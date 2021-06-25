@@ -1,9 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
@@ -71,7 +70,7 @@ namespace Caravela.TestFramework
 
             var syntaxTree = mainDocument.GetSyntaxTreeAsync().Result!;
 
-            testResult.AddInputDocument( mainDocument );
+            testResult.AddInputDocument( mainDocument, testInput.FullPath );
 
             var initialCompilation = CSharpCompilation.Create(
                 "test",
@@ -86,9 +85,9 @@ namespace Caravela.TestFramework
                 var includedFileName = Path.GetFileName( includedFullPath );
 
                 var includedDocument = project.AddDocument( includedFileName, SourceText.From( includedText, Encoding.UTF8 ), filePath: includedFileName );
-                project = mainDocument.Project;
+                project = includedDocument.Project;
 
-                testResult.AddInputDocument( includedDocument );
+                testResult.AddInputDocument( includedDocument, includedFullPath );
 
                 var includedSyntaxTree = includedDocument.GetSyntaxTreeAsync().Result!;
                 initialCompilation = initialCompilation.AddSyntaxTrees( includedSyntaxTree );
@@ -96,7 +95,7 @@ namespace Caravela.TestFramework
 
             ValidateCustomAttributes( initialCompilation );
 
-            testResult.Project = project;
+            testResult.InputProject = project;
             testResult.TestInput = testInput;
             testResult.InputCompilation = initialCompilation;
 
@@ -253,135 +252,77 @@ namespace Caravela.TestFramework
 
         protected void WriteHtml( TestInput testInput, TestResult testResult )
         {
+            var htmlCodeWriter = this.CreateHtmlCodeWriter( testInput.Options );
+
+            var htmlDirectory = Path.Combine(
+                this.ProjectDirectory!,
+                "obj",
+                "html",
+                Path.GetDirectoryName( testInput.RelativePath ) ?? "" );
+
+            // Write each document individually.
             foreach ( var syntaxTree in testResult.SyntaxTrees )
             {
-                this.WriteHtml( testInput, syntaxTree );
+                this.WriteHtml( syntaxTree, htmlDirectory, htmlCodeWriter );
+            }
+
+            // Write the consolidated output.
+            var output = testResult.GetConsolidatedTestOutput();
+            var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", output );
+
+            var formattedOutput = OutputCodeFormatter.FormatAsync( outputDocument ).Result;
+            var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + ".out.html" );
+            var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput );
+
+            using ( var outputHtml = File.CreateText( outputHtmlPath ) )
+            {
+                htmlCodeWriter.Write( formattedOutputDocument, null, outputHtml );
             }
         }
 
-        protected virtual void WriteHtmlProlog( TextWriter writer ) { }
+        protected virtual HtmlCodeWriter CreateHtmlCodeWriter( TestOptions options )
+            => new( new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault() ) );
 
-        protected virtual void WriteHtmlEpilogue( TextWriter writer ) { }
-
-        private void WriteHtml( TestInput testInput, TestSyntaxTree testSyntaxTree )
+        private void WriteHtml( TestSyntaxTree testSyntaxTree, string htmlDirectory, HtmlCodeWriter htmlCodeWriter )
         {
-            var htmlPath = Path.Combine(
-                this.ProjectDirectory!,
-                "obj",
-                "highlighted",
-                Path.GetDirectoryName( testInput.RelativePath ) ?? "",
-                Path.GetFileNameWithoutExtension( testSyntaxTree.InputDocument.FilePath ) + FileExtensions.Html );
+            var inputHtmlPath = Path.Combine(
+                htmlDirectory,
+                Path.GetFileNameWithoutExtension( testSyntaxTree.InputDocument.FilePath ) + FileExtensions.InputHtml );
 
-            if ( testSyntaxTree.AnnotatedSyntaxRoot == null )
-            {
-                // The tree has not been annotated, so there is nothing to write.
-                return;
-            }
-
-            testSyntaxTree.OutputHtmlPath = htmlPath;
-
-            var htmlDirectory = Path.GetDirectoryName( htmlPath );
+            testSyntaxTree.HtmlInputRunTimePath = inputHtmlPath;
 
             if ( !Directory.Exists( htmlDirectory ) )
             {
                 Directory.CreateDirectory( htmlDirectory );
             }
 
-            this.Logger?.WriteLine( "HTML output file: " + htmlPath );
+            this.Logger?.WriteLine( "HTML of input: " + inputHtmlPath );
 
-            var sourceText = testSyntaxTree.InputDocument.GetTextAsync().Result;
-            var classifier = new TextSpanClassifier( sourceText, detectRegion: true );
-            classifier.Visit( testSyntaxTree.AnnotatedSyntaxRoot );
-
-            using var textWriter = File.CreateText( htmlPath );
-
-            this.WriteHtmlProlog( textWriter );
-            textWriter.Write( "<pre><code class=\"lang-csharp\">" );
-
-            var i = 0;
-
-            foreach ( var classifiedSpan in classifier.ClassifiedTextSpans )
+            // Write the input document.
+            using ( var inputTextWriter = File.CreateText( inputHtmlPath ) )
             {
-                // Write the text between the previous span and the current one.
-                if ( i < classifiedSpan.Span.Start )
-                {
-                    var textBefore = sourceText.GetSubText( new TextSpan( i, classifiedSpan.Span.Start - i ) ).ToString();
-                    textWriter.Write( HtmlEncode( textBefore ) );
-                }
-
-                var spanText = sourceText.GetSubText( classifiedSpan.Span ).ToString();
-
-                if ( classifiedSpan.Classification != TextSpanClassification.Excluded )
-                {
-                    textWriter.Write( $"<span class='caravelaClassification_{classifiedSpan.Classification}'" );
-
-                    if ( testInput.Options.AddHtmlTitles.GetValueOrDefault() )
-                    {
-                        var title = classifiedSpan.Classification switch
-                        {
-                            TextSpanClassification.Dynamic => "Dynamic member",
-                            TextSpanClassification.CompileTime => "Compile-time code",
-                            TextSpanClassification.RunTime => "Run-time code",
-                            TextSpanClassification.TemplateKeyword => "Special member",
-                            TextSpanClassification.CompileTimeVariable => "Compile-time variable",
-                            _ => null
-                        };
-
-                        if ( title != null )
-                        {
-                            textWriter.Write( $" title='{title}'" );
-                        }
-                    }
-
-                    textWriter.Write( ">" );
-                    textWriter.Write( HtmlEncode( spanText ) );
-                    textWriter.Write( "</span>" );
-                }
-
-                i = classifiedSpan.Span.End;
+                htmlCodeWriter.Write(
+                    testSyntaxTree.InputDocument,
+                    testSyntaxTree.AnnotatedSyntaxRoot,
+                    inputTextWriter );
             }
 
-            // Write the remaining text.
-            if ( i < sourceText.Length )
+            // Write the output document.
+            if ( testSyntaxTree.OutputRunTimeDocument != null )
             {
-                textWriter.Write( HtmlEncode( sourceText.GetSubText( i ).ToString() ) );
-            }
+                var outputHtmlPath = Path.Combine(
+                    htmlDirectory,
+                    Path.GetFileNameWithoutExtension( testSyntaxTree.InputDocument.FilePath ) + FileExtensions.OutputHtml );
 
-            textWriter.WriteLine( "</code></pre>" );
-            this.WriteHtmlEpilogue( textWriter );
-        }
+                testSyntaxTree.HtmlOutputRunTimePath = outputHtmlPath;
 
-        private static string HtmlEncode( string s )
-        {
-            var stringBuilder = new StringBuilder( s.Length );
+                this.Logger?.WriteLine( "HTML of output: " + outputHtmlPath );
 
-            foreach ( var c in s )
-            {
-                switch ( c )
+                using ( var outputTextWriter = File.CreateText( outputHtmlPath ) )
                 {
-                    case '<':
-                        stringBuilder.Append( "&lt;" );
-
-                        break;
-
-                    case '>':
-                        stringBuilder.Append( "&gt;" );
-
-                        break;
-
-                    case '&':
-                        stringBuilder.Append( "&amp;" );
-
-                        break;
-
-                    default:
-                        stringBuilder.Append( c );
-
-                        break;
+                    htmlCodeWriter.Write( testSyntaxTree.OutputRunTimeDocument, null, outputTextWriter );
                 }
             }
-
-            return stringBuilder.ToString();
         }
     }
 }

@@ -37,7 +37,7 @@
                         "extensionToExtension": {
                             "add": {
                                 ".t.cs": [ ".cs" ],
-                                ".t.html": [ ".cs" ]
+                                ".cs.html": [ ".cs" ]
                             }
                         }
                     }

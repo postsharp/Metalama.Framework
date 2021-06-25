@@ -1,2 +1,0 @@
-// CompileTimeAspectPipeline.TryExecute failed. 
-// Error CR0507 on `TargetClass`: `The aspect 'Introduction' cannot introduce interface 'IInterface' into type 'TargetClass' because it is already implemented and ConflictBehavior is set to Fail.`

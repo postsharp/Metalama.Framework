@@ -1,3 +1,0 @@
-// TestTemplateCompiler.TryCompile failed. 
-// Error CR0104 on `new DisposableClass()`: `The expression 'new DisposableClass()' is compile-time but it is expected to be run-time because the expression appears in a 'using' statement.`
-// Error CR0104 on `DisposableClass c = null`: `The expression 'DisposableClass c = null' is compile-time but it is expected to be run-time because the expression appears in a 'using' statement.`
