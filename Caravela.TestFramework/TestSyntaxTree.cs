@@ -3,10 +3,11 @@
 
 using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
-using System;
+using PostSharp.Patterns;
 using System.IO;
 
 namespace Caravela.TestFramework
@@ -33,7 +34,7 @@ namespace Caravela.TestFramework
         /// <summary>
         /// Gets the root <see cref="SyntaxNode"/> of the output run-time syntax tree.
         /// </summary>
-        public SyntaxNode? OutputRunTimeSyntaxRoot { get; private set; }
+        public CompilationUnitSyntax? OutputRunTimeSyntaxRoot { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="SourceText"/> of the output run-time syntax tree.
@@ -80,14 +81,23 @@ namespace Caravela.TestFramework
 
         internal void SetRunTimeCode( SyntaxNode syntaxNode )
         {
+            CompilationUnitSyntax compilationUnit;
+
             switch ( syntaxNode )
             {
-                case CompilationUnitSyntax:
-                case MemberDeclarationSyntax:
+                case CompilationUnitSyntax cu:
+                    compilationUnit = cu;
+
+                    break;
+
+                case MemberDeclarationSyntax member:
+                    compilationUnit = SyntaxFactory.CompilationUnit().WithMembers( SyntaxFactory.SingletonList( member ) );
+
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException( nameof(syntaxNode), "This node kind cannot be set as output." );
+                    throw new AssertionFailedException(
+                        $"The root of the document must be a CompilationUnitSyntax or a MemberDeclarationSyntax but it is a {syntaxNode.Kind()}." );
             }
 
             if ( this.Parent.OutputProject == null )
@@ -99,7 +109,7 @@ namespace Caravela.TestFramework
 
             var document =
                 this.Parent.OutputProject!.RemoveDocument( this.InputDocument.Id )
-                    .AddDocument( documentName, syntaxNode );
+                    .AddDocument( documentName, compilationUnit );
 
             if ( this.Parent.TestInput!.Options.FormatOutput.GetValueOrDefault() )
             {
@@ -113,7 +123,7 @@ namespace Caravela.TestFramework
             else
             {
                 this.OutputRunTimeDocument = document;
-                this.OutputRunTimeSyntaxRoot = syntaxNode;
+                this.OutputRunTimeSyntaxRoot = compilationUnit;
             }
 
             this.OutputRunTimeSourceText = this.OutputRunTimeDocument.GetSyntaxTreeAsync().Result!.GetText();

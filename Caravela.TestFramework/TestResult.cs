@@ -190,7 +190,7 @@ namespace Caravela.TestFramework
                         .Where( m => m.GetLeadingTrivia().ToString().Contains( "<target>" ) )
                         .ToList();
 
-                var outputNode = outputNodes.FirstOrDefault() ?? syntaxNode;
+                var outputNode = outputNodes.FirstOrDefault() ?? (SyntaxNode) syntaxNode;
 
                 switch ( outputNode )
                 {
