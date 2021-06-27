@@ -3,6 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,18 +20,21 @@ namespace Caravela.Framework.Impl.Linking
             public BodyRewriter( Dictionary<SyntaxNode, SyntaxNode?> replacements )
             {
                 // Check that the input is correct - all replaced nodes should be independent in terms of ancestor relation.
+                // Exception to this are blocks which we specifically handle.
                 var nodes = new HashSet<SyntaxNode>( replacements.Select( x => x.Key ) );
                 
                 foreach (var node in nodes)
                 {
                     var current = node.Parent;
 
-                    while (current != null)
+                    while (current != null && current is not BlockSyntax)
                     {
                         if (nodes.Contains(current))
                         {
                             throw new AssertionFailedException();
                         }
+
+                        current = current.Parent;
                     }
                 }
 
@@ -45,7 +49,33 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else if ( this._replacements.TryGetValue( node, out var replacement ) )
                 {
-                    return replacement;
+                    // TODO: This does not work because the replacement block already has different statements that would not match original instances.
+                    //       We need either to annotate child statements or provide special mechanism for block changes (which should be enough for now).
+                    if ( node is BlockSyntax )
+                    {
+                        if (replacement is not BlockSyntax replacementBlock)
+                        {
+                            throw new AssertionFailedException();
+                        }
+
+                        var newStatements = new List<StatementSyntax>();
+
+                        foreach (var statement in replacementBlock.Statements)
+                        {
+                            var replacementStatement = (StatementSyntax?)this.Visit( statement );
+
+                            if (replacementStatement != null)
+                            {
+                                newStatements.Add( replacementStatement );
+                            }
+                        }
+
+                        return replacementBlock.WithStatements( SyntaxFactory.List( newStatements ) );
+                    }
+                    else
+                    {
+                        return replacement;
+                    }
                 }
                 else
                 {

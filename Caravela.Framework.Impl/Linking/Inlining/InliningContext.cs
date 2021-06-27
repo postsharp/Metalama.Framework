@@ -17,6 +17,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
     {
         private readonly LinkerRewritingDriver _rewritingDriver;
         private readonly int _depth;
+        private bool _labelUsed;
 
         public Compilation Compilation => this._rewritingDriver.IntermediateCompilation;
 
@@ -28,6 +29,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 
         public string? ReturnLabelName { get; }
 
+        public bool DeclaresReturnVariable { get; }
+
         private InliningContext( LinkerRewritingDriver rewritingDriver )
         {
             this._rewritingDriver = rewritingDriver;
@@ -37,13 +40,14 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             this._depth = 0;
         }
 
-        private InliningContext( InliningContext parent, string? returnVariableName )
+        private InliningContext( InliningContext parent, string? returnVariableName, bool declaresReturnVariable = false )
         {
             this._rewritingDriver = parent._rewritingDriver;
             this.HasIndirectReturn = true;
             this.ReturnVariableName = returnVariableName;
             this._depth = parent._depth + 1;
             this.ReturnLabelName = $"__aspect_return_{this._depth}";
+            this.DeclaresReturnVariable = declaresReturnVariable;
         }
 
         public BlockSyntax GetLinkedBody( IMethodSymbol targetSymbol )
@@ -56,30 +60,37 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                     Block(
                         new StatementSyntax?[]
                         {
-                            this.ReturnVariableName != null
+                            this.DeclaresReturnVariable
                             ? LocalDeclarationStatement(
                                 VariableDeclaration( 
                                     (TypeSyntax)LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(targetSymbol.ReturnType), 
-                                    SingletonSeparatedList( VariableDeclarator( this.ReturnVariableName ) ) ) )
+                                    SingletonSeparatedList( VariableDeclarator( this.ReturnVariableName.AssertNotNull() ) ) ) )
                             : null,
-                            linkedBody,
-                            LabeledStatement(
+                            linkedBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable ),
+                            this._labelUsed 
+                            ? LabeledStatement(
                                 Identifier( this.ReturnLabelName.AssertNotNull() ),
                                 ExpressionStatement(
                                     IdentifierName( MissingToken( SyntaxKind.IdentifierToken ) ) )
                                 .WithSemicolonToken( MissingToken( SyntaxKind.SemicolonToken ) ) )
+                            : null
                         }.Where( x => x != null ).AssertNoneNull() )
                     .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
             }
             else
             {
-                return linkedBody;
+                return linkedBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
             }
         }
 
         public static InliningContext Create( LinkerRewritingDriver rewritingDriver )
         {
             return new InliningContext( rewritingDriver );
+        }
+
+        public InliningContext WithDeclaredReturnLocal()
+        {
+            return new InliningContext( this, $"__aspect_return_{this._depth}", true );
         }
 
         public InliningContext WithReturnLocal( string valueText )
@@ -90,6 +101,11 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         internal InliningContext WithDiscard()
         {
             return new InliningContext( this, null );
+        }
+
+        public void UseLabel()
+        {
+            this._labelUsed = true;
         }
     }
 }

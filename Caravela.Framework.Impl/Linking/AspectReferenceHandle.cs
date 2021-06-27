@@ -12,8 +12,16 @@ namespace Caravela.Framework.Impl.Linking
 
         public ISymbol ReferencedSymbol { get; }
 
-        public ExpressionSyntax SyntaxNode { get; }
+        public ExpressionSyntax Expression { get; }
 
         public AspectReferenceSpecification Specification { get; }
+
+        public AspectReferenceHandle(ISymbol containingSymbol, ISymbol referencedSymbol, ExpressionSyntax expression, AspectReferenceSpecification specification )
+        {
+            this.ContainingSymbol = containingSymbol;
+            this.ReferencedSymbol = referencedSymbol;
+            this.Expression = expression;
+            this.Specification = specification;
+        }
     }
 }

@@ -12,9 +12,19 @@ namespace Caravela.Framework.Impl.Linking
 
         public static LinkerGeneratedFlags GetLinkerGeneratedFlags( this SyntaxNode node )
         {
-            var annotationValue = node.GetAnnotations( AnnotationKind ).SingleOrDefault()?.Data;
+            var annotations = node.GetAnnotations( AnnotationKind );
 
-            return annotationValue != null ? LinkerGeneratedAnnotation.FromString( annotationValue ).Flags : LinkerGeneratedFlags.None;
+            LinkerGeneratedFlags flags = default;
+
+            foreach (var annotation in annotations)
+            {
+                if ( annotation?.Data != null )
+                {
+                    flags |= LinkerGeneratedAnnotation.FromString( annotation.Data ).Flags;
+                }
+            }
+
+            return flags;
         }
 
         public static T AddLinkerGeneratedFlags<T>( this T node, in LinkerGeneratedFlags flags )

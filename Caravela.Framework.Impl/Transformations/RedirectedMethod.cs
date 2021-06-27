@@ -63,19 +63,21 @@ namespace Caravela.Framework.Impl.Transformations
                 return
                     InvocationExpression(
                             GetInvocationTargetExpression(),
-                            ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) )
-                        .WithAspectReferenceAnnotation( new AspectReferenceSpecification( this.Advice.AspectLayerId, AspectReferenceOrder.Default ) );
+                            ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) );
             }
 
             ExpressionSyntax GetInvocationTargetExpression()
             {
-                return
+                var expression =
                     this.OverriddenDeclaration.IsStatic
-                        ? IdentifierName( this.OverriddenDeclaration.Name )
+                        ? (ExpressionSyntax)IdentifierName( this.OverriddenDeclaration.Name )
                         : MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             ThisExpression(),
                             IdentifierName( this.OverriddenDeclaration.Name ) );
+
+                return expression
+                    .WithAspectReferenceAnnotation( new AspectReferenceSpecification( this.Advice.AspectLayerId, AspectReferenceOrder.Default ) );
             }
         }
     }

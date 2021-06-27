@@ -248,7 +248,7 @@ namespace Caravela.Framework.Impl.Linking
                         symbol.IsStatic
                         ? (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
                         : ThisExpression(),
-                        IdentifierName( GetAutoPropertyBackingFieldName( (IPropertySymbol) symbol.ContainingSymbol ) ) ) ) );
+                        IdentifierName( GetAutoPropertyBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ) ) );
         }
 
         private static BlockSyntax GetImplicitSetterBody( IMethodSymbol symbol )
@@ -262,7 +262,7 @@ namespace Caravela.Framework.Impl.Linking
                             symbol.IsStatic
                             ? (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
                             : ThisExpression(),
-                            IdentifierName( GetAutoPropertyBackingFieldName( (IPropertySymbol) symbol.ContainingSymbol ) ) ),
+                            IdentifierName( GetAutoPropertyBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ) ) );
         }
 

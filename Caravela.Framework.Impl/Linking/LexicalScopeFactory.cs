@@ -39,6 +39,10 @@ namespace Caravela.Framework.Impl.Linking
                         this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( sourceMethod.LookupSymbols() );
                         break;
 
+                    case MethodBuilder { DeclaringType: NamedType containingType }:
+                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( containingType.LookupSymbols() );
+                        break;
+
                     case IMethod { ContainingDeclaration: MemberBuilder { DeclaringType: NamedType containingType } _ }:
                         this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( containingType.LookupSymbols() );
                         break;

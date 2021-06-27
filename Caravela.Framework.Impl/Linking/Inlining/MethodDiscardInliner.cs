@@ -91,25 +91,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             // Mark the block as flattenable.
             inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
 
-            if ( context.HasIndirectReturn )
-            {
-                // Generate the final label.
-                newNode =
-                    Block(
-                        inlinedTargetBody,
-                        LabeledStatement(
-                            Identifier( contextWithDiscard.ReturnLabelName ),
-                            ExpressionStatement(
-                            IdentifierName( MissingToken( SyntaxKind.IdentifierToken ) ) )
-                        .WithSemicolonToken( MissingToken( SyntaxKind.SemicolonToken ) ) ) )
-                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
-            }
-            else
-            {
-                newNode = inlinedTargetBody;
-            }
-
             // We're replacing the whole return statement.
+            newNode = inlinedTargetBody;
             replacedNode = expressionStatement;
         }
     }

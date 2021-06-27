@@ -22,25 +22,24 @@ namespace Caravela.Framework.Impl.Linking
     internal class LinkerAnalysisRegistry
     {
         private readonly LinkerIntroductionRegistry _introductionRegistry;
-        private readonly IReadOnlyDictionary<SymbolVersion, int> _symbolVersionReferenceCounts;
-        private readonly IReadOnlyDictionary<ISymbol, MemberAnalysisResult> _methodBodyInfos;
-        private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
-
-        internal IReadOnlyList<AspectReferenceHandle> GetAspectReferences( ISymbol symbol, AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self )
-        {
-            throw new NotImplementedException();
-        }
+        private readonly IReadOnlyDictionary<ISymbol, MethodBodyAnalysisResult> _methodBodyInfos;
+        private readonly IReadOnlyDictionary<(ISymbol Symbol, AspectReferenceTargetKind TargetKind), IReadOnlyList<AspectReferenceHandle>> _aspectReferences;
 
         public LinkerAnalysisRegistry(
             LinkerIntroductionRegistry introductionRegistry,
-            IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
-            IReadOnlyDictionary<SymbolVersion, int> symbolVersionReferenceCounts,
-            IReadOnlyDictionary<ISymbol, MemberAnalysisResult> methodBodyInfos )
+            IReadOnlyDictionary<ISymbol, MethodBodyAnalysisResult> methodBodyInfos,
+            IReadOnlyDictionary<(ISymbol Symbol, AspectReferenceTargetKind TargetKind), IReadOnlyList<AspectReferenceHandle>> aspectReferenceIndex )
         {
-            this._orderedAspectLayers = orderedAspectLayers;
             this._introductionRegistry = introductionRegistry;
-            this._symbolVersionReferenceCounts = symbolVersionReferenceCounts;
             this._methodBodyInfos = methodBodyInfos;
+            this._aspectReferences = aspectReferenceIndex;
+        }
+
+        public AspectLinkerOptions GetLinkerOptions( ISymbol symbol )
+        {
+            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
+
+            return introducedMember?.LinkerOptions ?? AspectLinkerOptions.Default;
         }
 
         /// <summary>
@@ -53,129 +52,24 @@ namespace Caravela.Framework.Impl.Linking
             return this._introductionRegistry.GetOverridesForSymbol( symbol ).Count > 0;
         }
 
-        /// <summary>
-        /// Determines whether the symbol represents introduced interface implementation.
-        /// </summary>
-        /// <param name="symbol">Symbol.</param>
-        /// <returns></returns>
-        public bool IsInterfaceImplementation( ISymbol symbol )
-        {
-            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
-
-            if ( introducedMember == null )
-            {
-                return false;
-            }
-            else
-            {
-                return introducedMember.Semantic == IntroducedMemberSemantic.InterfaceImplementation;
-            }
-        }
-
-        public ISymbol GetImplementedInterfaceMember( ISymbol symbol )
-        {
-            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
-
-            if ( introducedMember == null || introducedMember.Semantic != IntroducedMemberSemantic.InterfaceImplementation )
-            {
-                throw new AssertionFailedException();
-            }
-
-            return (introducedMember.Declaration?.GetSymbol()).AssertNotNull();
-        }
-
-        /// <summary>
-        /// Determines whether the method body is inlineable.
-        /// </summary>
-        /// <param name="symbol">Method symbol.</param>
-        /// <returns><c>True</c> if the method body can be inlined, otherwise <c>false</c>.</returns>
-        public bool IsNotInlineable( ISymbol symbol )
-        {
-            // TODO: Inlineability also depends on parameters passed. 
-            //       Method/indexer is inlineable if only if:
-            //           * Call's argument expressions match parameter names of the caller.
-            //           * Parameter names of the caller match parameter names of the callee.
-            //           * Caller and callee signatures are equal.
-            //       This is satisfied for all proceed().
-
-            if ( this.IsOverrideTarget( symbol ) )
-            {
-                if ( symbol.GetAttributes()
-                    .Any(
-                        attributeData =>
-                            attributeData.AttributeClass?.ToDisplayString() == typeof(AspectLinkerOptionsAttribute).FullName
-                            && attributeData.NamedArguments
-                                .Any( x => x.Key == nameof(AspectLinkerOptionsAttribute.ForceNotInlineable) && (bool?) x.Value.Value == true ) ) )
-                {
-                    // Inlining is explicitly disabled for the declaration.
-                    return false;
-                }
-
-                return this.HasSingleReference( symbol, null );
-            }
-            else if ( this.IsOverride( symbol ) )
-            {
-                var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
-
-                if ( introducedMember == null )
-                {
-                    throw new AssertionFailedException();
-                }
-
-                if ( introducedMember.LinkerOptions?.ForceNotInlineable == true )
-                {
-                    return false;
-                }
-
-                return this.HasSingleReference( symbol, introducedMember.AspectLayerId );
-            }
-            else
-            {
-                // Base methods are not inlineable.
-
-                return false;
-            }
-        }
-
-        internal bool IsNotDiscardable( IMethodSymbol symbol )
-        {
-            throw new NotImplementedException();
-        }
-
-        private bool HasSingleReference( ISymbol symbol, AspectLayerId? aspectLayerId )
-        {
-            switch ( symbol )
-            {
-                case IMethodSymbol { AssociatedSymbol: null }:
-                    return this.HasSingleReference( symbol, aspectLayerId, AspectReferenceTargetKind.Self );
-
-                case IPropertySymbol propertySymbol:
-                    return this.HasSingleReference( propertySymbol, aspectLayerId, AspectReferenceTargetKind.PropertyGetAccessor )
-                           && this.HasSingleReference( propertySymbol, aspectLayerId, AspectReferenceTargetKind.PropertySetAccessor );
-
-                case IEventSymbol eventSymbol:
-                    return this.HasSingleReference( eventSymbol, aspectLayerId, AspectReferenceTargetKind.EventAddAccessor )
-                           && this.HasSingleReference( eventSymbol, aspectLayerId, AspectReferenceTargetKind.EventRemoveAccessor );
-
-                default:
-                    throw new NotSupportedException( $"{symbol}" );
-            }
-        }
-
-        private bool HasSingleReference( ISymbol symbol, AspectLayerId? aspectLayerId, AspectReferenceTargetKind targetKind )
-        {
-            if ( !this._symbolVersionReferenceCounts.TryGetValue( new SymbolVersion( symbol, aspectLayerId, targetKind ), out var counter ) )
-            {
-                // Method is not referenced in multiple places.
-                return true;
-            }
-
-            return counter <= 1;
-        }
-
         internal IReadOnlyList<AspectReferenceHandle> GetContainedAspectReferences( IMethodSymbol symbol )
         {
-            throw new NotImplementedException();
+            if (this._methodBodyInfos.TryGetValue(symbol, out var methodBodyInfo))
+            {
+                return methodBodyInfo.AspectReferences;
+            }
+
+            return Array.Empty<AspectReferenceHandle>();
+        }
+
+        internal IReadOnlyList<AspectReferenceHandle> GetAspectReferences( ISymbol symbol, AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self )
+        {
+            if ( !this._aspectReferences.TryGetValue( (symbol, targetKind), out var containedReferences ) )
+            {
+                return Array.Empty<AspectReferenceHandle>();
+            }
+
+            return containedReferences;
         }
 
         /// <summary>

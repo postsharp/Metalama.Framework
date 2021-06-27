@@ -98,17 +98,15 @@ namespace Caravela.Framework.Impl.Transformations
         {
             return
                 InvocationExpression(
-                    this.OverriddenDeclaration.IsStatic
-                    ? IdentifierName( this.OverriddenDeclaration.Name )
-                    : MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        ThisExpression(),
-                        IdentifierName( this.OverriddenDeclaration.Name ) ),
+                    CreateInvocationTarget()
+                    .WithAspectReferenceAnnotation(
+                        this.Advice.AspectLayerId,
+                        AspectReferenceOrder.Default ),
                     ArgumentList(
                         SeparatedList(
                             this.OverriddenDeclaration.Parameters.Select( p =>
                                 Argument(
-                                    NameColon( p.Name ),
+                                    null,
                                     p.RefKind switch
                                     {
                                         RefKind.None => default,
@@ -117,10 +115,17 @@ namespace Caravela.Framework.Impl.Transformations
                                         RefKind.Ref => Token( SyntaxKind.RefKeyword ),
                                         _ => throw new AssertionFailedException(),
                                     },
-                                    IdentifierName( p.Name ) ) ) ) ) )
-                .WithAspectReferenceAnnotation(
-                    this.Advice.AspectLayerId,
-                    AspectReferenceOrder.Default );
+                                    IdentifierName( p.Name ) ) ) ) ) );
+
+            ExpressionSyntax CreateInvocationTarget()
+            {
+                return this.OverriddenDeclaration.IsStatic
+                    ? IdentifierName( this.OverriddenDeclaration.Name )
+                    : MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ThisExpression(),
+                        IdentifierName( this.OverriddenDeclaration.Name ) );
+            }
         }
     }
 }

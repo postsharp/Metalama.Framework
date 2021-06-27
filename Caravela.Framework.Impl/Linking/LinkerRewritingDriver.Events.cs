@@ -252,7 +252,7 @@ namespace Caravela.Framework.Impl.Linking
                             symbol.IsStatic
                             ? (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
                             : ThisExpression(),
-                            IdentifierName( GetEventFieldBackingFieldName( (IEventSymbol) symbol.ContainingSymbol ) ) ),
+                            IdentifierName( GetEventFieldBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ) ) );
         }
 
@@ -267,7 +267,7 @@ namespace Caravela.Framework.Impl.Linking
                             symbol.IsStatic
                             ? (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
                             : ThisExpression(),
-                            IdentifierName( GetEventFieldBackingFieldName( (IEventSymbol) symbol.ContainingSymbol ) ) ),
+                            IdentifierName( GetEventFieldBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ) ) );
         }
 

@@ -45,12 +45,12 @@ namespace Caravela.Framework.Impl.Linking
         {
             var aspectReferences = this._analysisRegistry.GetAspectReferences( symbol );
 
-            if ( aspectReferences.Count != 1 )
+            if ( aspectReferences.Count > 1 )
             {
                 return false;
             }
 
-            return this.IsInlineableReference( aspectReferences[0] );
+            return aspectReferences.Count == 0 || this.IsInlineableReference( aspectReferences[0] );
         }
 
         public IReadOnlyList<MemberDeclarationSyntax> RewriteMethod( MethodDeclarationSyntax methodDeclaration, IMethodSymbol symbol )

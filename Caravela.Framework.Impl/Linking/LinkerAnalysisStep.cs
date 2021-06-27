@@ -20,66 +20,10 @@ namespace Caravela.Framework.Impl.Linking
 
         public override LinkerAnalysisStepOutput Execute( LinkerIntroductionStepOutput input )
         {
-            var referenceCounters = new Dictionary<SymbolVersion, int>();
-            var methodBodyInfos = new Dictionary<ISymbol, MemberAnalysisResult>();
+            Dictionary<ISymbol, MethodBodyAnalysisResult> methodBodyAnalysisResults = new();
+            Dictionary<(ISymbol Symbol, AspectReferenceTargetKind TargetKind), List<AspectReferenceHandle>> aspectReferences = new();
 
             var layersId = input.OrderedAspectLayers.Select( x => x.AspectLayerId ).ToArray();
-
-            foreach ( var syntaxTree in input.IntermediateCompilation.SyntaxTrees )
-            {
-                foreach ( var referencingNode in syntaxTree.GetRoot().GetAnnotatedNodes( AspectReferenceAnnotationExtensions.AnnotationKind ) )
-                {
-                    if (!referencingNode.TryGetAspectReference( out var linkerAnnotation ))
-                    {
-                        throw new AssertionFailedException();
-                    }
-
-                    AspectLayerId? targetLayerId;
-
-                    // Determine which version of the semantic is being invoked.
-                    switch ( linkerAnnotation.Order )
-                    {
-                        case AspectReferenceOrder.Base: // TODO:
-                            var currentLayerIndex = Array.IndexOf( layersId, linkerAnnotation.AspectLayerId );
-                            Invariant.Assert( currentLayerIndex >= 0 );
-
-                            targetLayerId = currentLayerIndex == 0 ? null : layersId[currentLayerIndex - 1];
-
-                            break;
-
-                        case AspectReferenceOrder.Original: // Original
-                            targetLayerId = null;
-
-                            break;
-
-                        case AspectReferenceOrder.Final:
-                            targetLayerId = layersId[layersId.Length - 1];
-
-                            break;
-
-                        case AspectReferenceOrder.Default: // Next one.
-                            targetLayerId = linkerAnnotation.AspectLayerId;
-
-                            break;
-
-                        default:
-                            throw new AssertionFailedException();
-                    }
-
-                    // Increment the usage count.
-                    var symbolInfo = input.IntermediateCompilation.Compilation.GetSemanticModel( syntaxTree ).GetSymbolInfo( referencingNode );
-
-                    if ( symbolInfo.Symbol == null )
-                    {
-                        continue;
-                    }
-
-                    var symbolVersion = new SymbolVersion( symbolInfo.Symbol.AssertNotNull(), targetLayerId, linkerAnnotation.TargetKind );
-
-                    _ = referenceCounters.TryGetValue( symbolVersion, out var counter );
-                    referenceCounters[symbolVersion] = counter + 1;
-                }
-            }
 
             // TODO: Do this on demand in analysis registry (provide the implementing class to the registry, let the registry manage the cache).
             // Analyze introduced method bodies.
@@ -90,64 +34,36 @@ namespace Caravela.Framework.Impl.Linking
                 switch ( symbol )
                 {
                     case IMethodSymbol methodSymbol:
-                        // TODO: partial methods.
-                        var methodBodyVisitor = new MethodBodyWalker();
-                        methodBodyVisitor.Visit( methodSymbol.DeclaringSyntaxReferences.Single().GetSyntax() );
-
-                        methodBodyInfos[methodSymbol] = new MemberAnalysisResult(
-                            methodSymbol.ReturnsVoid ? methodBodyVisitor.ReturnStatementCount == 0 : methodBodyVisitor.ReturnStatementCount <= 1 );
+                        AnalyzeIntroducedBody( methodSymbol );
 
                         break;
 
                     case IPropertySymbol propertySymbol:
                         if ( propertySymbol.GetMethod != null )
                         {
-                            var getterBodyVisitor = new MethodBodyWalker();
-                            getterBodyVisitor.Visit( propertySymbol.GetMethod.DeclaringSyntaxReferences.Single().GetSyntax() );
-
-                            methodBodyInfos[propertySymbol.GetMethod] = new MemberAnalysisResult( getterBodyVisitor.ReturnStatementCount <= 1 );
+                            AnalyzeIntroducedBody( propertySymbol.GetMethod );
                         }
 
                         if ( propertySymbol.SetMethod != null )
                         {
-                            var setterBodyVisitor = new MethodBodyWalker();
-                            setterBodyVisitor.Visit( propertySymbol.SetMethod.DeclaringSyntaxReferences.Single().GetSyntax() );
-
-                            methodBodyInfos[propertySymbol.SetMethod] = new MemberAnalysisResult( setterBodyVisitor.ReturnStatementCount == 0 );
+                            AnalyzeIntroducedBody( propertySymbol.SetMethod );
                         }
 
                         break;
 
                     case IEventSymbol eventSymbol:
-
-                        var addBodySyntax = eventSymbol.AddMethod?.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax();
-
-                        if ( addBodySyntax != null )
-                        {
-                            var addBodyVisitor = new MethodBodyWalker();
-                            addBodyVisitor.Visit( addBodySyntax );
-
-                            methodBodyInfos[eventSymbol.AddMethod!] = new MemberAnalysisResult( addBodyVisitor.ReturnStatementCount == 0 );
-                        }
-
-                        var removeBodySyntax = eventSymbol.RemoveMethod?.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax();
-
-                        if ( removeBodySyntax != null )
-                        {
-                            var removeBodyVisitor = new MethodBodyWalker();
-                            removeBodyVisitor.Visit( removeBodySyntax );
-
-                            methodBodyInfos[eventSymbol.RemoveMethod!] = new MemberAnalysisResult( removeBodyVisitor.ReturnStatementCount == 0 );
-                        }
+                        AnalyzeIntroducedBody( eventSymbol.AddMethod.AssertNotNull() );
+                        AnalyzeIntroducedBody( eventSymbol.RemoveMethod.AssertNotNull() );
 
                         break;
 
                     default:
-                        throw new InvalidOperationException( $"{symbol.Kind}" );
-                }
+                        throw new NotSupportedException();
 
-                // var declarationSyntax = (MethodDeclarationSyntax) symbol.DeclaringSyntaxReferences.Single().GetSyntax();
-                // ControlFlowGraph cfg = ControlFlowGraph.Create( declarationSyntax, this._intermediateCompilation.GetSemanticModel( declarationSyntax.SyntaxTree ) );
+                        // var declarationSyntax = (MethodDeclarationSyntax) symbol.DeclaringSyntaxReferences.Single().GetSyntax();
+                        // ControlFlowGraph cfg = ControlFlowGraph.Create( declarationSyntax, this._intermediateCompilation.GetSemanticModel( declarationSyntax.SyntaxTree ) );
+
+                }
             }
 
             foreach ( var symbol in input.IntroductionRegistry.GetOverriddenMembers() )
@@ -155,33 +71,26 @@ namespace Caravela.Framework.Impl.Linking
                 switch ( symbol )
                 {
                     case IMethodSymbol methodSymbol:
-                        AnalyzeMethodBody( methodBodyInfos, methodSymbol );
+                        AnalyzeOverriddenBody( methodSymbol );
 
                         break;
 
                     case IPropertySymbol propertySymbol:
                         if ( propertySymbol.GetMethod != null )
                         {
-                            AnalyzeMethodBody( methodBodyInfos, propertySymbol.GetMethod );
+                            AnalyzeOverriddenBody( propertySymbol.GetMethod );
                         }
 
                         if ( propertySymbol.SetMethod != null )
                         {
-                            AnalyzeMethodBody( methodBodyInfos, propertySymbol.SetMethod );
+                            AnalyzeOverriddenBody( propertySymbol.SetMethod );
                         }
 
                         break;
 
                     case IEventSymbol eventSymbol:
-                        if ( eventSymbol.AddMethod != null )
-                        {
-                            AnalyzeMethodBody( methodBodyInfos, eventSymbol.AddMethod );
-                        }
-
-                        if ( eventSymbol.RemoveMethod != null )
-                        {
-                            AnalyzeMethodBody( methodBodyInfos, eventSymbol.RemoveMethod );
-                        }
+                        AnalyzeOverriddenBody( eventSymbol.AddMethod.AssertNotNull() );
+                        AnalyzeOverriddenBody( eventSymbol.RemoveMethod.AssertNotNull() );
 
                         break;
 
@@ -190,65 +99,42 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            var analysisRegistry = new LinkerAnalysisRegistry( input.IntroductionRegistry, input.OrderedAspectLayers, referenceCounters, methodBodyInfos );
+            var analysisRegistry = new LinkerAnalysisRegistry( input.IntroductionRegistry, methodBodyAnalysisResults, aspectReferences.ToDictionary( x => x.Key, x => (IReadOnlyList<AspectReferenceHandle>)x.Value) );
 
             return new LinkerAnalysisStepOutput( input.Diagnostics, input.IntermediateCompilation, analysisRegistry, new AspectReferenceResolver( input.IntroductionRegistry, input.OrderedAspectLayers ) );
-        }
 
-        private static void AnalyzeMethodBody( Dictionary<ISymbol, MemberAnalysisResult> methodBodyInfos, IMethodSymbol symbol )
-        {
-            var syntax = symbol.DeclaringSyntaxReferences.Single().GetSyntax();
-
-            switch ( syntax )
+            void AnalyzeOverriddenBody( IMethodSymbol symbol )
             {
-                case MethodDeclarationSyntax methodDecl:
-                    if ( methodDecl.Body != null )
-                    {
-                        var methodBodyWalker = new MethodBodyWalker();
-                        methodBodyWalker.Visit( methodDecl.Body );
+                var syntax = symbol.GetPrimaryDeclaration();
+                var returnStatementCounter = new ReturnStatementCountingWalker();
+                returnStatementCounter.Visit( syntax );
 
-                        methodBodyInfos[symbol] = new MemberAnalysisResult(
-                            symbol.ReturnsVoid ? methodBodyWalker.ReturnStatementCount == 0 : methodBodyWalker.ReturnStatementCount <= 1 );
-                    }
-                    else if ( methodDecl.ExpressionBody != null )
-                    {
-                        methodBodyInfos[symbol] = new MemberAnalysisResult( true );
-                    }
-                    else
-                    {
-                        throw new NotSupportedException();
-                    }
+                methodBodyAnalysisResults[symbol] = new MethodBodyAnalysisResult(                    
+                    Array.Empty<AspectReferenceHandle>(),
+                    symbol.ReturnsVoid ? returnStatementCounter.ReturnStatementCount == 0 : returnStatementCounter.ReturnStatementCount <= 1 );
+            }
 
-                    break;
+            void AnalyzeIntroducedBody( IMethodSymbol symbol )
+            {
+                var syntax = symbol.GetPrimaryDeclaration();
+                var returnStatementCounter = new ReturnStatementCountingWalker();
+                returnStatementCounter.Visit( syntax );
+                var aspectReferenceCollector = new AspectReferenceWalker( input.IntermediateCompilation.Compilation.GetSemanticModel( syntax.SyntaxTree ), symbol );                
+                aspectReferenceCollector.Visit( syntax );
 
-                case AccessorDeclarationSyntax accessorDecl:
-                    if ( accessorDecl.Body != null )
-                    {
-                        var methodBodyWalker = new MethodBodyWalker();
-                        methodBodyWalker.Visit( accessorDecl.Body );
+                methodBodyAnalysisResults[symbol] = new MethodBodyAnalysisResult(
+                    aspectReferenceCollector.AspectReferences,
+                    symbol.ReturnsVoid ? returnStatementCounter.ReturnStatementCount == 0 : returnStatementCounter.ReturnStatementCount <= 1 );
 
-                        methodBodyInfos[symbol] = new MemberAnalysisResult(
-                            symbol.ReturnsVoid ? methodBodyWalker.ReturnStatementCount == 0 : methodBodyWalker.ReturnStatementCount <= 1 );
-                    }
-                    else if ( accessorDecl.ExpressionBody != null )
+                foreach (var aspectReference in aspectReferenceCollector.AspectReferences)
+                {
+                    if (!aspectReferences.TryGetValue( (aspectReference.ReferencedSymbol, aspectReference.Specification.TargetKind), out var list))
                     {
-                        methodBodyInfos[symbol] = new MemberAnalysisResult( true );
-                    }
-                    else
-                    {
-                        // Auto property?.
-                        methodBodyInfos[symbol] = new MemberAnalysisResult( true );
+                        aspectReferences[(aspectReference.ReferencedSymbol, aspectReference.Specification.TargetKind)] = list = new List<AspectReferenceHandle>();
                     }
 
-                    break;
-
-                case ArrowExpressionClauseSyntax _:
-                    methodBodyInfos[symbol] = new MemberAnalysisResult( true );
-
-                    break;
-
-                default:
-                    throw new NotSupportedException();
+                    list.Add( aspectReference );
+                }
             }
         }
     }

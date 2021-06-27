@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var referencedSymbol = (IMethodSymbol) semanticModel.GetSymbolInfo( annotatedExpression ).Symbol.AssertNotNull();
             var invocationExpression = (InvocationExpressionSyntax) annotatedExpression.Parent.AssertNotNull();
             var assignmentExpression = (AssignmentExpressionSyntax) invocationExpression.Parent.AssertNotNull();
-            var localVariable = (IdentifierNameSyntax)invocationExpression.Parent.AssertNotNull();
+            var localVariable = (IdentifierNameSyntax) assignmentExpression.Left.AssertNotNull();
             var expressionStatement = (ExpressionStatementSyntax) assignmentExpression.Parent.AssertNotNull();
 
             if ( !annotatedExpression.TryGetAspectReference( out var aspectReference ) )
@@ -89,25 +89,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             // Mark the block as flattenable.
             inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
 
-            if (context.HasIndirectReturn)
-            {
-                // Generate the final label.
-                newNode =
-                    Block(
-                        inlinedTargetBody,
-                        LabeledStatement(
-                            Identifier( contextWithLocal.ReturnLabelName ),
-                            ExpressionStatement(
-                            IdentifierName( MissingToken( SyntaxKind.IdentifierToken ) ) )
-                        .WithSemicolonToken( MissingToken( SyntaxKind.SemicolonToken ) ) ) )
-                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
-            }
-            else
-            {
-                newNode = inlinedTargetBody;
-            }
-
             // We're replacing the whole return statement.
+            newNode = inlinedTargetBody;
             replacedNode = expressionStatement;
         }
     }

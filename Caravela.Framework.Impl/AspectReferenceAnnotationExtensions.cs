@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl
         public static T WithAspectReferenceAnnotation<T>( this T node, AspectLayerId aspectLayerId, AspectReferenceOrder order, AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self, AspectReferenceFlags flags = AspectReferenceFlags.None    )
             where T : SyntaxNode
         {
-            return node.WithAdditionalAnnotations( new SyntaxAnnotation( AnnotationKind, new AspectReferenceSpecification( aspectLayerId, order, targetKind ).ToString() ) );
+            return node.WithAdditionalAnnotations( new SyntaxAnnotation( AnnotationKind, new AspectReferenceSpecification( aspectLayerId, order, targetKind, flags ).ToString() ) );
         }
     }
 }

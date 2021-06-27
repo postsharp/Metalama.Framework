@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
     /// <summary>
     /// Handles inlining of return statement which invokes an annotated expression.
     /// </summary>
-    internal class MethodInvocationInliner : MethodInliner
+    internal class MethodCastReturnStatementInliner : MethodInliner
     {
         public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[]
         {
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         
         public override bool CanInline( ISymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression )
         {
-            // The syntax has to be in form: <annotated_method_expression( <arguments> );
+            // The syntax has to be in form: return <annotated_method_expression( <arguments> );
             if ( contextDeclaration is not IMethodSymbol contextMethod )
             {
                 return false;
@@ -34,7 +34,17 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            if ( invocationExpression.Parent == null || invocationExpression.Parent is not ExpressionStatementSyntax)
+            if ( invocationExpression.Parent == null || invocationExpression.Parent is not CastExpressionSyntax castExpression )
+            {
+                return false;
+            }
+
+            if ( !SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo(castExpression.Type).Symbol, contextMethod.ReturnType) )
+            {
+                return false;
+            }
+
+            if ( castExpression.Parent == null || castExpression.Parent is not ReturnStatementSyntax)
             {
                 return false;
             }
@@ -52,7 +62,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var semanticModel = context.Compilation.GetSemanticModel( annotatedExpression.SyntaxTree );
             var referencedSymbol = (IMethodSymbol) semanticModel.GetSymbolInfo( annotatedExpression ).Symbol.AssertNotNull();
             var invocationExpression = (InvocationExpressionSyntax)annotatedExpression.Parent.AssertNotNull();
-            var expressionStatement = (ExpressionStatementSyntax) invocationExpression.Parent.AssertNotNull();
+            var castExpression = (CastExpressionSyntax) invocationExpression.Parent.AssertNotNull();
+            var returnStatement = (ReturnStatementSyntax) castExpression.Parent.AssertNotNull();
 
             // Regardless of whether we are returning directly or through variable+label, we just ask for the target method body a return it.
             if ( !annotatedExpression.TryGetAspectReference( out var aspectReference ) )
@@ -61,17 +72,14 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             }
 
             var targetSymbol = (IMethodSymbol) context.ReferenceResolver.Resolve( referencedSymbol, aspectReference );
-                        
-            // If this is non-void method, we will discard all results.
-            var discardingContext = context.WithDiscard();
 
             // Get the final body (after inlinings) of the target.
-            var inlinedTargetBody = discardingContext.GetLinkedBody( targetSymbol );
+            var inlinedTargetBody = context.GetLinkedBody( targetSymbol );
 
             // Mark the block as flattenable.
             inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
 
-            replacedNode = expressionStatement;
+            replacedNode = returnStatement;
             newNode = inlinedTargetBody;
         }
     }

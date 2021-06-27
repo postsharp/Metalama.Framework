@@ -41,13 +41,18 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         tag = node.ArgumentList.Arguments[1].ToString();
                     }
 
-                    if ( tag != null )
+                    AspectReferenceFlags flags = default;
+
+                    if (tag == "inline")
+                    {
+                        flags |= AspectReferenceFlags.Inlineable;
+                    }
+                    else if ( tag != null )
                     {
                         throw new ArgumentException( $"unsupported link() tag {tag}" );
                     }
 
-                    return callExpression.WithAspectReferenceAnnotation(
-                        new AspectReferenceSpecification( new AspectLayerId( this._aspectName, this._layerName ), AspectReferenceOrder.Default ) );
+                    return callExpression.WithAspectReferenceAnnotation( new AspectLayerId( this._aspectName, this._layerName ), AspectReferenceOrder.Default, flags: flags );
                 }
 
                 return base.VisitInvocationExpression( node );

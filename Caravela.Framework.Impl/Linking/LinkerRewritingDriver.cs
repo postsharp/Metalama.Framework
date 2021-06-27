@@ -14,6 +14,7 @@ using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 // TODO: A lot methods here are called multiple times. Optimize.
+// TODO: Split into a subclass for each declaration type?
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -39,7 +40,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public AspectLinkerOptions GetLinkerOptions( ISymbol symbol )
         {
-            throw new NotImplementedException();
+            return this._analysisRegistry.GetLinkerOptions( symbol );
         }
 
         public bool IsDiscarded( ISymbol symbol )
@@ -63,11 +64,11 @@ namespace Caravela.Framework.Impl.Linking
 
         private bool GetInliner( AspectReferenceHandle aspectReference, [NotNullWhen( true )] out Inliner? matchingInliner )
         {
-            var semanticModel = this.IntermediateCompilation.GetSemanticModel( aspectReference.SyntaxNode.SyntaxTree );
+            var semanticModel = this.IntermediateCompilation.GetSemanticModel( aspectReference.Expression.SyntaxTree );
 
             foreach ( var inliner in this._inliners )
             {
-                if ( inliner.CanInline( aspectReference.ContainingSymbol, semanticModel, aspectReference.SyntaxNode ) )
+                if ( inliner.CanInline( aspectReference.ContainingSymbol, semanticModel, aspectReference.Expression ) )
                 {
                     // We have inliner that will be able to inline the reference.
                     matchingInliner = inliner;
@@ -117,13 +118,13 @@ namespace Caravela.Framework.Impl.Linking
                             throw new AssertionFailedException();
                         }
 
-                        inliner.Inline( inliningContext, aspectReference.SyntaxNode, out var replacedNode, out var newNode );
+                        inliner.Inline( inliningContext, aspectReference.Expression, out var replacedNode, out var newNode );
                         replacements.Add( replacedNode, newNode );
                     }
                     else
                     {
                         var linkedExpression = this.GetLinkedExpression( aspectReference );
-                        replacements.Add( aspectReference.SyntaxNode, linkedExpression );
+                        replacements.Add( aspectReference.Expression, linkedExpression );
                     }
                 }
             }
@@ -136,6 +137,8 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         if ( !replacements.ContainsKey( returnStatement ) )
                         {
+                            inliningContext.UseLabel();
+
                             if ( returnStatement.Expression != null )
                             {
                                 replacements[returnStatement] =
@@ -161,22 +164,47 @@ namespace Caravela.Framework.Impl.Linking
                     }
                     else if (returnNode is ExpressionSyntax returnExpression)
                     {
-                        replacements[returnNode] =
-                            Block(
-                                ExpressionStatement(
-                                    AssignmentExpression(
-                                        SyntaxKind.SimpleAssignmentExpression,
-                                        IdentifierName( inliningContext.ReturnVariableName.AssertNotNull() ),
-                                        returnExpression ) ),
-                                GotoStatement(
-                                    SyntaxKind.GotoStatement,
-                                    IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ) ) )
-                            .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                        if ( symbol.ReturnsVoid )
+                        {
+                            replacements[returnNode] =
+                                Block(
+                                    ExpressionStatement( returnExpression ),
+                                    GotoStatement(
+                                        SyntaxKind.GotoStatement,
+                                        IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ) ) )
+                                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                        }
+                        else
+                        {
+                            replacements[returnNode] =
+                                Block(
+                                    ExpressionStatement(
+                                        AssignmentExpression(
+                                            SyntaxKind.SimpleAssignmentExpression,
+                                            IdentifierName( inliningContext.ReturnVariableName.AssertNotNull() ),
+                                            returnExpression ) ),
+                                    GotoStatement(
+                                        SyntaxKind.GotoStatement,
+                                        IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ) ) )
+                                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                        }
                     }
                     else
                     {
                         throw new AssertionFailedException();
                     }
+                }
+
+                if ( symbol.ReturnsVoid )
+                {
+                    // Add the implicit return for void methods.
+                    replacements[bodyRootNode] =
+                        Block(
+                            (StatementSyntax) bodyRootNode,
+                            GotoStatement(
+                                SyntaxKind.GotoStatement,
+                                IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ) ) )
+                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
                 }
             }
         }
@@ -185,7 +213,8 @@ namespace Caravela.Framework.Impl.Linking
         {
             var declaration = symbol.GetPrimaryDeclaration();
 
-            if (this._analysisRegistry.IsOverrideTarget(symbol))
+            if (this._analysisRegistry.IsOverrideTarget(symbol)
+                || (symbol.AssociatedSymbol != null && this._analysisRegistry.IsOverrideTarget( symbol.AssociatedSymbol )) )
             {
                 // Override targets are implicitly linked, i.e. no replacement of aspect references is necessary.
                 isImplicitlyLinked = true;
@@ -214,7 +243,8 @@ namespace Caravela.Framework.Impl.Linking
                         throw new AssertionFailedException();
                 }
             }
-            else if (this._analysisRegistry.IsOverride(symbol))
+            else if (this._analysisRegistry.IsOverride(symbol)
+                || (symbol.AssociatedSymbol != null && this._analysisRegistry.IsOverride( symbol.AssociatedSymbol )) )
             {               
                 isImplicitlyLinked = false;
                 switch ( declaration )
@@ -357,19 +387,24 @@ namespace Caravela.Framework.Impl.Linking
                 throw new AssertionFailedException();
             }
 
-            if (resolvedSymbol.IsStatic)
+            var targetMemberName =
+                this._analysisRegistry.IsOverrideTarget( resolvedSymbol )
+                ? GetOriginalImplMemberName( resolvedSymbol.Name )
+                : resolvedSymbol.Name;
+
+            if ( resolvedSymbol.IsStatic )
             {
                 return MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( resolvedSymbol.ContainingType ),
-                    IdentifierName( resolvedSymbol.Name ) );
+                    IdentifierName( targetMemberName ) );
             }
             else
             {
                 return MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     ThisExpression(),
-                    IdentifierName( resolvedSymbol.Name ) );
+                    IdentifierName( targetMemberName ) );
             }
         }
 

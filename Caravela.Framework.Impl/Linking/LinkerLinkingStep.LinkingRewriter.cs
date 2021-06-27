@@ -58,6 +58,7 @@ namespace Caravela.Framework.Impl.Linking
                                 fieldDecl.Declaration.Variables.Select( v => semanticModel.GetDeclaredSymbol(v)).ToArray(),
                             EventFieldDeclarationSyntax eventFieldDecl =>
                                 eventFieldDecl.Declaration.Variables.Select( v => semanticModel.GetDeclaredSymbol( v ) ).ToArray(),
+                            _ => Array.Empty<ISymbol>()
                         };
 
                     if ( symbols.Length == 0 || (symbols.Length == 1 && symbols[0] == null ) )

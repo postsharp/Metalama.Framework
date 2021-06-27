@@ -44,6 +44,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 new MethodAssignmentInliner(),
                 new MethodReturnStatementInliner(),
+                new MethodCastReturnStatementInliner(),
                 new MethodInvocationInliner(),
                 new MethodDiscardInliner(),
                 new PropertyGetAssignmentInliner(),

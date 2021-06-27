@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -13,7 +14,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Walks method bodies, counting return statements.
         /// </summary>
-        private class MethodBodyWalker : CSharpSyntaxWalker
+        private class ReturnStatementCountingWalker : CSharpSyntaxWalker
         {
             public int ReturnStatementCount { get; private set; }
 
@@ -30,7 +31,11 @@ namespace Caravela.Framework.Impl.Linking
             public override void VisitReturnStatement( ReturnStatementSyntax node )
             {
                 this.ReturnStatementCount++;
-                base.VisitReturnStatement( node );
+            }
+
+            public override void VisitArrowExpressionClause( ArrowExpressionClauseSyntax node )
+            {
+                this.ReturnStatementCount++;
             }
         }
     }

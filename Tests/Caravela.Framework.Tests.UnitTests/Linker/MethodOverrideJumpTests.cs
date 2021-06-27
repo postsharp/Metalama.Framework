@@ -34,7 +34,7 @@ class T
     void Foo_Override(int x)
     {
         Test(""Before"");
-        link(this.Foo(x));
+        link(this.Foo, inline)(x);
         Test(""After"");
     }
 }
@@ -58,7 +58,6 @@ class T
 
         Test(""Original End"");
         __aspect_return_1:
-            ;
         Test(""After"");
     }
 }
@@ -96,7 +95,7 @@ class T
     void Foo_Override1(int x)
     {
         Test(""Before1"");
-        link(this.Foo(x));
+        link(this.Foo, inline)(x);
         Test(""After1"");
     }
 
@@ -104,7 +103,7 @@ class T
     void Foo_Override2(int x)
     {
         Test(""Before2"");
-        link(this.Foo(x));
+        link(this.Foo, inline)(x);
         Test(""After2"");
     }
 }
@@ -167,7 +166,7 @@ class T
         {
             return;
         }
-        link(this.Foo(x));
+        link(this.Foo, inline)(x);
         Test(""After1"");
     }
 
@@ -175,7 +174,7 @@ class T
     void Foo_Override2(int x)
     {
         Test(""Before2"");
-        link(this.Foo(x));
+        link(this.Foo, inline)(x);
         Test(""After2"");
     }
 }
@@ -200,7 +199,6 @@ class T
         Test(""Original"");
         Test(""After1"");
         __aspect_return_1:
-            ;
         Test(""After2"");
     }
 }
@@ -243,7 +241,7 @@ class T
         {
             return;
         }
-        link(this.Foo(x));
+        link(this.Foo, inline)(x);
         Test(""After1"");
     }
 
@@ -251,7 +249,7 @@ class T
     void Foo_Override2(int x)
     {
         Test(""Before2"");
-        link(this.Foo(x));
+        link(this.Foo, inline)(x);
         Test(""After2"");
     }
 }
@@ -281,10 +279,8 @@ class T
 
         Test(""Original End"");
         __aspect_return_2:
-            ;
         Test(""After1"");
         __aspect_return_1:
-            ;
         Test(""After2"");
     }
 }
@@ -324,7 +320,7 @@ class T
     {
         Test(""Before"");
         int result;
-        result = link(this.Foo(x));
+        result = link(this.Foo, inline)(x);
         Test(""After"");
         return result;
     }
@@ -353,7 +349,6 @@ class T
         result = x;
         goto __aspect_return_1;
         __aspect_return_1:
-            ;
         Test(""After"");
         return result;
     }
