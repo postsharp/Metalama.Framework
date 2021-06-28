@@ -47,7 +47,7 @@ namespace Caravela.TestFramework
         /// Gets the input test project (before transformation).
         /// </summary>
         public Project? InputProject { get; internal set; }
-        
+
         /// <summary>
         /// Gets the input test project (after transformation).
         /// </summary>
@@ -73,8 +73,7 @@ namespace Caravela.TestFramework
         /// </summary>
         public Exception? Exception { get; private set; }
 
-        internal void AddInputDocument( Document document, string? path )
-            => this._syntaxTrees.Add( new TestSyntaxTree( path, document, this ) );
+        internal void AddInputDocument( Document document, string? path ) => this._syntaxTrees.Add( new TestSyntaxTree( path, document, this ) );
 
         private static string CleanMessage( string text )
         {

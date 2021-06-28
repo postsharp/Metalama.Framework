@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Formatting
 {
     internal class XmlDocumentationReader
     {
-        private static readonly Regex _cleanupRegex = new Regex( "`[0-9]+" );
+        private static readonly Regex _cleanupRegex = new( "`[0-9]+" );
         private readonly Dictionary<string, XElement> _members;
         private static readonly Regex _spaceRegex = new( "\\s+", RegexOptions.Compiled );
         private static XmlDocumentationReader? _instance;
@@ -48,14 +48,14 @@ namespace Caravela.Framework.Impl.Formatting
             {
                 case IMethodSymbol { IsOverride: true, OverriddenMethod: { } overriddenMethod }:
                     return this.GetFormattedDocumentation( overriddenMethod, compilation, "Overrides the " );
-                
+
                 case IMethodSymbol { ExplicitInterfaceImplementations: { Length: > 0 } } methodSymbol:
                     // TODO: Implicit implementations are not trivial.
                     return this.GetFormattedDocumentation( methodSymbol.ExplicitInterfaceImplementations.First(), compilation, "Implements the " );
-                    
+
                 case IMethodSymbol methodSymbol:
                     symbol = methodSymbol.OriginalDefinition;
-                    
+
                     break;
 
                 case INamedTypeSymbol namedTypeSymbol:
@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.Formatting
                 {
                     return this.GetFormattedDocumentation( methodSymbol.ContainingType, compilation );
                 }
-                
+
                 return null;
             }
 

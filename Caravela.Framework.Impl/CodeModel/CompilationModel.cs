@@ -30,8 +30,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public static CompilationModel CreateInitialInstance( Compilation compilation, SyntaxTree syntaxTree )
             => new( PartialCompilation.CreatePartial( compilation, syntaxTree ) );
 
-        internal CompilationModel WithTransformations( 
-            IReadOnlyList<IObservableTransformation> introducedDeclarations )
+        internal CompilationModel WithTransformations( IReadOnlyList<IObservableTransformation> introducedDeclarations )
         {
             if ( !introducedDeclarations.Any() )
             {
@@ -46,9 +45,9 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         internal CompilationModel WithAspectLayer( AspectLayerId aspectLayerId ) => new( this, aspectLayerId );
 
-
         public CompilationModel WithAspectInstances( IReadOnlyList<AspectInstance> aspectInstances )
-            => aspectInstances.Count == 0 ? this : new( this, aspectInstances );
+            => aspectInstances.Count == 0 ? this : new CompilationModel( this, aspectInstances );
+
         internal ReflectionMapper ReflectionMapper { get; }
 
         private readonly ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IObservableTransformation> _transformations;
@@ -82,7 +81,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             this._allMemberAttributesByType = ImmutableMultiValueDictionary<DeclarationRef<INamedType>, AttributeRef>
                 .Create( allAttributes, a => a.AttributeType, DeclarationRefEqualityComparer<DeclarationRef<INamedType>>.Instance );
-            
+
             this._aspects = ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IAspectInstance>.Empty;
         }
 
@@ -131,12 +130,12 @@ namespace Caravela.Framework.Impl.CodeModel
             this._aspects = prototype._aspects;
         }
 
-        private CompilationModel( CompilationModel prototype, AspectLayerId aspectLayerId ) : this(prototype)
+        private CompilationModel( CompilationModel prototype, AspectLayerId aspectLayerId ) : this( prototype )
         {
             this.AspectLayerId = aspectLayerId;
         }
 
-        private CompilationModel( CompilationModel prototype, IReadOnlyList<IAspectInstance> aspectInstances ) : this(prototype)
+        private CompilationModel( CompilationModel prototype, IReadOnlyList<IAspectInstance> aspectInstances ) : this( prototype )
         {
             this._aspects = this._aspects.AddRange( aspectInstances, a => a.TargetDeclaration.ToRef() );
         }
@@ -176,15 +175,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
         // TODO: throw an exception when the caller tries to get aspects that have not been initialized yet.
 
-
         IDeclaration? IDeclaration.ContainingDeclaration => null;
 
         DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.Compilation;
-
-        [Obsolete( "Not implemented." )]
-        public IAnnotationList GetAnnotations<T>()
-            where T : IAspect
-            => throw new NotImplementedException();
 
         public bool Equals( IDeclaration other ) => throw new NotImplementedException();
 

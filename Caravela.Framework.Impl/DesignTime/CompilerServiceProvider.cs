@@ -54,9 +54,8 @@ namespace Caravela.Framework.Impl.DesignTime
                             Directory.CreateDirectory( directory );
                         }
                     } );
-                
-                var textWriter = File.CreateText(
-                    Path.Combine( directory, $"Caravela.{Process.GetCurrentProcess().ProcessName}.{pid}.log" ) );
+
+                var textWriter = File.CreateText( Path.Combine( directory, $"Caravela.{Process.GetCurrentProcess().ProcessName}.{pid}.log" ) );
 
                 Logger.Initialize( textWriter );
             }

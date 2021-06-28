@@ -20,7 +20,7 @@ namespace Caravela.Framework.DesignTime.Contracts
         /// Gets the classification of <see cref="Span"/>.
         /// </summary>
         public TextSpanClassification Classification { get; }
-        
+
         public ImmutableDictionary<string, string> Tags { get; }
 
         public bool HasTagOrClassification => this.Classification != TextSpanClassification.Default || !this.Tags.IsEmpty;

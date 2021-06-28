@@ -266,7 +266,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                     }
                 }
             }
-            
+
             // Exclude any explicit interface implementation.
             // TODO: the Name be fully qualified, having it non-qualified is confusing and does not follow other implementations (28810).
             candidates = candidates.Where( c => !c.IsExplicitInterfaceImplementation );

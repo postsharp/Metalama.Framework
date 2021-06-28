@@ -38,7 +38,10 @@ namespace Caravela.Framework.Impl
                  select (attribute, member)).ToList();
         }
 
-        internal AspectInstanceResult ExecuteAspect( AspectInstance aspectInstance, CompilationModel compilationModelRevision, CancellationToken cancellationToken )
+        internal AspectInstanceResult ExecuteAspect(
+            AspectInstance aspectInstance,
+            CompilationModel compilationModelRevision,
+            CancellationToken cancellationToken )
         {
             return aspectInstance.TargetDeclaration switch
             {
@@ -47,13 +50,17 @@ namespace Caravela.Framework.Impl
                 IMethod method => this.EvaluateAspect( method, aspectInstance, compilationModelRevision, cancellationToken ),
                 IField field => this.EvaluateAspect( field, aspectInstance, compilationModelRevision, cancellationToken ),
                 IProperty property => this.EvaluateAspect( property, aspectInstance, compilationModelRevision, cancellationToken ),
-                IConstructor constructor => this.EvaluateAspect( constructor, aspectInstance, compilationModelRevision,  cancellationToken ),
+                IConstructor constructor => this.EvaluateAspect( constructor, aspectInstance, compilationModelRevision, cancellationToken ),
                 IEvent @event => this.EvaluateAspect( @event, aspectInstance, compilationModelRevision, cancellationToken ),
                 _ => throw new NotImplementedException()
             };
         }
 
-        private AspectInstanceResult EvaluateAspect<T>( T targetDeclaration, AspectInstance aspectInstance,  CompilationModel compilationModelRevision, CancellationToken cancellationToken )
+        private AspectInstanceResult EvaluateAspect<T>(
+            T targetDeclaration,
+            AspectInstance aspectInstance,
+            CompilationModel compilationModelRevision,
+            CancellationToken cancellationToken )
             where T : class, IDeclaration
         {
             static AspectInstanceResult CreateResultForError( Diagnostic diagnostic )

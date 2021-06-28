@@ -103,8 +103,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
                 ExpressionSyntax syntax => new RuntimeExpression( syntax ),
 
-                _ => throw new ArgumentOutOfRangeException( 
-                    nameof(value), 
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(value),
                     $"Cannot convert an instance of type {value.GetType().Name} to a run-time expression." )
             };
 

@@ -42,13 +42,13 @@ namespace Caravela.Framework.Impl.Transformations
         public AspectLinkerOptions? LinkerOptions { get; }
 
         public IntroducedInterfaceImplementation(
-            ImplementInterfaceAdvice ImplementInterfaceAdvice,
+            ImplementInterfaceAdvice implementInterfaceAdvice,
             INamedType targetType,
             INamedType interfaceType,
             IReadOnlyDictionary<IMember, (bool IsAspectInterfaceMember, IMember TargetMember, IMember ExplicitImplementationMember)> interfaceMemberMap,
             AspectLinkerOptions? linkerOptions )
         {
-            this.Advice = ImplementInterfaceAdvice;
+            this.Advice = implementInterfaceAdvice;
             this.TargetType = targetType;
             this.InterfaceType = interfaceType;
             this._interfaceMemberMap = interfaceMemberMap;

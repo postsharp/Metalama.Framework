@@ -134,9 +134,9 @@ namespace Caravela.Framework.Impl.Templating
 
             return new RuntimeExpression(
                 SyntaxFactory.MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    expression.Syntax,
-                    SyntaxFactory.IdentifierName( member ) )
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        expression.Syntax,
+                        SyntaxFactory.IdentifierName( member ) )
                     .WithAdditionalAnnotations( Simplifier.Annotation ) );
         }
 

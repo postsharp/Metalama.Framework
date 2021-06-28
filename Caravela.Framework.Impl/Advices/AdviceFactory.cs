@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Advices
         private readonly IReadOnlyList<Advice> _declarativeAdvices;
         private readonly List<Advice> _advices = new();
 
-        private readonly Dictionary<INamedType, ImplementInterfaceAdvice> _ImplementInterfaceAdvices;
+        private readonly Dictionary<INamedType, ImplementInterfaceAdvice> _implementInterfaceAdvices;
 
         internal IReadOnlyList<Advice> Advices => this._advices;
 
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.Advices
             this._compilation = compilation;
             this._diagnosticAdder = diagnosticAdder;
             this._declarativeAdvices = declarativeAdvices;
-            this._ImplementInterfaceAdvices = new Dictionary<INamedType, ImplementInterfaceAdvice>( compilation.InvariantComparer );
+            this._implementInterfaceAdvices = new Dictionary<INamedType, ImplementInterfaceAdvice>( compilation.InvariantComparer );
         }
 
         public void OverrideMethod( IMethod targetMethod, string defaultTemplate, AdviceOptions? options = null )
@@ -321,9 +321,9 @@ namespace Caravela.Framework.Impl.Advices
         {
             var diagnosticList = new DiagnosticList();
 
-            if ( !this._ImplementInterfaceAdvices.TryGetValue( targetType, out var advice ) )
+            if ( !this._implementInterfaceAdvices.TryGetValue( targetType, out var advice ) )
             {
-                this._ImplementInterfaceAdvices[targetType] = advice = new ImplementInterfaceAdvice( this._aspect, targetType, _layerName );
+                this._implementInterfaceAdvices[targetType] = advice = new ImplementInterfaceAdvice( this._aspect, targetType, _layerName );
                 advice.Initialize( this._declarativeAdvices, diagnosticList );
                 this._advices.Add( advice );
             }
@@ -356,9 +356,9 @@ namespace Caravela.Framework.Impl.Advices
         {
             var diagnosticList = new DiagnosticList();
 
-            if ( !this._ImplementInterfaceAdvices.TryGetValue( targetType, out var advice ) )
+            if ( !this._implementInterfaceAdvices.TryGetValue( targetType, out var advice ) )
             {
-                this._ImplementInterfaceAdvices[targetType] = advice = new ImplementInterfaceAdvice( this._aspect, targetType, _layerName );
+                this._implementInterfaceAdvices[targetType] = advice = new ImplementInterfaceAdvice( this._aspect, targetType, _layerName );
                 advice.Initialize( this._declarativeAdvices, diagnosticList );
                 this._advices.Add( advice );
             }

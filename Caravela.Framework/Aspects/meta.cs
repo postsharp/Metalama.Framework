@@ -191,7 +191,7 @@ namespace Caravela.Framework.Aspects
         /// </remarks>
         [TemplateKeyword]
         public static void Comment( params string?[] lines ) => throw NewInvalidOperationException();
-        
+
         /// <summary>
         /// Generates the cast syntax for the specified type.  
         /// </summary>
@@ -201,7 +201,6 @@ namespace Caravela.Framework.Aspects
         [return: RunTimeOnly]
         [TemplateKeyword]
         public static dynamic? Cast( IType type, dynamic? value ) => type.Compilation.TypeFactory.Cast( type, value );
-
 
         internal static IDisposable WithContext( IMetaApi current, object proceedImpl )
         {

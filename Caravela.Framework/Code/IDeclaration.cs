@@ -4,7 +4,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Diagnostics;
-using System;
 
 namespace Caravela.Framework.Code
 {
@@ -36,6 +35,5 @@ namespace Caravela.Framework.Code
         /// Gets the kind of declaration.
         /// </summary>
         public DeclarationKind DeclarationKind { get; }
-
     }
 }

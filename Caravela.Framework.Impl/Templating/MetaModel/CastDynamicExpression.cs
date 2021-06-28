@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
             return new RuntimeExpression(
                 SyntaxFactory.ParenthesizedExpression( LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression( this._type.GetSymbol(), expression ) )
-                    .WithAdditionalAnnotations( Simplifier.Annotation ));
+                    .WithAdditionalAnnotations( Simplifier.Annotation ) );
         }
     }
 }

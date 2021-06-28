@@ -1,11 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Diagnostics;
-using System;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -33,6 +31,5 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IAttributeList Attributes => this.Underlying.Attributes;
 
         public DeclarationKind DeclarationKind => this.Underlying.DeclarationKind;
-
     }
 }

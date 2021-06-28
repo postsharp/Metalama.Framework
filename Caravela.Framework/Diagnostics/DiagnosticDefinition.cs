@@ -31,7 +31,6 @@ namespace Caravela.Framework.Diagnostics
         internal DiagnosticDefinition( string id, string title, string messageFormat, string category, Severity severity )
             : this( id, severity, messageFormat, title, category ) { }
 
-
         /// <inheritdoc />
         public Severity Severity { get; }
 

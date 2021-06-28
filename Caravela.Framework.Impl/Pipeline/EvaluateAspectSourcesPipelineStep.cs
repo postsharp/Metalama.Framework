@@ -30,8 +30,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     s => s.GetAspectInstances( compilation, this.AspectLayer.AspectClass, pipelineStepsState, cancellationToken ) )
                 .ToList();
 
-            pipelineStepsState.AddAspectInstances(
-                aspectInstances );
+            pipelineStepsState.AddAspectInstances( aspectInstances );
 
             return compilation.WithAspectInstances( aspectInstances );
         }

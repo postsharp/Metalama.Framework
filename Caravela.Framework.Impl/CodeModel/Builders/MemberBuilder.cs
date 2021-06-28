@@ -13,9 +13,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 
-        public override string ToString()
-            => this.DeclaringType + "." + this.Name;
-        
+        public override string ToString() => this.DeclaringType + "." + this.Name;
+
         public abstract bool IsExplicitInterfaceImplementation { get; }
     }
 }

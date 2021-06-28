@@ -220,7 +220,6 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 return declaration.ToRef().Resolve( this.CompilationModel );
             }
-            
         }
 
         public IConstructor GetConstructor( IConstructor attributeBuilderConstructor )

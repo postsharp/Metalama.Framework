@@ -18,5 +18,4 @@ namespace Caravela.Framework.Aspects
         bool Any<T>()
             where T : IAnnotation;
     }
-
 }

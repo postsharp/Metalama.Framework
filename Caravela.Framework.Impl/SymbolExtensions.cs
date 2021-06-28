@@ -6,7 +6,6 @@ using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Caravela.Framework.Impl
 {

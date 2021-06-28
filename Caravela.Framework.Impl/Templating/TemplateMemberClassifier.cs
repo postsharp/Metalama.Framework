@@ -141,6 +141,5 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
         }
-
     }
 }

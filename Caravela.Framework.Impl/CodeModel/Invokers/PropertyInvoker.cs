@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             return expression;
         }
 
-        public object GetIndexerValue( object? instance, params object[] args )
+        public object GetIndexerValue( object? instance, params object?[] args )
         {
             return new DynamicExpression(
                 this.CreateIndexerAccess(
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                 false );
         }
 
-        public object SetIndexerValue( object? instance, object value, params object[] args )
+        public object SetIndexerValue( object? instance, object value, params object?[] args )
         {
             var propertyAccess = this.CreateIndexerAccess( RuntimeExpression.FromValue( instance ), RuntimeExpression.FromValue( args ) );
 

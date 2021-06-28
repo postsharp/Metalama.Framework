@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Formatting
             var sourceText = document.GetTextAsync().Result;
 
             ClassifiedTextSpanCollection classifiedTextSpans;
-            
+
             if ( annotatedSyntaxRoot != null )
             {
                 var classifier = new TextSpanClassifier( sourceText, detectRegion: true );
@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.Formatting
             }
             else
             {
-                classifiedTextSpans = new();
+                classifiedTextSpans = new ClassifiedTextSpanCollection();
             }
 
             if ( this._options.Prolog != null )
@@ -120,7 +120,7 @@ namespace Caravela.Framework.Impl.Formatting
                         {
                             textWriter.Write( $" title=\"{HtmlEncode( title!, true )}\"" );
                         }
-                        
+
                         textWriter.Write( ">" );
                         textWriter.Write( HtmlEncode( spanText ) );
                         textWriter.Write( "</span>" );

@@ -171,7 +171,7 @@ namespace Caravela.Framework.Impl.Templating
                     + "and templates cannot reference each other yet.",
                     _category,
                     Error );
-        
+
         internal static readonly DiagnosticDefinition
             CannotUseThisInRunTimeContext
                 = new(
@@ -180,6 +180,5 @@ namespace Caravela.Framework.Impl.Templating
                     "The expression 'this' cannot be used where a run-time expression is expected. Use 'meta.This' instead.",
                     _category,
                     Error );
-
     }
 }

@@ -104,19 +104,21 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
 
             Assert.Equal( "{ [0..10)=>Default, [10..20)=>CompileTimeVariable, [20..inf)=>Default } ", c.ToString() );
         }
-        
+
         [Fact]
         public void OneWideSpan()
         {
             var c = new ClassifiedTextSpanCollection
             {
-                { new TextSpan( 10, 10 ), TextSpanClassification.CompileTimeVariable }, 
+                { new TextSpan( 10, 10 ), TextSpanClassification.CompileTimeVariable },
                 { new TextSpan( 20, 10 ), TextSpanClassification.CompileTimeVariable },
                 { new TextSpan( 19, 1 ), TextSpanClassification.CompileTimeVariable, "n", "v" },
                 { new TextSpan( 20, 1 ), TextSpanClassification.CompileTimeVariable, "n", "v" }
             };
 
-            Assert.Equal( "{ [0..10)=>Default, [10..19)=>CompileTimeVariable, [19..20)=>CompileTimeVariable{n=v}, [20..21)=>CompileTimeVariable{n=v}, [21..30)=>CompileTimeVariable, [30..inf)=>Default } ", c.ToString() );
+            Assert.Equal(
+                "{ [0..10)=>Default, [10..19)=>CompileTimeVariable, [19..20)=>CompileTimeVariable{n=v}, [20..21)=>CompileTimeVariable{n=v}, [21..30)=>CompileTimeVariable, [30..inf)=>Default } ",
+                c.ToString() );
         }
     }
 }

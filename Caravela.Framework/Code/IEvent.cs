@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using System.Collections.Generic;
 using System.Reflection;
@@ -17,8 +16,8 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the type of the event, i.e. the type of the delegate.
         /// </summary>
-        INamedType EventType { get; } 
-        
+        INamedType EventType { get; }
+
         IMethod Signature { get; }
 
         /// <summary>

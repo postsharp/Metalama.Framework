@@ -12,7 +12,8 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         where TMember : class, IMemberOrNamedType
         where TSource : IMemberRef<TMember>
     {
-        protected MemberOrNamedTypeList( IDeclaration? containingDeclaration, IEnumerable<TSource> sourceItems ) : base( containingDeclaration, sourceItems ) { }
+        protected MemberOrNamedTypeList( IDeclaration? containingDeclaration, IEnumerable<TSource> sourceItems ) :
+            base( containingDeclaration, sourceItems ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MemberOrNamedTypeList{TMember,TSource}"/> class that represents an empty list.

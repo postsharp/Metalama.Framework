@@ -33,7 +33,7 @@ namespace Caravela.TestFramework
                         .item;
 
                 var previousRoot = originalSyntaxTree.AnnotatedSyntaxRoot ?? sourceSyntaxRoot.SyntaxTree.GetRoot();
-                
+
                 originalSyntaxTree.AnnotatedSyntaxRoot = previousRoot.ReplaceNode( sourceSyntaxRoot, annotatedSyntaxRoot );
             }
         }

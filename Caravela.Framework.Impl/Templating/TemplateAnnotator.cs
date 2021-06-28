@@ -1569,7 +1569,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             var transformedSections = new SwitchSectionSyntax[node.Sections.Count];
-            
+
             for ( var i = 0; i < node.Sections.Count; i++ )
             {
                 var section = node.Sections[i];
@@ -1584,7 +1584,7 @@ namespace Caravela.Framework.Impl.Templating
                 using ( this.WithScopeContext( labelContext ) )
                 {
                     transformedLabels = section.Labels.Select( l => this.Visit( l )! ).ToArray();
-                    
+
                     this.RequireScope( transformedLabels, switchScope, scopeReason );
 
                     transformedLabels = transformedLabels.Select( l => l.ReplaceScopeAnnotation( switchScope ) ).ToArray();
@@ -1863,7 +1863,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitArrayRankSpecifier( ArrayRankSpecifierSyntax node )
         {
-            var transformedSizes = node.Sizes.Select( this.Visit );
+            var transformedSizes = node.Sizes.Select( syntax => this.Visit( syntax )! ).ToList();
             var sizeScope = this.GetExpressionScope( transformedSizes, node );
 
             var arrayRankScope = sizeScope switch

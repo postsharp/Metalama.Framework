@@ -154,6 +154,7 @@ namespace Caravela.Framework.Impl.Templating
             // Look for annotation on the parent, but stop at 'if' and 'foreach' statements,
             // which have special interpretation.
             var previousParent = node;
+
             for ( var parent = node.Parent;
                   parent != null;
                   parent = parent.Parent )
@@ -162,10 +163,10 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( !parentScope.IsIndeterminate() )
                 {
-                    if ( parent is IfStatementSyntax || 
-                         parent is ForEachStatementSyntax || 
-                         parent is ElseClauseSyntax || 
-                         parent is WhileStatementSyntax || 
+                    if ( parent is IfStatementSyntax ||
+                         parent is ForEachStatementSyntax ||
+                         parent is ElseClauseSyntax ||
+                         parent is WhileStatementSyntax ||
                          parent is SwitchSectionSyntax )
                     {
                         throw new AssertionFailedException( $"The node '{previousParent}' must be annotated." );
@@ -311,7 +312,7 @@ namespace Caravela.Framework.Impl.Templating
                 // We change all dynamic into var in the template.
                 return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
             }
-            
+
             // If the identifier is declared withing the template, the expanded name is given by the TemplateExpansionContext and
             // stored in a template variable named __foo, where foo is the variable name in the template. This variable is defined
             // and initialized in the VisitVariableDeclarator.
@@ -420,7 +421,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 case SyntaxKind.SimpleLambdaExpression:
                     break;
-                
+
                 case SyntaxKind.ThisExpression:
                     // Cannot use 'this' in a context that expects a run-time expression.
                     this.Report( TemplatingDiagnosticDescriptors.CannotUseThisInRunTimeContext.CreateDiagnostic( expression.GetLocation() ) );
@@ -634,7 +635,6 @@ namespace Caravela.Framework.Impl.Templating
 
                 SyntaxNode? LocalTransformArgument( ArgumentSyntax a )
                 {
-                  
                     if ( this._templateMemberClassifier.IsDynamicParameter( a ) )
                     {
                         var expressionScope = a.Expression.GetScopeFromAnnotation().GetValueOrDefault();
@@ -648,10 +648,7 @@ namespace Caravela.Framework.Impl.Templating
 
                             default:
                                 return Argument( this.CreateRunTimeExpression( transformedExpression ) );
-
-                                
                         }
-                        
                     }
                     else
                     {

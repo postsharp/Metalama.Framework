@@ -22,7 +22,7 @@ namespace Caravela.Framework.Code
         /// Gets a value indicating whether the member is <c>override</c>.
         /// </summary>
         bool IsOverride { get; }
-        
+
         bool IsExplicitInterfaceImplementation { get; }
 
         new INamedType DeclaringType { get; }

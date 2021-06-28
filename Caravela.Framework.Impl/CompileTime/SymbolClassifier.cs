@@ -152,7 +152,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 case ITypeParameterSymbol:
                     return TemplatingScope.Both;
-                    
+
                 case IErrorTypeSymbol:
                     return TemplatingScope.Unknown;
 
