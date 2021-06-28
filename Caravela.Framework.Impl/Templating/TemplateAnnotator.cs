@@ -132,7 +132,7 @@ namespace Caravela.Framework.Impl.Templating
             }
             else if ( symbol is IParameterSymbol parameter )
             {
-                if ( parameter.ContainingSymbol.Equals( this._currentTemplateMember ) || 
+                if ( parameter.ContainingSymbol.Equals( this._currentTemplateMember ) ||
                      parameter.ContainingSymbol.Equals( this._currentTemplateMember?.ContainingSymbol ) )
                 {
                     // In the future, we may have parameters on the template parameters changing their meaning. However, now, all template
@@ -372,7 +372,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return null;
             }
-            
+
             this._cancellationToken.ThrowIfCancellationRequested();
 
             // Adds annotations to the children node.
@@ -821,43 +821,45 @@ namespace Caravela.Framework.Impl.Templating
             var annotatedCondition = this.Visit( node.Condition )!;
             var conditionScope = this.GetNodeScope( annotatedCondition );
 
+            TemplatingScope ifScope;
+            StatementSyntax annotatedStatement;
+            StatementSyntax? annotatedElseStatement;
+            ScopeContext? scopeContext;
+
             if ( conditionScope == TemplatingScope.CompileTimeOnly )
             {
                 // We have an if statement where the condition is a compile-time expression. Add annotations
                 // to the if and else statements but not to the blocks themselves.
 
-                var annotatedStatement = this.Visit( node.Statement )!;
-
-                var annotatedElse = node.Else != null
-                    ? ElseClause(
-                            node.Else.ElseKeyword,
-                            this.Visit( node.Else.Statement )! )
-                        .AddScopeAnnotation( TemplatingScope.CompileTimeOnly )
-                        .WithTriviaFrom( node.Else )
-                    : null;
-
-                return node.Update(
-                        node.AttributeLists,
-                        node.IfKeyword,
-                        node.OpenParenToken,
-                        annotatedCondition,
-                        node.CloseParenToken,
-                        annotatedStatement,
-                        annotatedElse )
-                    .AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
+                scopeContext = null;
+                ifScope = TemplatingScope.CompileTimeOnly;
             }
-
-            // We have an if statement where the condition is a runtime expression. Any variable assignment
-            // within this statement should make the variable as runtime-only, so we're calling EnterRuntimeConditionalBlock.
-            using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalScope( this._currentScopeContext, "if ( " + node.Condition + " )" ) ) )
+            else
             {
-                var annotatedStatement = this.Visit( node.Statement )!;
-                var annotatedElse = this.Visit( node.Else )!;
+                // We have an if statement where the condition is a runtime expression. Any variable assignment
+                // within this statement should make the variable as runtime-only, so we're calling EnterRuntimeConditionalBlock.
 
-                var result = node.Update( node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken, annotatedStatement, annotatedElse );
-
-                return result;
+                scopeContext = ScopeContext.CreateRuntimeConditionalScope( this._currentScopeContext, "if ( " + node.Condition + " )" );
+                ifScope = TemplatingScope.RunTimeOnly;
             }
+
+            using ( this.WithScopeContext( scopeContext ) )
+            {
+                // Statements of a compile-time control block must have an explicitly-set scope otherwise the template compiler
+                // will look at the scope in the parent node, which is here incorrect.
+                annotatedStatement = this.Visit( node.Statement ).AddRunTimeOnlyAnnotationIfIndeterminate();
+                annotatedElseStatement = this.Visit( node.Else?.Statement )?.AddRunTimeOnlyAnnotationIfIndeterminate();
+            }
+
+            return node.Update(
+                    node.AttributeLists,
+                    node.IfKeyword,
+                    node.OpenParenToken,
+                    annotatedCondition.ReplaceScopeAnnotation( ifScope ),
+                    node.CloseParenToken,
+                    annotatedStatement,
+                    node.Else?.Update( node.Else.ElseKeyword, annotatedElseStatement! ).AddScopeAnnotation( ifScope ) )
+                .AddScopeAnnotation( ifScope );
         }
 
         public override SyntaxNode? VisitBreakStatement( BreakStatementSyntax node )
@@ -887,7 +889,9 @@ namespace Caravela.Framework.Impl.Templating
             using ( this.WithScopeContext(
                 ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, forEachScope, $"foreach ( {node.Type} {node.Identifier} in ... )" ) ) )
             {
-                annotatedStatement = this.Visit( node.Statement )!;
+                // Statements of a compile-time control block must have an explicitly-set scope otherwise the template compiler
+                // will look at the scope in the parent node, which is here incorrect.
+                annotatedStatement = this.Visit( node.Statement )!.AddRunTimeOnlyAnnotationIfIndeterminate();
             }
 
             var identifierClassification = forEachScope == TemplatingScope.CompileTimeOnly ? TextSpanClassification.CompileTimeVariable : default;
@@ -897,12 +901,12 @@ namespace Caravela.Framework.Impl.Templating
                         default,
                         node.ForEachKeyword,
                         node.OpenParenToken,
-                        node.Type,
+                        node.Type.ReplaceScopeAnnotation( forEachScope ),
                         node.Identifier.AddColoringAnnotation( identifierClassification ),
                         node.InKeyword,
-                        annotatedExpression,
+                        annotatedExpression.ReplaceScopeAnnotation( forEachScope ),
                         node.CloseParenToken,
-                        annotatedStatement )
+                        annotatedStatement.ReplaceScopeAnnotation( forEachScope ) )
                     .AddScopeAnnotation( forEachScope )
                     .WithSymbolAnnotationsFrom( node );
 
@@ -1258,11 +1262,32 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitCastExpression( CastExpressionSyntax node )
         {
-            var annotatedType = this.Visit( node.Type )!;
+            TypeSyntax annotatedType;
             var annotatedExpression = this.Visit( node.Expression )!;
-            var transformedNode = node.WithType( annotatedType ).WithExpression( annotatedExpression );
+            var expressionScope = this.GetNodeScope( annotatedExpression );
+            TemplatingScope castScope;
 
-            return this.AnnotateCastExpression( transformedNode, annotatedType!, annotatedExpression! );
+            if ( expressionScope.DynamicToRunTimeOnly() == TemplatingScope.RunTimeOnly )
+            {
+                // The whole cast is run-time only.
+                using ( this.WithScopeContext(
+                    ScopeContext.CreatePreferredRunTimeScope(
+                        this._currentScopeContext,
+                        $"cast of the run-time-only expression '{node.Expression}'" ) ) )
+                {
+                    annotatedType = this.Visit( node.Type );
+                }
+
+                castScope = TemplatingScope.RunTimeOnly;
+            }
+            else
+            {
+                annotatedType = this.Visit( node.Type );
+                castScope = expressionScope;
+            }
+
+            return node.Update( node.OpenParenToken, annotatedType, node.CloseParenToken, annotatedExpression )
+                .AddScopeAnnotation( castScope );
         }
 
         public override SyntaxNode? VisitBinaryExpression( BinaryExpressionSyntax node )
@@ -1343,17 +1368,23 @@ namespace Caravela.Framework.Impl.Templating
             var annotatedCondition = this.Visit( node.Condition )!;
             var conditionScope = this.GetNodeScope( annotatedCondition );
 
-            this.RequireLoopScope( node.Condition, conditionScope, "white" );
+            this.RequireLoopScope( node.Condition, conditionScope, "while" );
 
             StatementSyntax annotatedStatement;
 
             using ( this.WithScopeContext(
                 ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, conditionScope, $"while ( {node.Condition} )" ) ) )
             {
-                annotatedStatement = this.Visit( node.Statement )!;
+                annotatedStatement = this.Visit( node.Statement )!.ReplaceScopeAnnotation( conditionScope );
             }
 
-            return node.Update( node.AttributeLists, node.WhileKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken, annotatedStatement )
+            return node.Update(
+                    node.AttributeLists,
+                    node.WhileKeyword,
+                    node.OpenParenToken,
+                    annotatedCondition,
+                    node.CloseParenToken,
+                    annotatedStatement )
                 .AddScopeAnnotation( conditionScope );
         }
 
@@ -1522,15 +1553,23 @@ namespace Caravela.Framework.Impl.Templating
             var annotatedExpression = this.Visit( node.Expression )!;
             var expressionScope = annotatedExpression.GetScopeFromAnnotation().GetValueOrDefault();
 
+            TemplatingScope switchScope;
+            string scopeReason;
+
             if ( (expressionScope == TemplatingScope.CompileTimeOnly && this._templateMemberClassifier.IsDynamicType( annotatedExpression ))
                  || expressionScope != TemplatingScope.CompileTimeOnly )
             {
-                expressionScope = TemplatingScope.RunTimeOnly;
+                switchScope = TemplatingScope.RunTimeOnly;
+                scopeReason = $"the run-time 'switch( {node.Expression} )'";
+            }
+            else
+            {
+                switchScope = TemplatingScope.CompileTimeOnly;
+                scopeReason = $"the compile-time 'switch( {node.Expression} )'";
             }
 
             var transformedSections = new SwitchSectionSyntax[node.Sections.Count];
-            var switchReason = $"switch ( {node.Expression} )";
-
+            
             for ( var i = 0; i < node.Sections.Count; i++ )
             {
                 var section = node.Sections[i];
@@ -1538,49 +1577,38 @@ namespace Caravela.Framework.Impl.Templating
                 SwitchLabelSyntax[] transformedLabels;
                 StatementSyntax[] transformedStatements;
 
-                const string compileTimeReason = "the 'case' is a part of a compile-time 'switch'";
-
-                var labelContext = expressionScope == TemplatingScope.CompileTimeOnly
-                    ? ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, compileTimeReason )
-                    : null;
+                var labelContext = switchScope == TemplatingScope.CompileTimeOnly
+                    ? ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, scopeReason )
+                    : ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, scopeReason );
 
                 using ( this.WithScopeContext( labelContext ) )
                 {
                     transformedLabels = section.Labels.Select( l => this.Visit( l )! ).ToArray();
-                    this.RequireScope( transformedLabels, expressionScope, compileTimeReason );
+                    
+                    this.RequireScope( transformedLabels, switchScope, scopeReason );
+
+                    transformedLabels = transformedLabels.Select( l => l.ReplaceScopeAnnotation( switchScope ) ).ToArray();
                 }
 
-                using ( this.WithScopeContext( ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, expressionScope, switchReason ) ) )
+                using ( this.WithScopeContext( ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, switchScope, scopeReason ) ) )
                 {
-                    transformedStatements = section.Statements.Select( s => this.Visit( s )! ).ToArray();
+                    // Statements of a compile-time control block must have an explicitly-set scope otherwise the template compiler
+                    // will look at the scope in the parent node, which is here incorrect.
+                    transformedStatements = section.Statements.Select( s => this.Visit( s )!.AddRunTimeOnlyAnnotationIfIndeterminate() ).ToArray();
                 }
 
-                transformedSections[i] = section.Update( List( transformedLabels ), List( transformedStatements ) ).AddScopeAnnotation( expressionScope );
+                transformedSections[i] = section.Update( List( transformedLabels ), List( transformedStatements ) ).AddScopeAnnotation( switchScope );
             }
 
-            if ( expressionScope == TemplatingScope.CompileTimeOnly )
-            {
-                return node.Update(
-                        node.SwitchKeyword,
-                        node.OpenParenToken,
-                        annotatedExpression,
-                        node.CloseParenToken,
-                        node.OpenBraceToken,
-                        List( transformedSections ),
-                        node.CloseBraceToken )
-                    .AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
-            }
-            else
-            {
-                return node.Update(
+            return node.Update(
                     node.SwitchKeyword,
                     node.OpenParenToken,
-                    annotatedExpression,
+                    annotatedExpression.ReplaceScopeAnnotation( switchScope ),
                     node.CloseParenToken,
                     node.OpenBraceToken,
                     List( transformedSections ),
-                    node.CloseBraceToken );
-            }
+                    node.CloseBraceToken )
+                .AddScopeAnnotation( switchScope );
         }
 
         private TemplatingScope GetSwitchCaseScope(

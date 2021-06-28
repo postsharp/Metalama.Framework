@@ -23,27 +23,27 @@ namespace Caravela.Framework.Tests.Integration.Runners
     <head>
         <link rel=""stylesheet"" href=""https://highlightjs.org/static/demo/styles/vs.css""/>
         <style>
-            .caravelaClassification_CompileTime,
-            .caravelaClassification_Conflict,
-            .caravelaClassification_TemplateKeyword,
-            .caravelaClassification_Dynamic,
-            .caravelaClassification_CompileTimeVariable
+            .cr-CompileTime,
+            .cr-Conflict,
+            .cr-TemplateKeyword,
+            .cr-Dynamic,
+            .cr-CompileTimeVariable
             {
                 background-color: rgba(50,50,90,0.1);
             }
 
-            .caravelaClassification_TemplateKeyword
+            .cr-TemplateKeyword
             {
                 color: rgb(250, 0, 250) !important;
                 font-weight: bold;
             }
 
-            .caravelaClassification_Dynamic
+            .cr-Dynamic
             {
                 text-decoration: underline;
             }
 
-            .caravelaClassification_CompileTimeVariable
+            .cr-CompileTimeVariable
             {
                 font-style: italic;
             }
@@ -72,7 +72,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             foreach ( var classification in Enum.GetValues( typeof(TextSpanClassification) ) )
             {
-                epilogueBuilder.AppendLine( $"<span class='caravelaClassification_{classification}'>{classification}</span>" );
+                epilogueBuilder.AppendLine( $"<span class='cr-{classification}'>{classification}</span>" );
             }
 
             epilogueBuilder.AppendLine( "       </pre>" );

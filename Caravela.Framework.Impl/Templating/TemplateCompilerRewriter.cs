@@ -153,17 +153,28 @@ namespace Caravela.Framework.Impl.Templating
 
             // Look for annotation on the parent, but stop at 'if' and 'foreach' statements,
             // which have special interpretation.
+            var previousParent = node;
             for ( var parent = node.Parent;
                   parent != null;
                   parent = parent.Parent )
             {
-                if ( !parent.GetScopeFromAnnotation().GetValueOrDefault().MustBeTransformed() )
+                var parentScope = parent.GetScopeFromAnnotation().GetValueOrDefault();
+
+                if ( !parentScope.IsIndeterminate() )
                 {
-                    return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax
-                           || parent is SwitchSectionSyntax
-                        ? TransformationKind.Transform
-                        : TransformationKind.None;
+                    if ( parent is IfStatementSyntax || 
+                         parent is ForEachStatementSyntax || 
+                         parent is ElseClauseSyntax || 
+                         parent is WhileStatementSyntax || 
+                         parent is SwitchSectionSyntax )
+                    {
+                        throw new AssertionFailedException( $"The node '{previousParent}' must be annotated." );
+                    }
+
+                    return parentScope.MustBeTransformed() ? TransformationKind.Transform : TransformationKind.None;
                 }
+
+                previousParent = parent;
             }
 
             return TransformationKind.Transform;
@@ -501,7 +512,7 @@ namespace Caravela.Framework.Impl.Templating
                             Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateReferenceId( type ) ) ) ) );
 
                 case null:
-                    throw new AssertionFailedException( $"Cannot convert {expression} to a run-time value." );
+                    throw new AssertionFailedException( $"Cannot convert {expression.Kind()} '{expression}' to a run-time value." );
 
                 default:
                     // Try to find a serializer for this type.
@@ -623,15 +634,16 @@ namespace Caravela.Framework.Impl.Templating
                     if ( this._templateMemberClassifier.IsDynamicParameter( a ) )
                     {
                         var expressionScope = a.Expression.GetScopeFromAnnotation().GetValueOrDefault();
+                        var transformedExpression = (ExpressionSyntax) this.Visit( a.Expression )!;
 
                         switch ( expressionScope )
                         {
                             case TemplatingScope.Dynamic:
                             case TemplatingScope.RunTimeOnly:
-                                return Argument( (ExpressionSyntax) this.Visit( a.Expression )! );
+                                return Argument( transformedExpression );
 
                             default:
-                                return Argument( this.CreateRunTimeExpression( a.Expression ) );
+                                return Argument( this.CreateRunTimeExpression( transformedExpression ) );
 
                                 
                         }
