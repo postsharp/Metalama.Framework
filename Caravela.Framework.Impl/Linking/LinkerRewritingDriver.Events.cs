@@ -117,7 +117,7 @@ namespace Caravela.Framework.Impl.Linking
                         TokenList(),
                         this.GetLinkedBody( 
                             this.GetBodySource( symbol.AddMethod.AssertNotNull() ), 
-                            InliningContext.Create( this ) ) );
+                            InliningContext.Create( this, symbol.AddMethod.AssertNotNull() ) ) );
 
                 var removeDeclaration = (AccessorDeclarationSyntax) symbol.RemoveMethod.AssertNotNull().GetPrimaryDeclaration().AssertNotNull();
 
@@ -126,7 +126,9 @@ namespace Caravela.Framework.Impl.Linking
                         SyntaxKind.SetAccessorDeclaration,
                         removeDeclaration.AttributeLists,
                         TokenList(),
-                        this.GetLinkedBody( symbol.RemoveMethod.AssertNotNull(), InliningContext.Create( this ) ) );
+                        this.GetLinkedBody( 
+                            symbol.RemoveMethod.AssertNotNull(), 
+                            InliningContext.Create( this, symbol.RemoveMethod.AssertNotNull() ) ) );
 
                 return eventDeclaration
                         .WithAccessorList( AccessorList( List( new[] { transformedAdd, transformedRemove } ) ) )
@@ -179,7 +181,7 @@ namespace Caravela.Framework.Impl.Linking
                         TokenList(),
                         this.GetLinkedBody( 
                             this.GetBodySource( symbol.AddMethod.AssertNotNull() ), 
-                            InliningContext.Create( this ) ) );
+                            InliningContext.Create( this, symbol.AddMethod.AssertNotNull() ) ) );
 
                 var transformedRemove =
                     AccessorDeclaration(
@@ -188,7 +190,7 @@ namespace Caravela.Framework.Impl.Linking
                         TokenList(),
                         this.GetLinkedBody( 
                             this.GetBodySource( symbol.RemoveMethod.AssertNotNull() ), 
-                            InliningContext.Create( this ) ) );
+                            InliningContext.Create( this, symbol.RemoveMethod.AssertNotNull() ) ) );
 
                 return 
                     EventDeclaration(

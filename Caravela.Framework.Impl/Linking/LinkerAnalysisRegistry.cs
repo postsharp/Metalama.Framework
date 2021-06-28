@@ -39,7 +39,42 @@ namespace Caravela.Framework.Impl.Linking
         {
             var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
 
-            return introducedMember?.LinkerOptions ?? AspectLinkerOptions.Default;
+            if ( introducedMember != null )
+            {
+                return introducedMember.LinkerOptions ?? AspectLinkerOptions.Default;
+            }
+            else
+            {
+                var linkerOptionsAttribute =
+                    symbol.GetAttributes()
+                   .SingleOrDefault( attributeData => attributeData.AttributeClass?.ToDisplayString() == typeof( AspectLinkerOptionsAttribute ).FullName );
+
+                if ( linkerOptionsAttribute != null )
+                {
+                    var forceNotInlineable = false;
+                    var forceNotDiscardable = false;
+
+                    if ( linkerOptionsAttribute.NamedArguments
+                       .Any( x => x.Key == nameof( AspectLinkerOptionsAttribute.ForceNotInlineable ) && (bool?) x.Value.Value == true ) )
+                    {
+                        // Inlining is explicitly disabled for the declaration.
+                        forceNotInlineable = true;
+                    }
+
+                    if ( linkerOptionsAttribute.NamedArguments
+                       .Any( x => x.Key == nameof( AspectLinkerOptionsAttribute.ForceNotInlineable ) && (bool?) x.Value.Value == true ) )
+                    {
+                        // Discarding is explicitly disabled for the declaration.
+                        forceNotDiscardable = true;
+                    }
+
+                    return AspectLinkerOptions.Create( forceNotInlineable, forceNotDiscardable );
+                }
+                else
+                {
+                    return AspectLinkerOptions.Default;
+                }
+            }
         }
 
         /// <summary>
@@ -135,9 +170,35 @@ namespace Caravela.Framework.Impl.Linking
             return result.HasSimpleReturnControlFlow;
         }
 
-        internal ISymbol GetPreviousOverride( ISymbol mainSymbol )
+        internal ISymbol? GetPreviousOverride( ISymbol symbol )
         {
-            throw new NotImplementedException();
+            var overrideTarget = this.GetOverrideTarget( symbol );
+            if (overrideTarget != null)
+            {
+                var overrides = this._introductionRegistry.GetOverridesForSymbol( overrideTarget );
+                var matched = false;
+
+                foreach (var introducedMember in overrides.Reverse())
+                {
+                    var overrideSymbol = this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember );
+
+                    if (matched)
+                    {
+                        return overrideSymbol;
+                    }
+
+                    if ( SymbolEqualityComparer.Default.Equals( overrideSymbol, symbol) )
+                    {
+                        matched = true;
+                    }
+                }
+
+                return null;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

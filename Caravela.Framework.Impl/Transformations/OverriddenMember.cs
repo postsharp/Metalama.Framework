@@ -93,7 +93,8 @@ namespace Caravela.Framework.Impl.Transformations
                 .WithAspectReferenceAnnotation(
                     this.Advice.AspectLayerId,
                     AspectReferenceOrder.Default,
-                    referenceTargetKind );
+                    referenceTargetKind,
+                    flags: AspectReferenceFlags.Inlineable );
         }
     }
 }

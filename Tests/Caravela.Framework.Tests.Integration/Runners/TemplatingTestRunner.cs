@@ -238,10 +238,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             var proceedExpression =
                 new DynamicExpression(
-                    SyntaxFactory.DefaultExpression(
-                        (TypeSyntax)LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetMethod.ReturnType.GetSymbol() ) ),
+                    GetProceedInvocation( targetMethod ),
                     targetMethod.ReturnType,
-                    false);
+                    false );
 
             var metaApi = MetaApi.ForMethod(
                 targetMethod,
@@ -260,6 +259,22 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 lexicalScope,
                 this._syntaxSerializationService,
                 compilation.Factory );
+
+            static ExpressionSyntax GetProceedInvocation( Code.IMethod targetMethod )
+            {
+                return
+                    SyntaxFactory.InvocationExpression(
+                        targetMethod.IsStatic
+                        ? SyntaxFactory.IdentifierName( targetMethod.Name )
+                        : SyntaxFactory.MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            SyntaxFactory.ThisExpression(),
+                            SyntaxFactory.IdentifierName( targetMethod.Name ) ),
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList(
+                                targetMethod.Parameters.Select( x =>
+                                    SyntaxFactory.Argument( SyntaxFactory.IdentifierName( x.Name ) ) ) ) ) );
+            }
         }
     }
 }

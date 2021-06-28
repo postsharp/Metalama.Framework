@@ -25,24 +25,39 @@ namespace Caravela.Framework.Impl.Linking
                 throw new AssertionFailedException();
             }
 
-            var aspectReferences = this._analysisRegistry.GetAspectReferences( symbol );
-
-            // A method is discarded when it is not used, if it inlined inlined, or if has no discard flag.
-            if ( aspectReferences.Count == 0 && !this.GetLinkerOptions( symbol ).ForceNotDiscardable )
+            if (this._analysisRegistry.IsOverride(symbol))
             {
-                return true;
-            }
+                var aspectReferences = this._analysisRegistry.GetAspectReferences( symbol );
+                var overrideTarget = this._analysisRegistry.GetOverrideTarget( symbol );
+                var lastOverride = this._analysisRegistry.GetLastOverride( overrideTarget.AssertNotNull() );
 
-            if ( this.IsInlineable( symbol ) )
+                if (SymbolEqualityComparer.Default.Equals(symbol, lastOverride))
+                {
+                    return this.IsInlineable( symbol ) && !this.GetLinkerOptions( symbol ).ForceNotDiscardable;
+                }
+                else
+                {
+                    return (this.IsInlineable( symbol ) || aspectReferences.Count == 0) && !this.GetLinkerOptions( symbol ).ForceNotDiscardable;
+                }
+            }
+            else
             {
-                return true;
+                return false;
             }
-
-            return false;
         }
 
         private bool IsInlineable( IMethodSymbol symbol )
         {
+            if ( symbol.MethodKind != MethodKind.Ordinary )
+            {
+                throw new AssertionFailedException();
+            }
+
+            if ( this.GetLinkerOptions( symbol ).ForceNotInlineable )
+            {
+                return false;
+            }
+
             var aspectReferences = this._analysisRegistry.GetAspectReferences( symbol );
 
             if ( aspectReferences.Count > 1 )
@@ -57,19 +72,21 @@ namespace Caravela.Framework.Impl.Linking
         {
             if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
             {
-                var members = new List<MemberDeclarationSyntax>
+                var members = new List<MemberDeclarationSyntax>();
+                var lastOverride = (IMethodSymbol) this._analysisRegistry.GetLastOverride( symbol );
+
+                if ( this.IsInlineable( lastOverride ) )
                 {
-                    GetLinkedDeclaration()
-                };
+                    members.Add( GetLinkedDeclaration() );
+                }
+                else
+                {
+                    members.Add( GetTrampolineMethod( methodDeclaration, lastOverride ) );
+                }
 
                 if (!this.IsInlineable(symbol))
                 {
                     members.Add( GetOriginalImplMethod( methodDeclaration ) );
-                }
-
-                if (!this.IsInlineable((IMethodSymbol)this._analysisRegistry.GetLastOverride(symbol)))
-                {
-                    members.Add( GetTrampolineMethod( methodDeclaration, symbol ) );
                 }
 
                 return members;
@@ -97,7 +114,7 @@ namespace Caravela.Framework.Impl.Linking
                     .WithBody( 
                         this.GetLinkedBody( 
                             this.GetBodySource( symbol ), 
-                            InliningContext.Create( this ) ) )
+                            InliningContext.Create( this, symbol ) ) )
                     .WithLeadingTrivia( methodDeclaration.GetLeadingTrivia() )
                     .WithTrailingTrivia( methodDeclaration.GetTrailingTrivia() );
             }

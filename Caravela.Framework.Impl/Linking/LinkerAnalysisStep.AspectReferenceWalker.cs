@@ -17,13 +17,15 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         private class AspectReferenceWalker : CSharpSyntaxWalker
         {
+            private readonly AspectReferenceResolver _referenceResolver;
             private readonly SemanticModel _semanticModel;
             private readonly ISymbol _containingSymbol;
 
             public List<AspectReferenceHandle> AspectReferences { get; }
 
-            public AspectReferenceWalker(SemanticModel semanticModel, ISymbol containingSymbol)
+            public AspectReferenceWalker( AspectReferenceResolver referenceResolver, SemanticModel semanticModel, ISymbol containingSymbol)
             {
+                this._referenceResolver = referenceResolver;
                 this._semanticModel = semanticModel;
                 this.AspectReferences = new List<AspectReferenceHandle>();
                 this._containingSymbol = containingSymbol;
@@ -39,7 +41,8 @@ namespace Caravela.Framework.Impl.Linking
                 if (node.TryGetAspectReference(out var aspectReference))
                 {
                     var referencedSymbol = this._semanticModel.GetSymbolInfo(node).Symbol.AssertNotNull();
-                    this.AspectReferences.Add( new AspectReferenceHandle( this._containingSymbol, referencedSymbol, (ExpressionSyntax)node, aspectReference ) );
+                    var resolvedSymbol = this._referenceResolver.Resolve( referencedSymbol, aspectReference );
+                    this.AspectReferences.Add( new AspectReferenceHandle( this._containingSymbol, resolvedSymbol, (ExpressionSyntax)node, aspectReference ) );
                 }
 
                 base.Visit( node );

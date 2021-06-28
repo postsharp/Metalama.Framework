@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
@@ -55,7 +56,36 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( this.MetaApi.Method.ReturnType.Is( typeof(void) ) )
             {
-                return ReturnStatement();
+                switch ( returnExpression )
+                {
+                    case InvocationExpressionSyntax invocationExpression:
+                        // Do not use discard on invocations, because it may be void.
+                        return
+                            Block(
+                                ExpressionStatement( invocationExpression ),
+                                ReturnStatement() )
+                            .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                    case null:
+                        // No return expression.
+                        return ReturnStatement();
+                    default:
+                        // Anything else should use discard.
+                        return
+                            Block(
+                                ExpressionStatement(
+                                    AssignmentExpression(
+                                        SyntaxKind.SimpleAssignmentExpression,
+                                        IdentifierName(
+                                            Identifier(
+                                                TriviaList(),
+                                                SyntaxKind.UnderscoreToken,
+                                                "_",
+                                                "_",
+                                                TriviaList() ) ),
+                                        returnExpression ) ),
+                                ReturnStatement() )
+                            .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                }
             }
 
             var returnExpressionKind = returnExpression.Kind();

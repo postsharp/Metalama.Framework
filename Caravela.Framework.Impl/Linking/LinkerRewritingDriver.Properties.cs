@@ -133,7 +133,9 @@ namespace Caravela.Framework.Impl.Linking
                                     SyntaxKind.GetAccessorDeclaration,
                                     getAccessorDeclaration.AttributeLists,
                                     getAccessorDeclaration.Modifiers,
-                                    this.GetLinkedBody( symbol.GetMethod, InliningContext.Create( this ) ) ) );
+                                    this.GetLinkedBody( 
+                                        symbol.GetMethod, 
+                                        InliningContext.Create( this, symbol.GetMethod ) ) ) );
                             break;
 
                         case ArrowExpressionClauseSyntax:
@@ -142,7 +144,9 @@ namespace Caravela.Framework.Impl.Linking
                                     SyntaxKind.GetAccessorDeclaration,
                                     List<AttributeListSyntax>(),
                                     TokenList(),
-                                    this.GetLinkedBody( symbol.GetMethod, InliningContext.Create( this ) ) ) );
+                                    this.GetLinkedBody( 
+                                        symbol.GetMethod, 
+                                        InliningContext.Create( this, symbol.GetMethod ) ) ) );
                             break;
                     }
                 }
@@ -156,7 +160,9 @@ namespace Caravela.Framework.Impl.Linking
                             SyntaxKind.SetAccessorDeclaration,
                             setDeclaration.AttributeLists,
                             setDeclaration.Modifiers,
-                            this.GetLinkedBody( symbol.SetMethod, InliningContext.Create( this ) ) ) );
+                            this.GetLinkedBody( 
+                                symbol.SetMethod, 
+                                InliningContext.Create( this, symbol.SetMethod ) ) ) );
                 }
 
                 return 

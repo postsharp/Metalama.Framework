@@ -128,7 +128,6 @@ class T
 
         Test(""Original End"");
         __aspect_return_2:
-            ;
         Test(""After1"");
         Test(""After2"");
     }

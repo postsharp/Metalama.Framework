@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var targetSymbol = (IMethodSymbol) context.ReferenceResolver.Resolve( referencedSymbol, aspectReference );
                         
             // If this is non-void method, we will discard all results.
-            var discardingContext = context.WithDiscard();
+            var discardingContext = context.WithDiscard( targetSymbol );
 
             // Get the final body (after inlinings) of the target.
             var inlinedTargetBody = discardingContext.GetLinkedBody( targetSymbol );

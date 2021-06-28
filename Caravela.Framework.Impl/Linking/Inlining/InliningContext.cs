@@ -31,16 +31,22 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 
         public bool DeclaresReturnVariable { get; }
 
-        private InliningContext( LinkerRewritingDriver rewritingDriver )
+        public IMethodSymbol TargetDeclaration { get; }
+
+        public IMethodSymbol CurrentDeclaration { get; }
+
+        private InliningContext( LinkerRewritingDriver rewritingDriver, IMethodSymbol targetDeclaration )
         {
             this._rewritingDriver = rewritingDriver;
             this.HasIndirectReturn = false;
             this.ReturnVariableName = null;
             this.ReturnLabelName = null;
             this._depth = 0;
+            this.TargetDeclaration = targetDeclaration;
+            this.CurrentDeclaration = targetDeclaration;
         }
 
-        private InliningContext( InliningContext parent, string? returnVariableName, bool declaresReturnVariable = false )
+        private InliningContext( InliningContext parent, IMethodSymbol currentDeclaration, string? returnVariableName, bool declaresReturnVariable = false )
         {
             this._rewritingDriver = parent._rewritingDriver;
             this.HasIndirectReturn = true;
@@ -48,6 +54,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             this._depth = parent._depth + 1;
             this.ReturnLabelName = $"__aspect_return_{this._depth}";
             this.DeclaresReturnVariable = declaresReturnVariable;
+            this.TargetDeclaration = parent.TargetDeclaration;
+            this.CurrentDeclaration = currentDeclaration;
         }
 
         public BlockSyntax GetLinkedBody( IMethodSymbol targetSymbol )
@@ -83,24 +91,24 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             }
         }
 
-        public static InliningContext Create( LinkerRewritingDriver rewritingDriver )
+        public static InliningContext Create( LinkerRewritingDriver rewritingDriver, IMethodSymbol targetDeclaration )
         {
-            return new InliningContext( rewritingDriver );
+            return new InliningContext( rewritingDriver, targetDeclaration );
         }
 
-        public InliningContext WithDeclaredReturnLocal()
+        public InliningContext WithDeclaredReturnLocal( IMethodSymbol currentDeclaration )
         {
-            return new InliningContext( this, $"__aspect_return_{this._depth}", true );
+            return new InliningContext( this, currentDeclaration, $"__aspect_return_{this._depth}", true );
         }
 
-        public InliningContext WithReturnLocal( string valueText )
+        public InliningContext WithReturnLocal( IMethodSymbol currentDeclaration, string valueText )
         {
-            return new InliningContext( this, valueText );
+            return new InliningContext( this, currentDeclaration, valueText );
         }
 
-        internal InliningContext WithDiscard()
+        internal InliningContext WithDiscard( IMethodSymbol currentDeclaration )
         {
-            return new InliningContext( this, null );
+            return new InliningContext( this, currentDeclaration, null );
         }
 
         public void UseLabel()

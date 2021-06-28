@@ -22,6 +22,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             Dictionary<ISymbol, MethodBodyAnalysisResult> methodBodyAnalysisResults = new();
             Dictionary<(ISymbol Symbol, AspectReferenceTargetKind TargetKind), List<AspectReferenceHandle>> aspectReferences = new();
+            var referenceResolver = new AspectReferenceResolver( input.IntroductionRegistry, input.OrderedAspectLayers );
 
             var layersId = input.OrderedAspectLayers.Select( x => x.AspectLayerId ).ToArray();
 
@@ -101,7 +102,7 @@ namespace Caravela.Framework.Impl.Linking
 
             var analysisRegistry = new LinkerAnalysisRegistry( input.IntroductionRegistry, methodBodyAnalysisResults, aspectReferences.ToDictionary( x => x.Key, x => (IReadOnlyList<AspectReferenceHandle>)x.Value) );
 
-            return new LinkerAnalysisStepOutput( input.Diagnostics, input.IntermediateCompilation, analysisRegistry, new AspectReferenceResolver( input.IntroductionRegistry, input.OrderedAspectLayers ) );
+            return new LinkerAnalysisStepOutput( input.Diagnostics, input.IntermediateCompilation, analysisRegistry, referenceResolver );
 
             void AnalyzeOverriddenBody( IMethodSymbol symbol )
             {
@@ -116,10 +117,10 @@ namespace Caravela.Framework.Impl.Linking
 
             void AnalyzeIntroducedBody( IMethodSymbol symbol )
             {
-                var syntax = symbol.GetPrimaryDeclaration();
+                var syntax = symbol.GetPrimaryDeclaration().AssertNotNull();
                 var returnStatementCounter = new ReturnStatementCountingWalker();
                 returnStatementCounter.Visit( syntax );
-                var aspectReferenceCollector = new AspectReferenceWalker( input.IntermediateCompilation.Compilation.GetSemanticModel( syntax.SyntaxTree ), symbol );                
+                var aspectReferenceCollector = new AspectReferenceWalker( referenceResolver, input.IntermediateCompilation.Compilation.GetSemanticModel( syntax.SyntaxTree ), symbol );                
                 aspectReferenceCollector.Visit( syntax );
 
                 methodBodyAnalysisResults[symbol] = new MethodBodyAnalysisResult(

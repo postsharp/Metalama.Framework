@@ -147,7 +147,6 @@ class T
             Assert.Equal( expectedCode.Trim(), transformedText );
         }
 
-        [Fact( Skip = "Auto properties not fully implemented in the linker." )]
         public void AutoProperty()
         {
             var code = @"

@@ -80,7 +80,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var targetSymbol = (IPropertySymbol)context.ReferenceResolver.Resolve( referencedSymbol, aspectReference );
 
             // Change the target local variable.
-            var contextWithLocal = context.WithReturnLocal( localVariable.Identifier.ValueText );
+            var contextWithLocal = context.WithReturnLocal( targetSymbol.GetMethod.AssertNotNull(), localVariable.Identifier.ValueText );
 
             // Get the final inlined body of the target property getter. 
             var inlinedTargetBody = contextWithLocal.GetLinkedBody( targetSymbol.GetMethod.AssertNotNull() );

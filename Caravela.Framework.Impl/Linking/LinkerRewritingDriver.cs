@@ -101,7 +101,27 @@ namespace Caravela.Framework.Impl.Linking
                 AddReturnNodeReplacements();
             }
 
-            return this.RewriteBody( bodyRootNode, symbol, replacements );
+            var rewrittenBody = this.RewriteBody( bodyRootNode, symbol, replacements );
+
+            // TODO: This is not a nice place to have this, but there are problems if we attempt to do this using the replacements.
+            //       The replacement block would already have different statements that would not match original instances.
+            //       We would need either to annotate child statements or provide special mechanism for block changes (which should be enough for now).
+            if ( inliningContext.HasIndirectReturn 
+                 && symbol.ReturnsVoid 
+                 && !SymbolEqualityComparer.Default.Equals( symbol, inliningContext.CurrentDeclaration ) )
+            {
+                // Add the implicit return for void methods.
+                inliningContext.UseLabel();
+                rewrittenBody =
+                    Block(
+                        rewrittenBody,
+                        GotoStatement(
+                            SyntaxKind.GotoStatement,
+                            IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ) ) )
+                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+            }
+
+            return rewrittenBody;
 
             void AddAspectReferenceReplacements()
             {
@@ -193,18 +213,6 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         throw new AssertionFailedException();
                     }
-                }
-
-                if ( symbol.ReturnsVoid )
-                {
-                    // Add the implicit return for void methods.
-                    replacements[bodyRootNode] =
-                        Block(
-                            (StatementSyntax) bodyRootNode,
-                            GotoStatement(
-                                SyntaxKind.GotoStatement,
-                                IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ) ) )
-                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
                 }
             }
         }
@@ -357,16 +365,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             if ( this._analysisRegistry.IsOverride( symbol ) )
             {
-                var previousOverride = (IMethodSymbol?) this._analysisRegistry.GetPreviousOverride( symbol );
-
-                if ( previousOverride != null )
-                {
-                    return previousOverride;
-                }
-                else
-                {
-                    return (IMethodSymbol) this._analysisRegistry.GetOverrideTarget( symbol ).AssertNotNull();
-                }
+                return symbol;
             }
             else if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
             {

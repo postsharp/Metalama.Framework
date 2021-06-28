@@ -83,7 +83,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var targetSymbol = (IMethodSymbol)context.ReferenceResolver.Resolve( referencedSymbol, aspectReference );
 
             // Change the target local variable.
-            var contextWithDiscard = context.WithDiscard();
+            var contextWithDiscard = context.WithDiscard( targetSymbol );
 
             // Get the final inlined body of the target method. 
             var inlinedTargetBody = contextWithDiscard.GetLinkedBody( targetSymbol );

@@ -101,7 +101,8 @@ namespace Caravela.Framework.Impl.Transformations
                     CreateInvocationTarget()
                     .WithAspectReferenceAnnotation(
                         this.Advice.AspectLayerId,
-                        AspectReferenceOrder.Default ),
+                        AspectReferenceOrder.Default,
+                        flags: AspectReferenceFlags.Inlineable ),
                     ArgumentList(
                         SeparatedList(
                             this.OverriddenDeclaration.Parameters.Select( p =>
