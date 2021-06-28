@@ -80,7 +80,7 @@ namespace $(RootNamespace)
 
     <Target Name="AcceptTestHtml">
         <ItemGroup>
-            <_AcceptTestOutput Include="obj\\html\**\*.cs.html" />
+            <_AcceptTestOutput Include="obj\\html\**\*.cs.html" Exclude="obj\\html\**\*.t.cs.html"  />
         </ItemGroup>
         <Copy
             SourceFiles="@(_AcceptTestOutput)"
