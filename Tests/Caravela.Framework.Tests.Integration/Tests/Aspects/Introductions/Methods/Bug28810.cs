@@ -50,14 +50,6 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
             int a;
             NaturallyCloneable b;
         }
-    
-        
-        [DeepClone]
-        class DerivedClass : BaseClass
-        {
-            int c;
-            NaturallyCloneable d;
-        }
-        
+
     }
 }

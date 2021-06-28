@@ -24,23 +24,5 @@ class Targets
     global::System.Object global::System.ICloneable.Clone()
     {
         return (object)this.Clone();
-    }    
-        
-    [DeepClone]
-    class DerivedClass : BaseClass
-    {
-        int c;
-        NaturallyCloneable d;
     }
-
-
-    public global::Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.Bug28810.Targets.DerivedClass Clone()
-    {
-        return null;
-    }
-
-    global::System.Object global::System.ICloneable.Clone()
-    {
-        return (object)this.Clone();
-    }        
 }
