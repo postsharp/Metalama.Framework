@@ -12,13 +12,13 @@ using MethodBase = System.Reflection.MethodBase;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdviceMethod : AdviceMember<IMethod>, IAdviceMethod
+    internal class AdvisedMethod : AdviceMember<IMethod>, IAdvisedMethod
     {
-        public AdviceMethod( IMethod underlying ) : base( underlying ) { }
+        public AdvisedMethod( IMethod underlying ) : base( underlying ) { }
 
         public IMethodList LocalFunctions => this.Underlying.LocalFunctions;
 
-        public dynamic Invoke( params dynamic[] args )
+        public dynamic Invoke( params dynamic?[] args )
         {
             if ( this.Invokers.Base != null )
             {
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         }
 
         [Memo]
-        public IAdviceParameterList Parameters => new AdviceParameterList( this.Underlying );
+        public IAdvisedParameterList Parameters => new AdvisedParameterList( this.Underlying );
 
         IParameterList IHasParameters.Parameters => this.Underlying.Parameters;
 

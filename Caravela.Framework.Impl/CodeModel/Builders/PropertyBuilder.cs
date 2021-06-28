@@ -72,6 +72,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override DeclarationKind DeclarationKind => throw new NotImplementedException();
 
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations { get; set; } = Array.Empty<IProperty>();
+        
+        public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
         public bool IsIndexer => this.Name == "Items";
 

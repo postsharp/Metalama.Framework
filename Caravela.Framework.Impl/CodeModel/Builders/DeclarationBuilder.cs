@@ -38,10 +38,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public abstract DeclarationKind DeclarationKind { get; }
 
-        public bool HasAspect<T>()
-            where T : IAspect
-            => throw new NotImplementedException();
-
         [Obsolete( "Not implemented." )]
         public IAnnotationList GetAnnotations<T>()
             where T : IAspect
@@ -59,7 +55,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         // TODO: How to implement this?
-        public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => nameof(DeclarationBuilder);
+        public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.GetType().Name;
 
         public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments )
         {

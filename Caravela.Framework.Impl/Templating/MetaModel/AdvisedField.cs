@@ -6,8 +6,8 @@ using Caravela.Framework.Code.Advised;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdviceField : AdviceFieldOrProperty<IField>, IAdviceField
+    internal class AdvisedField : AdvisedFieldOrProperty<IField>, IAdvisedField
     {
-        public AdviceField( IField underlying ) : base( underlying ) { }
+        public AdvisedField( IField underlying ) : base( underlying ) { }
     }
 }

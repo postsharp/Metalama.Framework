@@ -136,7 +136,7 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 if ( argumentsLength != parameters.Count )
                 {
-                    throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (declaration, parameters.Count) );
+                    throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (declaration, parameters.Count, argumentsLength) );
                 }
             }
         }

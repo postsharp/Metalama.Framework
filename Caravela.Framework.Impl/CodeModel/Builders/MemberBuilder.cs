@@ -12,5 +12,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         protected MemberBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice, declaringType, name ) { }
 
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
+
+        public override string ToString()
+            => this.DeclaringType + "." + this.Name;
+        
+        public abstract bool IsExplicitInterfaceImplementation { get; }
     }
 }

@@ -21,13 +21,19 @@ namespace Caravela.Framework.Impl.Pipeline
             new PipelineStepId( aspectLayer.AspectLayerId, -1 ),
             aspectLayer ) { }
 
-        public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState, CancellationToken cancellationToken )
+        public override CompilationModel Execute(
+            CompilationModel compilation,
+            PipelineStepsState pipelineStepsState,
+            CancellationToken cancellationToken )
         {
-            pipelineStepsState.AddAspectInstances(
-                this._aspectSources.SelectMany(
-                    s => s.GetAspectInstances( compilation, this.AspectLayer.AspectClass, pipelineStepsState, cancellationToken ) ) );
+            var aspectInstances = this._aspectSources.SelectMany(
+                    s => s.GetAspectInstances( compilation, this.AspectLayer.AspectClass, pipelineStepsState, cancellationToken ) )
+                .ToList();
 
-            return compilation;
+            pipelineStepsState.AddAspectInstances(
+                aspectInstances );
+
+            return compilation.WithAspectInstances( aspectInstances );
         }
 
         public void AddAspectSource( IAspectSource aspectSource ) => this._aspectSources.Add( aspectSource );

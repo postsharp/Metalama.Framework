@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal partial class IntroduceInterfaceAdvice
+    internal partial class ImplementInterfaceAdvice
     {
         private class IntroducedInterfaceSpecification
         {

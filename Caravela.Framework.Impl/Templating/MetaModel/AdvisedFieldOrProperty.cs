@@ -9,10 +9,10 @@ using System;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdviceFieldOrProperty<T> : AdviceMember<T>, IAdviceFieldOrProperty
+    internal class AdvisedFieldOrProperty<T> : AdviceMember<T>, IAdvisedFieldOrProperty
         where T : IFieldOrProperty
     {
-        public AdviceFieldOrProperty( T underlying ) : base( underlying ) { }
+        public AdvisedFieldOrProperty( T underlying ) : base( underlying ) { }
 
         public IType Type => this.Underlying.Type;
 

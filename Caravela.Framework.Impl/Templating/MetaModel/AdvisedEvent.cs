@@ -5,24 +5,27 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Code.Invokers;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdviceEvent : AdviceMember<IEvent>, IAdviceEvent
+    internal class AdvisedEvent : AdviceMember<IEvent>, IAdvisedEvent
     {
-        public AdviceEvent( IEvent underlying ) : base( underlying ) { }
+        public AdvisedEvent( IEvent underlying ) : base( underlying ) { }
 
-        public IType EventType => this.Underlying.EventType;
+        public INamedType EventType => this.Underlying.EventType;
 
-        [Memo]
-        public IAdviceMethod Adder => new AdviceMethod( this.Underlying.Adder );
-
-        [Memo]
-        public IAdviceMethod Remover => new AdviceMethod( this.Underlying.Remover );
+        public IMethod Signature => this.EventType.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
-        public IAdviceMethod? Raiser => this.Underlying.Raiser != null ? new AdviceMethod( this.Underlying.Raiser ) : null;
+        public IAdvisedMethod Adder => new AdvisedMethod( this.Underlying.Adder );
+
+        [Memo]
+        public IAdvisedMethod Remover => new AdvisedMethod( this.Underlying.Remover );
+
+        [Memo]
+        public IAdvisedMethod? Raiser => this.Underlying.Raiser != null ? new AdvisedMethod( this.Underlying.Raiser ) : null;
 
         public IInvokerFactory<IEventInvoker> Invokers => this.Underlying.Invokers;
 

@@ -8,16 +8,16 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    internal abstract class MemberList<TMember, TSource> : DeclarationList<TMember, TSource>, IMemberList<TMember>
+    internal abstract class MemberOrNamedTypeList<TMember, TSource> : DeclarationList<TMember, TSource>, IMemberList<TMember>
         where TMember : class, IMemberOrNamedType
         where TSource : IMemberRef<TMember>
     {
-        protected MemberList( IDeclaration? containingDeclaration, IEnumerable<TSource> sourceItems ) : base( containingDeclaration, sourceItems ) { }
+        protected MemberOrNamedTypeList( IDeclaration? containingDeclaration, IEnumerable<TSource> sourceItems ) : base( containingDeclaration, sourceItems ) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MemberList{TCodeElement, TSource}"/> class that represents an empty list.
+        /// Initializes a new instance of the <see cref="MemberOrNamedTypeList{TMember,TSource}"/> class that represents an empty list.
         /// </summary>
-        protected MemberList() { }
+        protected MemberOrNamedTypeList() { }
 
         public IEnumerable<TMember> OfName( string name )
         {

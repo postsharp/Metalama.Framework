@@ -38,8 +38,8 @@ namespace Caravela.Framework.Impl
         public static readonly DiagnosticDefinition<(string AspectType, string Exception)> ExceptionInWeaver =
             new( "CR0006", _category, "Exception occurred while executing the weaver of aspect '{0}': {1}", Error, "Exception in aspect weaver." );
 
-        public static readonly DiagnosticDefinition<(IDeclaration Member, int ArgumentsCount)> MemberRequiresNArguments =
-            new( "CR0012", _category, "Member '{0}' requires {1} arguments.", Error, "Member requires number of arguments." );
+        public static readonly DiagnosticDefinition<(IDeclaration Member, int RequiredArgumentsCount, int ActualArgumentsCount)> MemberRequiresNArguments =
+            new( "CR0012", _category, "Member '{0}' requires {1} arguments but received {2}.", Error, "Member requires number of arguments." );
 
         public static readonly DiagnosticDefinition<(IDeclaration Member, int ArgumentsCount)> MemberRequiresAtLeastNArguments =
             new( "CR0013", _category, "Member '{0}' requires at least {1} arguments.", Error, "Member requires more arguments." );

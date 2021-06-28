@@ -16,6 +16,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         ISymbol IDeclarationRef<IMember>.GetSymbol( Compilation compilation ) => throw new NotImplementedException();
 
+        public bool IsExplicitInterfaceImplementation => ((MemberBuilder) this.Builder).IsExplicitInterfaceImplementation;
+
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
     }
 }

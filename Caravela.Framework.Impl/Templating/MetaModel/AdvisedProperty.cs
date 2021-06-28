@@ -10,14 +10,14 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdviceProperty : AdviceFieldOrProperty<IProperty>, IAdviceProperty
+    internal class AdvisedProperty : AdvisedFieldOrProperty<IProperty>, IAdvisedProperty
     {
-        public AdviceProperty( IProperty underlying ) : base( underlying ) { }
+        public AdvisedProperty( IProperty underlying ) : base( underlying ) { }
 
         public RefKind RefKind => this.Underlying.RefKind;
 
         [Memo]
-        public IAdviceParameterList Parameters => new AdviceParameterList( this.Underlying );
+        public IAdvisedParameterList Parameters => new AdvisedParameterList( this.Underlying );
 
         IParameterList IHasParameters.Parameters => this.Underlying.Parameters;
 

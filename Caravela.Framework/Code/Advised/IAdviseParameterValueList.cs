@@ -9,7 +9,7 @@ namespace Caravela.Framework.Code.Advised
     /// Represents the list of method or property parameter values.
     /// </summary>
     [CompileTimeOnly]
-    public interface IAdviceParameterValueList
+    public interface IAdviseParameterValueList
     {
         /// <summary>
         /// Generates syntax that represents the current parameter list as an <c>object[]</c>.

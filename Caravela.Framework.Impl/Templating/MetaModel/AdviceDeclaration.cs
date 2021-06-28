@@ -34,14 +34,5 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public DeclarationKind DeclarationKind => this.Underlying.DeclarationKind;
 
-        [Obsolete( "Not implemented." )]
-        public bool HasAspect<T1>()
-            where T1 : IAspect
-            => this.Underlying.HasAspect<T1>();
-
-        [Obsolete( "Not implemented." )]
-        public IAnnotationList GetAnnotations<T1>()
-            where T1 : IAspect
-            => this.Underlying.GetAnnotations<T1>();
     }
 }

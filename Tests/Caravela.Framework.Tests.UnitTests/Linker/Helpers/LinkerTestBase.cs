@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.AspectOrdering;
@@ -73,7 +74,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
             FinalizeTransformationFakes( rewriter, inputCompilation, initialCompilationModel );
 
-            var inputCompilationModel = CompilationModel.CreateRevisedInstance( initialCompilationModel, rewriter.ObservableTransformations );
+            var inputCompilationModel = initialCompilationModel.WithTransformations( rewriter.ObservableTransformations );
 
             var linkerInput = new AspectLinkerInput(
                 PartialCompilation.CreateComplete( inputCompilation ),

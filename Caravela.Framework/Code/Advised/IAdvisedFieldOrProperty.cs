@@ -7,5 +7,5 @@ namespace Caravela.Framework.Code.Advised
     /// Represents the field or property being overwritten or introduced. This interface introduces
     /// the <see cref="IHasRuntimeValue.Value"/> property, which allows you to read or write the field or property.
     /// </summary>
-    public interface IAdviceFieldOrProperty : IFieldOrProperty, IHasRuntimeValue { }
+    public interface IAdvisedFieldOrProperty : IFieldOrProperty, IHasRuntimeValue { }
 }

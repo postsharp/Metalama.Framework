@@ -78,8 +78,8 @@ namespace Caravela.Framework.Impl.Pipeline
                 cancellationToken.ThrowIfCancellationRequested();
 
                 this._currentStep = enumerator.Current.Value;
-                var compilationWithAspectLayerId = this.Compilation.GetCompilationModel().WithAspectLayerId( this._currentStep.AspectLayer.AspectLayerId );
-                this.Compilation = this._currentStep!.Execute( compilationWithAspectLayerId, this, cancellationToken );
+                var compilationForAspectLayer = this.Compilation.GetCompilationModel().WithAspectLayer( this._currentStep.AspectLayer.AspectLayerId );
+                this.Compilation = this._currentStep!.Execute( compilationForAspectLayer, this, cancellationToken );
             }
         }
 

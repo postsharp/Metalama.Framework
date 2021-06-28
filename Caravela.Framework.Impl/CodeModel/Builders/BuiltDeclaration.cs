@@ -48,10 +48,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 
-        public bool HasAspect<T>()
-            where T : IAspect
-            => throw new NotImplementedException();
-
         [Obsolete( "Not implemented." )]
         public IAnnotationList GetAnnotations<T>()
             where T : IAspect
@@ -67,5 +63,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public DeclarationRef<IDeclaration> ToRef() => DeclarationRef.FromBuilder( this.Builder );
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
+
+        public override string ToString() => this.Builder.ToString();
     }
 }

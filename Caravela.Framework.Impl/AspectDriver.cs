@@ -38,22 +38,22 @@ namespace Caravela.Framework.Impl
                  select (attribute, member)).ToList();
         }
 
-        internal AspectInstanceResult ExecuteAspect( AspectInstance aspectInstance, CancellationToken cancellationToken )
+        internal AspectInstanceResult ExecuteAspect( AspectInstance aspectInstance, CompilationModel compilationModelRevision, CancellationToken cancellationToken )
         {
             return aspectInstance.TargetDeclaration switch
             {
-                ICompilation compilation => this.EvaluateAspect( compilation, aspectInstance, cancellationToken ),
-                INamedType type => this.EvaluateAspect( type, aspectInstance, cancellationToken ),
-                IMethod method => this.EvaluateAspect( method, aspectInstance, cancellationToken ),
-                IField field => this.EvaluateAspect( field, aspectInstance, cancellationToken ),
-                IProperty property => this.EvaluateAspect( property, aspectInstance, cancellationToken ),
-                IConstructor constructor => this.EvaluateAspect( constructor, aspectInstance, cancellationToken ),
-                IEvent @event => this.EvaluateAspect( @event, aspectInstance, cancellationToken ),
+                ICompilation compilation => this.EvaluateAspect( compilation, aspectInstance, compilationModelRevision, cancellationToken ),
+                INamedType type => this.EvaluateAspect( type, aspectInstance, compilationModelRevision, cancellationToken ),
+                IMethod method => this.EvaluateAspect( method, aspectInstance, compilationModelRevision, cancellationToken ),
+                IField field => this.EvaluateAspect( field, aspectInstance, compilationModelRevision, cancellationToken ),
+                IProperty property => this.EvaluateAspect( property, aspectInstance, compilationModelRevision, cancellationToken ),
+                IConstructor constructor => this.EvaluateAspect( constructor, aspectInstance, compilationModelRevision,  cancellationToken ),
+                IEvent @event => this.EvaluateAspect( @event, aspectInstance, compilationModelRevision, cancellationToken ),
                 _ => throw new NotImplementedException()
             };
         }
 
-        private AspectInstanceResult EvaluateAspect<T>( T targetDeclaration, AspectInstance aspectInstance, CancellationToken cancellationToken )
+        private AspectInstanceResult EvaluateAspect<T>( T targetDeclaration, AspectInstance aspectInstance,  CompilationModel compilationModelRevision, CancellationToken cancellationToken )
             where T : class, IDeclaration
         {
             static AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
@@ -64,6 +64,9 @@ namespace Caravela.Framework.Impl
                     ImmutableArray<IAspectSource>.Empty );
 
             cancellationToken.ThrowIfCancellationRequested();
+
+            // Map the target declaration to the correct revision of the compilation model.
+            targetDeclaration = compilationModelRevision.Factory.GetDeclaration( targetDeclaration );
 
             if ( aspectInstance.Aspect is not IAspect<T> aspectOfT )
             {
@@ -90,13 +93,11 @@ namespace Caravela.Framework.Impl
                         .WhereNotNull()
                         .ToArray();
 
-                var compilationModel = (CompilationModel) targetDeclaration.Compilation;
-
                 var adviceFactory = new AdviceFactory(
-                    compilationModel,
+                    compilationModelRevision,
                     diagnosticSink,
                     declarativeAdvices,
-                    compilationModel.Factory.GetNamedType( this.AspectType ),
+                    compilationModelRevision.Factory.GetNamedType( this.AspectType ),
                     aspectInstance );
 
                 var aspectBuilder = new AspectBuilder<T>( targetDeclaration, diagnosticSink, declarativeAdvices, adviceFactory, cancellationToken );

@@ -8,17 +8,17 @@ namespace Caravela.Framework.Code.Advised
 {
     /// <summary>
     /// Represents the list of parameters of the method being overridden by the advice.
-    /// The  <see cref="IAdviceParameter"/> interface augments <see cref="IParameter"/>
+    /// The  <see cref="IAdvisedParameter"/> interface augments <see cref="IParameter"/>
     /// with a <see cref="IHasRuntimeValue.Value"/> property, which allows to get or set the run-time value.
     /// </summary>
-    public interface IAdviceParameterList : IReadOnlyList<IAdviceParameter>
+    public interface IAdvisedParameterList : IReadOnlyList<IAdvisedParameter>
     {
-        IAdviceParameter this[ string name ] { get; }
+        IAdvisedParameter this[ string name ] { get; }
 
-        IEnumerable<IAdviceParameter> OfType( IType type );
+        IEnumerable<IAdvisedParameter> OfType( IType type );
 
-        IEnumerable<IAdviceParameter> OfType( Type type );
+        IEnumerable<IAdvisedParameter> OfType( Type type );
 
-        IAdviceParameterValueList Values { get; }
+        IAdviseParameterValueList Values { get; }
     }
 }

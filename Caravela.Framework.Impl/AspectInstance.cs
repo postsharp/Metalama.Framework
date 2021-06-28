@@ -35,5 +35,8 @@ namespace Caravela.Framework.Impl
             this.TargetDeclaration = declaration;
             this.AspectClass = aspectClass;
         }
+
+        public override string ToString() => this.AspectClass.DisplayName +  "@" + this.TargetDeclaration;
+        
     }
 }

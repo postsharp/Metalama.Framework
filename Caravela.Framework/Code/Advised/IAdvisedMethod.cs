@@ -10,17 +10,17 @@ namespace Caravela.Framework.Code.Advised
     /// the <see cref="Invoke"/> method, which allows you to invoke the method.
     /// It also overrides the <see cref="Parameters"/> property to expose their <see cref="IHasRuntimeValue.Value"/> property.
     /// </summary>
-    public interface IAdviceMethod : IMethod
+    public interface IAdvisedMethod : IMethod
     {
         /// <summary>
         /// Invokes the method.
         /// </summary>
         [return: RunTimeOnly]
-        dynamic Invoke( params dynamic[] args );
+        dynamic Invoke( params dynamic?[] args );
 
         /// <summary>
         /// Gets the list of method parameters.
         /// </summary>
-        new IAdviceParameterList Parameters { get; }
+        new IAdvisedParameterList Parameters { get; }
     }
 }

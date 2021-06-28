@@ -21,11 +21,14 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public void AddAspectInstance( AspectInstance aspectInstance ) => this._aspectInstances.Add( aspectInstance );
 
-        public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState, CancellationToken cancellationToken )
+        public override CompilationModel Execute(
+            CompilationModel compilation,
+            PipelineStepsState pipelineStepsState,
+            CancellationToken cancellationToken )
         {
             var aspectDriver = (AspectDriver) this.AspectLayer.AspectClass.AspectDriver;
 
-            var aspectInstanceResults = this._aspectInstances.Select( ai => aspectDriver.ExecuteAspect( ai, cancellationToken ) ).ToImmutableArray();
+            var aspectInstanceResults = this._aspectInstances.Select( ai => aspectDriver.ExecuteAspect( ai, compilation,  cancellationToken ) ).ToImmutableArray();
             var success = aspectInstanceResults.All( ar => ar.Success );
             var reportedDiagnostics = aspectInstanceResults.SelectMany( air => air.Diagnostics.ReportedDiagnostics );
             var diagnosticSuppressions = aspectInstanceResults.SelectMany( air => air.Diagnostics.DiagnosticSuppressions );

@@ -3,12 +3,14 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
@@ -26,7 +28,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.EventBuilder;
 
-        public IType EventType => this.EventBuilder.EventType;
+        public INamedType EventType => this.EventBuilder.EventType;
+
+        public IMethod Signature => this.EventType.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
         public IMethod Adder => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.Adder );

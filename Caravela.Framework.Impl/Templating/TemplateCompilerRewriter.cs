@@ -300,12 +300,7 @@ namespace Caravela.Framework.Impl.Templating
                 // We change all dynamic into var in the template.
                 return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
             }
-            else if ( this._templateMemberClassifier.IsImplicitValueParameter( node ) )
-            {
-                // In property setter and event accessor templates, the 'value' token has a special meaning. We keep the original name.
-                return base.TransformIdentifierName( node );
-            }
-
+            
             // If the identifier is declared withing the template, the expanded name is given by the TemplateExpansionContext and
             // stored in a template variable named __foo, where foo is the variable name in the template. This variable is defined
             // and initialized in the VisitVariableDeclarator.
@@ -624,16 +619,23 @@ namespace Caravela.Framework.Impl.Templating
 
                 SyntaxNode? LocalTransformArgument( ArgumentSyntax a )
                 {
+                  
                     if ( this._templateMemberClassifier.IsDynamicParameter( a ) )
                     {
-                        if ( a.Expression.GetScopeFromAnnotation() != TemplatingScope.RunTimeOnly )
+                        var expressionScope = a.Expression.GetScopeFromAnnotation().GetValueOrDefault();
+
+                        switch ( expressionScope )
                         {
-                            return Argument( this.CreateRunTimeExpression( a.Expression ) );
+                            case TemplatingScope.Dynamic:
+                            case TemplatingScope.RunTimeOnly:
+                                return Argument( (ExpressionSyntax) this.Visit( a.Expression )! );
+
+                            default:
+                                return Argument( this.CreateRunTimeExpression( a.Expression ) );
+
+                                
                         }
-                        else
-                        {
-                            return Argument( (ExpressionSyntax) this.Visit( a.Expression )! );
-                        }
+                        
                     }
                     else
                     {
@@ -1256,6 +1258,8 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
         {
+            InvocationExpressionSyntax invocationExpression;
+
             if ( node.Expression != null && this._templateMemberClassifier.IsProceed( node.Expression ) )
             {
                 var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression );
@@ -1266,7 +1270,7 @@ namespace Caravela.Framework.Impl.Templating
                     throw new AssertionFailedException( "The type of the return expression was not found." );
                 }
 
-                return InvocationExpression(
+                invocationExpression = InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         ParenthesizedExpression( CastFromDynamic( this.MetaSyntaxFactory.Type( typeof(IProceedImpl) ), node.Expression ) ),
@@ -1275,10 +1279,12 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                return InvocationExpression(
+                invocationExpression = InvocationExpression(
                         this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.TemplateReturnStatement) ) )
                     .AddArgumentListArguments( Argument( this.Transform( node.Expression ) ) );
             }
+
+            return this.AddCallToSimplifierAnnotations( invocationExpression );
         }
 
         public override SyntaxNode VisitIdentifierName( IdentifierNameSyntax node )

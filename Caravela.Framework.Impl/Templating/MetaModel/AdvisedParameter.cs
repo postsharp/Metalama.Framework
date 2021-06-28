@@ -9,9 +9,9 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdviceParameter : AdviceDeclaration<IParameter>, IAdviceParameter
+    internal class AdvisedParameter : AdviceDeclaration<IParameter>, IAdvisedParameter
     {
-        public AdviceParameter( IParameter p ) : base( p ) { }
+        public AdvisedParameter( IParameter p ) : base( p ) { }
 
         public RefKind RefKind => this.Underlying.RefKind;
 

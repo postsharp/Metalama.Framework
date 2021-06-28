@@ -136,7 +136,8 @@ namespace Caravela.Framework.Impl.Templating
                 SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     expression.Syntax,
-                    SyntaxFactory.IdentifierName( member ) ) );
+                    SyntaxFactory.IdentifierName( member ) )
+                    .WithAdditionalAnnotations( Simplifier.Annotation ) );
         }
 
         public static SyntaxToken GetUniqueIdentifier( string hint ) => SyntaxFactory.Identifier( ExpansionContext.LexicalScope.GetUniqueIdentifier( hint ) );

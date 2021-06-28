@@ -130,6 +130,17 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return GetMoreSpecificScope( this.GetSymbolScope( containingType ) );
             }
+            else if ( symbol is IParameterSymbol parameter )
+            {
+                if ( parameter.ContainingSymbol.Equals( this._currentTemplateMember ) || 
+                     parameter.ContainingSymbol.Equals( this._currentTemplateMember?.ContainingSymbol ) )
+                {
+                    // In the future, we may have parameters on the template parameters changing their meaning. However, now, all template
+                    // parameters map to run-time parameters of the same name.
+
+                    return TemplatingScope.RunTimeOnly;
+                }
+            }
 
             // The TemplateContext.runTime method must be processed separately. It is a compile-time-only method whose
             // return is run-time-only.
@@ -1821,5 +1832,24 @@ namespace Caravela.Framework.Impl.Templating
 
             // typeof(.) is always compile-time.
             => node.AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
+
+        public override SyntaxNode? VisitArrayRankSpecifier( ArrayRankSpecifierSyntax node )
+        {
+            var transformedSizes = node.Sizes.Select( this.Visit );
+            var sizeScope = this.GetExpressionScope( transformedSizes, node );
+
+            var arrayRankScope = sizeScope switch
+            {
+                TemplatingScope.RunTimeOnly => TemplatingScope.RunTimeOnly,
+                TemplatingScope.CompileTimeOnly => TemplatingScope.Both,
+                TemplatingScope.Both => TemplatingScope.Both,
+                _ => throw new AssertionFailedException( $"Unexpected scope: {sizeScope}." )
+            };
+
+            var transformedRank =
+                node.WithSizes( SeparatedList( transformedSizes ) ).AddScopeAnnotation( arrayRankScope );
+
+            return transformedRank;
+        }
     }
 }

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Diagnostics;
@@ -41,15 +40,6 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select( a => new AttributeRef( a, DeclarationRef.FromSymbol<IDeclaration>( this.Symbol ) ) ) );
 
         public abstract DeclarationKind DeclarationKind { get; }
-
-        public bool HasAspect<T>()
-            where T : IAspect
-            => throw new NotImplementedException();
-
-        [Obsolete( "Not implemented." )]
-        public IAnnotationList GetAnnotations<T>()
-            where T : IAspect
-            => throw new NotImplementedException();
 
         public abstract ISymbol Symbol { get; }
 

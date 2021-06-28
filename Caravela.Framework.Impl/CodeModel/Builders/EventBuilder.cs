@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Invokers;
@@ -35,10 +36,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             this._isEventField = isEventField;
             this.LinkerOptions = linkerOptions;
-            this.EventType = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(EventHandler) );
+            this.EventType = (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(EventHandler) );
         }
 
-        public IType EventType { get; set; }
+        public INamedType EventType { get; set; }
+        
+        public IMethod Signature => this.EventType.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
         public IMethodBuilder Adder => new AccessorBuilder( this, MethodKind.EventAdd );
@@ -57,7 +60,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 
-        IType IEvent.EventType => this.EventType;
+        INamedType IEvent.EventType => this.EventType;
 
         IMethod IEvent.Adder => this.Adder;
 
@@ -152,5 +155,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
         }
+
+        public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
     }
 }

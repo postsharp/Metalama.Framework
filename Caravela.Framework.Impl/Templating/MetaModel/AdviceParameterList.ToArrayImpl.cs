@@ -11,13 +11,13 @@ using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal partial class AdviceParameterList
+    internal partial class AdvisedParameterList
     {
         private class ToArrayImpl : IDynamicExpression
         {
-            private readonly AdviceParameterList _parent;
+            private readonly AdvisedParameterList _parent;
 
-            public ToArrayImpl( AdviceParameterList parent )
+            public ToArrayImpl( AdvisedParameterList parent )
             {
                 this._parent = parent;
             }

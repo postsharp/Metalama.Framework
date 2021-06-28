@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.ReflectionMocks;
@@ -27,7 +28,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public IInvokerFactory<IEventInvoker> Invokers => new InvokerFactory<IEventInvoker>( order => new EventInvoker( this, order ) );
 
         [Memo]
-        public IType EventType => this.Compilation.Factory.GetIType( this._symbol.Type );
+        public INamedType EventType => (INamedType) this.Compilation.Factory.GetIType( this._symbol.Type );
+
+        public IMethod Signature => this.EventType.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
         public IMethod Adder => this.Compilation.Factory.GetMethod( this._symbol.AddMethod! );
@@ -49,6 +52,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public EventInfo ToEventInfo() => new CompileTimeEventInfo( this );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
+
+        public override bool IsExplicitInterfaceImplementation => !this._symbol.ExplicitInterfaceImplementations.IsEmpty;
 
         public override bool IsAsync => false;
 

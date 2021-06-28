@@ -26,7 +26,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples
 
             if (!builder.TargetDeclaration.ImplementedInterfaces.Any(i => i.Is(typeof(IDirty))))
             {
-                builder.AdviceFactory.IntroduceInterface(builder.TargetDeclaration, typeof(IDirty));
+                builder.AdviceFactory.ImplementInterface(builder.TargetDeclaration, typeof(IDirty));
             }
             else
             {

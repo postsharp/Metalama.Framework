@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Advices
             // TODO: Checks.
 
             this.MemberBuilder.EventType =
-                (this.TemplateMember?.EventType ?? this._addTemplateMethod?.Parameters.FirstOrDefault().AssertNotNull().ParameterType).AssertNotNull();
+                (this.TemplateMember?.EventType ?? (INamedType?) this._addTemplateMethod?.Parameters.FirstOrDefault().AssertNotNull().ParameterType).AssertNotNull();
 
             this.MemberBuilder.Accessibility = (this.TemplateMember?.Accessibility ?? this._addTemplateMethod?.Accessibility).AssertNotNull();
         }

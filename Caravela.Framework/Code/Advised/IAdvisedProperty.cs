@@ -8,11 +8,11 @@ namespace Caravela.Framework.Code.Advised
     /// the <see cref="IHasRuntimeValue.Value"/> property, which allows you to read or write the property.
     /// It also overrides the <see cref="Parameters"/> property to expose their <see cref="IHasRuntimeValue.Value"/> property.
     /// </summary>
-    public interface IAdviceProperty : IProperty, IAdviceFieldOrProperty
+    public interface IAdvisedProperty : IProperty, IAdvisedFieldOrProperty
     {
         /// <summary>
         /// Gets the list of indexer parameters.
         /// </summary>
-        new IAdviceParameterList Parameters { get; }
+        new IAdvisedParameterList Parameters { get; }
     }
 }

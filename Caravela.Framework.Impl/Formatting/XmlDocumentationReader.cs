@@ -46,12 +46,12 @@ namespace Caravela.Framework.Impl.Formatting
         {
             switch ( symbol )
             {
-                case IMethodSymbol { IsOverride: true } methodSymbol:
-                    return this.GetFormattedDocumentation( methodSymbol.OverriddenMethod!, compilation, "Overriding the " );
+                case IMethodSymbol { IsOverride: true, OverriddenMethod: { } overriddenMethod }:
+                    return this.GetFormattedDocumentation( overriddenMethod, compilation, "Overrides the " );
                 
                 case IMethodSymbol { ExplicitInterfaceImplementations: { Length: > 0 } } methodSymbol:
                     // TODO: Implicit implementations are not trivial.
-                    return this.GetFormattedDocumentation( methodSymbol.ExplicitInterfaceImplementations.First(), compilation, "Implementing the " );
+                    return this.GetFormattedDocumentation( methodSymbol.ExplicitInterfaceImplementations.First(), compilation, "Implements the " );
                     
                 case IMethodSymbol methodSymbol:
                     symbol = methodSymbol.OriginalDefinition;

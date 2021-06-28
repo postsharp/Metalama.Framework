@@ -31,5 +31,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 return (this.AspectLayerId.GetHashCode() * 397) ^ this.Depth;
             }
         }
+
+        public override string ToString() => this.AspectLayerId + ":" + this.Depth;
     }
 }

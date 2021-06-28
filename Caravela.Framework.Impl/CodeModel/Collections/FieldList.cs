@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    internal class FieldList : MemberList<IField, MemberRef<IField>>, IFieldList
+    internal class FieldList : MemberOrNamedTypeList<IField, MemberRef<IField>>, IFieldList
     {
         public FieldList( INamedType containingDeclaration, IEnumerable<MemberRef<IField>> sourceItems ) : base( containingDeclaration, sourceItems ) { }
     }
