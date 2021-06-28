@@ -1879,5 +1879,17 @@ namespace Caravela.Framework.Impl.Templating
 
             return transformedRank;
         }
+
+        public override SyntaxNode? VisitThisExpression( ThisExpressionSyntax node )
+        {
+            if ( node.Parent is MemberAccessExpressionSyntax )
+            {
+                return base.VisitThisExpression( node );
+            }
+            else
+            {
+                return node.AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
+            }
+        }
     }
 }

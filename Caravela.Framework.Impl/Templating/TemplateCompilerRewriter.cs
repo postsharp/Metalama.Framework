@@ -402,8 +402,6 @@ namespace Caravela.Framework.Impl.Templating
                             Argument( this.Transform( true ) ) );
 
                 case SyntaxKind.DefaultExpression:
-                    // case SyntaxKind.NullLiteralExpression:
-                    // case SyntaxKind.DefaultLiteralExpression:
                     // Don't transform default or null.
                     // When we do that, we can try to cast a dynamic 'default' or 'null' into a SyntaxFactory.
                     return expression;
@@ -422,6 +420,12 @@ namespace Caravela.Framework.Impl.Templating
 
                 case SyntaxKind.SimpleLambdaExpression:
                     break;
+                
+                case SyntaxKind.ThisExpression:
+                    // Cannot use 'this' in a context that expects a run-time expression.
+                    this.Report( TemplatingDiagnosticDescriptors.CannotUseThisInRunTimeContext.CreateDiagnostic( expression.GetLocation() ) );
+
+                    return expression;
             }
 
             var type = this._syntaxTreeAnnotationMap.GetExpressionType( expression )!;
