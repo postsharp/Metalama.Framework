@@ -22,12 +22,12 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
 
 
         [Template]
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         [Template]
         protected virtual void OnPropertyChanged( string propertyName )
         {
-            var @event = (IEvent) meta.Tags["event"];
+            var @event = (IEvent) meta.Tags["event"]!;
             @event.Invokers.Final.Raise(meta.This, meta.This, new PropertyChangedEventArgs(propertyName));
         }
     }

@@ -5,6 +5,8 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 
+#pragma warning disable CS0169, CS8618
+
 namespace Caravela.Framework.Tests.Integration.Tests.Templating.Syntax.Array.RunTimeArrayOfCompileTimeSize
 {
     class Aspect

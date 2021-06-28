@@ -7,7 +7,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Templating.Syntax.Misc.Comp
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
 
             Console.WriteLine(CompileTimeMethod( this ));
@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Templating.Syntax.Misc.Comp
             return 0;
         }
 
-        static string CompileTimeMethod( Aspect a ) => a.ToString();
+        static string CompileTimeMethod( Aspect a ) => a.ToString()!;
 
     }
 

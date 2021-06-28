@@ -29,7 +29,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
             throw new System.NotImplementedException();
         }
 
-        public void BuildAspect( IAspectBuilder<IMethod> builder )
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
             
         }

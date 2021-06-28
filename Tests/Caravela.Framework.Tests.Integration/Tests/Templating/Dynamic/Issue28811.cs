@@ -17,11 +17,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Templating.Dynamic.Issue288
             
             var field = meta.NamedType.FieldsAndProperties.Single();
             
-            dynamic clone = null;
-            dynamic clonedValue = null;
-            field.Invokers.Base.SetValue(clone, clonedValue);
+            dynamic? clone = null;
+            dynamic? clonedValue = null;
+            field.Invokers.Base!.SetValue(clone, clonedValue);
             
-            field.Invokers.Base.SetValue(clone, field.Invokers.Base.GetValue(meta.This));
+            field.Invokers.Base!.SetValue(clone, field.Invokers.Base.GetValue(meta.This));
         
             
             return default;

@@ -7,7 +7,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Templating.LocalVariables.C
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             int[] compileTime = meta.CompileTime( new int[10] );
 

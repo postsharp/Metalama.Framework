@@ -3,6 +3,8 @@ using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
 
+#pragma warning disable CS0169, CS8618
+
 namespace Caravela.Framework.Tests.Integration.Tests.Templating.Dynamic.Cast
 {
     [CompileTime]
@@ -12,8 +14,8 @@ namespace Caravela.Framework.Tests.Integration.Tests.Templating.Dynamic.Cast
         dynamic? Template()
         {
             var field = meta.NamedType.Fields.Single();
-            object clone = null;
-            field.Invokers.Base.SetValue(
+            object? clone = null;
+            field.Invokers.Base!.SetValue(
                 clone, 
                 meta.Cast(field.Type, ((ICloneable)field.Invokers.Base.GetValue(meta.This)).Clone()));
             

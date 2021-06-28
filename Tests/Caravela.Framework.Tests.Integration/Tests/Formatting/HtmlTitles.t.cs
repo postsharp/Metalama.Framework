@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
         public override dynamic? OverrideMethod() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
 
 
-        public void BuildAspect( IAspectBuilder<IMethod> builder )
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
             
         }
