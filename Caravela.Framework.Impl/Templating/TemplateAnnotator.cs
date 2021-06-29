@@ -163,6 +163,7 @@ namespace Caravela.Framework.Impl.Templating
                 switch ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) )
                 {
                     case TemplateMemberKind.Introduction:
+                    case TemplateMemberKind.InterfaceMember:
                         return TemplatingScope.RunTimeOnly;
 
                     default:
@@ -491,10 +492,10 @@ namespace Caravela.Framework.Impl.Templating
                     // Template code cannot be referenced in a template until this is implemented.
                     if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) == TemplateMemberKind.Template )
                     {
-                        this.ReportDiagnostic(
-                            TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate,
-                            node,
-                            (symbol, this._currentTemplateMember!) );
+                            this.ReportDiagnostic(
+                                TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate,
+                                node,
+                                (symbol, this._currentTemplateMember!) );
                     }
                 }
 
@@ -863,14 +864,10 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public override SyntaxNode? VisitBreakStatement( BreakStatementSyntax node )
-        {
-            return node.AddScopeAnnotation( this._currentScopeContext.CurrentBreakOrContinueScope );
-        }
+            => node.AddScopeAnnotation( this._currentScopeContext.CurrentBreakOrContinueScope );
 
         public override SyntaxNode? VisitContinueStatement( ContinueStatementSyntax node )
-        {
-            return node.AddScopeAnnotation( this._currentScopeContext.CurrentBreakOrContinueScope );
-        }
+            => node.AddScopeAnnotation( this._currentScopeContext.CurrentBreakOrContinueScope );
 
         public override SyntaxNode? VisitForEachStatement( ForEachStatementSyntax node )
         {
@@ -1135,10 +1132,10 @@ namespace Caravela.Framework.Impl.Templating
         #endregion
 
         public override SyntaxNode? VisitAttribute( AttributeSyntax node )
-        {
-            // Don't process attributes.
-            return node;
-        }
+            =>
+
+                // Don't process attributes.
+                node;
 
         private T? VisitMemberDeclaration<T>( T node, Func<T, SyntaxNode?> callBase )
             where T : SyntaxNode
@@ -1391,9 +1388,7 @@ namespace Caravela.Framework.Impl.Templating
         #region Unsupported Features
 
         private void ReportUnsupportedLanguageFeature( SyntaxNodeOrToken nodeForDiagnostic, string featureName )
-        {
-            this.ReportDiagnostic( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, nodeForDiagnostic, featureName );
-        }
+            => this.ReportDiagnostic( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, nodeForDiagnostic, featureName );
 
         public override SyntaxNode? VisitDoStatement( DoStatementSyntax node )
         {
@@ -1615,9 +1610,7 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxNode transformedPattern,
             SyntaxNode? transformedWhen,
             SyntaxNode? transformedExpression = null )
-        {
-            return this.GetExpressionScope( new[] { transformedPattern, transformedWhen, transformedExpression } );
-        }
+            => this.GetExpressionScope( new[] { transformedPattern, transformedWhen, transformedExpression } );
 
         public override SyntaxNode? VisitCasePatternSwitchLabel( CasePatternSwitchLabelSyntax node )
         {

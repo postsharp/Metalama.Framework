@@ -10,7 +10,7 @@ namespace Caravela.Framework.Aspects
     /// <see cref="IAdviceFactory.ImplementInterface(Caravela.Framework.Code.INamedType,Caravela.Framework.Code.INamedType,Caravela.Framework.Aspects.OverrideStrategy,System.Collections.Generic.Dictionary{string,object?}?)"/>.
     /// </summary>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
-    public sealed class InterfaceMemberAttribute : CompileTimeOnlyAttribute
+    public sealed class InterfaceMemberAttribute : TemplateAttribute
     {
         /// <summary>
         /// Gets or sets a value indicating whether the interface member should be introduced explicitly.

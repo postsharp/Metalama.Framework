@@ -86,7 +86,7 @@ namespace Caravela.Framework.Aspects
             string? setTemplate = null,
             Dictionary<string, object?>? tags = null );
 
-        [Obsolete( "Not implemented." )]
+        [Obsolete("Not implemented.")]
         IFieldBuilder IntroduceField(
             INamedType targetType,
             IntroductionScope scope = IntroductionScope.Default,
