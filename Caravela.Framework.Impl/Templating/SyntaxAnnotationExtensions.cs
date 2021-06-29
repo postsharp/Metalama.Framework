@@ -5,6 +5,7 @@ using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -134,6 +135,19 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             return node.WithoutAnnotations( _scopeAnnotationKind ).AddScopeAnnotation( scope );
+        }
+
+        [return: NotNullIfNotNull( "node" )]
+        public static StatementSyntax AddRunTimeOnlyAnnotationIfIndeterminate( this StatementSyntax statement )
+        {
+            if ( statement.GetScopeFromAnnotation().GetValueOrDefault() == TemplatingScope.Both )
+            {
+                return statement.ReplaceScopeAnnotation( TemplatingScope.RunTimeOnly );
+            }
+            else
+            {
+                return statement;
+            }
         }
 
         [return: NotNullIfNotNull( "node" )]

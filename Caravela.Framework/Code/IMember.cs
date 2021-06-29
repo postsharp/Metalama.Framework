@@ -23,6 +23,8 @@ namespace Caravela.Framework.Code
         /// </summary>
         bool IsOverride { get; }
 
+        bool IsExplicitInterfaceImplementation { get; }
+
         new INamedType DeclaringType { get; }
     }
 }

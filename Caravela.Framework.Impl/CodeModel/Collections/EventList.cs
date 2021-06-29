@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    internal class EventList : MemberList<IEvent, MemberRef<IEvent>>, IEventList
+    internal class EventList : MemberOrNamedTypeList<IEvent, MemberRef<IEvent>>, IEventList
     {
         public EventList( NamedType containingDeclaration, IEnumerable<MemberRef<IEvent>> sourceItems ) : base( containingDeclaration, sourceItems ) { }
     }

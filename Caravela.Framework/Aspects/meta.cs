@@ -16,7 +16,8 @@ namespace Caravela.Framework.Aspects
     // ReSharper disable once InconsistentNaming
 
     /// <summary>
-    /// Exposes the meta-model and the meta-functions to a template method.
+    /// The entry point for the meta model, which can be used in templates to inspect the target code or access other
+    /// features of the template language.
     /// </summary>
     [CompileTimeOnly]
     [TemplateKeyword]
@@ -75,17 +76,17 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets the method metadata, or the accessor if this is a template for a field, property or event.
         /// </summary>
-        public static IAdviceMethod Method => CurrentContext.Method;
+        public static IAdvisedMethod Method => CurrentContext.Method;
 
         /// <summary>
         /// Gets the target property, or throws an exception if the advice does not target a property.
         /// </summary>
-        public static IAdviceProperty Property => CurrentContext.Property;
+        public static IAdvisedProperty Property => CurrentContext.Property;
 
         /// <summary>
         /// Gets the target field or property, or throws an exception if the advice does not target a field or a property.
         /// </summary>
-        public static IAdviceFieldOrProperty FieldOrProperty => CurrentContext.FieldOrProperty;
+        public static IAdvisedFieldOrProperty FieldOrProperty => CurrentContext.FieldOrProperty;
 
         /// <summary>
         /// Gets the target member (method, constructor, field, property or event, but not a nested type), or
@@ -96,13 +97,13 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets the target event, or throws an exception if the advice does not target an event.
         /// </summary>
-        public static IAdviceEvent Event => CurrentContext.Event;
+        public static IAdvisedEvent Event => CurrentContext.Event;
 
         /// <summary>
         /// Gets the list of parameters of the current <see cref="Method"/> or <see cref="Property"/>, or throws an
         /// exception if the advice of the target is neither a method.
         /// </summary>
-        public static IAdviceParameterList Parameters => CurrentContext.Parameters;
+        public static IAdvisedParameterList Parameters => CurrentContext.Parameters;
 
         // Gets the project configuration.
         // IProject Project { get; }
@@ -190,6 +191,16 @@ namespace Caravela.Framework.Aspects
         /// </remarks>
         [TemplateKeyword]
         public static void Comment( params string?[] lines ) => throw NewInvalidOperationException();
+
+        /// <summary>
+        /// Generates the cast syntax for the specified type.  
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="value">Must be explicitly cast to <c>object</c> otherwise the C# compiler will emit an error.</param>
+        /// <returns></returns>
+        [return: RunTimeOnly]
+        [TemplateKeyword]
+        public static dynamic? Cast( IType type, dynamic? value ) => type.Compilation.TypeFactory.Cast( type, value );
 
         internal static IDisposable WithContext( IMetaApi current, object proceedImpl )
         {

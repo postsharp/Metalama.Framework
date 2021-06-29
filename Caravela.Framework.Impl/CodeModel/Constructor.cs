@@ -24,6 +24,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override bool IsReadOnly => false;
 
+        public override bool IsExplicitInterfaceImplementation => false;
+
         public override bool IsAsync => false;
 
         public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );

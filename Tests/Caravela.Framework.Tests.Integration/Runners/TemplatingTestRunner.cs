@@ -103,7 +103,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     "assemblyName",
                     Array.Empty<SyntaxTree>(),
                     assemblyLocator.StandardCompileTimeMetadataReferences,
-                    (CSharpCompilationOptions) testResult.Project!.CompilationOptions! )
+                    (CSharpCompilationOptions) testResult.InputProject!.CompilationOptions! )
                 .AddReferences( MetadataReference.CreateFromFile( typeof(TestTemplateAttribute).Assembly.Location ) );
 
             var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult, this.ServiceProvider );

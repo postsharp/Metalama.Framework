@@ -15,6 +15,6 @@ namespace Caravela.Framework.Code.Invokers
         /// Invokes the method.
         /// </summary>
         [return: RunTimeOnly]
-        dynamic Invoke( dynamic? instance, params dynamic[] args );
+        dynamic Invoke( dynamic? instance, params dynamic?[] args );
     }
 }

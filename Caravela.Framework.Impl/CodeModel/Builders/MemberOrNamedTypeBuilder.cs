@@ -15,7 +15,7 @@ using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberBuilder, IMemberIntroduction, IObservableTransformation
+    internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOrNamedTypeBuilder, IMemberIntroduction, IObservableTransformation
     {
         public bool IsSealed { get; set; }
 

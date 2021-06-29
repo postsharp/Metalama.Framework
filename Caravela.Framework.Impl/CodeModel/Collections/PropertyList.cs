@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    internal class PropertyList : MemberList<IProperty, MemberRef<IProperty>>, IPropertyList
+    internal class PropertyList : MemberOrNamedTypeList<IProperty, MemberRef<IProperty>>, IPropertyList
     {
         public PropertyList( NamedType containingDeclaration, IEnumerable<MemberRef<IProperty>> sourceItems ) : base( containingDeclaration, sourceItems ) { }
     }

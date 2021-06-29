@@ -158,6 +158,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
 
+        public bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
+
         [return: RunTimeOnly]
         public MethodInfo ToMethodInfo()
         {

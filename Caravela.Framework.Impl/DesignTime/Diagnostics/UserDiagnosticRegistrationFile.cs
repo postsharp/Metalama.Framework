@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
         public void Write( TextWriter textWriter )
         {
             var serializer = JsonSerializer.Create();
-            serializer.Formatting = Formatting.Indented;
+            serializer.Formatting = Newtonsoft.Json.Formatting.Indented;
 
             serializer.Serialize( textWriter, this );
 

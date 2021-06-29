@@ -218,7 +218,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
             else
             {
-                throw new AssertionFailedException();
+                return declaration.ToRef().Resolve( this.CompilationModel );
             }
         }
 

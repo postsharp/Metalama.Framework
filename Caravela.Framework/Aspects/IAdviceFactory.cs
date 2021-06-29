@@ -99,20 +99,20 @@ namespace Caravela.Framework.Aspects
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AdviceOptions? options = null );
 
-        void IntroduceInterface(
+        void ImplementInterface(
             INamedType targetType,
             INamedType interfaceType,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AdviceOptions? options = null );
 
-        void IntroduceInterface(
+        void ImplementInterface(
             INamedType targetType,
             Type interfaceType,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AdviceOptions? options = null );
 
         [Obsolete( "Not implemented." )]
-        void IntroduceInterface(
+        void ImplementInterface(
             INamedType targetType,
             INamedType interfaceType,
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
@@ -120,7 +120,7 @@ namespace Caravela.Framework.Aspects
             AdviceOptions? options = null );
 
         [Obsolete( "Not implemented." )]
-        void IntroduceInterface(
+        void ImplementInterface(
             INamedType targetType,
             Type interfaceType,
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,

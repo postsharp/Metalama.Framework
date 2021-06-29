@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal partial class IntroduceInterfaceAdvice : Advice
+    internal partial class ImplementInterfaceAdvice : Advice
     {
         private readonly List<(IMethod Method, InterfaceMemberAttribute Attribute)> _aspectInterfaceMethods;
         private readonly List<(IProperty Property, InterfaceMemberAttribute Attribute)> _aspectInterfaceProperties;
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
-        public IntroduceInterfaceAdvice(
+        public ImplementInterfaceAdvice(
             AspectInstance aspect,
             INamedType targetType,
             string? layerName ) : base( aspect, targetType, layerName, null )
@@ -110,7 +110,7 @@ namespace Caravela.Framework.Impl.Advices
             // Adding interfaces may run into three problems:
             //      1) Target type already implements the interface.
             //      2) Target type already implements an ancestor of the interface.
-            //      3) The interface or it's ancestor was implemented by another IntroduceInterface call.
+            //      3) The interface or it's ancestor was implemented by another ImplementInterface call.
 
             if ( this._introducedAndImplementedInterfaces.TryGetValue( interfaceType, out var impl ) && impl.IsIntroduced )
             {

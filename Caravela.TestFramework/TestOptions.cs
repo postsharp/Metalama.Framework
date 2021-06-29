@@ -50,7 +50,7 @@ namespace Caravela.TestFramework
         /// Gets or sets a value indicating whether HTML of syntax-highlighted files should be produced. If <c>true</c>, these files
         /// are created to the <c>obj/highlighted</c> directory.
         /// </summary>
-        public bool? WriteFormattedHtml { get; set; }
+        public bool? WriteHtml { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether titles (tooltips) should be added to HTML files.
@@ -82,7 +82,7 @@ namespace Caravela.TestFramework
 
             this.TestRunnerFactoryType ??= directoryOptions.TestRunnerFactoryType;
 
-            this.WriteFormattedHtml ??= directoryOptions.WriteFormattedHtml;
+            this.WriteHtml ??= directoryOptions.WriteHtml;
 
             this.AddHtmlTitles ??= directoryOptions.AddHtmlTitles;
 
@@ -138,8 +138,9 @@ namespace Caravela.TestFramework
 
                         break;
 
-                    case "WriteFormattedHtml":
-                        this.WriteFormattedHtml = true;
+                    case "WriteHtml":
+                        this.WriteHtml = true;
+                        this.FormatOutput = true;
 
                         break;
 

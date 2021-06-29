@@ -44,19 +44,24 @@ namespace Caravela.TestFramework
         public string? ErrorMessage { get; private set; }
 
         /// <summary>
-        /// Gets or sets the test project.
+        /// Gets the input test project (before transformation).
         /// </summary>
-        public Project? Project { get; set; }
+        public Project? InputProject { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the initial compilation of the test project.
+        /// Gets the input test project (after transformation).
         /// </summary>
-        public Compilation? InputCompilation { get; set; }
+        public Project? OutputProject { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the result compilation of the test project.
+        /// Gets the initial compilation of the test project.
         /// </summary>
-        public Compilation? OutputCompilation { get; set; }
+        public Compilation? InputCompilation { get; internal set; }
+
+        /// <summary>
+        /// Gets the result compilation of the test project.
+        /// </summary>
+        public Compilation? OutputCompilation { get; internal set; }
 
         /// <summary>
         /// Gets a value indicating whether the test run succeeded.
@@ -68,7 +73,7 @@ namespace Caravela.TestFramework
         /// </summary>
         public Exception? Exception { get; private set; }
 
-        internal void AddInputDocument( Document document ) => this._syntaxTrees.Add( new TestSyntaxTree( document ) );
+        internal void AddInputDocument( Document document, string? path ) => this._syntaxTrees.Add( new TestSyntaxTree( path, document, this ) );
 
         private static string CleanMessage( string text )
         {
@@ -97,7 +102,7 @@ namespace Caravela.TestFramework
         {
             if ( this.InputCompilation == null ||
                  this.TestInput == null ||
-                 this.Project == null )
+                 this.InputProject == null )
             {
                 throw new InvalidOperationException( "The object has not bee properly initialized." );
             }
@@ -184,7 +189,7 @@ namespace Caravela.TestFramework
                         .Where( m => m.GetLeadingTrivia().ToString().Contains( "<target>" ) )
                         .ToList();
 
-                var outputNode = outputNodes.FirstOrDefault() ?? syntaxNode;
+                var outputNode = outputNodes.FirstOrDefault() ?? (SyntaxNode) syntaxNode;
 
                 switch ( outputNode )
                 {
@@ -235,13 +240,13 @@ namespace Caravela.TestFramework
             if ( this.TestInput.Options.FormatOutput.GetValueOrDefault( true ) )
             {
                 var outputDocument =
-                    this.Project!.RemoveDocuments( this.Project.DocumentIds.ToImmutableArray() )
+                    this.InputProject!.RemoveDocuments( this.InputProject.DocumentIds.ToImmutableArray() )
                         .AddDocument( this.TestInput.TestName, consolidatedCompilationUnit );
 
                 var simplifiedDocument = Simplifier.ReduceAsync( outputDocument ).Result;
                 var simplifiedSyntaxRoot = simplifiedDocument.GetSyntaxRootAsync().Result!;
 
-                consolidatedCompilationUnit = (CompilationUnitSyntax) Formatter.Format( simplifiedSyntaxRoot, this.Project!.Solution.Workspace );
+                consolidatedCompilationUnit = (CompilationUnitSyntax) Formatter.Format( simplifiedSyntaxRoot, this.InputProject!.Solution.Workspace );
             }
 
             return consolidatedCompilationUnit;

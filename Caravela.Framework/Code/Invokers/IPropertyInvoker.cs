@@ -14,7 +14,7 @@ namespace Caravela.Framework.Code.Invokers
         /// Get the value for an indexer.
         /// </summary>
         [return: RunTimeOnly]
-        dynamic GetIndexerValue( dynamic? instance, params dynamic[] args );
+        dynamic GetIndexerValue( dynamic? instance, params dynamic?[] args );
 
         /// <summary>
         /// Set the value for an indexer.
@@ -24,6 +24,6 @@ namespace Caravela.Framework.Code.Invokers
         /// e.g. <c>instance[args] = value</c> is <c>indexer.SetIndexerValue(instance, value, args)</c>.
         /// </remarks>
         [return: RunTimeOnly]
-        dynamic SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args );
+        dynamic SetIndexerValue( dynamic? instance, dynamic value, params dynamic?[] args );
     }
 }

@@ -27,6 +27,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod? Setter => throw new NotImplementedException();
 
+        public override bool IsExplicitInterfaceImplementation => false;
+
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
             => new InvokerFactory<IFieldOrPropertyInvoker>( order => new FieldOrPropertyInvoker( this, order ), false );

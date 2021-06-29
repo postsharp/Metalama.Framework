@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public RefKind RefKind => this._symbol.RefKind.ToOurRefKind();
 
-        public bool IsExplicitInterfaceImplementation => !this._symbol.ExplicitInterfaceImplementations.IsEmpty;
+        public override bool IsExplicitInterfaceImplementation => !this._symbol.ExplicitInterfaceImplementations.IsEmpty;
 
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );

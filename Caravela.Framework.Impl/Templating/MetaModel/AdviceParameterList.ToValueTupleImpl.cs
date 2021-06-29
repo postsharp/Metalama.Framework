@@ -11,13 +11,13 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal partial class AdviceParameterList
+    internal partial class AdvisedParameterList
     {
         private class ToValueTupleImpl : IDynamicExpression
         {
-            private readonly AdviceParameterList _parent;
+            private readonly AdvisedParameterList _parent;
 
-            public ToValueTupleImpl( AdviceParameterList parent )
+            public ToValueTupleImpl( AdvisedParameterList parent )
             {
                 this._parent = parent;
             }

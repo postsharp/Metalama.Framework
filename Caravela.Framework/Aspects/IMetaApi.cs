@@ -24,9 +24,9 @@ namespace Caravela.Framework.Aspects
 
         IMethodBase MethodBase { get; }
 
-        IAdviceField Field { get; }
+        IAdvisedField Field { get; }
 
-        IAdviceFieldOrProperty FieldOrProperty { get; }
+        IAdvisedFieldOrProperty FieldOrProperty { get; }
 
         IDeclaration Declaration { get; }
 
@@ -39,22 +39,22 @@ namespace Caravela.Framework.Aspects
         /// To invoke the method, use <see cref="IMethodInvoker.Invoke"/>,
         /// e.g. <c>meta.Method.Invoke(1, 2, 3);</c>.
         /// </remarks>
-        IAdviceMethod Method { get; }
+        IAdvisedMethod Method { get; }
 
         /// <summary>
         /// Gets the target field or property, or null if the advice does not target a field or a property.
         /// </summary>
-        IAdviceProperty Property { get; }
+        IAdvisedProperty Property { get; }
 
         /// <summary>
         /// Gets the target event, or null if the advice does not target an event.
         /// </summary>
-        IAdviceEvent Event { get; }
+        IAdvisedEvent Event { get; }
 
         /// <summary>
         /// Gets the list of parameters of <see cref="Method"/>.
         /// </summary>
-        IAdviceParameterList Parameters { get; }
+        IAdvisedParameterList Parameters { get; }
 
         // Gets the project configuration.
         // IProject Project { get; }

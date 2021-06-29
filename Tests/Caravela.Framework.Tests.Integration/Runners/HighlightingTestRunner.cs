@@ -2,15 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Formatting;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading;
+using System.Text;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -18,132 +16,117 @@ using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Runners
 {
-    internal class HighlightingTestRunner : BaseTestRunner
+    internal class HighlightingTestRunner : AspectTestRunner
     {
+        private const string _htmlProlog = @"
+<html>
+    <head>
+        <link rel=""stylesheet"" href=""https://highlightjs.org/static/demo/styles/vs.css""/>
+        <style>
+            .cr-CompileTime,
+            .cr-Conflict,
+            .cr-TemplateKeyword,
+            .cr-Dynamic,
+            .cr-CompileTimeVariable
+            {
+                background-color: rgba(50,50,90,0.1);
+            }
+
+            .cr-TemplateKeyword
+            {
+                color: rgb(250, 0, 250) !important;
+                font-weight: bold;
+            }
+
+            .cr-Dynamic
+            {
+                text-decoration: underline;
+            }
+
+            .cr-CompileTimeVariable
+            {
+                font-style: italic;
+            }
+
+            .legend 
+            {
+                margin-top: 100px;
+            }
+        </style>
+    </head>
+    <body>";
+
+        private readonly string _htmlEpilogue;
+
         public HighlightingTestRunner(
             IServiceProvider serviceProvider,
             string? projectDirectory,
             IEnumerable<MetadataReference> metadataReferences,
             ITestOutputHelper? logger )
-            : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
-
-        public override TestResult RunTest( TestInput testInput )
+            : base( serviceProvider, projectDirectory, metadataReferences, logger )
         {
-            var result = base.RunTest( testInput );
+            StringBuilder epilogueBuilder = new();
 
-            if ( !result.Success )
-            {
-                return result;
-            }
-
-            var templateDocument = result.SyntaxTrees.Single().InputDocument;
-            var templateSyntaxRoot = templateDocument.GetSyntaxRootAsync().Result!;
-            var templateSemanticModel = templateDocument.GetSemanticModelAsync().Result!;
-
-            DiagnosticList diagnostics = new();
-
-            var templateCompiler = new TemplateCompiler( this.ServiceProvider, result.InputCompilation! );
-
-            var templateCompilerSuccess = templateCompiler.TryAnnotate(
-                templateSyntaxRoot,
-                templateSemanticModel,
-                diagnostics,
-                CancellationToken.None,
-                out var annotatedTemplateSyntax );
-
-            if ( !templateCompilerSuccess )
-            {
-                result.Report( diagnostics );
-                result.SetFailed( "TemplateCompiler.TryAnnotate failed." );
-
-                return result;
-            }
-
-            result.SyntaxTrees.Single().AnnotatedSyntaxRoot = annotatedTemplateSyntax;
-
-            this.WriteHtml( testInput, result );
-
-            return result;
-        }
-
-        public override void ExecuteAssertions( TestInput testInput, TestResult testResult )
-        {
-            Assert.NotNull( testInput.ProjectDirectory );
-            Assert.NotNull( testInput.RelativePath );
-
-            Assert.True( testResult.Success, testResult.ErrorMessage );
-
-            var sourceAbsolutePath = Path.Combine( testInput.ProjectDirectory!, testInput.RelativePath! );
-
-            var expectedHighlightedPath = Path.Combine(
-                Path.GetDirectoryName( sourceAbsolutePath )!,
-                Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.Html );
-
-            Assert.True( File.Exists( expectedHighlightedPath ), $"The file '{expectedHighlightedPath}' does not exist." );
-            var expectedHighlightedSource = File.ReadAllText( expectedHighlightedPath );
-
-            var htmlPath = testResult.SyntaxTrees.Single().OutputHtmlPath!;
-            var htmlContent = File.ReadAllText( htmlPath );
-
-            Assert.Equal( expectedHighlightedSource, htmlContent );
-        }
-
-        protected override void WriteHtmlProlog( TextWriter textWriter )
-        {
-            textWriter.WriteLine( "<html>" );
-            textWriter.WriteLine( "<head>" );
-            textWriter.WriteLine( "<style>" );
-
-            textWriter.WriteLine(
-                @"
-.caravelaClassification_CompileTime,
-.caravelaClassification_Conflict,
-.caravelaClassification_TemplateKeyword,
-.caravelaClassification_Dynamic,
-.caravelaClassification_CompileTimeVariable
-{
-    background-color: rgba(50,50,90,0.1);
-}
-
-.caravelaClassification_TemplateKeyword
-{
-    color: rgb(250, 0, 250) !important;
-    font-weight: bold;
-}
-
-.caravelaClassification_Dynamic
-{
-    text-decoration: underline;
-}
-
-.caravelaClassification_CompileTimeVariable
-{
-    font-style: italic;
-}
-
-.legend 
-{
-    margin-top: 100px;
-}
-" );
-
-            textWriter.WriteLine( "</style>" );
-            textWriter.WriteLine( "</head>" );
-            textWriter.WriteLine( "<body>" );
-        }
-
-        protected override void WriteHtmlEpilogue( TextWriter textWriter )
-        {
-            textWriter.WriteLine( "<p class='legend'>Legend:</p>" );
-            textWriter.WriteLine( "<pre>" );
+            epilogueBuilder.AppendLine( "       <p class='legend'>Legend:</p>" );
+            epilogueBuilder.AppendLine( "       <pre>" );
 
             foreach ( var classification in Enum.GetValues( typeof(TextSpanClassification) ) )
             {
-                textWriter.WriteLine( $"<span class='{classification}'>{classification}</span>" );
+                epilogueBuilder.AppendLine( $"<span class='cr-{classification}'>{classification}</span>" );
             }
 
-            textWriter.WriteLine( "</pre></body>" );
-            textWriter.WriteLine( "</html>" );
+            epilogueBuilder.AppendLine( "       </pre>" );
+            epilogueBuilder.AppendLine( "   </body>" );
+            epilogueBuilder.AppendLine( "</html>" );
+
+            this._htmlEpilogue = epilogueBuilder.ToString();
+        }
+
+        protected override HtmlCodeWriter CreateHtmlCodeWriter( TestOptions options )
+            => new( new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault(), _htmlProlog, this._htmlEpilogue ) );
+
+        public override void ExecuteAssertions( TestInput testInput, TestResult testResult )
+        {
+            base.ExecuteAssertions( testInput, testResult );
+
+            Assert.NotNull( testInput.ProjectDirectory );
+            Assert.NotNull( testInput.RelativePath );
+            Assert.True( testResult.Success, testResult.ErrorMessage );
+
+            foreach ( var syntaxTree in testResult.SyntaxTrees )
+            {
+                // Input.
+
+                var sourceAbsolutePath = syntaxTree.InputPath;
+
+                var expectedInputHtmlPath = Path.Combine(
+                    Path.GetDirectoryName( sourceAbsolutePath )!,
+                    Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.InputHtml );
+
+                CompareHtmlFiles( syntaxTree.HtmlInputRunTimePath!, expectedInputHtmlPath );
+
+                // Output.
+                var expectedOutputHtmlPath = Path.Combine(
+                    Path.GetDirectoryName( sourceAbsolutePath )!,
+                    Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.OutputHtml );
+
+                CompareHtmlFiles( syntaxTree.HtmlOutputRunTimePath!, expectedOutputHtmlPath );
+            }
+        }
+
+        private static void CompareHtmlFiles( string actualHtmlPath, string expectedHtmlPath )
+        {
+            if ( !File.Exists( expectedHtmlPath ) )
+            {
+                return;
+            }
+            
+            var expectedHighlightedSource = File.ReadAllText( expectedHtmlPath );
+
+            var htmlPath = actualHtmlPath!;
+            var htmlContent = File.ReadAllText( htmlPath );
+
+            Assert.Equal( expectedHighlightedSource, htmlContent );
         }
     }
 }
