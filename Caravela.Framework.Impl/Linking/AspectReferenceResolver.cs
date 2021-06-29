@@ -5,11 +5,9 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Text;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -72,7 +70,6 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             return this._introductionRegistry.GetSymbolForIntroducedMember( previousLayerOverride );
-
 
             static bool TryGetHiddenSymbol( ISymbol symbol, [NotNullWhen( true )] out ISymbol? hiddenSymbol )
             {

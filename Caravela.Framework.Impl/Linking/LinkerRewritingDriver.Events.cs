@@ -8,7 +8,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
@@ -205,44 +204,6 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private BlockSyntax RewriteAdderBody( IMethodSymbol symbol, Dictionary<SyntaxNode, SyntaxNode?> replacements )
-        {
-            return this.RewriteEventAccessorBody( symbol, replacements );
-        }
-
-        private BlockSyntax RewriteRemoverBody( IMethodSymbol symbol, Dictionary<SyntaxNode, SyntaxNode?> replacements )
-        {
-            return this.RewriteEventAccessorBody( symbol, replacements );
-        }
-
-        private BlockSyntax RewriteEventAccessorBody( IMethodSymbol symbol, Dictionary<SyntaxNode, SyntaxNode?> replacements )
-        {
-            var rewriter = new BodyRewriter( replacements );
-            var accessorSyntax = (AccessorDeclarationSyntax) symbol.GetPrimaryDeclaration().AssertNotNull();
-
-            if ( accessorSyntax.Body != null )
-            {
-                return (BlockSyntax) rewriter.Visit( accessorSyntax.Body ).AssertNotNull();
-            }
-            else if ( accessorSyntax.ExpressionBody != null )
-            {
-                var rewrittenNode = rewriter.Visit( accessorSyntax.ExpressionBody );
-
-                if ( rewrittenNode is ArrowExpressionClauseSyntax arrowExpr )
-                {
-                    return Block( ExpressionStatement( arrowExpr.Expression ) );
-                }
-                else
-                {
-                    return (BlockSyntax) rewrittenNode.AssertNotNull();
-                }
-            }
-            else
-            {
-                throw new AssertionFailedException();
-            }
-        }
-
         private static BlockSyntax GetImplicitAdderBody( IMethodSymbol symbol )
         {
             return Block(
@@ -252,7 +213,7 @@ namespace Caravela.Framework.Impl.Linking
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
-                            ? (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
+                            ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
                             : ThisExpression(),
                             IdentifierName( GetEventFieldBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ) ) );
@@ -267,7 +228,7 @@ namespace Caravela.Framework.Impl.Linking
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
-                            ? (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
+                            ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
                             : ThisExpression(),
                             IdentifierName( GetEventFieldBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ) ) );

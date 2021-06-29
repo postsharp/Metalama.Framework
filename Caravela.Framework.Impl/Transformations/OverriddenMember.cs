@@ -85,7 +85,7 @@ namespace Caravela.Framework.Impl.Transformations
                 expression =
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.OverriddenDeclaration.DeclaringType.GetSymbol() ),
+                        LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.OverriddenDeclaration.DeclaringType.GetSymbol() ),
                         IdentifierName( this.OverriddenDeclaration.Name ) );
             }
 

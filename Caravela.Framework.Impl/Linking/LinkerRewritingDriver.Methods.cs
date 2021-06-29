@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
@@ -117,41 +116,6 @@ namespace Caravela.Framework.Impl.Linking
                             InliningContext.Create( this, symbol ) ) )
                     .WithLeadingTrivia( methodDeclaration.GetLeadingTrivia() )
                     .WithTrailingTrivia( methodDeclaration.GetTrailingTrivia() );
-            }
-        }
-
-        private BlockSyntax RewriteMethodBody( IMethodSymbol symbol, Dictionary<SyntaxNode, SyntaxNode?> replacements )
-        {
-            var rewriter = new BodyRewriter( replacements );
-            var methodSyntax = (MethodDeclarationSyntax)symbol.GetPrimaryDeclaration().AssertNotNull();
-
-            if ( methodSyntax.Body != null )
-            {
-                return (BlockSyntax) rewriter.Visit( methodSyntax.Body ).AssertNotNull();
-            }
-            else if ( methodSyntax.ExpressionBody != null )
-            {
-                var rewrittenNode = rewriter.Visit( methodSyntax.ExpressionBody );
-
-                if ( rewrittenNode is ArrowExpressionClauseSyntax arrowExpr )
-                {
-                    if ( symbol.ReturnsVoid )
-                    {
-                        return Block( ExpressionStatement( arrowExpr.Expression ) );
-                    }
-                    else
-                    {
-                        return Block( ReturnStatement( arrowExpr.Expression ) );
-                    }
-                }
-                else
-                {
-                    return (BlockSyntax) rewrittenNode.AssertNotNull();
-                }
-            }
-            else
-            {
-                throw new AssertionFailedException();
             }
         }
 

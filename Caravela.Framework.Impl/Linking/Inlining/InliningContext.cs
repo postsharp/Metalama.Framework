@@ -5,10 +5,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking.Inlining
@@ -71,7 +68,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                             this.DeclaresReturnVariable
                             ? LocalDeclarationStatement(
                                 VariableDeclaration( 
-                                    (TypeSyntax)LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(targetSymbol.ReturnType), 
+                                    LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(targetSymbol.ReturnType), 
                                     SingletonSeparatedList( VariableDeclarator( this.ReturnVariableName.AssertNotNull() ) ) ) )
                             : null,
                             linkedBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable ),

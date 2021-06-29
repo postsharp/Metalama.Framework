@@ -147,6 +147,7 @@ class T
             Assert.Equal( expectedCode.Trim(), transformedText );
         }
 
+        [Fact]
         public void AutoProperty()
         {
             var code = @"
@@ -182,21 +183,22 @@ class T
     {
     }
 
-    int __foo__BackingField;
     int Foo
     {
         get
         {
             Test(""Get"");
-            return this.__foo__BackingField;
+            return this.__Foo__BackingField;
         }
 
         set
         {
             Test(""Set"");
-            this.__foo__BackingField = value;
+            this.__Foo__BackingField = value;
         }
     }
+
+    private int __Foo__BackingField;
 }
 ";
 

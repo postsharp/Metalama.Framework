@@ -31,7 +31,6 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         /// <param name="annotatedExpression">Annotated expression.</param>
         /// <param name="replacedNode">Replaced node (has to be direct ancestor of the annotated expression).</param>
         /// <param name="newNode"></param>
-        /// <returns></returns>
         public abstract void Inline( InliningContext context, ExpressionSyntax annotatedExpression, out SyntaxNode replacedNode, out SyntaxNode newNode );
     }
 }

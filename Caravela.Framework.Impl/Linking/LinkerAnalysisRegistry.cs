@@ -2,16 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.AspectOrdering;
-using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Linking
