@@ -10,6 +10,7 @@ public class Target
     [Test]
     public void Bar()
     {
+        _ = default;
         return;
     }
 }

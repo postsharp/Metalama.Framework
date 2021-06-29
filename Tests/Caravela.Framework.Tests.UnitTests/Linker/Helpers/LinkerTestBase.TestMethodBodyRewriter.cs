@@ -32,7 +32,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         throw new ArgumentException( "link method should have 1 or 2 arguments." );
                     }
 
-                    var callExpression = node.ArgumentList.Arguments[0].Expression;
+                    var annotatedExpression = node.ArgumentList.Arguments[0].Expression;
 
                     string? tag = null;
 
@@ -52,7 +52,32 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         throw new ArgumentException( $"unsupported link() tag {tag}" );
                     }
 
-                    return callExpression.WithAspectReferenceAnnotation( new AspectLayerId( this._aspectName, this._layerName ), AspectReferenceOrder.Default, flags: flags );
+                    var target = AspectReferenceTargetKind.Self;
+
+                    if ( annotatedExpression is MemberAccessExpressionSyntax memberAccess)
+                    {
+                        switch ( memberAccess.Name.Identifier.ValueText )
+                        {
+                            case "get":
+                                annotatedExpression = memberAccess.Expression;
+                                target = AspectReferenceTargetKind.PropertyGetAccessor;
+                                break;
+                            case "set":
+                                annotatedExpression = memberAccess.Expression;
+                                target = AspectReferenceTargetKind.PropertySetAccessor;
+                                break;
+                            case "add":
+                                annotatedExpression = memberAccess.Expression;
+                                target = AspectReferenceTargetKind.EventAddAccessor;
+                                break;
+                            case "remove":
+                                annotatedExpression = memberAccess.Expression;
+                                target = AspectReferenceTargetKind.EventRemoveAccessor;
+                                break;
+                        }
+                    }
+
+                    return annotatedExpression.WithAspectReferenceAnnotation( new AspectLayerId( this._aspectName, this._layerName ), AspectReferenceOrder.Default, target, flags );
                 }
 
                 return base.VisitInvocationExpression( node );

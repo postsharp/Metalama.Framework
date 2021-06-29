@@ -24,73 +24,69 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns></returns>
         private bool IsDiscarded( IPropertySymbol symbol )
         {
-            var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, AspectReferenceTargetKind.PropertyGetAccessor );
-            var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, AspectReferenceTargetKind.PropertySetAccessor );
-
-            if ( getAspectReferences.Count == 0 && setAspectReferences.Count == 0 && !this.GetLinkerOptions( symbol ).ForceNotDiscardable )
+            if ( this._analysisRegistry.IsOverride( symbol ) )
             {
-                return true;
-            }
+                var overrideTarget = this._analysisRegistry.GetOverrideTarget( symbol );
+                var lastOverride = this._analysisRegistry.GetLastOverride( overrideTarget.AssertNotNull() );
+                var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, AspectReferenceTargetKind.PropertyGetAccessor );
+                var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, AspectReferenceTargetKind.PropertySetAccessor );
 
-            if ( this.IsInlineable( symbol ) )
+                if ( SymbolEqualityComparer.Default.Equals( symbol, lastOverride ) )
+                {
+                    return this.IsInlineable( symbol ) && !this.GetLinkerOptions( symbol ).ForceNotDiscardable;
+                }
+                else
+                {
+                    return 
+                        (this.IsInlineable( symbol ) || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0)) 
+                        && !this.GetLinkerOptions( symbol ).ForceNotDiscardable;
+                }
+            }
+            else
             {
-                return true;
+                return false;
             }
-
-            return false;
         }
 
         private bool IsInlineable( IPropertySymbol symbol )
         {
+
+            if ( this.GetLinkerOptions( symbol ).ForceNotInlineable )
+            {
+                return false;
+            }
+
             var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, AspectReferenceTargetKind.PropertyGetAccessor );
             var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, AspectReferenceTargetKind.PropertySetAccessor );
 
-            if ( getAspectReferences.Count > 1 || setAspectReferences.Count > 1
-                || getAspectReferences.Count + setAspectReferences.Count == 0 )
+            if ( getAspectReferences.Count > 1 || setAspectReferences.Count > 1 )
             {
                 return false;
             }
 
-            var matchingContainingSymbol =
-                getAspectReferences.Count == 1 && setAspectReferences.Count == 1
-                ? SymbolEqualityComparer.Default.Equals( getAspectReferences[0].ContainingSymbol, setAspectReferences[0].ContainingSymbol )
-                : getAspectReferences.Count <= 1 && setAspectReferences.Count <= 1;
-
-            if ( !matchingContainingSymbol )
-            {
-                return false;
-            }
-
-            if ( getAspectReferences.Count == 0 || !this.IsInlineableReference( getAspectReferences[0] ) )
-            {
-                return false;
-            }
-
-            if ( setAspectReferences.Count == 0 || !this.IsInlineableReference( setAspectReferences[0] ) )
-            {
-                return false;
-            }
-
-            return true;
+            return ( getAspectReferences.Count == 0 || this.IsInlineableReference( getAspectReferences[0] ))
+                && (setAspectReferences.Count == 0 || this.IsInlineableReference( setAspectReferences[0] ) );
         }
 
         private IReadOnlyList<MemberDeclarationSyntax> RewriteProperty(PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol)
         {
             if (this._analysisRegistry.IsOverrideTarget(symbol))
             {
-                var members = new List<MemberDeclarationSyntax>
+                var members = new List<MemberDeclarationSyntax>();
+                var lastOverride = (IPropertySymbol) this._analysisRegistry.GetLastOverride( symbol );
+
+                if ( this.IsInlineable( lastOverride ) )
                 {
-                    GetLinkedDeclaration()
-                };
+                    members.Add( GetLinkedDeclaration() );
+                }
+                else
+                {
+                    members.Add( GetTrampolineProperty( propertyDeclaration, lastOverride ) );
+                }
 
                 if ( !this.IsInlineable( symbol ) )
                 {
                     members.Add( GetOriginalImplProperty( propertyDeclaration, symbol ) );
-                }
-
-                if ( !this.IsInlineable( (IPropertySymbol) this._analysisRegistry.GetLastOverride(symbol) ) )
-                {
-                    members.Add( GetTrampolineProperty( propertyDeclaration, symbol ) );                    
                 }
 
                 if ( IsAutoPropertyDeclaration( propertyDeclaration ) )
@@ -134,7 +130,7 @@ namespace Caravela.Framework.Impl.Linking
                                     getAccessorDeclaration.AttributeLists,
                                     getAccessorDeclaration.Modifiers,
                                     this.GetLinkedBody( 
-                                        symbol.GetMethod, 
+                                        this.GetBodySource( symbol.GetMethod ), 
                                         InliningContext.Create( this, symbol.GetMethod ) ) ) );
                             break;
 
@@ -144,8 +140,8 @@ namespace Caravela.Framework.Impl.Linking
                                     SyntaxKind.GetAccessorDeclaration,
                                     List<AttributeListSyntax>(),
                                     TokenList(),
-                                    this.GetLinkedBody( 
-                                        symbol.GetMethod, 
+                                    this.GetLinkedBody(
+                                        this.GetBodySource( symbol.GetMethod ), 
                                         InliningContext.Create( this, symbol.GetMethod ) ) ) );
                             break;
                     }
@@ -160,8 +156,8 @@ namespace Caravela.Framework.Impl.Linking
                             SyntaxKind.SetAccessorDeclaration,
                             setDeclaration.AttributeLists,
                             setDeclaration.Modifiers,
-                            this.GetLinkedBody( 
-                                symbol.SetMethod, 
+                            this.GetLinkedBody(
+                                this.GetBodySource( symbol.SetMethod ), 
                                 InliningContext.Create( this, symbol.SetMethod ) ) ) );
                 }
 
@@ -172,62 +168,6 @@ namespace Caravela.Framework.Impl.Linking
                         .WithTrailingTrivia( propertyDeclaration.GetTrailingTrivia() )
                         .WithExpressionBody( null )
                         .WithSemicolonToken( Token( SyntaxKind.None ) );
-            }
-        }
-
-        private BlockSyntax RewriteGetterBody( IMethodSymbol symbol, Dictionary<SyntaxNode, SyntaxNode?> replacements )
-        {
-            var rewriter = new BodyRewriter( replacements );
-            var methodSyntax = (AccessorDeclarationSyntax) symbol.GetPrimaryDeclaration().AssertNotNull();
-
-            if ( methodSyntax.Body != null )
-            {
-                return (BlockSyntax) rewriter.Visit( methodSyntax.Body ).AssertNotNull();
-            }
-            else if ( methodSyntax.ExpressionBody != null )
-            {
-                var rewrittenNode = rewriter.Visit( methodSyntax.ExpressionBody );
-
-                if ( rewrittenNode is ArrowExpressionClauseSyntax arrowExpr )
-                {
-                    return Block( ReturnStatement( arrowExpr.Expression ) );
-                }
-                else
-                {
-                    return (BlockSyntax) rewrittenNode.AssertNotNull();
-                }
-            }
-            else
-            {
-                throw new AssertionFailedException();
-            }
-        }
-
-        private BlockSyntax RewriteSetterBody( IMethodSymbol symbol, Dictionary<SyntaxNode, SyntaxNode?> replacements )
-        {
-            var rewriter = new BodyRewriter( replacements );
-            var methodSyntax = (AccessorDeclarationSyntax) symbol.GetPrimaryDeclaration().AssertNotNull();
-
-            if ( methodSyntax.Body != null )
-            {
-                return (BlockSyntax) rewriter.Visit( methodSyntax.Body ).AssertNotNull();
-            }
-            else if ( methodSyntax.ExpressionBody != null )
-            {
-                var rewrittenNode = rewriter.Visit( methodSyntax.ExpressionBody );
-
-                if ( rewrittenNode is ArrowExpressionClauseSyntax arrowExpr )
-                {
-                    return Block( ExpressionStatement( arrowExpr.Expression ) );
-                }
-                else
-                {
-                    return (BlockSyntax) rewrittenNode.AssertNotNull();
-                }
-            }
-            else
-            {
-                throw new AssertionFailedException();
             }
         }
 

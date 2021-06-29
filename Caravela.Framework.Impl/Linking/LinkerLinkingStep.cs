@@ -49,6 +49,7 @@ namespace Caravela.Framework.Impl.Linking
                 new MethodDiscardInliner(),
                 new PropertyGetAssignmentInliner(),
                 new PropertyGetReturnInliner(),
+                new PropertyGetCastReturnInliner(),
                 new PropertySetValueAssignmentInliner(),
             };
 

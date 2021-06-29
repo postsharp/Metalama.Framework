@@ -38,12 +38,12 @@ class T
         get
         {
             Test(""Get"");
-            return link(this.Foo);
+            return link(this.Foo.get, inline);
         }
         set
         {
             Test(""Set"");
-            link(this.Foo) = value;
+            link(this.Foo.set, inline) = value;
         }
     }
 }
@@ -103,12 +103,12 @@ class T
         get
         {
             Test(""Get"");
-            return link(this.Foo);
+            return link(this.Foo.get, inline);
         }
         set
         {
             Test(""Set"");
-            link(this.Foo) = value;
+            link(this.Foo.set, inline) = value;
         }
     }
 }

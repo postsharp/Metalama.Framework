@@ -54,6 +54,17 @@ namespace Caravela.Framework.Impl.Linking
             };
         }
 
+        private bool IsInlineable( ISymbol symbol )
+        {
+            return symbol switch
+            {
+                IMethodSymbol methodSymbol => this.IsInlineable( methodSymbol ),
+                IPropertySymbol propertySymbol => this.IsInlineable( propertySymbol ),
+                IEventSymbol eventSymbol => this.IsInlineable( eventSymbol ),
+                _ => throw new AssertionFailedException(),
+            };
+        }
+
         private bool IsInlineableReference( AspectReferenceHandle aspectReference )
         {
             return
@@ -68,7 +79,7 @@ namespace Caravela.Framework.Impl.Linking
 
             foreach ( var inliner in this._inliners )
             {
-                if ( inliner.CanInline( aspectReference.ContainingSymbol, semanticModel, aspectReference.Expression ) )
+                if ( inliner.CanInline( (IMethodSymbol)aspectReference.ContainingSymbol, semanticModel, aspectReference.Expression ) )
                 {
                     // We have inliner that will be able to inline the reference.
                     matchingInliner = inliner;
@@ -131,7 +142,7 @@ namespace Caravela.Framework.Impl.Linking
                 // Collect syntax node replacements from inliners and redirect the rest to correct targets.
                 foreach ( var aspectReference in containedAspectReferences )
                 {
-                    if ( this.IsInlineableReference( aspectReference ) )
+                    if ( this.IsInlineable( aspectReference.ReferencedSymbol ) )
                     {
                         if ( !this.GetInliner( aspectReference, out var inliner ) )
                         {
@@ -295,8 +306,17 @@ namespace Caravela.Framework.Impl.Linking
             {
                 case BlockSyntax block:
                     return (BlockSyntax) rewriter.Visit( block ).AssertNotNull();
+
                 case ArrowExpressionClauseSyntax arrowExpressionClause:
-                    return (BlockSyntax) rewriter.Visit( arrowExpressionClause.Expression ).AssertNotNull();
+                    if ( symbol.ReturnsVoid )
+                    {
+                        return Block( ExpressionStatement( (ExpressionSyntax) rewriter.Visit( arrowExpressionClause.Expression ).AssertNotNull()) );
+                    }
+                    else
+                    {
+                        return Block( ReturnStatement( (ExpressionSyntax) rewriter.Visit( arrowExpressionClause.Expression ).AssertNotNull() ) );
+                    }
+
                 default:
                     throw new NotImplementedException();
             }

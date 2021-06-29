@@ -18,18 +18,12 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             SyntaxKind.ReturnStatement
         };
         
-        public override bool CanInline( ISymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression )
+        public override bool CanInline( IMethodSymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression )
         {
             // The syntax needs to be in form: <variable> = <annotated_property_expression>;
-
-            if ( !annotatedExpression.TryGetAspectReference( out _ ) )
+            if ( contextDeclaration.AssociatedSymbol is not IPropertySymbol )
             {
-                throw new AssertionFailedException();
-            }
-
-            if ( contextDeclaration is not IPropertySymbol )
-            {
-                throw new AssertionFailedException();
+                return false;
             }
 
             if ( annotatedExpression.Parent == null || annotatedExpression.Parent is not AssignmentExpressionSyntax assignmentExpression )
@@ -37,7 +31,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            if ( annotatedExpression.Parent == null || annotatedExpression.Parent is not ExpressionStatementSyntax )
+            if ( assignmentExpression.Parent == null || assignmentExpression.Parent is not ExpressionStatementSyntax )
             {
                 return false;
             }

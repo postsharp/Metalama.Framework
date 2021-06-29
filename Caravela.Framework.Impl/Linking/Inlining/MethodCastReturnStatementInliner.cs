@@ -21,14 +21,9 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             SyntaxKind.ReturnStatement
         };
         
-        public override bool CanInline( ISymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression )
+        public override bool CanInline( IMethodSymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression )
         {
             // The syntax has to be in form: return <annotated_method_expression( <arguments> );
-            if ( contextDeclaration is not IMethodSymbol contextMethod )
-            {
-                return false;
-            }
-
             if ( annotatedExpression.Parent == null || annotatedExpression.Parent is not InvocationExpressionSyntax invocationExpression)
             {
                 return false;
@@ -39,7 +34,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            if ( !SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo(castExpression.Type).Symbol, contextMethod.ReturnType) )
+            if ( !SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo(castExpression.Type).Symbol, contextDeclaration.ReturnType) )
             {
                 return false;
             }
@@ -49,7 +44,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            if (invocationExpression.ArgumentList.Arguments.Count != contextMethod.Parameters.Length)
+            if (invocationExpression.ArgumentList.Arguments.Count != contextDeclaration.Parameters.Length)
             {
                 return false;
             }

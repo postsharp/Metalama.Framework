@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         /// <param name="semanticModel">Semantic model for the syntax tree containing the expression.</param>
         /// <param name="annotatedExpression">Annotated expression.</param>
         /// <returns></returns>
-        public abstract bool CanInline( ISymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression );
+        public abstract bool CanInline( IMethodSymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression );
 
         /// <summary>
         /// Inlines the target of the annotated expression by specifying node to be replaced and the replacing node.

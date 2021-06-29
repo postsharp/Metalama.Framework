@@ -18,11 +18,10 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             SyntaxKind.ReturnStatement
         };
         
-        public override bool CanInline( ISymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression )
+        public override bool CanInline( IMethodSymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression )
         {
             // The syntax needs to be in form: <annotated_property_expression> = value;
-
-            if ( contextDeclaration is not IPropertySymbol )
+            if ( contextDeclaration.AssociatedSymbol is not IPropertySymbol )
             {
                 return false;
             }

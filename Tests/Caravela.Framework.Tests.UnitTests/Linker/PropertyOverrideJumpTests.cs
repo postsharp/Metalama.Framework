@@ -41,7 +41,7 @@ class T
         {
             Test(""Get1"");
             int foo;
-            foo = link(this.Foo);
+            foo = link(this.Foo.get, inline);
             if (foo > 0)
             {
                 return foo;
@@ -56,7 +56,7 @@ class T
             Test(""Set1"");
             if (value != 0)
             {
-                link(this.Foo) = value;
+                link(this.Foo.set, inline) = value;
             }
             else
             {
@@ -71,12 +71,12 @@ class T
         get
         {
             Test(""Get2"");
-            return link(this.Foo);
+            return link(this.Foo.get, inline);
         }
         set
         {
             Test(""Set2"");
-            link(this.Foo) = value;
+            link(this.Foo.set, inline) = value;
         }
     }
 }
@@ -98,7 +98,8 @@ class T
             Test(""Get1"");
             int foo;
             foo = _foo;
-            __aspect_return_2:
+            goto __aspect_return_1;
+            __aspect_return_1:
             if (foo > 0)
             {
                 return foo;

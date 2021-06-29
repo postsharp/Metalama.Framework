@@ -11,10 +11,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking.Inlining
 {
-    /// <summary>
-    /// Handles inlining of return statement which invokes an annotated expression.
-    /// </summary>
-    internal class MethodReturnStatementInliner : MethodInliner
+    internal class PropertyGetCastReturnInliner : PropertyInliner
     {
         public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[]
         {
@@ -23,18 +20,23 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         
         public override bool CanInline( IMethodSymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression )
         {
-            // The syntax has to be in form: return <annotated_method_expression( <arguments> );
-            if ( annotatedExpression.Parent == null || annotatedExpression.Parent is not InvocationExpressionSyntax invocationExpression)
+            // The syntax needs to be in form: return <annotated_property_expression>;
+            if ( contextDeclaration.AssociatedSymbol is not IPropertySymbol )
             {
                 return false;
             }
 
-            if ( invocationExpression.Parent == null || invocationExpression.Parent is not ReturnStatementSyntax)
+            if ( annotatedExpression.Parent == null || annotatedExpression.Parent is not CastExpressionSyntax castExpression )
             {
                 return false;
             }
 
-            if (invocationExpression.ArgumentList.Arguments.Count != contextDeclaration.Parameters.Length)
+            if ( !SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( castExpression.Type ).Symbol, contextDeclaration.ReturnType ) )
+            {
+                return false;
+            }
+
+            if ( castExpression.Parent == null || castExpression.Parent is not ReturnStatementSyntax )
             {
                 return false;
             }
@@ -45,26 +47,26 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         public override void Inline( InliningContext context, ExpressionSyntax annotatedExpression, out SyntaxNode replacedNode, out SyntaxNode newNode )
         {
             var semanticModel = context.Compilation.GetSemanticModel( annotatedExpression.SyntaxTree );
-            var referencedSymbol = (IMethodSymbol) semanticModel.GetSymbolInfo( annotatedExpression ).Symbol.AssertNotNull();
-            var invocationExpression = (InvocationExpressionSyntax)annotatedExpression.Parent.AssertNotNull();
-            var returnStatement = (ReturnStatementSyntax) invocationExpression.Parent.AssertNotNull();
+            var referencedSymbol = (IPropertySymbol) semanticModel.GetSymbolInfo( annotatedExpression ).Symbol.AssertNotNull();
+            var castExpression = (CastExpressionSyntax) annotatedExpression.Parent.AssertNotNull();
+            var returnStatement = (ReturnStatementSyntax) castExpression.Parent.AssertNotNull();
 
-            // Regardless of whether we are returning directly or through variable+label, we just ask for the target method body a return it.
             if ( !annotatedExpression.TryGetAspectReference( out var aspectReference ) )
             {
                 throw new AssertionFailedException();
             }
 
-            var targetSymbol = (IMethodSymbol) context.ReferenceResolver.Resolve( referencedSymbol, aspectReference );
+            // We need to change the return variable and label of the inlined code and then generate hand-over code.
+            var targetSymbol = (IPropertySymbol)context.ReferenceResolver.Resolve( referencedSymbol, aspectReference );
 
-            // Get the final body (after inlinings) of the target.
-            var inlinedTargetBody = context.GetLinkedBody( targetSymbol );
+            // Get the final inlined body of the target property getter. 
+            var inlinedTargetBody = context.GetLinkedBody( targetSymbol.GetMethod.AssertNotNull() );
 
             // Mark the block as flattenable.
             inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
 
-            replacedNode = returnStatement;
             newNode = inlinedTargetBody;
+            replacedNode = returnStatement;
         }
     }
 }
