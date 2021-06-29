@@ -128,13 +128,12 @@ namespace Caravela.MemoTransformer
             }
 
             private static BlockSyntax TransformExpression( string fieldName, ExpressionSyntax expression )
-            {
-                // PERF: read the field into a local, to avoid unnecessary double read in the fast case
+                =>
 
-                // if (field == null)
-                //     Interlocked.CompareExchange(ref field, expression, null);
-                // return field;
-                return
+                    // PERF: read the field into a local, to avoid unnecessary double read in the fast case
+                    // if (field == null)
+                    //     Interlocked.CompareExchange(ref field, expression, null);
+                    // return field;
                     Block(
                         IfStatement(
                             BinaryExpression( SyntaxKind.EqualsExpression, IdentifierName( fieldName ), LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
@@ -145,7 +144,6 @@ namespace Caravela.MemoTransformer
                                         Argument( expression ),
                                         Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ) ) ) ),
                         ReturnStatement( IdentifierName( fieldName ) ) );
-            }
 
             public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node )
             {

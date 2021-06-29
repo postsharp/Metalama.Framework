@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.DesignTime.Contracts;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,12 +11,12 @@ namespace Caravela.Framework.Impl.Formatting
 {
     public sealed partial class HtmlCodeWriter
     {
-        private class AddTitlesVisitor : CSharpSyntaxWalker
+        private class Annotator : CSharpSyntaxWalker
         {
             private readonly ClassifiedTextSpanCollection _textSpans;
             private readonly SemanticModel _semanticModel;
 
-            public AddTitlesVisitor( ClassifiedTextSpanCollection textSpans, SemanticModel semanticModel )
+            public Annotator( ClassifiedTextSpanCollection textSpans, SemanticModel semanticModel ) 
             {
                 this._textSpans = textSpans;
                 this._semanticModel = semanticModel;

@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.Formatting
             // Add XML doc based on the input compilation.
             if ( this._options.AddTitles )
             {
-                var visitor = new AddTitlesVisitor( classifiedTextSpans, semanticModel );
+                var visitor = new Annotator( classifiedTextSpans, semanticModel );
                 visitor.Visit( syntaxTree.GetRoot() );
             }
 
