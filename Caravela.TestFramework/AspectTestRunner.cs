@@ -10,16 +10,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Xunit.Abstractions;
 
 namespace Caravela.TestFramework
 {
     /// <summary>
     /// Executes aspect integration tests by running the full aspect pipeline on the input source file.
     /// </summary>
-    public class AspectTestRunner : BaseTestRunner
+    public partial class AspectTestRunner : BaseTestRunner
     {
-        public AspectTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences )
-            : base( serviceProvider, projectDirectory, metadataReferences ) { }
+        public AspectTestRunner(
+            IServiceProvider serviceProvider,
+            string? projectDirectory,
+            IEnumerable<MetadataReference> metadataReferences,
+            ITestOutputHelper? logger )
+            : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
         /// <summary>
         /// Runs the aspect test with the given name and source.
@@ -29,29 +34,33 @@ namespace Caravela.TestFramework
         {
             var testResult = base.RunTest( testInput );
 
-            using var buildOptions = new TestProjectOptions();
+            using var testProjectOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
 
-            var pipeline = new CompileTimeAspectPipeline( buildOptions, domain, true );
+            var pipeline = new CompileTimeAspectPipeline( testProjectOptions, domain, true, testProjectOptions );
             var spy = new Spy( testResult );
             pipeline.ServiceProvider.AddService<ICompileTimeCompilationBuilderSpy>( spy );
             pipeline.ServiceProvider.AddService<ITemplateCompilerSpy>( spy );
 
-            if ( pipeline.TryExecute( testResult, testResult.InitialCompilation!, CancellationToken.None, out var resultCompilation, out _ ) )
+            if ( pipeline.TryExecute( testResult, testResult.InputCompilation!, CancellationToken.None, out var resultCompilation, out _ ) )
             {
-                testResult.ResultCompilation = resultCompilation;
-                var syntaxRoot = resultCompilation.SyntaxTrees.Single().GetRoot();
+                testResult.OutputCompilation = resultCompilation;
 
                 if ( testInput.Options.IncludeFinalDiagnostics.GetValueOrDefault() )
                 {
                     testResult.Report( resultCompilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
                 }
 
-                testResult.SetTransformedTarget( syntaxRoot );
+                testResult.SetOutputCompilation( resultCompilation );
             }
             else
             {
                 testResult.SetFailed( "CompileTimeAspectPipeline.TryExecute failed." );
+            }
+
+            if ( testInput.Options.WriteFormattedHtml.GetValueOrDefault() )
+            {
+                this.WriteHtml( testInput, testResult );
             }
 
             return testResult;
@@ -59,32 +68,5 @@ namespace Caravela.TestFramework
 
         // We don't want the base class to report errors in the input compilation because the pipeline does.
         protected override bool ReportInvalidInputCompilation => false;
-
-        private class Spy : ICompileTimeCompilationBuilderSpy, ITemplateCompilerSpy
-        {
-            private readonly TestResult _testResult;
-            private SyntaxNode? _annotatedSyntaxRoot;
-
-            public Spy( TestResult testResult )
-            {
-                this._testResult = testResult;
-            }
-
-            public void ReportCompileTimeCompilation( Compilation compilation )
-            {
-                this._testResult.TransformedTemplateSyntax = compilation.SyntaxTrees.First().GetRoot();
-            }
-
-            public void ReportAnnotatedSyntaxNode( SyntaxNode sourceSyntaxRoot, SyntaxNode annotatedSyntaxRoot )
-            {
-                if ( this._annotatedSyntaxRoot == null )
-                {
-                    this._annotatedSyntaxRoot = sourceSyntaxRoot.SyntaxTree.GetRoot();
-                }
-
-                this._annotatedSyntaxRoot = this._annotatedSyntaxRoot.ReplaceNode( sourceSyntaxRoot, annotatedSyntaxRoot );
-                this._testResult.AnnotatedTemplateSyntax = this._annotatedSyntaxRoot;
-            }
-        }
     }
 }

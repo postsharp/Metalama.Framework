@@ -1,4 +1,3 @@
-[TestOutput]
 [Introduction]
 internal class TargetClass
 {

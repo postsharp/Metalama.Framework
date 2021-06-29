@@ -5,12 +5,12 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-    internal class NullDiagnosticAdder : IDiagnosticAdder
+    public sealed class NullDiagnosticAdder : IDiagnosticAdder
     {
         public static NullDiagnosticAdder Instance { get; } = new();
 
         private NullDiagnosticAdder() { }
 
-        public void Report( Diagnostic diagnostic ) { }
+        void IDiagnosticAdder.Report( Diagnostic diagnostic ) { }
     }
 }

@@ -39,7 +39,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMet
         
             }
     
-    [TestOutput]
+    // <target>
     internal class TargetClass
     {
         [SuppressWarning]

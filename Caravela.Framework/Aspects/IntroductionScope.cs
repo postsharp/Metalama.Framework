@@ -6,6 +6,7 @@ namespace Caravela.Framework.Aspects
     /// <summary>
     /// Scope of introduction advices.
     /// </summary>
+    [CompileTimeOnly]
     public enum IntroductionScope
     {
         /// <summary>

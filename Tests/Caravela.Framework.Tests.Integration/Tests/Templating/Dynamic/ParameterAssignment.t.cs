@@ -1,3 +1,4 @@
+int Method(out int a)
 {
     global::System.Int32 result;
     result = this.Method(out a);

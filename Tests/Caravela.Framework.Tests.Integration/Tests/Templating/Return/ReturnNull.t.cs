@@ -1,3 +1,4 @@
+string Method(string a, string b)
 {
     if (a == null || b == null)
     {

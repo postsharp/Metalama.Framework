@@ -1,4 +1,4 @@
-﻿<html>
+<html>
 <head>
 <style>
 
@@ -27,10 +27,15 @@
     font-style: italic;
 }
 
+.legend 
+{
+    margin-top: 100px;
+}
+
 </style>
 </head>
-<body><pre>
-#pragma warning disable CS0649, CS8618
+<body>
+<pre><code class="lang-csharp">#pragma warning disable CS0649, CS8618
 
 using System.Collections.Generic;
 using Caravela.TestFramework;
@@ -40,7 +45,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.ForEachSt
 {
     class RunTimeClass
     {
-        public IEnumerable<int> runTimeEnumerable;
+        public IEnumerable&lt;int&gt; runTimeEnumerable;
     }
 
     [CompileTimeOnly]
@@ -69,13 +74,13 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.ForEachSt
                 <span class='caravelaClassification_RunTime'>x.ToString();</span>
             <span class='caravelaClassification_RunTime'>}</span>
 
-            <span class='caravelaClassification_RunTime'>return </span><span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.</span><span class='caravelaClassification_TemplateKeyword'>Proceed</span><span class='caravelaClassification_CompileTime'>()</span><span class='caravelaClassification_RunTime'>;</span>
+            <span class='caravelaClassification_RunTime'>return </span><span class='caravelaClassification_TemplateKeyword'>meta.Proceed</span><span class='caravelaClassification_CompileTime'>()</span><span class='caravelaClassification_RunTime'>;</span>
         <span class='caravelaClassification_CompileTime'>}</span>
     <span class='caravelaClassification_CompileTime'>}
 </span>}
-
-
-Legend:
+</code></pre>
+<p class='legend'>Legend:</p>
+<pre>
 <span class='Default'>Default</span>
 <span class='RunTime'>RunTime</span>
 <span class='CompileTime'>CompileTime</span>
@@ -83,5 +88,6 @@ Legend:
 <span class='CompileTimeVariable'>CompileTimeVariable</span>
 <span class='TemplateKeyword'>TemplateKeyword</span>
 <span class='Conflict'>Conflict</span>
+<span class='Excluded'>Excluded</span>
 </pre></body>
 </html>

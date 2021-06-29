@@ -1,11 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
+
 namespace Caravela.Framework.Code
 {
     /// <summary>
     /// Kinds of parameters, such as <c>ref</c>, <c>in</c>, <c>out</c>...
     /// </summary>
+    [CompileTimeOnly]
     public enum RefKind
     {
         /// <summary>

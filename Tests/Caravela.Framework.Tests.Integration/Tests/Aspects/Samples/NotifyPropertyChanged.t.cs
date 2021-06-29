@@ -1,4 +1,3 @@
-[TestOutput]
 [NotifyPropertyChanged]
 class Car : global::System.ComponentModel.INotifyPropertyChanged
 {

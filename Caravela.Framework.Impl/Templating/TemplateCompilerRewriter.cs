@@ -12,6 +12,7 @@ using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -70,7 +71,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression )
-            => CastExpression( targetType, CastExpression( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), expression ) );
+            => CastExpression( targetType, CastExpression( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), ParenthesizedExpression( expression ) ) );
 
         private static string NormalizeSpace( string statementComment )
         {
@@ -442,11 +443,8 @@ namespace Caravela.Framework.Impl.Templating
             switch ( type?.Name )
             {
                 case "dynamic":
-                    var invocation = InvocationExpression(
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            ParenthesizedExpression( CastFromDynamic( this.MetaSyntaxFactory.Type( typeof(IDynamicExpression) ), expression ) ),
-                            IdentifierName( nameof(IDynamicExpression.CreateExpression) ) ) );
+
+                    ArgumentListSyntax arguments;
 
                     if ( this._templateMemberClassifier.GetMetaMemberKind( expression ) == MetaMemberKind.This )
                     {
@@ -454,10 +452,17 @@ namespace Caravela.Framework.Impl.Templating
                         var expressionText = SyntaxFactoryEx.LiteralExpression( expression.ToString() );
                         var location = this._templateMetaSyntaxFactory.Location( this._syntaxTreeAnnotationMap.GetLocation( expression ) );
 
-                        invocation = invocation.WithArgumentList( ArgumentList( SeparatedList( new[] { Argument( expressionText ), Argument( location ) } ) ) );
+                        arguments = ArgumentList( SeparatedList( new[] { Argument( expressionText ), Argument( location ) } ) );
+                    }
+                    else
+                    {
+                        arguments = ArgumentList();
                     }
 
-                    return invocation;
+                    return ConditionalAccessExpression(
+                        ParenthesizedExpression( CastFromDynamic( this.MetaSyntaxFactory.Type( typeof(IDynamicExpression) ), expression ) ),
+                        InvocationExpression( MemberBindingExpression( IdentifierName( nameof(IDynamicExpression.CreateExpression) ) ) )
+                            .WithArgumentList( arguments ) );
 
                 case "String":
                     return CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind.StringLiteralExpression );
@@ -612,7 +617,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     if ( this._templateMemberClassifier.IsDynamicParameter( a ) )
                     {
-                        if ( a.GetScopeFromAnnotation() != TemplatingScope.RunTimeOnly )
+                        if ( a.Expression.GetScopeFromAnnotation() != TemplatingScope.RunTimeOnly )
                         {
                             return Argument( this.CreateRunTimeExpression( a.Expression ) );
                         }
@@ -1064,7 +1069,7 @@ namespace Caravela.Framework.Impl.Templating
 
             this.Indent();
 
-            var result = InvocationExpression( this.MetaSyntaxFactory.SyntaxFactoryMethod( nameof(InterpolatedStringExpression) ) )
+            var createInterpolatedString = InvocationExpression( this.MetaSyntaxFactory.SyntaxFactoryMethod( nameof(InterpolatedStringExpression) ) )
                 .WithArgumentList(
                     ArgumentList(
                         SeparatedList<ArgumentSyntax>(
@@ -1076,12 +1081,16 @@ namespace Caravela.Framework.Impl.Templating
                                     .WithLeadingTrivia( this.GetIndentation() ),
                                 Token( SyntaxKind.CommaToken ).WithTrailingTrivia( GetLineBreak() ),
                                 Argument( this.Transform( node.StringEndToken ) ).WithLeadingTrivia( this.GetIndentation() )
-                            } ) ) )
+                            } ) ) );
+
+            var callRender = InvocationExpression(
+                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RenderInterpolatedString) ),
+                    ArgumentList( SingletonSeparatedList( Argument( createInterpolatedString ) ) ) )
                 .NormalizeWhitespace();
 
             this.Unindent();
 
-            return result;
+            return callRender;
         }
 
         public override SyntaxNode VisitSwitchStatement( SwitchStatementSyntax node )
@@ -1207,6 +1216,11 @@ namespace Caravela.Framework.Impl.Templating
             return base.VisitIdentifierName( node );
         }
 
+        private ExpressionSyntax AddCallToSimplifierAnnotations( ExpressionSyntax expression )
+            => InvocationExpression(
+                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddSimplifierAnnotations) ),
+                ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
+
         /// <summary>
         /// Transforms a type or namespace so that it is fully qualified, but return <c>false</c> if the input <paramref name="node"/>
         /// is not a type or namespace.
@@ -1224,7 +1238,7 @@ namespace Caravela.Framework.Impl.Templating
                     var nameExpression = LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( namespaceOrType );
 
                     transformedNode = this.GetTransformationKind( node ) == TransformationKind.Transform
-                        ? this.Transform( nameExpression )
+                        ? this.AddCallToSimplifierAnnotations( this.Transform( nameExpression ) )
                         : nameExpression;
 
                     return true;
@@ -1246,6 +1260,18 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return base.VisitQualifiedName( node );
             }
+        }
+
+        protected override ExpressionSyntax TransformQualifiedName( QualifiedNameSyntax node )
+        {
+            var transformed = base.TransformQualifiedName( node );
+
+            if ( node.HasAnnotation( Simplifier.Annotation ) )
+            {
+                transformed = this.AddCallToSimplifierAnnotations( transformed );
+            }
+
+            return transformed;
         }
 
         public override SyntaxNode VisitAliasQualifiedName( AliasQualifiedNameSyntax node )
@@ -1270,6 +1296,18 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return base.VisitGenericName( node );
             }
+        }
+
+        protected override ExpressionSyntax TransformConditionalExpression( ConditionalExpressionSyntax node )
+        {
+            var transformedCondition = this.Transform( node.Condition );
+            var transformedWhenTrue = this.Transform( node.WhenTrue );
+            var transformedWhenFalse = this.Transform( node.WhenFalse );
+
+            return InvocationExpression(
+                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ConditionalExpression) ),
+                ArgumentList(
+                    SeparatedList( new[] { Argument( transformedCondition ), Argument( transformedWhenTrue ), Argument( transformedWhenFalse ) } ) ) );
         }
     }
 }

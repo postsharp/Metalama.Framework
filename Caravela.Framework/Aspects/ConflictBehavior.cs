@@ -6,6 +6,7 @@ namespace Caravela.Framework.Aspects
     /// <summary>
     /// Conflict behavior of introduction advices.
     /// </summary>
+    [CompileTimeOnly]
     public enum ConflictBehavior
     {
         /// <summary>

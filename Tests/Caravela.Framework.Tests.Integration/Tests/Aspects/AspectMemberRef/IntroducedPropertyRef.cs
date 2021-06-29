@@ -19,7 +19,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.Introduced
         
     }
     
-    [TestOutput]
+    // <target>
     [Retry]
     class Program
     {

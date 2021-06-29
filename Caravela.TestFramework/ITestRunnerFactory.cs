@@ -3,6 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 using System;
+using Xunit.Abstractions;
 
 namespace Caravela.TestFramework
 {
@@ -11,6 +12,10 @@ namespace Caravela.TestFramework
     /// </summary>
     internal interface ITestRunnerFactory
     {
-        BaseTestRunner CreateTestRunner( IServiceProvider serviceProvider, string? projectDirectory, MetadataReference[] metadataReferences );
+        BaseTestRunner CreateTestRunner(
+            IServiceProvider serviceProvider,
+            string? projectDirectory,
+            MetadataReference[] metadataReferences,
+            ITestOutputHelper? logger );
     }
 }

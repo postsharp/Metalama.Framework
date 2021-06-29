@@ -6,7 +6,6 @@ using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Reflection;
 using MethodBase = System.Reflection.MethodBase;
@@ -32,7 +31,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             else
             {
                 return new DynamicExpression(
-                    (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol() ),
+                    LanguageServiceFactory.CSharpSyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol() ),
                     this.ReturnType,
                     false );
             }

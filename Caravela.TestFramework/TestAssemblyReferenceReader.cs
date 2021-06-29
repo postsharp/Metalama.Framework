@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.TestFramework.XunitFramework;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -34,15 +35,20 @@ namespace Caravela.TestFramework
                 throw new InvalidOperationException( "The test assembly must have a single AssemblyMetadataAttribute with Key = \"ReferenceAssemblyList\"." );
             }
 
+            TestDiscoverer testDiscoverer = new( assembly );
+            var projectDirectory = testDiscoverer.FindProjectDirectory();
+
             var path = (string) attribute.GetConstructorArguments().ElementAt( 1 )!;
 
             var lines = File.ReadAllLines( path );
 
-            return lines.Select( t => new TestAssemblyReference { Path = FilterReference( t ) } ).ToArray();
+            return lines.Select( t => new TestAssemblyReference { Path = FilterReference( projectDirectory, t ) } ).ToArray();
         }
 
-        private static string FilterReference( string path )
+        private static string FilterReference( string projectDirectory, string path )
         {
+            path = Path.Combine( projectDirectory, path );
+
             var directory = Path.GetDirectoryName( path )!;
             var leafDirectory = Path.GetFileName( directory );
 

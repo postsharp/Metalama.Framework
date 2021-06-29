@@ -26,7 +26,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Samples.SimpleLogging
         }
     }
 
-    [TestOutput]
+    // <target>
     internal class TargetClass
     {
         [Log]

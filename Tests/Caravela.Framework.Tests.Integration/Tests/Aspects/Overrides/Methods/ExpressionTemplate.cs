@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.E
             => default;
     }
 
-    [TestOutput]
+    // <target>
     public class Target
     {
         [Test]

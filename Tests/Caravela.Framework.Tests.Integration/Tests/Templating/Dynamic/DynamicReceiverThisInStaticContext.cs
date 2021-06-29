@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicReceive
         }
     }
 
-    [TestOutput]
+    // <target>
     static class TargetCode
     {
         static int Method(int a)

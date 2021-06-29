@@ -1,4 +1,4 @@
-﻿<html>
+<html>
 <head>
 <style>
 
@@ -27,10 +27,15 @@
     font-style: italic;
 }
 
+.legend 
+{
+    margin-top: 100px;
+}
+
 </style>
 </head>
-<body><pre>
-using Caravela.TestFramework;
+<body>
+<pre><code class="lang-csharp">using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStatements.TemplateKeywords
@@ -41,16 +46,16 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
         [TestTemplate]
         <span class='caravelaClassification_CompileTime'>dynamic? Template()</span>
         <span class='caravelaClassification_CompileTime'>{</span>
-            <span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.</span><span class='caravelaClassification_TemplateKeyword'>CompileTime</span><span class='caravelaClassification_CompileTime'>( 0 );</span>
+            <span class='caravelaClassification_TemplateKeyword'>meta.CompileTime</span><span class='caravelaClassification_CompileTime'>( 0 );</span>
             <span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.</span><span class='caravelaClassification_TemplateKeyword'>CompileTime</span><span class='caravelaClassification_CompileTime'>&lt;long&gt;( 0 );</span>
-            <span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.</span><span class='caravelaClassification_TemplateKeyword'>Comment</span><span class='caravelaClassification_CompileTime'>( &quot;Hey&quot; );</span>
-            <span class='caravelaClassification_RunTime'>return </span><span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.</span><span class='caravelaClassification_TemplateKeyword'>Proceed</span><span class='caravelaClassification_CompileTime'>()</span><span class='caravelaClassification_RunTime'>;</span>
+            <span class='caravelaClassification_TemplateKeyword'>meta.Comment</span><span class='caravelaClassification_CompileTime'>( "Hey" );</span>
+            <span class='caravelaClassification_RunTime'>return </span><span class='caravelaClassification_TemplateKeyword'>meta.Proceed</span><span class='caravelaClassification_CompileTime'>()</span><span class='caravelaClassification_RunTime'>;</span>
         <span class='caravelaClassification_CompileTime'>}</span>
     <span class='caravelaClassification_CompileTime'>}
 </span>}
-
-
-Legend:
+</code></pre>
+<p class='legend'>Legend:</p>
+<pre>
 <span class='Default'>Default</span>
 <span class='RunTime'>RunTime</span>
 <span class='CompileTime'>CompileTime</span>
@@ -58,5 +63,6 @@ Legend:
 <span class='CompileTimeVariable'>CompileTimeVariable</span>
 <span class='TemplateKeyword'>TemplateKeyword</span>
 <span class='Conflict'>Conflict</span>
+<span class='Excluded'>Excluded</span>
 </pre></body>
 </html>

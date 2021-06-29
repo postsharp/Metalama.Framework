@@ -1,4 +1,3 @@
-[TestOutput]
 internal class TargetClass
 {
     [Override]
@@ -12,7 +11,6 @@ internal class TargetClass
     }
 
     private readonly int __Property__BackingField;
-
     [Override]
     public static int Static_Property
     {
@@ -24,7 +22,6 @@ internal class TargetClass
     }
 
     private static readonly int __Static_Property__BackingField;
-
     [Override]
     private int PrivateProperty
     {
@@ -36,7 +33,6 @@ internal class TargetClass
     }
 
     private readonly int __PrivateProperty__BackingField;
-
     [Override]
     protected int ProtectedProperty
     {
@@ -48,7 +44,6 @@ internal class TargetClass
     }
 
     private readonly int __ProtectedProperty__BackingField;
-
     [Override]
     private protected int PrivateProtectedProperty
     {
@@ -60,7 +55,6 @@ internal class TargetClass
     }
 
     private readonly int __PrivateProtectedProperty__BackingField;
-
     [Override]
     protected internal int ProtectedInternalProperty
     {
@@ -72,7 +66,6 @@ internal class TargetClass
     }
 
     private readonly int __ProtectedInternalProperty__BackingField;
-
     [Override]
     protected internal int InternalProperty
     {
@@ -84,7 +77,6 @@ internal class TargetClass
     }
 
     private readonly int __InternalProperty__BackingField;
-
     [Override]
     public int PropertyWithSetter
     {
@@ -103,7 +95,6 @@ internal class TargetClass
     }
 
     private int __PropertyWithSetter__BackingField;
-
     [Override]
     public static int Static_PropertyWithSetter
     {
@@ -122,7 +113,6 @@ internal class TargetClass
     }
 
     private static int __Static_PropertyWithSetter__BackingField;
-
     [Override]
     public int PropertyWithRestrictedSetter
     {
@@ -141,7 +131,6 @@ internal class TargetClass
     }
 
     private int __PropertyWithRestrictedSetter__BackingField;
-
     [Override]
     public int PropertyWithRestrictedGetter
     {
@@ -160,7 +149,6 @@ internal class TargetClass
     }
 
     private int __PropertyWithRestrictedGetter__BackingField;
-
     [Override]
     public int PropertyWithInitSetter
     {
@@ -179,7 +167,6 @@ internal class TargetClass
     }
 
     private int __PropertyWithInitSetter__BackingField;
-
     [Override]
     public int PropertyWithRestrictedInitSetter
     {
@@ -198,19 +185,14 @@ internal class TargetClass
     }
 
     private int __PropertyWithRestrictedInitSetter__BackingField;
-
-    // Needs to change accesses in ctors to the newly defined backing field.
-    // Linker needs to rewrite ctor bodies if there is any such field.
-
-    //[Override]
-    //public int GetterPropertyWithInitializer { get; } = 42;
-
-    //[Override]
-    //public static int Static_GetterPropertyWithInitializer { get; } = 42;
-
-    //[Override]
-    //public int PropertyWithInitializer { get; set; } = 42;
-
-    //[Override]
-    //public static int Static_PropertyWithInitializer { get; set; } = 42;
+// Needs to change accesses in ctors to the newly defined backing field.
+// Linker needs to rewrite ctor bodies if there is any such field.
+//[Override]
+//public int GetterPropertyWithInitializer { get; } = 42;
+//[Override]
+//public static int Static_GetterPropertyWithInitializer { get; } = 42;
+//[Override]
+//public int PropertyWithInitializer { get; set; } = 42;
+//[Override]
+//public static int Static_PropertyWithInitializer { get; set; } = 42;
 }

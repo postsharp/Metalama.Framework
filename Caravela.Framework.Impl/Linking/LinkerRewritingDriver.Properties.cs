@@ -182,7 +182,8 @@ namespace Caravela.Framework.Impl.Linking
                     VariableDeclaration(
                         propertyDeclaration.Type,
                         SingletonSeparatedList(
-                            VariableDeclarator( Identifier( GetAutoPropertyBackingFieldName( symbol ) ) ) ) ) );
+                            VariableDeclarator( Identifier( GetAutoPropertyBackingFieldName( symbol ) ) ) ) ) )
+                .NormalizeWhitespace();
         }
 
         private static BlockSyntax GetImplicitGetterBody(IMethodSymbol symbol)
@@ -192,7 +193,7 @@ namespace Caravela.Framework.Impl.Linking
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         symbol.IsStatic
-                        ? (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
+                        ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
                         : ThisExpression(),
                         IdentifierName( GetAutoPropertyBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ) ) );
         }
@@ -206,7 +207,7 @@ namespace Caravela.Framework.Impl.Linking
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
-                            ? (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
+                            ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
                             : ThisExpression(),
                             IdentifierName( GetAutoPropertyBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ) ) );

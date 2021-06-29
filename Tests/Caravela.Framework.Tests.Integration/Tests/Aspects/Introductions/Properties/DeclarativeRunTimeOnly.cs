@@ -30,7 +30,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.D
     
     public class RunTimeOnlyClass {}
 
-    [TestOutput]
+    // <target>
     [Introduction]
     internal class TargetClass
     {

@@ -1,3 +1,4 @@
+string Method(string a)
 {
     object arg0 = null;
     arg0 = a;

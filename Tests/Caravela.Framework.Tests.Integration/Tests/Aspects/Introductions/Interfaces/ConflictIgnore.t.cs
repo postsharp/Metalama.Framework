@@ -1,4 +1,3 @@
-[TestOutput]
 [Introduction]
 public class TargetClass : IInterface
 {

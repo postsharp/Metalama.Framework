@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using System;
 
 namespace Caravela.Framework.Eligibility
@@ -9,6 +10,7 @@ namespace Caravela.Framework.Eligibility
     /// (Not implemented.)
     /// </summary>
     [Obsolete( "Not implemented." )]
+    [CompileTimeOnly]
     public static class DescribedObjectExtensions
     {
         public static IDescribedObject<TOut> Cast<TIn, TOut>( this IDescribedObject<TIn> describedObject )

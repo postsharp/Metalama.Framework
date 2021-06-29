@@ -231,7 +231,7 @@ namespace Caravela.Framework.Impl.Linking
                     // TODO: Do this properly.
                     return MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
+                        LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
                         IdentifierName( targetSymbol.Name ) );
                 }
                 else

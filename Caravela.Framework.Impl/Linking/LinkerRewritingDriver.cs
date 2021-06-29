@@ -310,11 +310,19 @@ namespace Caravela.Framework.Impl.Linking
                 case ArrowExpressionClauseSyntax arrowExpressionClause:
                     if ( symbol.ReturnsVoid )
                     {
-                        return Block( ExpressionStatement( (ExpressionSyntax) rewriter.Visit( arrowExpressionClause.Expression ).AssertNotNull()) );
+                        return 
+                            Block( 
+                                ExpressionStatement( 
+                                    (ExpressionSyntax) rewriter.Visit( arrowExpressionClause.Expression ).AssertNotNull()) );
                     }
                     else
                     {
-                        return Block( ReturnStatement( (ExpressionSyntax) rewriter.Visit( arrowExpressionClause.Expression ).AssertNotNull() ) );
+                        return 
+                            Block( 
+                                ReturnStatement(
+                                    Token( SyntaxKind.ReturnKeyword ).WithLeadingTrivia( Whitespace( " " ) ),
+                                    ( ExpressionSyntax) rewriter.Visit( arrowExpressionClause.Expression ).AssertNotNull(),
+                                    Token( SyntaxKind.SemicolonToken) ) );
                     }
 
                 default:

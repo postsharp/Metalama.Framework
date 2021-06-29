@@ -88,7 +88,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <param name="type"></param>
         /// <returns></returns>
         public TypeSyntax GetTypeSyntax( Type type )
-            => this._syntaxCache.GetOrAdd( type, t => (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.GetTypeSymbol( t ) ) );
+            => this._syntaxCache.GetOrAdd( type, t => LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.GetTypeSymbol( t ) ) );
 
         private ITypeSymbol GetTypeSymbolCore( Type type )
         {

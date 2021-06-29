@@ -6,9 +6,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.CodeAnalysis.Text;
+using Microsoft.CodeAnalysis.Simplification;
+using PostSharp.Patterns;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -19,20 +21,22 @@ namespace Caravela.TestFramework
     /// </summary>
     public class TestResult : IDiagnosticAdder
     {
-        public TestInput? Input { get; set; }
+        private bool _frozen;
+
+        public TestInput? TestInput { get; set; }
 
         private readonly List<Diagnostic> _diagnostics = new();
+        private readonly List<TestSyntaxTree> _syntaxTrees = new();
         private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
 
-        public void Report( Diagnostic diagnostic )
-        {
-            this._diagnostics.Add( diagnostic );
-        }
+        void IDiagnosticAdder.Report( Diagnostic diagnostic ) => this._diagnostics.Add( diagnostic );
 
         /// <summary>
         /// Gets the list of diagnostics emitted during test run.
         /// </summary>
         public IReadOnlyList<Diagnostic> Diagnostics => this._diagnostics;
+
+        public IReadOnlyList<TestSyntaxTree> SyntaxTrees => this._syntaxTrees;
 
         /// <summary>
         /// Gets the primary error message emitted during test run.
@@ -45,41 +49,26 @@ namespace Caravela.TestFramework
         public Project? Project { get; set; }
 
         /// <summary>
-        /// Gets or sets the source code document of the template.
-        /// </summary>
-        public Document? TemplateDocument { get; set; }
-
-        /// <summary>
         /// Gets or sets the initial compilation of the test project.
         /// </summary>
-        public Compilation? InitialCompilation { get; set; }
+        public Compilation? InputCompilation { get; set; }
 
         /// <summary>
         /// Gets or sets the result compilation of the test project.
         /// </summary>
-        public Compilation? ResultCompilation { get; set; }
+        public Compilation? OutputCompilation { get; set; }
 
         /// <summary>
-        /// Gets or sets the root <see cref="SyntaxNode"/> of the template annotated with template annotations from <see cref="AnnotationExtensions"/>.
+        /// Gets a value indicating whether the test run succeeded.
         /// </summary>
-        internal SyntaxNode? AnnotatedTemplateSyntax { get; set; }
+        public bool Success { get; private set; } = true;
 
         /// <summary>
-        /// Gets the root <see cref="SyntaxNode"/> of the transformed syntax tree of the template.
+        /// Gets the <see cref="System.Exception"/> in which the test resulted, if any.
         /// </summary>
-        public SyntaxNode? TransformedTemplateSyntax { get; internal set; }
+        public Exception? Exception { get; private set; }
 
-        public string? TransformedTemplatePath { get; internal set; }
-
-        /// <summary>
-        /// Gets the root <see cref="SyntaxNode"/> of the transformed syntax tree of the target declaration.
-        /// </summary>
-        public SyntaxNode? TransformedTargetSyntax { get; private set; }
-
-        /// <summary>
-        /// Gets the transformed <see cref="SourceText"/> of the target declaration.
-        /// </summary>
-        public SourceText? TransformedTargetSourceText { get; private set; }
+        internal void AddInputDocument( Document document ) => this._syntaxTrees.Add( new TestSyntaxTree( document ) );
 
         private static string CleanMessage( string text )
         {
@@ -104,79 +93,37 @@ namespace Caravela.TestFramework
             return string.Join( Environment.NewLine, lines );
         }
 
-        internal void SetTransformedTarget( SyntaxNode syntaxNode )
+        internal void SetOutputCompilation( Compilation runTimeCompilation )
         {
-            if ( this.InitialCompilation == null ||
-                 this.Input == null ||
+            if ( this.InputCompilation == null ||
+                 this.TestInput == null ||
                  this.Project == null )
             {
                 throw new InvalidOperationException( "The object has not bee properly initialized." );
             }
 
-            string? GetTextUnderDiagnostic( Diagnostic diagnostic )
+            var i = -1;
+
+            foreach ( var syntaxTree in runTimeCompilation.SyntaxTrees )
             {
-                var syntaxTree = diagnostic.Location!.SourceTree;
+                i++;
 
-                if ( syntaxTree == null )
-                {
-                    // If we don't have the a SyntaxTree, find it from the input compilation.
-                    syntaxTree = this.InitialCompilation.SyntaxTrees.SingleOrDefault( t => t.FilePath == diagnostic.Location.GetLineSpan().Path );
-                }
+                var syntaxNode = syntaxTree.GetRoot();
 
-                return syntaxTree?.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
+                // Format the output code.
+                this.SyntaxTrees[i].SetRunTimeCode( syntaxNode );
             }
-
-            // Find notes annotated with [TestOutput] and choose the first one. If there is none, the test output is the whole tree
-            // passed to this method.
-            var outputNodes =
-                syntaxNode
-                    .DescendantNodesAndSelf( _ => true )
-                    .OfType<MemberDeclarationSyntax>()
-                    .Where(
-                        m => m.AttributeLists
-                            .SelectMany( list => list.Attributes )
-                            .Any( a => a.Name.ToString().Contains( "TestOutput" ) ) )
-                    .ToList();
-
-            var outputNode = outputNodes.FirstOrDefault() ?? syntaxNode;
-
-            // Convert diagnostics into comments in the code.
-            var comments =
-                this.Diagnostics
-                    .Where(
-                        d => this.Input.Options.IncludeAllSeverities.GetValueOrDefault()
-                             || d.Severity >= DiagnosticSeverity.Warning )
-                    .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
-                    .OrderByDescending( s => s )
-                    .Select( SyntaxFactory.Comment )
-                    .ToList();
-
-            if ( comments.Any() )
-            {
-                comments.Add( SyntaxFactory.LineFeed );
-            }
-
-            // Format the output code.
-
-            var outputNodeWithComments = outputNode.WithLeadingTrivia( outputNode.GetLeadingTrivia().AddRange( comments ) );
-            var formattedOutput = Formatter.Format( outputNodeWithComments, this.Project.Solution.Workspace );
-
-            this.TransformedTargetSyntax = outputNodeWithComments;
-            this.TransformedTargetSourceText = formattedOutput.GetText();
         }
-
-        /// <summary>
-        /// Gets a value indicating whether the test run succeeded.
-        /// </summary>
-        public bool Success { get; private set; } = true;
-
-        /// <summary>
-        /// Gets the <see cref="System.Exception"/> in which the test resulted, if any.
-        /// </summary>
-        public Exception? Exception { get; private set; }
 
         internal void SetFailed( string reason, Exception? exception = null )
         {
+            if ( this._frozen )
+            {
+                throw new InvalidOperationException( "The test result can no longer be modified." );
+            }
+
+            this._frozen = true;
+
             this.Exception = exception;
             this.Success = false;
             this.ErrorMessage = reason;
@@ -185,14 +132,119 @@ namespace Caravela.TestFramework
             {
                 this.ErrorMessage += Environment.NewLine + exception;
             }
+        }
 
-            var emptyStatement =
-                SyntaxFactory.ExpressionStatement( SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) ) )
-                    .WithSemicolonToken( SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
+        private string? GetTextUnderDiagnostic( Diagnostic diagnostic )
+        {
+            var syntaxTree = diagnostic.Location!.SourceTree;
 
-            this.SetTransformedTarget(
-                emptyStatement
-                    .WithLeadingTrivia( SyntaxFactory.Comment( $"// {reason} \n" ) ) );
+            if ( syntaxTree == null )
+            {
+                // If we don't have the a SyntaxTree, find it from the input compilation.
+                syntaxTree = this.InputCompilation!.SyntaxTrees.SingleOrDefault( t => t.FilePath == diagnostic.Location.GetLineSpan().Path );
+            }
+
+            var text = syntaxTree?.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
+
+            return text;
+        }
+
+        /// <summary>
+        /// Gets the content of the <c>.t.cs</c> file, i.e. the output transformed code with comments
+        /// for diagnostics.
+        /// </summary>
+        public CompilationUnitSyntax GetConsolidatedTestOutput()
+        {
+            if ( this.TestInput == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            var consolidatedCompilationUnit = SyntaxFactory.CompilationUnit();
+
+            // Adding the syntax.
+            if ( this.Success && this.SyntaxTrees.Any() )
+            {
+                var syntaxTree = this.SyntaxTrees.First();
+
+                if ( syntaxTree.OutputRunTimeSyntaxRoot == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                var syntaxNode = syntaxTree.OutputRunTimeSyntaxRoot!;
+
+                // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
+                // passed to this method.
+
+                var outputNodes =
+                    syntaxNode
+                        .DescendantNodesAndSelf( _ => true )
+                        .OfType<MemberDeclarationSyntax>()
+                        .Where( m => m.GetLeadingTrivia().ToString().Contains( "<target>" ) )
+                        .ToList();
+
+                var outputNode = outputNodes.FirstOrDefault() ?? syntaxNode;
+
+                switch ( outputNode )
+                {
+                    case MemberDeclarationSyntax member:
+                        consolidatedCompilationUnit = consolidatedCompilationUnit.AddMembers( member.WithoutTrivia() );
+
+                        break;
+
+                    case CompilationUnitSyntax compilationUnit:
+                        consolidatedCompilationUnit = consolidatedCompilationUnit
+                            .AddMembers( compilationUnit.Members.ToArray() )
+                            .AddUsings( compilationUnit.Usings.ToArray() );
+
+                        break;
+
+                    case ExpressionStatementSyntax statementSyntax when statementSyntax.ToString() == "":
+                        // This is an empty statement
+                        consolidatedCompilationUnit = consolidatedCompilationUnit
+                            .WithLeadingTrivia( statementSyntax.GetLeadingTrivia().AddRange( consolidatedCompilationUnit.GetLeadingTrivia() ) );
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException( $"Don't know how to add a {outputNode.Kind()} to the compilation unit." );
+                }
+            }
+
+            // Adding the diagnostics as trivia.
+            List<SyntaxTrivia> comments = new();
+
+            if ( !this.Success && this.TestInput!.Options.ReportErrorMessage.GetValueOrDefault() )
+            {
+                comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
+            }
+
+            comments.AddRange(
+                this.Diagnostics
+                    .Where(
+                        d => this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
+                             || d.Severity >= DiagnosticSeverity.Warning )
+                    .Select( d => $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
+                    .OrderByDescending( s => s )
+                    .Select( SyntaxFactory.Comment )
+                    .ToList() );
+
+            consolidatedCompilationUnit = consolidatedCompilationUnit.WithLeadingTrivia( comments );
+
+            if ( this.TestInput.Options.FormatOutput.GetValueOrDefault( true ) )
+            {
+                var outputDocument =
+                    this.Project!.RemoveDocuments( this.Project.DocumentIds.ToImmutableArray() )
+                        .AddDocument( this.TestInput.TestName, consolidatedCompilationUnit );
+
+                var simplifiedDocument = Simplifier.ReduceAsync( outputDocument ).Result;
+                var simplifiedSyntaxRoot = simplifiedDocument.GetSyntaxRootAsync().Result!;
+
+                consolidatedCompilationUnit = (CompilationUnitSyntax) Formatter.Format( simplifiedSyntaxRoot, this.Project!.Solution.Workspace );
+            }
+
+            return consolidatedCompilationUnit;
         }
     }
 }

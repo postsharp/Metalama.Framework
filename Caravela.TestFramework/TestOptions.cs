@@ -13,7 +13,7 @@ namespace Caravela.TestFramework
     /// </summary>
     public class TestOptions
     {
-        private static readonly Regex _directivesRegex = new( "^// @(\\w+)" );
+        private static readonly Regex _directivesRegex = new( @"^\s*//\s*@(?<name>\w+)\s*(\((?<arg>[^\)]*)\))?", RegexOptions.Multiline );
 
         public string? SkipReason { get; set; }
 
@@ -42,6 +42,33 @@ namespace Caravela.TestFramework
         public List<TestAssemblyReference> References { get; } = new();
 
         /// <summary>
+        /// Gets the list of source code files that should be included in the compilation.
+        /// </summary>
+        public List<string> IncludedFiles { get; } = new();
+
+        /// <summary>
+        /// Gets or sets a value indicating whether HTML of syntax-highlighted files should be produced. If <c>true</c>, these files
+        /// are created to the <c>obj/highlighted</c> directory.
+        /// </summary>
+        public bool? WriteFormattedHtml { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether titles (tooltips) should be added to HTML files.
+        /// </summary>
+        public bool? AddHtmlTitles { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the <see cref="TestResult.ErrorMessage"/> should be added to
+        /// the test output.
+        /// </summary>
+        public bool? ReportErrorMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the output <c>t.cs</c> file should be formatted. The default behavior is <c>true</c>.
+        /// </summary>
+        public bool? FormatOutput { get; set; }
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
@@ -54,6 +81,18 @@ namespace Caravela.TestFramework
             this.IncludeAllSeverities ??= directoryOptions.IncludeAllSeverities;
 
             this.TestRunnerFactoryType ??= directoryOptions.TestRunnerFactoryType;
+
+            this.WriteFormattedHtml ??= directoryOptions.WriteFormattedHtml;
+
+            this.AddHtmlTitles ??= directoryOptions.AddHtmlTitles;
+
+            this.ReportErrorMessage ??= directoryOptions.ReportErrorMessage;
+
+            this.FormatOutput ??= directoryOptions.FormatOutput;
+
+            this.IncludedFiles.AddRange( directoryOptions.IncludedFiles );
+
+            this.References.AddRange( directoryOptions.References );
         }
 
         /// <summary>
@@ -68,7 +107,8 @@ namespace Caravela.TestFramework
                     continue;
                 }
 
-                var directiveName = directive.Groups[1].Value;
+                var directiveName = directive.Groups["name"].Value;
+                var directiveArg = (directive.Groups["arg"]?.Value ?? "").Trim();
 
                 switch ( directiveName )
                 {
@@ -83,13 +123,33 @@ namespace Caravela.TestFramework
                         break;
 
                     case "Skipped":
-                        this.SkipReason = "Skipped by directive in source code.";
+                        this.SkipReason = string.IsNullOrEmpty( directiveArg ) ? "Skipped by directive in source code." : directiveArg;
+
+                        break;
+
+                    case "Include":
+                        this.IncludedFiles.Add( directiveArg );
 
                         break;
 
                     case "DesignTime":
                         this.TestRunnerFactoryType =
                             "Caravela.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory, Caravela.Framework.Tests.Integration";
+
+                        break;
+
+                    case "WriteFormattedHtml":
+                        this.WriteFormattedHtml = true;
+
+                        break;
+
+                    case "AddHtmlTitles":
+                        this.AddHtmlTitles = true;
+
+                        break;
+
+                    case "FormatOutput":
+                        this.FormatOutput = true;
 
                         break;
                 }

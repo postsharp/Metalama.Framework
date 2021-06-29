@@ -24,6 +24,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Runners
 {
@@ -40,11 +41,16 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
         /// </summary>
-        public TemplatingTestRunner( IServiceProvider serviceProvider, string? projectDirectory, IEnumerable<MetadataReference> metadataReferences ) : this(
+        public TemplatingTestRunner(
+            IServiceProvider serviceProvider,
+            string? projectDirectory,
+            IEnumerable<MetadataReference> metadataReferences,
+            ITestOutputHelper? logger ) : this(
             serviceProvider,
             projectDirectory,
             metadataReferences,
-            Array.Empty<CSharpSyntaxVisitor>() ) { }
+            Array.Empty<CSharpSyntaxVisitor>(),
+            logger ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
@@ -54,11 +60,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
             IServiceProvider serviceProvider,
             string? projectDirectory,
             IEnumerable<MetadataReference> metadataReferences,
-            IEnumerable<CSharpSyntaxVisitor> testAnalyzers )
+            IEnumerable<CSharpSyntaxVisitor> testAnalyzers,
+            ITestOutputHelper? logger )
             : base(
                 serviceProvider,
                 projectDirectory,
-                metadataReferences )
+                metadataReferences,
+                logger )
         {
             this._testAnalyzers = testAnalyzers;
         }
@@ -77,8 +85,10 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 return testResult;
             }
 
-            var templateSyntaxRoot = testResult.TemplateDocument!.GetSyntaxRootAsync().Result!;
-            var templateSemanticModel = testResult.TemplateDocument.GetSemanticModelAsync().Result!;
+            var testSyntaxTree = testResult.SyntaxTrees.Single();
+            var templateDocument = testSyntaxTree.InputDocument;
+            var templateSyntaxRoot = templateDocument.GetSyntaxRootAsync().Result!;
+            var templateSemanticModel = templateDocument.GetSemanticModelAsync().Result!;
 
             foreach ( var testAnalyzer in this._testAnalyzers )
             {
@@ -110,8 +120,20 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 Assert.Equal( templateSyntaxRoot.ToString(), annotatedTemplateSyntax.ToString() );
             }
 
-            testResult.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
-            testResult.TransformedTemplateSyntax = transformedTemplateSyntax;
+            testSyntaxTree.AnnotatedSyntaxRoot = annotatedTemplateSyntax;
+
+            // Write the transformed code to disk.
+            var transformedTemplatePath = Path.Combine( GeneratedDirectoryPath, Path.ChangeExtension( testInput.TestName, ".cs" ) );
+            var transformedTemplateText = transformedTemplateSyntax!.SyntaxTree.GetText();
+            Directory.CreateDirectory( Path.GetDirectoryName( transformedTemplatePath ) );
+
+            using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
+            {
+                transformedTemplateText.Write( textWriter );
+            }
+
+            // Report the result to the test.
+            testSyntaxTree.SetCompileTimeCode( transformedTemplateSyntax, transformedTemplatePath );
 
             if ( !templateCompilerSuccess )
             {
@@ -120,19 +142,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 return testResult;
             }
 
-            // Write the transformed code to disk.
-            var transformedTemplateText = testResult.TransformedTemplateSyntax!.SyntaxTree.GetText();
-            var transformedTemplatePath = Path.Combine( GeneratedDirectoryPath, Path.ChangeExtension( testInput.TestName, ".cs" ) );
-            testResult.TransformedTemplatePath = transformedTemplatePath;
-            Directory.CreateDirectory( Path.GetDirectoryName( transformedTemplatePath ) );
-
-            using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
-            {
-                transformedTemplateText.Write( textWriter );
-            }
-
             // Create a SyntaxTree that maps to the file we have just written.
-            var oldTransformedTemplateSyntaxTree = testResult.TransformedTemplateSyntax.SyntaxTree;
+            var oldTransformedTemplateSyntaxTree = transformedTemplateSyntax.SyntaxTree;
 
             var newTransformedTemplateSyntaxTree = CSharpSyntaxTree.Create(
                 (CSharpSyntaxNode) oldTransformedTemplateSyntaxTree.GetRoot(),
@@ -171,13 +182,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var compiledAspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
                 var compiledTemplateMethod = compiledAspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
 
-                var templateMethod = testResult.InitialCompilation!.Assembly.GetTypes().Single( t => t.Name == "Aspect" ).GetMembers( "Template" ).Single();
+                var templateMethod = testResult.InputCompilation!.Assembly.GetTypes().Single( t => t.Name == "Aspect" ).GetMembers( "Template" ).Single();
 
                 Invariant.Assert( compiledTemplateMethod != null );
                 var driver = new TemplateDriver( null!, templateMethod, compiledTemplateMethod );
 
-                var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InitialCompilation );
-                var expansionContext = this.CreateTemplateExpansionContext( assembly, compilationModel, templateMethod );
+                var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InputCompilation );
+                var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( assembly, compilationModel, templateMethod );
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult, out var output );
 
@@ -190,7 +201,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     return testResult;
                 }
 
-                testResult.SetTransformedTarget( output! );
+                testSyntaxTree.SetRunTimeCode( targetMethod.WithBody( output! ) );
             }
             catch ( Exception e )
             {
@@ -204,7 +215,10 @@ namespace Caravela.Framework.Tests.Integration.Runners
             return testResult;
         }
 
-        private TemplateExpansionContext CreateTemplateExpansionContext( Assembly assembly, CompilationModel compilation, ISymbol templateMethod )
+        private (TemplateExpansionContext Context, MethodDeclarationSyntax TargetMethod) CreateTemplateExpansionContext(
+            Assembly assembly,
+            CompilationModel compilation,
+            ISymbol templateMethod )
         {
             var roslynCompilation = compilation.RoslynCompilation;
 
@@ -219,7 +233,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             var roslynTargetType = roslynCompilation.Assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
 
-            var roslynTargetMethod = (BaseMethodDeclarationSyntax) roslynTargetType.GetMembers()
+            var roslynTargetMethod = (MethodDeclarationSyntax) roslynTargetType.GetMembers()
                 .Single( m => m.Name == "Method" )
                 .DeclaringSyntaxReferences
                 .Select( r => (CSharpSyntaxNode) r.GetSyntax() )
@@ -252,13 +266,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ),
                     proceedExpression ) );
 
-            return new TemplateExpansionContext(
+            return (new TemplateExpansionContext(
                 templateInstance,
                 metaApi,
                 compilation,
                 lexicalScope,
                 this._syntaxSerializationService,
-                compilation.Factory );
+                compilation.Factory ), roslynTargetMethod);
 
             static ExpressionSyntax GetProceedInvocation( Code.IMethod targetMethod )
             {

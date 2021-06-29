@@ -1,10 +1,6 @@
-
-[TestOutput]
 [Introduction]
 internal class TargetClass
 {
-
-
     public void IntroducedMethod_Void()
     {
         global::System.Console.WriteLine("This is introduced method.");
@@ -35,4 +31,3 @@ internal class TargetClass
         return default(global::System.Int32);
     }
 }
-

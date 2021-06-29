@@ -1,3 +1,4 @@
+void Method(int a, int b)
 {
     try
     {

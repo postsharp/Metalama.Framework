@@ -1,4 +1,3 @@
-[TestOutput]
 internal class TargetClass
 {
     [Override]
@@ -83,7 +82,6 @@ internal class TargetClass
             return 42;
         }
 
-
         private init
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
@@ -101,7 +99,6 @@ internal class TargetClass
             Console.WriteLine("This is the original getter.");
             return 42;
         }
-
 
         private init
         {

@@ -24,8 +24,8 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.Tags
 
     class TargetCode
     {
+        // <target>
         [Aspect]
-        [TestOutput]
         int Method(int a)
         {
             return a;

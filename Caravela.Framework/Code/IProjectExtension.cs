@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Policies;
 using System;
 
@@ -12,6 +13,7 @@ namespace Caravela.Framework.Code
     /// Implementations must implement the Freezable pattern. (Not implemented.)
     /// </summary>
     [Obsolete( "Not implemented." )]
+    [CompileTimeOnly]
     public interface IProjectExtension
     {
         /// <summary>

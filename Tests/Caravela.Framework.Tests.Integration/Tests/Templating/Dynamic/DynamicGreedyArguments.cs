@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicGreedyA
         }
     }
 
-    [TestOutput]
+    // <target>
     class TargetCode
     {
         int Method(PropertyChangedEventArgs a)

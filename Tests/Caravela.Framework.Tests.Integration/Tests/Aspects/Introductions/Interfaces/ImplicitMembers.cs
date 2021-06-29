@@ -74,7 +74,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         public int AutoProperty { get; set; }
     }
 
-    [TestOutput]
+    // <target>
     [Introduction]
     public class TargetClass
     {

@@ -1,8 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Simplification;
 
 namespace Caravela.Framework.Impl.Serialization
 {
@@ -20,17 +22,18 @@ namespace Caravela.Framework.Impl.Serialization
             // we only have a reference assembly, not an implementation assembly.
             return SyntaxFactory.InvocationExpression(
                     SyntaxFactory.MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        SyntaxFactory.MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             SyntaxFactory.MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
-                                SyntaxFactory.AliasQualifiedName(
-                                    SyntaxFactory.IdentifierName( SyntaxFactory.Token( SyntaxKind.GlobalKeyword ) ),
-                                    SyntaxFactory.IdentifierName( "Caravela" ) ),
-                                SyntaxFactory.IdentifierName( "Compiler" ) ),
-                            SyntaxFactory.IdentifierName( "Intrinsics" ) ),
-                        SyntaxFactory.IdentifierName( methodName ) ) )
+                                SyntaxFactory.MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    SyntaxFactory.AliasQualifiedName(
+                                        SyntaxFactory.IdentifierName( SyntaxFactory.Token( SyntaxKind.GlobalKeyword ) ),
+                                        SyntaxFactory.IdentifierName( "Caravela" ) ),
+                                    SyntaxFactory.IdentifierName( "Compiler" ) ),
+                                SyntaxFactory.IdentifierName( "Intrinsics" ) ),
+                            SyntaxFactory.IdentifierName( methodName ) )
+                        .WithAdditionalAnnotations( Simplifier.Annotation ) )
                 .AddArgumentListArguments(
                     SyntaxFactory.Argument(
                         SyntaxFactory.LiteralExpression(

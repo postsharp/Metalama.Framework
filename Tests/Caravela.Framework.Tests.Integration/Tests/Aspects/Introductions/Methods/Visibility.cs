@@ -55,7 +55,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Visi
         }
     }
 
-    [TestOutput]
+    // <target>
     [Introduction]
     internal class TargetClass
     {

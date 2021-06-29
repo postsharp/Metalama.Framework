@@ -78,6 +78,7 @@ namespace Caravela.Framework.Impl.Templating
                 var errorCountAfter = templateExpansionContext.DiagnosticSink.ErrorCount;
 
                 block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );
+                block = block.NormalizeWhitespace();
 
                 return errorCountAfter == errorCountBefore;
             }

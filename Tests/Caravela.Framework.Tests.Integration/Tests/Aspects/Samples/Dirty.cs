@@ -86,7 +86,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples
         Dirty
     }
 
-    [TestOutput]
+    // <target>
     [Dirty]
     public class TargetClass
     {

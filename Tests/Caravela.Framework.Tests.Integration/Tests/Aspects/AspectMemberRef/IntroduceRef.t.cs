@@ -1,5 +1,5 @@
 
-[TestOutput]
+// <target>
 class Program
 {
     [Retry]

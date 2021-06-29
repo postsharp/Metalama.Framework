@@ -14,6 +14,7 @@ namespace Caravela.Framework.Policies
     /// </summary>
     [InternalImplement]
     [Obsolete( "Not implemented." )]
+    [CompileTimeOnly]
     public interface INamespacePolicyBuilder
     {
         IProject Project { get; }

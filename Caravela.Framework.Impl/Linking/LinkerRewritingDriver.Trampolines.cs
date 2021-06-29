@@ -21,6 +21,7 @@ namespace Caravela.Framework.Impl.Linking
 
             return method
                 .WithBody( GetBody() )
+                .NormalizeWhitespace()
                 .WithLeadingTrivia( method.GetLeadingTrivia() )
                 .WithTrailingTrivia( method.GetTrailingTrivia() );
 
@@ -69,6 +70,7 @@ namespace Caravela.Framework.Impl.Linking
                                     ? AccessorDeclaration(
                                         SyntaxKind.GetAccessorDeclaration,
                                         Block( ReturnStatement( GetInvocationTarget() ) ) )
+                                        .NormalizeWhitespace()
                                     : null,
                                 setAccessor != null
                                     ? AccessorDeclaration(
@@ -79,7 +81,8 @@ namespace Caravela.Framework.Impl.Linking
                                                     SyntaxKind.SimpleAssignmentExpression,
                                                     GetInvocationTarget(),
                                                     IdentifierName( "value" ) ) ) ) )
-                                        : null
+                                        .NormalizeWhitespace()
+                                    : null
                             }.Where( a => a != null )
                             .AssertNoneNull() ) ) )
                 .WithLeadingTrivia( property.GetLeadingTrivia() )
@@ -118,6 +121,7 @@ namespace Caravela.Framework.Impl.Linking
                                                     SyntaxKind.AddAssignmentExpression,
                                                     GetInvocationTarget(),
                                                     IdentifierName( "value" ) ) ) ) )
+                                        .NormalizeWhitespace()
                                     : null,
                                 removeAccessor != null
                                     ? AccessorDeclaration(
@@ -128,6 +132,7 @@ namespace Caravela.Framework.Impl.Linking
                                                     SyntaxKind.SubtractAssignmentExpression,
                                                     GetInvocationTarget(),
                                                     IdentifierName( "value" ) ) ) ) )
+                                        .NormalizeWhitespace()
                                             : null
                             }.Where( a => a != null )
                             .AssertNoneNull() ) ) )
@@ -170,7 +175,8 @@ namespace Caravela.Framework.Impl.Linking
                                             AssignmentExpression(
                                                 SyntaxKind.AddAssignmentExpression,
                                                 GetInvocationTarget(),
-                                                IdentifierName( "value" ) ) ) ) ),
+                                                IdentifierName( "value" ) ) ) ) )
+                                    .NormalizeWhitespace(),
                                 AccessorDeclaration(
                                     SyntaxKind.AddAccessorDeclaration,
                                     Block(
@@ -179,6 +185,7 @@ namespace Caravela.Framework.Impl.Linking
                                                 SyntaxKind.SubtractAssignmentExpression,
                                                 GetInvocationTarget(),
                                                 IdentifierName( "value" ) ) ) ) )
+                                    .NormalizeWhitespace()
                             }.Where( a => a != null )
                             .AssertNoneNull() ) ) )
                 .WithLeadingTrivia( eventField.GetLeadingTrivia() )

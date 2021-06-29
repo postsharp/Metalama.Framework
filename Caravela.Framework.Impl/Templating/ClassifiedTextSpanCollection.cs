@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Templating
         /// Adds a marked <see cref="TextSpan"/>.
         /// </summary>
         /// <param name="span"></param>
-        internal void Add( in TextSpan span, TextSpanClassification classification )
+        public void Add( in TextSpan span, TextSpanClassification classification )
         {
             for ( var i = 0; /* nothing */; i++ )
             {

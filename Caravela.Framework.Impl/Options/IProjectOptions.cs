@@ -18,5 +18,11 @@ namespace Caravela.Framework.Impl.Options
         string? AssemblyName { get; }
 
         ImmutableArray<object> PlugIns { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the aspect framework is enabled for the current project. If <c>false</c>,
+        /// the project will not be modified. 
+        /// </summary>
+        bool IsFrameworkEnabled { get; }
     }
 }

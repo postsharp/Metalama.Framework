@@ -67,7 +67,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
         }
     }
 
-    [TestOutput]
+    // <target>
     [Introduction]
     internal class TargetClass : BaseClass
     {

@@ -14,6 +14,7 @@ namespace Caravela.Framework.Policies
     /// </summary>
     [InternalImplement]
     [Obsolete( "Not implemented." )]
+    [CompileTimeOnly]
     public interface IProjectPolicyBuilder
     {
         // The builder intentionally does not give write access to project properties. All configuration must use IProjectExtension.

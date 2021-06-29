@@ -30,7 +30,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer
         }
     }
 
-    [TestOutput]
+    // <target>
     internal class TargetClass
     {
         public TargetClass( int x ) { }

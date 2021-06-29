@@ -1,3 +1,4 @@
+int Method(int a, int b)
 {
     global::System.Console.WriteLine("a");
     global::System.Int32 result;

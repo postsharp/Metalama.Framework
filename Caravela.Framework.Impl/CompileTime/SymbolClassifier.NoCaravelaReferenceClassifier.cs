@@ -30,7 +30,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    return this._referenceAssemblyLocator.StandardAssemblyNames.Contains( symbol.ContainingAssembly.Name )
+                    var containingAssembly = symbol.ContainingAssembly;
+
+                    return containingAssembly != null && this._referenceAssemblyLocator.StandardAssemblyNames.Contains( containingAssembly.Name )
                         ? TemplatingScope.Both
                         : TemplatingScope.RunTimeOnly;
                 }

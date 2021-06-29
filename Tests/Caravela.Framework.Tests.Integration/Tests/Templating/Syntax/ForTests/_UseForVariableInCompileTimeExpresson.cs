@@ -1,3 +1,5 @@
+// @Skipped
+
 using System;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;

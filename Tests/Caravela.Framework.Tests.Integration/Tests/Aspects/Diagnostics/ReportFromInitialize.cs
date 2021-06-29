@@ -29,7 +29,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromIni
         }
     }
 
-    [TestOutput]
+    // <target>
     internal class TargetClass
     {
         [Error]

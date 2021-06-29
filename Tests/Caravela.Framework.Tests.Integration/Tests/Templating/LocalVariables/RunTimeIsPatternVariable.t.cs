@@ -1,3 +1,4 @@
+int Method(int a)
 {
     if (a is global::System.Collections.IEnumerable a_1)
     {

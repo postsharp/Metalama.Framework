@@ -47,8 +47,19 @@ namespace Caravela.Framework.Code
         public static bool Is( this IType left, SpecialType right )
             => left.Compilation.InvariantComparer.Is( left, left.Compilation.TypeFactory.GetSpecialType( right ) );
 
+        /// <summary>
+        /// Generates the cast syntax for the type.  
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="value">Must be explicitly cast to <c>object</c> otherwise the C# compiler will emit an error.</param>
+        /// <returns></returns>
         [return: RunTimeOnly]
-        [Obsolete( "Not implemented." )]
-        public static dynamic Cast( this IType type, dynamic value ) => throw new NotImplementedException();
+        public static dynamic? Cast( this IType type, object? value ) => type.Compilation.TypeFactory.Cast( type, value );
+
+        /// <summary>
+        /// Generates the <c>default(T)</c> syntax for the type.
+        /// </summary>
+        [return: RunTimeOnly]
+        public static dynamic? DefaultValue( this IType type ) => type.Compilation.TypeFactory.DefaultValue( type );
     }
 }

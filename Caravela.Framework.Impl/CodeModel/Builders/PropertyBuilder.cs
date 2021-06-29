@@ -151,7 +151,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 PropertyDeclaration(
                     List<AttributeListSyntax>(), // TODO: Attributes.
                     this.GetSyntaxModifierList(),
-                    (TypeSyntax) syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
+                    syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
                     this.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier(
                             (NameSyntax) syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
@@ -196,15 +196,16 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 // TODO: Attributes.
                 return
                     AccessorDeclaration(
-                        SyntaxKind.GetAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        TokenList( tokens ),
-                        Token( SyntaxKind.GetKeyword ),
-                        this.IsAutoPropertyOrField
-                            ? null
-                            : Block( ReturnStatement( DefaultExpression( (TypeSyntax) syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
-                        null,
-                        this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
+                            SyntaxKind.GetAccessorDeclaration,
+                            List<AttributeListSyntax>(),
+                            TokenList( tokens ),
+                            Token( SyntaxKind.GetKeyword ),
+                            this.IsAutoPropertyOrField
+                                ? null
+                                : Block( ReturnStatement( DefaultExpression( syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
+                            null,
+                            this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default )
+                        .NormalizeWhitespace();
             }
 
             AccessorDeclarationSyntax GenerateSetAccessor()

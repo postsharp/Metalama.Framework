@@ -30,7 +30,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
     }
 
-    [TestOutput]
+    // <target>
     internal class TargetClass
     {
         [Override]

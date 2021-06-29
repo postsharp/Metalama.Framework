@@ -1,3 +1,4 @@
+string Method(MyClass1 a)
 {
     var rt = global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle("T:Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1"));
     global::System.Console.WriteLine("rt=" + rt);

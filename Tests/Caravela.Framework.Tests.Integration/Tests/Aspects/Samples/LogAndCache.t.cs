@@ -1,4 +1,3 @@
-[TestOutput]
 class TargetCode
 {
     [Log]
@@ -9,7 +8,7 @@ class TargetCode
         try
         {
             global::System.Int32 result_1;
-            string cacheKey = string.Format("Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache.TargetCode.Add({0}, {1})", new object[] { a, b });
+            string cacheKey = string.Format("Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache.TargetCode.Add({0}, {1})", new object[]{a, b});
             if (global::Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache.SampleCache.Cache.TryGetValue(cacheKey, out object? value))
             {
                 global::System.Console.WriteLine("Cache hit.");
@@ -27,8 +26,8 @@ class TargetCode
                 goto __aspect_return_1;
             }
 
-__aspect_return_1:
-            ;
+            __aspect_return_1:
+                ;
             global::System.Console.WriteLine("Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache.TargetCode.Add(int, int) succeeded.");
             return (int)result_1;
         }

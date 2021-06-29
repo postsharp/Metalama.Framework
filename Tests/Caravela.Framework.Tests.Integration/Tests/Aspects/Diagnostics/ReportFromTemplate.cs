@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromTem
         }
     }
 
-    [TestOutput]
+    // <target>
     internal class TargetClass
     {
         [Log]

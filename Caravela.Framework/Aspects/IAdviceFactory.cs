@@ -14,6 +14,7 @@ namespace Caravela.Framework.Aspects
     /// of <see cref="IAspectBuilder{TAspectTarget}"/> or <see cref="IAspectLayerBuilder"/>.
     /// </summary>
     [InternalImplement]
+    [CompileTimeOnly]
     public interface IAdviceFactory
     {
         /// <summary>

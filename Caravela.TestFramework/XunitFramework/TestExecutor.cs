@@ -16,8 +16,10 @@ namespace Caravela.TestFramework.XunitFramework
     {
         private readonly TestFactory _factory;
 
-        public TestExecutor( AssemblyName assemblyName )
+        public TestExecutor( AssemblyName assemblyName, IMessageSink messageSink )
         {
+            _ = messageSink;
+
             var assembly = Assembly.Load( assemblyName );
             var assemblyInfo = new ReflectionAssemblyInfo( assembly );
             TestDiscoverer discoverer = new( assemblyInfo );
@@ -47,6 +49,7 @@ namespace Caravela.TestFramework.XunitFramework
 
             foreach ( var collection in collections )
             {
+                // Creates the set of references. Include all project references plus the project itself.
                 var references = TestAssemblyReferenceReader.GetAssemblyReferences( collection.Key.TestAssembly.Assembly ).ToList();
 
                 executionMessageSink.OnMessage( new TestCollectionStarting( collection, collection.Key ) );
@@ -103,9 +106,9 @@ namespace Caravela.TestFramework.XunitFramework
                                     }
                                     else
                                     {
-                                        var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider );
+                                        var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, logger );
                                         var testResult = testRunner.RunTest( testInput );
-                                        testRunner.ExecuteAssertions( testInput, testResult, logger );
+                                        testRunner.ExecuteAssertions( testInput, testResult );
 
                                         executionMessageSink.OnMessage( new TestPassed( test, testStopwatch.GetSeconds(), logger.ToString() ) );
 

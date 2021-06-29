@@ -55,7 +55,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Scop
         }
     }
 
-    [TestOutput]
+    // <target>
     [Introduction]
     internal static class TargetClass
     {

@@ -1,4 +1,4 @@
-﻿// @Skipped Case for interface merge conflict resolution, not implemented.
+﻿// @Skipped(Case for interface merge conflict resolution, not implemented.)
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
@@ -51,7 +51,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     }
 
 
-    [TestOutput]
+    // <target>
     [Introduction]
     public class TargetClass : ISubInterface
     {

@@ -1,3 +1,4 @@
+void Method(string aBc)
 {
     global::System.Console.WriteLine(42);
     global::Caravela.Framework.Aspects.__Void result;

@@ -15,7 +15,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple
         }
     }
 
-    [TestOutput]
+    // <target>
     internal class TargetClass
     {
         [Override]

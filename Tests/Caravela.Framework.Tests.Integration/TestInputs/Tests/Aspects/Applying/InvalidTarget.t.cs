@@ -1,0 +1,2 @@
+// CompileTimeAspectPipeline.TryExecute failed. 
+// Error CR0003 on `Method`: `Aspect 'IntroductionAttribute' cannot be applied to method 'TargetClass.Method()', because this aspect does not implement the 'IAspect<IMethod>' interface.`

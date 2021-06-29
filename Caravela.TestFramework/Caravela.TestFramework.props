@@ -1,7 +1,6 @@
 <Project>
     <PropertyGroup>
-        <!-- This property, when set to True, excludes any .cs file in the project from the compilation except _Runner.cs itself. -->
-        <CaravelaTestAutoExclude Condition="'$(CaravelaTestAutoExclude)'==''">True</CaravelaTestAutoExclude>
+        <CaravelaEnabled Condition="'$(CaravelaEnabled)'==''">False</CaravelaEnabled>
         <CaravelaTestGenerateDefaultRunner Condition="'$(CaravelaTestGenerateDefaultRunner)'==''">True</CaravelaTestGenerateDefaultRunner>
     </PropertyGroup>
     <ItemGroup>
