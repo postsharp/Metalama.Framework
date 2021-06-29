@@ -6,7 +6,8 @@ using System;
 namespace Caravela.Framework.Aspects
 {
     /// <summary>
-    /// Custom attribute that marks the target method as a template for <see cref="IAdviceFactory.IntroduceProperty(Caravela.Framework.Code.INamedType,string,Caravela.Framework.Aspects.IntroductionScope,Caravela.Framework.Aspects.ConflictBehavior,Caravela.Framework.Aspects.AdviceOptions?)"/> and results in creation of the advice.
+    /// Custom attribute that applied to a member of an aspect class and means that this aspect member is a template implementing a member of an interface implemented by
+    /// <see cref="IAdviceFactory.ImplementInterface(Caravela.Framework.Code.INamedType,Caravela.Framework.Code.INamedType,Caravela.Framework.Aspects.OverrideStrategy,System.Collections.Generic.Dictionary{string,object?}?)"/>.
     /// </summary>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
     public sealed class InterfaceMemberAttribute : CompileTimeOnlyAttribute

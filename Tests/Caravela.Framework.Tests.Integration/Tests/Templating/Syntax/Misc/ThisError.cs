@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Templating.Syntax.Misc.This
         dynamic Template()
         {
             // Must be an error.
-            meta.Cast( meta.NamedType, this );
+            meta.Cast( meta.Type, this );
 
             return 0;
         }

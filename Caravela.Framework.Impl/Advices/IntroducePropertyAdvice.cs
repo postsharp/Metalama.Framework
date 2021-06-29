@@ -30,10 +30,10 @@ namespace Caravela.Framework.Impl.Advices
             IMethod? getTemplateMethod,
             IMethod? setTemplateMethod,
             IntroductionScope scope,
-            ConflictBehavior conflictBehavior,
+            OverrideStrategy overrideStrategy,
             string? layerName,
-            AdviceOptions? options )
-            : base( aspect, targetDeclaration, templateProperty, scope, conflictBehavior, layerName, options )
+            Dictionary<string, object?>? tags )
+            : base( aspect, targetDeclaration, templateProperty, scope, overrideStrategy, layerName, tags )
         {
             this._getTemplateMethod = getTemplateMethod;
             this._setTemplateMethod = setTemplateMethod;
@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.Advices
                 hasSet,
                 this.TemplateMember != null && this.TemplateMember.IsAutoPropertyOrField,
                 this.TemplateMember != null && this.TemplateMember.Writeability == Writeability.InitOnly,
-                options?.LinkerOptions );
+                AspectLinkerOptions.FromTags( tags ) );
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )

@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -24,6 +25,7 @@ namespace Caravela.Framework.Impl.Linking
         private readonly IReadOnlyDictionary<SymbolVersion, int> _symbolVersionReferenceCounts;
         private readonly IReadOnlyDictionary<ISymbol, MemberAnalysisResult> _methodBodyInfos;
         private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
+        public static readonly SyntaxAnnotation DoNotInlineAnnotation = new SyntaxAnnotation( "DoNotInline" );
 
         public LinkerAnalysisRegistry(
             LinkerIntroductionRegistry introductionRegistry,
@@ -94,12 +96,9 @@ namespace Caravela.Framework.Impl.Linking
 
             if ( this.IsOverrideTarget( symbol ) )
             {
-                if ( symbol.GetAttributes()
-                    .Any(
-                        attributeData =>
-                            attributeData.AttributeClass?.ToDisplayString() == typeof(AspectLinkerOptionsAttribute).FullName
-                            && attributeData.NamedArguments
-                                .Any( x => x.Key == nameof(AspectLinkerOptionsAttribute.ForceNotInlineable) && (bool?) x.Value.Value == true ) ) )
+                
+                // Check for the presence of a magic comment that is only used in tests.
+                if ( symbol.DeclaringSyntaxReferences.Any( r => r.GetSyntax(  ).HasAnnotation( DoNotInlineAnnotation )))
                 {
                     // Inlining is explicitly disabled for the declaration.
                     return false;

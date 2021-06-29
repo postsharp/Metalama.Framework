@@ -46,12 +46,12 @@ namespace Caravela.Framework.Impl.Advices
             this._implementInterfaceAdvices = new Dictionary<INamedType, ImplementInterfaceAdvice>( compilation.InvariantComparer );
         }
 
-        public void OverrideMethod( IMethod targetMethod, string defaultTemplate, AdviceOptions? options = null )
+        public void OverrideMethod( IMethod targetMethod, string defaultTemplate, Dictionary<string, object?>? tags = null )
         {
             var diagnosticList = new DiagnosticList();
             var templateMethod = this._aspectType.GetTemplateMethod( this._compilation, defaultTemplate, nameof(this.OverrideMethod) );
 
-            var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, _layerName, options );
+            var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, _layerName, tags );
             advice.Initialize( this._declarativeAdvices, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this._advices.Add( advice );
@@ -63,8 +63,8 @@ namespace Caravela.Framework.Impl.Advices
             INamedType targetType,
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AdviceOptions? options = null )
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null )
         {
             var diagnosticList = new DiagnosticList();
             var templateMethod = this._aspectType.GetTemplateMethod( this._compilation, defaultTemplate, nameof(this.IntroduceMethod) );
@@ -74,9 +74,9 @@ namespace Caravela.Framework.Impl.Advices
                 targetType,
                 templateMethod,
                 scope,
-                conflictBehavior,
+                whenExists,
                 _layerName,
-                options );
+                tags );
 
             advice.Initialize( this._declarativeAdvices, diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -90,7 +90,7 @@ namespace Caravela.Framework.Impl.Advices
         public void OverrideFieldOrProperty(
             IFieldOrProperty targetDeclaration,
             string defaultTemplate,
-            AdviceOptions? options = null )
+            Dictionary<string, object?>? tags = null )
         {
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
@@ -103,7 +103,7 @@ namespace Caravela.Framework.Impl.Advices
                 null,
                 null,
                 _layerName,
-                options );
+                tags );
 
             advice.Initialize( this._declarativeAdvices, diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -116,7 +116,7 @@ namespace Caravela.Framework.Impl.Advices
             IFieldOrProperty targetDeclaration,
             string? getTemplate,
             string? setTemplate,
-            AdviceOptions? options = null )
+            Dictionary<string, object?>? tags = null )
         {
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
@@ -130,7 +130,7 @@ namespace Caravela.Framework.Impl.Advices
                 getTemplateMethod,
                 setTemplateMethod,
                 _layerName,
-                options );
+                tags );
 
             advice.Initialize( this._declarativeAdvices, diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -142,8 +142,8 @@ namespace Caravela.Framework.Impl.Advices
         public IFieldBuilder IntroduceField(
             INamedType targetType,
             IntroductionScope scope = IntroductionScope.Default,
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AdviceOptions? options = null )
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null )
         {
             throw new NotImplementedException();
         }
@@ -152,8 +152,8 @@ namespace Caravela.Framework.Impl.Advices
             INamedType targetType,
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AdviceOptions? options = null )
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null )
         {
             var diagnosticList = new DiagnosticList();
 
@@ -167,9 +167,9 @@ namespace Caravela.Framework.Impl.Advices
                 null,
                 null,
                 scope,
-                conflictBehavior,
+                whenExists,
                 _layerName,
-                options );
+                tags );
 
             advice.Initialize( this._declarativeAdvices, diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -183,11 +183,11 @@ namespace Caravela.Framework.Impl.Advices
         public IPropertyBuilder IntroduceProperty(
             INamedType targetType,
             string name,
-            string defaultGetTemplate,
+            string? defaultGetTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AdviceOptions? options = null )
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null )
         {
             var diagnosticList = new DiagnosticList();
             var getTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, defaultGetTemplate, nameof(this.OverrideFieldOrPropertyAccessors) );
@@ -201,9 +201,9 @@ namespace Caravela.Framework.Impl.Advices
                 getTemplateMethod,
                 setTemplateMethod,
                 scope,
-                conflictBehavior,
+                whenExists,
                 _layerName,
-                options );
+                tags );
 
             advice.Initialize( this._declarativeAdvices, diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -219,7 +219,7 @@ namespace Caravela.Framework.Impl.Advices
             string? addTemplate,
             string? removeTemplate,
             string? invokeTemplate,
-            AdviceOptions? options = null )
+            Dictionary<string, object?>? tags = null )
         {
             if ( invokeTemplate != null )
             {
@@ -237,7 +237,7 @@ namespace Caravela.Framework.Impl.Advices
                 addTemplateMethod,
                 removeTemplateMethod,
                 _layerName,
-                options );
+                tags );
 
             advice.Initialize( this._declarativeAdvices, diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -248,11 +248,10 @@ namespace Caravela.Framework.Impl.Advices
 
         public IEventBuilder IntroduceEvent(
             INamedType targetType,
-            string name,
             string eventTemplate,
             IntroductionScope scope = IntroductionScope.Default,
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AdviceOptions? options = null )
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null )
         {
             var diagnosticList = new DiagnosticList();
             var templateEvent = this._aspectType.GetTemplateEvent( this._compilation, eventTemplate, nameof(this.IntroduceProperty) );
@@ -260,14 +259,14 @@ namespace Caravela.Framework.Impl.Advices
             var advice = new IntroduceEventAdvice(
                 this._aspect,
                 targetType,
-                name,
+                null,
                 templateEvent,
                 null,
                 null,
                 scope,
-                conflictBehavior,
+                whenExists,
                 _layerName,
-                options );
+                tags );
 
             advice.Initialize( this._declarativeAdvices, diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -285,8 +284,8 @@ namespace Caravela.Framework.Impl.Advices
             string removeTemplate,
             string? invokeTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AdviceOptions? options = null )
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null )
         {
             var diagnosticList = new DiagnosticList();
             var addTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, addTemplate, nameof(this.OverrideEventAccessors) );
@@ -300,9 +299,9 @@ namespace Caravela.Framework.Impl.Advices
                 addTemplateMethod,
                 removeTemplateMethod,
                 scope,
-                conflictBehavior,
+                whenExists,
                 _layerName,
-                options );
+                tags );
 
             advice.Initialize( this._declarativeAdvices, diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -316,8 +315,8 @@ namespace Caravela.Framework.Impl.Advices
         public void ImplementInterface(
             INamedType targetType,
             INamedType interfaceType,
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AdviceOptions? options = null )
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null )
         {
             var diagnosticList = new DiagnosticList();
 
@@ -328,7 +327,7 @@ namespace Caravela.Framework.Impl.Advices
                 this._advices.Add( advice );
             }
 
-            advice.AddInterfaceImplementation( interfaceType, conflictBehavior, null, diagnosticList, options );
+            advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList, tags );
             ThrowOnErrors( diagnosticList );
 
             this._diagnosticAdder.Report( diagnosticList );
@@ -337,22 +336,22 @@ namespace Caravela.Framework.Impl.Advices
         public void ImplementInterface(
             INamedType targetType,
             Type interfaceType,
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AdviceOptions? options = null )
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null )
         {
             this.ImplementInterface(
                 targetType,
                 (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( interfaceType ),
-                conflictBehavior,
-                options );
+                whenExists,
+                tags );
         }
 
         public void ImplementInterface(
             INamedType targetType,
             INamedType interfaceType,
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AdviceOptions? options = null )
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null )
         {
             var diagnosticList = new DiagnosticList();
 
@@ -363,7 +362,7 @@ namespace Caravela.Framework.Impl.Advices
                 this._advices.Add( advice );
             }
 
-            advice.AddInterfaceImplementation( interfaceType, conflictBehavior, null, diagnosticList, options );
+            advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList, tags );
             ThrowOnErrors( diagnosticList );
 
             this._diagnosticAdder.Report( diagnosticList );
@@ -373,15 +372,15 @@ namespace Caravela.Framework.Impl.Advices
             INamedType targetType,
             Type interfaceType,
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AdviceOptions? options = null )
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null )
         {
             this.ImplementInterface(
                 targetType,
                 (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( interfaceType ),
                 interfaceMemberSpecifications,
-                conflictBehavior,
-                options );
+                whenExists,
+                tags );
         }
 
         private static void ThrowOnErrors( DiagnosticList diagnosticList )

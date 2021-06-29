@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.InterpolatedStringForm
             var rt = $"Value={meta.Parameters[0].Value,-5:x}";
             
             // Both
-            var both = $"{meta.NamedType.Fields.Single().Name}={meta.Parameters[0].Value}";
+            var both = $"{meta.Type.Fields.Single().Name}={meta.Parameters[0].Value}";
 
             
             Console.WriteLine(ct);

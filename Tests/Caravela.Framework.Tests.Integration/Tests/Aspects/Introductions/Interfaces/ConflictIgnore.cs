@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.AdviceFactory.ImplementInterface(
                 aspectBuilder.TargetDeclaration,
                 typeof(IInterface),
-                conflictBehavior: ConflictBehavior.Ignore);
+                whenExists: OverrideStrategy.Ignore);
         }
 
         [InterfaceMember]

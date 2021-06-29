@@ -102,10 +102,10 @@ namespace Caravela.Framework.Impl.Advices
 
         public void AddInterfaceImplementation(
             INamedType interfaceType,
-            ConflictBehavior conflictBehavior,
+            OverrideStrategy overrideStrategy,
             IReadOnlyList<InterfaceMemberSpecification>? explicitMemberSpecification,
             IDiagnosticAdder diagnosticAdder,
-            AdviceOptions? options )
+            Dictionary<string, object?>? tags )
         {
             // Adding interfaces may run into three problems:
             //      1) Target type already implements the interface.
@@ -124,9 +124,9 @@ namespace Caravela.Framework.Impl.Advices
             if ( this._introducedAndImplementedInterfaces.ContainsKey( interfaceType ) )
             {
                 // Conflict on the introduced interface itself.
-                switch ( conflictBehavior )
+                switch ( overrideStrategy )
                 {
-                    case ConflictBehavior.Fail:
+                    case OverrideStrategy.Fail:
                         // Report the diagnostic and return.
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateDiagnostic(
@@ -135,7 +135,7 @@ namespace Caravela.Framework.Impl.Advices
 
                         return;
 
-                    case ConflictBehavior.Ignore:
+                    case OverrideStrategy.Ignore:
                         // Nothing to do.
                         return;
 
@@ -149,9 +149,9 @@ namespace Caravela.Framework.Impl.Advices
             if ( conflictingAncestorInterfaces.Count > 0 )
             {
                 // Conflict on ancestor of the introduced interface.
-                switch ( conflictBehavior )
+                switch ( overrideStrategy )
                 {
-                    case ConflictBehavior.Fail:
+                    case OverrideStrategy.Fail:
                         foreach ( var conflictingInterface in conflictingAncestorInterfaces )
                         {
                             diagnosticAdder.Report(
@@ -162,7 +162,7 @@ namespace Caravela.Framework.Impl.Advices
 
                         return;
 
-                    case ConflictBehavior.Ignore:
+                    case OverrideStrategy.Ignore:
                         // Nothing to do.
                         break;
 
@@ -279,7 +279,7 @@ namespace Caravela.Framework.Impl.Advices
                     this._introducedAndImplementedInterfaces.Add( interfaceType, (true, default) );
 
                     this._introducedInterfaceTypes.Add(
-                        new IntroducedInterfaceSpecification( interfaceType, memberSpecifications, conflictBehavior, options ) );
+                        new IntroducedInterfaceSpecification( interfaceType, memberSpecifications, overrideStrategy, tags ) );
                 }
             }
             else

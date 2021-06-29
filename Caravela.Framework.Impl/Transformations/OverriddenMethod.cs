@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.Transformations
                     new MetaApiProperties(
                         context.DiagnosticSink,
                         this.TemplateMethod.GetSymbol(),
-                        this.Advice.Options.Tags,
+                        this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
                         context.ServiceProvider.GetService<AspectPipelineDescription>() ) );
 

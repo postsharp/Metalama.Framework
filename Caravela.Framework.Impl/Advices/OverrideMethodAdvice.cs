@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Advices
             IMethod targetDeclaration,
             IMethod templateMethod,
             string layerName,
-            AdviceOptions? options ) : base( aspect, targetDeclaration, layerName, options )
+            Dictionary<string, object?>? tags ) : base( aspect, targetDeclaration, layerName, tags )
         {
             this.TemplateMethod = templateMethod;
         }

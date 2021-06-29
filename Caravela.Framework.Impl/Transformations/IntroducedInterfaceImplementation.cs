@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -173,7 +174,7 @@ namespace Caravela.Framework.Impl.Transformations
                         new MetaApiProperties(
                             context.DiagnosticSink,
                             aspectInterfaceMethod.GetSymbol(),
-                            advice.Options.Tags,
+                            advice.ReadOnlyTags,
                             advice.AspectLayerId,
                             context.ServiceProvider.GetService<AspectPipelineDescription>() ) );
 
@@ -311,7 +312,7 @@ namespace Caravela.Framework.Impl.Transformations
                         new MetaApiProperties(
                             context.DiagnosticSink,
                             aspectInterfaceAccessor.GetSymbol(),
-                            this.Advice.Options.Tags,
+                            this.Advice.ReadOnlyTags,
                             this.Advice.AspectLayerId,
                             context.ServiceProvider.GetService<AspectPipelineDescription>() ) );
 
@@ -455,7 +456,7 @@ namespace Caravela.Framework.Impl.Transformations
                         new MetaApiProperties(
                             context.DiagnosticSink,
                             aspectInterfaceAccessor.GetSymbol(),
-                            this.Advice.Options.Tags,
+                            this.Advice.ReadOnlyTags,
                             this.Advice.AspectLayerId,
                             context.ServiceProvider.GetService<AspectPipelineDescription>() ) );
 

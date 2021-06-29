@@ -15,20 +15,20 @@ namespace Caravela.Framework.Impl.Advices
 
             public IReadOnlyList<MemberSpecification> MemberSpecifications { get; }
 
-            public ConflictBehavior ConflictBehavior { get; }
+            public OverrideStrategy OverrideStrategy { get; }
 
-            public AdviceOptions? Options { get; }
+            public Dictionary<string, object?>? Tags { get; }
 
             public IntroducedInterfaceSpecification(
                 INamedType interfaceType,
                 IReadOnlyList<MemberSpecification> memberSpecification,
-                ConflictBehavior conflictBehavior,
-                AdviceOptions? options )
+                OverrideStrategy overrideStrategy,
+                Dictionary<string, object?>? tags )
             {
                 this.InterfaceType = interfaceType;
                 this.MemberSpecifications = memberSpecification;
-                this.ConflictBehavior = conflictBehavior;
-                this.Options = options;
+                this.OverrideStrategy = overrideStrategy;
+                this.Tags = tags;
             }
         }
     }

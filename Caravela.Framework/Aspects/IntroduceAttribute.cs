@@ -6,7 +6,7 @@ using System;
 namespace Caravela.Framework.Aspects
 {
     /// <summary>
-    /// Custom attribute that marks the target method as a template for <see cref="IAdviceFactory.IntroduceProperty(Caravela.Framework.Code.INamedType,string,Caravela.Framework.Aspects.IntroductionScope,Caravela.Framework.Aspects.ConflictBehavior,Caravela.Framework.Aspects.AdviceOptions?)"/> and results in creation of the advice.
+    /// Custom attribute 
     /// </summary>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
     public class IntroduceAttribute : AdviceAttribute

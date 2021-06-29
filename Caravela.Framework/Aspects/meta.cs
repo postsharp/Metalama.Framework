@@ -112,7 +112,7 @@ namespace Caravela.Framework.Aspects
         /// Gets the target type of the advice. If the advice is applied to a member, this property returns the declaring
         /// type of the member.
         /// </summary>
-        public static INamedType NamedType => CurrentContext.Type;
+        public static INamedType Type => CurrentContext.Type;
 
         /// <summary>
         /// Gets the code model of the whole compilation.
@@ -171,8 +171,7 @@ namespace Caravela.Framework.Aspects
         public static IDiagnosticSink Diagnostics => CurrentContext.Diagnostics;
 
         /// <summary>
-        /// Gets the dictionary of tags that were passed to the <see cref="IAdviceFactory"/> method by the <see cref="IAspect{T}.BuildAspect"/> method using the 
-        /// <see cref="AdviceOptions.Tags"/> option.
+        /// Gets the dictionary of tags that were passed to the <see cref="IAdviceFactory"/> method by the <see cref="IAspect{T}.BuildAspect"/> method.
         /// </summary>
         public static IReadOnlyDictionary<string, object?> Tags => CurrentContext.Tags;
 

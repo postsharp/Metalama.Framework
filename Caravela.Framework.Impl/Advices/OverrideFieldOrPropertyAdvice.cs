@@ -27,8 +27,8 @@ namespace Caravela.Framework.Impl.Advices
             IMethod? getTemplateMethod,
             IMethod? setTemplateMethod,
             string layerName,
-            AdviceOptions? options )
-            : base( aspect, targetDeclaration, layerName, options )
+            Dictionary<string, object?>? tags )
+            : base( aspect, targetDeclaration, layerName, tags )
         {
             // We need either property template or (one or more) accessor templates, but never both.
             Invariant.Assert( templateProperty != null || getTemplateMethod != null || setTemplateMethod != null );

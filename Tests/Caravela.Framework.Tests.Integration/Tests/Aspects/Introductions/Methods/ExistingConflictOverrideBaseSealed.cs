@@ -12,7 +12,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
        
         
         
-        [Introduce(ConflictBehavior = ConflictBehavior.Override)]
+        [Introduce(WhenExists = OverrideStrategy.Override)]
         public int ExistingMethod()
         {
             Console.WriteLine("This is introduced method.");

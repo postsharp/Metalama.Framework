@@ -12,121 +12,121 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
        
         
         
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassMethod()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public static int BaseClassMethod_Static()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public int HiddenBaseClassMethod()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public static int HiddenBaseClassMethod_Static()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public int HiddenBaseClassVirtualMethod()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public int HiddenVirtualBaseClassVirtualMethod()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassVirtualMethod()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassVirtualSealedMethod()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassVirtualOverridenMethod()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassAbstractMethod()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassAbstractSealedMethod()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public int DerivedClassMethod()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public static int DerivedClassMethod_Static()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public int DerivedClassVirtualMethod()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public int DerivedClassVirtualSealedMethod()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public int ExistingMethod()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public static int ExistingMethod_Static()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public int ExistingVirtualMethod()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public int NonExistentMethod()
         {
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.New)]
+        [Introduce(WhenExists = OverrideStrategy.New)]
         public static int NonExistentMethod_Static()
         {
             return meta.Proceed();

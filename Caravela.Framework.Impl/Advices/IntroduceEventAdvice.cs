@@ -33,10 +33,10 @@ namespace Caravela.Framework.Impl.Advices
             IMethod? addTemplateMethod,
             IMethod? removeTemplateMethod,
             IntroductionScope scope,
-            ConflictBehavior conflictBehavior,
+            OverrideStrategy overrideStrategy,
             string? layerName,
-            AdviceOptions? options )
-            : base( aspect, targetDeclaration, eventTemplate, scope, conflictBehavior, layerName, options )
+            Dictionary<string, object?>? tags )
+            : base( aspect, targetDeclaration, eventTemplate, scope, overrideStrategy, layerName, tags )
         {
             this._addTemplateMethod = addTemplateMethod;
             this._removeTemplateMethod = removeTemplateMethod;
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Advices
                 this.TargetDeclaration,
                 eventTemplate?.Name ?? explicitName.AssertNotNull(),
                 eventTemplate != null && IsEventField( eventTemplate ),
-                options?.LinkerOptions );
+                AspectLinkerOptions.FromTags( tags ) );
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
