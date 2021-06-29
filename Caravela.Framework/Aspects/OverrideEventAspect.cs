@@ -10,6 +10,7 @@ namespace Caravela.Framework.Aspects
     /// <summary>
     /// A base aspect that overrides the implementation of an event.
     /// </summary>
+    /// <seealso href="@overriding-events"/>
     [AttributeUsage( AttributeTargets.Event )]
     public abstract class OverrideEventAspect : Attribute, IAspect<IEvent>
     {

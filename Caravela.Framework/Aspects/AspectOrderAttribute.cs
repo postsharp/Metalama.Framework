@@ -13,6 +13,7 @@ namespace Caravela.Framework.Aspects
     /// <remarks>
     /// Note that, at compile-time, aspects are applied in the reverse order compared to the run-time execution order.
     /// </remarks>
+    /// <seealso href="@ordering-aspects"/>
     [AttributeUsage( AttributeTargets.Assembly, AllowMultiple = true )]
     public class AspectOrderAttribute : Attribute
     {

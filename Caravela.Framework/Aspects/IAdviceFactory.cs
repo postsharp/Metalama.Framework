@@ -13,6 +13,7 @@ namespace Caravela.Framework.Aspects
     /// Exposes all factory methods to create advices. Exposed on the <see cref="IAspectLayerBuilder.AdviceFactory"/> property
     /// of <see cref="IAspectBuilder{TAspectTarget}"/> or <see cref="IAspectLayerBuilder"/>.
     /// </summary>
+    /// <seealso href="@advising-code"/>
     [InternalImplement]
     [CompileTimeOnly]
     public interface IAdviceFactory
@@ -25,6 +26,7 @@ namespace Caravela.Framework.Aspects
         /// This property must be annotated with <see cref="TemplateAttribute"/>.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property
         /// of the <see cref="meta"/> API.</param>
+        /// <seealso href="@overriding-members"/>
         void OverrideMethod( IMethod method, string template, Dictionary<string, object?>? tags = null );
 
         /// <summary>
@@ -43,6 +45,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property
         /// of the <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IMethodBuilder"/> that allows to modify the name or signature, or to add custom attributes.</returns>
+        /// <seealso href="@introducing-members"/>
         IMethodBuilder IntroduceMethod(
             INamedType targetType,
             string template,
@@ -58,6 +61,7 @@ namespace Caravela.Framework.Aspects
         /// This property must be annotated with <see cref="TemplateAttribute"/>.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
+        /// <seealso href="@overriding-members"/>
         void OverrideFieldOrProperty(
             IFieldOrProperty targetDeclaration,
             string template,
@@ -75,13 +79,14 @@ namespace Caravela.Framework.Aspects
         /// be <c>void Set(T value</c>  where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
+        /// <seealso href="@overriding-members"/>
         void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
             string? getTemplate = null,
             string? setTemplate = null,
             Dictionary<string, object?>? tags = null );
 
-        [Obsolete("Not implemented.")]
+        [Obsolete( "Not implemented." )]
         IFieldBuilder IntroduceField(
             INamedType targetType,
             IntroductionScope scope = IntroductionScope.Default,
@@ -105,6 +110,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
+        /// <seealso href="@introducing-members"/>
         IPropertyBuilder IntroduceProperty(
             INamedType targetType,
             string template,
@@ -131,6 +137,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
+        /// <seealso href="@introducing-members"/>
         IPropertyBuilder IntroduceProperty(
             INamedType targetType,
             string name,
@@ -153,6 +160,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="raiseTemplate">Not yet implemented.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
+        /// <seealso href="@overriding-members"/>
         void OverrideEventAccessors(
             IEvent targetEvent,
             string? addTemplate,
@@ -176,6 +184,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IEventBuilder"/> that allows to change the name and the type of the event.</returns>
+        /// <seealso href="@introducing-members"/>
         IEventBuilder IntroduceEvent(
             INamedType targetType,
             string eventTemplate,
@@ -204,6 +213,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IEventBuilder"/> that allows to change the name and the type of the event.</returns>
+        /// <seealso href="@introducing-members"/>
         IEventBuilder IntroduceEvent(
             INamedType targetType,
             string eventName,
@@ -223,6 +233,7 @@ namespace Caravela.Framework.Aspects
         /// The default strategy is to fail with a compile-time error.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
+        /// <seealso href="@implementing-interfaces"/>
         void ImplementInterface(
             INamedType targetType,
             INamedType interfaceType,
@@ -238,6 +249,7 @@ namespace Caravela.Framework.Aspects
         /// The default strategy is to fail with a compile-time error.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
+        /// <seealso href="@implementing-interfaces"/>
         void ImplementInterface(
             INamedType targetType,
             Type interfaceType,

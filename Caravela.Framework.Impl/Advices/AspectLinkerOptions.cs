@@ -13,11 +13,11 @@ namespace Caravela.Framework.Impl.Advices
     [CompileTimeOnly]
     internal sealed class AspectLinkerOptions
     {
-        private const string tagName = "__ForceNotInlineable";
+        private const string _tagName = "__ForceNotInlineable";
+
         public bool ForceNotInlineable { get; }
 
-        public static AspectLinkerOptions Default { get; } = new AspectLinkerOptions();
-        
+        public static AspectLinkerOptions Default { get; } = new();
 
         private AspectLinkerOptions( bool forceNotInlineable = false )
         {
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public static AspectLinkerOptions FromTags( Dictionary<string, object?>? tags )
         {
-            if ( tags != null && tags.ContainsKey( tagName ) )
+            if ( tags != null && tags.ContainsKey( _tagName ) )
             {
                 return new AspectLinkerOptions( true );
             }
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             if ( this.ForceNotInlineable )
             {
-                return ImmutableDictionary.Create<string, object?>().Add( tagName, tagName );
+                return ImmutableDictionary.Create<string, object?>().Add( _tagName, _tagName );
             }
             else
             {

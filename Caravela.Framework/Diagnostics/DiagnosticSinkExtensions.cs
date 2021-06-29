@@ -9,6 +9,7 @@ namespace Caravela.Framework.Diagnostics
     /// <summary>
     /// Defines extension methods for <see cref="IDiagnosticSink"/>.
     /// </summary>
+    /// <seealso href="@diagnostics"/>
     [CompileTimeOnly]
     public static class DiagnosticSinkExtensions
     {

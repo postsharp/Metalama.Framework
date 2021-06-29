@@ -1,13 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
-using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Transformations;
 using FakeItEasy;
 using Microsoft.CodeAnalysis;
@@ -189,17 +187,15 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                     return this.ProcessPseudoOverride( node, newAttributeLists, pseudoOverrideAttribute, forceNotInlineable );
                 }
-                
-                
+
                 isPseudoMember = false;
 
                 var transformedNode = node.WithAttributeLists( List( newAttributeLists ) );
-                
+
                 if ( forceNotInlineable )
                 {
                     transformedNode = transformedNode.WithAdditionalAnnotations( LinkerAnalysisRegistry.DoNotInlineAnnotation );
                 }
-
 
                 return transformedNode;
             }

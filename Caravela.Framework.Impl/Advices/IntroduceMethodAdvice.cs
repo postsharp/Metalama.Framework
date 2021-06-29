@@ -116,7 +116,6 @@ namespace Caravela.Framework.Impl.Advices
                                     this.TargetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
 
-                    //case OverrideStrategy.Merge:
                     case OverrideStrategy.Ignore:
                         // Do nothing.
                         return AdviceResult.Create();

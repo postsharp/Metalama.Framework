@@ -278,8 +278,7 @@ namespace Caravela.Framework.Impl.Advices
 
                     this._introducedAndImplementedInterfaces.Add( interfaceType, (true, default) );
 
-                    this._introducedInterfaceTypes.Add(
-                        new IntroducedInterfaceSpecification( interfaceType, memberSpecifications, overrideStrategy, tags ) );
+                    this._introducedInterfaceTypes.Add( new IntroducedInterfaceSpecification( interfaceType, memberSpecifications, overrideStrategy, tags ) );
                 }
             }
             else

@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
@@ -15,7 +14,7 @@ namespace Caravela.TestFramework
 {
     /// <summary>
     /// A base class for test classes built using the current framework.
-    /// All test methods must be annotated with both <see cref="TheoryAttribute"/> and <see cref="CurrentDirectoryAttribute"/>,
+    /// All test methods must be annotated with both <c>[Theory]</c> and <see cref="CurrentDirectoryAttribute"/>,
     /// must have a single parameter accepting the relative path of the test file, and must call <see cref="RunTest"/> as their only implementation.
     /// </summary>
     public abstract class TestSuite

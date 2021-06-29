@@ -9,6 +9,7 @@ namespace Caravela.Framework.Diagnostics
     /// Defines the suppression of a kind of diagnostics. Suppressions must be
     /// defined as static fields or properties of an aspect classes. Suppressions are instantiated with <see cref="IDiagnosticSink.Suppress"/>.
     /// </summary>
+    /// <seealso href="@diagnostics"/>
     [CompileTimeOnly]
     public sealed class SuppressionDefinition
     {
