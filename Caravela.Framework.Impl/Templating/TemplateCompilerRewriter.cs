@@ -153,17 +153,29 @@ namespace Caravela.Framework.Impl.Templating
 
             // Look for annotation on the parent, but stop at 'if' and 'foreach' statements,
             // which have special interpretation.
+            var previousParent = node;
+
             for ( var parent = node.Parent;
                   parent != null;
                   parent = parent.Parent )
             {
-                if ( !parent.GetScopeFromAnnotation().GetValueOrDefault().MustBeTransformed() )
+                var parentScope = parent.GetScopeFromAnnotation().GetValueOrDefault();
+
+                if ( !parentScope.IsIndeterminate() )
                 {
-                    return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax
-                           || parent is SwitchSectionSyntax
-                        ? TransformationKind.Transform
-                        : TransformationKind.None;
+                    if ( parent is IfStatementSyntax ||
+                         parent is ForEachStatementSyntax ||
+                         parent is ElseClauseSyntax ||
+                         parent is WhileStatementSyntax ||
+                         parent is SwitchSectionSyntax )
+                    {
+                        throw new AssertionFailedException( $"The node '{previousParent}' must be annotated." );
+                    }
+
+                    return parentScope.MustBeTransformed() ? TransformationKind.Transform : TransformationKind.None;
                 }
+
+                previousParent = parent;
             }
 
             return TransformationKind.Transform;
@@ -300,11 +312,6 @@ namespace Caravela.Framework.Impl.Templating
                 // We change all dynamic into var in the template.
                 return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
             }
-            else if ( this._templateMemberClassifier.IsImplicitValueParameter( node ) )
-            {
-                // In property setter and event accessor templates, the 'value' token has a special meaning. We keep the original name.
-                return base.TransformIdentifierName( node );
-            }
 
             // If the identifier is declared withing the template, the expanded name is given by the TemplateExpansionContext and
             // stored in a template variable named __foo, where foo is the variable name in the template. This variable is defined
@@ -396,8 +403,6 @@ namespace Caravela.Framework.Impl.Templating
                             Argument( this.Transform( true ) ) );
 
                 case SyntaxKind.DefaultExpression:
-                    // case SyntaxKind.NullLiteralExpression:
-                    // case SyntaxKind.DefaultLiteralExpression:
                     // Don't transform default or null.
                     // When we do that, we can try to cast a dynamic 'default' or 'null' into a SyntaxFactory.
                     return expression;
@@ -416,6 +421,12 @@ namespace Caravela.Framework.Impl.Templating
 
                 case SyntaxKind.SimpleLambdaExpression:
                     break;
+
+                case SyntaxKind.ThisExpression:
+                    // Cannot use 'this' in a context that expects a run-time expression.
+                    this.Report( TemplatingDiagnosticDescriptors.CannotUseThisInRunTimeContext.CreateDiagnostic( expression.GetLocation() ) );
+
+                    return expression;
             }
 
             var type = this._syntaxTreeAnnotationMap.GetExpressionType( expression )!;
@@ -497,7 +508,7 @@ namespace Caravela.Framework.Impl.Templating
                             Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateReferenceId( type ) ) ) ) );
 
                 case null:
-                    throw new AssertionFailedException( $"Cannot convert {expression} to a run-time value." );
+                    throw new AssertionFailedException( $"Cannot convert {expression.Kind()} '{expression}' to a run-time value." );
 
                 default:
                     // Try to find a serializer for this type.
@@ -617,13 +628,17 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     if ( this._templateMemberClassifier.IsDynamicParameter( a ) )
                     {
-                        if ( a.Expression.GetScopeFromAnnotation() != TemplatingScope.RunTimeOnly )
+                        var expressionScope = a.Expression.GetScopeFromAnnotation().GetValueOrDefault();
+                        var transformedExpression = (ExpressionSyntax) this.Visit( a.Expression )!;
+
+                        switch ( expressionScope )
                         {
-                            return Argument( this.CreateRunTimeExpression( a.Expression ) );
-                        }
-                        else
-                        {
-                            return Argument( (ExpressionSyntax) this.Visit( a.Expression )! );
+                            case TemplatingScope.Dynamic:
+                            case TemplatingScope.RunTimeOnly:
+                                return Argument( transformedExpression );
+
+                            default:
+                                return Argument( this.CreateRunTimeExpression( transformedExpression ) );
                         }
                     }
                     else
@@ -1179,9 +1194,13 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
         {
-            return InvocationExpression(
+            InvocationExpressionSyntax invocationExpression;
+
+            invocationExpression = InvocationExpression(
                     this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.TemplateReturnStatement ) ) )
                 .AddArgumentListArguments( Argument( this.Transform( node.Expression ) ) );
+
+            return this.AddCallToSimplifierAnnotations( invocationExpression );
         }
 
         public override SyntaxNode VisitIdentifierName( IdentifierNameSyntax node )

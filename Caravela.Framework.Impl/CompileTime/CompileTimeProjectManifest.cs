@@ -81,7 +81,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public void Serialize( Stream stream )
         {
-            var manifestJson = JsonConvert.SerializeObject( this, Formatting.Indented );
+            var manifestJson = JsonConvert.SerializeObject( this, Newtonsoft.Json.Formatting.Indented );
             using var manifestWriter = new StreamWriter( stream, Encoding.UTF8 );
             manifestWriter.Write( manifestJson );
         }

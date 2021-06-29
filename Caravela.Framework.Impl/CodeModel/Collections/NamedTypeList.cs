@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    internal class NamedTypeList : MemberList<INamedType, MemberRef<INamedType>>, INamedTypeList
+    internal class NamedTypeList : MemberOrNamedTypeList<INamedType, MemberRef<INamedType>>, INamedTypeList
     {
         public NamedTypeList( INamedType containingDeclaration, IEnumerable<MemberRef<INamedType>> sourceItems ) :
             base( containingDeclaration, sourceItems ) { }

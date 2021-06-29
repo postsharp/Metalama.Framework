@@ -51,6 +51,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
+        public override bool IsExplicitInterfaceImplementation => false;
+
         public override bool IsAsync => false;
 
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();

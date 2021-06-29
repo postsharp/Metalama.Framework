@@ -90,6 +90,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsOverride => false;
 
+        public bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
+
         public bool IsNew => this._containingMember.IsNew;
 
         public bool IsAsync => false;
@@ -103,15 +105,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public IAttributeList Attributes => AttributeList.Empty;
 
         public DeclarationKind DeclarationKind => DeclarationKind.Method;
-
-        public bool HasAspect<T>()
-            where T : IAspect
-            => throw new NotImplementedException();
-
-        [Obsolete( "Not implemented." )]
-        public IAnnotationList GetAnnotations<T>()
-            where T : IAspect
-            => throw new NotImplementedException();
 
         public IDiagnosticLocation? DiagnosticLocation => this._containingMember.DiagnosticLocation;
 

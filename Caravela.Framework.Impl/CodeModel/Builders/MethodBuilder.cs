@@ -87,7 +87,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
-        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; set; } = Array.Empty<IMethod>();
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
         public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, AspectLinkerOptions? linkerOptions )
             : base( parentAdvice, targetType, name )
@@ -150,5 +150,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             this.ExplicitInterfaceImplementations = new[] { interfaceMethod };
         }
+
+        public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
     }
 }

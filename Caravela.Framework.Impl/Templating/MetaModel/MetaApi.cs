@@ -17,9 +17,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     /// </summary>
     internal class MetaApi : IMetaApi
     {
-        private readonly IAdviceFieldOrProperty? _fieldOrProperty;
-        private readonly IAdviceMethod? _method;
-        private readonly IAdviceEvent? _event;
+        private readonly IAdvisedFieldOrProperty? _fieldOrProperty;
+        private readonly IAdvisedMethod? _method;
+        private readonly IAdvisedEvent? _event;
         private readonly INamedType? _type;
         private readonly MetaApiProperties _common;
 
@@ -31,21 +31,21 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IMethodBase MethodBase => this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
-        public IAdviceField Field => this._fieldOrProperty as IAdviceField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
+        public IAdvisedField Field => this._fieldOrProperty as IAdvisedField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
 
-        public IAdviceFieldOrProperty FieldOrProperty => this._fieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
+        public IAdvisedFieldOrProperty FieldOrProperty => this._fieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
 
         public IDeclaration Declaration { get; }
 
         public IMember Member => this.Declaration as IMember ?? throw this.CreateInvalidOperationException( nameof(this.Member) );
 
-        public IAdviceMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
+        public IAdvisedMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
 
-        public IAdviceProperty Property => this._fieldOrProperty as IAdviceProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
+        public IAdvisedProperty Property => this._fieldOrProperty as IAdvisedProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
 
-        public IAdviceEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
+        public IAdvisedEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
 
-        public IAdviceParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters) );
+        public IAdvisedParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters) );
 
         public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type) );
 
@@ -103,18 +103,18 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             (IDeclaration) method,
             common )
         {
-            this._method = new AdviceMethod( method );
+            this._method = new AdvisedMethod( method );
             this._type = method.DeclaringType;
         }
 
         private MetaApi( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
         {
-            this._method = new AdviceMethod( accessor );
+            this._method = new AdvisedMethod( accessor );
 
             this._fieldOrProperty = fieldOrProperty switch
             {
-                IField field => new AdviceField( field ),
-                IProperty property => new AdviceProperty( property ),
+                IField field => new AdvisedField( field ),
+                IProperty property => new AdvisedProperty( property ),
                 _ => throw new AssertionFailedException()
             };
 
@@ -123,9 +123,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         private MetaApi( IEvent @event, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
         {
-            this._event = new AdviceEvent( @event );
+            this._event = new AdvisedEvent( @event );
             this._type = @event.DeclaringType;
-            this._method = new AdviceMethod( accessor );
+            this._method = new AdvisedMethod( accessor );
         }
 
         public static MetaApi ForMethod( IMethodBase methodBase, MetaApiProperties common ) => new( (IMethod) methodBase, common );

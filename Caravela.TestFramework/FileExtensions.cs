@@ -6,6 +6,7 @@ namespace Caravela.TestFramework
     internal static class FileExtensions
     {
         public const string TransformedCode = ".t.cs";
-        public const string Html = ".t.html";
+        public const string InputHtml = ".cs.html";
+        public const string OutputHtml = ".t.cs.html";
     }
 }

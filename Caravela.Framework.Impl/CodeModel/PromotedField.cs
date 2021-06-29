@@ -60,6 +60,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IParameterList IHasParameters.Parameters => ParameterList.Empty;
 
+        public override bool IsExplicitInterfaceImplementation => false;
+
         public override bool IsAsync => false;
 
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => Array.Empty<IProperty>();

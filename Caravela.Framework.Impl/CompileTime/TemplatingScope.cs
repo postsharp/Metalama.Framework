@@ -47,6 +47,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <summary>
         /// A member of a dynamic receiver.
         /// </summary>
-        Dynamic
+        Dynamic,
+        Conflict
     }
 }

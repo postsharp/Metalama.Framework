@@ -59,6 +59,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override bool IsReadOnly => this.MethodSymbol.IsReadOnly;
 
+        public override bool IsExplicitInterfaceImplementation => !this.MethodSymbol.ExplicitInterfaceImplementations.IsEmpty;
+
         public override bool IsAsync => this.MethodSymbol.IsAsync;
 
         public IMethod? OverriddenMethod

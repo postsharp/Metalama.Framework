@@ -49,6 +49,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsOverride => this.AccessorBuilder.IsOverride;
 
+        public bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
+
         public bool IsNew => this.AccessorBuilder.IsNew;
 
         public bool IsAsync => this.AccessorBuilder.IsAsync;

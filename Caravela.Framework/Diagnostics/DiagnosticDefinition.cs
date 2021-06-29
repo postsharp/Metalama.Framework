@@ -27,6 +27,10 @@ namespace Caravela.Framework.Diagnostics
             this.Category = category ?? "Caravela.User";
         }
 
+        // Constructor used by internal code.
+        internal DiagnosticDefinition( string id, string title, string messageFormat, string category, Severity severity )
+            : this( id, severity, messageFormat, title, category ) { }
+
         /// <inheritdoc />
         public Severity Severity { get; }
 

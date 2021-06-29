@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 // TODO: A lot methods here are called multiple times. Optimize.
@@ -358,6 +357,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Gets rewritten member and any additional induced members (e.g. backing field of auto property).
         /// </summary>
+        /// <param name="syntax"></param>
         /// <param name="symbol"></param>
         /// <returns></returns>
         public IReadOnlyList<MemberDeclarationSyntax> RewriteMember( MemberDeclarationSyntax syntax, ISymbol symbol )
@@ -423,7 +423,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 return MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( resolvedSymbol.ContainingType ),
+                    LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( resolvedSymbol.ContainingType ),
                     IdentifierName( targetMemberName ) );
             }
             else

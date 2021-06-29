@@ -227,7 +227,7 @@ namespace Caravela.Framework.Impl.Linking
 
         private static MemberDeclarationSyntax GetOriginalImplProperty( PropertyDeclarationSyntax property, IPropertySymbol symbol )
         {
-            if ( IsAutoPropertyDeclaration (property))
+            if ( IsAutoPropertyDeclaration( property ) )
             {
                 return
                     property
@@ -247,10 +247,12 @@ namespace Caravela.Framework.Impl.Linking
                                         SyntaxKind.SetAccessorDeclaration,
                                         GetImplicitSetterBody(symbol.SetMethod))
                                     : null,
-                                }.Where(a => a != null).AssertNoneNull() ) ) );
+                                }.Where( a => a != null ).AssertNoneNull() ) ) );
             }
             else
+            {
                 return property.WithIdentifier( Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ) );
+            }
         }
     }
 }

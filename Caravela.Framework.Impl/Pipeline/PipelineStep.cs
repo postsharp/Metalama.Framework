@@ -29,6 +29,9 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <param name="pipelineStepsState"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public abstract CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState, CancellationToken cancellationToken );
+        public abstract CompilationModel Execute(
+            CompilationModel compilation,
+            PipelineStepsState pipelineStepsState,
+            CancellationToken cancellationToken );
     }
 }

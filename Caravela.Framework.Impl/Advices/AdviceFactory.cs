@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Advices
         private readonly IReadOnlyList<Advice> _declarativeAdvices;
         private readonly List<Advice> _advices = new();
 
-        private readonly Dictionary<INamedType, IntroduceInterfaceAdvice> _introduceInterfaceAdvices;
+        private readonly Dictionary<INamedType, ImplementInterfaceAdvice> _implementInterfaceAdvices;
 
         internal IReadOnlyList<Advice> Advices => this._advices;
 
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.Advices
             this._compilation = compilation;
             this._diagnosticAdder = diagnosticAdder;
             this._declarativeAdvices = declarativeAdvices;
-            this._introduceInterfaceAdvices = new Dictionary<INamedType, IntroduceInterfaceAdvice>( compilation.InvariantComparer );
+            this._implementInterfaceAdvices = new Dictionary<INamedType, ImplementInterfaceAdvice>( compilation.InvariantComparer );
         }
 
         public void OverrideMethod( IMethod targetMethod, string defaultTemplate, AdviceOptions? options = null )
@@ -313,7 +313,7 @@ namespace Caravela.Framework.Impl.Advices
             return advice.Builder;
         }
 
-        public void IntroduceInterface(
+        public void ImplementInterface(
             INamedType targetType,
             INamedType interfaceType,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
@@ -321,9 +321,9 @@ namespace Caravela.Framework.Impl.Advices
         {
             var diagnosticList = new DiagnosticList();
 
-            if ( !this._introduceInterfaceAdvices.TryGetValue( targetType, out var advice ) )
+            if ( !this._implementInterfaceAdvices.TryGetValue( targetType, out var advice ) )
             {
-                this._introduceInterfaceAdvices[targetType] = advice = new IntroduceInterfaceAdvice( this._aspect, targetType, _layerName );
+                this._implementInterfaceAdvices[targetType] = advice = new ImplementInterfaceAdvice( this._aspect, targetType, _layerName );
                 advice.Initialize( this._declarativeAdvices, diagnosticList );
                 this._advices.Add( advice );
             }
@@ -334,20 +334,20 @@ namespace Caravela.Framework.Impl.Advices
             this._diagnosticAdder.Report( diagnosticList );
         }
 
-        public void IntroduceInterface(
+        public void ImplementInterface(
             INamedType targetType,
             Type interfaceType,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AdviceOptions? options = null )
         {
-            this.IntroduceInterface(
+            this.ImplementInterface(
                 targetType,
                 (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( interfaceType ),
                 conflictBehavior,
                 options );
         }
 
-        public void IntroduceInterface(
+        public void ImplementInterface(
             INamedType targetType,
             INamedType interfaceType,
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
@@ -356,9 +356,9 @@ namespace Caravela.Framework.Impl.Advices
         {
             var diagnosticList = new DiagnosticList();
 
-            if ( !this._introduceInterfaceAdvices.TryGetValue( targetType, out var advice ) )
+            if ( !this._implementInterfaceAdvices.TryGetValue( targetType, out var advice ) )
             {
-                this._introduceInterfaceAdvices[targetType] = advice = new IntroduceInterfaceAdvice( this._aspect, targetType, _layerName );
+                this._implementInterfaceAdvices[targetType] = advice = new ImplementInterfaceAdvice( this._aspect, targetType, _layerName );
                 advice.Initialize( this._declarativeAdvices, diagnosticList );
                 this._advices.Add( advice );
             }
@@ -369,14 +369,14 @@ namespace Caravela.Framework.Impl.Advices
             this._diagnosticAdder.Report( diagnosticList );
         }
 
-        public void IntroduceInterface(
+        public void ImplementInterface(
             INamedType targetType,
             Type interfaceType,
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AdviceOptions? options = null )
         {
-            this.IntroduceInterface(
+            this.ImplementInterface(
                 targetType,
                 (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( interfaceType ),
                 interfaceMemberSpecifications,

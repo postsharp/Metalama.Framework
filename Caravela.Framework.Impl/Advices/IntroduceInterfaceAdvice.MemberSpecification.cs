@@ -5,7 +5,7 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal partial class IntroduceInterfaceAdvice
+    internal partial class ImplementInterfaceAdvice
     {
         private readonly struct MemberSpecification
         {

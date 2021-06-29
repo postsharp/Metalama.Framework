@@ -29,6 +29,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public bool IsOverride => this.Underlying.IsOverride;
 
+        public bool IsExplicitInterfaceImplementation => this.Underlying.IsExplicitInterfaceImplementation;
+
         public INamedType DeclaringType => this.Underlying.DeclaringType;
 
         public MemberInfo ToMemberInfo() => this.Underlying.ToMemberInfo();

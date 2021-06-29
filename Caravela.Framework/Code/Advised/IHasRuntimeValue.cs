@@ -6,8 +6,8 @@ using Caravela.Framework.Aspects;
 namespace Caravela.Framework.Code.Advised
 {
     /// <summary>
-    /// Something that has a value that can be read or assigned at run time - typically an <see cref="IAdviceParameter"/>
-    /// or an <see cref="IAdviceFieldOrProperty"/>.
+    /// Something that has a value that can be read or assigned at run time - typically an <see cref="IAdvisedParameter"/>
+    /// or an <see cref="IAdvisedFieldOrProperty"/>.
     /// </summary>
     [CompileTimeOnly]
     public interface IHasRuntimeValue

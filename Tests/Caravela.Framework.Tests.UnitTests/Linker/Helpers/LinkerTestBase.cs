@@ -73,7 +73,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
             FinalizeTransformationFakes( rewriter, inputCompilation, initialCompilationModel );
 
-            var inputCompilationModel = CompilationModel.CreateRevisedInstance( initialCompilationModel, rewriter.ObservableTransformations );
+            var inputCompilationModel = initialCompilationModel.WithTransformations( rewriter.ObservableTransformations );
 
             var linkerInput = new AspectLinkerInput(
                 PartialCompilation.CreateComplete( inputCompilation ),

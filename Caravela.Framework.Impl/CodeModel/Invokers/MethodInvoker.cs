@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             this._method = method;
         }
 
-        public object Invoke( object? instance, params object[] args )
+        public object Invoke( object? instance, params object?[] args )
         {
             // TODO: Use LinkerAnnotation.
 

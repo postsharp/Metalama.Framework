@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Simplification;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -26,11 +27,13 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             {
                 null => SyntaxFactoryEx.Null,
                 ExpressionSyntax expressionSyntax => expressionSyntax,
+                RuntimeExpression runtimeExpression => runtimeExpression.Syntax,
                 _ => SyntaxFactoryEx.LiteralExpression( this._value )
             };
 
             return new RuntimeExpression(
-                SyntaxFactory.ParenthesizedExpression( LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression( this._type.GetSymbol(), expression ) ) );
+                SyntaxFactory.ParenthesizedExpression( LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression( this._type.GetSymbol(), expression ) )
+                    .WithAdditionalAnnotations( Simplifier.Annotation ) );
         }
     }
 }

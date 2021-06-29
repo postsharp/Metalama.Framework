@@ -34,5 +34,8 @@ namespace Caravela.Framework.Code
         /// the same type or declaration even if they belong to different compilation versions.
         /// </summary>
         IDeclarationComparer InvariantComparer { get; }
+
+        IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
+            where T : IAspect;
     }
 }
