@@ -176,7 +176,7 @@ namespace Caravela.Framework.Impl.Linking
                                         ExpressionStatement(
                                             AssignmentExpression(
                                                 SyntaxKind.SimpleAssignmentExpression,
-                                                IdentifierName( inliningContext.ReturnVariableName.AssertNotNull() ),
+                                                IdentifierName( inliningContext.ReturnVariableName ?? "_" ),
                                                 returnStatement.Expression ) ),
                                         GotoStatement(
                                             SyntaxKind.GotoStatement,
@@ -211,7 +211,7 @@ namespace Caravela.Framework.Impl.Linking
                                     ExpressionStatement(
                                         AssignmentExpression(
                                             SyntaxKind.SimpleAssignmentExpression,
-                                            IdentifierName( inliningContext.ReturnVariableName.AssertNotNull() ),
+                                            IdentifierName( inliningContext.ReturnVariableName ?? "_" ),
                                             returnExpression ) ),
                                     GotoStatement(
                                         SyntaxKind.GotoStatement,

@@ -39,6 +39,12 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
+            // Assignment should be simple.
+            if ( assignmentExpression.Kind() != SyntaxKind.SimpleAssignmentExpression )
+            {
+                return false;
+            }
+
             // Assignment should have a local on the left (TODO: ref returns).
             if ( assignmentExpression.Left is not IdentifierNameSyntax || semanticModel.GetSymbolInfo(assignmentExpression.Left).Symbol is not ILocalSymbol)
             {

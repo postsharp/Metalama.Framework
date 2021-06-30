@@ -40,6 +40,12 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
+            // Assignment should be simple.
+            if ( assignmentExpression.Kind() != SyntaxKind.SimpleAssignmentExpression )
+            {
+                return false;
+            }
+
             // The assignment should be part of expression statement.
             if ( assignmentExpression.Parent == null || assignmentExpression.Parent is not ExpressionStatementSyntax )
             {

@@ -7,14 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Linking\LinkerLinkingStep.EventInliningRewriter.cs" />
-    <Compile Remove="Linking\LinkerLinkingStep.InliningRewriterBase.cs" />
-    <Compile Remove="Linking\LinkerLinkingStep.MethodInliningRewriter.cs" />
-    <Compile Remove="Linking\LinkerLinkingStep.PropertyGetInliningRewriter.cs" />
-    <Compile Remove="Linking\LinkerLinkingStep.PropertySetInliningRewriter.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Include="..\IsExternalInit.cs" Link="IsExternalInit.cs" />
     
     <!-- We have to embed the netstandard2.0 build of Caravela.Framework so we can reference it to create
@@ -30,14 +22,6 @@
     <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration" />
     <InternalsVisibleTo Include="Caravela.Framework.CompilerAddIn" />
     </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Linking\LinkerLinkingStep.EventInliningRewriter.cs" />
-    <None Include="Linking\LinkerLinkingStep.InliningRewriterBase.cs" />
-    <None Include="Linking\LinkerLinkingStep.MethodInliningRewriter.cs" />
-    <None Include="Linking\LinkerLinkingStep.PropertyGetInliningRewriter.cs" />
-    <None Include="Linking\LinkerLinkingStep.PropertySetInliningRewriter.cs" />
-  </ItemGroup>
     
    <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />

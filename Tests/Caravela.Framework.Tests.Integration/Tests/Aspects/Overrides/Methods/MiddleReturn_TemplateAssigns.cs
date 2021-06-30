@@ -12,8 +12,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.MiddleRe
         public override dynamic? OverrideMethod()
         {
             Console.WriteLine("Begin override.");
-            dynamic? result;
-            result = meta.Proceed();
+            dynamic? result = meta.Proceed();
             Console.WriteLine("End override.");
             return result;
         }

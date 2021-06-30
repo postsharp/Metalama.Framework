@@ -4,7 +4,6 @@ internal class TargetClass
     public void TargetMethod_Void(int x)
     {
         global::System.Console.WriteLine("Begin override.");
-        global::Caravela.Framework.Aspects.__Void result;
         Console.WriteLine("Begin target.");
         if (x == 0)
             goto __aspect_return_1;

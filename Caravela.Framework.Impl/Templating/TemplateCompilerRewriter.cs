@@ -274,6 +274,21 @@ namespace Caravela.Framework.Impl.Templating
             return base.Transform( token );
         }
 
+        protected override ExpressionSyntax TransformVariableDeclaration( VariableDeclarationSyntax node )
+        {
+            switch ( node )
+            {
+                case { Type: NullableTypeSyntax { ElementType: IdentifierNameSyntax { Identifier: { Text: "dynamic" } } } }:
+                    // Variable of dynamic? type needs to become var type (without the ?).
+                    return base.TransformVariableDeclaration(
+                        VariableDeclaration(
+                            IdentifierName( Identifier( "var" ) ),
+                            node.Variables ) );
+                default:
+                    return base.TransformVariableDeclaration(node);
+            }
+        }
+
         protected override ExpressionSyntax TransformIdentifierName( IdentifierNameSyntax node )
         {
             switch ( node.Identifier.Kind() )
