@@ -40,7 +40,7 @@ namespace Caravela.Framework.Aspects
         /// in a parent class of the target tye.
         /// The default value is <see cref="OverrideStrategy.Fail"/>. 
         /// </summary>
-        [Obsolete( "Not implemented." )]
+        [Obsolete("Not implemented.")]
         public OverrideStrategy WhenInherited { get; set; }
 
         public Accessibility? GetAccessibility() => this._accessibility;

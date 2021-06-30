@@ -172,12 +172,12 @@ namespace Caravela.Framework.Impl.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition
+        internal static readonly DiagnosticDefinition<string>
             CannotUseThisInRunTimeContext
                 = new(
                     "CR0221",
                     "Cannot use 'this' when a run-time expression is expected.",
-                    "The expression 'this' cannot be used where a run-time expression is expected. Use 'meta.This' instead.",
+                    "Cannot use 'this' in expression '{0}' because a run-time expression is expected, and 'this' in a template is a compile-time keyword. Use 'meta.This' instead.",
                     _category,
                     Error );
     }
