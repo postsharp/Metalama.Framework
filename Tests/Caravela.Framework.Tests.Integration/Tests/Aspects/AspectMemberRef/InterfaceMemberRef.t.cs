@@ -1,14 +1,28 @@
-[Dispose]
+[Introduce]
 class Program
-    : global::System.IDisposable    {
+    : global::Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.InterfaceMemberRef.IInterface    {
 
 
     public void SomeMethod()
     {
-        this.Dispose();
+        this.Method();
+        this.Property = this.Property + 1;
+        this.Event += this.EventHandler;
     }
 
-    public void Dispose()
+    private void EventHandler(global::System.Object sender, global::System.EventArgs a)
     {
     }
+
+    public void Method()
+    {
+    }
+
+    public global::System.Int32 Property
+    {
+        private get;
+        private set;
+    }
+
+    public event global::System.EventHandler Event;
 }

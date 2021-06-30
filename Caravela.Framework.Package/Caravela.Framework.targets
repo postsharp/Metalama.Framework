@@ -9,7 +9,7 @@
         <CaravelaProjectId>$(AssemblyName)_$(Configuration)_$(TargetFramework)</CaravelaProjectId>
     </PropertyGroup>
     
-    <PropertyGroup Condition="'$(CaravelaEnabled)'=='True'">
+    <PropertyGroup Condition="'$(CaravelaEnabled)'!='False'">
         <DefineConstants>$(DefineConstants);CARAVELA</DefineConstants>
     </PropertyGroup>
 
