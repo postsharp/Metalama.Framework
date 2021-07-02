@@ -1213,7 +1213,8 @@ namespace Caravela.Framework.Impl.Templating
 
             this.Unindent();
 
-            return ForEachStatement( node.Type, node.Identifier, node.Expression, statement );
+            // It seems that trivia can be lost upstream, there can be a missing one between the 'in' keyword and the expression. Add them to be sure.
+            return ForEachStatement( node.Type.WithTrailingTrivia( Space ), node.Identifier.WithTrailingTrivia( Space ), node.Expression.WithLeadingTrivia( Space ), statement );
         }
 
         public override SyntaxNode VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
