@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using System;
 using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,26 +41,35 @@ namespace Caravela.Framework.Impl.DesignTime
 
         private static async Task<Document> GetFixedDocument( Document document, TextSpan span, CancellationToken cancellationToken )
         {
-            var syntaxRoot = await document.GetSyntaxRootAsync( cancellationToken );
-
-            if ( syntaxRoot == null )
+            try
             {
+                var syntaxRoot = await document.GetSyntaxRootAsync( cancellationToken );
+
+                if ( syntaxRoot == null )
+                {
+                    return document;
+                }
+
+                var node = syntaxRoot.FindNode( span );
+                var typeDeclaration = GetTypeDeclaration( node );
+
+                if ( typeDeclaration == null )
+                {
+                    return document;
+                }
+
+                var newTypeDeclaration = typeDeclaration.AddModifiers( SyntaxFactory.Token( SyntaxKind.PartialKeyword ) );
+                var newSyntaxRoot = syntaxRoot.ReplaceNode( typeDeclaration, newTypeDeclaration );
+                var newDocument = document.WithSyntaxRoot( newSyntaxRoot );
+
+                return newDocument;
+            }
+            catch ( Exception e )
+            {
+                DesignTimeExceptionHandler.ReportException( e );
+
                 return document;
             }
-
-            var node = syntaxRoot.FindNode( span );
-            var typeDeclaration = GetTypeDeclaration( node );
-
-            if ( typeDeclaration == null )
-            {
-                return document;
-            }
-
-            var newTypeDeclaration = typeDeclaration.AddModifiers( SyntaxFactory.Token( SyntaxKind.PartialKeyword ) );
-            var newSyntaxRoot = syntaxRoot.ReplaceNode( typeDeclaration, newTypeDeclaration );
-            var newDocument = document.WithSyntaxRoot( newSyntaxRoot );
-
-            return newDocument;
         }
 
         private static BaseTypeDeclarationSyntax? GetTypeDeclaration( SyntaxNode node )

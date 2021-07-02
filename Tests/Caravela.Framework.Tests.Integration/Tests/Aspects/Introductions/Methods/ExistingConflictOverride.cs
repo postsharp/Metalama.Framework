@@ -12,42 +12,42 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
        
         
         
-        [Introduce(ConflictBehavior = ConflictBehavior.Override)]
+        [Introduce(WhenExists = OverrideStrategy.Override)]
         public int BaseMethod()
         {
             Console.WriteLine("This is introduced method.");
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.Override)]
+        [Introduce(WhenExists = OverrideStrategy.Override)]
         public static int BaseMethod_Static()
         {
             Console.WriteLine("This is introduced method.");
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.Override)]
+        [Introduce(WhenExists = OverrideStrategy.Override)]
         public int ExistingMethod()
         {
             Console.WriteLine("This is introduced method.");
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.Override)]
+        [Introduce(WhenExists = OverrideStrategy.Override)]
         public static int ExistingMethod_Static()
         {
             Console.WriteLine("This is introduced method.");
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.Override)]
+        [Introduce(WhenExists = OverrideStrategy.Override)]
         public int NonExistingMethod()
         {
             Console.WriteLine("This is introduced method.");
             return meta.Proceed();
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.Override)]
+        [Introduce(WhenExists = OverrideStrategy.Override)]
         public static int NonExistingMethod_Static()
         {
             Console.WriteLine("This is introduced method.");

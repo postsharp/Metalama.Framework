@@ -19,6 +19,7 @@ namespace Caravela.Framework.Aspects
     /// The entry point for the meta model, which can be used in templates to inspect the target code or access other
     /// features of the template language.
     /// </summary>
+    /// <seealso href="@templates"/>
     [CompileTimeOnly]
     [TemplateKeyword]
 #pragma warning disable SA1300, IDE1006 // Element should begin with upper-case letter
@@ -48,6 +49,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Requests the debugger to break, if any debugger is attached to the current process.
         /// </summary>
+        /// <seealso href="@debugging-aspects"/>
         [TemplateKeyword]
         public static void DebugBreak() => CurrentContext.DebugBreak();
 
@@ -59,6 +61,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="expression">An expression.</param>
         /// <typeparam name="T"></typeparam>
         /// <returns>Exactly <paramref name="expression"/>, but coerced as a compile-time expression.</returns>
+        /// <seealso href="@templates"/>
         [return: NotNullIfNotNull( "expression" )]
         [TemplateKeyword]
         public static T? CompileTime<T>( T? expression ) => expression;
@@ -70,39 +73,46 @@ namespace Caravela.Framework.Aspects
         /// <param name="value">A compile-time value.</param>
         /// <typeparam name="T"></typeparam>
         /// <returns>A value that is structurally equivalent to the compile-time <paramref name="value"/>.</returns>
+        /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static T? RunTime<T>( T? value ) => value;
 
         /// <summary>
         /// Gets the method metadata, or the accessor if this is a template for a field, property or event.
         /// </summary>
+        /// <seealso href="@templates"/>
         public static IAdvisedMethod Method => CurrentContext.Method;
 
         /// <summary>
         /// Gets the target property, or throws an exception if the advice does not target a property.
         /// </summary>
+        /// <seealso href="@templates"/>
         public static IAdvisedProperty Property => CurrentContext.Property;
 
         /// <summary>
         /// Gets the target field or property, or throws an exception if the advice does not target a field or a property.
         /// </summary>
+        /// <seealso href="@templates"/>
         public static IAdvisedFieldOrProperty FieldOrProperty => CurrentContext.FieldOrProperty;
 
         /// <summary>
         /// Gets the target member (method, constructor, field, property or event, but not a nested type), or
         /// throws an exception if the advice does not target member.
         /// </summary>
+        /// <seealso href="@templates"/>
         public static IMember Member => CurrentContext.Member;
 
         /// <summary>
         /// Gets the target event, or throws an exception if the advice does not target an event.
         /// </summary>
+        /// <seealso href="@templates"/>
         public static IAdvisedEvent Event => CurrentContext.Event;
 
         /// <summary>
         /// Gets the list of parameters of the current <see cref="Method"/> or <see cref="Property"/>, or throws an
         /// exception if the advice of the target is neither a method.
         /// </summary>
+        /// <seealso href="@templates"/>
         public static IAdvisedParameterList Parameters => CurrentContext.Parameters;
 
         // Gets the project configuration.
@@ -112,11 +122,13 @@ namespace Caravela.Framework.Aspects
         /// Gets the target type of the advice. If the advice is applied to a member, this property returns the declaring
         /// type of the member.
         /// </summary>
-        public static INamedType NamedType => CurrentContext.Type;
+        /// <seealso href="@templates"/>
+        public static INamedType Type => CurrentContext.Type;
 
         /// <summary>
         /// Gets the code model of the whole compilation.
         /// </summary>
+        /// <seealso href="@templates"/>
         public static ICompilation Compilation => CurrentContext.Compilation;
 
         /// <summary>
@@ -129,6 +141,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <seealso cref="Base"/>
         /// <seealso cref="ThisStatic"/>
+        /// <seealso href="@templates"/>
         [RunTimeOnly]
         public static dynamic This => CurrentContext.This;
 
@@ -140,6 +153,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <seealso cref="This"/>
         /// <seealso cref="BaseStatic"/>
+        /// <seealso href="@templates"/>
         [RunTimeOnly]
         public static dynamic Base => CurrentContext.Base;
 
@@ -151,6 +165,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <seealso cref="This"/>
         /// <seealso cref="BaseStatic"/>
+        /// <seealso href="@templates"/>
         [RunTimeOnly]
         public static dynamic ThisStatic => CurrentContext.ThisStatic;
 
@@ -162,18 +177,20 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <seealso cref="Base"/>
         /// <seealso cref="ThisStatic"/>
+        /// <seealso href="@templates"/>
         [RunTimeOnly]
         public static dynamic BaseStatic => CurrentContext.BaseStatic;
 
         /// <summary>
         /// Gets a service allowing to report and suppress diagnostics.
         /// </summary>
+        /// <seealso href="@diagnostics"/>
         public static IDiagnosticSink Diagnostics => CurrentContext.Diagnostics;
 
         /// <summary>
-        /// Gets the dictionary of tags that were passed to the <see cref="IAdviceFactory"/> method by the <see cref="IAspect{T}.BuildAspect"/> method using the 
-        /// <see cref="AdviceOptions.Tags"/> option.
+        /// Gets the dictionary of tags that were passed to the <see cref="IAdviceFactory"/> method by the <see cref="IAspect{T}.BuildAspect"/> method.
         /// </summary>
+        /// <seealso href="sharing-state-with-advices"/>
         public static IReadOnlyDictionary<string, object?> Tags => CurrentContext.Tags;
 
         /// <summary>
@@ -198,6 +215,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="type"></param>
         /// <param name="value">Must be explicitly cast to <c>object</c> otherwise the C# compiler will emit an error.</param>
         /// <returns></returns>
+        /// <seealso href="@templates"/>
         [return: RunTimeOnly]
         [TemplateKeyword]
         public static dynamic? Cast( IType type, dynamic? value ) => type.Compilation.TypeFactory.Cast( type, value );

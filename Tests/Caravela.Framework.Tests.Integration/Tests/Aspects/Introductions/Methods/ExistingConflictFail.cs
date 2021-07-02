@@ -14,14 +14,14 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
         
        
 
-        [Introduce(ConflictBehavior = ConflictBehavior.Fail)]
+        [Introduce(WhenExists = OverrideStrategy.Fail)]
         public int ExistingMethod()
         {
             Console.WriteLine("This is introduced method.");
             return 42;
         }
 
-        [Introduce(ConflictBehavior = ConflictBehavior.Fail)]
+        [Introduce(WhenExists = OverrideStrategy.Fail)]
         public static int ExistingMethod_Static()
         {
             Console.WriteLine("This is introduced method.");

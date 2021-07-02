@@ -8,6 +8,7 @@ namespace Caravela.Framework.Diagnostics
     /// defined as static fields or properties of an aspect classes. Diagnostics are instantiated with <see cref="IDiagnosticSink"/>.
     /// For a strongly-typed variant, see <see cref="DiagnosticDefinition{T}"/>. 
     /// </summary>
+    /// <seealso href="@diagnostics"/>
     public sealed class DiagnosticDefinition : IDiagnosticDefinition
     {
         /// <summary>

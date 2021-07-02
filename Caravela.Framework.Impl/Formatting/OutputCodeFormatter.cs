@@ -19,5 +19,6 @@ namespace Caravela.Framework.Impl.Formatting
 
             return (CompilationUnitSyntax) Formatter.Format( simplifiedSyntaxRoot, document.Project.Solution.Workspace );
         }
+
     }
 }

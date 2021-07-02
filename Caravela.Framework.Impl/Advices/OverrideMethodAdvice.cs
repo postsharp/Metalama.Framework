@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
@@ -20,7 +19,7 @@ namespace Caravela.Framework.Impl.Advices
             IMethod targetDeclaration,
             IMethod templateMethod,
             string layerName,
-            AdviceOptions? options ) : base( aspect, targetDeclaration, layerName, options )
+            Dictionary<string, object?>? tags ) : base( aspect, targetDeclaration, layerName, tags )
         {
             this.TemplateMethod = templateMethod;
         }

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
@@ -26,8 +25,8 @@ namespace Caravela.Framework.Impl.Advices
             IMethod? addTemplateMethod,
             IMethod? removeTemplateMethod,
             string layerName,
-            AdviceOptions? options )
-            : base( aspect, targetDeclaration, layerName, options )
+            Dictionary<string, object?>? tags )
+            : base( aspect, targetDeclaration, layerName, tags )
         {
             // We need either property template or both accessor templates, but never both.
             Invariant.Assert( templateEvent != null || (addTemplateMethod != null && removeTemplateMethod != null) );

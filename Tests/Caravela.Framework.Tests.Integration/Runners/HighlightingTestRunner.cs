@@ -120,7 +120,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             {
                 return;
             }
-            
+
             var expectedHighlightedSource = File.ReadAllText( expectedHtmlPath );
 
             var htmlPath = actualHtmlPath!;

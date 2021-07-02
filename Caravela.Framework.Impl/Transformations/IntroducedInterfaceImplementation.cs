@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
@@ -173,7 +172,7 @@ namespace Caravela.Framework.Impl.Transformations
                         new MetaApiProperties(
                             context.DiagnosticSink,
                             aspectInterfaceMethod.GetSymbol(),
-                            advice.Options.Tags,
+                            advice.ReadOnlyTags,
                             advice.AspectLayerId,
                             context.ServiceProvider.GetService<AspectPipelineDescription>() ) );
 
@@ -311,7 +310,7 @@ namespace Caravela.Framework.Impl.Transformations
                         new MetaApiProperties(
                             context.DiagnosticSink,
                             aspectInterfaceAccessor.GetSymbol(),
-                            this.Advice.Options.Tags,
+                            this.Advice.ReadOnlyTags,
                             this.Advice.AspectLayerId,
                             context.ServiceProvider.GetService<AspectPipelineDescription>() ) );
 
@@ -455,7 +454,7 @@ namespace Caravela.Framework.Impl.Transformations
                         new MetaApiProperties(
                             context.DiagnosticSink,
                             aspectInterfaceAccessor.GetSymbol(),
-                            this.Advice.Options.Tags,
+                            this.Advice.ReadOnlyTags,
                             this.Advice.AspectLayerId,
                             context.ServiceProvider.GetService<AspectPipelineDescription>() ) );
 

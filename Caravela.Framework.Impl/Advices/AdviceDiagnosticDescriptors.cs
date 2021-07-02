@@ -72,7 +72,7 @@ namespace Caravela.Framework.Impl.Advices
             InterfaceIsAlreadyImplemented = new(
                 "CR0507",
                 "Cannot introduce an interface when the target type already implements it.",
-                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because it is already implemented and ConflictBehavior is set to Fail.",
+                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because it is already implemented and WhenExists is set to Fail.",
                 Error, _category );
 
         public static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType)>

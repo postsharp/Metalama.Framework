@@ -11,13 +11,12 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
         {
             var eventBuilder = builder.AdviceFactory.IntroduceEvent(
                 builder.TargetDeclaration, 
-                nameof(PropertyChanged), 
                 nameof(PropertyChanged));
 
             builder.AdviceFactory.IntroduceMethod(
                 builder.TargetDeclaration,
                 nameof(OnPropertyChanged),
-                options: AdviceOptions.Default.AddTag("event", eventBuilder));
+                tags: new(){{"event", eventBuilder}});
         }
 
 

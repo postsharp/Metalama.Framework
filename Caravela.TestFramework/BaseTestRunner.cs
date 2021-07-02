@@ -5,7 +5,6 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -63,10 +62,21 @@ namespace Caravela.TestFramework
 
             // Source. Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
             // which is more difficult to test.
-            var project = this.CreateProject().WithParseOptions( CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER" ) );
+            var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER", "CARAVELA" );
+            var project = this.CreateProject().WithParseOptions( parseOptions );
+            
+            Document AddDocument( string fileName, string sourceCode )
+            {
+                var syntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
+                var prunedSyntaxRoot = new InactiveCodeRemover().Visit( syntaxTree.GetRoot() );
+                var document = project.AddDocument( fileName, prunedSyntaxRoot, filePath: fileName );
+                project = document.Project;
+
+                return document;
+            }
+
             var sourceFileName = testInput.TestName + ".cs";
-            var mainDocument = project.AddDocument( sourceFileName, SourceText.From( testInput.SourceCode, Encoding.UTF8 ), filePath: sourceFileName );
-            project = mainDocument.Project;
+            var mainDocument = AddDocument( sourceFileName, testInput.SourceCode );
 
             var syntaxTree = mainDocument.GetSyntaxTreeAsync().Result!;
 
@@ -84,8 +94,7 @@ namespace Caravela.TestFramework
                 var includedText = File.ReadAllText( includedFullPath );
                 var includedFileName = Path.GetFileName( includedFullPath );
 
-                var includedDocument = project.AddDocument( includedFileName, SourceText.From( includedText, Encoding.UTF8 ), filePath: includedFileName );
-                project = includedDocument.Project;
+                var includedDocument = AddDocument( includedFileName,  includedText );
 
                 testResult.AddInputDocument( includedDocument, includedFullPath );
 

@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeRefactorings;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -22,72 +23,79 @@ namespace Caravela.Framework.Impl.DesignTime
     {
         public override async Task ComputeRefactoringsAsync( CodeRefactoringContext context )
         {
-            if ( !context.Document.SupportsSemanticModel )
+            try
             {
-                return;
-            }
-
-            var cancellationToken = context.CancellationToken.IgnoreIfDebugging();
-
-            var syntaxTree = await context.Document.GetSyntaxTreeAsync( cancellationToken );
-
-            if ( syntaxTree == null )
-            {
-                return;
-            }
-
-            var node = (await syntaxTree.GetRootAsync( cancellationToken )).FindNode( context.Span );
-
-            var semanticModel = await context.Document.GetSemanticModelAsync( cancellationToken );
-
-            if ( semanticModel == null )
-            {
-                return;
-            }
-
-            var compilation = semanticModel.Compilation;
-
-            var symbol = semanticModel.GetDeclaredSymbol( node, cancellationToken );
-
-            if ( symbol == null )
-            {
-                return;
-            }
-
-            var buildOptions = new ProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
-
-            DebuggingHelper.AttachDebugger( buildOptions );
-
-            // TODO: Make sure we are on a background thread.
-
-            // Execute the pipeline.
-
-            var eligibleAspects = DesignTimeAspectPipelineCache.Instance.GetEligibleAspects( symbol, buildOptions, cancellationToken );
-
-            var addAspectAttributeActions = ImmutableArray.CreateBuilder<CodeAction>();
-            var expandAspectActions = ImmutableArray.CreateBuilder<CodeAction>();
-
-            foreach ( var aspect in eligibleAspects )
-            {
-                addAspectAttributeActions.Add( CodeAction.Create( aspect.DisplayName, ct => AddAspectAttribute( aspect, symbol, context.Document, ct ) ) );
-
-                if ( aspect.CanExpandToSource )
+                if ( !context.Document.SupportsSemanticModel )
                 {
-                    expandAspectActions.Add(
-                        CodeAction.Create(
-                            aspect.DisplayName,
-                            ct => ExpandAspectToCode( buildOptions, compilation, aspect, symbol, context.Document, ct.IgnoreIfDebugging() ) ) );
+                    return;
+                }
+
+                var cancellationToken = context.CancellationToken.IgnoreIfDebugging();
+
+                var syntaxTree = await context.Document.GetSyntaxTreeAsync( cancellationToken );
+
+                if ( syntaxTree == null )
+                {
+                    return;
+                }
+
+                var node = (await syntaxTree.GetRootAsync( cancellationToken )).FindNode( context.Span );
+
+                var semanticModel = await context.Document.GetSemanticModelAsync( cancellationToken );
+
+                if ( semanticModel == null )
+                {
+                    return;
+                }
+
+                var compilation = semanticModel.Compilation;
+
+                var symbol = semanticModel.GetDeclaredSymbol( node, cancellationToken );
+
+                if ( symbol == null )
+                {
+                    return;
+                }
+
+                var buildOptions = new ProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
+
+                DebuggingHelper.AttachDebugger( buildOptions );
+
+                // TODO: Make sure we are on a background thread.
+
+                // Execute the pipeline.
+
+                var eligibleAspects = DesignTimeAspectPipelineCache.Instance.GetEligibleAspects( symbol, buildOptions, cancellationToken );
+
+                var addAspectAttributeActions = ImmutableArray.CreateBuilder<CodeAction>();
+                var expandAspectActions = ImmutableArray.CreateBuilder<CodeAction>();
+
+                foreach ( var aspect in eligibleAspects )
+                {
+                    addAspectAttributeActions.Add( CodeAction.Create( aspect.DisplayName, ct => AddAspectAttribute( aspect, symbol, context.Document, ct ) ) );
+
+                    if ( aspect.CanExpandToSource )
+                    {
+                        expandAspectActions.Add(
+                            CodeAction.Create(
+                                aspect.DisplayName,
+                                ct => ExpandAspectToCode( buildOptions, compilation, aspect, symbol, context.Document, ct.IgnoreIfDebugging() ) ) );
+                    }
+                }
+
+                if ( addAspectAttributeActions.Count > 0 )
+                {
+                    context.RegisterRefactoring( CodeAction.Create( "Add aspect as attribute", addAspectAttributeActions.ToImmutable(), true ) );
+                }
+
+                if ( expandAspectActions.Count > 0 )
+                {
+                    context.RegisterRefactoring( CodeAction.Create( "Expand aspect", expandAspectActions.ToImmutable(), false ) );
                 }
             }
-
-            if ( addAspectAttributeActions.Count > 0 )
+            catch ( Exception e )
             {
-                context.RegisterRefactoring( CodeAction.Create( "Add aspect as attribute", addAspectAttributeActions.ToImmutable(), true ) );
-            }
-
-            if ( expandAspectActions.Count > 0 )
-            {
-                context.RegisterRefactoring( CodeAction.Create( "Expand aspect", expandAspectActions.ToImmutable(), false ) );
+                DesignTimeExceptionHandler.ReportException( e );
             }
         }
 

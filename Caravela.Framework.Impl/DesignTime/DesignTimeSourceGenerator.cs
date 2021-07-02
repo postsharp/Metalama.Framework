@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.DesignTime
             }
             catch ( Exception e )
             {
-                Logger.Instance?.Write( e.ToString() );
+                DesignTimeExceptionHandler.ReportException( e );
             }
         }
 

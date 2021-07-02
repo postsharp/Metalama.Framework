@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Templating.Dynamic.Issue287
         [TestTemplate]
         dynamic? Template()
         {
-            foreach ( var fieldOrProperty in meta.NamedType.FieldsAndProperties )
+            foreach ( var fieldOrProperty in meta.Type.FieldsAndProperties )
             {
                 if ( fieldOrProperty.IsAutoPropertyOrField )
                 {
