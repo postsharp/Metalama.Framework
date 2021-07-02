@@ -5,13 +5,19 @@
     <!-- LocalBuildId.props is created by CreateLocalPackages.ps1. It is used on development environments only 
         (not on build servers) -->
     <Import Project="LocalBuildId.props" Condition="Exists('LocalBuildId.props')" />
+    
+    <!-- To create a development release build, define the properties Configuration=Release and UseLocalBuildId=True -->
 
     <PropertyGroup>
         <MainVersion>0.3.1</MainVersion>
     </PropertyGroup>
+    
+    <PropertyGroup>
+        <UseLocalBuildId Condition="'$(UseLocalBuildId)'=='' AND ( '$(Configuration)'!='Release' AND '$(VersionSuffix)'=='') ">True</UseLocalBuildId>
+    </PropertyGroup>
 
     <!-- The version for the release build is set manually. -->
-    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <PropertyGroup Condition="'$(Configuration)'=='Release' AND '$(UseLocalBuildId)'!='True'">
         <CaravelaVersion Condition="'$(Configuration)'=='Release'">$(MainVersion)-preview</CaravelaVersion>
     </PropertyGroup>
 
@@ -23,9 +29,9 @@
     </PropertyGroup>
 
     <!-- For local builds, the LocalBuildId property must be defined before calling `dotnet pack` -->
-    <PropertyGroup Condition="'$(Configuration)'!='Release' AND '$(VersionSuffix)'==''">
+    <PropertyGroup Condition="'$(UseLocalBuildId)'=='True'">
         <LocalBuildId Condition="'$(LocalBuildId)'==''">LocalBuildIdUndefined</LocalBuildId>
-        <CaravelaVersion Condition="'$(Configuration)'=='Debug' AND '$(LocalBuildIdUndefined)'==''">$(MainVersion)-dev-$(USERNAME)-$(LocalBuildId)</CaravelaVersion>
+        <CaravelaVersion>$(MainVersion)-$(LocalBuildId)</CaravelaVersion>
         <CaravelaAssemblyVersion>$(MainVersion)$([System.DateTime]::Now.ToString('MMdd.HHmm'))</CaravelaAssemblyVersion>
     </PropertyGroup>
 
