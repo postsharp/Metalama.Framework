@@ -10,7 +10,7 @@ class Program
         this.Event += this.EventHandler;
     }
 
-    private void EventHandler(global::System.Object sender, global::System.EventArgs a)
+    private void EventHandler(global::System.Object? sender, global::System.EventArgs a)
     {
     }
 
