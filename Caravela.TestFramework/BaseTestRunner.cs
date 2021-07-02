@@ -5,7 +5,6 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -61,7 +60,6 @@ namespace Caravela.TestFramework
         {
             var testResult = this.CreateTestResult();
 
-            
             // Source. Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
             // which is more difficult to test.
             var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER", "CARAVELA" );
@@ -336,6 +334,4 @@ namespace Caravela.TestFramework
             }
         }
     }
-    
-    
 }

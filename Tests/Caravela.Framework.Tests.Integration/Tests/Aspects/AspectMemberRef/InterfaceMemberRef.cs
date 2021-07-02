@@ -4,6 +4,8 @@ using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
 using Caravela.Framework.Code;
 
+#pragma warning disable CS0067
+
 namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.InterfaceMemberRef
 {
 
@@ -23,7 +25,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.InterfaceM
         }
 
         [Framework.Aspects.Introduce]
-        void EventHandler( object sender, EventArgs a ) { }
+        void EventHandler( object? sender, EventArgs a ) { }
 
         [InterfaceMember]
         void Method()
@@ -35,7 +37,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.InterfaceM
         private int Property { get; set; }
 
         [InterfaceMember]
-        private event EventHandler Event;
+        private event EventHandler? Event;
 
     }
 

@@ -17,12 +17,8 @@ namespace Caravela.Framework.Impl.Formatting
             var simplifiedDocument = await Simplifier.ReduceAsync( document, cancellationToken: cancellationToken );
             var simplifiedSyntaxRoot = (await simplifiedDocument.GetSyntaxRootAsync( cancellationToken ))!;
 
-
             return (CompilationUnitSyntax) Formatter.Format( simplifiedSyntaxRoot, document.Project.Solution.Workspace );
         }
-        
-        
 
-     
     }
 }
