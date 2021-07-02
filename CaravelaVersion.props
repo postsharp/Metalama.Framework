@@ -7,7 +7,7 @@
     <Import Project="LocalBuildId.props" Condition="Exists('LocalBuildId.props')" />
 
     <PropertyGroup>
-        <MainVersion>0.1.4</MainVersion>
+        <MainVersion>0.3.1</MainVersion>
     </PropertyGroup>
 
     <!-- The version for the release build is set manually. -->

@@ -13,7 +13,7 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    public class TemplateCompiler
+    internal class TemplateCompiler
     {
         public const string TemplateMethodSuffix = "_Template";
 

@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// Provides the location to the reference assemblies that are needed to create the compile-time projects.
     /// This is achieved by creating an MSBuild project and restoring it.
     /// </summary>
-    public class ReferenceAssemblyLocator : IService
+    internal class ReferenceAssemblyLocator : IService
     {
         private const string _frameworkAssemblyName = "Caravela.Framework";
         private readonly string _cacheDirectory;
