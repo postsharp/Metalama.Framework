@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.Utilities
                     _ => false
                 };
 
-            if ( mustAttachDebugger && !_attachDebuggerRequested )
+            if ( mustAttachDebugger )
             {
                 lock ( _sync )
                 {

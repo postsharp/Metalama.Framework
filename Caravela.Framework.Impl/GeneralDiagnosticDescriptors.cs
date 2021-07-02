@@ -122,6 +122,6 @@ namespace Caravela.Framework.Impl
                 "CR0099",
                 "Feature is not yet supported.",
                 "Feature is not yet supported: {0}",
-                Error, _category );
+                _category, Error );
     }
 }

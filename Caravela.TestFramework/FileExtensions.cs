@@ -7,6 +7,6 @@ namespace Caravela.TestFramework
     {
         public const string TransformedCode = ".t.cs";
         public const string InputHtml = ".cs.html";
-        public const string OutputHtml = ".t.cs.html";
+        public const string OutputHtml = ".out.cs.html";
     }
 }

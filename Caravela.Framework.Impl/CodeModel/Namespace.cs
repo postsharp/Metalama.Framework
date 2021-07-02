@@ -21,9 +21,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override ISymbol Symbol => this._symbol;
 
-        public string Name => this._symbol.Name;
+        public string? Name => this._symbol.IsGlobalNamespace ? null : this._symbol.Name;
 
-        public string FullName => this._symbol.ToDisplayString();
+        public string? FullName => this._symbol.IsGlobalNamespace ? null : this._symbol.ToDisplayString();
 
         public INamespace? ParentNamespace => throw new NotImplementedException();
 

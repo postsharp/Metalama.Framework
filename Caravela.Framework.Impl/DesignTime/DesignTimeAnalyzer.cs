@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 DebuggingHelper.RequireCaravelaCompiler();
             }
 
-            context.ConfigureGeneratedCodeAnalysis( GeneratedCodeAnalysisFlags.ReportDiagnostics );
+            context.ConfigureGeneratedCodeAnalysis( GeneratedCodeAnalysisFlags.None );
 
             // Semantic model analysis is used for frequent and "short loop" analysis, principally of the templates themselves.
             context.RegisterSemanticModelAction( this.AnalyzeSemanticModel );
@@ -115,7 +115,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 }
 
                 // Perform additional analysis not done by the design-time pipeline.
-                var pipeline = DesignTimeAspectPipelineCache.Instance.GetOrCreatePipeline( buildOptions );
+                var pipeline = DesignTimeAspectPipelineCache.Instance.GetOrCreatePipeline( buildOptions, context.CancellationToken );
 
                 if ( pipeline != null )
                 {

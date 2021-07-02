@@ -5,8 +5,10 @@ using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime.Diff
 {
@@ -15,7 +17,9 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
     /// </summary>
     internal class CompilationChangeTracker
     {
-        private Dictionary<string, (SyntaxTree Tree, bool HasCompileTimeCode)>? _lastTrees;
+        private readonly object _sync = new();
+
+        private ImmutableDictionary<string, (SyntaxTree Tree, bool HasCompileTimeCode)>? _lastTrees;
 
         /// <summary>
         /// Gets the last <see cref="Compilation"/>, or <c>null</c> if the <see cref="Update"/> method
@@ -27,27 +31,40 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
         /// Updates the <see cref="LastCompilation"/> property and returns the set of changes between the
         /// old value of <see cref="LastCompilation"/> and the newly provided <see cref="Compilation"/>.
         /// </summary>
-        public CompilationChange Update( Compilation newCompilation )
+        public CompilationChange Update( Compilation newCompilation, CancellationToken cancellationToken )
         {
             if ( newCompilation == this.LastCompilation )
             {
-                return CompilationChange.Empty;
+                return CompilationChange.Empty( newCompilation );
             }
 
-            lock ( this )
+            lock ( this._sync )
             {
-                var newTrees = new Dictionary<string, (SyntaxTree Tree, bool HasCompileTimeCode)>( this._lastTrees?.Count ?? 32 );
+                var newTrees = ImmutableDictionary.CreateBuilder<string, (SyntaxTree Tree, bool HasCompileTimeCode)>( StringComparer.Ordinal );
+                var generatedTrees = new List<SyntaxTree>();
 
                 var syntaxTreeChanges = ImmutableArray.CreateBuilder<SyntaxTreeChange>();
                 var hasCompileTimeChange = false;
 
                 // Process new trees.
+                var lastTrees = this._lastTrees;
+
                 foreach ( var newSyntaxTree in newCompilation.SyntaxTrees )
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     bool hasCompileTimeCode;
                     CompileTimeChangeKind compileTimeChangeKind;
 
-                    if ( this._lastTrees != null && this._lastTrees.TryGetValue( newSyntaxTree.FilePath, out var oldEntry ) )
+                    // Generated files are ignored during the comparison.
+                    if ( IsGeneratedFile( newSyntaxTree ) )
+                    {
+                        generatedTrees.Add( newSyntaxTree );
+
+                        continue;
+                    }
+
+                    if ( lastTrees != null && lastTrees.TryGetValue( newSyntaxTree.FilePath, out var oldEntry ) )
                     {
                         if ( IsDifferent( oldEntry.Tree, newSyntaxTree, out var newHasCompileTimeCode ) )
                         {
@@ -88,13 +105,13 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
                     }
 
                     newTrees.Add( newSyntaxTree.FilePath, (newSyntaxTree, hasCompileTimeCode) );
-                    this._lastTrees?.Remove( newSyntaxTree.FilePath );
+                    lastTrees = lastTrees?.Remove( newSyntaxTree.FilePath );
                 }
 
                 // Process old trees.
-                if ( this._lastTrees != null )
+                if ( lastTrees != null )
                 {
-                    foreach ( var oldSyntaxTree in this._lastTrees )
+                    foreach ( var oldSyntaxTree in lastTrees )
                     {
                         syntaxTreeChanges.Add(
                             new SyntaxTreeChange(
@@ -106,13 +123,37 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
                     }
                 }
 
-                // Swap.
-                this._lastTrees = newTrees;
-                this.LastCompilation = newCompilation;
+                // Determine which compilation should be analyzed.
+                CompilationChange compilationChange;
 
-                return new CompilationChange( syntaxTreeChanges.ToImmutable(), hasCompileTimeChange );
+                if ( !hasCompileTimeChange && syntaxTreeChanges.Count == 0 )
+                {
+                    // There is no change, so we can analyze the previous compilation.
+                    compilationChange = CompilationChange.Empty( this.LastCompilation! );
+                }
+                else
+                {
+                    // We have to analyze a new compilation, however we need to remove generated trees.
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var compilationToAnalyze = newCompilation.RemoveSyntaxTrees( generatedTrees );
+
+                    compilationChange = new CompilationChange(
+                        syntaxTreeChanges.ToImmutable(),
+                        hasCompileTimeChange,
+                        compilationToAnalyze,
+                        this.LastCompilation != null );
+                }
+
+                // Swap.
+                this._lastTrees = newTrees.ToImmutable();
+                this.LastCompilation = compilationChange.CompilationToAnalyze;
+
+                return compilationChange;
             }
         }
+
+        internal static bool IsGeneratedFile( SyntaxTree syntaxTree )
+            => syntaxTree.FilePath.StartsWith( "Caravela.Framework.CompilerExtensions", StringComparison.Ordinal );
 
         private static CompileTimeChangeKind GetCompileTimeChangeKind( bool oldValue, bool newValue )
             => (oldValue, newValue) switch
@@ -236,7 +277,8 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
 
             // Determines if a change in a node can possibly affect a change in symbols.
             static bool IsChangeIrrelevantToSymbol( SyntaxNode node )
-                => node.Parent switch
+            {
+                return node.Parent switch
                 {
                     BaseMethodDeclarationSyntax method => node == method.Body || node == method.ExpressionBody,
                     AccessorDeclarationSyntax accessor => node == accessor.Body || node == accessor.ExpressionBody,
@@ -244,6 +286,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
                     PropertyDeclarationSyntax property => node == property.ExpressionBody || node == property.Initializer,
                     _ => node.Parent != null && IsChangeIrrelevantToSymbol( node.Parent )
                 };
+            }
         }
 
         /// <summary>
@@ -251,8 +294,11 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
         /// </summary>
         public void Reset()
         {
-            this.LastCompilation = null;
-            this._lastTrees = null;
+            lock ( this._sync )
+            {
+                this.LastCompilation = null;
+                this._lastTrees = null;
+            }
         }
     }
 }

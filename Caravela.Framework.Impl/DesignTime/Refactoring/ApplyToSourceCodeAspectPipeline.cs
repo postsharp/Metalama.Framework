@@ -13,6 +13,7 @@ using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -45,29 +46,35 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             PartialCompilation inputCompilation,
             ISymbol targetSymbol,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out Compilation? outputCompilation )
+            [NotNullWhen( true )] out Compilation? outputCompilation,
+            out ImmutableArray<Diagnostic> diagnostics )
         {
             ApplyToSourceCodeAspectPipeline pipeline = new( projectOptions, domain, aspectClass, targetSymbol );
 
-            return pipeline.TryExecute( configuration, inputCompilation, cancellationToken, out outputCompilation );
+            return pipeline.TryExecute( configuration, inputCompilation, cancellationToken, out outputCompilation, out diagnostics );
         }
 
         private bool TryExecute(
             AspectPipelineConfiguration designTimePipelineConfiguration,
             PartialCompilation compilation,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out Compilation? outputCompilation )
+            [NotNullWhen( true )] out Compilation? outputCompilation,
+            out ImmutableArray<Diagnostic> diagnostics )
         {
             var pipelineConfiguration = designTimePipelineConfiguration.WithStages( s => MapPipelineStage( designTimePipelineConfiguration, s ) );
 
-            if ( !this.TryExecute( compilation, NullDiagnosticAdder.Instance, pipelineConfiguration, cancellationToken, out var result ) )
+            DiagnosticList diagnosticList = new();
+
+            if ( !this.TryExecute( compilation, diagnosticList, pipelineConfiguration, cancellationToken, out var result ) )
             {
                 outputCompilation = null;
+                diagnostics = diagnosticList.ToImmutableArray();
 
                 return false;
             }
 
             outputCompilation = result.PartialCompilation.Compilation;
+            diagnostics = ImmutableArray<Diagnostic>.Empty;
 
             return true;
         }

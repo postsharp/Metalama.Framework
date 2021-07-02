@@ -5,7 +5,6 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -61,16 +60,15 @@ namespace Caravela.TestFramework
         {
             var testResult = this.CreateTestResult();
 
-            
             // Source. Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
             // which is more difficult to test.
             var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER", "CARAVELA" );
             var project = this.CreateProject().WithParseOptions( parseOptions );
-            
+
             Document AddDocument( string fileName, string sourceCode )
             {
-                var syntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
-                var prunedSyntaxRoot = new InactiveCodeRemover().Visit( syntaxTree.GetRoot() );
+                var parsedSyntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
+                var prunedSyntaxRoot = new InactiveCodeRemover().Visit( parsedSyntaxTree.GetRoot() );
                 var document = project.AddDocument( fileName, prunedSyntaxRoot, filePath: fileName );
                 project = document.Project;
 
@@ -96,7 +94,7 @@ namespace Caravela.TestFramework
                 var includedText = File.ReadAllText( includedFullPath );
                 var includedFileName = Path.GetFileName( includedFullPath );
 
-                var includedDocument = AddDocument( includedFileName,  includedText );
+                var includedDocument = AddDocument( includedFileName, includedText );
 
                 testResult.AddInputDocument( includedDocument, includedFullPath );
 
@@ -270,24 +268,37 @@ namespace Caravela.TestFramework
                 "obj",
                 "html",
                 Path.GetDirectoryName( testInput.RelativePath ) ?? "" );
+            
+            if ( !Directory.Exists( htmlDirectory ) )
+            {
+                Directory.CreateDirectory( htmlDirectory );
+            }
 
             // Write each document individually.
-            foreach ( var syntaxTree in testResult.SyntaxTrees )
+            if ( testInput.Options.WriteInputHtml.GetValueOrDefault() )
             {
-                this.WriteHtml( syntaxTree, htmlDirectory, htmlCodeWriter );
+                foreach ( var syntaxTree in testResult.SyntaxTrees )
+                {
+                    this.WriteHtml( syntaxTree, htmlDirectory, htmlCodeWriter );
+                }
             }
 
             // Write the consolidated output.
-            var output = testResult.GetConsolidatedTestOutput();
-            var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", output );
-
-            var formattedOutput = OutputCodeFormatter.FormatAsync( outputDocument ).Result;
-            var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + ".out.html" );
-            var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput );
-
-            using ( var outputHtml = File.CreateText( outputHtmlPath ) )
+            if ( testInput.Options.WriteOutputHtml.GetValueOrDefault() )
             {
-                htmlCodeWriter.Write( formattedOutputDocument, null, outputHtml );
+                var output = testResult.GetConsolidatedTestOutput();
+                var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", output );
+
+                var formattedOutput = OutputCodeFormatter.FormatAsync( outputDocument ).Result;
+                var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.OutputHtml );
+                var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput );
+
+                using ( var outputHtml = File.CreateText( outputHtmlPath ) )
+                {
+                    htmlCodeWriter.Write( formattedOutputDocument, null, outputHtml );
+                }
+
+                testResult.OutputHtmlPath = outputHtmlPath;
             }
         }
 
@@ -302,11 +313,6 @@ namespace Caravela.TestFramework
 
             testSyntaxTree.HtmlInputRunTimePath = inputHtmlPath;
 
-            if ( !Directory.Exists( htmlDirectory ) )
-            {
-                Directory.CreateDirectory( htmlDirectory );
-            }
-
             this.Logger?.WriteLine( "HTML of input: " + inputHtmlPath );
 
             // Write the input document.
@@ -318,24 +324,7 @@ namespace Caravela.TestFramework
                     inputTextWriter );
             }
 
-            // Write the output document.
-            if ( testSyntaxTree.OutputRunTimeDocument != null )
-            {
-                var outputHtmlPath = Path.Combine(
-                    htmlDirectory,
-                    Path.GetFileNameWithoutExtension( testSyntaxTree.InputDocument.FilePath ) + FileExtensions.OutputHtml );
-
-                testSyntaxTree.HtmlOutputRunTimePath = outputHtmlPath;
-
-                this.Logger?.WriteLine( "HTML of output: " + outputHtmlPath );
-
-                using ( var outputTextWriter = File.CreateText( outputHtmlPath ) )
-                {
-                    htmlCodeWriter.Write( testSyntaxTree.OutputRunTimeDocument, null, outputTextWriter );
-                }
-            }
+            // We have no use case to write the output document because all cases use the consolidated output document instead.
         }
     }
-    
-    
 }

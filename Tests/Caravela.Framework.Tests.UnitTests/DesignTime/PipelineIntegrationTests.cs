@@ -31,7 +31,10 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
         protected ITestOutputHelper Logger { get; }
 
-        private static CSharpCompilation CreateCSharpCompilation( IReadOnlyDictionary<string, string> code, string? assemblyName = null )
+        private static CSharpCompilation CreateCSharpCompilation(
+            IReadOnlyDictionary<string, string> code,
+            string? assemblyName = null,
+            bool acceptErrors = false )
         {
             CSharpCompilation CreateEmptyCompilation()
             {
@@ -52,7 +55,10 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
             compilation = compilation.AddSyntaxTrees( code.Select( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key ) ) );
 
-            Assert.Empty( compilation.GetDiagnostics().Where( d => d.Severity == DiagnosticSeverity.Error ) );
+            if ( !acceptErrors )
+            {
+                Assert.Empty( compilation.GetDiagnostics().Where( d => d.Severity == DiagnosticSeverity.Error ) );
+            }
 
             return compilation;
         }
@@ -144,7 +150,7 @@ F1.cs:
         }
 
         [Fact]
-        public void Caching()
+        public void ChangeInAspectCode()
         {
             var assemblyName = "test_" + Guid.NewGuid();
 
@@ -199,7 +205,7 @@ Target.cs:
                 assemblyName );
 
             using DesignTimeAspectPipelineCache cache = new( new UnloadableCompileTimeDomain() );
-            var pipeline = cache.GetOrCreatePipeline( projectOptions )!;
+            var pipeline = cache.GetOrCreatePipeline( projectOptions, CancellationToken.None )!;
 
             // First execution of the pipeline.
             var results = cache.GetSyntaxTreeResults( compilation, projectOptions );
@@ -314,6 +320,69 @@ Target.cs:
             Assert.DoesNotContain(
                 diagnostics6,
                 d => d.Severity == DiagnosticSeverity.Error && d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
+        }
+
+        [Fact]
+        public void ChangeInTargetCode()
+        {
+            var assemblyName = "test_" + Guid.NewGuid();
+
+            var aspectCode = @"
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Eligibility;
+
+class MyAspect : System.Attribute, IAspect<INamedType>
+{
+   [Introduce]
+   public void NewProperty() { }
+}
+";
+
+            var expectedResult = @"
+Aspect.cs:
+0 diagnostic(s):
+0 suppression(s):
+0 introductions(s):
+----------------------------------------------------------
+Target.cs:
+0 diagnostic(s):
+0 suppression(s):
+1 introductions(s):
+partial class C
+{
+    public void NewProperty()
+    {
+    }
+}
+";
+
+            using TestProjectOptions projectOptions = new();
+
+            using DesignTimeAspectPipelineCache cache = new( new UnloadableCompileTimeDomain() );
+
+            void TestWithTargetCode( string targetCode )
+            {
+                var compilation1 = CreateCSharpCompilation(
+                    new Dictionary<string, string>() { { "Aspect.cs", aspectCode }, { "Target.cs", targetCode } },
+                    assemblyName,
+                    true );
+
+                var results = cache.GetSyntaxTreeResults( compilation1, projectOptions );
+
+                var dumpedResults = DumpResults( results );
+
+                this.Logger.WriteLine( "-----------------" );
+                this.Logger.WriteLine( dumpedResults );
+
+                Assert.Equal( expectedResult.Trim(), dumpedResults.Trim() );
+            }
+
+            TestWithTargetCode( "[MyAspect] partial class C { }" );
+            TestWithTargetCode( "[MyAspect] partial class C { void }" );
+            TestWithTargetCode( "[MyAspect] partial class C { void NewMethod() {} }" );
+            TestWithTargetCode( "[MyAspect] partial class C { void NewMethod() { ; } }" );
         }
     }
 }

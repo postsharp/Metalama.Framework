@@ -105,6 +105,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
             void AddTypeRecursive( ITypeSymbol type )
             {
+                if ( type is IErrorTypeSymbol )
+                {
+                    return;
+                }
+
                 if ( !SymbolEqualityComparer.Default.Equals( type.ContainingAssembly, assembly ) )
                 {
                     // The type is defined in a different assembly.

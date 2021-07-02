@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Linking
         private readonly IReadOnlyDictionary<SymbolVersion, int> _symbolVersionReferenceCounts;
         private readonly IReadOnlyDictionary<ISymbol, MemberAnalysisResult> _methodBodyInfos;
         private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
-        public static readonly SyntaxAnnotation DoNotInlineAnnotation = new( "DoNotInline" );
+        public static readonly SyntaxAnnotation DoNotInlineAnnotation = new( "Caravela_DoNotInline" );
 
         public LinkerAnalysisRegistry(
             LinkerIntroductionRegistry introductionRegistry,

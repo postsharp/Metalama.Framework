@@ -15,12 +15,12 @@ namespace Caravela.Framework.Impl.Templating
 {
     internal static class SyntaxAnnotationExtensions
     {
-        private const string _scopeAnnotationKind = "scope";
-        private const string _proceedAnnotationKind = "proceed";
-        private const string _noIndentAnnotationKind = "noIndent";
-        private const string _colorAnnotationKind = "color";
-        private const string _templateAnnotationKind = "template";
-        private const string _scopeMismatchKind = "scopeMismatch";
+        private const string _scopeAnnotationKind = "Caravela_Scope";
+        private const string _proceedAnnotationKind = "Caravela_Proceed";
+        private const string _noIndentAnnotationKind = "Caravela_NoIndent";
+        private const string _colorAnnotationKind = "Caravela_Color";
+        private const string _templateAnnotationKind = "Caravela_Template";
+        private const string _scopeMismatchKind = "Caravela_ScopeMismatch";
         private const string _buildTimeAnnotationData = "buildTime";
         private const string _runTimeAnnotationData = "runTime";
         private const string _dynamicAnnotationData = "compileTimeDynamic";

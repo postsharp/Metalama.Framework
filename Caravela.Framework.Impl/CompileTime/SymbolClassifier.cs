@@ -91,7 +91,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 case nameof(IntroduceAttribute):
                     return TemplateMemberKind.Introduction;
-                
+
                 case nameof(InterfaceMemberAttribute):
                     return TemplateMemberKind.InterfaceMember;
 

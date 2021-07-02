@@ -21,13 +21,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
         private const string _htmlProlog = @"
 <html>
     <head>
-        <link rel=""stylesheet"" href=""https://highlightjs.org/static/demo/styles/vs.css""/>
         <style>
             .cr-CompileTime,
             .cr-Conflict,
             .cr-TemplateKeyword,
             .cr-Dynamic,
-            .cr-CompileTimeVariable
+            .cr-CompileTimeVariable,
+            .cr-GeneratedCode
             {
                 background-color: rgba(50,50,90,0.1);
             }
@@ -87,39 +87,42 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
         public override void ExecuteAssertions( TestInput testInput, TestResult testResult )
         {
-            base.ExecuteAssertions( testInput, testResult );
+            // We do NOT run the base assertions because we don't want the *.t.cs files, and this is not the point of these tests anyway.
 
             Assert.NotNull( testInput.ProjectDirectory );
             Assert.NotNull( testInput.RelativePath );
             Assert.True( testResult.Success, testResult.ErrorMessage );
 
-            foreach ( var syntaxTree in testResult.SyntaxTrees )
+            // Input
+            if ( testInput.Options.WriteInputHtml.GetValueOrDefault() )
             {
-                // Input.
+                foreach ( var syntaxTree in testResult.SyntaxTrees )
+                {
+                    var sourceAbsolutePath = syntaxTree.InputPath;
 
-                var sourceAbsolutePath = syntaxTree.InputPath;
+                    // Input.
+                    var expectedInputHtmlPath = Path.Combine(
+                        Path.GetDirectoryName( sourceAbsolutePath )!,
+                        Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.InputHtml );
 
-                var expectedInputHtmlPath = Path.Combine(
-                    Path.GetDirectoryName( sourceAbsolutePath )!,
-                    Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.InputHtml );
+                    CompareHtmlFiles( syntaxTree.HtmlInputRunTimePath!, expectedInputHtmlPath );
+                }
+            }
 
-                CompareHtmlFiles( syntaxTree.HtmlInputRunTimePath!, expectedInputHtmlPath );
-
-                // Output.
+            // Output.
+            if ( testInput.Options.WriteOutputHtml.GetValueOrDefault() )
+            {
                 var expectedOutputHtmlPath = Path.Combine(
-                    Path.GetDirectoryName( sourceAbsolutePath )!,
-                    Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.OutputHtml );
+                    Path.GetDirectoryName( testInput.FullPath )!,
+                    Path.GetFileNameWithoutExtension( testInput.FullPath ) + FileExtensions.OutputHtml );
 
-                CompareHtmlFiles( syntaxTree.HtmlOutputRunTimePath!, expectedOutputHtmlPath );
+                CompareHtmlFiles( testResult.OutputHtmlPath!, expectedOutputHtmlPath );
             }
         }
 
         private static void CompareHtmlFiles( string actualHtmlPath, string expectedHtmlPath )
         {
-            if ( !File.Exists( expectedHtmlPath ) )
-            {
-                return;
-            }
+            Assert.True( File.Exists( expectedHtmlPath ) );
 
             var expectedHighlightedSource = File.ReadAllText( expectedHtmlPath );
 

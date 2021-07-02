@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.DesignTime.Diff;
 using Caravela.Framework.Impl.DesignTime.Refactoring;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
@@ -13,6 +14,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime.Pipeline
@@ -51,22 +53,47 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         /// </summary>
         /// <param name="projectOptions"></param>
         /// <returns></returns>
-        internal DesignTimeAspectPipeline? GetOrCreatePipeline( IProjectOptions projectOptions )
+        internal DesignTimeAspectPipeline? GetOrCreatePipeline( IProjectOptions projectOptions, CancellationToken cancellationToken )
         {
             if ( !projectOptions.IsFrameworkEnabled )
             {
                 return null;
             }
 
-            return this._pipelinesByProjectId.GetOrAdd(
-                projectOptions.ProjectId,
-                _ =>
+            // We lock the dictionary because the ConcurrentDictionary does not guarantee that the creation delegate
+            // is called only once, and we prefer a single instance for the simplicity of debugging. 
+
+            if ( this._pipelinesByProjectId.TryGetValue( projectOptions.ProjectId, out var pipeline ) )
+            {
+                return pipeline;
+            }
+            else
+            {
+                lock ( this._pipelinesByProjectId )
                 {
-                    var pipeline = new DesignTimeAspectPipeline( projectOptions, this._domain, false );
+                    if ( this._pipelinesByProjectId.TryGetValue( projectOptions.ProjectId, out pipeline ) )
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+
+                        return pipeline;
+                    }
+
+                    pipeline = new DesignTimeAspectPipeline( projectOptions, this._domain, false );
                     pipeline.ExternalBuildStarted += this.OnExternalBuildStarted;
 
+                    // We _intentionally_ wait 5 seconds before starting a pipeline. This allows the initial burst of requests
+                    // to "settle down" and hopefully only the final will survive.
+                    // This is a temporary solution until we understand that happens.
+                    Thread.Sleep( 5000 );
+
+                    if ( !this._pipelinesByProjectId.TryAdd( projectOptions.ProjectId, pipeline ) )
+                    {
+                        throw new AssertionFailedException();
+                    }
+
                     return pipeline;
-                } );
+                }
+            }
         }
 
         private void OnExternalBuildStarted( object sender, EventArgs e )
@@ -78,7 +105,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
         public IEnumerable<AspectClass> GetEligibleAspects( ISymbol symbol, IProjectOptions projectOptions, CancellationToken cancellationToken )
         {
-            var pipeline = this.GetOrCreatePipeline( projectOptions );
+            var pipeline = this.GetOrCreatePipeline( projectOptions, cancellationToken );
 
             if ( pipeline == null )
             {
@@ -119,7 +146,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             IProjectOptions projectOptions,
             CancellationToken cancellationToken )
         {
-            var pipeline = this.GetOrCreatePipeline( projectOptions );
+            var pipeline = this.GetOrCreatePipeline( projectOptions, cancellationToken );
 
             if ( pipeline == null )
             {
@@ -129,9 +156,9 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             lock ( pipeline.Sync )
             {
                 // Update the cache.
-                var changes = pipeline.InvalidateCache( compilation );
+                var changes = pipeline.InvalidateCache( compilation, cancellationToken );
 
-                if ( pipeline.Status == DesignTimeAspectPipelineStatus.Ready )
+                if ( pipeline.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
                 {
                     this._syntaxTreeResultCache.InvalidateCache( changes );
                 }
@@ -141,21 +168,23 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     // instead of nothing.
                 }
 
+                var compilationToAnalyze = changes.CompilationToAnalyze;
+
                 if ( pipeline.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
                 {
-                    var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilation );
+                    var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilationToAnalyze );
 
                     // Execute the pipeline if required, and update the cache.
                     if ( dirtySyntaxTrees.Count > 0 )
                     {
-                        var partialCompilation = PartialCompilation.CreatePartial( compilation, dirtySyntaxTrees );
+                        var partialCompilation = PartialCompilation.CreatePartial( compilationToAnalyze, dirtySyntaxTrees );
 
                         if ( !partialCompilation.IsEmpty )
                         {
                             Interlocked.Increment( ref this._pipelineExecutionCount );
                             var result = pipeline.Execute( partialCompilation, cancellationToken );
 
-                            this._syntaxTreeResultCache.SetResults( compilation, result );
+                            this._syntaxTreeResultCache.SetResults( partialCompilation, result );
                         }
                     }
                 }
@@ -212,23 +241,36 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             Compilation inputCompilation,
             ISymbol targetSymbol,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out Compilation? outputCompilation )
+            [NotNullWhen( true )] out Compilation? outputCompilation,
+            out ImmutableArray<Diagnostic> diagnostics )
         {
-            var designTimePipeline = this.GetOrCreatePipeline( projectOptions );
+            var designTimePipeline = this.GetOrCreatePipeline( projectOptions, cancellationToken );
 
             if ( designTimePipeline == null )
             {
                 outputCompilation = null;
+                diagnostics = ImmutableArray<Diagnostic>.Empty;
 
                 return false;
             }
 
-            // TODO: use partial compilation (it does not seem to work).
-            var partialCompilation = PartialCompilation.CreateComplete( inputCompilation );
+            // Get a compilation _without_ generated code, and map the target symbol.
+            var generatedFiles = inputCompilation.SyntaxTrees.Where( CompilationChangeTracker.IsGeneratedFile );
+            var sourceCompilation = inputCompilation.RemoveSyntaxTrees( generatedFiles );
 
-            if ( !designTimePipeline.TryGetConfiguration( partialCompilation, NullDiagnosticAdder.Instance, cancellationToken, out var configuration ) )
+            var sourceSymbol = DocumentationCommentId
+                .GetFirstSymbolForDeclarationId( targetSymbol.GetDocumentationCommentId().AssertNotNull(), sourceCompilation )
+                .AssertNotNull();
+
+            // TODO: use partial compilation (it does not seem to work).
+            var partialCompilation = PartialCompilation.CreateComplete( sourceCompilation );
+
+            DiagnosticList configurationDiagnostics = new();
+
+            if ( !designTimePipeline.TryGetConfiguration( partialCompilation, configurationDiagnostics, true, cancellationToken, out var configuration ) )
             {
                 outputCompilation = null;
+                diagnostics = configurationDiagnostics.ToImmutableArray();
 
                 return false;
             }
@@ -239,9 +281,10 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 configuration,
                 aspectClass,
                 partialCompilation,
-                targetSymbol,
+                sourceSymbol,
                 cancellationToken,
-                out outputCompilation );
+                out outputCompilation,
+                out diagnostics );
         }
 
         public void Dispose() => this._domain.Dispose();

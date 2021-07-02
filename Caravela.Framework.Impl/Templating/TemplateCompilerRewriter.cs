@@ -425,12 +425,13 @@ namespace Caravela.Framework.Impl.Templating
                 case SyntaxKind.ThisExpression:
                     // Cannot use 'this' in a context that expects a run-time expression.
                     var location = this._syntaxTreeAnnotationMap.GetLocation( expression );
+
                     // Find a meaningful parent exception.
                     var parentExpression = expression.Ancestors()
-                                              .Where( n => n is InvocationExpressionSyntax or BinaryExpressionSyntax )
-                                              .FirstOrDefault()
-                                          ?? expression;
-                    
+                                               .Where( n => n is InvocationExpressionSyntax or BinaryExpressionSyntax )
+                                               .FirstOrDefault()
+                                           ?? expression;
+
                     this.Report( TemplatingDiagnosticDescriptors.CannotUseThisInRunTimeContext.CreateDiagnostic( location, parentExpression.ToString() ) );
 
                     return expression;
