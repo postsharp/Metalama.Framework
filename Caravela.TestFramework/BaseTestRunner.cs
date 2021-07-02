@@ -136,6 +136,9 @@ namespace Caravela.TestFramework
                 visitor.Visit( syntaxTree.GetRoot() );
             }
         }
+        
+        public static string NormalizeEndOfLines( string s )
+            => _newLineRegex.Replace( s, "\n" );
 
         public static string? NormalizeTestOutput( string? s, bool preserveFormatting )
             => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting );
@@ -150,7 +153,7 @@ namespace Caravela.TestFramework
             {
                 var s = syntaxNode.NormalizeWhitespace().ToFullString();
 
-                s = _newLineRegex.Replace( s, "\n" );
+                s = NormalizeEndOfLines( s );
                 s = _spaceRegex.Replace( s, " " );
 
                 return s;

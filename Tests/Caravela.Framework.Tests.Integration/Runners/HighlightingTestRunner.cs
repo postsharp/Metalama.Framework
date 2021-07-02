@@ -124,10 +124,10 @@ namespace Caravela.Framework.Tests.Integration.Runners
         {
             Assert.True( File.Exists( expectedHtmlPath ) );
 
-            var expectedHighlightedSource = File.ReadAllText( expectedHtmlPath );
+            var expectedHighlightedSource = NormalizeEndOfLines( File.ReadAllText( expectedHtmlPath ) );
 
             var htmlPath = actualHtmlPath!;
-            var htmlContent = File.ReadAllText( htmlPath );
+            var htmlContent = NormalizeEndOfLines( File.ReadAllText( htmlPath ) );
 
             Assert.Equal( expectedHighlightedSource, htmlContent );
         }
