@@ -62,11 +62,6 @@ namespace Caravela.TestFramework
         /// </summary>
         public string? OutputCompileTimePath { get; private set; }
 
-        /// <summary>
-        /// Gets the full path of the HTML file with syntax highlighting.
-        /// </summary>
-        public string? HtmlOutputRunTimePath { get; internal set; }
-
         public string? HtmlInputRunTimePath { get; internal set; }
 
         internal void SetCompileTimeCode( SyntaxNode? syntaxNode, string transformedTemplatePath )

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -609,23 +610,57 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             private static MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method )
-            {
-                return method.WithIdentifier( Identifier( GetOriginalImplMemberName( method.Identifier.ValueText ) ) );
-            }
+                => method.WithIdentifier( Identifier( GetOriginalImplMemberName( method.Identifier.ValueText ) ) )
+                    .WithBody( method.Body.AddSourceCodeAnnotation() )
+                    .WithExpressionBody( method.ExpressionBody.AddSourceCodeAnnotation() );
 
             private static MemberDeclarationSyntax GetOriginalImplProperty( PropertyDeclarationSyntax property )
-            {
-                return property.WithIdentifier( Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ) );
-            }
+                => property.WithIdentifier( Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ) )
+                    .WithInitializer( property.Initializer.AddSourceCodeAnnotation() )
+                    .WithAccessorList( property.AccessorList.AddSourceCodeAnnotation() );
 
             private static MemberDeclarationSyntax GetOriginalImplEvent( EventDeclarationSyntax @event )
-            {
-                return @event.WithIdentifier( Identifier( GetOriginalImplMemberName( @event.Identifier.ValueText ) ) );
-            }
+                => @event.WithIdentifier( Identifier( GetOriginalImplMemberName( @event.Identifier.ValueText ) ) )
+                    .WithAccessorList( @event.AccessorList.AddSourceCodeAnnotation() );
 
             public static string GetImplicitBackingFieldName( IPropertySymbol property )
             {
-                return $"__{property.Name}__BackingField";
+                var firstPropertyLetter = property.Name.Substring( 0, 1 );
+                var camelCasePropertyName = firstPropertyLetter.ToLowerInvariant() + (property.Name.Length > 1 ? property.Name.Substring( 1 ) : "");
+
+                if ( property.ContainingType.GetMembers( camelCasePropertyName ).Any() && firstPropertyLetter == firstPropertyLetter.ToLowerInvariant() )
+                {
+                    // If there there is another property whose name differs only by the case of the first character, then the lower case variant will be suffixed.
+                    // This is unlikely given naming standards.
+
+                    camelCasePropertyName = FindUniqueName( camelCasePropertyName );
+                }
+
+                // TODO: Write tests of the collision resolution algorithm.
+
+                var fieldName = FindUniqueName( "_" + camelCasePropertyName );
+
+                return fieldName;
+
+                string FindUniqueName( string hint )
+                {
+                    if ( !property.ContainingType.GetMembers( hint ).Any() )
+                    {
+                        return hint;
+                    }
+                    else
+                    {
+                        for ( var i = 1; /* Nothing */; i++ )
+                        {
+                            var candidate = hint + i;
+
+                            if ( !property.ContainingType.GetMembers( hint ).Any() )
+                            {
+                                return candidate;
+                            }
+                        }
+                    }
+                }
             }
 
             private static MemberDeclarationSyntax GetImplicitBackingFieldDeclaration(
@@ -639,7 +674,10 @@ namespace Caravela.Framework.Impl.Linking
                         VariableDeclaration(
                             propertyDeclaration.Type,
                             SingletonSeparatedList( VariableDeclarator( GetImplicitBackingFieldName( propertySymbol ) ) ) ) )
-                    .NormalizeWhitespace();
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( LineFeed )
+                    .WithTrailingTrivia( LineFeed, LineFeed )
+                    .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
 
                 static SyntaxTokenList GetModifiers( IPropertySymbol propertySymbol )
                 {

@@ -47,10 +47,16 @@ namespace Caravela.TestFramework
         public List<string> IncludedFiles { get; } = new();
 
         /// <summary>
-        /// Gets or sets a value indicating whether HTML of syntax-highlighted files should be produced. If <c>true</c>, these files
-        /// are created to the <c>obj/highlighted</c> directory.
+        /// Gets or sets a value indicating whether HTML of syntax-highlighted files should be produced for input files. If <c>true</c>, these files
+        /// are created to the <c>obj/html</c> directory.
         /// </summary>
-        public bool? WriteHtml { get; set; }
+        public bool? WriteInputHtml { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether HTML of syntax-highlighted files should be produced for the consolidated output file. If <c>true</c>, this file
+        /// is created to the <c>obj/html</c> directory.
+        /// </summary>
+        public bool? WriteOutputHtml { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether titles (tooltips) should be added to HTML files.
@@ -82,7 +88,9 @@ namespace Caravela.TestFramework
 
             this.TestRunnerFactoryType ??= directoryOptions.TestRunnerFactoryType;
 
-            this.WriteHtml ??= directoryOptions.WriteHtml;
+            this.WriteInputHtml ??= directoryOptions.WriteInputHtml;
+            
+            this.WriteOutputHtml ??= directoryOptions.WriteOutputHtml;
 
             this.AddHtmlTitles ??= directoryOptions.AddHtmlTitles;
 
@@ -138,10 +146,15 @@ namespace Caravela.TestFramework
 
                         break;
 
-                    case "WriteHtml":
-                        this.WriteHtml = true;
-                        this.FormatOutput = true;
+                    case "WriteInputHtml":
+                        this.WriteInputHtml = true;
 
+                        break;
+                    
+                    case "WriteOutputHtml":
+                        this.WriteOutputHtml = true;
+                        this.FormatOutput = true;
+                        
                         break;
 
                     case "AddHtmlTitles":

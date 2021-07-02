@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -149,9 +150,10 @@ namespace Caravela.Framework.Impl.Linking
                     if ( additionalBaseList.Any() )
                     {
                         node = node.WithBaseList(
-                            node.BaseList != null
-                                ? BaseList( node.BaseList.Types.AddRange( additionalBaseList ) )
-                                : BaseList( SeparatedList( additionalBaseList ) ).NormalizeWhitespace() );
+                                node.BaseList != null
+                                    ? BaseList( node.BaseList.Types.AddRange( additionalBaseList ) )
+                                    : BaseList( SeparatedList( additionalBaseList ) ).NormalizeWhitespace() )
+                            .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
                     }
 
                     return node;
@@ -166,7 +168,9 @@ namespace Caravela.Framework.Impl.Linking
                         // IMPORTANT: This need to be here and cannot be in introducedMember.Syntax, result of TrackNodes is not trackable!
                         var introducedNode = introducedMember.Syntax.TrackNodes( introducedMember.Syntax );
 
-                        introducedNode = introducedNode.NormalizeWhitespace().WithLeadingTrivia( LineFeed, LineFeed );
+                        introducedNode = introducedNode.NormalizeWhitespace()
+                            .WithLeadingTrivia( LineFeed, LineFeed )
+                            .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
 
                         if ( introducedMember.Declaration != null )
                         {
@@ -203,7 +207,7 @@ namespace Caravela.Framework.Impl.Linking
                     => expression switch
                     {
                         IdentifierNameSyntax identifier => identifier.Identifier.Text,
-                        LiteralExpressionSyntax literal => string.Format( "CS{0:0000}", literal.Token.Value ),
+                        LiteralExpressionSyntax literal => $"CS{literal.Token.Value:0000}",
                         _ => throw new AssertionFailedException()
                     };
             }

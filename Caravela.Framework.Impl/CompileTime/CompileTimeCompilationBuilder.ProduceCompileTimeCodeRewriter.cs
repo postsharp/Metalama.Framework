@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         private sealed class ProduceCompileTimeCodeRewriter : CompileTimeBaseRewriter
         {
-            private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "hasCompileTimeCode" );
+            private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Caravela_HasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;

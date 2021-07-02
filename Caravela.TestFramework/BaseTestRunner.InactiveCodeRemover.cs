@@ -16,7 +16,7 @@ namespace Caravela.TestFramework
         {
             public InactiveCodeRemover() : base( true ) { }
 
-            public override SyntaxTrivia VisitTrivia( SyntaxTrivia trivia ) 
+            public override SyntaxTrivia VisitTrivia( SyntaxTrivia trivia )
                 => trivia.Kind() == SyntaxKind.DisabledTextTrivia ? SyntaxFactory.Whitespace( "" ) : base.VisitTrivia( trivia );
 
             public override SyntaxNode? VisitElifDirectiveTrivia( ElifDirectiveTriviaSyntax node ) => null;

@@ -5,12 +5,9 @@ using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.CodeAnalysis.Simplification;
 using PostSharp.Patterns;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -62,6 +59,11 @@ namespace Caravela.TestFramework
         /// Gets the result compilation of the test project.
         /// </summary>
         public Compilation? OutputCompilation { get; internal set; }
+        
+        /// <summary>
+        /// Gets the full path of the HTML file with syntax highlighting.
+        /// </summary>
+        public string? OutputHtmlPath { get; internal set; }
 
         /// <summary>
         /// Gets a value indicating whether the test run succeeded.
@@ -237,17 +239,7 @@ namespace Caravela.TestFramework
 
             consolidatedCompilationUnit = consolidatedCompilationUnit.WithLeadingTrivia( comments );
 
-            if ( this.TestInput.Options.FormatOutput.GetValueOrDefault( true ) )
-            {
-                var outputDocument =
-                    this.InputProject!.RemoveDocuments( this.InputProject.DocumentIds.ToImmutableArray() )
-                        .AddDocument( this.TestInput.TestName, consolidatedCompilationUnit );
-
-                var simplifiedDocument = Simplifier.ReduceAsync( outputDocument ).Result;
-                var simplifiedSyntaxRoot = simplifiedDocument.GetSyntaxRootAsync().Result!;
-
-                consolidatedCompilationUnit = (CompilationUnitSyntax) Formatter.Format( simplifiedSyntaxRoot, this.InputProject!.Solution.Workspace );
-            }
+            // Individual trees should be formatted, so we don't need to format again.
 
             return consolidatedCompilationUnit;
         }

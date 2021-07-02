@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         /// <summary>
         /// Updates cache with a <see cref="DesignTimeAspectPipelineResult"/> that includes results for several syntax trees.
         /// </summary>
-        public void SetResults( Compilation compilation, DesignTimeAspectPipelineResult results )
+        public void SetResults( PartialCompilation compilation, DesignTimeAspectPipelineResult results )
         {
             var resultsByTree = SplitResultsByTree( compilation, results );
 
@@ -45,8 +45,11 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         /// </summary>
         /// <param name="results"></param>
         /// <returns></returns>
-        private static IEnumerable<SyntaxTreeResult> SplitResultsByTree( Compilation compilation, DesignTimeAspectPipelineResult results )
+        private static IEnumerable<SyntaxTreeResult> SplitResultsByTree( PartialCompilation compilation, DesignTimeAspectPipelineResult results )
         {
+            var inputPaths = compilation.SyntaxTrees
+                .ToDictionary( p => p.FilePath, p => p );
+
             var resultsByTree = results
                 .InputSyntaxTrees
                 .ToDictionary( r => r.FilePath, syntaxTree => new SyntaxTreeResultBuilder( syntaxTree ) );
@@ -114,7 +117,19 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 builder.Introductions.Add( introduction );
             }
 
-            return resultsByTree.Select( b => b.Value.ToImmutable( compilation ) );
+            // Add syntax trees with empty output to it gets cached too.
+            foreach ( var path in resultsByTree.Keys )
+            {
+                inputPaths.Remove( path );
+            }
+
+            foreach ( var empty in inputPaths )
+            {
+                resultsByTree.Add( empty.Key, new SyntaxTreeResultBuilder( empty.Value ) );
+            }
+
+            // Return an immutable copy.
+            return resultsByTree.Select( b => b.Value.ToImmutable( compilation.Compilation ) );
         }
 
         public bool TryGetResult( SyntaxTree syntaxTree, [NotNullWhen( true )] out SyntaxTreeResult? result )
@@ -124,19 +139,30 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
         public void InvalidateCache( CompilationChange compilationChange )
         {
-            foreach ( var change in compilationChange.SyntaxTreeChanges )
+            if ( !compilationChange.HasChange )
             {
-                switch ( change.SyntaxTreeChangeKind )
+                // Nothing to do.
+            }
+            else if ( compilationChange.HasCompileTimeCodeChange )
+            {
+                this._syntaxTreeCache.Clear();
+            }
+            else
+            {
+                foreach ( var change in compilationChange.SyntaxTreeChanges )
                 {
-                    case SyntaxTreeChangeKind.Added:
-                        break;
+                    switch ( change.SyntaxTreeChangeKind )
+                    {
+                        case SyntaxTreeChangeKind.Added:
+                            break;
 
-                    case SyntaxTreeChangeKind.Deleted:
-                    case SyntaxTreeChangeKind.Changed:
-                        Logger.Instance?.Write( $"DesignTimeSyntaxTreeResultCache.InvalidateCache({change.FilePath}): removed from cache." );
-                        this._syntaxTreeCache.TryRemove( change.FilePath, out _ );
+                        case SyntaxTreeChangeKind.Deleted:
+                        case SyntaxTreeChangeKind.Changed:
+                            Logger.Instance?.Write( $"DesignTimeSyntaxTreeResultCache.InvalidateCache({change.FilePath}): removed from cache." );
+                            this._syntaxTreeCache.TryRemove( change.FilePath, out _ );
 
-                        break;
+                            break;
+                    }
                 }
             }
         }

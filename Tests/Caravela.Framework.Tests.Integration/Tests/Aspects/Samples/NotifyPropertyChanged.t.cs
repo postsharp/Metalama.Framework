@@ -1,54 +1,42 @@
 [NotifyPropertyChanged]
-class Car : global::System.ComponentModel.INotifyPropertyChanged
-{
-    public string? Make
-    {
-        get
-        {
-            return this.__Make__BackingField;
-        }
-
-        set
-        {
-            var value = value;
-            if (value != this.Make)
-            {
-                this.OnPropertyChanged("Make");
-                global::System.String dummy;
-                this.__Make__BackingField = value;
-            }
-
-            return;
-        }
+    class Car
+: global::System.ComponentModel.INotifyPropertyChanged    {
+        public string? Make {get    {
+    return this._make;
     }
 
-    private string? __Make__BackingField;
-    public double Power
-    {
-        get
+set    {
+        var value = value;
+        if (value != this.Make)
         {
-            return this.__Power__BackingField;
-        }
+            this.OnPropertyChanged("Make");
+            global::System.String dummy;
+this._make=value;        }
 
-        set
-        {
-            var value = value;
-            if (value != this.Power)
-            {
-                this.OnPropertyChanged("Power");
-                global::System.Double dummy;
-                this.__Power__BackingField = value;
-            }
-
-            return;
-        }
+        return;
     }
-
-    private double __Power__BackingField;
-    protected void OnPropertyChanged(global::System.String name)
-    {
-        this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
-    }
-
-    public event global::System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 }
+private string? _make;        public double Power {get    {
+    return this._power;
+    }
+
+set    {
+        var value = value;
+        if (value != this.Power)
+        {
+            this.OnPropertyChanged("Power");
+            global::System.Double dummy;
+this._power=value;        }
+
+        return;
+    }
+}
+private double _power;
+
+protected void OnPropertyChanged(global::System.String name)
+{
+    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
+}
+
+public event global::System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+    }

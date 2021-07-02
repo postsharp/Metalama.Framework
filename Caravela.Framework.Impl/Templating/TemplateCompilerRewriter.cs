@@ -428,10 +428,10 @@ namespace Caravela.Framework.Impl.Templating
 
                     // Find a meaningful parent exception.
                     var parentExpression = expression.Ancestors()
-                                              .Where( n => n is InvocationExpressionSyntax or BinaryExpressionSyntax )
-                                              .FirstOrDefault()
-                                          ?? expression;
-                    
+                                               .Where( n => n is InvocationExpressionSyntax or BinaryExpressionSyntax )
+                                               .FirstOrDefault()
+                                           ?? expression;
+
                     this.Report( TemplatingDiagnosticDescriptors.CannotUseThisInRunTimeContext.CreateDiagnostic( location, parentExpression.ToString() ) );
 
                     return expression;

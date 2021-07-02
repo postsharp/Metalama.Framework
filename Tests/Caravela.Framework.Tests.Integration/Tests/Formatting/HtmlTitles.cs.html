@@ -1,13 +1,13 @@
 
 <html>
     <head>
-        <link rel="stylesheet" href="https://highlightjs.org/static/demo/styles/vs.css"/>
         <style>
             .cr-CompileTime,
             .cr-Conflict,
             .cr-TemplateKeyword,
             .cr-Dynamic,
-            .cr-CompileTimeVariable
+            .cr-CompileTimeVariable,
+            .cr-GeneratedCode
             {
                 background-color: rgba(50,50,90,0.1);
             }
@@ -78,8 +78,8 @@
             
             <span class="cr-CompileTime cs-keyword cs-control" title="Compile-time code.">return</span><span class="cr-CompileTime" title="Compile-time code."> </span><span class="cr-CompileTime cs-static-symbol" title="meta class&#10;&#10;The entry point for the meta model, which can be used in templates to inspect the target code or access other features of the template language.">meta</span><span class="cr-CompileTime cs-operator" title="Compile-time code.">.</span><span class="cr-CompileTime cs-static-symbol" title="meta.Proceed() method&#10;&#10;Injects the logic that has been intercepted. For instance, in an OverrideMethodAspect, calling meta.Proceed invokes the method being overridden. Note that the way how the logic is invoked (as a method call or inlining) is considered an implementation detail.">Proceed</span><span class="cr-CompileTime cs-punctuation" title="Compile-time code.">();</span>
         <span class="cr-CompileTime cs-punctuation" title="Compile-time code.">}</span>
-    <span class="cr-CompileTime cs-punctuation" title="Compile-time code.">}</span><span class="cr-CompileTime" title="Compile-time code.">
-</span><span class="cs-punctuation">}</span>
+    <span class="cr-CompileTime cs-punctuation" title="Compile-time code.">}</span>
+<span class="cs-punctuation">}</span>
 </code></pre>
        <p class='legend'>Legend:</p>
        <pre>
@@ -91,6 +91,8 @@
 <span class='cr-TemplateKeyword'>TemplateKeyword</span>
 <span class='cr-Conflict'>Conflict</span>
 <span class='cr-Excluded'>Excluded</span>
+<span class='cr-GeneratedCode'>GeneratedCode</span>
+<span class='cr-SourceCode'>SourceCode</span>
        </pre>
    </body>
 </html>

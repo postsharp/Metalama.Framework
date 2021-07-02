@@ -1,4 +1,5 @@
 {
   "TestRunnerFactoryType": "Caravela.Framework.Tests.Integration.Runners.HighlightingTestRunnerFactory, Caravela.Framework.Tests.Integration",
-  "WriteInputHtml": true
+  "WriteInputHtml": false,
+  "WriteOutputHtml": true
 }

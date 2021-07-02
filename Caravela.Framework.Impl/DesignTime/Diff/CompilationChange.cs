@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 namespace Caravela.Framework.Impl.DesignTime.Diff
 {
     /// <summary>
-    /// Represents changes between two instances of the <see cref="Compilation"/> class.
+    /// Represents changes between two instances of the <see cref="Microsoft.CodeAnalysis.Compilation"/> class.
     /// </summary>
     internal sealed class CompilationChange
     {
@@ -24,20 +24,30 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
         /// <summary>
         /// Initializes a new instance of the <see cref="CompilationChange"/> class.
         /// </summary>
-        public CompilationChange( ImmutableArray<SyntaxTreeChange> syntaxTreeChanges, bool hasCompileTimeCodeChange )
+        public CompilationChange(
+            ImmutableArray<SyntaxTreeChange> syntaxTreeChanges,
+            bool hasCompileTimeCodeChange,
+            Compilation compilationToAnalyze,
+            bool isIncremental )
         {
             this.SyntaxTreeChanges = syntaxTreeChanges;
             this.HasCompileTimeCodeChange = hasCompileTimeCodeChange;
+            this.CompilationToAnalyze = compilationToAnalyze;
+            this.IsIncremental = isIncremental;
         }
 
-        private CompilationChange()
-        {
-            this.SyntaxTreeChanges = ImmutableArray<SyntaxTreeChange>.Empty;
-        }
+        public static CompilationChange Empty( Compilation compilation ) => new( ImmutableArray<SyntaxTreeChange>.Empty, false, compilation, true );
+
+        public bool HasChange => this.SyntaxTreeChanges.Length > 0 || this.HasCompileTimeCodeChange;
+
+        public bool IsIncremental { get; }
 
         /// <summary>
-        /// Gets a <see cref="CompilationChange"/> that represents the absence of any change.
+        /// Gets the <see cref="Microsoft.CodeAnalysis.Compilation"/> that must be analyzed. If <see cref="HasChange"/> is false,
+        /// this is the last compilation of <see cref="CompilationChangeTracker"/>. Otherwise, this is the new compilation. 
         /// </summary>
-        public static CompilationChange Empty { get; } = new();
+        public Compilation CompilationToAnalyze { get; }
+
+        public override string ToString() => $"HasCompileTimeCodeChange={this.HasCompileTimeCodeChange}, SyntaxTreeChanges={this.SyntaxTreeChanges.Length}";
     }
 }

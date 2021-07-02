@@ -492,10 +492,10 @@ namespace Caravela.Framework.Impl.Templating
                     // Template code cannot be referenced in a template until this is implemented.
                     if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) == TemplateMemberKind.Template )
                     {
-                            this.ReportDiagnostic(
-                                TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate,
-                                node,
-                                (symbol, this._currentTemplateMember!) );
+                        this.ReportDiagnostic(
+                            TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate,
+                            node,
+                            (symbol, this._currentTemplateMember!) );
                     }
                 }
 

@@ -189,7 +189,8 @@ namespace Caravela.Framework.Impl.Linking
                 var rewrittenBlock =
                     (BlockSyntax) innerRewriter.VisitBlock( declaration.Body.AssertNotNull() )
                         .AssertNotNull()
-                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable )
+                        .AddSourceCodeAnnotation();
 
                 if ( this.AnalysisRegistry.HasSimpleReturnControlFlow( calledMethodSymbol )
                      || (!calledMethodSymbol.ReturnsVoid && returnVariableName == null) )
