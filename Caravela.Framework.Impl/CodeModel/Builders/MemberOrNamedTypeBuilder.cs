@@ -25,8 +25,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsNew { get; set; }
 
-        public bool IsAsync { get; set; }
-
         public INamedType DeclaringType { get; }
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
@@ -38,9 +36,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsAbstract { get; set; }
 
         public bool IsStatic { get; set; }
-
-        public bool IsVirtual { get; set; }
-
+        
         public sealed override IDeclaration ContainingDeclaration => this.DeclaringType;
 
         public MemberOrNamedTypeBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice )

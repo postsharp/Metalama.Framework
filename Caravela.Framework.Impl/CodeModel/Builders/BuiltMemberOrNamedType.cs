@@ -24,8 +24,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsStatic => this.MemberOrNamedTypeBuilder.IsStatic;
 
-        public bool IsVirtual => this.MemberOrNamedTypeBuilder.IsVirtual;
-
         public bool IsSealed => this.MemberOrNamedTypeBuilder.IsSealed;
 
         public bool IsReadOnly => this.MemberOrNamedTypeBuilder.IsReadOnly;
@@ -33,8 +31,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsOverride => this.MemberOrNamedTypeBuilder.IsOverride;
 
         public bool IsNew => this.MemberOrNamedTypeBuilder.IsNew;
-
-        public bool IsAsync => this.MemberOrNamedTypeBuilder.IsAsync;
 
         public INamedType? DeclaringType => this.Compilation.Factory.GetDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType );
 

@@ -19,5 +19,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsExplicitInterfaceImplementation => ((MemberBuilder) this.Builder).IsExplicitInterfaceImplementation;
 
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
+        
+        public bool IsVirtual => ((MemberBuilder) this.MemberOrNamedTypeBuilder).IsVirtual;
+
+        public bool IsAsync => ((MemberBuilder) this.MemberOrNamedTypeBuilder).IsAsync;
+
+
     }
 }
