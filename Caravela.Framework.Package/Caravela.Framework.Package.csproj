@@ -21,7 +21,7 @@
         <Pack>true</Pack>
         <PackagePath>buildTransitive</PackagePath>
       </None>
-      <None Update="Caravela.CompilerVisibleProperties.targets">
+      <None Update="Caravela.CompilerVisibleProperties.props">
         <Pack>true</Pack>
         <PackagePath>buildTransitive</PackagePath>
       </None>
