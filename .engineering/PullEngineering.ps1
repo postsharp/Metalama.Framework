@@ -35,6 +35,7 @@ Foreach-Object {
 }
 
 # Link files.
+# If the creation of the symlinks fails, either the script needs to be executed with elevation, or the Windows Developer Mode needs to be enabled.
 New-Item -Path ".\.editorconfig" -ItemType SymbolicLink -Value ".\$EngineeringDirectory\style\.editorconfig"
 
 Get-ChildItem ".\" -Filter "*.sln" | 
