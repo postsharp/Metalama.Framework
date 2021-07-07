@@ -9,6 +9,8 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         protected Member( CompilationModel compilation ) : base( compilation ) { }
 
+        public abstract bool IsExplicitInterfaceImplementation { get; }
+
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 
         public abstract bool IsAsync { get; }

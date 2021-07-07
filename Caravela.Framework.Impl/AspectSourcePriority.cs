@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl
         FromAttribute,
 
         /// <summary>
-        /// Provided implicitly by <see cref="RequiresAspectAttribute"/>.
+        /// Provided implicitly by <see cref="IAspectDependencyBuilder.RequiresAspect{TAspect}"/>.
         /// </summary>
         Implicit,
 

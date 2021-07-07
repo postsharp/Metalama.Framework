@@ -60,12 +60,17 @@ namespace Caravela.Framework.Impl.Linking
                     targetPropertySymbol,
                     annotation.AssertNotNull() );
 
+                var overrideTargetSymbol =
+                    this.AnalysisRegistry.IsOverride( this.ContextBodyMethod )
+                        ? this.AnalysisRegistry.GetOverrideTarget( this.ContextBodyMethod )
+                        : this.ContextBodyMethod;
+
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {
                     // Inline the accessor body.
                     return this.GetInlinedBody( resolvedSymbol, GetAssignmentVariableName( node.Left ) );
                 }
-                else
+                else if ( overrideTargetSymbol != null && StructuralSymbolComparer.Default.Equals( overrideTargetSymbol, targetPropertySymbol ) )
                 {
                     // Replace with invocation of the correct override.
 
@@ -91,6 +96,10 @@ namespace Caravela.Framework.Impl.Linking
                             throw new NotImplementedException( $"Cannot inline {node.Right}." );
                     }
                 }
+                else
+                {
+                    return node;
+                }
             }
 
             protected override SyntaxNode? VisitReturnedExpression( ExpressionSyntax node )
@@ -113,12 +122,17 @@ namespace Caravela.Framework.Impl.Linking
                     targetPropertySymbol,
                     annotation.AssertNotNull() );
 
+                var overrideTargetSymbol =
+                    this.AnalysisRegistry.IsOverride( this.ContextBodyMethod )
+                        ? this.AnalysisRegistry.GetOverrideTarget( this.ContextBodyMethod )
+                        : this.ContextBodyMethod;
+
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {
                     // Inline the accessor body.
                     return this.GetInlinedBody( resolvedSymbol, null );
                 }
-                else
+                else if ( overrideTargetSymbol != null && StructuralSymbolComparer.Default.Equals( overrideTargetSymbol, targetPropertySymbol ) )
                 {
                     // Replace with invocation of the correct override.
 
@@ -136,6 +150,10 @@ namespace Caravela.Framework.Impl.Linking
                             throw new NotImplementedException( $"Cannot inline {node}." );
                     }
                 }
+                else
+                {
+                    return node;
+                }
             }
 
             private BlockSyntax? GetInlinedBody( IPropertySymbol calledProperty, string? returnVariableName )
@@ -144,15 +162,33 @@ namespace Caravela.Framework.Impl.Linking
 
                 // Create the top-most inlining rewriter for the called method.
                 var innerRewriter = new PropertyGetInliningRewriter( this.AnalysisRegistry, this.SemanticModel, calledProperty, returnVariableName, labelId );
-                var declaration = (AccessorDeclarationSyntax) calledProperty.GetMethod.AssertNotNull().DeclaringSyntaxReferences.Single().GetSyntax();
+                var declaration = calledProperty.GetMethod.AssertNotNull().DeclaringSyntaxReferences.Single().GetSyntax();
 
                 // Run the inlined method's body through the rewriter.
+                // TODO: Preserve trivias.
                 var rewrittenBlock =
                     declaration switch
                     {
-                        { Body: not null } => (BlockSyntax) innerRewriter.VisitBlock( declaration.Body ).AssertNotNull(),
-                        { ExpressionBody: not null } => (BlockSyntax) innerRewriter.Visit( Block( ReturnStatement( declaration.ExpressionBody.Expression ) ) )
-                            .AssertNotNull(),                  // TODO: Preserve trivia.
+                        AccessorDeclarationSyntax
+                            { Body: not null } accessorDecl => (BlockSyntax) innerRewriter.VisitBlock( accessorDecl.Body! ).AssertNotNull(),
+                        AccessorDeclarationSyntax { ExpressionBody: not null } accessorDecl
+                            => (BlockSyntax) innerRewriter.Visit(
+                                    Block(
+                                        ReturnStatement(
+                                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
+                                            accessorDecl.ExpressionBody!.Expression,
+                                            Token( SyntaxKind.SemicolonToken ) ) ) )
+                                .AssertNotNull(),
+                        ArrowExpressionClauseSyntax { Expression: not null } arrowExprClause
+                            => (BlockSyntax) innerRewriter.Visit(
+                                    Block(
+                                        ReturnStatement(
+                                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
+                                            arrowExprClause.Expression!,
+                                            Token( SyntaxKind.SemicolonToken ) ) ) )
+                                .AssertNotNull(),
+                        AccessorDeclarationSyntax _ when calledProperty.IsAbstract == false
+                            => Block( ReturnStatement( GetImplicitBackingFieldAccessExpression( calledProperty ) ) ).NormalizeWhitespace(),
                         _ => throw new NotSupportedException() // TODO: Auto-properties.
                     };
 
@@ -223,7 +259,7 @@ namespace Caravela.Framework.Impl.Linking
                     // TODO: Do this properly.
                     return MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
+                        LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
                         IdentifierName( targetSymbol.Name ) );
                 }
                 else

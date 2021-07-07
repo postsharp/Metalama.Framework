@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Immutable;
@@ -34,14 +33,6 @@ namespace Caravela.Framework.Impl.Options
 
         public bool DebugIdeProcess => this.GetBooleanOption( "DebugCaravelaIde" );
 
-        public bool MapPdbToTransformedCode => this.GetBooleanOption( "CaravelaDebugTransformedCode" );
-
-        public string? CompileTimeProjectDirectory => this.GetStringOption( "CaravelaCompileTimeProjectDirectory" );
-
-        public string? CrashReportDirectory => this.GetStringOption( "CaravelaCrashReportDirectory" );
-
-        public string CacheDirectory => this.GetStringOption( "CaravelaCacheDirectory" ) ?? TempPathHelper.GetTempPath( "Cache" );
-
         public string ProjectId => this.GetStringOption( "CaravelaProjectId" ) ?? this._defaultProjectId;
 
         public string? BuildTouchFile => this.GetStringOption( "CaravelaBuildTouchFile" );
@@ -49,6 +40,8 @@ namespace Caravela.Framework.Impl.Options
         public string? AssemblyName => this.GetStringOption( "AssemblyName" );
 
         public ImmutableArray<object> PlugIns { get; }
+
+        public bool IsFrameworkEnabled => this.GetBooleanOption( "CaravelaEnabled", true );
 
         private bool GetBooleanOption( string name, bool defaultValue = false )
         {

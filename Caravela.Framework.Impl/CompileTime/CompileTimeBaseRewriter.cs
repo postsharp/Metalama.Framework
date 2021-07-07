@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -42,17 +43,16 @@ namespace Caravela.Framework.Impl.CompileTime
                 .WithTrailingTrivia( LineFeed, LineFeed );
         }
 
-        protected static BasePropertyDeclarationSyntax WithThrowNotSupportedExceptionBody( BasePropertyDeclarationSyntax baseProperty, string message )
+        protected static BasePropertyDeclarationSyntax WithThrowNotSupportedExceptionBody( BasePropertyDeclarationSyntax memberDeclaration, string message )
         {
-            if ( baseProperty.Modifiers.Any( x => x.Kind() == SyntaxKind.AbstractKeyword ) )
+            if ( memberDeclaration.Modifiers.Any( x => x.Kind() == SyntaxKind.AbstractKeyword ) )
             {
                 // Abstract property - we don't have to do anything with it.
-                return baseProperty;
+                return memberDeclaration;
             }
-
-            if ( baseProperty is PropertyDeclarationSyntax property )
+            else if ( memberDeclaration is PropertyDeclarationSyntax property )
             {
-                if ( baseProperty is PropertyDeclarationSyntax && property.ExpressionBody != null )
+                if ( property.ExpressionBody != null )
                 {
                     // Expression bodied property - change the expression to throw exception.
                     return property
@@ -61,8 +61,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         .WithLeadingTrivia( property.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed );
                 }
-
-                if ( property.AccessorList != null )
+                else if ( property.AccessorList != null )
                 {
                     // Property with accessor list - change all accessors to expression bodied which do throw exception, remove initializer.
 
@@ -81,7 +80,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         .WithTrailingTrivia( LineFeed, LineFeed );
                 }
             }
-            else if ( baseProperty is IndexerDeclarationSyntax indexer )
+            else if ( memberDeclaration is IndexerDeclarationSyntax indexer )
             {
                 if ( indexer.AccessorList != null )
                 {
@@ -101,8 +100,58 @@ namespace Caravela.Framework.Impl.CompileTime
                         .WithTrailingTrivia( LineFeed, LineFeed );
                 }
             }
+            else if ( memberDeclaration is EventDeclarationSyntax @event )
+            {
+                // Event with accessor list.
+
+                return @event
+                    .WithAccessorList(
+                        @event.AccessorList.AssertNotNull()
+                            .WithAccessors(
+                                List(
+                                    @event.AccessorList.AssertNotNull()
+                                        .Accessors.Select(
+                                            x => x
+                                                .WithBody( null )
+                                                .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
+                                                .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( @event.GetLeadingTrivia() )
+                    .WithTrailingTrivia( LineFeed, LineFeed );
+            }
 
             throw new AssertionFailedException();
+        }
+
+        protected static IEnumerable<EventDeclarationSyntax> WithThrowNotSupportedExceptionBody( EventFieldDeclarationSyntax @eventField, string message )
+        {
+            // Event with accessor list.
+
+            foreach ( var declarator in @eventField.Declaration.Variables )
+            {
+                yield return
+                    EventDeclaration(
+                        List<AttributeListSyntax>(),
+                        eventField.Modifiers,
+                        eventField.Declaration.Type,
+                        null,
+                        declarator.Identifier,
+                        AccessorList(
+                            List(
+                                new[]
+                                {
+                                    AccessorDeclaration(
+                                        SyntaxKind.AddAccessorDeclaration,
+                                        List<AttributeListSyntax>(),
+                                        TokenList(),
+                                        ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) ),
+                                    AccessorDeclaration(
+                                        SyntaxKind.RemoveAccessorDeclaration,
+                                        List<AttributeListSyntax>(),
+                                        TokenList(),
+                                        ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
+                                } ) ) );
+            }
         }
 
         private static ThrowExpressionSyntax GetNotSupportedExceptionExpression( string message )
@@ -113,11 +162,11 @@ namespace Caravela.Framework.Impl.CompileTime
                     .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( message ) ) ) ) );
         }
 
-        protected SymbolDeclarationScope GetSymbolDeclarationScope( MemberDeclarationSyntax node )
+        protected TemplatingScope GetTemplatingScope( MemberDeclarationSyntax node )
         {
             var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 
-            return this.SymbolClassifier.GetSymbolDeclarationScope( symbol );
+            return this.SymbolClassifier.GetTemplatingScope( symbol );
         }
     }
 }

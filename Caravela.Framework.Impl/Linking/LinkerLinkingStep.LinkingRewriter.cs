@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -66,33 +68,16 @@ namespace Caravela.Framework.Impl.Linking
                         }
                         else
                         {
-                            switch ( member )
-                            {
-                                case MethodDeclarationSyntax method:
-                                    // Non-inlineable method.
-                                    var transformedMethod = this.TransformMethod( semanticModel, method, method );
-                                    newMembers.Add( transformedMethod );
-
-                                    break;
-
-                                case PropertyDeclarationSyntax property:
-                                    // Non-inlineable property.
-                                    var transformedProperty = this.TransformProperty( semanticModel, property, property );
-                                    newMembers.Add( transformedProperty );
-
-                                    break;
-
-                                case EventDeclarationSyntax @event:
-                                    // Non-inlineable event.
-                                    var transformedEvent = this.TransformEvent( semanticModel, @event, @event );
-                                    newMembers.Add( transformedEvent );
-
-                                    break;
-
-                                default:
-                                    throw new AssertionFailedException();
-                            }
+                            // Declaration is not inlineable, it will stay but inlineable references need to be inlined into it.
+                            newMembers.Add( this.GetTransformedNonInlineableOverride( member, semanticModel ) );
                         }
+                    }
+                    else if ( this._analysisRegistry.IsInterfaceImplementation( symbol ) )
+                    {
+                        // Interface implementation member.
+                        var interfaceMember = this._analysisRegistry.GetImplementedInterfaceMember( symbol );
+
+                        newMembers.Add( GetTransformedInterfaceImplementation( member, interfaceMember ) );
                     }
                     else if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
                     {
@@ -102,101 +87,144 @@ namespace Caravela.Framework.Impl.Linking
                         if ( !this._analysisRegistry.IsInlineable( lastOverrideSymbol ) )
                         {
                             // Body of the last (outermost) override is not inlineable. We need to emit a trampoline method.
-                            switch ( member )
-                            {
-                                case MethodDeclarationSyntax method:
-                                    var transformedMethod = GetTrampolineMethod( method, (IMethodSymbol) lastOverrideSymbol );
-                                    newMembers.Add( transformedMethod );
-
-                                    break;
-
-                                case PropertyDeclarationSyntax property:
-                                    var transformedProperty = GetTrampolineProperty( property, (IPropertySymbol) lastOverrideSymbol );
-                                    newMembers.Add( transformedProperty );
-
-                                    break;
-
-                                case EventDeclarationSyntax @event:
-                                    var transformedEvent = GetTrampolineEvent( @event, (IEventSymbol) lastOverrideSymbol );
-                                    newMembers.Add( transformedEvent );
-
-                                    break;
-
-                                default:
-                                    throw new AssertionFailedException();
-                            }
+                            newMembers.Add( GetTransformedInlineableOverrideTarget( member, lastOverrideSymbol ) );
                         }
                         else
                         {
                             // Body of the last (outermost) override is inlineable. We will run inlining on the override's body/bodies and place replace the current body with the result.
-                            switch ( member )
-                            {
-                                case MethodDeclarationSyntax method:
-                                    var lastMethodOverrideSyntax = (MethodDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
-                                    var transformedMethod = this.TransformMethod( semanticModel, method, lastMethodOverrideSyntax );
-                                    newMembers.Add( transformedMethod );
-
-                                    break;
-
-                                case PropertyDeclarationSyntax property:
-                                    var lastPropertyOverrideSyntax =
-                                        (PropertyDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
-
-                                    var transformedProperty = this.TransformProperty( semanticModel, property, lastPropertyOverrideSyntax );
-                                    newMembers.Add( transformedProperty );
-
-                                    break;
-
-                                case EventDeclarationSyntax @event:
-                                    var lastEventOverrideSyntax = (EventDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
-                                    var transformedEvent = this.TransformEvent( semanticModel, @event, lastEventOverrideSyntax );
-                                    newMembers.Add( transformedEvent );
-
-                                    break;
-
-                                default:
-                                    throw new AssertionFailedException();
-                            }
+                            newMembers.Add( this.GetTransformedNonInlineableOverrideTarget( member, lastOverrideSymbol, semanticModel ) );
                         }
 
+                        // TODO: This should be inserted after all other overrides.
                         if ( !this._analysisRegistry.IsInlineable( symbol ) )
                         {
-                            // TODO: This should be inserted after all other overrides.
-
-                            // This is target member that is not inlineable, we need to a separate declaration.
-                            switch ( member )
+                            newMembers.Add( GetOriginalImplDeclaration( member ) );
+                        }
+                        else
+                        {
+                            if ( symbol is IPropertySymbol propertySymbol && IsAutoPropertyDeclaration( (BasePropertyDeclarationSyntax) member ) )
                             {
-                                case MethodDeclarationSyntax method:
-                                    var originalBodyMethod = GetOriginalImplMethod( method );
-                                    newMembers.Add( originalBodyMethod );
-
-                                    break;
-
-                                case PropertyDeclarationSyntax property:
-                                    var originalBodyProperty = GetOriginalImplProperty( property );
-                                    newMembers.Add( originalBodyProperty );
-
-                                    break;
-
-                                case EventDeclarationSyntax @event:
-                                    var originalBodyEvent = GetOriginalImplEvent( @event );
-                                    newMembers.Add( originalBodyEvent );
-
-                                    break;
-
-                                default:
-                                    throw new AssertionFailedException();
+                                newMembers.Add( GetImplicitBackingFieldDeclaration( (BasePropertyDeclarationSyntax) member, propertySymbol ) );
                             }
                         }
                     }
                     else
                     {
-                        // Normal method without any transformations.
+                        // Normal member without any transformations.
                         newMembers.Add( member );
                     }
                 }
 
                 return node.WithMembers( List( newMembers ) );
+            }
+
+            private MemberDeclarationSyntax GetTransformedNonInlineableOverride( MemberDeclarationSyntax member, SemanticModel semanticModel )
+            {
+                switch ( member )
+                {
+                    case MethodDeclarationSyntax method:
+                        // Non-inlineable method.
+                        return this.TransformMethod( semanticModel, method, method );
+
+                    case PropertyDeclarationSyntax property:
+                        // Non-inlineable property.
+                        return this.TransformProperty( semanticModel, property, property );
+
+                    case EventDeclarationSyntax @event:
+                        // Non-inlineable event.
+                        return this.TransformEvent( semanticModel, @event, @event );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+            private static MemberDeclarationSyntax GetTransformedInterfaceImplementation( MemberDeclarationSyntax member, ISymbol symbol )
+            {
+                switch ( member )
+                {
+                    case MethodDeclarationSyntax method:
+                        // Non-inlineable method.
+                        return TransformInterfaceMethodImplementation( method, (IMethodSymbol) symbol );
+
+                    case PropertyDeclarationSyntax property:
+                        // Non-inlineable property.
+                        return TransformInterfacePropertyImplementation( property, (IPropertySymbol) symbol );
+
+                    case EventDeclarationSyntax @event:
+                        // Non-inlineable event.
+                        return TransformInterfaceEventImplementation( @event, (IEventSymbol) symbol );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+            private static MemberDeclarationSyntax GetTransformedInlineableOverrideTarget( MemberDeclarationSyntax member, ISymbol lastOverrideSymbol )
+            {
+                switch ( member )
+                {
+                    case MethodDeclarationSyntax method:
+                        // Non-inlineable method.
+                        return GetTrampolineMethod( method, (IMethodSymbol) lastOverrideSymbol );
+
+                    case PropertyDeclarationSyntax property:
+                        // Non-inlineable property.
+                        return GetTrampolineProperty( property, (IPropertySymbol) lastOverrideSymbol );
+
+                    case EventDeclarationSyntax @event:
+                        // Non-inlineable event.
+                        return GetTrampolineEvent( @event, (IEventSymbol) lastOverrideSymbol );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+            private MemberDeclarationSyntax GetTransformedNonInlineableOverrideTarget(
+                MemberDeclarationSyntax member,
+                ISymbol lastOverrideSymbol,
+                SemanticModel semanticModel )
+            {
+                switch ( member )
+                {
+                    case MethodDeclarationSyntax method:
+                        var lastMethodOverrideSyntax = (MethodDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+
+                        return this.TransformMethod( semanticModel, method, lastMethodOverrideSyntax );
+
+                    case PropertyDeclarationSyntax property:
+                        var lastPropertyOverrideSyntax = (PropertyDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+
+                        return this.TransformProperty( semanticModel, property, lastPropertyOverrideSyntax );
+
+                    case EventDeclarationSyntax @event:
+                        var lastEventOverrideSyntax = (EventDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+
+                        return this.TransformEvent( semanticModel, @event, lastEventOverrideSyntax );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+            private static MemberDeclarationSyntax GetOriginalImplDeclaration( MemberDeclarationSyntax member )
+            {
+                // This is target member that is not inlineable, we need to a separate declaration.
+                switch ( member )
+                {
+                    case MethodDeclarationSyntax method:
+                        return GetOriginalImplMethod( method );
+
+                    case PropertyDeclarationSyntax property:
+                        return GetOriginalImplProperty( property );
+
+                    case EventDeclarationSyntax @event:
+                        return GetOriginalImplEvent( @event );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
 
             private MethodDeclarationSyntax TransformMethod(
@@ -222,21 +250,54 @@ namespace Caravela.Framework.Impl.Linking
                     var transformedAccessors = new List<AccessorDeclarationSyntax>();
                     var symbol = semanticModel.GetDeclaredSymbol( propertyDeclaration ).AssertNotNull();
 
-                    foreach ( var originalAccessor in propertyBodySource.AccessorList.Accessors )
+                    if ( propertyDeclaration.AccessorList != null )
                     {
+                        // Go through accessors on the property and rewrite them.
+                        foreach ( var originalAccessor in propertyDeclaration.AccessorList.Accessors )
+                        {
+                            var accessorBodySource =
+                                propertyBodySource.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == originalAccessor.Kind() )
+                                ?? originalAccessor;
+
+                            transformedAccessors.Add(
+                                AccessorDeclaration(
+                                    originalAccessor.Kind(),
+                                    List<AttributeListSyntax>(),
+                                    originalAccessor.Modifiers,
+                                    this.GetRewrittenPropertyAccessorBody(
+                                        semanticModel,
+                                        accessorBodySource,
+                                        symbol ) ) );
+                        }
+                    }
+                    else
+                    {
+                        // Expression body property.
+                        var accessorBodySource =
+                            propertyBodySource.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration )
+                            ?? AccessorDeclaration(
+                                SyntaxKind.GetKeyword,
+                                Block(
+                                    ReturnStatement(
+                                        Token( SyntaxKind.ReturnKeyword ).WithLeadingTrivia( Whitespace( " " ) ),
+                                        propertyDeclaration.ExpressionBody.AssertNotNull().Expression,
+                                        Token( SyntaxKind.SemicolonToken ) ) ) );
+
                         transformedAccessors.Add(
                             AccessorDeclaration(
-                                originalAccessor.Kind(),
+                                SyntaxKind.GetAccessorDeclaration,
                                 this.GetRewrittenPropertyAccessorBody(
                                     semanticModel,
-                                    originalAccessor,
+                                    accessorBodySource,
                                     symbol ) ) );
                     }
 
                     return propertyDeclaration
                         .WithAccessorList( AccessorList( List( transformedAccessors ) ) )
                         .WithLeadingTrivia( propertyDeclaration.GetLeadingTrivia() )
-                        .WithTrailingTrivia( propertyDeclaration.GetTrailingTrivia() );
+                        .WithTrailingTrivia( propertyDeclaration.GetTrailingTrivia() )
+                        .WithExpressionBody( null )
+                        .WithSemicolonToken( Token( SyntaxKind.None ) );
                 }
                 else
                 {
@@ -255,7 +316,7 @@ namespace Caravela.Framework.Impl.Linking
 
                     foreach ( var originalAccessor in propertyBodySource.AccessorList.Accessors )
                     {
-                        var symbol = semanticModel.GetDeclaredSymbol( originalAccessor ).AssertNotNull();
+                        var symbol = semanticModel.GetDeclaredSymbol( eventDeclaration ).AssertNotNull();
 
                         transformedAccessors.Add(
                             AccessorDeclaration(
@@ -277,12 +338,61 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
+            public static MethodDeclarationSyntax TransformInterfaceMethodImplementation( MethodDeclarationSyntax method, IMethodSymbol interfaceMethodSymbol )
+            {
+                var interfaceType = interfaceMethodSymbol.ContainingType;
+
+                return
+                    MethodDeclaration(
+                        List<AttributeListSyntax>(),
+                        TokenList(),
+                        method.ReturnType,
+                        ExplicitInterfaceSpecifier( (NameSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( interfaceType ) ),
+                        Identifier( interfaceMethodSymbol.Name ),
+                        method.TypeParameterList,
+                        method.ParameterList,
+                        method.ConstraintClauses,
+                        method.Body,
+                        null );
+            }
+
+            public static PropertyDeclarationSyntax TransformInterfacePropertyImplementation(
+                PropertyDeclarationSyntax property,
+                IPropertySymbol interfacePropertySymbol )
+            {
+                var interfaceType = interfacePropertySymbol.ContainingType;
+
+                return
+                    PropertyDeclaration(
+                        List<AttributeListSyntax>(),
+                        TokenList(),
+                        property.Type,
+                        ExplicitInterfaceSpecifier( (NameSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( interfaceType ) ),
+                        Identifier( interfacePropertySymbol.Name ),
+                        property.AccessorList.AssertNotNull() );
+            }
+
+            public static EventDeclarationSyntax TransformInterfaceEventImplementation( EventDeclarationSyntax @event, IEventSymbol interfaceEventSymbol )
+            {
+                var interfaceType = interfaceEventSymbol.ContainingType;
+
+                return
+                    EventDeclaration(
+                        List<AttributeListSyntax>(),
+                        TokenList(),
+                        @event.Type,
+                        ExplicitInterfaceSpecifier( (NameSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( interfaceType ) ),
+                        Identifier( interfaceEventSymbol.Name ),
+                        @event.AccessorList );
+            }
+
             private static MethodDeclarationSyntax GetTrampolineMethod( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
             {
                 // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
 
                 return method
                     .WithBody( GetBody() )
+                    .NormalizeWhitespace()
                     .WithLeadingTrivia( method.GetLeadingTrivia() )
                     .WithTrailingTrivia( method.GetTrailingTrivia() );
 
@@ -446,6 +556,7 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         SyntaxKind.GetAccessorDeclaration => new PropertyGetInliningRewriter( this._analysisRegistry, semanticModel, propertySymbol ),
                         SyntaxKind.SetAccessorDeclaration => new PropertySetInliningRewriter( this._analysisRegistry, semanticModel, propertySymbol ),
+                        SyntaxKind.InitAccessorDeclaration => new PropertySetInliningRewriter( this._analysisRegistry, semanticModel, propertySymbol ),
                         _ => throw new AssertionFailedException( $"{accessor.Kind()}" )
                     };
 
@@ -464,30 +575,140 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private BlockSyntax GetRewrittenEventAccessorBody( SemanticModel semanticModel, AccessorDeclarationSyntax accessor, IMethodSymbol symbol )
+            private BlockSyntax GetRewrittenEventAccessorBody( SemanticModel semanticModel, AccessorDeclarationSyntax accessor, IEventSymbol eventSymbol )
             {
-                // Turn off warnings.
-                _ = this;
-                _ = semanticModel;
-                _ = accessor;
-                _ = symbol;
+                // Create inlining rewriter and inline calls into this method's body.
+                InliningRewriterBase inliningRewriter =
+                    accessor.Kind() switch
+                    {
+                        SyntaxKind.AddAccessorDeclaration => new EventInliningRewriter(
+                            this._analysisRegistry,
+                            semanticModel,
+                            eventSymbol,
+                            eventSymbol.AddMethod.AssertNotNull() ),
+                        SyntaxKind.RemoveAccessorDeclaration => new EventInliningRewriter(
+                            this._analysisRegistry,
+                            semanticModel,
+                            eventSymbol,
+                            eventSymbol.RemoveMethod.AssertNotNull() ),
+                        _ => throw new AssertionFailedException( $"{accessor.Kind()}" )
+                    };
 
-                throw new NotImplementedException();
+                if ( accessor.Body != null )
+                {
+                    return (BlockSyntax) inliningRewriter.VisitBlock( accessor.Body ).AssertNotNull();
+                }
+                else if ( accessor.ExpressionBody != null )
+                {
+                    // TODO: Correct trivia for the generated block body.
+                    return (BlockSyntax) inliningRewriter.VisitBlock( Block( ExpressionStatement( accessor.ExpressionBody.Expression ) ) ).AssertNotNull();
+                }
+                else
+                {
+                    throw new AssertionFailedException( $"{accessor}" );
+                }
             }
 
             private static MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method )
-            {
-                return method.WithIdentifier( Identifier( GetOriginalImplMemberName( method.Identifier.ValueText ) ) );
-            }
+                => method.WithIdentifier( Identifier( GetOriginalImplMemberName( method.Identifier.ValueText ) ) )
+                    .WithBody( method.Body.AddSourceCodeAnnotation() )
+                    .WithExpressionBody( method.ExpressionBody.AddSourceCodeAnnotation() );
 
             private static MemberDeclarationSyntax GetOriginalImplProperty( PropertyDeclarationSyntax property )
-            {
-                return property.WithIdentifier( Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ) );
-            }
+                => property.WithIdentifier( Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ) )
+                    .WithInitializer( property.Initializer.AddSourceCodeAnnotation() )
+                    .WithAccessorList( property.AccessorList.AddSourceCodeAnnotation() );
 
             private static MemberDeclarationSyntax GetOriginalImplEvent( EventDeclarationSyntax @event )
+                => @event.WithIdentifier( Identifier( GetOriginalImplMemberName( @event.Identifier.ValueText ) ) )
+                    .WithAccessorList( @event.AccessorList.AddSourceCodeAnnotation() );
+
+            public static string GetImplicitBackingFieldName( IPropertySymbol property )
             {
-                return @event.WithIdentifier( Identifier( GetOriginalImplMemberName( @event.Identifier.ValueText ) ) );
+                var firstPropertyLetter = property.Name.Substring( 0, 1 );
+                var camelCasePropertyName = firstPropertyLetter.ToLowerInvariant() + (property.Name.Length > 1 ? property.Name.Substring( 1 ) : "");
+
+                if ( property.ContainingType.GetMembers( camelCasePropertyName ).Any() && firstPropertyLetter == firstPropertyLetter.ToLowerInvariant() )
+                {
+                    // If there there is another property whose name differs only by the case of the first character, then the lower case variant will be suffixed.
+                    // This is unlikely given naming standards.
+
+                    camelCasePropertyName = FindUniqueName( camelCasePropertyName );
+                }
+
+                // TODO: Write tests of the collision resolution algorithm.
+
+                var fieldName = FindUniqueName( "_" + camelCasePropertyName );
+
+                return fieldName;
+
+                string FindUniqueName( string hint )
+                {
+                    if ( !property.ContainingType.GetMembers( hint ).Any() )
+                    {
+                        return hint;
+                    }
+                    else
+                    {
+                        for ( var i = 1; /* Nothing */; i++ )
+                        {
+                            var candidate = hint + i;
+
+                            if ( !property.ContainingType.GetMembers( hint ).Any() )
+                            {
+                                return candidate;
+                            }
+                        }
+                    }
+                }
+            }
+
+            private static MemberDeclarationSyntax GetImplicitBackingFieldDeclaration(
+                BasePropertyDeclarationSyntax propertyDeclaration,
+                IPropertySymbol propertySymbol )
+            {
+                // TODO: Move initializer
+                return FieldDeclaration(
+                        List<AttributeListSyntax>(),
+                        GetModifiers( propertySymbol ),
+                        VariableDeclaration(
+                            propertyDeclaration.Type,
+                            SingletonSeparatedList( VariableDeclarator( GetImplicitBackingFieldName( propertySymbol ) ) ) ) )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( LineFeed )
+                    .WithTrailingTrivia( LineFeed, LineFeed )
+                    .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
+
+                static SyntaxTokenList GetModifiers( IPropertySymbol propertySymbol )
+                {
+                    var modifiers = new List<SyntaxToken> { Token( SyntaxKind.PrivateKeyword ) };
+
+                    if ( propertySymbol.IsStatic )
+                    {
+                        modifiers.Add( Token( SyntaxKind.StaticKeyword ) );
+                    }
+
+                    if ( propertySymbol.SetMethod == null )
+                    {
+                        modifiers.Add( Token( SyntaxKind.ReadOnlyKeyword ) );
+                    }
+
+                    return TokenList( modifiers );
+                }
+            }
+
+            private static bool IsAutoPropertyDeclaration( BasePropertyDeclarationSyntax basePropertyDeclaration )
+            {
+                switch ( basePropertyDeclaration )
+                {
+                    case PropertyDeclarationSyntax propertyDeclaration:
+                        return propertyDeclaration.ExpressionBody == null
+                               && propertyDeclaration.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true
+                               && propertyDeclaration.Modifiers.All( x => x.Kind() != SyntaxKind.AbstractKeyword );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
         }
     }

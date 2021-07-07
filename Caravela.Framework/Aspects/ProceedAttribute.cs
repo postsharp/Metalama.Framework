@@ -9,7 +9,7 @@ namespace Caravela.Framework.Aspects
     /// Marks the method as having <c>proceed</c> semantics.
     /// </summary>
     [AttributeUsage( AttributeTargets.Method )]
-    public class ProceedAttribute : Attribute { }
+    internal class ProceedAttribute : Attribute { }
 
     // TODO: This class and its usages must be removed.
 }

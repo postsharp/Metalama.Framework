@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
@@ -14,13 +15,14 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal static class AdviceAttributeFactory
     {
-        public static Advice CreateAdvice<T>(
+        public static bool TryCreateAdvice<T>(
             this AttributeData attribute,
             AspectInstance aspect,
             IDiagnosticAdder diagnosticAdder,
             T aspectTargetDeclaration,
             IDeclaration templateDeclaration,
-            string? layerName )
+            string? layerName,
+            [NotNullWhen( true )] out Advice? advice )
             where T : IDeclaration
         {
             var namedArguments = attribute.NamedArguments.ToDictionary( p => p.Key, p => p.Value );
@@ -39,45 +41,51 @@ namespace Caravela.Framework.Impl.Advices
                 return false;
             }
 
-            var aspectLinkerOptionsAttribute = templateDeclaration.Attributes.FirstOrDefault(
-                x => x.Type == x.Compilation.TypeFactory.GetTypeByReflectionType( typeof(AspectLinkerOptionsAttribute) ) );
-
-            var adviceOptions = AdviceOptions.Default;
-
-            if ( aspectLinkerOptionsAttribute != null )
-            {
-                var linkerOptionsArguments = attribute.NamedArguments.ToDictionary( p => p.Key, p => p.Value );
-
-                var forceNotInlineable = false;
-
-                if ( linkerOptionsArguments.TryGetValue( nameof(AspectLinkerOptionsAttribute.ForceNotInlineable), out var forceNotInlineableValue ) )
-                {
-                    forceNotInlineable = (bool) forceNotInlineableValue.Value.AssertNotNull();
-                }
-
-                adviceOptions = adviceOptions.WithLinkerOptions( forceNotInlineable );
-            }
-
             switch ( attribute.AttributeClass?.Name )
             {
                 case nameof(IntroduceAttribute):
                     {
                         TryGetNamedArgument<IntroductionScope>( nameof(IntroduceAttribute.Scope), out var scope );
-                        TryGetNamedArgument<ConflictBehavior>( nameof(IntroduceAttribute.ConflictBehavior), out var conflictBehavior );
+                        TryGetNamedArgument<OverrideStrategy>( nameof(IntroduceAttribute.WhenExists), out var conflictBehavior );
                         IMemberBuilder builder;
-                        Advice advice;
+                        INamedType targetType;
+
+                        switch ( aspectTargetDeclaration )
+                        {
+                            case IMember member:
+                                targetType = member.DeclaringType;
+
+                                break;
+
+                            case INamedType type:
+                                targetType = type;
+
+                                break;
+
+                            default:
+                                // TODO: This error should probably not be reported when the aspect is used, but when it is compiled, because it does not depend on a specific target.
+                                // However, we don't have the infrastructure to do it now.
+                                diagnosticAdder.Report(
+                                    AdviceDiagnosticDescriptors.CannotUseIntroduceWithoutDeclaringType.CreateDiagnostic(
+                                        attribute.GetLocation(),
+                                        (aspect.AspectClass.DisplayName, templateDeclaration.DeclarationKind, aspectTargetDeclaration.DeclarationKind) ) );
+
+                                advice = null;
+
+                                return false;
+                        }
 
                         switch ( templateDeclaration )
                         {
                             case IMethod templateMethod:
                                 var introduceMethodAdvice = new IntroduceMethodAdvice(
                                     aspect,
-                                    (INamedType) aspectTargetDeclaration,
+                                    targetType,
                                     templateMethod,
                                     scope,
                                     conflictBehavior,
                                     layerName,
-                                    adviceOptions );
+                                    null );
 
                                 advice = introduceMethodAdvice;
                                 builder = introduceMethodAdvice.Builder;
@@ -87,26 +95,44 @@ namespace Caravela.Framework.Impl.Advices
                             case IProperty templateProperty:
                                 var introducePropertyAdvice = new IntroducePropertyAdvice(
                                     aspect,
-                                    (INamedType) aspectTargetDeclaration,
-                                    templateProperty,
+                                    targetType,
                                     null,
+                                    templateProperty,
                                     null,
                                     null,
                                     scope,
                                     conflictBehavior,
                                     layerName,
-                                    adviceOptions );
+                                    null );
 
                                 advice = introducePropertyAdvice;
                                 builder = introducePropertyAdvice.Builder;
 
                                 break;
 
+                            case IEvent templateEvent:
+                                var introduceEventAdvice = new IntroduceEventAdvice(
+                                    aspect,
+                                    targetType,
+                                    null,
+                                    templateEvent,
+                                    null,
+                                    null,
+                                    scope,
+                                    conflictBehavior,
+                                    layerName,
+                                    null );
+
+                                advice = introduceEventAdvice;
+                                builder = introduceEventAdvice.Builder;
+
+                                break;
+
                             default:
-                                throw new AssertionFailedException();
+                                throw new AssertionFailedException( $"Don't know how to introduce a {templateDeclaration.DeclarationKind}." );
                         }
 
-                        advice.Initialize( diagnosticAdder );
+                        advice.Initialize( Array.Empty<Advice>(), diagnosticAdder );
 
                         if ( TryGetNamedArgument<string>( nameof(IntroduceAttribute.Name), out var name ) )
                         {
@@ -128,7 +154,7 @@ namespace Caravela.Framework.Impl.Advices
                             builder.Accessibility = accessibility;
                         }
 
-                        return advice;
+                        return true;
                     }
             }
 

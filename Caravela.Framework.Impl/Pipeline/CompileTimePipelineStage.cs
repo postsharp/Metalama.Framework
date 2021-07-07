@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Linking;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -21,8 +22,8 @@ namespace Caravela.Framework.Impl.Pipeline
         public CompileTimePipelineStage(
             CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            IAspectPipelineProperties properties )
-            : base( compileTimeProject, aspectLayers, properties )
+            IServiceProvider serviceProvider )
+            : base( compileTimeProject, aspectLayers, serviceProvider )
         {
             this._compileTimeProject = compileTimeProject;
         }
@@ -34,7 +35,7 @@ namespace Caravela.Framework.Impl.Pipeline
             CancellationToken cancellationToken )
         {
             var linker = new AspectLinker(
-                this.PipelineProperties.ServiceProvider,
+                this.ServiceProvider,
                 new AspectLinkerInput(
                     input.PartialCompilation,
                     pipelineStepResult.Compilation,

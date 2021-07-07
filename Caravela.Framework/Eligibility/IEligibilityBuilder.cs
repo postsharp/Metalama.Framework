@@ -1,12 +1,17 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Validation;
 using System;
 
 namespace Caravela.Framework.Eligibility
 {
+    /// <summary>
+    /// (Not implemented.)
+    /// </summary>
     [InternalImplement]
+    [CompileTimeOnly]
     public interface IEligibilityBuilder
     {
         /// <summary>
@@ -25,6 +30,9 @@ namespace Caravela.Framework.Eligibility
         IEligibilityRule<object> Build();
     }
 
+    /// <summary>
+    /// (Not implemented.)
+    /// </summary>
     public interface IEligibilityBuilder<out T> : IEligibilityBuilder
     {
         /// <summary>

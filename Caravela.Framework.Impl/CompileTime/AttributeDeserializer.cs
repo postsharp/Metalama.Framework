@@ -19,8 +19,6 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal class AttributeDeserializer
     {
-        public static AttributeDeserializer SystemTypes { get; } = new( new SystemTypeResolver() );
-
         private readonly ICompileTimeTypeResolver _compileTimeTypeResolver;
 
         public AttributeDeserializer( ICompileTimeTypeResolver compileTimeTypeResolver )

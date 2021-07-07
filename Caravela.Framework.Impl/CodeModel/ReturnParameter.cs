@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
@@ -42,15 +42,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public abstract IAttributeList Attributes { get; }
 
         public DeclarationKind DeclarationKind => DeclarationKind.Parameter;
-
-        public bool HasAspect<T>()
-            where T : IAspect
-            => throw new NotImplementedException();
-
-        [Obsolete( "Not implemented." )]
-        public IAnnotationList GetAnnotations<T>()
-            where T : IAspect
-            => throw new NotImplementedException();
 
         public ICompilation Compilation => this.ContainingDeclaration?.Compilation ?? throw new AssertionFailedException();
 

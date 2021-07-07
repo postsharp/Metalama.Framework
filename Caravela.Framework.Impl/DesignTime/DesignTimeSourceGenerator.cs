@@ -3,7 +3,6 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
-using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
@@ -29,7 +28,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             try
             {
-                DesignTimeLogger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}')." );
+                Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}')." );
 
                 var buildOptions = new ProjectOptions( context.AnalyzerConfigOptions );
 
@@ -56,14 +55,14 @@ namespace Caravela.Framework.Impl.DesignTime
                     }
                 }
 
-                DesignTimeLogger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): {sourcesCount} sources generated." );
+                Logger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): {sourcesCount} sources generated." );
 
                 // We don't report diagnostics because it seems to be without effect.
                 // All diagnostics are reported by the analyzer.
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
-                DesignTimeLogger.Instance?.Write( e.ToString() );
+                DesignTimeExceptionHandler.ReportException( e );
             }
         }
 

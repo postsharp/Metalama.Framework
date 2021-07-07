@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -25,7 +26,7 @@ namespace Caravela.Framework.Impl.Pipeline
         protected HighLevelPipelineStage(
             CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            IAspectPipelineProperties properties ) : base( properties )
+            IServiceProvider serviceProvider ) : base( serviceProvider )
         {
             this.CompileTimeProject = compileTimeProject;
             this._aspectLayers = aspectLayers;

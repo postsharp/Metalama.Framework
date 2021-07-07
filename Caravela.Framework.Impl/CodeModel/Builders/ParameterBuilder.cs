@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Reflection;
@@ -38,8 +39,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMemberOrNamedType DeclaringMember { get; }
 
-        public ParameterInfo ToRunTimeReflection() => throw new NotImplementedException();
-
         public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
 
         public ParameterBuilder( MemberOrNamedTypeBuilder declaringMember, int index, string? name, IType type, RefKind refKind ) : base(
@@ -60,9 +59,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         internal ParameterSyntax ToDeclarationSyntax()
         {
-            var syntaxGenerator = this.Compilation.SyntaxGenerator;
+            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
-            return (ParameterSyntax) syntaxGenerator.ParameterDeclaration(
+            return syntaxGenerator.ParameterDeclaration(
                 this.Name,
                 syntaxGenerator.TypeExpression( this.ParameterType.GetSymbol() ),
                 this.DefaultValue.ToExpressionSyntax( this.Compilation ),

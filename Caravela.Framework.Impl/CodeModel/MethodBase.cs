@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
@@ -81,6 +82,8 @@ namespace Caravela.Framework.Impl.CodeModel
                     SymbolMethodKind.FunctionPointerSignature => throw new NotSupportedException(),
                 _ => throw new InvalidOperationException()
             };
+
+        public abstract bool IsReadOnly { get; }
 
         public abstract System.Reflection.MethodBase ToMethodBase();
 

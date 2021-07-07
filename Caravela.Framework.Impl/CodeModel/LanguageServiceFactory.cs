@@ -7,9 +7,9 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal static class LanguageServiceFactory
+    internal static partial class LanguageServiceFactory
     {
-        public static SyntaxGenerator CSharpSyntaxGenerator { get; }
+        public static AnnotatingSyntaxGenerator CSharpSyntaxGenerator { get; }
 
         static LanguageServiceFactory()
         {
@@ -22,7 +22,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var type = assembly.GetType( $"Microsoft.CodeAnalysis.CSharp.CodeGeneration.CSharpSyntaxGenerator" )!;
             var field = type.GetField( "Instance", BindingFlags.Public | BindingFlags.Static )!;
-            CSharpSyntaxGenerator = (SyntaxGenerator) field.GetValue( null );
+            var syntaxGenerator = (SyntaxGenerator) field.GetValue( null );
+            CSharpSyntaxGenerator = new AnnotatingSyntaxGenerator( syntaxGenerator );
         }
     }
 }

@@ -11,7 +11,7 @@ using System.Reflection;
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
     // This class must be public because it is referenced from compiled templates.
-    public class CompileTimeType : Type, ICompileTimeReflectionObject<IType>
+    public sealed class CompileTimeType : Type, ICompileTimeReflectionObject<IType>
     {
         private readonly string _fullName;
 

@@ -28,8 +28,8 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         public SourceGeneratorPipelineStage(
             CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            IAspectPipelineProperties properties )
-            : base( compileTimeProject, aspectLayers, properties ) { }
+            IServiceProvider serviceProvider )
+            : base( compileTimeProject, aspectLayers, serviceProvider ) { }
 
         /// <inheritdoc/>
         protected override PipelineStageResult GenerateCode(
@@ -79,31 +79,33 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 // Add members to the class.
                 foreach ( var transformation in transformationGroup.Transformations )
                 {
-                    switch ( transformation )
+                    if ( transformation is IMemberIntroduction memberIntroduction )
                     {
-                        case IMemberIntroduction memberIntroduction:
-                            // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything .
-                            var introductionContext = new MemberIntroductionContext(
-                                diagnostics,
-                                new LinkerIntroductionNameProvider(),
-                                lexicalScopeFactory.GetLexicalScope( memberIntroduction ),
-                                syntaxFactory,
-                                this.PipelineProperties.ServiceProvider );
+                        // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything .
+                        var introductionContext = new MemberIntroductionContext(
+                            diagnostics,
+                            new LinkerIntroductionNameProvider(),
+                            lexicalScopeFactory.GetLexicalScope( memberIntroduction ),
+                            syntaxFactory,
+                            this.ServiceProvider );
 
-                            classDeclaration = classDeclaration.AddMembers(
-                                memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray() );
+                        var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext )
+                            .Select( m => m.Syntax.NormalizeWhitespace() )
+                            .ToArray();
 
-                            break;
+                        classDeclaration = classDeclaration.AddMembers( introducedMembers );
+                    }
 
-                        default:
-                            throw new AssertionFailedException();
+                    if ( transformation is IIntroducedInterface interfaceImplementation )
+                    {
+                        classDeclaration = classDeclaration.AddBaseListTypes( interfaceImplementation.GetIntroducedInterfaceImplementations().ToArray() );
                     }
                 }
 
                 // Add the class to a namespace.
                 SyntaxNode topDeclaration = classDeclaration;
 
-                if ( declaringType.Namespace != null )
+                if ( declaringType.Namespace.FullName != null )
                 {
                     topDeclaration = SyntaxFactory.NamespaceDeclaration(
                         SyntaxFactory.ParseName( declaringType.Namespace.FullName ),

@@ -24,11 +24,12 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         private readonly CompileTimeProjectManifest? _manifest;
         private readonly string? _compiledAssemblyPath;
-        private readonly Func<string, TextMap?>? _getLocationMap;
+        private readonly Func<string, TextMapFile?>? _getLocationMap;
         private Assembly? _assembly;
 
         /// <summary>
         /// Gets the full path of the directory containing the transformed source code (typically under a temp directory). 
+        /// This property is <c>null</c> is the current instance represents an empty project.
         /// </summary>
         public string? Directory { get; }
 
@@ -115,7 +116,7 @@ namespace Caravela.Framework.Impl.CompileTime
             IReadOnlyList<CompileTimeProject> references,
             CompileTimeProjectManifest? manifest,
             string? compiledAssemblyPath,
-            Func<string, TextMap?>? getLocationMap,
+            Func<string, TextMapFile?>? getLocationMap,
             string? directory )
         {
             this.Domain = domain;
@@ -139,7 +140,7 @@ namespace Caravela.Framework.Impl.CompileTime
             CompileTimeProjectManifest manifest,
             string? compiledAssemblyPath,
             string sourceDirectory,
-            Func<string, TextMap?> getLocationMap )
+            Func<string, TextMapFile?> getLocationMap )
             => new( domain, runTimeIdentity, compileTimeIdentity, references, manifest, compiledAssemblyPath, getLocationMap, sourceDirectory );
 
         /// <summary>
@@ -231,9 +232,9 @@ namespace Caravela.Framework.Impl.CompileTime
         public override string ToString() => this.RunTimeIdentity.ToString();
 
         /// <summary>
-        /// Gets a <see cref="TextMap"/> given a the path of the transformed code file.
+        /// Gets a <see cref="TextMapFile"/> given a the path of the transformed code file.
         /// </summary>
-        public TextMap? GetTextMap( string csFilePath ) => this._getLocationMap?.Invoke( csFilePath );
+        public TextMapFile? GetTextMap( string csFilePath ) => this._getLocationMap?.Invoke( csFilePath );
 
         /// <summary>
         /// Gets the list of diagnostics and suppressions defined in the current project.

@@ -3,8 +3,13 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -21,25 +26,26 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class PropertyBuilder : MemberBuilder, IPropertyBuilder
     {
-        // TODO: How to set this from user code? Now it's only possible to do through template.
-        private readonly bool _isAutoProperty;
         private readonly bool _hasInitOnlySetter;
 
         RefKind IProperty.RefKind => this.RefKind;
 
         public RefKind RefKind { get; set; }
 
-        public bool IsByRef => this.RefKind != RefKind.None;
+        public Writeability Writeability
+            => this switch
+            {
+                { Setter: null, IsAutoPropertyOrField: false } => Writeability.None,
+                { Setter: null, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
+                { _hasInitOnlySetter: true } => Writeability.InitOnly,
+                _ => Writeability.All
+            };
 
-        public bool IsRef => this.RefKind == RefKind.Ref;
-
-        public bool IsRefReadonly => this.RefKind == RefKind.RefReadOnly;
+        public bool IsAutoPropertyOrField { get; }
 
         public ParameterBuilderList Parameters { get; } = new();
 
-        IParameterList IProperty.Parameters => this.Parameters;
-
-        public IPropertyInvocation Base => throw new NotImplementedException();
+        IParameterList IHasParameters.Parameters => this.Parameters;
 
         IType IFieldOrProperty.Type => this.Type;
 
@@ -51,20 +57,23 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethodBuilder? Setter { get; }
 
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
+
         IMethod? IFieldOrProperty.Setter => this.Setter;
 
-        public bool HasBase => throw new NotImplementedException();
-
-        public dynamic Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        IFieldOrPropertyInvocation IFieldOrProperty.Base => throw new NotImplementedException();
+        [Memo]
+        public IInvokerFactory<IPropertyInvoker> Invokers => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ), false );
 
         public AspectLinkerOptions? LinkerOptions { get; }
 
         public override MemberDeclarationSyntax InsertPositionNode
-            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
+            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
 
         public override DeclarationKind DeclarationKind => throw new NotImplementedException();
+
+        public IReadOnlyList<IProperty> ExplicitInterfaceImplementations { get; set; } = Array.Empty<IProperty>();
+
+        public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
         public bool IsIndexer => this.Name == "Items";
 
@@ -94,28 +103,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 this.Setter = new AccessorBuilder( this, MethodKind.PropertySet );
             }
 
-            this._isAutoProperty = isAutoProperty;
+            this.IsAutoPropertyOrField = isAutoProperty;
             this._hasInitOnlySetter = hasInitOnlySetter;
-        }
-
-        public dynamic GetIndexerValue( dynamic? instance, params dynamic[] args )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic GetValue( dynamic? instance )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic SetValue( dynamic? instance, dynamic value )
-        {
-            throw new NotImplementedException();
         }
 
         public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
@@ -157,15 +146,18 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = this.Compilation.SyntaxGenerator;
+            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
             // TODO: Indexers.
             var property =
                 PropertyDeclaration(
                     List<AttributeListSyntax>(), // TODO: Attributes.
-                    GenerateModifierList(),
-                    (TypeSyntax) syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
-                    null,
+                    this.GetSyntaxModifierList(),
+                    syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
+                    this.ExplicitInterfaceImplementations.Count > 0
+                        ? ExplicitInterfaceSpecifier(
+                            (NameSyntax) syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                        : null,
                     Identifier( this.Name ),
                     GenerateAccessorList(),
                     null,
@@ -175,33 +167,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this )
             };
-
-            SyntaxTokenList GenerateModifierList()
-            {
-                // Modifiers for property.
-                var tokens = new List<SyntaxToken>();
-
-                this.Accessibility.AddTokens( tokens );
-
-                if ( this.IsAbstract )
-                {
-                    tokens.Add( Token( SyntaxKind.AbstractKeyword ) );
-                }
-
-                if ( this.IsSealed )
-                {
-                    tokens.Add( Token( SyntaxKind.SealedKeyword ) );
-                }
-
-                if ( this.IsOverride )
-                {
-                    tokens.Add( Token( SyntaxKind.OverrideKeyword ) );
-                }
-
-                this.RefKind.AddReturnValueTokens( tokens );
-
-                return TokenList( tokens );
-            }
 
             AccessorListSyntax GenerateAccessorList()
             {
@@ -233,13 +198,16 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 // TODO: Attributes.
                 return
                     AccessorDeclaration(
-                        SyntaxKind.GetAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        TokenList( tokens ),
-                        this._isAutoProperty
-                            ? null
-                            : Block( ReturnStatement( DefaultExpression( (TypeSyntax) syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
-                        null );
+                            SyntaxKind.GetAccessorDeclaration,
+                            List<AttributeListSyntax>(),
+                            TokenList( tokens ),
+                            Token( SyntaxKind.GetKeyword ),
+                            this.IsAutoPropertyOrField
+                                ? null
+                                : Block( ReturnStatement( DefaultExpression( syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
+                            null,
+                            this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default )
+                        .NormalizeWhitespace();
             }
 
             AccessorDeclarationSyntax GenerateSetAccessor()
@@ -256,10 +224,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         this._hasInitOnlySetter ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
                         List<AttributeListSyntax>(),
                         TokenList( tokens ),
-                        this._isAutoProperty
+                        this._hasInitOnlySetter ? Token( SyntaxKind.InitKeyword ) : Token( SyntaxKind.SetKeyword ),
+                        this.IsAutoPropertyOrField
                             ? null
                             : Block(),
-                        null );
+                        null,
+                        this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
             }
         }
 
@@ -273,6 +243,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public FieldOrPropertyInfo ToFieldOrPropertyInfo()
         {
             throw new NotImplementedException();
+        }
+
+        public void SetExplicitInterfaceImplementation( IProperty interfaceProperty )
+        {
+            this.ExplicitInterfaceImplementations = new[] { interfaceProperty };
         }
     }
 }

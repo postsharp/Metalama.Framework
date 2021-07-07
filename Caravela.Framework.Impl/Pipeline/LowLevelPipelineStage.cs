@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Pipeline
         private readonly IAspectWeaver _aspectWeaver;
         private readonly AspectClass _aspectClass;
 
-        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, AspectClass aspectClass, IAspectPipelineProperties properties ) : base( properties )
+        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, AspectClass aspectClass, IServiceProvider serviceProvider ) : base( serviceProvider )
         {
             this._aspectWeaver = aspectWeaver;
             this._aspectClass = aspectClass;
@@ -63,7 +63,8 @@ namespace Caravela.Framework.Impl.Pipeline
 
             try
             {
-                newCompilation = (PartialCompilation) this._aspectWeaver.Transform( context );
+                this._aspectWeaver.Transform( context );
+                newCompilation = (PartialCompilation) context.Compilation;
             }
             catch ( Exception ex )
             {

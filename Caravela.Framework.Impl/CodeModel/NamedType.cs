@@ -2,10 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
+using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,6 +15,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
@@ -49,7 +52,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override MemberInfo ToMemberInfo() => this.ToType();
 
-        public override bool IsReadOnly => this.TypeSymbol.IsReadOnly;
+        public bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
         public bool HasDefaultConstructor
             => this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||
@@ -74,6 +77,7 @@ namespace Caravela.Framework.Impl.CodeModel
                             _ => default
                         } ) );
 
+        [Memo]
         public IFieldList Fields
             => new FieldList(
                 this,
@@ -81,7 +85,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select(
                         m => m switch
                         {
-                            IFieldSymbol p => new MemberRef<IField>( p ),
+                            IFieldSymbol { CanBeReferencedByName: true } p => new MemberRef<IField>( p ),
                             _ => default
                         } ) );
 
@@ -181,14 +185,36 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => throw new NotImplementedException()
             };
 
-        public override DeclarationKind DeclarationKind => DeclarationKind.Type;
+        public override DeclarationKind DeclarationKind => DeclarationKind.NamedType;
 
         [Memo]
         public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.Factory.GetNamedType( this.TypeSymbol.BaseType );
 
         [Memo]
-        public IReadOnlyList<INamedType> ImplementedInterfaces
-            => this.TypeSymbol.AllInterfaces.Select( this.Compilation.Factory.GetNamedType ).ToImmutableArray();
+        public IImplementedInterfaceList AllImplementedInterfaces
+            => // TODO: Correct order after concat and distinct?            
+                (this.BaseType?.AllImplementedInterfaces ?? Enumerable.Empty<INamedType>())
+                .Concat(
+                    this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
+                        .Concat(
+                            this.Compilation.GetObservableTransformationsOnElement( this )
+                                .OfType<IntroducedInterface>()
+                                .Select( i => i.InterfaceType ) ) )
+                .Distinct() // Remove duplicates (re-implementations of earlier interface by aspect).
+                .ToImmutableArray()
+                .ToImplementedInterfaceList();
+
+        [Memo]
+        public IImplementedInterfaceList ImplementedInterfaces
+            => // TODO: Correct order after concat and distinct?            
+                this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
+                    .Concat(
+                        this.Compilation.GetObservableTransformationsOnElement( this )
+                            .OfType<IntroducedInterface>()
+                            .Select( i => i.InterfaceType ) )
+                    .Distinct() // Remove duplicates (re-implementations of earlier interface by aspect).
+                    .ToImmutableArray()
+                    .ToImplementedInterfaceList();
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
@@ -198,5 +224,93 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool Equals( IType other ) => this.Compilation.InvariantComparer.Equals( this, other );
 
         public override string ToString() => this.TypeSymbol.ToString();
+
+        public bool IsSubclassOf( INamedType type )
+        {
+            // TODO: enum.IsSubclassOf(int) == true etc.
+            if ( type.TypeKind == TypeKind.Class )
+            {
+                INamedType? currentType = this;
+
+                while ( currentType != null )
+                {
+                    if ( this.Compilation.InvariantComparer.Equals( currentType, type ) )
+                    {
+                        return true;
+                    }
+
+                    currentType = currentType.BaseType;
+                }
+
+                return false;
+            }
+            else if ( type.TypeKind == TypeKind.Interface )
+            {
+                return this.ImplementedInterfaces.SingleOrDefault( i => this.Compilation.InvariantComparer.Equals( i, type ) ) != null;
+            }
+            else
+            {
+                return this.Compilation.InvariantComparer.Equals( this, type );
+            }
+        }
+
+        public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
+        {
+            // TODO: Type introductions.
+            var symbolInterfaceMemberImplementationSymbol = this.TypeSymbol.FindImplementationForInterfaceMember( interfaceMember.GetSymbol().AssertNotNull() );
+
+            var symbolInterfaceMemberImplementation =
+                symbolInterfaceMemberImplementationSymbol != null
+                    ? (IMember) this.Compilation.Factory.GetDeclaration( symbolInterfaceMemberImplementationSymbol )
+                    : null;
+
+            // Introduced implementation can be implementing the interface member in a subtype.
+            INamedType currentType = this;
+
+            while ( currentType != null )
+            {
+                var introducedInterface =
+                    this.Compilation.GetObservableTransformationsOnElement( currentType )
+                        .OfType<IntroducedInterface>()
+                        .Where( i => this.Compilation.InvariantComparer.Equals( i.InterfaceType, interfaceMember.DeclaringType ) )
+                        .SingleOrDefault();
+
+                if ( introducedInterface != null )
+                {
+                    // TODO: Generics.
+                    if ( !introducedInterface.MemberMap.TryGetValue( interfaceMember, out var interfaceMemberImplementation ) )
+                    {
+                        throw new AssertionFailedException();
+                    }
+
+                    // Which is later in inheritance?
+                    if ( symbolInterfaceMemberImplementation == null || currentType.IsSubclassOf( symbolInterfaceMemberImplementation.DeclaringType ) )
+                    {
+                        implementationMember = interfaceMemberImplementation;
+
+                        return true;
+                    }
+                    else
+                    {
+                        implementationMember = symbolInterfaceMemberImplementation;
+
+                        return true;
+                    }
+                }
+            }
+
+            if ( symbolInterfaceMemberImplementation != null )
+            {
+                implementationMember = symbolInterfaceMemberImplementation;
+
+                return true;
+            }
+            else
+            {
+                implementationMember = null;
+
+                return false;
+            }
+        }
     }
 }

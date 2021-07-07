@@ -19,6 +19,7 @@ namespace Caravela.Framework.Impl.Pipeline
             serviceProvider.AddService( new ReferenceAssemblyLocator( serviceProvider ) );
             serviceProvider.AddService( new SymbolClassificationService( serviceProvider ) );
             serviceProvider.AddService( new SyntaxSerializationService() );
+            serviceProvider.AddService( new SystemTypeResolver( serviceProvider ) );
 
             if ( freeze )
             {

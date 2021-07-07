@@ -3,9 +3,11 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
@@ -15,7 +17,7 @@ namespace Caravela.Framework.Impl.Advices
     {
         public IntroductionScope Scope { get; }
 
-        public ConflictBehavior ConflictBehavior { get; }
+        public OverrideStrategy OverrideStrategy { get; }
 
         public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
@@ -28,20 +30,20 @@ namespace Caravela.Framework.Impl.Advices
             INamedType targetDeclaration,
             IMemberOrNamedType? templateMember,
             IntroductionScope scope,
-            ConflictBehavior conflictBehavior,
+            OverrideStrategy overrideStrategy,
             string? layerName,
-            AdviceOptions? options ) : base( aspect, targetDeclaration, layerName, options )
+            Dictionary<string, object?>? tags ) : base( aspect, targetDeclaration, layerName, tags )
         {
             this.TemplateMember = templateMember;
             this.Scope = scope;
-            this.ConflictBehavior = conflictBehavior;
+            this.OverrideStrategy = overrideStrategy;
 
             // This is to make the nullability analyzer happy. Derived classes are supposed to set this member in the
             // constructor. Other designs are more cumbersome.
             this.MemberBuilder = null!;
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
             this.MemberBuilder.Accessibility = this.TemplateMember?.Accessibility ?? Accessibility.Private;
 

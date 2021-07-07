@@ -3,13 +3,11 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Sdk;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -27,15 +25,15 @@ namespace Caravela.Framework.Impl.Advices
         public IntroducePropertyAdvice(
             AspectInstance aspect,
             INamedType targetDeclaration,
-            IProperty? templateProperty,
             string? explicitName,
+            IProperty? templateProperty,
             IMethod? getTemplateMethod,
             IMethod? setTemplateMethod,
             IntroductionScope scope,
-            ConflictBehavior conflictBehavior,
+            OverrideStrategy overrideStrategy,
             string? layerName,
-            AdviceOptions? options )
-            : base( aspect, targetDeclaration, templateProperty, scope, conflictBehavior, layerName, options )
+            Dictionary<string, object?>? tags )
+            : base( aspect, targetDeclaration, templateProperty, scope, overrideStrategy, layerName, tags )
         {
             this._getTemplateMethod = getTemplateMethod;
             this._setTemplateMethod = setTemplateMethod;
@@ -50,14 +48,14 @@ namespace Caravela.Framework.Impl.Advices
                 name,
                 hasGet,
                 hasSet,
-                this.TemplateMember != null && IsAutoProperty( this.TemplateMember ),
-                this.TemplateMember != null && HasInitOnlySetter( this.TemplateMember ),
-                options?.LinkerOptions );
+                this.TemplateMember != null && this.TemplateMember.IsAutoPropertyOrField,
+                this.TemplateMember != null && this.TemplateMember.Writeability == Writeability.InitOnly,
+                AspectLinkerOptions.FromTags( tags ) );
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( diagnosticAdder );
+            base.Initialize( declarativeAdvices, diagnosticAdder );
 
             // TODO: The rest (unify with methods?).
 
@@ -70,27 +68,6 @@ namespace Caravela.Framework.Impl.Advices
             return AdviceResult.Create(
                 this.MemberBuilder,
                 new OverriddenProperty( this, this.MemberBuilder, this.TemplateMember, this._getTemplateMethod, this._setTemplateMethod, this.LinkerOptions ) );
-        }
-
-        private static bool HasInitOnlySetter( IProperty templateProperty )
-        {
-            var symbol = (IPropertySymbol) templateProperty.GetSymbol().AssertNotNull();
-
-            return symbol.SetMethod?.IsInitOnly == true;
-        }
-
-        private static bool IsAutoProperty( IProperty templateProperty )
-        {
-            var symbol = (IPropertySymbol) templateProperty.GetSymbol().AssertNotNull();
-            var syntax = symbol.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax(); // TODO: Partial?
-
-            if ( syntax == null )
-            {
-                // TODO: How to detect without source code?
-                return false;
-            }
-
-            return ((PropertyDeclarationSyntax) syntax).AccessorList?.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) == true;
         }
     }
 }

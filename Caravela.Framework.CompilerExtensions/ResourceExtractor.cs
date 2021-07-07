@@ -32,11 +32,15 @@ namespace Caravela.Framework.CompilerExtensions
                 {
                     if ( !_initialized )
                     {
+                        // To debug, uncomment the next line.
+                        // Debugger.Launch();
+
                         var currentAssembly = Assembly.GetCallingAssembly();
 
                         AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
 
-                        _snapshotDirectory = TempPathHelper.GetTempPath( "EmbeddedResources" );
+                        // Get a temp directory. AssemblyName.GetAssemblyName does not support long paths.
+                        _snapshotDirectory = TempPathHelper.GetTempPath( "Extract" );
 
                         // Extract embedded assemblies to a temp directory.
                         ExtractEmbeddedAssemblies( currentAssembly );
@@ -67,7 +71,7 @@ namespace Caravela.Framework.CompilerExtensions
             if ( !Directory.Exists( _snapshotDirectory ) )
             {
                 // We cannot use MutexHelper because of dependencies on an embedded assembly.
-                using var extractMutex = new Mutex( false, "Global\\Caravela_Extract_" + AssemblyMetadataReader.MainVersionId );
+                using var extractMutex = new Mutex( false, "Global\\Caravela_Extract_" + AssemblyMetadataReader.BuildId );
                 extractMutex.WaitOne();
 
                 try

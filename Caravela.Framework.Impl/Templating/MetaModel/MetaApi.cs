@@ -3,11 +3,13 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -16,61 +18,78 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     /// </summary>
     internal class MetaApi : IMetaApi
     {
-        private readonly IFieldOrProperty? _fieldOrProperty;
-        private readonly IMethodBase? _methodBase;
-        private readonly IEvent? _event;
+        private readonly IAdvisedFieldOrProperty? _fieldOrProperty;
+        private readonly IAdvisedMethod? _method;
+        private readonly IAdvisedEvent? _event;
         private readonly INamedType? _type;
-        private readonly AdviceParameterList? _parameters;
         private readonly MetaApiProperties _common;
 
         private Exception CreateInvalidOperationException( string memberName, string? description = null )
             => TemplatingDiagnosticDescriptors.MemberMemberNotAvailable.CreateException(
                 (this._common.TemplateSymbol, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind, description ?? "I" + memberName) );
 
-        public IConstructor Constructor => this._methodBase as IConstructor ?? throw this.CreateInvalidOperationException( nameof(this.Constructor) );
+        public IConstructor Constructor => throw new NotImplementedException();
 
-        public IMethodBase MethodBase => this._methodBase ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
+        public IMethodBase MethodBase => this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
-        public IField Field => this._fieldOrProperty as IField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
+        public IAdvisedField Field => this._fieldOrProperty as IAdvisedField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
 
-        public IFieldOrProperty FieldOrProperty => this._fieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
+        public IAdvisedFieldOrProperty FieldOrProperty => this._fieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
 
         public IDeclaration Declaration { get; }
 
-        public IMemberOrNamedType Member => this.Declaration as IMemberOrNamedType ?? throw this.CreateInvalidOperationException( nameof(this.Member) );
+        public IMember Member => this.Declaration as IMember ?? throw this.CreateInvalidOperationException( nameof(this.Member) );
 
-        public IMethod Method => this._methodBase as IMethod ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
+        public IAdvisedMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
 
-        public IProperty Property => this._fieldOrProperty as IProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
+        public IAdvisedProperty Property => this._fieldOrProperty as IAdvisedProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
 
-        public IEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
+        public IAdvisedEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
 
-        public IAdviceParameterList Parameters
-            => this._parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters), "list of parameters" );
+        public IAdvisedParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters) );
 
         public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type) );
 
         public ICompilation Compilation { get; }
 
         private ThisInstanceDynamicReceiver GetThisOrBase( string expressionName, LinkerAnnotation linkerAnnotation )
-            => this._type is { IsStatic: false } && this.Declaration is IMemberOrNamedType { IsStatic: false }
-                ? new ThisInstanceDynamicReceiver( this.Type, linkerAnnotation )
-                : throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                    (this._common.TemplateSymbol, expressionName, this.Declaration, this.Declaration.DeclarationKind) );
+        {
+            return this._type switch
+            {
+                null => throw this.CreateInvalidOperationException( expressionName ),
+                { IsStatic: false } when this.Declaration is IMemberOrNamedType { IsStatic: false }
+                    => new ThisInstanceDynamicReceiver(
+                        this.Type,
+                        linkerAnnotation ),
 
-        public dynamic This => this.GetThisOrBase( "meta.This", new LinkerAnnotation( this._common.AspectLayerId, LinkerAnnotationOrder.Default ) );
+                _ => throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
+                    (this._common.TemplateSymbol, expressionName, this.Declaration, this.Declaration.DeclarationKind) )
+            };
+        }
 
-        public dynamic Base => this.GetThisOrBase( "meta.Base", new LinkerAnnotation( this._common.AspectLayerId, LinkerAnnotationOrder.Original ) );
+        public dynamic This => this.GetThisOrBase( "meta.This", new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Default ) );
 
-        public dynamic ThisStatic
-            => new ThisTypeDynamicReceiver( this.Type, new LinkerAnnotation( this._common.AspectLayerId, LinkerAnnotationOrder.Default ) );
+        public dynamic Base => this.GetThisOrBase( "meta.Base", new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Base ) );
 
-        public dynamic BaseStatic
-            => new ThisTypeDynamicReceiver( this.Type, new LinkerAnnotation( this._common.AspectLayerId, LinkerAnnotationOrder.Original ) );
+        public dynamic ThisStatic => new ThisTypeDynamicReceiver( this.Type, new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Default ) );
+
+        public dynamic BaseStatic => new ThisTypeDynamicReceiver( this.Type, new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Base ) );
 
         public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;
 
-        public IDiagnosticSink Diagnostics => this._common.Diagnostics;
+        IDiagnosticSink IMetaApi.Diagnostics => this._common.Diagnostics;
+
+        public void DebugBreak()
+        {
+            if ( Debugger.IsAttached )
+            {
+                Debugger.Break();
+            }
+        }
+
+        public AspectExecutionScenario ExecutionScenario => this._common.PipelineDescription.ExecutionScenario;
+
+        public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
 
         private MetaApi( IDeclaration declaration, MetaApiProperties common )
         {
@@ -79,37 +98,40 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this._common = common;
         }
 
-        public MetaApi( IMethodBase methodBase, MetaApiProperties common ) : this(
-            (IDeclaration) methodBase,
+        private MetaApi( IMethod method, MetaApiProperties common ) : this(
+            (IDeclaration) method,
             common )
         {
-            // TODO: if the method is a getter/setter/adder/remover, set the event or property.
-
-            this._methodBase = methodBase;
-            this._type = methodBase.DeclaringType;
-            this._parameters = new AdviceParameterList( methodBase );
+            this._method = new AdvisedMethod( method );
+            this._type = method.DeclaringType;
         }
 
-        public MetaApi( IFieldOrProperty fieldOrProperty, MetaApiProperties common ) : this(
-            (IDeclaration) fieldOrProperty,
-            common )
+        private MetaApi( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
         {
-            // TODO: if the method is a getter/setter/adder/remover, set the event or property.
+            this._method = new AdvisedMethod( accessor );
 
-            this._fieldOrProperty = fieldOrProperty;
+            this._fieldOrProperty = fieldOrProperty switch
+            {
+                IField field => new AdvisedField( field ),
+                IProperty property => new AdvisedProperty( property ),
+                _ => throw new AssertionFailedException()
+            };
+
             this._type = fieldOrProperty.DeclaringType;
-
-            // TODO: indexer parameters
         }
 
-        public MetaApi( IEvent @event, MetaApiProperties common ) : this( (IDeclaration) @event, common )
+        private MetaApi( IEvent @event, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
         {
-            // TODO: if the method is a getter/setter/adder/remover, set the event or property.
-
-            this._event = @event;
+            this._event = new AdvisedEvent( @event );
             this._type = @event.DeclaringType;
-
-            // TODO: event parameters
+            this._method = new AdvisedMethod( accessor );
         }
+
+        public static MetaApi ForMethod( IMethodBase methodBase, MetaApiProperties common ) => new( (IMethod) methodBase, common );
+
+        public static MetaApi ForFieldOrProperty( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common )
+            => new( fieldOrProperty, accessor, common );
+
+        public static MetaApi ForEvent( IEvent @event, IMethod accessor, MetaApiProperties common ) => new( @event, accessor, common );
     }
 }

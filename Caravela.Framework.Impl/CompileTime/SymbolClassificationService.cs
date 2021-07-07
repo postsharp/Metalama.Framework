@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal partial class SymbolClassificationService
+    internal partial class SymbolClassificationService : IService
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly object _addSync = new();

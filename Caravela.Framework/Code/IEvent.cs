@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code.Invokers;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace Caravela.Framework.Code
@@ -14,7 +16,9 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the type of the event, i.e. the type of the delegate.
         /// </summary>
-        INamedType EventType { get; } // TODO: This should be IType
+        INamedType EventType { get; }
+
+        IMethod Signature { get; }
 
         /// <summary>
         /// Gets the method implementing the <c>add</c> semantic. In case of field-like events, this property returns
@@ -33,6 +37,16 @@ namespace Caravela.Framework.Code
         /// as with a normal method.
         /// </summary>
         IMethod? Raiser { get; }
+
+        /// <summary>
+        /// Gets an object that allows to add or remove a handler to or from the current event. 
+        /// </summary>
+        IInvokerFactory<IEventInvoker> Invokers { get; }
+
+        /// <summary>
+        /// Gets a list of interface events this event explicitly implements.
+        /// </summary>
+        IReadOnlyList<IEvent> ExplicitInterfaceImplementations { get; }
 
         /// <summary>
         /// Gets an <see cref="EventInfo"/> that represents the current event at run time.

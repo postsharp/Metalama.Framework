@@ -2,8 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Invokers;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -20,7 +24,12 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public INamedType EventType => this.Compilation.Factory.GetNamedType( (INamedTypeSymbol) this._symbol.Type );
+        public IInvokerFactory<IEventInvoker> Invokers => new InvokerFactory<IEventInvoker>( order => new EventInvoker( this, order ) );
+
+        [Memo]
+        public INamedType EventType => (INamedType) this.Compilation.Factory.GetIType( this._symbol.Type );
+
+        public IMethod Signature => this.EventType.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
         public IMethod Adder => this.Compilation.Factory.GetMethod( this._symbol.AddMethod! );
@@ -35,11 +44,15 @@ namespace Caravela.Framework.Impl.CodeModel
                 ? new PseudoAccessor( this, AccessorSemantic.Raise )
                 : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );
 
+        [Memo]
+        public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
+            => this._symbol.ExplicitInterfaceImplementations.Select( e => this.Compilation.Factory.GetEvent( e ) ).ToList();
+
         public EventInfo ToEventInfo() => new CompileTimeEventInfo( this );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 
-        public override bool IsReadOnly => false;
+        public override bool IsExplicitInterfaceImplementation => !this._symbol.ExplicitInterfaceImplementations.IsEmpty;
 
         public override bool IsAsync => false;
 

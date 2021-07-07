@@ -39,6 +39,8 @@ namespace Caravela.Framework.Impl
 
         public bool IsDefault => this.LayerName == null;
 
+        public bool IsNull => this.AspectName == null!;
+
         public string AspectName { get; }
 
         public string? LayerName { get; }

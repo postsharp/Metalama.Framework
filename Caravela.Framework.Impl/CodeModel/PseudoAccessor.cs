@@ -3,8 +3,11 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using System;
 using System.Collections.Generic;
@@ -42,9 +45,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsOpenGeneric => this._containingMember.DeclaringType.IsOpenGeneric;
 
-        public bool HasBase => false;
-
-        public IMethodInvocation Base => throw new InvalidOperationException();
+        [Memo]
+        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ) );
 
         public IMethod? OverriddenMethod => null;
 
@@ -88,6 +90,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsOverride => false;
 
+        public bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
+
         public bool IsNew => this._containingMember.IsNew;
 
         public bool IsAsync => false;
@@ -102,22 +106,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public DeclarationKind DeclarationKind => DeclarationKind.Method;
 
-        public bool HasAspect<T>()
-            where T : IAspect
-            => throw new NotImplementedException();
-
-        [Obsolete( "Not implemented." )]
-        public IAnnotationList GetAnnotations<T>()
-            where T : IAspect
-            => throw new NotImplementedException();
-
         public IDiagnosticLocation? DiagnosticLocation => this._containingMember.DiagnosticLocation;
 
         public ICompilation Compilation => this._containingMember.Compilation;
 
-        public dynamic Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
-
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
+
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
 
         [return: RunTimeOnly]
         public MemberInfo ToMemberInfo()
@@ -171,15 +166,6 @@ namespace Caravela.Framework.Impl.CodeModel
             public IAttributeList Attributes => throw new NotImplementedException();
 
             public DeclarationKind DeclarationKind => DeclarationKind.Parameter;
-
-            public bool HasAspect<T>()
-                where T : IAspect
-                => throw new NotImplementedException();
-
-            [Obsolete( "Not implemented." )]
-            public IAnnotationList GetAnnotations<T>()
-                where T : IAspect
-                => throw new NotImplementedException();
 
             public IDiagnosticLocation? DiagnosticLocation => throw new NotImplementedException();
 

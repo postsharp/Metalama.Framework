@@ -15,7 +15,6 @@ using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -32,8 +31,9 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly CompileTimeDomain _domain;
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
         private readonly IDirectoryOptions _directoryOptions;
+        private readonly ICompileTimeCompilationBuilderSpy? _spy;
 
-        private static readonly string _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).VersionId;
+        private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
 
         public const string ResourceName = "Caravela.CompileTimeAssembly";
 
@@ -42,6 +42,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this._directoryOptions = serviceProvider.GetService<IDirectoryOptions>();
             this._serviceProvider = serviceProvider;
             this._domain = domain;
+            this._spy = serviceProvider.GetOptionalService<ICompileTimeCompilationBuilderSpy>();
         }
 
         private static ulong ComputeSourceHash( IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log = null )
@@ -122,7 +123,7 @@ namespace Caravela.Framework.Impl.CompileTime
             var assemblyName = GetCompileTimeAssemblyName( runTimeCompilation.AssemblyName!, hash );
             compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( assemblyName, referencedProjects );
 
-            var templateCompiler = new TemplateCompiler( this._serviceProvider );
+            var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilation );
 
             var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
                 runTimeCompilation,
@@ -135,7 +136,7 @@ namespace Caravela.Framework.Impl.CompileTime
             // Creates the new syntax trees. Store them in a dictionary mapping the transformed trees to the source trees.
             var syntaxTrees = treesWithCompileTimeCode.Select(
                     t => (TransformedTree: CSharpSyntaxTree.Create(
-                                  (CSharpSyntaxNode) produceCompileTimeCodeRewriter.Visit( t.GetRoot() ),
+                                  (CSharpSyntaxNode) produceCompileTimeCodeRewriter.Visit( t.GetRoot() ).AssertNotNull(),
                                   CSharpParseOptions.Default,
                                   t.FilePath,
                                   Encoding.UTF8 )
@@ -160,6 +161,8 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees.Select( t => t.TransformedTree ) );
+
+            this._spy?.ReportCompileTimeCompilation( compileTimeCompilation );
 
             compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitTrees( compileTimeCompilation );
 
@@ -199,8 +202,7 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             var assemblyLocator = this._serviceProvider.GetService<ReferenceAssemblyLocator>();
 
-            var standardReferences = assemblyLocator.StandardAssemblyPaths
-                .Select( path => MetadataReference.CreateFromFile( path ) );
+            var standardReferences = assemblyLocator.StandardCompileTimeMetadataReferences;
 
             return CSharpCompilation.Create(
                     assemblyName,
@@ -213,32 +215,15 @@ namespace Caravela.Framework.Impl.CompileTime
                         .Select( r => r.ToMetadataReference() ) );
         }
 
-        private static ImmutableArray<TextMap> CreateLocationMaps( Compilation compileTimeCompilation, ILocationAnnotationMap locationAnnotationMap )
-            => compileTimeCompilation.SyntaxTrees.Select( t => TextMap.Create( t, locationAnnotationMap ) ).WhereNotNull().ToImmutableArray();
-
-        private static void WriteLocationMaps( IEnumerable<TextMap> maps, string outputDirectory )
-        {
-            foreach ( var map in maps )
-            {
-                var filePath = Path.Combine( outputDirectory, Path.GetFileNameWithoutExtension( map.TargetPath ) + ".map" );
-
-                using ( var writer = File.Create( filePath ) )
-                {
-                    map.Write( writer );
-                }
-            }
-        }
-
         private bool TryEmit(
             Compilation compileTimeCompilation,
             IDiagnosticAdder diagnosticSink,
-            IReadOnlyDictionary<string, SyntaxTree>? syntaxTreeMap,
-            CancellationToken cancellationToken,
-            [NotNullWhen( true )] out IReadOnlyList<CompileTimeFile>? codeFiles )
+            TextMapDirectory? textMapDirectory,
+            CancellationToken cancellationToken )
         {
             var outputInfo = this.GetOutputPaths( compileTimeCompilation.AssemblyName! );
 
-            var sourceFilesList = new List<CompileTimeFile>();
+            Logger.Instance?.Write( $"TryEmit( '{compileTimeCompilation.AssemblyName}' )" );
 
             try
             {
@@ -247,6 +232,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 // Write the generated files to disk if we should.
                 if ( !Directory.Exists( outputInfo.Directory ) )
                 {
+                    Logger.Instance?.Write( $"Creating directory ( '{outputInfo.Directory}'." );
                     Directory.CreateDirectory( outputInfo.Directory );
                 }
 
@@ -256,11 +242,6 @@ namespace Caravela.Framework.Impl.CompileTime
                 foreach ( var compileTimeSyntaxTree in compileTimeCompilation.SyntaxTrees )
                 {
                     var transformedFileName = Path.Combine( outputInfo.Directory, compileTimeSyntaxTree.FilePath );
-
-                    if ( syntaxTreeMap != null )
-                    {
-                        sourceFilesList.Add( new CompileTimeFile( transformedFileName, syntaxTreeMap[compileTimeSyntaxTree.FilePath] ) );
-                    }
 
                     var path = Path.Combine( outputInfo.Directory, transformedFileName );
                     var text = compileTimeSyntaxTree.GetText();
@@ -272,7 +253,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         {
                             using ( var textWriter = new StreamWriter( path, false, Encoding.UTF8 ) )
                             {
-                                text.Write( textWriter );
+                                text.Write( textWriter, cancellationToken );
                             }
                         } );
 
@@ -294,19 +275,67 @@ namespace Caravela.Framework.Impl.CompileTime
                     emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
                 }
 
-                diagnosticSink.Report( emitResult.Diagnostics.Where( d => d.Severity >= DiagnosticSeverity.Error ) );
+                // Reports a diagnostic in the original syntax tree.
+                void ReportDiagnostics( IEnumerable<Diagnostic> diagnostics )
+                {
+                    foreach ( var diagnostic in diagnostics )
+                    {
+                        if ( textMapDirectory == null )
+                        {
+                            textMapDirectory = TextMapDirectory.Load( outputInfo.Directory );
+                        }
+
+                        var transformedPath = diagnostic.Location.SourceTree?.FilePath;
+
+                        if ( !string.IsNullOrEmpty( transformedPath ) && textMapDirectory.TryGetByName( transformedPath!, out var mapFile ) )
+                        {
+                            var location = mapFile.GetSourceLocation( diagnostic.Location.SourceSpan );
+
+                            var relocatedDiagnostic = Diagnostic.Create(
+                                diagnostic.Id,
+                                diagnostic.Descriptor.Category,
+                                new NonLocalizedString( diagnostic.GetMessage() ),
+                                diagnostic.Severity,
+                                diagnostic.DefaultSeverity,
+                                true,
+                                diagnostic.WarningLevel,
+                                location: location );
+
+                            diagnosticSink.Report( relocatedDiagnostic );
+                        }
+                        else
+                        {
+                            diagnosticSink.Report( diagnostic );
+                        }
+                    }
+                }
 
                 if ( !emitResult.Success )
                 {
+                    Logger.Instance?.Write(
+                        $"TryEmit( '{compileTimeCompilation.AssemblyName}' ): failure: " +
+                        string.Join( Environment.NewLine, emitResult.Diagnostics ) );
+
+                    ReportDiagnostics( emitResult.Diagnostics.Where( d => d.Severity >= DiagnosticSeverity.Error ) );
+
                     DeleteOutputFiles();
+
+                    return false;
                 }
 
-                codeFiles = sourceFilesList;
+                if ( textMapDirectory == null )
+                {
+                    diagnosticSink.Report( emitResult.Diagnostics );
+                }
+
+                Logger.Instance?.Write( $"TryEmit( '{compileTimeCompilation.AssemblyName}' ): success." );
 
                 return emitResult.Success;
             }
-            catch
+            catch ( Exception e )
             {
+                Logger.Instance?.Write( e.ToString() );
+
                 DeleteOutputFiles();
 
                 throw;
@@ -386,19 +415,27 @@ namespace Caravela.Framework.Impl.CompileTime
             ulong projectHash,
             out CompileTimeProject? project )
         {
+            Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' )" );
+
             // Look in in-memory cache.
             if ( this._cache.TryGetValue( projectHash, out project ) )
             {
+                Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' ): found in memory cache." );
+
                 return true;
             }
 
             // Look on disk.
             if ( !File.Exists( outputPaths.Pe ) || !File.Exists( outputPaths.Manifest ) )
             {
+                Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' ): not found." );
+
                 project = null;
 
                 return false;
             }
+
+            Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' ): found on disk. Deserializing." );
 
             // Deserialize the manifest.
             if ( CompileTimeProjectManifest.TryDeserialize( File.OpenRead( outputPaths.Manifest ), out var manifest ) )
@@ -411,7 +448,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     manifest,
                     outputPaths.Pe,
                     outputPaths.Directory,
-                    TextMap.Read );
+                    TextMapFile.ReadForSource );
 
                 this._cache.Add( projectHash, project );
 
@@ -419,11 +456,16 @@ namespace Caravela.Framework.Impl.CompileTime
             }
             else
             {
+                Logger.Instance?.Write( $"Cannot deserialize '{outputPaths.Manifest}'." );
+
                 try
                 {
                     File.Delete( outputPaths.Manifest );
                 }
-                catch ( IOException ) { }
+                catch ( IOException e )
+                {
+                    Logger.Instance?.Write( $"Cannot delete '{outputPaths.Manifest}': {e.Message}" );
+                }
 
                 project = null;
 
@@ -440,11 +482,9 @@ namespace Caravela.Framework.Impl.CompileTime
             CancellationToken cancellationToken,
             out CompileTimeProject? project )
         {
-            StringBuilder hashLog = new();
-
             // Check the in-process cache.
             var (sourceHash, projectHash, compileTimeAssemblyName, outputPaths) =
-                this.GetPreCacheProjectInfo( runTimeCompilation, sourceTreesWithCompileTimeCode, referencedProjects, hashLog );
+                this.GetPreCacheProjectInfo( runTimeCompilation, sourceTreesWithCompileTimeCode, referencedProjects );
 
             if ( !this.TryGetCompileTimeProjectFromCache(
                 runTimeCompilation,
@@ -486,7 +526,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         cancellationToken,
                         out var compileTimeCompilation,
                         out var locationAnnotationMap,
-                        out var syntaxTreeMap ) )
+                        out _ ) )
                     {
                         project = null;
 
@@ -514,15 +554,16 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
                     else
                     {
-                        if ( !this.TryEmit( compileTimeCompilation, diagnosticSink, syntaxTreeMap, cancellationToken, out var sourceFiles ) )
+                        var textMapDirectory = TextMapDirectory.Create( compileTimeCompilation, locationAnnotationMap! );
+
+                        if ( !this.TryEmit( compileTimeCompilation, diagnosticSink, textMapDirectory, cancellationToken ) )
                         {
                             project = null;
 
                             return false;
                         }
 
-                        var locationMaps = CreateLocationMaps( compileTimeCompilation, locationAnnotationMap! );
-                        WriteLocationMaps( locationMaps, outputPaths.Directory );
+                        textMapDirectory.Write( outputPaths.Directory );
 
                         var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName );
 
@@ -535,7 +576,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                 .ToList(),
                             referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
                             sourceHash,
-                            sourceFiles );
+                            textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );
 
                         project = CompileTimeProject.Create(
                             this._domain,
@@ -545,14 +586,12 @@ namespace Caravela.Framework.Impl.CompileTime
                             manifest,
                             outputPaths.Pe,
                             outputPaths.Directory,
-                            name => GetLocationMap( locationMaps, name ) );
+                            name => textMapDirectory.GetByName( name ) );
 
                         using ( var manifestStream = File.Create( outputPaths.Manifest ) )
                         {
                             manifest.Serialize( manifestStream );
                         }
-
-                        File.WriteAllText( Path.Combine( outputPaths.Directory, "hashlog.txt" ), hashLog.ToString() );
                     }
                 }
 
@@ -566,7 +605,7 @@ namespace Caravela.Framework.Impl.CompileTime
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
             IReadOnlyList<CompileTimeProject> referencedProjects,
-            StringBuilder? log )
+            StringBuilder? log = null )
         {
             var sourceHash = ComputeSourceHash( sourceTreesWithCompileTimeCode, log );
             var projectHash = ComputeProjectHash( referencedProjects, sourceHash, log );
@@ -577,16 +616,12 @@ namespace Caravela.Framework.Impl.CompileTime
             return (sourceHash, projectHash, compileTimeAssemblyName, outputPaths);
         }
 
-        private static TextMap? GetLocationMap( ImmutableArray<TextMap> locationMaps, string name )
-            => locationMaps.Where( m => name.EndsWith( m.TargetPath, StringComparison.OrdinalIgnoreCase ) )
-                .OrderByDescending( m => m.TargetPath.Length )
-                .FirstOrDefault();
-
         private record OutputPaths( string Directory, string Pe, string Pdb, string Manifest );
 
         private OutputPaths GetOutputPaths( string compileTimeAssemblyName )
         {
-            var directory = Path.Combine( this._directoryOptions.CompileTimeProjectCacheDirectory, compileTimeAssemblyName );
+            // We cannot include the full assembly name in the path because we're hitting the max path length.
+            var directory = Path.Combine( this._directoryOptions.CompileTimeProjectCacheDirectory, HashUtilities.HashString( compileTimeAssemblyName ) );
             var pe = Path.Combine( directory, compileTimeAssemblyName + ".dll" );
             var pdb = Path.ChangeExtension( pe, ".pdb" );
             var manifest = Path.ChangeExtension( pe, ".manifest" );
@@ -607,6 +642,7 @@ namespace Caravela.Framework.Impl.CompileTime
             out string assemblyPath,
             out string sourceDirectory )
         {
+            Logger.Instance?.Write( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
             var compileTimeAssemblyName = GetCompileTimeAssemblyName( runTimeAssemblyName, referencedProjects, syntaxTreeHash );
 
             var outputInfo = this.GetOutputPaths( compileTimeAssemblyName );
@@ -624,11 +660,13 @@ namespace Caravela.Framework.Impl.CompileTime
                     // If the file already exists, given that it has a strong hash, it means that the assembly has already been 
                     // emitted and it does not need to be done a second time.
 
+                    Logger.Instance?.Write( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' ): '{outputInfo.Pe}' already exists." );
+
                     return true;
                 }
                 else
                 {
-                    return this.TryEmit( compilation, diagnosticAdder, null, cancellationToken, out _ );
+                    return this.TryEmit( compilation, diagnosticAdder, null, cancellationToken );
                 }
             }
         }

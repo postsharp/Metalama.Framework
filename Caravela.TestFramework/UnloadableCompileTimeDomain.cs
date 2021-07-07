@@ -18,7 +18,7 @@ namespace Caravela.TestFramework
     /// An implementation of <see cref="CompileTimeDomain"/> base on <see cref="AssemblyLoadContext"/> and able to unload
     /// itself. Not compatible with .NET Framework.
     /// </summary>
-    public class UnloadableCompileTimeDomain : CompileTimeDomain
+    internal class UnloadableCompileTimeDomain : CompileTimeDomain
     {
         private readonly AssemblyLoadContext _assemblyLoadContext;
         private readonly List<WeakReference> _loadedAssemblies = new();

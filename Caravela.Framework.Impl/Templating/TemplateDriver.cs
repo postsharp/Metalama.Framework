@@ -2,9 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Templating.MetaModel;
+using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -38,22 +37,10 @@ namespace Caravela.Framework.Impl.Templating
         {
             Invariant.Assert( templateExpansionContext.DiagnosticSink.DefaultScope != null );
 
-            // TODO: support target declaration other than a method.
-            if ( templateExpansionContext.TargetDeclaration is not IMethod targetMethod )
-            {
-                throw new NotImplementedException();
-            }
-
-            MetaApiProperties commonProperties =
-                new( templateExpansionContext.DiagnosticSink, this._sourceTemplateSymbol, templateExpansionContext.Properties, templateExpansionContext
-                         .AspectLayerId );
-
-            var templateContext = new MetaApi( targetMethod, commonProperties );
-
             var errorCountBefore = templateExpansionContext.DiagnosticSink.ErrorCount;
 
             using ( TemplateSyntaxFactory.WithContext( templateExpansionContext ) )
-            using ( meta.WithContext( templateContext, templateExpansionContext.ProceedImplementation ) )
+            using ( meta.WithContext( templateExpansionContext.MetaApi, templateExpansionContext.ProceedImplementation ) )
             {
                 SyntaxNode output;
 
@@ -78,7 +65,9 @@ namespace Caravela.Framework.Impl.Templating
                         diagnosticAdder.Report(
                             TemplatingDiagnosticDescriptors.ExceptionInTemplate.CreateDiagnostic(
                                 location,
-                                (this._sourceTemplateSymbol, templateExpansionContext.TargetDeclaration, userException.GetType().Name,
+                                (this._sourceTemplateSymbol,
+                                 templateExpansionContext.MetaApi.Declaration,
+                                 userException.GetType().Name,
                                  userException.ToString()) ) );
 
                         block = null;
@@ -90,6 +79,11 @@ namespace Caravela.Framework.Impl.Templating
                 var errorCountAfter = templateExpansionContext.DiagnosticSink.ErrorCount;
 
                 block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );
+
+                block = block.NormalizeWhitespace();
+
+                // We add generated-code annotations to the statements and not to the block itself so that the brackets don't get colored.
+                block = block.AddSourceCodeAnnotation();
 
                 return errorCountAfter == errorCountBefore;
             }
@@ -127,7 +121,9 @@ namespace Caravela.Framework.Impl.Templating
                 return null;
             }
 
-            var transformedText = SourceText.From( File.ReadAllText( frame.File.TransformedPath ) );
+            var transformedFileFullPath = Path.Combine( this._aspectClass.Project.Directory, frame.File.TransformedPath );
+
+            var transformedText = SourceText.From( File.ReadAllText( transformedFileFullPath ) );
 
             // Find the node in the syntax tree.
             var textLines = transformedText.Lines;

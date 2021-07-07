@@ -23,7 +23,10 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public void AddAdvice( Advice advice ) => this._advices.Add( advice );
 
-        public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState, CancellationToken cancellationToken )
+        public override CompilationModel Execute(
+            CompilationModel compilation,
+            PipelineStepsState pipelineStepsState,
+            CancellationToken cancellationToken )
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -38,7 +41,7 @@ namespace Caravela.Framework.Impl.Pipeline
             pipelineStepsState.AddNonObservableTransformations( addedNonObservableTransformations );
             pipelineStepsState.AddDiagnostics( addedDiagnostics, Enumerable.Empty<ScopedSuppression>() );
 
-            return CompilationModel.CreateRevisedInstance( compilation, addedObservableIntroductions );
+            return compilation.WithTransformations( addedObservableIntroductions );
         }
     }
 }

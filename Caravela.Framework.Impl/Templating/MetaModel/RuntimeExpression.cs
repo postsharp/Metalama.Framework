@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Simplification;
 using System;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
@@ -31,7 +32,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         /// </summary>
         /// <param name="runtimeExpression"></param>
         /// <returns></returns>
-        public static implicit operator ExpressionSyntax( RuntimeExpression runtimeExpression ) => runtimeExpression.Syntax;
+        public static implicit operator ExpressionSyntax?( RuntimeExpression? runtimeExpression ) => runtimeExpression?.Syntax;
 
         private ITypeSymbol? GetExpressionType( ITypeFactory typeFactory )
         {
@@ -100,10 +101,14 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 // This case is used to simplify tests.
                 IDynamicExpression dynamicMember => dynamicMember.CreateExpression(),
 
-                _ => throw new ArgumentOutOfRangeException( nameof(value) )
+                ExpressionSyntax syntax => new RuntimeExpression( syntax ),
+
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(value),
+                    $"Cannot convert an instance of type {value.GetType().Name} to a run-time expression." )
             };
 
-        public static RuntimeExpression[]? FromValue( object[]? array )
+        public static RuntimeExpression[]? FromValue( object?[]? array )
         {
             RuntimeExpression[] ConvertArray()
             {
@@ -149,7 +154,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
             var cast = (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression( targetTypeSymbol, this.Syntax );
 
-            return addsParenthesis ? SyntaxFactory.ParenthesizedExpression( cast ) : cast;
+            return (addsParenthesis ? SyntaxFactory.ParenthesizedExpression( cast ) : cast).WithAdditionalAnnotations( Simplifier.Annotation );
         }
     }
 }

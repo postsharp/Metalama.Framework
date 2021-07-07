@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -302,15 +303,19 @@ class C
 {
     int a = 0, b;
     int c;    
+    int AutoProperty { get; set; }
+    event Handler EventField;
+
+    delegate void Handler();
 }";
 
             var compilation = CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
-            var propertyNames = type.Fields.Select( p => p.Name );
+            var fieldNames = type.Fields.Select( p => p.Name );
 
-            Assert.Equal( new[] { "a", "b", "c" }, propertyNames );
+            Assert.Equal( new[] { "a", "b", "c" }, fieldNames );
         }
 
         [Fact]
@@ -333,6 +338,32 @@ class C
             var refKinds = type.Properties.Select( p => p.RefKind );
 
             Assert.Equal( new[] { None, Ref, RefReadOnly }, refKinds );
+        }
+
+        [Fact]
+        public void Events()
+        {
+            var code = @"
+class C
+{
+    event Handler Event
+    {
+        add {}
+        remove {}
+    }
+
+    event Handler EventField;
+
+    delegate void Handler();
+}";
+
+            var compilation = CreateCompilationModel( code );
+
+            var type = Assert.Single( compilation.DeclaredTypes )!;
+
+            var eventNames = type.Events.Select( p => p.Name );
+
+            Assert.Equal( new[] { "Event", "EventField" }, eventNames );
         }
 
         [Fact]

@@ -9,8 +9,12 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Policies
 {
+    /// <summary>
+    /// (Not implemented.)
+    /// </summary>
     [InternalImplement]
     [Obsolete( "Not implemented." )]
+    [CompileTimeOnly]
     public interface INamespacePolicyBuilder
     {
         IProject Project { get; }

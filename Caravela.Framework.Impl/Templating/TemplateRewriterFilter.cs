@@ -18,19 +18,19 @@ namespace Caravela.Framework.Impl.Templating
     internal class TemplateRewriterFilter<T> : CSharpSyntaxRewriter
         where T : CSharpSyntaxRewriter
     {
-        private readonly SemanticAnnotationMap _semanticAnnotationMap;
+        private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
 
         public T Inner { get; }
 
-        public TemplateRewriterFilter( SemanticAnnotationMap semanticAnnotationMap, T inner )
+        public TemplateRewriterFilter( SyntaxTreeAnnotationMap syntaxTreeAnnotationMap, T inner )
         {
-            this._semanticAnnotationMap = semanticAnnotationMap;
+            this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
             this.Inner = inner;
         }
 
         private bool IsTemplate( SyntaxNode node )
         {
-            var symbol = this._semanticAnnotationMap.GetDeclaredSymbol( node );
+            var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node );
 
             if ( symbol != null )
             {
@@ -40,7 +40,9 @@ namespace Caravela.Framework.Impl.Templating
             return false;
         }
 
-        private static bool IsTemplate( ISymbol symbol ) => symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(TemplateAttribute) );
+        private static bool IsTemplate( ISymbol symbol )
+            => symbol.GetAttributes()
+                .Any( a => a.AttributeClass?.Name == nameof(TemplateAttribute) || a.AttributeClass?.Name == nameof(InterfaceMemberAttribute) );
 
         public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
         {

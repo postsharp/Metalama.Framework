@@ -67,12 +67,17 @@ namespace Caravela.Framework.Impl.Linking
                     targetPropertySymbol,
                     annotation.AssertNotNull() );
 
+                var overrideTargetSymbol =
+                    this.AnalysisRegistry.IsOverride( this.ContextBodyMethod )
+                        ? this.AnalysisRegistry.GetOverrideTarget( this.ContextBodyMethod )
+                        : this.ContextBodyMethod;
+
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {
                     // Inline the accessor body.
                     return this.GetInlinedBody( resolvedSymbol, null );
                 }
-                else
+                else if ( overrideTargetSymbol != null && StructuralSymbolComparer.Default.Equals( overrideTargetSymbol, targetPropertySymbol ) )
                 {
                     // Replace with invocation of the correct override.
 
@@ -114,6 +119,10 @@ namespace Caravela.Framework.Impl.Linking
                             throw new NotImplementedException( $"Cannot inline {node.Right}." );
                     }
                 }
+                else
+                {
+                    return node;
+                }
             }
 
             protected override SyntaxNode? VisitReturnedExpression( ExpressionSyntax returnedExpression )
@@ -129,15 +138,23 @@ namespace Caravela.Framework.Impl.Linking
                 var innerRewriter = new PropertySetInliningRewriter( this.AnalysisRegistry, this.SemanticModel, calledProperty, returnVariableName, labelId );
                 var declaration = (AccessorDeclarationSyntax) calledProperty.SetMethod.AssertNotNull().DeclaringSyntaxReferences.Single().GetSyntax();
 
-                // Run the inlined method's body through the rewriter.                
+                // Run the inlined method's body through the rewriter.
+                // TODO: Preserve trivia.
                 var rewrittenBlock =
                     declaration switch
                     {
                         { Body: not null } => (BlockSyntax) innerRewriter.VisitBlock( declaration.Body ).AssertNotNull(),
                         { ExpressionBody: not null } =>
                             (BlockSyntax) innerRewriter.Visit( Block( ExpressionStatement( declaration.ExpressionBody.Expression ) ) )
-                                .AssertNotNull(),              // TODO: Preserve trivia.
-                        _ => throw new NotSupportedException() // TODO: Auto-properties.
+                                .AssertNotNull(),
+                        { Body: null, ExpressionBody: null } when calledProperty.IsAbstract == false
+                            => Block(
+                                ExpressionStatement(
+                                    AssignmentExpression(
+                                        SyntaxKind.SimpleAssignmentExpression,
+                                        GetImplicitBackingFieldAccessExpression( calledProperty ),
+                                        IdentifierName( "value" ) ) ) ),
+                        _ => throw new NotSupportedException()
                     };
 
                 // Mark the block as flattenable (this is the root block so it will not get marked by the inner rewriter).
@@ -207,7 +224,7 @@ namespace Caravela.Framework.Impl.Linking
                     // TODO: Do this properly.
                     return MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
+                        LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
                         IdentifierName( targetSymbol.Name ) );
                 }
                 else

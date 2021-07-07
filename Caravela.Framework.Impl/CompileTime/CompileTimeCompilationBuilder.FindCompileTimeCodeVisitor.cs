@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 var declaredSymbol = this._semanticModel.GetDeclaredSymbol( node );
 
-                if ( declaredSymbol != null && this._classifier.GetSymbolDeclarationScope( declaredSymbol ) != SymbolDeclarationScope.RunTimeOnly )
+                if ( declaredSymbol != null && this._classifier.GetTemplatingScope( declaredSymbol ) != TemplatingScope.RunTimeOnly )
                 {
                     this.HasCompileTimeCode = true;
                 }

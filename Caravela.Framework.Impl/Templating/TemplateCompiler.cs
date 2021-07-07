@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -11,19 +13,25 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    public class TemplateCompiler
+    internal class TemplateCompiler
     {
         public const string TemplateMethodSuffix = "_Template";
 
         private readonly IServiceProvider _serviceProvider;
-        private readonly SemanticAnnotationMap _semanticAnnotationMap = new();
+        private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap = new();
+        private readonly ITemplateCompilerSpy? _spy;
+        private readonly SerializableTypes _serializableTypes;
 
-        public TemplateCompiler( IServiceProvider serviceProvider )
+        public TemplateCompiler( IServiceProvider serviceProvider, Compilation runTimeCompilation )
         {
             this._serviceProvider = serviceProvider;
+            var syntaxSerializationService = serviceProvider.GetService<SyntaxSerializationService>();
+            this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( runTimeCompilation ) );
+
+            this._spy = serviceProvider.GetOptionalService<ITemplateCompilerSpy>();
         }
 
-        public ILocationAnnotationMap LocationAnnotationMap => this._semanticAnnotationMap;
+        public ILocationAnnotationMapBuilder LocationAnnotationMap => this._syntaxTreeAnnotationMap;
 
         public bool TryAnnotate(
             SyntaxNode sourceSyntaxRoot,
@@ -48,7 +56,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // Annotate the syntax tree with symbols.
-            currentSyntaxRoot = this._semanticAnnotationMap.AnnotateTree( sourceSyntaxRoot, semanticModel );
+            currentSyntaxRoot = this._syntaxTreeAnnotationMap.AnnotateTemplate( sourceSyntaxRoot, semanticModel );
 
             FixupTreeForDiagnostics();
 
@@ -57,12 +65,15 @@ namespace Caravela.Framework.Impl.Templating
             // Annotate the syntax tree with info about build- and run-time nodes,
             var annotatorRewriter = new TemplateAnnotator(
                 (CSharpCompilation) semanticModel.Compilation,
-                this._semanticAnnotationMap,
+                this._syntaxTreeAnnotationMap,
                 diagnostics,
                 this._serviceProvider,
+                this._serializableTypes,
                 cancellationToken );
 
             annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot )!;
+
+            this._spy?.ReportAnnotatedSyntaxNode( sourceSyntaxRoot, annotatedSyntaxRoot );
 
             // Stop if we have any error.
             if ( !annotatorRewriter.Success )
@@ -90,6 +101,7 @@ namespace Caravela.Framework.Impl.Templating
                 return false;
             }
 
+            // TODO: Reporting diagnostics here can result in duplicate reports because there may be several templates in one syntax tree.
             var sourceDiagnostics = semanticModel.GetDiagnostics( sourceSyntaxRoot.Span, cancellationToken );
 
             if ( sourceDiagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
@@ -105,10 +117,12 @@ namespace Caravela.Framework.Impl.Templating
             // Compile the syntax tree.
             var templateCompilerRewriter = new TemplateCompilerRewriter(
                 templateName,
+                semanticModel.Compilation,
                 compileTimeCompilation,
-                this._semanticAnnotationMap,
+                this._syntaxTreeAnnotationMap,
                 diagnostics,
                 this._serviceProvider,
+                this._serializableTypes,
                 cancellationToken );
 
             transformedSyntaxRoot = templateCompilerRewriter.Visit( annotatedSyntaxRoot );

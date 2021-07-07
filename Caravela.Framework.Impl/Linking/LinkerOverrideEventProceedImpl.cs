@@ -16,12 +16,12 @@ namespace Caravela.Framework.Impl.Linking
     {
         private readonly IMethod _overriddenDeclaration;
         private readonly AspectLayerId _aspectLayerId;
-        private readonly LinkerAnnotationOrder _order;
+        private readonly LinkingOrder _order;
 
         public LinkerOverrideEventProceedImpl(
             AspectLayerId aspectLayerId,
             IMethod overriddenDeclaration,
-            LinkerAnnotationOrder order,
+            LinkingOrder order,
             ISyntaxFactory syntaxFactory )
         {
             this._aspectLayerId = aspectLayerId;
@@ -37,15 +37,14 @@ namespace Caravela.Framework.Impl.Linking
         TypeSyntax IProceedImpl.CreateTypeSyntax()
         {
             // TODO: Introduced types?
-            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(
-                (ITypeSymbol) ((NamedType) this.ContainingEvent.EventType).Symbol );
+            return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( (ITypeSymbol) ((NamedType) this.ContainingEvent.EventType).Symbol );
         }
 
         StatementSyntax IProceedImpl.CreateAssignStatement( SyntaxToken returnValueLocalName )
         {
             switch ( this._overriddenDeclaration.MethodKind )
             {
-                case MethodKind.PropertyGet:
+                case MethodKind.EventAdd:
                     // Emit `xxx = <original_event_access> += value`.
                     return
                         ExpressionStatement(
@@ -57,7 +56,7 @@ namespace Caravela.Framework.Impl.Linking
                                     this.CreateOriginalEventAccess(),
                                     IdentifierName( "value" ) ) ) );
 
-                case MethodKind.PropertySet:
+                case MethodKind.EventRemove:
                     // Emit `xxx = <original_event_access> -= value`.
                     return
                         ExpressionStatement(

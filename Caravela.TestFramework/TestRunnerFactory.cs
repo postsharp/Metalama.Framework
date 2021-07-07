@@ -1,0 +1,42 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
+using System.Linq;
+using Xunit.Abstractions;
+
+namespace Caravela.TestFramework
+{
+    /// <summary>
+    /// Instantiates a specific implementation of the  <see cref="BaseTestRunner"/> class.
+    /// </summary>
+    internal static class TestRunnerFactory
+    {
+        public static BaseTestRunner CreateTestRunner( TestInput testInput, IServiceProvider serviceProvider, ITestOutputHelper? logger )
+        {
+            var metadataReferences = testInput.Options.References.Select( a => a.ToMetadataReference() ).ToArray();
+
+            if ( string.IsNullOrEmpty( testInput.Options.TestRunnerFactoryType ) )
+            {
+                return new AspectTestRunner( serviceProvider, testInput.ProjectDirectory, metadataReferences, logger );
+            }
+            else
+            {
+                Type? factoryType;
+
+                try
+                {
+                    factoryType = Type.GetType( testInput.Options.TestRunnerFactoryType, true )!;
+                }
+                catch ( Exception e )
+                {
+                    throw new InvalidOperationException( $"Cannot instantiate the type '{testInput.Options.TestRunnerFactoryType}': {e.Message}" );
+                }
+
+                var testRunnerFactory = (ITestRunnerFactory) Activator.CreateInstance( factoryType )!;
+
+                return testRunnerFactory.CreateTestRunner( serviceProvider, testInput.ProjectDirectory, metadataReferences, logger );
+            }
+        }
+    }
+}

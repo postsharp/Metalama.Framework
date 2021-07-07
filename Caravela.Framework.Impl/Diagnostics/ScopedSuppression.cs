@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// <summary>
     /// Represents the suppression of a diagnostic of a given id in a given scope.
     /// </summary>
-    public readonly struct ScopedSuppression
+    internal readonly struct ScopedSuppression
     {
         public SuppressionDefinition Definition { get; }
 

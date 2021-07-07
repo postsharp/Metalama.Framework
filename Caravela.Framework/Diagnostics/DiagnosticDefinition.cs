@@ -8,6 +8,7 @@ namespace Caravela.Framework.Diagnostics
     /// defined as static fields or properties of an aspect classes. Diagnostics are instantiated with <see cref="IDiagnosticSink"/>.
     /// For a strongly-typed variant, see <see cref="DiagnosticDefinition{T}"/>. 
     /// </summary>
+    /// <seealso href="@diagnostics"/>
     public sealed class DiagnosticDefinition : IDiagnosticDefinition
     {
         /// <summary>
@@ -26,6 +27,10 @@ namespace Caravela.Framework.Diagnostics
             this.Title = title ?? messageFormat;
             this.Category = category ?? "Caravela.User";
         }
+
+        // Constructor used by internal code.
+        internal DiagnosticDefinition( string id, string title, string messageFormat, string category, Severity severity )
+            : this( id, severity, messageFormat, title, category ) { }
 
         /// <inheritdoc />
         public Severity Severity { get; }

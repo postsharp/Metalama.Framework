@@ -7,7 +7,7 @@ using System.Reflection;
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Base interface for <see cref="IMethod"/>, <see cref="IProperty"/> and <see cref="IEvent"/>, but not <see cref="INamedType"/>.
+    /// Base interface for <see cref="IMethod"/>, <see cref="IFieldOrProperty"/>, <see cref="IEvent"/>, and <see cref="INamedType"/>.
     /// </summary>
     public interface IMemberOrNamedType : IDeclaration
     {
@@ -35,11 +35,6 @@ namespace Caravela.Framework.Code
         /// Gets a value indicating whether the member is <c>sealed</c>.
         /// </summary>
         bool IsSealed { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the member is <c>readonly</c>.
-        /// </summary>
-        bool IsReadOnly { get; }
 
         /// <summary>
         /// Gets a value indicating whether the member is <c>new</c>.

@@ -1,11 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Templating.Mapping;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -13,6 +15,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// Represents a file in a <see cref="CompileTimeProject"/>. This class is serialized
     /// to Json as a part of the <see cref="CompileTimeProjectManifest"/>.
     /// </summary>
+    [Obfuscation(Exclude = true /* JSON */)]
     internal sealed class CompileTimeFile
     {
         // TODO: Add serialization-deserialization tests because this is brittle.
@@ -44,14 +47,12 @@ namespace Caravela.Framework.Impl.CompileTime
             // Deserializer.
         }
 
-        public CompileTimeFile( string transformedPath, SyntaxTree sourceSyntaxTree )
+        public CompileTimeFile( TextMapFile textMapFile )
         {
-            var sourceText = sourceSyntaxTree.GetText();
-
-            this.SourcePath = sourceSyntaxTree.FilePath;
-            this.TransformedPath = transformedPath;
-            this.SourceHash = sourceText.GetChecksum();
-            this.SourceHashAlgorithm = sourceText.ChecksumAlgorithm;
+            this.SourcePath = textMapFile.SourcePath;
+            this.TransformedPath = textMapFile.TargetPath;
+            this.SourceHash = ImmutableArray<byte>.Empty;
+            this.SourceHashAlgorithm = SourceHashAlgorithm.None;
         }
 
         /// <summary>

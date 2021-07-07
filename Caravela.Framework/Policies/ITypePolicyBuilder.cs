@@ -7,6 +7,10 @@ using System;
 
 namespace Caravela.Framework.Policies
 {
+    /// <summary>
+    /// (Not implemented.)
+    /// </summary>
     [Obsolete( "Not implemented." )]
+    [CompileTimeOnly]
     public interface ITypePolicyBuilder : IAspectBuilder<INamedType> { }
 }

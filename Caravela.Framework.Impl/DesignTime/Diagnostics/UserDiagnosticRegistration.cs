@@ -3,12 +3,14 @@
 
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.DesignTime.Diagnostics
 {
     /// <summary>
     /// Represents a JSON-serializable user diagnostic for <see cref="UserDiagnosticRegistrationFile"/>.
     /// </summary>
+    [Obfuscation(Exclude = true /* JSON */)]
     internal class UserDiagnosticRegistration
     {
         [JsonConstructor]

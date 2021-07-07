@@ -13,6 +13,7 @@ using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -30,7 +31,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             IProjectOptions projectOptions,
             CompileTimeDomain domain,
             AspectClass aspectClass,
-            ISymbol targetSymbol ) : base( projectOptions, domain )
+            ISymbol targetSymbol ) : base( projectOptions, domain, AspectExecutionScenario.ApplyToSourceCode, false )
         {
             this._source = new InteractiveAspectSource( aspectClass, targetSymbol );
         }
@@ -45,29 +46,35 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             PartialCompilation inputCompilation,
             ISymbol targetSymbol,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out Compilation? outputCompilation )
+            [NotNullWhen( true )] out Compilation? outputCompilation,
+            out ImmutableArray<Diagnostic> diagnostics )
         {
             ApplyToSourceCodeAspectPipeline pipeline = new( projectOptions, domain, aspectClass, targetSymbol );
 
-            return pipeline.TryExecute( configuration, inputCompilation, cancellationToken, out outputCompilation );
+            return pipeline.TryExecute( configuration, inputCompilation, cancellationToken, out outputCompilation, out diagnostics );
         }
 
         private bool TryExecute(
             AspectPipelineConfiguration designTimePipelineConfiguration,
             PartialCompilation compilation,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out Compilation? outputCompilation )
+            [NotNullWhen( true )] out Compilation? outputCompilation,
+            out ImmutableArray<Diagnostic> diagnostics )
         {
             var pipelineConfiguration = designTimePipelineConfiguration.WithStages( s => MapPipelineStage( designTimePipelineConfiguration, s ) );
 
-            if ( !this.TryExecute( compilation, NullDiagnosticAdder.Instance, pipelineConfiguration, cancellationToken, out var result ) )
+            DiagnosticList diagnosticList = new();
+
+            if ( !this.TryExecute( compilation, diagnosticList, pipelineConfiguration, cancellationToken, out var result ) )
             {
                 outputCompilation = null;
+                diagnostics = diagnosticList.ToImmutableArray();
 
                 return false;
             }
 
             outputCompilation = result.PartialCompilation.Compilation;
+            diagnostics = ImmutableArray<Diagnostic>.Empty;
 
             return true;
         }
@@ -78,7 +85,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
                 SourceGeneratorPipelineStage => new CompileTimePipelineStage(
                     configuration.CompileTimeProject!,
                     configuration.Layers,
-                    stage.PipelineProperties ),
+                    stage.ServiceProvider ),
                 _ => stage
             };
 
@@ -86,9 +93,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             IReadOnlyList<OrderedAspectLayer> parts,
             CompileTimeProject compileTimeProject,
             CompileTimeProjectLoader compileTimeProjectLoader )
-            => new CompileTimePipelineStage( compileTimeProject, parts, this );
-
-        public override bool CanTransformCompilation => true;
+            => new CompileTimePipelineStage( compileTimeProject, parts, this.ServiceProvider );
 
         private class InteractiveAspectSource : IAspectSource
         {

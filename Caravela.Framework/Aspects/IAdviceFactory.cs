@@ -2,98 +2,274 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Validation;
 using System;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Aspects
 {
     /// <summary>
-    /// Exposes all factory methods to create advices.
+    /// Exposes all factory methods to create advices. Exposed on the <see cref="IAspectLayerBuilder.AdviceFactory"/> property
+    /// of <see cref="IAspectBuilder{TAspectTarget}"/> or <see cref="IAspectLayerBuilder"/>.
     /// </summary>
+    /// <seealso href="@advising-code"/>
     [InternalImplement]
+    [CompileTimeOnly]
     public interface IAdviceFactory
     {
         /// <summary>
-        /// Creates an advice that overrides the implementation of a method.
+        /// Overrides the implementation of a method.
         /// </summary>
         /// <param name="method">The method to override.</param>
-        /// <param name="defaultTemplate">Name of the template method to by used by default.</param>
-        /// <param name="options"></param>
-        void OverrideMethod( IMethod method, string defaultTemplate, AdviceOptions? options = null );
+        /// <param name="template">Name of a method in the aspect class whose implementation will be used as a template.
+        /// This property must be annotated with <see cref="TemplateAttribute"/>.</param>
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property
+        /// of the <see cref="meta"/> API.</param>
+        /// <seealso href="@overriding-members"/>
+        void OverrideMethod( IMethod method, string template, Dictionary<string, object?>? tags = null );
 
         /// <summary>
-        /// Creates an advice that introduces a new method or overrides the implementation of the existing one.
+        /// Introduces a new method or overrides the implementation of the existing one.
         /// </summary>
-        /// <param name="targetType">The type into which the method is to be introduced.</param>
-        /// <param name="defaultTemplate">Name of the template method to by used by default.</param>
-        /// <param name="scope">Introduction scope.</param>
-        /// <param name="conflictBehavior">Conflict behavior.</param>
-        /// <param name="options"></param>
-        /// <returns></returns>
+        /// <param name="targetType">The type into which the method must be introduced.</param>
+        /// <param name="template">Name of the method of the aspect class that will be used as a template for the introduced method. This method must be
+        /// annotated with <see cref="TemplateAttribute"/>. This method can parameters and a return type. The actual parameters and return type
+        /// of the introduced method can be modified using the <see cref="IMethodBuilder"/> returned by this method.</param>
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        /// method. The default scope depends on the scope of the template method.
+        /// If the method is static, the introduced method is static. However, if the template method is non-static, then the introduced method
+        /// copies of the scope of the target declaration of the aspect.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a method of the same name and signature is already declared in the target type.
+        /// The default strategy is to fail with a compile-time error.</param>
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property
+        /// of the <see cref="meta"/> API.</param>
+        /// <returns>An <see cref="IMethodBuilder"/> that allows to modify the name or signature, or to add custom attributes.</returns>
+        /// <seealso href="@introducing-members"/>
         IMethodBuilder IntroduceMethod(
             INamedType targetType,
-            string defaultTemplate,
+            string template,
             IntroductionScope scope = IntroductionScope.Default,
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AdviceOptions? options = null );
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null );
 
+        /// <summary>
+        /// Overrides a field or property by specifying a property template.
+        /// </summary>
+        /// <param name="targetDeclaration">The field or property to override.</param>
+        /// <param name="template">The name of a property of the aspect class, with a getter, a setter, or both, whose implementation will be used as a template.
+        /// This property must be annotated with <see cref="TemplateAttribute"/>.</param>
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <see cref="meta"/> API.</param>
+        /// <seealso href="@overriding-members"/>
         void OverrideFieldOrProperty(
             IFieldOrProperty targetDeclaration,
-            string defaultTemplate,
-            AdviceOptions? options = null );
+            string template,
+            Dictionary<string, object?>? tags = null );
 
+        /// <summary>
+        /// Overrides a field or property by specifying a method template for the getter, the setter, or both.
+        /// </summary>
+        /// <param name="targetDeclaration">The field or property to override.</param>
+        /// <param name="getTemplate">The name of the method of the aspect class whose implementation will be used as a template for the getter, or <c>null</c>
+        /// if the getter should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        /// be <c>T Get()</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.</param>
+        /// <param name="setTemplate">The name of the method of the aspect class whose implementation will be used as a template for the getter, or <c>null</c>
+        /// if the getter should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        /// be <c>void Set(T value</c>  where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.</param>
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <see cref="meta"/> API.</param>
+        /// <seealso href="@overriding-members"/>
         void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
-            string? getTemplate,
-            string? setTemplate,
-            AdviceOptions? options = null );
+            string? getTemplate = null,
+            string? setTemplate = null,
+            Dictionary<string, object?>? tags = null );
 
+        [Obsolete( "Not implemented." )]
         IFieldBuilder IntroduceField(
             INamedType targetType,
             IntroductionScope scope = IntroductionScope.Default,
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AdviceOptions? options = null );
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null );
 
+        /// <summary>
+        /// Introduces a property to the target type, or overrides the implementation of an existing one, by specifying a property template.
+        /// </summary>
+        /// <param name="targetType">The type into which the property must be introduced.</param>
+        /// <param name="template">The name of the property in the aspect class that will be used as a template for the new property.
+        /// This property must be annotated with <see cref="TemplateAttribute"/>. The type of this property can be either <c>dynamic</c> or any specific
+        /// type. It is possible to dynamically change the type of the introduced property thanks to the <see cref="IPropertyBuilder"/> returned by
+        /// this method.
+        /// </param>
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        /// method. The default scope depends on the scope of the template method. If the method is static, the introduced method is static. However, if the
+        /// template method is non-static, then the introduced method copies of the scope of the target declaration of the aspect.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
+        /// The default strategy is to fail with a compile-time error.</param>
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <see cref="meta"/> API.</param>
+        /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
+        /// <seealso href="@introducing-members"/>
         IPropertyBuilder IntroduceProperty(
             INamedType targetType,
-            string defaultPropertyTemplate,
+            string template,
             IntroductionScope scope = IntroductionScope.Default,
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AdviceOptions? options = null );
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null );
 
+        /// <summary>
+        /// Introduces a property to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
+        /// </summary>
+        /// <param name="targetType">The type into which the property must be introduced.</param>
+        /// <param name="name">Name of the introduced property.</param> 
+        /// <param name="getTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the getter, or <c>null</c>
+        /// the introduced property should not have a getter. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        /// be <c>T Get()</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.</param>
+        /// <param name="setTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the getter, or <c>null</c>
+        /// if the introduced property should not have a setter. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        /// be <c>void Set(T value</c>  where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.</param>
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        /// property. The default scope depends on the scope of the template accessors. If the accessors are static, the introduced property is static. However, if the
+        /// template accessors are non-static, then the introduced property copies of the scope of the target declaration of the aspect.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
+        /// The default strategy is to fail with a compile-time error.</param>
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <see cref="meta"/> API.</param>
+        /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
+        /// <seealso href="@introducing-members"/>
         IPropertyBuilder IntroduceProperty(
             INamedType targetType,
             string name,
-            string defaultGetTemplate,
+            string? getTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AdviceOptions? options = null );
-
-        void OverrideEventAccessors(
-            IEvent targetDeclaration,
-            string? addTemplate,
-            string? removeTemplate,
-            string? invokeTemplate,
-            AdviceOptions? options = null );
-
-        IEventBuilder IntroduceEvent(
-            INamedType targetType,
-            string addTemplate,
-            string removeTemplate,
-            string? invokeTemplate = null,
-            IntroductionScope scope = IntroductionScope.Default,
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
-            AdviceOptions? options = null );
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null );
 
         /// <summary>
-        /// Gets a factory objects that allows to add advices to other layers than the default one.
+        /// Overrides an event by specifying a template for the adder, the remover, and/or the raiser.
         /// </summary>
-        /// <param name="layerName">Name of the layer to which advices created by the returned factory will belong.
-        /// Layers must be declared by the aspect using <see cref="ProvidesAspectLayersAttribute"/>.
+        /// <param name="targetEvent">The event to be overridden.</param>
+        /// <param name="addTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the adder, or <c>null</c>
+        /// the adder should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        /// be <c>void Add(T value)</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the event.</param>
+        /// <param name="removeTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the remover, or <c>null</c>
+        /// the adder should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        /// be <c>void Remove(T value)</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the event.</param>
+        /// <param name="raiseTemplate">Not yet implemented.</param>
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <see cref="meta"/> API.</param>
+        /// <seealso href="@overriding-members"/>
+        void OverrideEventAccessors(
+            IEvent targetEvent,
+            string? addTemplate,
+            string? removeTemplate,
+            string? raiseTemplate,
+            Dictionary<string, object?>? tags = null );
+
+        /// <summary>
+        /// Introduces a new event to the target type, or overrides the implementation of an existing one, by specifying an event template.
+        /// </summary>
+        /// <param name="targetType">The type into which the event must be introduced.</param>
+        /// <param name="eventTemplate">The name of the event in the aspect class that must be used as a template for the introduced event. This event
+        /// must be annotated with <see cref="TemplateAttribute"/>. The type of the template event can be any delegate type. The type of the introduced event
+        /// can be changed dynamically thanks to the <see cref="IEventBuilder"/> returned by this method. 
         /// </param>
-        /// <returns></returns>
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        /// event. The default scope depends on the scope of the template event. If the event is static, the introduced event is static. However, if the
+        /// template event is non-static, then the introduced event copies of the scope of the target declaration of the aspect.</param>
+        /// <param name="whenExists">Determines the implementation strategy when an event of the same name is already declared in the target type.
+        /// The default strategy is to fail with a compile-time error.</param>
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <see cref="meta"/> API.</param>
+        /// <returns>An <see cref="IEventBuilder"/> that allows to change the name and the type of the event.</returns>
+        /// <seealso href="@introducing-members"/>
+        IEventBuilder IntroduceEvent(
+            INamedType targetType,
+            string eventTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null );
+
+        /// <summary>
+        /// Introduces a new event to the target type, or overrides the implementation of an existing one, by specifying individual template methods
+        /// for the adder, the remover, and the raiser.
+        /// </summary>
+        /// <param name="targetType">The type into which the event must be introduced.</param>
+        /// <param name="eventName">The name of the introduced event.</param>
+        /// <param name="addTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the adder.
+        /// This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        /// be <c>void Add(T value)</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the event.</param>
+        /// <param name="removeTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the remover.
+        /// This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        /// be <c>void Add(T value)</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the event.</param>
+        /// <param name="raiseTemplate">Not implemented.</param>
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        /// event. The default scope depends on the scope of the template event. If the event is static, the introduced event is static. However, if the
+        /// template event is non-static, then the introduced event copies of the scope of the target declaration of the aspect.</param>
+        /// <param name="whenExists">Determines the implementation strategy when an event of the same name is already declared in the target type.
+        /// The default strategy is to fail with a compile-time error.</param>
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <see cref="meta"/> API.</param>
+        /// <returns>An <see cref="IEventBuilder"/> that allows to change the name and the type of the event.</returns>
+        /// <seealso href="@introducing-members"/>
+        IEventBuilder IntroduceEvent(
+            INamedType targetType,
+            string eventName,
+            string addTemplate,
+            string removeTemplate,
+            string? raiseTemplate = null,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null );
+
+        /// <summary>
+        /// Makes a type implement a new interface specified as an <see cref="INamedType"/>.
+        /// </summary>
+        /// <param name="targetType">The type that must implement the new interface.</param>
+        /// <param name="interfaceType">The type of the implemented interface.</param>
+        /// <param name="whenExists">Determines the implementation strategy when the interface is already implemented by the target type.
+        /// The default strategy is to fail with a compile-time error.</param>
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <see cref="meta"/> API.</param>
+        /// <seealso href="@implementing-interfaces"/>
+        void ImplementInterface(
+            INamedType targetType,
+            INamedType interfaceType,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null );
+
+        /// <summary>
+        /// Makes a type implement a new interface specified as a reflection <see cref="Type"/>.
+        /// </summary>
+        /// <param name="targetType">The type that must implement the new interface.</param>
+        /// <param name="interfaceType">The type of the implemented interface.</param>
+        /// <param name="whenExists">Determines the implementation strategy when the interface is already implemented by the target type.
+        /// The default strategy is to fail with a compile-time error.</param>
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <see cref="meta"/> API.</param>
+        /// <seealso href="@implementing-interfaces"/>
+        void ImplementInterface(
+            INamedType targetType,
+            Type interfaceType,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null );
+
         [Obsolete( "Not implemented." )]
-        IAdviceFactory ForLayer( string layerName );
+        void ImplementInterface(
+            INamedType targetType,
+            INamedType interfaceType,
+            IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null );
+
+        [Obsolete( "Not implemented." )]
+        void ImplementInterface(
+            INamedType targetType,
+            Type interfaceType,
+            IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Dictionary<string, object?>? tags = null );
     }
 }

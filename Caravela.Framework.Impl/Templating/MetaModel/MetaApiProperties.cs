@@ -1,7 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 
@@ -11,8 +12,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     /// Encapsulates properties that are common to all constructors of <see cref="Caravela.Framework.Impl.Templating.MetaModel.MetaApi"/>.
     /// </summary>
     internal record MetaApiProperties(
-        IDiagnosticSink Diagnostics,
+        UserDiagnosticSink Diagnostics,
         ISymbol TemplateSymbol,
         IReadOnlyDictionary<string, object?> Tags,
-        AspectLayerId AspectLayerId );
+        AspectLayerId AspectLayerId,
+        AspectPipelineDescription PipelineDescription );
 }

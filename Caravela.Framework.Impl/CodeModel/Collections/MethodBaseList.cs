@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Types;
 using Caravela.Framework.Impl.CodeModel.References;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    internal abstract class MethodBaseList<T> : MemberList<T, MemberRef<T>>
+    internal abstract class MethodBaseList<T> : MemberOrNamedTypeList<T, MemberRef<T>>
         where T : class, IMethodBase
     {
         // TODO: This should be further extracted into MemberList for (parameterized) property search.
@@ -200,15 +201,15 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 bool? isStatic,
                 CompilationModel compilation )
             {
-                return
-                    instance.OfSignature(
-                            (payload, parameterGetter, compilation),
-                            name,
-                            genericParameterCount,
-                            parameterCount,
-                            IsMatchingParameter,
-                            isStatic )
-                        .SingleOrDefault();
+                var matching = instance.OfSignature(
+                    (payload, parameterGetter, compilation),
+                    name,
+                    genericParameterCount,
+                    parameterCount,
+                    IsMatchingParameter,
+                    isStatic );
+
+                return matching.SingleOrDefault();
             }
 
             static bool IsMatchingParameter(
@@ -265,6 +266,10 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                     }
                 }
             }
+
+            // Exclude any explicit interface implementation.
+            // TODO: the Name be fully qualified, having it non-qualified is confusing and does not follow other implementations (28810).
+            candidates = candidates.Where( c => !c.IsExplicitInterfaceImplementation );
 
             foreach ( var sourceItem in candidates )
             {

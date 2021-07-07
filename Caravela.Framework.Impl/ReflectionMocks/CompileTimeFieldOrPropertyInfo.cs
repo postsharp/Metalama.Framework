@@ -2,8 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using System;
+using Caravela.Framework.RunTime;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
@@ -17,13 +16,5 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         }
 
         public static FieldOrPropertyInfo Create( IFieldOrProperty fieldOrProperty ) => new CompileTimeFieldOrPropertyInfo( fieldOrProperty );
-
-        public static FieldOrPropertyInfo Create( IFieldOrPropertyInvocation fieldOrProperty )
-            => fieldOrProperty switch
-            {
-                Property property => Create( property ),
-                Field field => Create( field ),
-                _ => throw new ArgumentOutOfRangeException( nameof(fieldOrProperty) )
-            };
     }
 }

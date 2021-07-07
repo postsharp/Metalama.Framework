@@ -6,7 +6,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
@@ -26,12 +25,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this._linkerAnnotation = linkerAnnotation;
         }
 
-        public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null ) => throw new NotSupportedException();
+        public RuntimeExpression? CreateExpression( string? expressionText = null, Location? location = null ) => throw new NotSupportedException();
 
         public RuntimeExpression CreateMemberAccessExpression( string member )
             => new( SyntaxFactory.MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this._type.GetSymbol() ),
+                            LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this._type.GetSymbol() ),
                             SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
                         .AddLinkerAnnotation( this._linkerAnnotation ) );
     }

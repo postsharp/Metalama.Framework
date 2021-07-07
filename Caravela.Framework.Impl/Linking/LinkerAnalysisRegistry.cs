@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -23,6 +23,7 @@ namespace Caravela.Framework.Impl.Linking
         private readonly IReadOnlyDictionary<SymbolVersion, int> _symbolVersionReferenceCounts;
         private readonly IReadOnlyDictionary<ISymbol, MemberAnalysisResult> _methodBodyInfos;
         private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
+        public static readonly SyntaxAnnotation DoNotInlineAnnotation = new( "Caravela_DoNotInline" );
 
         public LinkerAnalysisRegistry(
             LinkerIntroductionRegistry introductionRegistry,
@@ -39,11 +40,42 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Determines whether the symbol represents override target.
         /// </summary>
-        /// <param name="symbol">Method symbol.</param>
+        /// <param name="symbol">Symbol.</param>
         /// <returns><c>True</c> if the method is override target, otherwise <c>false</c>.</returns>
         public bool IsOverrideTarget( ISymbol symbol )
         {
             return this._introductionRegistry.GetOverridesForSymbol( symbol ).Count > 0;
+        }
+
+        /// <summary>
+        /// Determines whether the symbol represents introduced interface implementation.
+        /// </summary>
+        /// <param name="symbol">Symbol.</param>
+        /// <returns></returns>
+        public bool IsInterfaceImplementation( ISymbol symbol )
+        {
+            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
+
+            if ( introducedMember == null )
+            {
+                return false;
+            }
+            else
+            {
+                return introducedMember.Semantic == IntroducedMemberSemantic.InterfaceImplementation;
+            }
+        }
+
+        public ISymbol GetImplementedInterfaceMember( ISymbol symbol )
+        {
+            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
+
+            if ( introducedMember == null || introducedMember.Semantic != IntroducedMemberSemantic.InterfaceImplementation )
+            {
+                throw new AssertionFailedException();
+            }
+
+            return (introducedMember.Declaration?.GetSymbol()).AssertNotNull();
         }
 
         /// <summary>
@@ -62,12 +94,8 @@ namespace Caravela.Framework.Impl.Linking
 
             if ( this.IsOverrideTarget( symbol ) )
             {
-                if ( symbol.GetAttributes()
-                    .Any(
-                        attributeData =>
-                            attributeData.AttributeClass?.ToDisplayString() == typeof(AspectLinkerOptionsAttribute).FullName
-                            && attributeData.NamedArguments
-                                .Any( x => x.Key == nameof(AspectLinkerOptionsAttribute.ForceNotInlineable) && (bool?) x.Value.Value == true ) ) )
+                // Check for the presence of a magic comment that is only used in tests.
+                if ( symbol.DeclaringSyntaxReferences.Any( r => r.GetSyntax().HasAnnotation( DoNotInlineAnnotation ) ) )
                 {
                     // Inlining is explicitly disabled for the declaration.
                     return false;
@@ -144,8 +172,19 @@ namespace Caravela.Framework.Impl.Linking
                 return false;
             }
 
-            return introducedMember.Semantic == IntroducedMemberSemantic.MethodOverride
-                   || introducedMember.Semantic == IntroducedMemberSemantic.PropertyOverride;
+            return introducedMember.Semantic == IntroducedMemberSemantic.Override;
+        }
+
+        public ISymbol? GetOverrideTarget( ISymbol overrideSymbol )
+        {
+            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( overrideSymbol );
+
+            if ( introducedMember == null )
+            {
+                return null;
+            }
+
+            return this._introductionRegistry.GetOverrideTarget( introducedMember );
         }
 
         /// <summary>
@@ -178,7 +217,7 @@ namespace Caravela.Framework.Impl.Linking
             // TODO: Other things than methods.
             var overrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
             var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (o.AspectLayerId, Index: i) ).ToReadOnlyList();
-            var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceAnnotation.AspectLayer ).Index;
+            var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceAnnotation.AspectLayerId ).Index;
 
             // TODO: Optimize.
             var previousLayerOverride = (

@@ -2,12 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.DesignTime.Utilities;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using System;
 using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,7 +24,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public override Task RegisterCodeFixesAsync( CodeFixContext context )
         {
-            DesignTimeLogger.Instance?.Write( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync" );
+            Logger.Instance?.Write( "DesignTimeCodeFixProvider.RegisterCodeFixesAsync" );
 
             context.RegisterCodeFix(
                 CodeAction.Create(
@@ -39,26 +41,35 @@ namespace Caravela.Framework.Impl.DesignTime
 
         private static async Task<Document> GetFixedDocument( Document document, TextSpan span, CancellationToken cancellationToken )
         {
-            var syntaxRoot = await document.GetSyntaxRootAsync( cancellationToken );
-
-            if ( syntaxRoot == null )
+            try
             {
+                var syntaxRoot = await document.GetSyntaxRootAsync( cancellationToken );
+
+                if ( syntaxRoot == null )
+                {
+                    return document;
+                }
+
+                var node = syntaxRoot.FindNode( span );
+                var typeDeclaration = GetTypeDeclaration( node );
+
+                if ( typeDeclaration == null )
+                {
+                    return document;
+                }
+
+                var newTypeDeclaration = typeDeclaration.AddModifiers( SyntaxFactory.Token( SyntaxKind.PartialKeyword ) );
+                var newSyntaxRoot = syntaxRoot.ReplaceNode( typeDeclaration, newTypeDeclaration );
+                var newDocument = document.WithSyntaxRoot( newSyntaxRoot );
+
+                return newDocument;
+            }
+            catch ( Exception e )
+            {
+                DesignTimeExceptionHandler.ReportException( e );
+
                 return document;
             }
-
-            var node = syntaxRoot.FindNode( span );
-            var typeDeclaration = GetTypeDeclaration( node );
-
-            if ( typeDeclaration == null )
-            {
-                return document;
-            }
-
-            var newTypeDeclaration = typeDeclaration.AddModifiers( SyntaxFactory.Token( SyntaxKind.PartialKeyword ) );
-            var newSyntaxRoot = syntaxRoot.ReplaceNode( typeDeclaration, newTypeDeclaration );
-            var newDocument = document.WithSyntaxRoot( newSyntaxRoot );
-
-            return newDocument;
         }
 
         private static BaseTypeDeclarationSyntax? GetTypeDeclaration( SyntaxNode node )

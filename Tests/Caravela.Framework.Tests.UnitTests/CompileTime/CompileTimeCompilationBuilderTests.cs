@@ -163,8 +163,6 @@ class ReferencingClass
 
             List<string> tempFiles = new();
 
-            PortableExecutableReference indirectlyReferenced;
-
             try
             {
                 using var isolatedTest = this.WithIsolatedTest();
@@ -211,7 +209,7 @@ class ReferencingClass
                     return referenceToSelf;
                 }
 
-                indirectlyReferenced = CompileProject( indirectlyReferencedCode );
+                var indirectlyReferenced = CompileProject( indirectlyReferencedCode );
                 var directlyReferenced = CompileProject( directlyReferencedCode, indirectlyReferenced );
                 _ = CompileProject( referencingCode, directlyReferenced );
             }
@@ -442,7 +440,7 @@ public class CompileTimeOnlyClass
    static Type Type1 = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.CreateFromDocumentationId(""T:RunTimeOnlyClass"",""RunTimeOnlyClass"");
    static Type Type2 = typeof(CompileTimeOnlyClass);
    static string Name1 = ""RunTimeOnlyClass"";
-   static string Name2 = nameof(CompileTimeOnlyClass);
+   static string Name2 = ""CompileTimeOnlyClass"";
 
    void Method() { var t = global::Caravela.Framework.Impl.ReflectionMocks.CompileTimeType.CreateFromDocumentationId(""T:RunTimeOnlyClass"",""RunTimeOnlyClass""); }
    string Property => ""RunTimeOnlyClass"";
@@ -456,7 +454,7 @@ public class CompileTimeOnlyClass
             DiagnosticList diagnosticList = new();
             Assert.True( loader.TryGetCompileTimeProject( compilation, null, diagnosticList, false, CancellationToken.None, out var compileTimeProject ) );
 
-            var transformed = File.ReadAllText( compileTimeProject!.CodeFiles[0].TransformedPath );
+            var transformed = File.ReadAllText( Path.Combine( compileTimeProject!.Directory!, compileTimeProject!.CodeFiles[0].TransformedPath ) );
 
             Assert.Equal( expected, transformed );
 

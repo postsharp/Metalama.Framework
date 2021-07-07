@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -17,13 +18,13 @@ namespace Caravela.Framework.Impl.Linking
     {
         private readonly IMethod _overriddenDeclaration;
         private readonly AspectLayerId _aspectLayerId;
-        private readonly LinkerAnnotationOrder _order;
+        private readonly LinkingOrder _order;
         private readonly ISyntaxFactory _syntaxFactory;
 
         public LinkerOverrideMethodProceedImpl(
             AspectLayerId aspectLayerId,
             IMethod overriddenDeclaration,
-            LinkerAnnotationOrder order,
+            LinkingOrder order,
             ISyntaxFactory syntaxFactory )
         {
             this._aspectLayerId = aspectLayerId;
@@ -41,8 +42,7 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             // TODO: Introduced types?
-            return (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(
-                (ITypeSymbol) ((NamedType) this._overriddenDeclaration.ReturnType).Symbol );
+            return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( (ITypeSymbol) ((NamedType) this._overriddenDeclaration.ReturnType).Symbol );
         }
 
         StatementSyntax IProceedImpl.CreateAssignStatement( SyntaxToken returnValueLocalName )
@@ -86,7 +86,21 @@ namespace Caravela.Framework.Impl.Linking
                             ThisExpression(),
                             IdentifierName( this._overriddenDeclaration.Name ) )
                         : IdentifierName( this._overriddenDeclaration.Name ),
-                    ArgumentList( SeparatedList( this._overriddenDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ) ) ) );
+                    ArgumentList(
+                        SeparatedList(
+                            this._overriddenDeclaration.Parameters.Select(
+                                x =>
+                                    Argument(
+                                        null,
+                                        x.RefKind switch
+                                        {
+                                            RefKind.None => default,
+                                            RefKind.In => default,
+                                            RefKind.Ref => Token( SyntaxKind.RefKeyword ),
+                                            RefKind.Out => Token( SyntaxKind.OutKeyword ),
+                                            _ => throw new AssertionFailedException()
+                                        },
+                                        IdentifierName( x.Name! ) ) ) ) ) );
 
             invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, this._order ) );
 

@@ -2,10 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using static Caravela.Framework.Diagnostics.Severity;
+
+#pragma warning disable SA1118
 
 namespace Caravela.Framework.Impl
 {
@@ -15,8 +18,12 @@ namespace Caravela.Framework.Impl
 
         private const string _category = "Caravela.General";
 
-        public static readonly DiagnosticDefinition<(string Message, string File)> UncaughtException =
-            new( "CR0001", _category, "Unexpected exception occurred in Caravela: {0} Exception details are in {1}.", Error,
+        public static readonly DiagnosticDefinition<(string Message, string File)> UnhandledException =
+            new( "CR0001",
+                 _category,
+                 "Unexpected exception occurred in Caravela: {0} Exception details are in '{1}'. " +
+                 " Please report this issue at https://www.postsharp.net/support and attach this file to the ticket.",
+                 Error,
                  "Unexpected exception in Caravela." );
 
         public static readonly
@@ -31,15 +38,11 @@ namespace Caravela.Framework.Impl
         public static readonly DiagnosticDefinition<(string AspectType, string Exception)> ExceptionInWeaver =
             new( "CR0006", _category, "Exception occurred while executing the weaver of aspect '{0}': {1}", Error, "Exception in aspect weaver." );
 
-        public static readonly DiagnosticDefinition<(IDeclaration Member, int ArgumentsCount)> MemberRequiresNArguments =
-            new( "CR0012", _category, "Member '{0}' requires {1} arguments.", Error, "Member requires number of arguments." );
+        public static readonly DiagnosticDefinition<(IDeclaration Member, int RequiredArgumentsCount, int ActualArgumentsCount)> MemberRequiresNArguments =
+            new( "CR0012", _category, "Member '{0}' requires {1} arguments but received {2}.", Error, "Member requires number of arguments." );
 
         public static readonly DiagnosticDefinition<(IDeclaration Member, int ArgumentsCount)> MemberRequiresAtLeastNArguments =
             new( "CR0013", _category, "Member '{0}' requires at least {1} arguments.", Error, "Member requires more arguments." );
-
-        public static readonly DiagnosticDefinition<IMemberOrNamedType> CannotProvideInstanceForStaticMember =
-            new( "CR0014", _category, "Member {0} is static, but has been used with a non-null instance.", Error,
-                 "Cannot provide instance for a static member." );
 
         public static readonly DiagnosticDefinition<IMemberOrNamedType> MustProvideInstanceForInstanceMember =
             new( "CR0015", _category, "Member {0} is not static, but has been used with a null instance.", Error,
@@ -79,7 +82,7 @@ namespace Caravela.Framework.Impl
                 _category,
                 Error );
 
-        public static readonly DiagnosticDefinition<(INamedType AspectType, string MethodName)> AspectMustHaveExactlyOneTemplateMethod = new(
+        public static readonly DiagnosticDefinition<(INamedType AspectType, string MethodName)> AspectMustHaveExactlyOneTemplateMember = new(
             "CR0025",
             "The aspect type must have exactly one member of a given name otherwise it cannot be used as a dynamic advice.",
             "The type '{0}' must have exactly one member named '{1}'.",
@@ -107,5 +110,18 @@ namespace Caravela.Framework.Impl
             InvalidCompileTimeProjectResource = new(
                 "CR0030", _category, "The compile-time project in assembly '{0}' is corrupted.", Error,
                 "The compile-time project resource file was corrupted." );
+
+        public static readonly DiagnosticDefinition<(ISymbol TemplateMethod, ISymbol[] RunTimeOnlyTypes)>
+            VirtualTemplateCannotReferenceRunTimeOnlyTypes = new(
+                "CR0031", _category, "The template '{0}' cannot be virtual because it references the following runtime-only types: {1}.", Error,
+                "A template cannot be virtual when it references run-time-only types." );
+
+        // TODO: Use formattable string (C# does not seem to find extension methods).
+        public static readonly DiagnosticDefinition<string>
+            UnsupportedFeature = new(
+                "CR0099",
+                "Feature is not yet supported.",
+                "Feature is not yet supported: {0}",
+                _category, Error );
     }
 }

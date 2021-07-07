@@ -7,7 +7,7 @@ using System;
 namespace Caravela.Framework.Policies
 {
     /// <summary>
-    /// A project policy is a type that can add aspects and validators to the compilation in which they are defined.
+    /// A project policy is a type that can add aspects and validators to the compilation in which they are defined. (Not implemented.)
     /// </summary>
     /// <remarks>
     ///  Project policies can also be defined outside the project in a file named <c>CaravelaPolicy.cs</c> and located

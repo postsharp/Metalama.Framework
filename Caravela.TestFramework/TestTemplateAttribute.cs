@@ -3,12 +3,14 @@
 
 using Caravela.Framework.Aspects;
 using System;
+using System.ComponentModel;
 
 namespace Caravela.TestFramework
 {
-    /// <summary>
-    /// The attribute that marks a template method in the templating integration tests.
-    /// </summary>
+    // The attribute that marks a template method in the templating integration tests.
+
+    /// <exclude />
     [AttributeUsage( AttributeTargets.Method )]
+    [EditorBrowsable( EditorBrowsableState.Never )]
     public sealed class TestTemplateAttribute : TemplateAttribute { }
 }

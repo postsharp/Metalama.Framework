@@ -1,14 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -47,15 +46,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 
-        public bool HasAspect<T>()
-            where T : IAspect
-            => throw new NotImplementedException();
-
-        [Obsolete( "Not implemented." )]
-        public IAnnotationList GetAnnotations<T>()
-            where T : IAspect
-            => throw new NotImplementedException();
-
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         protected IDeclaration GetForCompilation( CompilationModel compilation )
@@ -66,5 +56,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public DeclarationRef<IDeclaration> ToRef() => DeclarationRef.FromBuilder( this.Builder );
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
+
+        public override string ToString() => this.Builder.ToString();
     }
 }

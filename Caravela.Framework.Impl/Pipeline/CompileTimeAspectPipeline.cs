@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
@@ -8,6 +9,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -23,10 +25,13 @@ namespace Caravela.Framework.Impl.Pipeline
         public CompileTimeAspectPipeline(
             IProjectOptions projectOptions,
             CompileTimeDomain domain,
+            bool isTest,
             IDirectoryOptions? directoryOptions = null,
             IAssemblyLocator? assemblyLocator = null ) : base(
             projectOptions,
             domain,
+            AspectExecutionScenario.CompileTime,
+            isTest,
             directoryOptions,
             assemblyLocator )
         {
@@ -46,6 +51,14 @@ namespace Caravela.Framework.Impl.Pipeline
             [NotNullWhen( true )] out Compilation? outputCompilation,
             [NotNullWhen( true )] out IReadOnlyList<ResourceDescription>? additionalResources )
         {
+            if ( !this.ProjectOptions.IsFrameworkEnabled )
+            {
+                outputCompilation = compilation;
+                additionalResources = Array.Empty<ResourceDescription>();
+
+                return true;
+            }
+
             try
             {
                 if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
@@ -58,6 +71,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
+                // Initialize the pipeline and generate the compile-time project.
                 if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )
                 {
                     outputCompilation = null;
@@ -66,6 +80,9 @@ namespace Caravela.Framework.Impl.Pipeline
                     return false;
                 }
 
+                List<ResourceDescription> additionalResourcesBuilder = new();
+
+                // Execute the pipeline.
                 if ( !this.TryExecute( partialCompilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
                 {
                     outputCompilation = null;
@@ -75,15 +92,12 @@ namespace Caravela.Framework.Impl.Pipeline
                 }
 
                 // Add managed resources.
-                List<ResourceDescription> additionalResourcesBuilder = new();
-
                 foreach ( var resource in result.Resources )
                 {
                     additionalResourcesBuilder.Add( resource );
                 }
 
-                if ( configuration.CompileTimeProject != null &&
-                     result.PartialCompilation.Compilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
+                if ( configuration.CompileTimeProject is { IsEmpty: false } )
                 {
                     additionalResourcesBuilder.Add( configuration.CompileTimeProject!.ToResource() );
                 }
@@ -111,8 +125,6 @@ namespace Caravela.Framework.Impl.Pipeline
             IReadOnlyList<OrderedAspectLayer> parts,
             CompileTimeProject compileTimeProject,
             CompileTimeProjectLoader compileTimeProjectLoader )
-            => new CompileTimePipelineStage( compileTimeProject, parts, this );
-
-        public override bool CanTransformCompilation => true;
+            => new CompileTimePipelineStage( compileTimeProject, parts, this.ServiceProvider );
     }
 }

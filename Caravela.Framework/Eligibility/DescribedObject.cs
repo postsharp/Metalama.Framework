@@ -5,6 +5,9 @@ using System;
 
 namespace Caravela.Framework.Eligibility
 {
+    /// <summary>
+    /// (Not implemented.)
+    /// </summary>
     [Obsolete( "Not implemented." )]
     public sealed class DescribedObject<T> : IDescribedObject<T>
     {
@@ -21,7 +24,7 @@ namespace Caravela.Framework.Eligibility
             this.Description = description;
         }
 
-        public string ToString( string format, IFormatProvider formatProvider )
+        public string ToString( string? format, IFormatProvider? formatProvider )
 
             // ReSharper disable FormatStringProblem
             => this.Description?.ToString( this.FormatProvider ) ?? string.Format( this.FormatProvider, "{0:" + format + "}", this.Object );

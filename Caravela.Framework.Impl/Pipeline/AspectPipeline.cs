@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
@@ -21,7 +22,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// <summary>
     /// The base class for the main process of Caravela.
     /// </summary>
-    public abstract class AspectPipeline : IDisposable, IAspectPipelineProperties
+    public abstract class AspectPipeline : IDisposable
     {
         public IProjectOptions ProjectOptions { get; }
 
@@ -29,17 +30,20 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public ServiceProvider ServiceProvider { get; }
 
-        IServiceProvider IAspectPipelineProperties.ServiceProvider => this.ServiceProvider;
-
         protected AspectPipeline(
             IProjectOptions projectOptions,
             CompileTimeDomain domain,
+            AspectExecutionScenario executionScenario,
+            bool isTest,
             IDirectoryOptions? directoryOptions = null,
             IAssemblyLocator? assemblyLocator = null )
         {
             this._domain = domain;
             this.ProjectOptions = projectOptions;
             this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( directoryOptions, assemblyLocator );
+
+            // ReSharper disable once VirtualMemberCallInConstructor
+            this.ServiceProvider.AddService( new AspectPipelineDescription( executionScenario, isTest ) );
         }
 
         internal int PipelineInitializationCount { get; set; }
@@ -86,7 +90,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var aspectOrderSources = new IAspectOrderingSource[]
             {
-                new AttributeAspectOrderingSource( compilation.Compilation ), new AspectLayerOrderingSource( aspectTypes )
+                new AttributeAspectOrderingSource( compilation.Compilation, loader ), new AspectLayerOrderingSource( aspectTypes )
             };
 
             if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var sortedAspectLayers ) )
@@ -196,7 +200,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                     var partData = parts.Single();
 
-                    return new LowLevelPipelineStage( weaver, partData.AspectClass, this );
+                    return new LowLevelPipelineStage( weaver, partData.AspectClass, this.ServiceProvider );
 
                 case nameof(AspectDriver):
 
@@ -212,7 +216,5 @@ namespace Caravela.Framework.Impl.Pipeline
 
         /// <inheritdoc/>
         public void Dispose() => this.Dispose( true );
-
-        public abstract bool CanTransformCompilation { get; }
     }
 }

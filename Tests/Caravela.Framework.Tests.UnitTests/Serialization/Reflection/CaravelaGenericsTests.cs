@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.ReflectionMocks;
 using System;
 using System.Linq;
@@ -21,12 +20,11 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var code = "class Target<TKey> { class Nested<TValue> { public System.Collections.Generic.Dictionary<TKey,TValue> Field; } }";
 
             var serialized = this.Serialize(
-                    CompileTimeFieldOrPropertyInfo.Create(
-                        (IFieldOrPropertyInvocation) CreateCompilationModel( code ).DeclaredTypes.Single().NestedTypes.Single().Fields.Single() ) )
+                    CompileTimeFieldOrPropertyInfo.Create( CreateCompilationModel( code ).DeclaredTypes.Single().NestedTypes.Single().Fields.Single() ) )
                 .ToString();
 
             this.AssertEqual(
-                @"new global::Caravela.Framework.Code.FieldOrPropertyInfo(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1.Nested`1"")).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1.Nested`1"")).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             TestExpression<FieldInfo>(

@@ -8,13 +8,12 @@ using System.Threading.Tasks;
 
 namespace Caravela.AspectWorkbench.Model
 {
-    internal class TestSerializer
+    internal static class TestSerializer
     {
-        private static string GetExpectedOutputFilePath( string testFilePath ) => Path.ChangeExtension( testFilePath, ".transformed.txt" );
+        private static string GetExpectedOutputFilePath( string testFilePath ) => Path.ChangeExtension( testFilePath, FileExtensions.TransformedCode );
 
         public static async Task<TemplateTest> LoadFromFileAsync( string filePath )
         {
-            var testName = Path.GetFileNameWithoutExtension( filePath );
             var testSource = await File.ReadAllTextAsync( filePath );
 
             var expectedOutputFilePath = GetExpectedOutputFilePath( filePath );
@@ -22,10 +21,10 @@ namespace Caravela.AspectWorkbench.Model
 
             if ( File.Exists( expectedOutputFilePath ) )
             {
-                expectedOutput = File.ReadAllText( expectedOutputFilePath );
+                expectedOutput = await File.ReadAllTextAsync( expectedOutputFilePath );
             }
 
-            return new TemplateTest { Input = new TestInput( testName, testSource ), ExpectedOutput = expectedOutput };
+            return new TemplateTest { Input = TestInput.FromSource( testSource, filePath ), ExpectedOutput = expectedOutput };
         }
 
         public static async Task SaveToFileAsync( TemplateTest test, string filePath )
@@ -35,7 +34,7 @@ namespace Caravela.AspectWorkbench.Model
                 throw new InvalidOperationException( "Test input not set." );
             }
 
-            await File.WriteAllTextAsync( filePath, test.Input.TestSource );
+            await File.WriteAllTextAsync( filePath, test.Input.SourceCode );
 
             var expectedOutputFilePath = GetExpectedOutputFilePath( filePath );
             await File.WriteAllTextAsync( expectedOutputFilePath, test.ExpectedOutput );

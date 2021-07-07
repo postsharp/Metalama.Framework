@@ -8,7 +8,7 @@ namespace Caravela.Framework.Policies
 {
     /// <summary>
     /// Namespace policies are types that can provide aspects and constraints to types the same namespace as the namespace policy type itself.
-    /// They can be arbitrarily named as long as they implement this interface, but their namespace matters. 
+    /// They can be arbitrarily named as long as they implement this interface, but their namespace matters. (Not implemented.) 
     /// </summary>
     [CompileTimeOnly]
     [Obsolete( "Not implemented." )]

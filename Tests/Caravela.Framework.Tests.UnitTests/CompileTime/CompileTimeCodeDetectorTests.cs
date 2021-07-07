@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         [Fact]
         public void NotCompileTime()
         {
-            var compilation = CreateCSharpCompilation( @"using Caravela.Framework; namespace X { class Y {} } " );
+            var compilation = CreateCSharpCompilation( @"using Caravela.Framework.RunTime; namespace X { class Y {} } " );
             Assert.False( CompileTimeCodeDetector.HasCompileTimeCode( compilation.SyntaxTrees.Single().GetRoot() ) );
         }
 
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         public void InvalidFile()
         {
             var compilation = CreateCSharpCompilation( @"using Caravela.Framework; namespace X class Y {} ", ignoreErrors: true );
-            Assert.False( CompileTimeCodeDetector.HasCompileTimeCode( compilation.SyntaxTrees.Single().GetRoot() ) );
+            Assert.True( CompileTimeCodeDetector.HasCompileTimeCode( compilation.SyntaxTrees.Single().GetRoot() ) );
         }
 
         [Fact]

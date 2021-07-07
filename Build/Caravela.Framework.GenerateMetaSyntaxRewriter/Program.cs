@@ -188,9 +188,11 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                 .GroupBy( m => m.Name ) )
             {
                 MethodInfo SelectBestMethod( IEnumerable<MethodInfo> methods )
-                    => methods
+                {
+                    return methods
                         .OrderBy( m => m.GetParameters().LastOrDefault()?.IsDefined( typeof(ParamArrayAttribute) ) ?? false ? 0 : 1 )
                         .First();
+                }
 
                 foreach ( var methodsWithSameParameterCount in methodGroup
                     .Select( m => (Method: m, Parameters: string.Join( ",", m.GetParameters().Select( p => p.Name ) )) )
@@ -339,8 +341,6 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
         }
 
         private static bool IsEnumerable( ParameterInfo parameter )
-        {
-            return parameter.ParameterType.IsGenericType && parameter.ParameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>);
-        }
+            => parameter.ParameterType.IsGenericType && parameter.ParameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>);
     }
 }

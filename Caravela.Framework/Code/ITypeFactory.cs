@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code.Types;
 using System;
 
 namespace Caravela.Framework.Code
@@ -47,5 +48,16 @@ namespace Caravela.Framework.Code
         /// <param name="pointedType"></param>
         /// <returns></returns>
         IPointerType MakePointerType( IType pointedType );
+
+        IType GetSpecialType( SpecialType specialType );
+
+        /// <summary>
+        /// Gets a run-time value that corresponds to the default value of a specified type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        dynamic? DefaultValue( IType type );
+
+        dynamic? Cast( IType type, object? value );
     }
 }

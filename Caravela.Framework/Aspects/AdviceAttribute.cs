@@ -3,6 +3,9 @@
 
 namespace Caravela.Framework.Aspects
 {
+    /// <summary>
+    /// Base class for all custom attributes representing a declarative advice.
+    /// </summary>
     public abstract class AdviceAttribute : TemplateAttribute
     {
         private protected AdviceAttribute() { }

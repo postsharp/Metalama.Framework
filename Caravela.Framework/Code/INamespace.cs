@@ -6,18 +6,30 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
 {
+    /// <summary>
+    /// Represents a namespace.
+    /// </summary>
     public interface INamespace : IDeclaration
     {
-        string Name { get; }
+        /// <summary>
+        /// Gets the short name of the namespace, or <c>null</c> if this is the global namespace.
+        /// </summary>
+        string? Name { get; }
 
-        string FullName { get; }
+        /// <summary>
+        /// Gets the full name of the namespace, or <c>null</c> if this is the global namespace.
+        /// </summary>
+        string? FullName { get; }
 
+        /// <exclude/>
         [Obsolete( "Not implemented." )]
         INamespace? ParentNamespace { get; }
 
+        /// <exclude/>
         [Obsolete( "Not implemented." )]
         IReadOnlyList<INamedType> Types { get; }
 
+        /// <exclude/>
         [Obsolete( "Not implemented." )]
         IReadOnlyList<INamespace> ChildrenNamespaces { get; }
     }

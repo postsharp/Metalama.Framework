@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
 	<Metadata>
-		<Identity Id="Caravela.731899e8-8d88-4bf2-8239-d8a2ec63e33d" Version="0.1" Language="en-US" Publisher="PostSharp Technologies"/>
+		<Identity Id="PostSharp.731899e8-8d88-4bf2-8239-d8a2ec63e33d" Version="0.3.1" Language="en-US" Publisher="PostSharp Technologies"/>
 		<DisplayName>PostSharp 'Caravela'</DisplayName>
-		<Description xml:space="preserve">A research project.</Description>
+		<Description xml:space="preserve">This extension provides syntax highlighting of aspects written using PostSharp 'Caravela'. For details about this project, see https://github.com/postsharp/Caravela. </Description>
 	</Metadata>
 	<Installation>
 		<InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[15.0,)" />

@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Eligibility;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
@@ -30,7 +29,7 @@ namespace Caravela.Framework.Impl
 
         private readonly IAspectDriver? _aspectDriver;
 
-        private readonly IAspect _prototypeAspectInstance;
+        private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
         private IReadOnlyList<AspectLayer>? _layers;
 
         public Type AspectType { get; }
@@ -39,7 +38,9 @@ namespace Caravela.Framework.Impl
         public string FullName { get; }
 
         /// <inheritdoc />
-        public string DisplayName { get; }
+        public string DisplayName { get; private set; }
+
+        public string? Description { get; private set; }
 
         /// <summary>
         /// Gets metadata of the base aspect class.
@@ -74,7 +75,9 @@ namespace Caravela.Framework.Impl
             INamedTypeSymbol aspectTypeSymbol,
             AspectClass? baseClass,
             IAspectDriver? aspectDriver,
-            CompileTimeProject project )
+            CompileTimeProject project,
+            Type aspectType,
+            IAspect? prototype )
         {
             this.FullName = aspectTypeSymbol.GetReflectionNameSafe();
             this.DisplayName = aspectTypeSymbol.Name.TrimEnd( "Attribute" );
@@ -83,27 +86,22 @@ namespace Caravela.Framework.Impl
             this.Project = project;
             this._aspectDriver = aspectDriver;
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
+            this.AspectType = aspectType;
+            this._prototypeAspectInstance = prototype;
+            this.CanExpandToSource = !this.IsAbstract && this.AspectType.GetConstructor( Type.EmptyTypes ) != null;
+        }
 
-            if ( this.Project != null! )
+        private void Initialize()
+        {
+            if ( this._prototypeAspectInstance != null )
             {
-                this.AspectType = this.Project.GetType( this.FullName )!;
+                var builder = new AspectClassBuilder( this );
+                this._prototypeAspectInstance.BuildAspectClass( builder );
 
-                this._prototypeAspectInstance =
-                    (IAspect) FormatterServices.GetUninitializedObject( this.AspectType ).AssertNotNull();
-
-                // TODO: get all eligibility rules from the prototype instance and combine them into a single rule.
-
-                // TODO: We may have a custom attribute to enable that feature.
-                this.CanExpandToSource = this.AspectType.GetConstructor( Type.EmptyTypes ) != null;
+                this._layers = builder.Layers.As<string?>().Prepend( null ).Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
             }
-            else
-            {
-                // CompileTimeProject may be null in tests. These lines makes the analyzer happy.
 
-                this.AspectType = null!;
-                this._prototypeAspectInstance = null!;
-                this.Project = null!;
-            }
+            // TODO: get all eligibility rules from the prototype instance and combine them into a single rule.
         }
 
         /// <summary>
@@ -123,44 +121,13 @@ namespace Caravela.Framework.Impl
             IAspectDriver? aspectDriver,
             CompileTimeProject compileTimeProject,
             IDiagnosticAdder diagnosticAdder,
-            [NotNullWhen( true )] out AspectClass? aspectClassMetadata )
+            [NotNullWhen( true )] out AspectClass? aspectClass )
         {
-            var layersBuilder = ImmutableArray.CreateBuilder<AspectLayer>();
+            var aspectType = compileTimeProject.GetType( aspectNamedType.GetReflectionNameSafe() ).AssertNotNull();
+            var prototype = aspectNamedType.IsAbstract ? null : (IAspect) FormatterServices.GetUninitializedObject( aspectType ).AssertNotNull();
 
-            var newAspectType = new AspectClass( aspectNamedType, baseAspectType, aspectDriver, compileTimeProject );
-
-            // Add the default part.
-            layersBuilder.Add( new AspectLayer( newAspectType, null ) );
-
-            // Add the parts defined in [ProvidesAspectLayers]. If it is not defined in the current type, look up in the base classes.
-
-            for ( var type = aspectNamedType; type != null; type = type.BaseType )
-            {
-                var aspectLayersAttributeData =
-                    type.GetAttributes().SingleOrDefault( a => a.AttributeClass?.Is( typeof(ProvidesAspectLayersAttribute) ) ?? false );
-
-                if ( aspectLayersAttributeData != null )
-                {
-                    // TODO: Using global state makes it impossible to test.
-                    if ( !AttributeDeserializer.SystemTypes.TryCreateAttribute<ProvidesAspectLayersAttribute>(
-                        aspectLayersAttributeData,
-                        diagnosticAdder,
-                        out var aspectLayersAttribute ) )
-                    {
-                        aspectClassMetadata = null;
-
-                        return false;
-                    }
-
-                    layersBuilder.AddRange( aspectLayersAttribute.Layers.Select( partName => new AspectLayer( newAspectType, partName ) ) );
-
-                    break;
-                }
-            }
-
-            newAspectType._layers = layersBuilder.ToImmutable();
-
-            aspectClassMetadata = newAspectType;
+            aspectClass = new AspectClass( aspectNamedType, baseAspectType, aspectDriver, compileTimeProject, aspectType, prototype );
+            aspectClass.Initialize();
 
             return true;
         }
@@ -206,7 +173,7 @@ namespace Caravela.Framework.Impl
                 _ => false
             };
 
-        public bool IsEligible( ISymbol symbol, EligibilityValue requiredEligibility )
+        public bool IsEligible( ISymbol symbol )
             => symbol switch
             {
                 // TODO: Map the symbol to a code model declaration (which requires a CompilationModel), then simply
@@ -242,5 +209,29 @@ namespace Caravela.Framework.Impl
                 // TODO: parameters (using markers)
                 // TODO: call IsEligible on the prototype
             };
+
+        public override string ToString() => this.FullName;
+
+        private class AspectClassBuilder : IAspectClassBuilder, IAspectDependencyBuilder
+        {
+            private readonly AspectClass _parent;
+
+            public AspectClassBuilder( AspectClass parent )
+            {
+                this._parent = parent;
+            }
+
+            public string DisplayName { get => this._parent.DisplayName; set => this._parent.DisplayName = value; }
+
+            public string? Description { get => this._parent.Description; set => this._parent.Description = value; }
+
+            public ImmutableArray<string> Layers { get; set; } = ImmutableArray<string>.Empty;
+
+            public IAspectDependencyBuilder Dependencies => this;
+
+            public void RequiresAspect<TAspect>()
+                where TAspect : Attribute, IAspect, new()
+                => throw new NotImplementedException();
+        }
     }
 }

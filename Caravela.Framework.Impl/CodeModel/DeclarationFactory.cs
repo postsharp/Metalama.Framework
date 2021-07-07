@@ -2,14 +2,17 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Types;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Serialization;
+using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -20,6 +23,8 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly ConcurrentDictionary<DeclarationRef<IDeclaration>, object> _cache =
             new( DeclarationRefEqualityComparer<DeclarationRef<IDeclaration>>.Instance );
+
+        private IType? _voidType;
 
         public DeclarationFactory( CompilationModel compilation )
         {
@@ -37,6 +42,24 @@ namespace Caravela.Framework.Impl.CodeModel
             var symbol = this.CompilationModel.ReflectionMapper.GetNamedTypeSymbolByMetadataName( reflectionName );
 
             return this.GetNamedType( symbol );
+        }
+
+        public bool TryGetTypeByReflectionName( string reflectionName, [NotNullWhen( true )] out INamedType? namedType )
+        {
+            var symbol = this.Compilation.GetTypeByMetadataName( reflectionName );
+
+            if ( symbol == null )
+            {
+                namedType = null;
+
+                return false;
+            }
+            else
+            {
+                namedType = this.GetNamedType( symbol );
+
+                return true;
+            }
         }
 
         public IType GetTypeByReflectionType( Type type ) => this.GetIType( this.CompilationModel.ReflectionMapper.GetTypeSymbol( type ) );
@@ -120,6 +143,17 @@ namespace Caravela.Framework.Impl.CodeModel
         IPointerType ITypeFactory.MakePointerType( IType pointedType )
             => (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ITypeInternal) pointedType).TypeSymbol.AssertNotNull() ) );
 
+        public IType GetSpecialType( SpecialType specialType )
+            => specialType switch
+            {
+                SpecialType.Void => this._voidType ??= this.GetTypeByReflectionType( typeof(void) ),
+                _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
+            };
+
+        dynamic? ITypeFactory.DefaultValue( IType type ) => new DefaultDynamicExpression( type );
+
+        dynamic? ITypeFactory.Cast( IType type, object? value ) => new CastDynamicExpression( type, value );
+
         internal IAttribute GetAttribute( AttributeBuilder attributeBuilder )
             => (IAttribute) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( attributeBuilder ),
@@ -145,11 +179,17 @@ namespace Caravela.Framework.Impl.CodeModel
                 DeclarationRef.FromBuilder( propertyBuilder ),
                 l => new BuiltProperty( (PropertyBuilder) l.Target!, this.CompilationModel ) );
 
+        internal IEvent GetEvent( EventBuilder propertyBuilder )
+            => (IEvent) this._cache.GetOrAdd(
+                DeclarationRef.FromBuilder( propertyBuilder ),
+                l => new BuiltEvent( (EventBuilder) l.Target!, this.CompilationModel ) );
+
         internal IDeclaration GetDeclaration( DeclarationBuilder builder )
             => builder switch
             {
                 MethodBuilder methodBuilder => this.GetMethod( methodBuilder ),
                 PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder ),
+                EventBuilder eventBuilder => this.GetEvent( eventBuilder ),
                 ParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
                 GenericParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
@@ -196,7 +236,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
             else
             {
-                throw new AssertionFailedException();
+                return declaration.ToRef().Resolve( this.CompilationModel );
             }
         }
 

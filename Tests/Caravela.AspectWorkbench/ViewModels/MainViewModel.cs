@@ -2,8 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.AspectWorkbench.Model;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Tests.Integration.Templating;
+using Caravela.Framework.Impl.Formatting;
+using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Formatting;
@@ -61,56 +61,70 @@ namespace Caravela.AspectWorkbench.ViewModels
                 this.ErrorsDocument = new FlowDocument();
                 this.TransformedTargetDocument = null;
 
-                TestRunnerBase testRunner = this.TestText.Contains( "[TestTemplate]" )
-                    ? new TemplatingTestRunner( this._serviceProvider )
-                    : new AspectTestRunner( this._serviceProvider );
+                var testInput = TestInput.FromSource( this.TestText, this.CurrentPath );
+
+                testInput.Options.References.AddRange(
+                    TestCompilationFactory.GetMetadataReferences()
+                        .Select( r => new TestAssemblyReference { Path = r.FilePath } ) );
+
+                // This is a dirty trick. We should read options from the directory instead.
+                if ( this.TestText.Contains( "[TestTemplate]" ) )
+                {
+                    testInput.Options.TestRunnerFactoryType = typeof(TemplatingTestRunnerFactory).AssemblyQualifiedName;
+                }
+
+                var testRunner = TestRunnerFactory.CreateTestRunner( testInput, this._serviceProvider, null );
 
                 var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject() );
 
-                var testInput = new TestInput( "interactive", this.TestText );
-
                 var compilationStopwatch = Stopwatch.StartNew();
 
-                var testResult = await testRunner.RunTestAsync( testInput );
+                var testResult = testRunner.RunTest( testInput );
                 compilationStopwatch.Stop();
 
-                if ( testResult.AnnotatedTemplateSyntax != null )
+                var testSyntaxTree = testResult.SyntaxTrees.First();
+
+                var annotatedTemplateSyntax = testSyntaxTree.AnnotatedSyntaxRoot;
+
+                if ( annotatedTemplateSyntax != null )
                 {
                     // Display the annotated syntax tree.
-                    var sourceText = await testResult.TemplateDocument.GetTextAsync();
+                    var sourceText = await testResult.SyntaxTrees.First().InputDocument.GetTextAsync();
                     var classifier = new TextSpanClassifier( sourceText, testRunner is TemplatingTestRunner );
-                    classifier.Visit( testResult.AnnotatedTemplateSyntax );
+                    classifier.Visit( annotatedTemplateSyntax );
                     var metaSpans = classifier.ClassifiedTextSpans;
 
                     this.ColoredTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( sourceText, metaSpans );
                 }
 
-                if ( testResult.TransformedTemplateSyntax != null )
+                var errorsDocument = new FlowDocument();
+
+                var transformedTemplateSyntax = testSyntaxTree.OutputCompileTimeSyntaxRoot;
+
+                if ( transformedTemplateSyntax != null )
                 {
-                    this.CompiledTemplatePath = testResult.TransformedTemplatePath;
+                    // this.CompiledTemplatePath = testResult.TransformedTemplatePath;
 
                     // Render the transformed tree.
                     var project3 = testRunner.CreateProject();
-                    var document3 = project3.AddDocument( "name.cs", testResult.TransformedTemplateSyntax );
+                    var document3 = project3.AddDocument( "name.cs", transformedTemplateSyntax );
                     var optionSet = (await document3.GetOptionsAsync()).WithChangedOption( FormattingOptions.IndentationSize, 4 );
 
-                    var formattedTransformedSyntaxRoot = Formatter.Format( testResult.TransformedTemplateSyntax, project3.Solution.Workspace, optionSet );
+                    var formattedTransformedSyntaxRoot = Formatter.Format( transformedTemplateSyntax, project3.Solution.Workspace, optionSet );
                     var text4 = formattedTransformedSyntaxRoot.GetText( Encoding.UTF8 );
                     var spanMarker = new TextSpanClassifier( text4 );
                     spanMarker.Visit( formattedTransformedSyntaxRoot );
                     this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
                 }
 
-                var errorsDocument = new FlowDocument();
-
-                if ( testResult.TransformedTargetSourceText != null )
+                if ( testSyntaxTree.OutputRunTimeSourceText != null )
                 {
                     // Display the transformed code.
-                    this.TransformedTargetDocument = await syntaxColorizer.WriteSyntaxColoring( testResult.TransformedTargetSourceText, null );
+                    this.TransformedTargetDocument = await syntaxColorizer.WriteSyntaxColoring( testSyntaxTree.OutputRunTimeSourceText, null );
 
                     // Compare the output and shows the result.
-                    if ( UnitTestBase.NormalizeString( this.ExpectedOutputText ) ==
-                         UnitTestBase.NormalizeString( testResult.TransformedTargetSourceText.ToString() ) )
+                    if ( BaseTestRunner.NormalizeTestOutput( this.ExpectedOutputText, false ) ==
+                         BaseTestRunner.NormalizeTestOutput( testSyntaxTree.OutputRunTimeSourceText.ToString(), false ) )
                     {
                         errorsDocument.Blocks.Add(
                             new Paragraph( new Run( "The transformed target code is equal to expectations." ) { Foreground = Brushes.Green } ) );
@@ -167,7 +181,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
             var input = this._currentTest.Input ?? throw new InvalidOperationException( $"The {nameof(this._currentTest.Input)} property cannot be null." );
 
-            this.TestText = input.TestSource;
+            this.TestText = input.SourceCode;
             this.ExpectedOutputText = this._currentTest.ExpectedOutput;
             this.CompiledTemplateDocument = null;
             this.TransformedTargetDocument = null;
@@ -193,7 +207,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 this._currentTest = new TemplateTest();
             }
 
-            this._currentTest.Input = new TestInput( "interactive", this.TestText );
+            this._currentTest.Input = TestInput.FromSource( this.TestText, filePath );
             this._currentTest.ExpectedOutput = this.ExpectedOutputText ?? string.Empty;
 
             this.CurrentPath = filePath;

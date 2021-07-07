@@ -17,6 +17,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+// ReSharper disable SuspiciousTypeConversion.Global
+
 namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 {
     // Aspect linker tests' source use [PseudoIntroduction] and [PseudoOverride] attributes, that cause the marked declaration to be removed
@@ -71,7 +73,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
             FinalizeTransformationFakes( rewriter, inputCompilation, initialCompilationModel );
 
-            var inputCompilationModel = CompilationModel.CreateRevisedInstance( initialCompilationModel, rewriter.ObservableTransformations );
+            var inputCompilationModel = initialCompilationModel.WithTransformations( rewriter.ObservableTransformations );
 
             var linkerInput = new AspectLinkerInput(
                 PartialCompilation.CreateComplete( inputCompilation ),
@@ -187,6 +189,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         .Returns( (MemberDeclarationSyntax) insertPositionNode );
 
                     A.CallTo( () => ((IMemberIntroduction) observableTransformation).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
+
+                    // ReSharper disable SuspiciousTypeConversion.Global
 
                     // TODO: This should be a deep copy of declarations to have a correct parent.
                     A.CallTo( () => ((IMethod) observableTransformation).LocalFunctions ).Returns( symbolHelperElement.LocalFunctions );

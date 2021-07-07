@@ -8,6 +8,7 @@ namespace Caravela.Framework.Diagnostics
     /// <summary>
     /// Severity of diagnostics.
     /// </summary>
+    /// <seealso href="@diagnostics"/>
     [CompileTimeOnly]
     public enum Severity
     {

@@ -3,7 +3,11 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
@@ -45,6 +49,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsOverride => this.AccessorBuilder.IsOverride;
 
+        public bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
+
         public bool IsNew => this.AccessorBuilder.IsNew;
 
         public bool IsAsync => this.AccessorBuilder.IsAsync;
@@ -58,8 +64,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 this.AccessorBuilder.Parameters.AsBuilderList.Select( DeclarationRef.FromBuilder<IParameter, IParameterBuilder> ) );
 
         public MethodKind MethodKind => this.AccessorBuilder.MethodKind;
-
-        public dynamic Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
 
         [Memo]
         public IParameter ReturnParameter => new BuiltParameter( this.AccessorBuilder.ReturnParameter, this.Compilation );
@@ -76,9 +80,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
 
-        public bool HasBase => throw new NotImplementedException();
-
-        public IMethodInvocation Base => throw new NotImplementedException();
+        [Memo]
+        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), false );
 
         public IMethod? OverriddenMethod => throw new NotImplementedException();
 
@@ -89,6 +92,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         IMethod IDeclarationRef<IMethod>.Resolve( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
 
         ISymbol IDeclarationRef<IMethod>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
 
         [return: RunTimeOnly]
         public MethodInfo ToMethodInfo()

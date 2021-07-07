@@ -52,12 +52,12 @@ namespace Caravela.Framework.Impl.Linking
                 var invocationExpression = (InvocationExpressionSyntax) node;
 
                 // This is an invocation of a void method that can be possibly inlined.
-                var calleeSymbol = this.SemanticModel.GetSymbolInfo( node ).Symbol.AssertNotNull();
+                var targetMethodSymbol = this.SemanticModel.GetSymbolInfo( node ).Symbol.AssertNotNull();
 
                 // If the body is inlineable, inline it.
                 var resolvedSymbol = (IMethodSymbol) this.AnalysisRegistry.ResolveSymbolReference(
                     this.ContextMember,
-                    calleeSymbol,
+                    targetMethodSymbol,
                     annotation.AssertNotNull() );
 
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
@@ -65,11 +65,15 @@ namespace Caravela.Framework.Impl.Linking
                     // Inline the method body.
                     return this.GetInlinedMethodBody( resolvedSymbol, null );
                 }
-                else
+                else if ( StructuralSymbolComparer.Default.Equals( this.ContextMember, targetMethodSymbol ) )
                 {
                     return invocationExpression.Update(
-                        ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocationExpression.Expression, resolvedSymbol ),
+                        ReplaceCallTarget( (IMethodSymbol) targetMethodSymbol, invocationExpression.Expression, resolvedSymbol ),
                         invocationExpression.ArgumentList );
+                }
+                else
+                {
+                    return node;
                 }
             }
 
@@ -89,28 +93,37 @@ namespace Caravela.Framework.Impl.Linking
                 var invocation = (InvocationExpressionSyntax) node.Right;
 
                 // This is an invocation of a non-void method that can be possibly inlined.
-                var calleeSymbol = this.SemanticModel.GetSymbolInfo( invocation ).Symbol.AssertNotNull();
+                var targetMethodSymbol = this.SemanticModel.GetSymbolInfo( invocation ).Symbol.AssertNotNull();
 
                 // We are on an assignment of a method return value to a variable.
                 var resolvedSymbol = (IMethodSymbol) this.AnalysisRegistry.ResolveSymbolReference(
                     this.ContextMember,
-                    calleeSymbol,
+                    targetMethodSymbol,
                     annotation.AssertNotNull() );
+
+                var overrideTargetSymbol =
+                    this.AnalysisRegistry.IsOverride( this.ContextBodyMethod )
+                        ? this.AnalysisRegistry.GetOverrideTarget( this.ContextBodyMethod )
+                        : this.ContextBodyMethod;
 
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {
                     // Inline the method body.
                     return this.GetInlinedMethodBody( resolvedSymbol, GetAssignmentVariableName( node.Left ) );
                 }
-                else
+                else if ( overrideTargetSymbol != null && StructuralSymbolComparer.Default.Equals( overrideTargetSymbol, targetMethodSymbol ) )
                 {
                     // Replace with invocation of the correct override.
                     return node.Update(
                         node.Left,
                         node.OperatorToken,
                         invocation.Update(
-                            ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocation.Expression, resolvedSymbol ),
+                            ReplaceCallTarget( (IMethodSymbol) targetMethodSymbol, invocation.Expression, resolvedSymbol ),
                             invocation.ArgumentList ) );
+                }
+                else
+                {
+                    return node;
                 }
             }
 
@@ -129,29 +142,38 @@ namespace Caravela.Framework.Impl.Linking
                 var invocation = (InvocationExpressionSyntax) node.Expression;
 
                 // This is an invocation of a method that can be possibly inlined.
-                var calleeSymbol = this.SemanticModel.GetSymbolInfo( invocation ).Symbol.AssertNotNull();
+                var targetMethodSymbol = this.SemanticModel.GetSymbolInfo( invocation ).Symbol.AssertNotNull();
 
                 // We are on an assignment of a method return value to a variable.
                 var resolvedSymbol = (IMethodSymbol) this.AnalysisRegistry.ResolveSymbolReference(
                     this.ContextMember,
-                    calleeSymbol,
+                    targetMethodSymbol,
                     annotation.AssertNotNull() );
+
+                var overrideTargetSymbol =
+                    this.AnalysisRegistry.IsOverride( this.ContextBodyMethod )
+                        ? this.AnalysisRegistry.GetOverrideTarget( this.ContextBodyMethod )
+                        : this.ContextBodyMethod;
 
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {
                     // Inline the method body.
                     return this.GetInlinedMethodBody( resolvedSymbol, null );
                 }
-                else
+                else if ( overrideTargetSymbol != null && StructuralSymbolComparer.Default.Equals( overrideTargetSymbol, targetMethodSymbol ) )
                 {
                     // Replace with invocation of the correct override.
                     return
                         base.VisitExpressionStatement(
                             node.Update(
                                 invocation.Update(
-                                    ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocation.Expression, resolvedSymbol ),
+                                    ReplaceCallTarget( (IMethodSymbol) targetMethodSymbol, invocation.Expression, resolvedSymbol ),
                                     invocation.ArgumentList ),
                                 node.SemicolonToken ) );
+                }
+                else
+                {
+                    return node;
                 }
             }
 
@@ -167,7 +189,8 @@ namespace Caravela.Framework.Impl.Linking
                 var rewrittenBlock =
                     (BlockSyntax) innerRewriter.VisitBlock( declaration.Body.AssertNotNull() )
                         .AssertNotNull()
-                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable )
+                        .AddSourceCodeAnnotation();
 
                 if ( this.AnalysisRegistry.HasSimpleReturnControlFlow( calledMethodSymbol )
                      || (!calledMethodSymbol.ReturnsVoid && returnVariableName == null) )
@@ -212,7 +235,7 @@ namespace Caravela.Framework.Impl.Linking
                         if ( originalSymbol.IsStatic )
                         {
                             return memberAccess.Update(
-                                (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( methodSymbol.ContainingType ),
+                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( methodSymbol.ContainingType ),
                                 memberAccess.OperatorToken,
                                 IdentifierName( methodSymbol.Name ) );
                         }
@@ -243,7 +266,7 @@ namespace Caravela.Framework.Impl.Linking
                         // TODO: Do this properly.
                         return MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( methodSymbol.ContainingType ),
+                            LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( methodSymbol.ContainingType ),
                             IdentifierName( methodSymbol.Name ) );
                     }
                     else

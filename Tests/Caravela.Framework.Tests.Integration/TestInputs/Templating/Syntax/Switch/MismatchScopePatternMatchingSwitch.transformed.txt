@@ -1,2 +1,0 @@
-// TestTemplateCompiler.TryCompile failed. 
-// Error CR0104 on `case IParameter p:`: `The expression 'case IParameter p:' is compile-time but it is expected to be run-time because the expression appears in the 'case' is a part of a compile-time 'switch'.`

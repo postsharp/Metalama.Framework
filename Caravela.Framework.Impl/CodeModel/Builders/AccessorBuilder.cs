@@ -3,7 +3,11 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -28,8 +32,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IParameterBuilder ReturnParameter
             => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
-                (PropertyBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this, -1 ),
-                (PropertyBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this, -1 ),
+                (PropertyBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this ),
+                (PropertyBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this ),
+                (EventBuilder _, _) => new EventReturnParameter( this ),
                 _ => throw new AssertionFailedException()
             };
 
@@ -47,16 +52,15 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsOpenGeneric => false;
 
-        public bool HasBase => throw new NotImplementedException();
-
-        public IMethodInvocation Base => throw new NotImplementedException();
+        [Memo]
+        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), false );
 
         public IMethod? OverriddenMethod => throw new NotImplementedException();
 
         // TODO: Local functions from templates will never be visible (which is probably only thing possible).
         public IMethodList LocalFunctions => MethodList.Empty;
 
-        IParameterList IMethodBase.Parameters => this.Parameters;
+        IParameterList IHasParameters.Parameters => this.Parameters;
 
         public ParameterBuilderList Parameters
             => (this._containingDeclaration, this.MethodKind) switch
@@ -64,8 +68,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 // TODO: Indexer parameters (need to have special IParameterList implementation that would mirror adding parameters to the indexer property).
                 // TODO: Events.
                 (IProperty property, MethodKind.PropertyGet) when property.Parameters.Count == 0 => new ParameterBuilderList(),
-                (IProperty property, MethodKind.PropertySet) when property.Parameters.Count == 0 => new ParameterBuilderList(
-                    new[] { new PropertySetValueParameter( this, 0 ) } ),
+                (IProperty property, MethodKind.PropertySet) when property.Parameters.Count == 0 =>
+                    new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
+                (IEvent _, _) =>
+                    new ParameterBuilderList( new[] { new EventValueParameter( this ) } ),
                 _ => throw new AssertionFailedException()
             };
 
@@ -145,15 +151,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             throw new NotSupportedException( "Cannot directly add parameters to accessors." );
         }
 
-        public dynamic Invoke( dynamic? instance, params dynamic[] args )
-        {
-            throw new NotImplementedException();
-        }
-
         public IMethod WithGenericArguments( params IType[] genericArguments )
         {
             throw new NotSupportedException( "Cannot add generic parameters to accessors." );
         }
+
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
+
+        public bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
         [return: RunTimeOnly]
         public MethodInfo ToMethodInfo()

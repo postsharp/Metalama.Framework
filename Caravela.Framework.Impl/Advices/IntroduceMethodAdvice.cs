@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
@@ -24,17 +25,17 @@ namespace Caravela.Framework.Impl.Advices
             INamedType targetDeclaration,
             IMethod templateMethod,
             IntroductionScope scope,
-            ConflictBehavior conflictBehavior,
+            OverrideStrategy overrideStrategy,
             string? layerName,
-            AdviceOptions? options )
-            : base( aspect, targetDeclaration, templateMethod, scope, conflictBehavior, layerName, options )
+            Dictionary<string, object?>? tags )
+            : base( aspect, targetDeclaration, templateMethod, scope, overrideStrategy, layerName, tags )
         {
             this.MemberBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Name, this.LinkerOptions );
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( diagnosticAdder );
+            base.Initialize( declarativeAdvices, diagnosticAdder );
 
             this.MemberBuilder.IsAsync = this.TemplateMember.IsAsync;
 
@@ -105,9 +106,9 @@ namespace Caravela.Framework.Impl.Advices
                                 (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
                 }
 
-                switch ( this.ConflictBehavior )
+                switch ( this.OverrideStrategy )
                 {
-                    case ConflictBehavior.Fail:
+                    case OverrideStrategy.Fail:
                         // Produce fail diagnostic.
                         return
                             AdviceResult.Create(
@@ -115,12 +116,11 @@ namespace Caravela.Framework.Impl.Advices
                                     this.TargetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
 
-                    case ConflictBehavior.Merge:
-                    case ConflictBehavior.Ignore:
+                    case OverrideStrategy.Ignore:
                         // Do nothing.
                         return AdviceResult.Create();
 
-                    case ConflictBehavior.New:
+                    case OverrideStrategy.New:
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
                         {
@@ -137,7 +137,7 @@ namespace Caravela.Framework.Impl.Advices
                             return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                         }
 
-                    case ConflictBehavior.Override:
+                    case OverrideStrategy.Override:
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
                         {
                             var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.TemplateMember, this.LinkerOptions );

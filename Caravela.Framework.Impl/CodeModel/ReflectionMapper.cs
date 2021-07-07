@@ -88,13 +88,13 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <param name="type"></param>
         /// <returns></returns>
         public TypeSyntax GetTypeSyntax( Type type )
-            => this._syntaxCache.GetOrAdd( type, t => (TypeSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.GetTypeSymbol( t ) ) );
+            => this._syntaxCache.GetOrAdd( type, t => LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.GetTypeSymbol( t ) ) );
 
         private ITypeSymbol GetTypeSymbolCore( Type type )
         {
             if ( type.IsGenericParameter )
             {
-                return this.GetNamedTypeSymbol( type.DeclaringType, Array.Empty<Type>() ).TypeParameters[type.GenericParameterPosition];
+                return this.GetNamedTypeSymbol( type.DeclaringType.AssertNotNull(), Array.Empty<Type>() ).TypeParameters[type.GenericParameterPosition];
             }
 
             if ( type is CompileTimeType compileTimeType )
@@ -161,7 +161,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
             else
             {
-                return this.GetNamedTypeSymbolByMetadataName( type.FullName );
+                return this.GetNamedTypeSymbolByMetadataName( type.FullName.AssertNotNull() );
             }
         }
     }

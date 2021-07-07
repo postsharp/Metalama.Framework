@@ -1,10 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -21,6 +24,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public ParameterBuilderList Parameters { get; } = new();
 
         public GenericParameterBuilderList GenericParameters { get; } = new();
+
+        [Memo]
+        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), false );
 
         public IMethod? OverriddenMethod { get; set; }
 
@@ -63,13 +69,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IMethodList IMethodBase.LocalFunctions => MethodList.Empty;
 
-        IParameterList IMethodBase.Parameters => this.Parameters;
+        IParameterList IHasParameters.Parameters => this.Parameters;
 
         IGenericParameterList IMethod.GenericParameters => this.GenericParameters;
 
         IReadOnlyList<IType> IMethod.GenericArguments => ImmutableArray<IType>.Empty;
 
-        bool IMethod.IsOpenGeneric => true;
+        bool IMethod.IsOpenGeneric => this.GenericParameters.Count > 0;
 
         // We don't currently support adding other methods than default ones.
         public MethodKind MethodKind => MethodKind.Default;
@@ -78,11 +84,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IMethod IMethod.WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
 
-        bool IMethod.HasBase => throw new NotImplementedException();
-
-        IMethodInvocation IMethod.Base => throw new NotImplementedException();
-
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
+
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
         public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, AspectLinkerOptions? linkerOptions )
             : base( parentAdvice, targetType, name )
@@ -106,23 +110,30 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = this.Compilation.SyntaxGenerator;
+            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
-            var method = (MethodDeclarationSyntax)
-                syntaxGenerator.MethodDeclaration(
-                    this.Name,
-                    this.Parameters.AsBuilderList.Select( p => ((ParameterBuilder) p).ToDeclarationSyntax() ),
-                    this.GenericParameters.AsBuilderList.Select( p => p.Name ),
-                    syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ),
-                    this.Accessibility.ToRoslynAccessibility(),
-                    this.ToDeclarationModifiers(),
-                    !this.ReturnParameter.ParameterType.Is( typeof(void) )
-                        ? new[]
-                        {
-                            ReturnStatement(
-                                DefaultExpression( (TypeSyntax) syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ) )
-                        }
-                        : null );
+            var method =
+                MethodDeclaration(
+                    List<AttributeListSyntax>(),
+                    this.GetSyntaxModifierList(),
+                    this.GetSyntaxReturnType(),
+                    this.ExplicitInterfaceImplementations.Count > 0
+                        ? ExplicitInterfaceSpecifier(
+                            (NameSyntax) syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                        : null,
+                    Identifier( this.Name ),
+                    this.GetSyntaxTypeParameterList(),
+                    this.GetSyntaxParameterList(),
+                    this.GetSyntaxConstraintClauses(),
+                    Block(
+                        List(
+                            !this.ReturnParameter.ParameterType.Is( typeof(void) )
+                                ? new[]
+                                {
+                                    ReturnStatement( DefaultExpression( syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ) )
+                                }
+                                : new StatementSyntax[0] ) ),
+                    null );
 
             return new[]
             {
@@ -132,8 +143,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         // TODO: Temporary
         public override MemberDeclarationSyntax InsertPositionNode
-            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
+            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
 
-        dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
+        public void SetExplicitInterfaceImplementation( IMethod interfaceMethod )
+        {
+            this.ExplicitInterfaceImplementations = new[] { interfaceMethod };
+        }
+
+        public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
     }
 }

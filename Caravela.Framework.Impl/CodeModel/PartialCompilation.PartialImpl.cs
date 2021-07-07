@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    public abstract partial class PartialCompilation
+    internal abstract partial class PartialCompilation
     {
         /// <summary>
         /// Represents a partial compilation, containing a subset of syntax trees.

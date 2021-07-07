@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Reflection;
 using System.Text;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -12,6 +13,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// <summary>
     /// A serializable object that stores the manifest of a <see cref="CompileTimeProject"/>. 
     /// </summary>
+    [Obfuscation(Exclude = true /* JSON */)]
     internal class CompileTimeProjectManifest
     {
         public CompileTimeProjectManifest(
@@ -81,7 +83,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public void Serialize( Stream stream )
         {
-            var manifestJson = JsonConvert.SerializeObject( this, Formatting.Indented );
+            var manifestJson = JsonConvert.SerializeObject( this, Newtonsoft.Json.Formatting.Indented );
             using var manifestWriter = new StreamWriter( stream, Encoding.UTF8 );
             manifestWriter.Write( manifestJson );
         }

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.TestFramework;
@@ -9,10 +8,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Tests.UnitTests
 {
@@ -54,23 +51,8 @@ namespace Caravela.Framework.Tests.UnitTests
             IEnumerable<MetadataReference>? additionalReferences = null,
             string? name = null )
         {
-            CSharpCompilation CreateEmptyCompilation()
-            {
-                return CSharpCompilation.Create( name ?? "test_" + Guid.NewGuid() )
-                    .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
-                    .AddReferences(
-                        new[] { "netstandard", "System.Runtime" }
-                            .Select(
-                                r => MetadataReference.CreateFromFile(
-                                    Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) ) )
-                    .AddReferences(
-                        MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
-                        MetadataReference.CreateFromFile( typeof(DynamicAttribute).Assembly.Location ),
-                        MetadataReference.CreateFromFile( typeof(TestBase).Assembly.Location ),
-                        MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ) );
-            }
-
-            var mainRoslynCompilation = CreateEmptyCompilation();
+            var additionalAssemblies = new[] { typeof(TestBase).Assembly };
+            var mainRoslynCompilation = TestCompilationFactory.CreateEmptyCSharpCompilation( name, additionalAssemblies );
 
             if ( code != null )
             {
@@ -79,7 +61,10 @@ namespace Caravela.Framework.Tests.UnitTests
 
             if ( dependentCode != null )
             {
-                var dependentCompilation = CreateEmptyCompilation().AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( dependentCode ) );
+                var dependentCompilation = TestCompilationFactory
+                    .CreateEmptyCSharpCompilation( name == null ? null : null + ".Dependency", additionalAssemblies )
+                    .AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( dependentCode ) );
+
                 mainRoslynCompilation = mainRoslynCompilation.AddReferences( dependentCompilation.ToMetadataReference() );
             }
 

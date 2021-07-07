@@ -3,9 +3,11 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using System;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -23,15 +25,15 @@ namespace Caravela.Framework.Impl.Advices
             INamedType targetDeclaration,
             string name,
             IntroductionScope scope,
-            ConflictBehavior conflictBehavior,
+            OverrideStrategy overrideStrategy,
             string layerName,
-            AdviceOptions? options )
-            : base( aspect, targetDeclaration, null, scope, conflictBehavior, layerName, options )
+            Dictionary<string, object?>? tags )
+            : base( aspect, targetDeclaration, null, scope, overrideStrategy, layerName, tags )
         {
-            this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, name, options?.LinkerOptions );
+            this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, name, AspectLinkerOptions.FromTags( tags ) );
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
             throw new NotImplementedException();
         }

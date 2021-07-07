@@ -1,2 +1,0 @@
-// TestTemplateCompiler.TryCompile failed. 
-// Error CR0110 on `meta.Parameters`: `The compile-time loop 'foreach' is not allowed here because it is a part of block whose execution depends on a run-time condition.`

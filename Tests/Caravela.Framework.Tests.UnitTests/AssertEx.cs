@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.UnitTests
         {
             _ = expression;
             var meta = (IDynamicExpression) expression;
-            var actual = meta.CreateExpression().Syntax.NormalizeWhitespace().ToString();
+            var actual = meta.CreateExpression()?.Syntax.NormalizeWhitespace().ToString();
 
             Assert.Equal( expected, actual );
         }

@@ -5,7 +5,6 @@ using Caravela.Compiler;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.DesignTime.Diagnostics;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
-using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
@@ -41,7 +40,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             try
             {
-                DesignTimeLogger.Instance?.Write( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{context.Compilation.AssemblyName}')." );
+                Logger.Instance?.Write( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{context.Compilation.AssemblyName}')." );
 
                 var syntaxTrees = context.ReportedDiagnostics
                     .Select( d => d.Location.SourceTree )
@@ -60,9 +59,9 @@ namespace Caravela.Framework.Impl.DesignTime
                     buildOptions,
                     context.CancellationToken );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
-                DesignTimeLogger.Instance?.Write( e.ToString() );
+                DesignTimeExceptionHandler.ReportException( e );
             }
         }
 
@@ -145,7 +144,7 @@ namespace Caravela.Framework.Impl.DesignTime
                     }
                 }
 
-                DesignTimeLogger.Instance?.Write(
+                Logger.Instance?.Write(
                     $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): {suppressionsCount} suppressions reported." );
             }
         }

@@ -3,6 +3,7 @@
 
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System;
@@ -32,7 +33,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             var diagnostics = new DiagnosticList();
 
-            var templateCompiler = new TemplateCompiler( this._serviceProvider );
+            var templateCompiler = new TemplateCompiler( this._serviceProvider, semanticModel.Compilation );
 
             _ = templateCompiler.TryAnnotate( semanticModel.SyntaxTree.GetRoot(), semanticModel, diagnostics, cancellationToken, out var annotatedSyntaxRoot );
 

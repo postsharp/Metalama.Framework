@@ -6,12 +6,14 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.DesignTime.Diagnostics
 {
     /// <summary>
     /// A JSON-serializable file that contains user-defined diagnostic and suppression descriptors.
     /// </summary>
+    [Obfuscation(Exclude = true /* JSON */)] 
     internal class UserDiagnosticRegistrationFile
     {
         public Dictionary<string, UserDiagnosticRegistration> Diagnostics { get; } = new( StringComparer.OrdinalIgnoreCase );
@@ -31,7 +33,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
         public void Write( TextWriter textWriter )
         {
             var serializer = JsonSerializer.Create();
-            serializer.Formatting = Formatting.Indented;
+            serializer.Formatting = Newtonsoft.Json.Formatting.Indented;
 
             serializer.Serialize( textWriter, this );
 

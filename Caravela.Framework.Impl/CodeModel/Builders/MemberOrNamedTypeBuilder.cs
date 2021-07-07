@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
@@ -14,7 +15,7 @@ using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberBuilder, IMemberIntroduction, IObservableTransformation
+    internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOrNamedTypeBuilder, IMemberIntroduction, IObservableTransformation
     {
         public bool IsSealed { get; set; }
 
@@ -23,8 +24,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsOverride { get; set; }
 
         public bool IsNew { get; set; }
-
-        public bool IsAsync { get; set; }
 
         public INamedType DeclaringType { get; }
 
@@ -37,9 +36,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsAbstract { get; set; }
 
         public bool IsStatic { get; set; }
-
-        public bool IsVirtual { get; set; }
-
+        
         public sealed override IDeclaration ContainingDeclaration => this.DeclaringType;
 
         public MemberOrNamedTypeBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice )

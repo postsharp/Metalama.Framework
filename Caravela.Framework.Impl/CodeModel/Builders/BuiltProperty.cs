@@ -3,10 +3,16 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using RefKind = Caravela.Framework.Code.RefKind;
@@ -34,13 +40,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public RefKind RefKind => this.PropertyBuilder.RefKind;
 
-        public bool IsByRef => this.PropertyBuilder.IsByRef;
+        public Writeability Writeability => this.PropertyBuilder.Writeability;
 
-        public bool IsRef => this.PropertyBuilder.IsRef;
-
-        public bool IsRefReadonly => this.PropertyBuilder.IsRefReadonly;
-
-        public IPropertyInvocation Base => throw new NotImplementedException();
+        public bool IsAutoPropertyOrField => this.PropertyBuilder.IsAutoPropertyOrField;
 
         public IType Type => this.PropertyBuilder.Type;
 
@@ -50,31 +52,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IMethod? Setter => this.PropertyBuilder.Setter != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.Setter ) : null;
 
-        public bool HasBase => throw new NotImplementedException();
+        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 
-        public dynamic Value { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        [Memo]
+        public IInvokerFactory<IPropertyInvoker> Invokers => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ), false );
 
-        IFieldOrPropertyInvocation IFieldOrProperty.Base => throw new NotImplementedException();
-
-        public dynamic GetIndexerValue( dynamic? instance, params dynamic[] args )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic GetValue( dynamic? instance )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args )
-        {
-            throw new NotImplementedException();
-        }
-
-        public dynamic SetValue( dynamic? instance, dynamic value )
-        {
-            throw new NotImplementedException();
-        }
+        // TODO: When an interface is introduced, explicit implementation should appear here.
+        public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => Array.Empty<IProperty>();
 
         [return: RunTimeOnly]
         public FieldOrPropertyInfo ToFieldOrPropertyInfo()

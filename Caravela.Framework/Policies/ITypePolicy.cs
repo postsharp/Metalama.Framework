@@ -9,7 +9,7 @@ namespace Caravela.Framework.Policies
     /// <summary>
     /// A type policy is a nested type of arbitrary name that implements <see cref="ITypePolicy"/> and
     /// that can add aspects and advices to the declaring type. Type policies are executed before any other aspect.
-    /// They cannot have layers.
+    /// They cannot have layers. (Not implemented.)
     /// </summary>
     [CompileTimeOnly]
     [Obsolete( "Not implemented." )]

@@ -6,7 +6,6 @@ using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -27,8 +26,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public static DeclarationKind GetDeclarationKind( this ISymbol symbol )
             => symbol switch
             {
-                INamespaceSymbol => DeclarationKind.Compilation,
-                INamedTypeSymbol => DeclarationKind.Type,
+                INamespaceSymbol => DeclarationKind.Namespace,
+                INamedTypeSymbol => DeclarationKind.NamedType,
                 IMethodSymbol method => method.MethodKind == MethodKind.Constructor || method.MethodKind == MethodKind.StaticConstructor
                     ? DeclarationKind.Constructor
                     : DeclarationKind.Method,
@@ -39,6 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 IParameterSymbol => DeclarationKind.Parameter,
                 IEventSymbol => DeclarationKind.Event,
                 ITypeSymbol => DeclarationKind.None,
+                IModuleSymbol => DeclarationKind.Compilation,
                 _ => throw new ArgumentException( nameof(symbol), $"Unexpected symbol: {symbol.GetType().Name}." )
             };
 
@@ -136,7 +136,7 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 if ( argumentsLength != parameters.Count )
                 {
-                    throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (declaration, parameters.Count) );
+                    throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (declaration, parameters.Count, argumentsLength) );
                 }
             }
         }
@@ -202,12 +202,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             if ( declaration.IsStatic )
             {
-                if ( instance != null )
-                {
-                    throw GeneralDiagnosticDescriptors.CannotProvideInstanceForStaticMember.CreateException( declaration );
-                }
-
-                return (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( declaration.DeclaringType!.GetSymbol() );
+                return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( declaration.DeclaringType!.GetSymbol() );
             }
 
             if ( instance == null )
@@ -285,7 +280,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 modifiers |= DeclarationModifiers.Sealed;
             }
 
-            if ( member.IsReadOnly )
+            if ( member is IField field && field.Writeability == Writeability.ConstructorOnly )
             {
                 modifiers |= DeclarationModifiers.ReadOnly;
             }
@@ -324,5 +319,13 @@ namespace Caravela.Framework.Impl.CodeModel
                 DeclarationKind.GenericParameter => "generic parameter",
                 _ => kind.ToString().ToLowerInvariant()
             };
+
+        internal static bool IsAutoProperty( this IPropertySymbol symbol )
+            => !symbol.IsAbstract
+               && symbol.DeclaringSyntaxReferences.All(
+                   sr =>
+                       sr.GetSyntax() is BasePropertyDeclarationSyntax propertyDecl
+                       && propertyDecl.AccessorList != null
+                       && propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) );
     }
 }

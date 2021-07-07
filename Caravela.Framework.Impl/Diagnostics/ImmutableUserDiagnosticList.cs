@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-    public readonly struct ImmutableUserDiagnosticList
+    internal readonly struct ImmutableUserDiagnosticList
     {
         public static ImmutableUserDiagnosticList Empty { get; } = new( ImmutableArray<Diagnostic>.Empty, ImmutableArray<ScopedSuppression>.Empty );
 

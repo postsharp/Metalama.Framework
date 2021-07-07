@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// <summary>
     /// Exposes a method <see cref="TryFindAssembly"/>, which must try to find an assembly that of a given identity.
     /// </summary>
-    public interface IAssemblyLocator
+    public interface IAssemblyLocator : IService
     {
         /// <summary>
         /// Tries to find an assembly of a given identity.

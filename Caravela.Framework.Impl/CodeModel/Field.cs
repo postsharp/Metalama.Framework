@@ -2,9 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Invokers;
+using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.ReflectionMocks;
+using Caravela.Framework.RunTime;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -23,7 +25,8 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        private FieldOrPropertyInvocation Invocation => new( this );
+        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
+            => new InvokerFactory<IFieldOrPropertyInvoker>( order => new FieldOrPropertyInvoker( this, order ) );
 
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
@@ -32,25 +35,23 @@ namespace Caravela.Framework.Impl.CodeModel
         public IMethod? Getter => new PseudoAccessor( this, AccessorSemantic.Get );
 
         [Memo]
-        public IMethod? Setter => new PseudoAccessor( this, AccessorSemantic.Set );
+        public IMethod? Setter => this.Writeability != Writeability.None ? new PseudoAccessor( this, AccessorSemantic.Set ) : null;
 
-        public dynamic Value
-        {
-            get => this.Invocation.Value;
-            set => throw new InvalidOperationException();
-        }
+        // TODO: Memo does not work here.
+        // [Memo]
+        public Writeability Writeability
+            => this._symbol switch
+            {
+                { IsConst: true } => Writeability.None,
+                { IsReadOnly: true } => Writeability.ConstructorOnly,
+                _ => Writeability.All
+            };
 
-        public dynamic GetValue( object? instance ) => this.Invocation.GetValue( instance );
-
-        public dynamic SetValue( object? instance, object value ) => this.Invocation.SetValue( instance, value );
-
-        public bool HasBase => true;
-
-        public IFieldOrPropertyInvocation Base => this.Invocation.Base;
+        public bool IsAutoPropertyOrField => true;
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
-        public override bool IsReadOnly => this._symbol.IsReadOnly;
+        public override bool IsExplicitInterfaceImplementation => false;
 
         public override bool IsAsync => false;
 

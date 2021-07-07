@@ -8,6 +8,9 @@ using System.IO;
 
 namespace Caravela.TestFramework
 {
+    /// <summary>
+    /// An implementation of <see cref="IProjectOptions"/> that can be used in tests.
+    /// </summary>
     public class TestProjectOptions : DefaultDirectoryOptions, IProjectOptions, IDisposable
     {
         public TestProjectOptions()
@@ -33,6 +36,8 @@ namespace Caravela.TestFramework
         public string? AssemblyName => null;
 
         public ImmutableArray<object> PlugIns => ImmutableArray<object>.Empty;
+
+        public bool IsFrameworkEnabled => true;
 
         public void Dispose()
         {

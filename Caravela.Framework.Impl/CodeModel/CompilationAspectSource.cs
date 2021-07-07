@@ -33,7 +33,15 @@ namespace Caravela.Framework.Impl.CodeModel
             AspectClass aspectClass,
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken )
-            => compilation.GetAllAttributesOfType( compilation.Factory.GetTypeByReflectionName( aspectClass.FullName ) )
+        {
+            if ( !compilation.Factory.TryGetTypeByReflectionName( aspectClass.FullName, out var aspectType ) )
+            {
+                // This happens at design time when the IDE sends an incomplete compilation. We cannot apply the aspects in this case,
+                // but we prefer not to throw an exception since the case is expected.
+                return Enumerable.Empty<AspectInstance>();
+            }
+
+            return compilation.GetAllAttributesOfType( aspectType )
                 .Select(
                     attribute =>
                     {
@@ -49,5 +57,6 @@ namespace Caravela.Framework.Impl.CodeModel
                         }
                     } )
                 .WhereNotNull();
+        }
     }
 }

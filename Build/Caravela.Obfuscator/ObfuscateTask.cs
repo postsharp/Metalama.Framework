@@ -279,7 +279,7 @@ namespace Caravela.Obfuscator
                  (type.Attributes & TypeAttributes.Serializable) == 0 &&
                  !this.IsObfuscationExcluded( type ) )
             {
-                this._obfuscatedDeclarations.Add( type, this._currentObfuscationTable.CreateHash( type.Name, true ) );
+                this._obfuscatedDeclarations.Add( type, this._currentObfuscationTable.CreateHash( type.Name, type.DeclaringType == null ) );
             }
 
             // Obfuscate generic parameter names.

@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal class LinkerIntroductionNameProvider : IntroductionNameProvider
     {
-        internal override string GetOverrideName( AspectLayerId aspectLayer, IMemberOrNamedType overriddenDeclaration )
+        internal override string GetOverrideName( AspectLayerId aspectLayer, IMember overriddenDeclaration )
         {
             // TODO: Obviously these replace methods are not very efficient.
             var cleanAspectName = aspectLayer.AspectName.Replace( "_", "__" ).Replace( ".", "_" );
@@ -16,8 +16,20 @@ namespace Caravela.Framework.Impl.Linking
 
             return
                 cleanLayerName != null
-                    ? $"__{overriddenDeclaration.Name}__{cleanAspectName}__{cleanLayerName}"
-                    : $"__{overriddenDeclaration.Name}__{cleanAspectName}";
+                    ? $"__Override__{overriddenDeclaration.Name}__By__{cleanAspectName}__{cleanLayerName}"
+                    : $"__Override__{overriddenDeclaration.Name}__By__{cleanAspectName}";
+        }
+
+        internal override string GetInterfaceProxyName( AspectLayerId aspectLayer, IMember interfaceMember )
+        {
+            var cleanAspectName = aspectLayer.AspectName.Replace( "_", "__" ).Replace( ".", "_" );
+            var cleanLayerName = aspectLayer.LayerName?.Replace( "_", "__" ).Replace( ".", "_" );
+            var cleanInterfaceName = interfaceMember.DeclaringType.FullName.Replace( "_", "__" ).Replace( ".", "_" );
+
+            return
+                cleanLayerName != null
+                    ? $"__InterfaceImpl__{cleanInterfaceName}__{interfaceMember.Name}__By__{cleanAspectName}__{cleanLayerName}"
+                    : $"__InterfaceImpl__{cleanInterfaceName}__{interfaceMember.Name}__By__{cleanAspectName}";
         }
     }
 }
