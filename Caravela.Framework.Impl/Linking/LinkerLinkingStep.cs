@@ -51,6 +51,8 @@ namespace Caravela.Framework.Impl.Linking
                 new PropertyGetReturnInliner(),
                 new PropertyGetCastReturnInliner(),
                 new PropertySetValueAssignmentInliner(),
+                new EventAddAssignmentInliner(),
+                new EventRemoveAssignmentInliner(),
             };
 
             var finalCompilation = input.IntermediateCompilation.Compilation;

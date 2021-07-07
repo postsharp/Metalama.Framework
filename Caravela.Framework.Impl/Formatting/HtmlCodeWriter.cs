@@ -50,6 +50,11 @@ namespace Caravela.Framework.Impl.Formatting
             var syntaxTree = document.GetSyntaxTreeAsync().Result!;
             var semanticModel = document.Project.GetCompilationAsync().Result!.GetSemanticModel( syntaxTree );
 
+            var spans = Classifier.GetClassifiedSpans(
+                semanticModel,
+                syntaxTree.GetRoot().Span,
+                document.Project!.Solution.Workspace );
+
             foreach ( var csharpSpan in Classifier.GetClassifiedSpans(
                 semanticModel,
                 syntaxTree.GetRoot().Span,

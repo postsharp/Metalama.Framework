@@ -183,6 +183,7 @@ class T
     {
     }
 
+    private int __Foo__BackingField;
     int Foo
     {
         get
@@ -197,8 +198,6 @@ class T
             this.__Foo__BackingField = value;
         }
     }
-
-    private int __Foo__BackingField;
 }
 ";
 

@@ -116,6 +116,50 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 return node;
             }
 
+            public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
+            {
+                if ( HasPseudoAttribute( node ) )
+                {
+                    var newNode = this.ProcessPseudoAttributeNode( node, out var isPseudoMember );
+
+                    if ( !isPseudoMember )
+                    {
+                        newNode = AssignNodeId( newNode.AssertNotNull() );
+                        this._currentInsertPosition = (MemberDeclarationSyntax) newNode.AssertNotNull();
+                    }
+
+                    return newNode;
+                }
+
+                // Non-pseudo nodes become the next insert positions.
+                node = AssignNodeId( node );
+                this._currentInsertPosition = node;
+
+                return node;
+            }
+
+            public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+            {
+                if ( HasPseudoAttribute( node ) )
+                {
+                    var newNode = this.ProcessPseudoAttributeNode( node, out var isPseudoMember );
+
+                    if ( !isPseudoMember )
+                    {
+                        newNode = AssignNodeId( newNode.AssertNotNull() );
+                        this._currentInsertPosition = (MemberDeclarationSyntax) newNode.AssertNotNull();
+                    }
+
+                    return newNode;
+                }
+
+                // Non-pseudo nodes become the next insert positions.
+                node = AssignNodeId( node );
+                this._currentInsertPosition = node;
+
+                return node;
+            }
+
             private static bool HasPseudoAttribute( MemberDeclarationSyntax node )
             {
                 return node.AttributeLists.SelectMany( x => x.Attributes ).Any( x => x.Name.ToString().StartsWith( "Pseudo" ) );
@@ -273,6 +317,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 {
                     MethodDeclarationSyntax method => method.Identifier.ValueText,
                     PropertyDeclarationSyntax property => property.Identifier.ValueText,
+                    EventDeclarationSyntax @event => @event.Identifier.ValueText,
+                    EventFieldDeclarationSyntax eventField => eventField.Declaration.Variables.Single().Identifier.ValueText,
                     _ => throw new NotSupportedException()
                 };
 
@@ -330,7 +376,6 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                         break;
 
-                    // TODO: All cases for properties.
                     case PropertyDeclarationSyntax { AccessorList: not null } property when property.AccessorList!.Accessors.All( a => a.Body != null ):
                         overrideSyntax =
                             property
@@ -340,6 +385,25 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                                         List(
                                             property.AccessorList!.Accessors.Select(
                                                 a => a.WithBody( (BlockSyntax) methodBodyRewriter.VisitBlock( a.Body! ).AssertNotNull() ) ) ) ) );
+
+                        break;
+
+                    case EventDeclarationSyntax @event:
+                        overrideSyntax =
+                            @event
+                                .WithAttributeLists( List( newAttributeLists ) )
+                                .WithAccessorList(
+                                    AccessorList(
+                                        List(
+                                            @event.AccessorList!.Accessors.Select(
+                                                a => a.WithBody( (BlockSyntax) methodBodyRewriter.VisitBlock( a.Body! ).AssertNotNull() ) ) ) ) );
+
+                        break;
+
+                    case EventFieldDeclarationSyntax eventField:
+                        overrideSyntax =
+                            eventField
+                                .WithAttributeLists( List( newAttributeLists ) );
 
                         break;
 
@@ -364,6 +428,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                                 {
                                     MethodDeclarationSyntax _ => IntroducedMemberSemantic.Override,
                                     PropertyDeclarationSyntax _ => IntroducedMemberSemantic.Override,
+                                    EventDeclarationSyntax _ => IntroducedMemberSemantic.Override,
+                                    EventFieldDeclarationSyntax _ => IntroducedMemberSemantic.Override,
                                     _ => throw new NotSupportedException()
                                 },
                                 AspectLinkerOptions.Create( forceNotInlineable ),
@@ -389,10 +455,23 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     MarkTemporary(
                         node switch
                         {
+                            FieldDeclarationSyntax field => GetSymbolHelperField( field ),
                             MethodDeclarationSyntax method => GetSymbolHelperMethod( method ),
                             PropertyDeclarationSyntax property => GetSymbolHelperProperty( property ),
+                            EventDeclarationSyntax @event => GetSymbolHelperEvent( @event ),
+                            EventFieldDeclarationSyntax eventField => GetSymbolHelperEventField( eventField ),
                             _ => throw new NotSupportedException()
                         } ) );
+            }
+
+            private static SyntaxNode GetSymbolHelperField( FieldDeclarationSyntax field )
+            {
+                return field
+                    .WithAttributeLists( List<AttributeListSyntax>() )
+                    .WithDeclaration( 
+                        field.Declaration.WithVariables(
+                            SeparatedList(
+                                field.Declaration.Variables.Select( v => v.WithIdentifier( Identifier( v.Identifier.ValueText + "__SymbolHelper" ) ) ) ) ) );
             }
 
             private static SyntaxNode GetSymbolHelperMethod( MethodDeclarationSyntax method )
@@ -447,6 +526,27 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                                     SyntaxKind.DefaultLiteralExpression,
                                     Token( SyntaxKind.DefaultKeyword ) ) ) );
                 }
+            }
+
+            private static SyntaxNode GetSymbolHelperEvent( EventDeclarationSyntax @event )
+            {
+                return @event
+                    .WithAttributeLists( List<AttributeListSyntax>() )
+                    .WithIdentifier( Identifier( @event.Identifier.ValueText + "__SymbolHelper" ) )
+                    .WithAccessorList(
+                        AccessorList(
+                            List(
+                                @event.AccessorList.AssertNotNull().Accessors.Select( a => a.WithBody( Block() ) ) ) ) );
+            }
+
+            private static SyntaxNode GetSymbolHelperEventField( EventFieldDeclarationSyntax eventField )
+            {
+                return eventField
+                    .WithAttributeLists( List<AttributeListSyntax>() )
+                    .WithDeclaration(
+                        eventField.Declaration.WithVariables(
+                            SeparatedList(
+                                eventField.Declaration.Variables.Select( v => v.WithIdentifier( Identifier( v.Identifier.ValueText + "__SymbolHelper" ) ) ) ) ) );
             }
         }
     }

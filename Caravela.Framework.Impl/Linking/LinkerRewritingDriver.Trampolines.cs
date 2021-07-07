@@ -124,7 +124,7 @@ namespace Caravela.Framework.Impl.Linking
                                     : null,
                                 removeAccessor != null
                                     ? AccessorDeclaration(
-                                        SyntaxKind.AddAccessorDeclaration,
+                                        SyntaxKind.RemoveAccessorDeclaration,
                                         Block(
                                             ExpressionStatement(
                                                 AssignmentExpression(
@@ -176,7 +176,7 @@ namespace Caravela.Framework.Impl.Linking
                                                 IdentifierName( "value" ) ) ) ) )
                                     .NormalizeWhitespace(),
                                 AccessorDeclaration(
-                                    SyntaxKind.AddAccessorDeclaration,
+                                    SyntaxKind.RemoveAccessorDeclaration,
                                     Block(
                                         ExpressionStatement(
                                             AssignmentExpression(

@@ -39,36 +39,21 @@ namespace Caravela.Framework.Impl.Linking
 
         private bool IsInlineable( IEventSymbol symbol )
         {
+            if ( this.GetLinkerOptions( symbol ).ForceNotInlineable )
+            {
+                return false;
+            }
+
             var addAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, AspectReferenceTargetKind.EventAddAccessor );
             var removeAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, AspectReferenceTargetKind.EventRemoveAccessor );
 
-            if ( addAspectReferences.Count != 1 || removeAspectReferences.Count != 1
-                || addAspectReferences.Count + removeAspectReferences.Count == 0 )
+            if ( addAspectReferences.Count > 1 || removeAspectReferences.Count > 1 )
             {
                 return false;
             }
 
-            var matchingContainingSymbol =
-                addAspectReferences.Count == 1 && removeAspectReferences.Count == 1
-                ? SymbolEqualityComparer.Default.Equals( addAspectReferences[0].ContainingSymbol, removeAspectReferences[0].ContainingSymbol )
-                : addAspectReferences.Count <= 1 && removeAspectReferences.Count <= 1;
-
-            if ( !matchingContainingSymbol )
-            {
-                return false;
-            }
-
-            if ( addAspectReferences.Count == 0 || !this.IsInlineableReference( addAspectReferences[0] ) )
-            {
-                return false;
-            }
-
-            if ( removeAspectReferences.Count == 0 || !this.IsInlineableReference( removeAspectReferences[0] ) )
-            {
-                return false;
-            }
-
-            return true;
+            return (addAspectReferences.Count == 0 || this.IsInlineableReference( addAspectReferences[0] ))
+                && (removeAspectReferences.Count == 0 || this.IsInlineableReference( removeAspectReferences[0] ));
         }
 
         private IReadOnlyList<MemberDeclarationSyntax> RewriteEvent( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
@@ -85,7 +70,7 @@ namespace Caravela.Framework.Impl.Linking
                     members.Add( GetOriginalImplEvent( eventDeclaration ) );
                 }
 
-                if ( !this.IsInlineable( (IPropertySymbol) this._analysisRegistry.GetLastOverride( symbol ) ) )
+                if ( !this.IsInlineable( (IEventSymbol) this._analysisRegistry.GetLastOverride( symbol ) ) )
                 {
                     members.Add( GetTrampolineEvent( eventDeclaration, symbol ) );
                 }
@@ -111,7 +96,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 var transformedAdd =
                     AccessorDeclaration(
-                        SyntaxKind.GetAccessorDeclaration,
+                        SyntaxKind.AddAccessorDeclaration,
                         addDeclaration.AttributeLists,
                         TokenList(),
                         this.GetLinkedBody( 
@@ -122,11 +107,11 @@ namespace Caravela.Framework.Impl.Linking
 
                 var transformedRemove =
                     AccessorDeclaration(
-                        SyntaxKind.SetAccessorDeclaration,
+                        SyntaxKind.RemoveAccessorDeclaration,
                         removeDeclaration.AttributeLists,
                         TokenList(),
-                        this.GetLinkedBody( 
-                            symbol.RemoveMethod.AssertNotNull(), 
+                        this.GetLinkedBody(
+                            this.GetBodySource( symbol.RemoveMethod.AssertNotNull() ), 
                             InliningContext.Create( this, symbol.RemoveMethod.AssertNotNull() ) ) );
 
                 return eventDeclaration
@@ -142,8 +127,8 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var members = new List<MemberDeclarationSyntax>
                 {
+                    GetEventBackingField(eventFieldDeclaration, symbol),
                     GetLinkedDeclaration(),
-                    GetEventBackingField(eventFieldDeclaration, symbol)
                 };
 
                 if ( !this.IsInlineable( symbol ) )
@@ -151,7 +136,7 @@ namespace Caravela.Framework.Impl.Linking
                     members.Add( GetOriginalImplEvent( eventFieldDeclaration, symbol ) );
                 }
 
-                if ( !this.IsInlineable( (IPropertySymbol) this._analysisRegistry.GetLastOverride( symbol ) ) )
+                if ( !this.IsInlineable( (IEventSymbol) this._analysisRegistry.GetLastOverride( symbol ) ) )
                 {
                     members.Add( GetTrampolineEvent( eventFieldDeclaration, symbol ) );
                 }
@@ -175,7 +160,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var transformedAdd =
                     AccessorDeclaration(
-                        SyntaxKind.GetAccessorDeclaration,
+                        SyntaxKind.AddAccessorDeclaration,
                         List<AttributeListSyntax>(),
                         TokenList(),
                         this.GetLinkedBody( 
@@ -184,7 +169,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 var transformedRemove =
                     AccessorDeclaration(
-                        SyntaxKind.SetAccessorDeclaration,
+                        SyntaxKind.RemoveAccessorDeclaration,
                         List<AttributeListSyntax>(),
                         TokenList(),
                         this.GetLinkedBody( 
@@ -266,7 +251,7 @@ namespace Caravela.Framework.Impl.Linking
                     eventField.Modifiers,
                     eventField.Declaration.Type,
                     null,
-                    Identifier( symbol.Name ),
+                    Identifier( GetOriginalImplMemberName( symbol.Name ) ),
                     AccessorList(
                         List(
                             new[]

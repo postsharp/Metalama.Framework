@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         
         public override bool CanInline( IMethodSymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression )
         {
-            // The syntax has to be in form: return <annotated_method_expression( <arguments> );
+            // The syntax has to be in form: return (<type>)<annotated_method_expression( <arguments> );
             if ( annotatedExpression.Parent == null || annotatedExpression.Parent is not InvocationExpressionSyntax invocationExpression)
             {
                 return false;

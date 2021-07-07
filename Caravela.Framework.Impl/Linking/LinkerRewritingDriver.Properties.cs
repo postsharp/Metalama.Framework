@@ -48,7 +48,6 @@ namespace Caravela.Framework.Impl.Linking
 
         private bool IsInlineable( IPropertySymbol symbol )
         {
-
             if ( this.GetLinkerOptions( symbol ).ForceNotInlineable )
             {
                 return false;
@@ -73,6 +72,12 @@ namespace Caravela.Framework.Impl.Linking
                 var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = (IPropertySymbol) this._analysisRegistry.GetLastOverride( symbol );
 
+                if ( IsAutoPropertyDeclaration( propertyDeclaration ) )
+                {
+                    // Backing field for auto property.
+                    members.Add( GetPropertyBackingField( propertyDeclaration, symbol ) );
+                }
+
                 if ( this.IsInlineable( lastOverride ) )
                 {
                     members.Add( GetLinkedDeclaration() );
@@ -85,12 +90,6 @@ namespace Caravela.Framework.Impl.Linking
                 if ( !this.IsInlineable( symbol ) )
                 {
                     members.Add( GetOriginalImplProperty( propertyDeclaration, symbol ) );
-                }
-
-                if ( IsAutoPropertyDeclaration( propertyDeclaration ) )
-                {
-                    // Backing field for auto property.
-                    members.Add( GetPropertyBackingField( propertyDeclaration, symbol ) );
                 }
 
                 return members;
