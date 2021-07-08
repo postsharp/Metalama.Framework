@@ -1,8 +1,5 @@
 <Project>
 
-    <!-- LocalBuildId.props is created by CreateLocalPackages.ps1. It is used on development environments only (not on build servers) -->
-    <Import Project="LocalBuildId.props" Condition="Exists('LocalBuildId.props')" />
-
     <!-- To create a development release build, define the properties Configuration=Release and UseLocalBuildId=True -->
 
     <PropertyGroup>

@@ -4,6 +4,14 @@
 # It generates a new version number, which is then read by Version.props so that it is available
 # by other solutions that reference the NuGet packages.
 
+# Stop after first error.
+$ErrorActionPreference = "Stop"
+
+# Check that we are in the root of a GIT repository.
+If ( -Not ( Test-Path -Path ".\.git" ) ) {
+    throw "This script has to run in a GIT repository root!"
+}
+
 $random1 = Get-Random 
 $random2 = Get-Random
 
@@ -14,7 +22,8 @@ $props = "<Project><PropertyGroup><LocalBuildId>$random</LocalBuildId></Property
 if (Test-Path "artifacts\bin\Debug" -PathType Container ) {
     del "artifacts\bin\Debug\*.nupkg"
 }
-$LocalBuildIdProps = "..\LocalBuildId.props";
+
+$LocalBuildIdProps = "LocalBuildId.props";
 
 if ( Test-Path $LocalBuildIdProps ) {
     Remove-Item $LocalBuildIdProps
@@ -23,11 +32,11 @@ if ( Test-Path $LocalBuildIdProps ) {
 New-Item $LocalBuildIdProps -Value $props | Out-Null
 
 if ( $release ) {
-$configuration = "Release"
-$obfuscation = "True"
+    $configuration = "Release"
+    $obfuscation = "True"
 } else {
-$configuration = "Debug"
-$obfuscation = "False" 
+    $configuration = "Debug"
+    $obfuscation = "False" 
 }
 
 
