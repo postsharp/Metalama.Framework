@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 
 # Check that we are in the root of a GIT repository.
 If ( -Not ( Test-Path -Path ".\.git" ) ) {
-    throw "This script has to run in a GIT repository root! Usage: Copy this file to the root of the repository and execute. The file deletes itself upon success."
+    throw "This script has to run in a GIT repository root!"
 }
 
 # Update/initialize the engineering subtree.

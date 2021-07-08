@@ -36,6 +36,7 @@ This repository contains common development, build and publishig scripts and con
 
 - From the repository root containing the `.engineering` subtree, execute `& .engineering\PullEngineering.ps1`.
 - Follow the steps described in [the changelog](CHANGELOG.md).
+- Commit & push. (Even if there are no changes ouside the `.engineering` subtree.)
 
 ## Features
 
