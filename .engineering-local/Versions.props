@@ -2,7 +2,7 @@
 
     <!-- The version of the product produced by this repository. -->
     <PropertyGroup>
-        <ProductMainVersion>0.1.4</ProductMainVersion>
+        <ProductMainVersion>0.3.1</ProductMainVersion>
         <!-- Empty for RTM. -->
         <ProductMaturity>preview</ProductMaturity>
     </PropertyGroup>
