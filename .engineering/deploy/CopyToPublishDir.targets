@@ -7,10 +7,6 @@
         <Configuration>Release</Configuration>
     </PropertyGroup>
 
-    <Import Project=".\referenced\Engineering.Versions.props" />
-    <Import Project=".\referenced\Engineering.Directories.props" />
-    <Import Project="..\.engineering-local\Shipping.props" />
-
     <PropertyGroup>
         <PackagesDir>$(OutputPath)</PackagesDir>
         <ShippingDir>..\publish</ShippingDir>

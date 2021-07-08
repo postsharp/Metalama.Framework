@@ -18,4 +18,12 @@
 
     </ItemGroup>
 
+    <PropertyGroup>
+        <!-- We only publish release builds -->
+        <Configuration>Release</Configuration>
+    </PropertyGroup>
+
+    <Import Project="Directory.Build.props" />
+    <Import Project=".engineering\deploy\CopyToPublishDir.targets" />
+
 </Project>

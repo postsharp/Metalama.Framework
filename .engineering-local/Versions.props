@@ -7,7 +7,7 @@
         <ProductMaturity>preview</ProductMaturity>
     </PropertyGroup>
 
-    <!-- Version of dependencies -->
+    <!-- Versions of dependencies -->
     <PropertyGroup>
 
         <RoslynVersion>3.8.0</RoslynVersion>
