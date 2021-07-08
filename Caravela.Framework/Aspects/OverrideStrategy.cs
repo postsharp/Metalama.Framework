@@ -7,7 +7,7 @@ namespace Caravela.Framework.Aspects
     /// Conflict behavior of introduction advices.
     /// </summary>
     [CompileTimeOnly]
-    public enum ConflictBehavior
+    public enum OverrideStrategy
     {
         /// <summary>
         /// The advice fails with a compilation error if the member already exists in the target declaration. Same as <see cref="Fail"/>.
@@ -32,8 +32,9 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// If the member already exists, the advice attempts to redefine it using <c>new</c> or fails with a compilation error if that is not possible.
         /// </summary>
-        New = 3,
+        New = 3
 
+        /*
         // TODO: What happens if the there is a conflict while merging members?
 
         /// <summary>
@@ -41,5 +42,6 @@ namespace Caravela.Framework.Aspects
         /// Merging is done by introducing individual member of the template into the target type.
         /// </summary>
         Merge = 4
+        */
     }
 }

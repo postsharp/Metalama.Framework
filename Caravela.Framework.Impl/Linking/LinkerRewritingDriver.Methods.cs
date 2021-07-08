@@ -32,11 +32,11 @@ namespace Caravela.Framework.Impl.Linking
 
                 if (SymbolEqualityComparer.Default.Equals(symbol, lastOverride))
                 {
-                    return this.IsInlineable( symbol ) && !this.GetLinkerOptions( symbol ).ForceNotDiscardable;
+                    return this.IsInlineable( symbol );
                 }
                 else
                 {
-                    return (this.IsInlineable( symbol ) || aspectReferences.Count == 0) && !this.GetLinkerOptions( symbol ).ForceNotDiscardable;
+                    return this.IsInlineable( symbol ) || aspectReferences.Count == 0;
                 }
             }
             else
@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.Linking
                 throw new AssertionFailedException();
             }
 
-            if ( this.GetLinkerOptions( symbol ).ForceNotInlineable )
+            if ( GetDeclarationFlags( symbol ).HasFlag( LinkerDeclarationFlags.NotInlineable ) )
             {
                 return false;
             }
@@ -110,7 +110,7 @@ namespace Caravela.Framework.Impl.Linking
             MethodDeclarationSyntax GetLinkedDeclaration()
             {
                 return methodDeclaration
-                    .WithBody( 
+                    .WithBody(
                         this.GetLinkedBody( 
                             this.GetBodySource( symbol ), 
                             InliningContext.Create( this, symbol ) ) )
@@ -121,7 +121,10 @@ namespace Caravela.Framework.Impl.Linking
 
         private static MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method )
         {
-            return method.WithIdentifier( Identifier( GetOriginalImplMemberName( method.Identifier.ValueText ) ) );
+            return method
+                .WithIdentifier( Identifier( GetOriginalImplMemberName( method.Identifier.ValueText ) ) )
+                .WithBody( method.Body.AddSourceCodeAnnotation() )
+                .WithExpressionBody( method.ExpressionBody.AddSourceCodeAnnotation() );
         }
     }
 }

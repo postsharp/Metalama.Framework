@@ -15,7 +15,7 @@
     }
 
 set    {
-this.__Turtles__BackingField=value;    }
+this._turtles=value;    }
 }
-private int __Turtles__BackingField;
+private int _turtles;
     }

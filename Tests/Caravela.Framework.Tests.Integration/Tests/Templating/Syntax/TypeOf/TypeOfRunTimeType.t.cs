@@ -6,5 +6,5 @@ string Method(MyClass1 a)
     global::System.Console.WriteLine("Oops");
     global::System.Console.WriteLine(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle("T:Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1")));
     global::System.Console.WriteLine(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle("T:Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1")).FullName);
-    return this.Method(a);
+    return (string)this.Method(a);
 }

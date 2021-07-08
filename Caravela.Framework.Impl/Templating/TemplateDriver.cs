@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -78,7 +79,11 @@ namespace Caravela.Framework.Impl.Templating
                 var errorCountAfter = templateExpansionContext.DiagnosticSink.ErrorCount;
 
                 block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );
+
                 block = block.NormalizeWhitespace();
+
+                // We add generated-code annotations to the statements and not to the block itself so that the brackets don't get colored.
+                block = block.AddSourceCodeAnnotation();
 
                 return errorCountAfter == errorCountBefore;
             }

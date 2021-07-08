@@ -59,9 +59,9 @@ namespace Caravela.Framework.Impl.DesignTime
                     buildOptions,
                     context.CancellationToken );
             }
-            catch ( Exception e )
+            catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
-                Logger.Instance?.Write( e.ToString() );
+                DesignTimeExceptionHandler.ReportException( e );
             }
         }
 

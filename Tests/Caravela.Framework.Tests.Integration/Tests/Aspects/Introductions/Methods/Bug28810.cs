@@ -15,13 +15,13 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
             typedMethod.Name = "Clone";
             typedMethod.ReturnType = builder.TargetDeclaration;
 
-            builder.AdviceFactory.ImplementInterface(builder.TargetDeclaration, typeof(ICloneable), conflictBehavior: ConflictBehavior.Ignore);
+            builder.AdviceFactory.ImplementInterface(builder.TargetDeclaration, typeof(ICloneable), whenExists: OverrideStrategy.Ignore);
         }
 
         [Template]
         public virtual dynamic? CloneImpl()
         {
-            var baseMethod = meta.NamedType.Methods.OfExactSignature("Clone", 0, Array.Empty<IType>());
+            var baseMethod = meta.Type.Methods.OfExactSignature("Clone", 0, Array.Empty<IType>());
 
             return null;
         }

@@ -5,12 +5,12 @@
 
 public global::System.Int32 AutoProperty
 {get    {
-    return this.__AutoProperty__BackingField;
+    return this._autoProperty;
     }
 
 set    {
-this.__AutoProperty__BackingField=value;    }
-}private global::System.Int32 __AutoProperty__BackingField;
+this._autoProperty=value;    }
+}private global::System.Int32 _autoProperty;
 
 public global::System.Int32 Property
 {get    {

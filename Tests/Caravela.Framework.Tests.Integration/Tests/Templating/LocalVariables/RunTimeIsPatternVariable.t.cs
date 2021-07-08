@@ -5,5 +5,5 @@ int Method(int a)
         a_1.GetEnumerator();
     }
 
-    return this.Method(a);
+    return (int)this.Method(a);
 }

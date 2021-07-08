@@ -2,5 +2,5 @@ int Method(int a)
 {
     // 1
 
-    return this.Method(a);
+    return (int)this.Method(a);
 }

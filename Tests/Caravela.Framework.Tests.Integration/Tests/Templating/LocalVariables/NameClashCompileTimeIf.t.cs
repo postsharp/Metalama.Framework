@@ -17,5 +17,5 @@ int Method(int a)
         global::System.Console.WriteLine(x_3);
     }
 
-    return this.Method(a);
+    return (int)this.Method(a);
 }

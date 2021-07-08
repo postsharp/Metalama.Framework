@@ -10,6 +10,7 @@ namespace Caravela.Framework.Diagnostics
     /// Exposes a <see cref="DiagnosticLocation"/> property that determines the location of a user-code diagnostic.
     /// This interface is implemented by <see cref="IDeclaration"/>.
     /// </summary>
+    /// <seealso href="@diagnostics"/>
     [CompileTimeOnly]
     public interface IDiagnosticScope
     {

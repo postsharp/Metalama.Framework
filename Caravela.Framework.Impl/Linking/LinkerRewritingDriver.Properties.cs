@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking.Inlining;
+using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -31,13 +32,11 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( SymbolEqualityComparer.Default.Equals( symbol, lastOverride ) )
                 {
-                    return this.IsInlineable( symbol ) && !this.GetLinkerOptions( symbol ).ForceNotDiscardable;
+                    return this.IsInlineable( symbol );
                 }
                 else
                 {
-                    return 
-                        (this.IsInlineable( symbol ) || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0)) 
-                        && !this.GetLinkerOptions( symbol ).ForceNotDiscardable;
+                    return this.IsInlineable( symbol ) || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0);
                 }
             }
             else
@@ -48,7 +47,7 @@ namespace Caravela.Framework.Impl.Linking
 
         private bool IsInlineable( IPropertySymbol symbol )
         {
-            if ( this.GetLinkerOptions( symbol ).ForceNotInlineable )
+            if ( GetDeclarationFlags( symbol ).HasFlag( LinkerDeclarationFlags.NotInlineable ) )
             {
                 return false;
             }
@@ -180,6 +179,9 @@ namespace Caravela.Framework.Impl.Linking
                         propertyDeclaration.Type,
                         SingletonSeparatedList(
                             VariableDeclarator( Identifier( GetAutoPropertyBackingFieldName( symbol ) ) ) ) ) )
+                .WithLeadingTrivia( LineFeed )
+                .WithTrailingTrivia( LineFeed, LineFeed )
+                .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode )
                 .NormalizeWhitespace();
         }
 
@@ -212,7 +214,42 @@ namespace Caravela.Framework.Impl.Linking
 
         private static string GetAutoPropertyBackingFieldName( IPropertySymbol property )
         {
-            return $"__{property.Name}__BackingField";
+            var firstPropertyLetter = property.Name.Substring( 0, 1 );
+            var camelCasePropertyName = firstPropertyLetter.ToLowerInvariant() + (property.Name.Length > 1 ? property.Name.Substring( 1 ) : "");
+
+            if ( property.ContainingType.GetMembers( camelCasePropertyName ).Any() && firstPropertyLetter == firstPropertyLetter.ToLowerInvariant() )
+            {
+                // If there there is another property whose name differs only by the case of the first character, then the lower case variant will be suffixed.
+                // This is unlikely given naming standards.
+
+                camelCasePropertyName = FindUniqueName( camelCasePropertyName );
+            }
+
+            // TODO: Write tests of the collision resolution algorithm.
+
+            var fieldName = FindUniqueName( "_" + camelCasePropertyName );
+
+            return fieldName;
+
+            string FindUniqueName( string hint )
+            {
+                if ( !property.ContainingType.GetMembers( hint ).Any() )
+                {
+                    return hint;
+                }
+                else
+                {
+                    for ( var i = 1; /* Nothing */; i++ )
+                    {
+                        var candidate = hint + i;
+
+                        if ( !property.ContainingType.GetMembers( hint ).Any() )
+                        {
+                            return candidate;
+                        }
+                    }
+                }
+            }
         }
 
         private static bool IsAutoPropertyDeclaration( PropertyDeclarationSyntax propertyDeclaration )
@@ -244,11 +281,15 @@ namespace Caravela.Framework.Impl.Linking
                                         SyntaxKind.SetAccessorDeclaration,
                                         GetImplicitSetterBody(symbol.SetMethod))
                                     : null,
-                                }.Where( a => a != null ).AssertNoneNull() ) ) );
+                                }.Where( a => a != null ).AssertNoneNull() ) ) )
+                    ;
             }
             else
             {
-                return property.WithIdentifier( Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ) );
+                return 
+                    property.WithIdentifier( Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ) )
+                    .WithInitializer( property.Initializer.AddSourceCodeAnnotation() )
+                    .WithAccessorList( property.AccessorList.AddSourceCodeAnnotation() );
             }
         }
     }

@@ -13,7 +13,6 @@ using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -27,14 +26,14 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
     /// </summary>
     internal class DesignTimeAspectPipeline : AspectPipeline
     {
-        // Syntax trees that may have compile time code based on namespaces. When a syntax tree is known to be compile-time but
-        // has been invalidated, we don't remove it from the dictionary, but we set its value to null. It allows to know
-        // that this specific tree is outdated, which then allows us to display a warning.
-        private readonly ConcurrentDictionary<string, SyntaxTree?> _compileTimeSyntaxTrees = new();
-
         private readonly object _configureSync = new();
         private readonly CompilationChangeTracker _compilationChangeTracker = new();
         private readonly FileSystemWatcher? _fileSystemWatcher;
+
+        // Syntax trees that may have compile time code based on namespaces. When a syntax tree is known to be compile-time but
+        // has been invalidated, we don't remove it from the dictionary, but we set its value to null. It allows to know
+        // that this specific tree is outdated, which then allows us to display a warning.
+        private ImmutableDictionary<string, SyntaxTree?>? _compileTimeSyntaxTrees;
 
         private AspectPipelineConfiguration? _lastKnownConfiguration;
 
@@ -54,9 +53,10 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         {
             if ( projectOptions.BuildTouchFile != null )
             {
-                this._fileSystemWatcher = new FileSystemWatcher(
-                    Path.GetDirectoryName( projectOptions.BuildTouchFile ),
-                    "*" + Path.GetExtension( projectOptions.BuildTouchFile ) ) { IncludeSubdirectories = true };
+                var watchedFilter = "*" + Path.GetExtension( projectOptions.BuildTouchFile );
+                var watchedDirectory = Path.GetDirectoryName( projectOptions.BuildTouchFile );
+
+                this._fileSystemWatcher = new FileSystemWatcher( watchedDirectory, watchedFilter ) { IncludeSubdirectories = false };
 
                 this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
                 this._fileSystemWatcher.EnableRaisingEvents = true;
@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
                 var hasRelevantChange = false;
 
-                foreach ( var file in this._compileTimeSyntaxTrees )
+                foreach ( var file in this._compileTimeSyntaxTrees.AssertNotNull() )
                 {
                     if ( file.Value == null )
                     {
@@ -94,27 +94,45 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
         internal void OnExternalBuildStarted()
         {
+            this._compilationChangeTracker.Reset();
             this.Reset();
             this.ExternalBuildStarted?.Invoke( this, EventArgs.Empty );
         }
 
-        private IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees( Compilation compilation )
+        private IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees( Compilation compilation, CancellationToken cancellationToken )
         {
-            List<SyntaxTree> trees = new( this._compileTimeSyntaxTrees.Count );
+            List<SyntaxTree> trees = new( this._compileTimeSyntaxTrees?.Count ?? 8 );
 
-            if ( this._compilationChangeTracker.LastCompilation == null )
+            if ( this._compileTimeSyntaxTrees == null )
             {
-                lock ( this._configureSync )
-                {
-                    this._compileTimeSyntaxTrees.Clear();
+                // The cache has not been set yet, so we need to compute the value from zero.
 
-                    this.InvalidateCache( compilation );
+                if ( this._compilationChangeTracker.LastCompilation != null && this._compilationChangeTracker.LastCompilation != compilation )
+                {
+                    throw new AssertionFailedException();
                 }
+
+                var newCompileTimeSyntaxTrees = ImmutableDictionary<string, SyntaxTree?>.Empty;
+
+                foreach ( var syntaxTree in compilation.SyntaxTrees )
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    
+                    if ( CompileTimeCodeDetector.HasCompileTimeCode( syntaxTree.GetRoot() ) )
+                    {
+                        newCompileTimeSyntaxTrees = newCompileTimeSyntaxTrees.Add( syntaxTree.FilePath, syntaxTree );
+                        trees.Add( syntaxTree );
+                    }
+                }
+
+                this._compileTimeSyntaxTrees = newCompileTimeSyntaxTrees;
             }
             else
             {
                 foreach ( var syntaxTree in compilation.SyntaxTrees )
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    
                     if ( this._compileTimeSyntaxTrees.ContainsKey( syntaxTree.FilePath ) )
                     {
                         trees.Add( syntaxTree );
@@ -131,20 +149,36 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         /// determine whether an error must displayed in the editor.  
         /// </summary>
         public bool IsCompileTimeSyntaxTreeOutdated( string name )
-            => this._compileTimeSyntaxTrees.TryGetValue( name, out var syntaxTree ) && syntaxTree == null;
+            => this._compileTimeSyntaxTrees.AssertNotNull().TryGetValue( name, out var syntaxTree ) && syntaxTree == null;
 
         /// <summary>
         /// Invalidates the cache given a new <see cref="Compilation"/> and returns the set of changes between
         /// the previous compilation and the new one.
         /// </summary>
-        public CompilationChange InvalidateCache( Compilation newCompilation )
+        public CompilationChange InvalidateCache( Compilation newCompilation, CancellationToken cancellationToken )
         {
             lock ( this._configureSync )
             {
-                var compilationChange = this._compilationChangeTracker.Update( newCompilation );
+                var compilationChange = this._compilationChangeTracker.Update( newCompilation, cancellationToken );
+
+                // Do not cancel in the middle of cache invalidation!
 
                 if ( compilationChange.HasCompileTimeCodeChange )
                 {
+                    var newCompileTimeSyntaxTrees = this._compileTimeSyntaxTrees;
+
+                    if ( newCompileTimeSyntaxTrees == null )
+                    {
+                        if ( compilationChange.IsIncremental )
+                        {
+                            throw new AssertionFailedException( "Got an incremental compilation change, but _compileTimeSyntaxTrees is null." );
+                        }
+                        else
+                        {
+                            newCompileTimeSyntaxTrees = ImmutableDictionary<string, SyntaxTree?>.Empty;
+                        }
+                    }
+
                     foreach ( var change in compilationChange.SyntaxTreeChanges )
                     {
                         switch ( change.CompileTimeChangeKind )
@@ -152,42 +186,54 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                             case CompileTimeChangeKind.None:
                                 if ( change.HasCompileTimeCode )
                                 {
-                                    this._compileTimeSyntaxTrees[change.FilePath] = null;
-                                    OnCompileTimeChange();
+                                    newCompileTimeSyntaxTrees = newCompileTimeSyntaxTrees.SetItem( change.FilePath, null );
+
+                                    // We require an external build because we don't want to invalidate the pipeline configuration at
+                                    // each keystroke.
+                                    OnCompileTimeChange( true );
                                 }
 
                                 break;
 
                             case CompileTimeChangeKind.NewlyCompileTime:
-                                this._compileTimeSyntaxTrees[change.FilePath] = change.NewTree;
-                                OnCompileTimeChange();
+                                newCompileTimeSyntaxTrees = newCompileTimeSyntaxTrees.SetItem( change.FilePath, change.NewTree );
+                                OnCompileTimeChange( false );
 
                                 break;
 
                             case CompileTimeChangeKind.NoLongerCompileTime:
-                                this._compileTimeSyntaxTrees.TryRemove( change.FilePath, out _ );
-                                OnCompileTimeChange();
+                                newCompileTimeSyntaxTrees = newCompileTimeSyntaxTrees.Remove( change.FilePath );
+                                OnCompileTimeChange( false );
 
                                 break;
                         }
                     }
+
+                    this._compileTimeSyntaxTrees = newCompileTimeSyntaxTrees;
                 }
 
                 return compilationChange;
             }
 
-            void OnCompileTimeChange()
+            void OnCompileTimeChange( bool requireExternalBuild )
             {
                 if ( this.Status == DesignTimeAspectPipelineStatus.Ready )
                 {
                     Logger.Instance?.Write( $"DesignTimeAspectPipeline.InvalidateCache('{newCompilation.AssemblyName}'): compile-time change detected." );
 
-                    this.Status = DesignTimeAspectPipelineStatus.NeedsExternalBuild;
-
-                    if ( this.ProjectOptions.BuildTouchFile != null && File.Exists( this.ProjectOptions.BuildTouchFile ) )
+                    if ( requireExternalBuild )
                     {
-                        using var mutex = MutexHelper.WithGlobalLock( this.ProjectOptions.BuildTouchFile );
-                        File.Delete( this.ProjectOptions.BuildTouchFile );
+                        this.Status = DesignTimeAspectPipelineStatus.NeedsExternalBuild;
+
+                        if ( this.ProjectOptions.BuildTouchFile != null && File.Exists( this.ProjectOptions.BuildTouchFile ) )
+                        {
+                            using var mutex = MutexHelper.WithGlobalLock( this.ProjectOptions.BuildTouchFile );
+                            File.Delete( this.ProjectOptions.BuildTouchFile );
+                        }
+                    }
+                    else
+                    {
+                        this.Reset();
                     }
                 }
             }
@@ -196,7 +242,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         /// <summary>
         /// Resets the current pipeline, including all caches and statuses.
         /// </summary>
-        public void Reset()
+        private void Reset()
         {
             lock ( this._configureSync )
             {
@@ -204,24 +250,32 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
                 this._lastKnownConfiguration = null;
                 this.Status = DesignTimeAspectPipelineStatus.Default;
-                this._compilationChangeTracker.Reset();
-                this._compileTimeSyntaxTrees.Clear();
+                this._compileTimeSyntaxTrees = null;
+
+                // We don't reset the change tracker from here because the current method is called as a result of a change detected by the change tracker.
+                // If we call Reset here, we would never get a stable cached configuration, it would always be invalidated.
             }
         }
 
         internal bool TryGetConfiguration(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
+            bool ignoreStatus,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
         {
             lock ( this._configureSync )
             {
+                if ( this.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild && ignoreStatus )
+                {
+                    this.Status = DesignTimeAspectPipelineStatus.Default;
+                }
+
                 if ( this._lastKnownConfiguration == null )
                 {
                     // If we don't have any configuration, we will build one, because this is the first time we are called.
 
-                    var compileTimeTrees = this.GetCompileTimeSyntaxTrees( compilation.Compilation );
+                    var compileTimeTrees = this.GetCompileTimeSyntaxTrees( compilation.Compilation, cancellationToken );
 
                     if ( !this.TryInitialize(
                         diagnosticAdder,
@@ -282,9 +336,9 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
             // The production use case should call UpdateCompilation before calling Execute, so a call to UpdateCompilation is redundant,
             // but some tests don't. Redundant calls to UpdateCompilation have no adverse side effect.
-            this.InvalidateCache( compilation.Compilation );
+            this.InvalidateCache( compilation.Compilation, cancellationToken );
 
-            if ( !this.TryGetConfiguration( compilation, diagnosticList, cancellationToken, out var configuration ) )
+            if ( !this.TryGetConfiguration( compilation, diagnosticList, false, cancellationToken, out var configuration ) )
             {
                 return new DesignTimeAspectPipelineResult(
                     false,

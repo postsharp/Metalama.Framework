@@ -22,7 +22,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Dyna
             return meta.Method.Invoke();
         }
         
-         [Introduce(ConflictBehavior = ConflictBehavior.Override)]
+         [Introduce(WhenExists = OverrideStrategy.Override)]
         public int OverrideInt()
         {
             Console.WriteLine("Introduced");
@@ -31,7 +31,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Dyna
             return meta.Method.Invoke();
         }
         
-          [Introduce(ConflictBehavior = ConflictBehavior.Override)]
+          [Introduce(WhenExists = OverrideStrategy.Override)]
         public void OverrideVoid()
         {
             Console.WriteLine("Introduced");

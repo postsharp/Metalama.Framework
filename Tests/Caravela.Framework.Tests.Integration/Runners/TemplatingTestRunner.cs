@@ -286,8 +286,18 @@ namespace Caravela.Framework.Tests.Integration.Runners
                             SyntaxFactory.IdentifierName( targetMethod.Name ) ),
                         SyntaxFactory.ArgumentList(
                             SyntaxFactory.SeparatedList(
-                                targetMethod.Parameters.Select( x =>
-                                    SyntaxFactory.Argument( SyntaxFactory.IdentifierName( x.Name ) ) ) ) ) );
+                                targetMethod.Parameters.Select( p =>
+                                    SyntaxFactory.Argument(
+                                        null,
+                                        p.RefKind switch
+                                        {
+                                            Code.RefKind.None => default,
+                                            Code.RefKind.In => default,
+                                            Code.RefKind.Out => SyntaxFactory.Token( SyntaxKind.OutKeyword ),
+                                            Code.RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
+                                            _ => throw new AssertionFailedException(),
+                                        }, 
+                                        SyntaxFactory.IdentifierName( p.Name ) ) ) ) ) );
             }
         }
     }

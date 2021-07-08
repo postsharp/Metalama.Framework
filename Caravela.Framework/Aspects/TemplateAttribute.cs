@@ -29,7 +29,19 @@ namespace Caravela.Framework.Aspects
 
         public IntroductionScope Scope { get; set; }
 
-        public ConflictBehavior ConflictBehavior { get; set; }
+        /// <summary>
+        /// Gets or sets the implementation strategy (like <see cref="OverrideStrategy.Override"/>, <see cref="OverrideStrategy.Fail"/> or <see cref="OverrideStrategy.Ignore"/>) when the member is already declared in the target type.
+        /// The default value is <see cref="OverrideStrategy.Fail"/>. 
+        /// </summary>
+        public OverrideStrategy WhenExists { get; set; }
+
+        /// <summary>
+        /// Gets or sets the implementation strategy (like <see cref="OverrideStrategy.Override"/>, <see cref="OverrideStrategy.Fail"/> or <see cref="OverrideStrategy.Ignore"/>) when the member is already declared
+        /// in a parent class of the target tye.
+        /// The default value is <see cref="OverrideStrategy.Fail"/>. 
+        /// </summary>
+        [Obsolete( "Not implemented." )]
+        public OverrideStrategy WhenInherited { get; set; }
 
         public Accessibility? GetAccessibility() => this._accessibility;
 

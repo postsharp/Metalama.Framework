@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Templating.Dynamic.Cast
         [TestTemplate]
         dynamic? Template()
         {
-            var field = meta.NamedType.Fields.Single();
+            var field = meta.Type.Fields.Single();
             object? clone = null;
             field.Invokers.Base!.SetValue(
                 clone, 

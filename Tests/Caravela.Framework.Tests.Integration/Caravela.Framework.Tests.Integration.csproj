@@ -60,12 +60,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Tests\Linker\Inliners\Methods\" />
-    <Folder Include="Tests\Linker\Inliners\Events\" />
-    <Folder Include="Tests\Linker\Interfaces\" />
-    <Folder Include="Tests\Linker\Discarding\" />
-    <Folder Include="Tests\Linker\Inliners\Properties\" />
-    <Folder Include="Tests\Linker\References\" />
+    <None Include="Tests\Formatting\Output\Introduce.t.cs" />
+    <None Include="Tests\Formatting\Output\Override.t.cs" />
   </ItemGroup>
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />

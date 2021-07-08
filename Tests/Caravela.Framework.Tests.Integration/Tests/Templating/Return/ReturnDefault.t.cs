@@ -2,8 +2,7 @@ int Method(int a)
 {
     try
     {
-        global::System.Int32 result;
-        result = this.Method(a);
+        var result = this.Method(a);
         return (int)result;
     }
     catch

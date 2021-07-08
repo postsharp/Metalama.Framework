@@ -31,7 +31,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMet
         
         public void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            builder.AdviceFactory.OverrideMethod( builder.TargetDeclaration, nameof(Override), AdviceOptions.Default.WithLinkerOptions(true) );
+            builder.AdviceFactory.OverrideMethod( builder.TargetDeclaration, nameof(Override), new () { {"__ForceNotInlineable", true } } );
             builder.Diagnostics.Suppress( null, _suppression );
         }
 

@@ -12,14 +12,14 @@ namespace Caravela.Framework.Code
     public interface INamespace : IDeclaration
     {
         /// <summary>
-        /// Gets the short name of the namespace.
+        /// Gets the short name of the namespace, or <c>null</c> if this is the global namespace.
         /// </summary>
-        string Name { get; }
+        string? Name { get; }
 
         /// <summary>
-        /// Gets the full name of the namespace.
+        /// Gets the full name of the namespace, or <c>null</c> if this is the global namespace.
         /// </summary>
-        string FullName { get; }
+        string? FullName { get; }
 
         /// <exclude/>
         [Obsolete( "Not implemented." )]

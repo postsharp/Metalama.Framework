@@ -9,5 +9,5 @@ int Method(int a)
         throw;
     }
 
-    return this.Method(a);
+    return (int)this.Method(a);
 }

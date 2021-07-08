@@ -58,7 +58,7 @@ namespace Caravela.TestFramework
                 testResult.SetFailed( "CompileTimeAspectPipeline.TryExecute failed." );
             }
 
-            if ( testInput.Options.WriteHtml.GetValueOrDefault() )
+            if ( testInput.Options.WriteInputHtml.GetValueOrDefault() || testInput.Options.WriteOutputHtml.GetValueOrDefault() )
             {
                 this.WriteHtml( testInput, testResult );
             }

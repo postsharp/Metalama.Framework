@@ -5,21 +5,21 @@
 
 public global::System.Int32 IntroducedProperty_Auto
 {get    {
-    return this.__IntroducedProperty_Auto__BackingField;
+    return this._introducedProperty_Auto;
     }
 
 set    {
-this.__IntroducedProperty_Auto__BackingField=value;    }
-}private global::System.Int32 __IntroducedProperty_Auto__BackingField;
+this._introducedProperty_Auto=value;    }
+}private global::System.Int32 _introducedProperty_Auto;
 
 public static global::System.Int32 IntroducedProperty_Auto_Static
 {get    {
-    return __IntroducedProperty_Auto_Static__BackingField;
+    return _introducedProperty_Auto_Static;
     }
 
 set    {
-__IntroducedProperty_Auto_Static__BackingField=value;    }
-}private static global::System.Int32 __IntroducedProperty_Auto_Static__BackingField;
+_introducedProperty_Auto_Static=value;    }
+}private static global::System.Int32 _introducedProperty_Auto_Static;
 
 public global::System.Int32 IntroducedProperty_Accessors
 {get    {

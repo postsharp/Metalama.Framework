@@ -10,6 +10,7 @@ namespace Caravela.Framework.Aspects
     /// <summary>
     /// A base aspect that overrides the implementation of a method.
     /// </summary>
+    /// <seealso href="@overriding-methods"/>
     [AttributeUsage( AttributeTargets.Method )]
     public abstract class OverrideMethodAspect : Attribute, IAspect<IMethod>
     {

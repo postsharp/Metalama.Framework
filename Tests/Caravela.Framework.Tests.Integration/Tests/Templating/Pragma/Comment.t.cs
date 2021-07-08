@@ -6,5 +6,5 @@ int Method(int a)
 
     // Oops 2
 
-    return this.Method(a);
+    return (int)this.Method(a);
 }

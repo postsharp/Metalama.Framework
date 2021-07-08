@@ -12,5 +12,5 @@ int Method(int a)
     global::System.Collections.Generic.IEnumerable<global::System.Object> enumerable when global::System.Linq.Enumerable.Count(enumerable) > 1 => -1, global::System.Collections.Generic.IEnumerable<global::System.Object> enumerable2 => global::System.Linq.Enumerable.Count(enumerable2)}
 
     ;
-    return this.Method(a);
+    return (int)this.Method(a);
 }

@@ -105,7 +105,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             if ( this._isEventField && this.ExplicitInterfaceImplementations.Count > 0 )
             {
                 // Add annotation to the explicit annotation that the linker should treat this an event field.
-                @event = @event.AddLinkerDeclarationFlags( LinkerDeclarationFlags.EventField );
+                @event = @event.WithLinkerDeclarationFlags( LinkerDeclarationFlags.EventField );
             }
 
             return new[]

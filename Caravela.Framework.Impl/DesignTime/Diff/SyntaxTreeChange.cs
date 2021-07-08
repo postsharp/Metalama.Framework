@@ -49,5 +49,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diff
             this.FilePath = filePath;
             this.NewTree = newTree;
         }
+
+        public override string ToString() => $"{this.FilePath}, ChangeKind={this.SyntaxTreeChangeKind}, CompileTimeChangeKind={this.CompileTimeChangeKind}";
     }
 }

@@ -8,6 +8,10 @@ using System.Linq.Expressions;
 namespace Caravela.Framework.Aspects
 {
     // ReSharper disable once ClassNeverInstantiated.Global
+
+    /// <summary>
+    /// Not implemented.
+    /// </summary>
     public sealed class InterfaceMemberSpecification
     {
 #pragma warning disable IDE0051 // Remove unused private members

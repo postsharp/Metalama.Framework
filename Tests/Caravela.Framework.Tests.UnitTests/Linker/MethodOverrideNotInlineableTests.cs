@@ -20,7 +20,7 @@ class T
     {
     }
 
-    [PseudoForceNotInlineable]
+    [PseudoNotInlineable]
     void Foo()
     {
         Test(""Original"");
@@ -30,7 +30,7 @@ class T
     void Foo_Override()
     {
         Test(""Before"");
-        link(this.Foo, inline)();
+        link(this.Foo)();
         Test(""After"");
     }
 }
@@ -43,7 +43,6 @@ class T
     {
     }
 
-    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
     void Foo()
     {
         Test(""Before"");
@@ -51,7 +50,6 @@ class T
         Test(""After"");
     }
 
-    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
     void __Foo__OriginalImpl()
     {
         Test(""Original"");
@@ -156,13 +154,11 @@ class T
     {
     }
 
-    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
     void Foo()
     {
         this.Foo_Override();
     }
 
-    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
     void __Foo__OriginalImpl()
     {
         Test(""Original"");
@@ -227,13 +223,11 @@ class T
     {
     }
 
-    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
     void Foo()
     {
         this.Foo_Override2();
     }
 
-    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
     void __Foo__OriginalImpl()
     {
         Test(""Original"");
@@ -333,7 +327,6 @@ class T
     {
     }
 
-    [PseudoForceNotInlineable]
     int Foo()
     {
         Test(""Original"");
@@ -345,7 +338,7 @@ class T
     {
         Test(""Before"");
         int result;
-        result = link(this.Foo, inline)();
+        result = link(this.Foo)();
         Test(""After"");
         return result;
     }
@@ -359,7 +352,6 @@ class T
     {
     }
 
-    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
     int Foo()
     {
         Test(""Before"");
@@ -369,7 +361,6 @@ class T
         return result;
     }
 
-    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
     int __Foo__OriginalImpl()
     {
         Test(""Original"");

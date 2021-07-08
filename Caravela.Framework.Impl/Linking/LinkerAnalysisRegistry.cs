@@ -29,48 +29,6 @@ namespace Caravela.Framework.Impl.Linking
             this._aspectReferences = aspectReferenceIndex;
         }
 
-        public AspectLinkerOptions GetLinkerOptions( ISymbol symbol )
-        {
-            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
-
-            if ( introducedMember != null )
-            {
-                return introducedMember.LinkerOptions ?? AspectLinkerOptions.Default;
-            }
-            else
-            {
-                var linkerOptionsAttribute =
-                    symbol.GetAttributes()
-                   .SingleOrDefault( attributeData => attributeData.AttributeClass?.ToDisplayString() == typeof( AspectLinkerOptionsAttribute ).FullName );
-
-                if ( linkerOptionsAttribute != null )
-                {
-                    var forceNotInlineable = false;
-                    var forceNotDiscardable = false;
-
-                    if ( linkerOptionsAttribute.NamedArguments
-                       .Any( x => x.Key == nameof( AspectLinkerOptionsAttribute.ForceNotInlineable ) && (bool?) x.Value.Value == true ) )
-                    {
-                        // Inlining is explicitly disabled for the declaration.
-                        forceNotInlineable = true;
-                    }
-
-                    if ( linkerOptionsAttribute.NamedArguments
-                       .Any( x => x.Key == nameof( AspectLinkerOptionsAttribute.ForceNotInlineable ) && (bool?) x.Value.Value == true ) )
-                    {
-                        // Discarding is explicitly disabled for the declaration.
-                        forceNotDiscardable = true;
-                    }
-
-                    return AspectLinkerOptions.Create( forceNotInlineable, forceNotDiscardable );
-                }
-                else
-                {
-                    return AspectLinkerOptions.Default;
-                }
-            }
-        }
-
         /// <summary>
         /// Determines whether the symbol represents override target.
         /// </summary>

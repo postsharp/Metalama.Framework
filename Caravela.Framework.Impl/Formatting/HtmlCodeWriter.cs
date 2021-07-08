@@ -12,7 +12,8 @@ using System.Text;
 namespace Caravela.Framework.Impl.Formatting
 {
     public sealed partial class HtmlCodeWriter
-    {
+    {        
+        private const string _csClassTagName = "csharp";
         private readonly HtmlCodeWriterOptions _options;
 
         public HtmlCodeWriter( HtmlCodeWriterOptions options )
@@ -23,7 +24,9 @@ namespace Caravela.Framework.Impl.Formatting
         public void Write( Document document, SyntaxNode? annotatedSyntaxRoot, TextWriter textWriter )
         {
             var sourceText = document.GetTextAsync().Result;
+            var syntaxTree = document.GetSyntaxTreeAsync().Result!;
 
+            // Process the annotations by the template compiler.
             ClassifiedTextSpanCollection classifiedTextSpans;
 
             if ( annotatedSyntaxRoot != null )
@@ -42,12 +45,15 @@ namespace Caravela.Framework.Impl.Formatting
                 textWriter.Write( this._options.Prolog );
             }
 
+            // Process the annotations by the aspect linker (on the output document).
+            GeneratedCodeVisitor generatedCodeVisitor = new( classifiedTextSpans );
+            generatedCodeVisitor.Visit( syntaxTree.GetRoot() );
+
             textWriter.Write( "<pre><code class=\"nohighlight\">" );
 
             var i = 0;
 
             // Add C# classifications
-            var syntaxTree = document.GetSyntaxTreeAsync().Result!;
             var semanticModel = document.Project.GetCompilationAsync().Result!.GetSemanticModel( syntaxTree );
 
             var spans = Classifier.GetClassifiedSpans(
@@ -60,7 +66,7 @@ namespace Caravela.Framework.Impl.Formatting
                 syntaxTree.GetRoot().Span,
                 document.Project!.Solution.Workspace ) )
             {
-                classifiedTextSpans.SetTag( csharpSpan.TextSpan, "class", csharpSpan.ClassificationType );
+                classifiedTextSpans.SetTag( csharpSpan.TextSpan, _csClassTagName, csharpSpan.ClassificationType );
             }
 
             // Add XML doc based on the input compilation.
@@ -73,43 +79,52 @@ namespace Caravela.Framework.Impl.Formatting
             foreach ( var classifiedSpan in classifiedTextSpans )
             {
                 // Write the text between the previous span and the current one.
-                if ( i < classifiedSpan.Span.Start )
+                var textSpan = classifiedSpan.Span;
+
+                if ( i < textSpan.Start )
                 {
-                    var textBefore = sourceText.GetSubText( new TextSpan( i, classifiedSpan.Span.Start - i ) ).ToString();
+                    var textBefore = sourceText.GetSubText( new TextSpan( i, textSpan.Start - i ) ).ToString();
                     textWriter.Write( HtmlEncode( textBefore ) );
                 }
 
-                var spanText = sourceText.GetSubText( classifiedSpan.Span ).ToString();
+                var subText = sourceText.GetSubText( textSpan );
+                var spanText = subText.ToString();
 
                 if ( classifiedSpan.Classification != TextSpanClassification.Excluded )
                 {
                     List<string> classes = new();
                     string? title = null;
 
-                    if ( classifiedSpan.Classification != TextSpanClassification.Default )
-                    {
-                        classes.Add( $"cr-{classifiedSpan.Classification}" );
-                    }
+                    var isLeadingTrivia = string.IsNullOrWhiteSpace( spanText ) && (spanText[0] == '\r' || spanText[0] == '\n');
 
-                    if ( classifiedSpan.Tags.TryGetValue( "class", out var csClassification ) )
+                    if ( !isLeadingTrivia )
                     {
-                        foreach ( string c in csClassification.Split( '-' ) )
+                        if ( classifiedSpan.Classification != TextSpanClassification.Default )
                         {
-                            classes.Add( "cs-" + c.Trim().Replace( " ", "-" ) );
+                            classes.Add( $"cr-{classifiedSpan.Classification}" );
                         }
-                    }
 
-                    if ( this._options.AddTitles && !classifiedSpan.Tags.TryGetValue( "title", out title ) )
-                    {
-                        title = classifiedSpan.Classification switch
+                        if ( classifiedSpan.Tags.TryGetValue( _csClassTagName, out var csClassification ) )
                         {
-                            TextSpanClassification.Dynamic => "Dynamic member.",
-                            TextSpanClassification.CompileTime => "Compile-time code.",
-                            TextSpanClassification.RunTime => "Run-time code.",
-                            TextSpanClassification.TemplateKeyword => "Meta API.",
-                            TextSpanClassification.CompileTimeVariable => "Compile-time variable.",
-                            _ => null
-                        };
+                            foreach ( string c in csClassification.Split( '-' ) )
+                            {
+                                classes.Add( "cs-" + c.Trim().Replace( " ", "-" ) );
+                            }
+                        }
+
+                        if ( this._options.AddTitles && !classifiedSpan.Tags.TryGetValue( "title", out title ) )
+                        {
+                            title = classifiedSpan.Classification switch
+                            {
+                                TextSpanClassification.Dynamic => "Dynamic member.",
+                                TextSpanClassification.CompileTime => "Compile-time code.",
+                                TextSpanClassification.RunTime => "Run-time code.",
+                                TextSpanClassification.TemplateKeyword => "Meta API.",
+                                TextSpanClassification.CompileTimeVariable => "Compile-time variable.",
+                                TextSpanClassification.GeneratedCode => "Generated code.",
+                                _ => null
+                            };
+                        }
                     }
 
                     if ( classes.Count > 0 || !string.IsNullOrEmpty( title ) )
@@ -136,7 +151,7 @@ namespace Caravela.Framework.Impl.Formatting
                     }
                 }
 
-                i = classifiedSpan.Span.End;
+                i = textSpan.End;
             }
 
             // Write the remaining text.

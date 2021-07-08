@@ -41,31 +41,12 @@ namespace Caravela.Framework.Impl.Advices
                 return false;
             }
 
-            var aspectLinkerOptionsAttribute = templateDeclaration.Attributes.FirstOrDefault(
-                x => x.Type == x.Compilation.TypeFactory.GetTypeByReflectionType( typeof(AspectLinkerOptionsAttribute) ) );
-
-            var adviceOptions = AdviceOptions.Default;
-
-            if ( aspectLinkerOptionsAttribute != null )
-            {
-                var linkerOptionsArguments = attribute.NamedArguments.ToDictionary( p => p.Key, p => p.Value );
-
-                var forceNotInlineable = false;
-
-                if ( linkerOptionsArguments.TryGetValue( nameof(AspectLinkerOptionsAttribute.ForceNotInlineable), out var forceNotInlineableValue ) )
-                {
-                    forceNotInlineable = (bool) forceNotInlineableValue.Value.AssertNotNull();
-                }
-
-                adviceOptions = adviceOptions.WithLinkerOptions( forceNotInlineable );
-            }
-
             switch ( attribute.AttributeClass?.Name )
             {
                 case nameof(IntroduceAttribute):
                     {
                         TryGetNamedArgument<IntroductionScope>( nameof(IntroduceAttribute.Scope), out var scope );
-                        TryGetNamedArgument<ConflictBehavior>( nameof(IntroduceAttribute.ConflictBehavior), out var conflictBehavior );
+                        TryGetNamedArgument<OverrideStrategy>( nameof(IntroduceAttribute.WhenExists), out var conflictBehavior );
                         IMemberBuilder builder;
                         INamedType targetType;
 
@@ -104,7 +85,7 @@ namespace Caravela.Framework.Impl.Advices
                                     scope,
                                     conflictBehavior,
                                     layerName,
-                                    adviceOptions );
+                                    null );
 
                                 advice = introduceMethodAdvice;
                                 builder = introduceMethodAdvice.Builder;
@@ -122,7 +103,7 @@ namespace Caravela.Framework.Impl.Advices
                                     scope,
                                     conflictBehavior,
                                     layerName,
-                                    adviceOptions );
+                                    null );
 
                                 advice = introducePropertyAdvice;
                                 builder = introducePropertyAdvice.Builder;
@@ -140,7 +121,7 @@ namespace Caravela.Framework.Impl.Advices
                                     scope,
                                     conflictBehavior,
                                     layerName,
-                                    adviceOptions );
+                                    null );
 
                                 advice = introduceEventAdvice;
                                 builder = introduceEventAdvice.Builder;
@@ -148,7 +129,7 @@ namespace Caravela.Framework.Impl.Advices
                                 break;
 
                             default:
-                                throw new AssertionFailedException();
+                                throw new AssertionFailedException( $"Don't know how to introduce a {templateDeclaration.DeclarationKind}." );
                         }
 
                         advice.Initialize( Array.Empty<Advice>(), diagnosticAdder );

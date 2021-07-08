@@ -44,6 +44,24 @@ namespace Caravela.Framework.Impl.CodeModel
             return this.GetNamedType( symbol );
         }
 
+        public bool TryGetTypeByReflectionName( string reflectionName, [NotNullWhen( true )] out INamedType? namedType )
+        {
+            var symbol = this.Compilation.GetTypeByMetadataName( reflectionName );
+
+            if ( symbol == null )
+            {
+                namedType = null;
+
+                return false;
+            }
+            else
+            {
+                namedType = this.GetNamedType( symbol );
+
+                return true;
+            }
+        }
+
         public IType GetTypeByReflectionType( Type type ) => this.GetIType( this.CompilationModel.ReflectionMapper.GetTypeSymbol( type ) );
 
         internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )

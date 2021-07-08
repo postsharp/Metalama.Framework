@@ -12,6 +12,7 @@ namespace Caravela.Framework.Diagnostics
     /// For a weakly-typed or parameterless variant, see <see cref="DiagnosticDefinition"/>. 
     /// </summary>
     /// <typeparam name="T">Type of arguments: a single type if there is a single argument, or a named tuple type.</typeparam>
+    /// <seealso href="@diagnostics"/>
     public sealed class DiagnosticDefinition<T> : IDiagnosticDefinition
     {
         // Constructor used by internal code.

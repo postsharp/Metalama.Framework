@@ -13,7 +13,7 @@ using Xunit.Sdk;
 namespace Caravela.TestFramework
 {
     /// <summary>
-    /// An implementation of <see cref="DataAttribute"/> that generates test cases from files in the current directory. To be used with <c>[Theory]</c>.
+    /// An implementation of <c>SyntaxAttribute</c> that generates test cases from files in the current directory. To be used with <c>[Theory]</c>.
     /// This attribute will not include subdirectories that contain a file named <c>_Runner.cs</c>, nor subdirectories that are covered by
     /// another test method of the same class. It also takes into account the <c>caravelaTests.config</c> file.
     /// </summary>

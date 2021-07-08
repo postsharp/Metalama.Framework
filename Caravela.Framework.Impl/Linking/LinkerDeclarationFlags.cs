@@ -9,6 +9,7 @@ namespace Caravela.Framework.Impl.Linking
     internal enum LinkerDeclarationFlags
     {
         None = 0,
-        EventField = 1
+        EventField = 1,
+        NotInlineable = 1 << 15,
     }
 }

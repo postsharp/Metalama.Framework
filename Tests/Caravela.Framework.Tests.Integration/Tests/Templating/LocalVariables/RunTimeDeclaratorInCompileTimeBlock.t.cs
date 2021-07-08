@@ -4,5 +4,5 @@ int Method(int a)
     global::System.Console.WriteLine(x);
     var y = 0;
     global::System.Console.WriteLine(y);
-    return this.Method(a);
+    return (int)this.Method(a);
 }

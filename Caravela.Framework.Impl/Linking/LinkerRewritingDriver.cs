@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 // TODO: A lot methods here are called multiple times. Optimize.
@@ -35,11 +36,6 @@ namespace Caravela.Framework.Impl.Linking
             this.IntermediateCompilation = intermediateCompilation;
             this._inliners = inliners;
             this.ReferenceResolver = referenceResolver;
-        }
-
-        public AspectLinkerOptions GetLinkerOptions( ISymbol symbol )
-        {
-            return this._analysisRegistry.GetLinkerOptions( symbol );
         }
 
         public bool IsDiscarded( ISymbol symbol )
@@ -68,7 +64,6 @@ namespace Caravela.Framework.Impl.Linking
         {
             return
                 aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable )
-                && !this.GetLinkerOptions( aspectReference.ReferencedSymbol ).ForceNotInlineable
                 && this.GetInliner( aspectReference, out _ );
         }
 
@@ -436,5 +431,10 @@ namespace Caravela.Framework.Impl.Linking
         }
 
         internal static string GetOriginalImplMemberName( string memberName ) => $"__{memberName}__OriginalImpl";
+
+        private static LinkerDeclarationFlags GetDeclarationFlags(ISymbol symbol)
+        {
+            return symbol.DeclaringSyntaxReferences.Select( dsr => (dsr.GetSyntax() as MemberDeclarationSyntax)?.GetLinkerDeclarationFlags() ?? LinkerDeclarationFlags.None ).SingleOrDefault();
+        }
     }    
 }

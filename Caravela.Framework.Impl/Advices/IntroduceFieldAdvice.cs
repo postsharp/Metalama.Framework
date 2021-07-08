@@ -25,17 +25,17 @@ namespace Caravela.Framework.Impl.Advices
             INamedType targetDeclaration,
             string name,
             IntroductionScope scope,
-            ConflictBehavior conflictBehavior,
+            OverrideStrategy overrideStrategy,
             string layerName,
-            AdviceOptions? options )
-            : base( aspect, targetDeclaration, null, scope, conflictBehavior, layerName, options )
+            Dictionary<string, object?>? tags )
+            : base( aspect, targetDeclaration, null, scope, overrideStrategy, layerName, tags )
         {
-            this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, name, options?.LinkerOptions );
+            this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, name, AspectLinkerOptions.FromTags( tags ) );
         }
 
         public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
-            throw new NotImplementedException();
+            base.Initialize( declarativeAdvices, diagnosticAdder );
         }
 
         public override AdviceResult ToResult( ICompilation compilation )

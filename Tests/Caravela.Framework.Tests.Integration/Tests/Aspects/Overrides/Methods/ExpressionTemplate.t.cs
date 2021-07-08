@@ -9,7 +9,7 @@ public class Target
     [Test]
     public void Bar()
     {
-        _ = default;
+        _ = (object)default;
         return;
     }
 }

@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking.Inlining;
+using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 
@@ -67,7 +68,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 // Run the linking rewriter for this tree.
                 var linkedRoot = linkingRewriter.Visit( syntaxTree.GetRoot() );
-                var cleanRoot = cleanupRewriter.Visit( linkedRoot );
+                var cleanRoot = cleanupRewriter.Visit( linkedRoot ).WithAdditionalAnnotations( AspectPipelineAnnotations.ModifiedSyntaxTree );
 
                 var newSyntaxTree = syntaxTree.WithRootAndOptions( cleanRoot, syntaxTree.Options );
 

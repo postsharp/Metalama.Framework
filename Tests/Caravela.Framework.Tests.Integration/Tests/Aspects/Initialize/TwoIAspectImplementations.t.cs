@@ -16,23 +16,23 @@ class TargetCode
 
         [Log]
         public int Property {get    {
-    return this.__Property__BackingField;
+    return this._property;
     }
 
 set    {
         global::System.Console.WriteLine("Assigning Caravela.Framework.Tests.Integration.Aspects.Initialize.TwoIAspectImplementations.TargetCode.Property.set");
         global::System.Int32 _;
-this.__Property__BackingField=value;    }
+this._property=value;    }
 }
-private int __Property__BackingField;
+private int _property;
         [Log]
         public string? Field {get    {
-    return this.__Field__BackingField;
+    return this._field;
     }
 
 set    {
         global::System.Console.WriteLine("Assigning Caravela.Framework.Tests.Integration.Aspects.Initialize.TwoIAspectImplementations.TargetCode.Field.set");
         global::System.String? _;
-this.__Field__BackingField=value;    }
+this._field=value;    }
 }
-private string? __Field__BackingField;    }
+private string? _field;    }

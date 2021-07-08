@@ -1,10 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
+using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using FakeItEasy;
 using Microsoft.CodeAnalysis;
@@ -205,10 +206,6 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         {
                             throw new NotSupportedException( $"Unsupported pseudo attribute {name}" );
                         }
-                        else if ( name != "PseudoForceNotInlineable" )
-                        {
-                            newAttributes.Add( attribute );
-                        }
                     }
 
                     if ( newAttributes.Count > 0 )
@@ -230,30 +227,17 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                     return this.ProcessPseudoOverride( node, newAttributeLists, pseudoOverrideAttribute, forceNotInlineable );
                 }
-                else if ( forceNotInlineable )
-                {
-                    // If pseudo attribute is on the target declaration, generate the attribute there.
-                    newAttributeLists.Add(
-                        AttributeList(
-                            SingletonSeparatedList(
-                                Attribute(
-                                        QualifiedName(
-                                            QualifiedName(
-                                                QualifiedName(
-                                                    IdentifierName( "Caravela" ),
-                                                    IdentifierName( "Framework" ) ),
-                                                IdentifierName( "Aspects" ) ),
-                                            IdentifierName( "AspectLinkerOptions" ) ) )
-                                    .WithArgumentList(
-                                        AttributeArgumentList(
-                                            SingletonSeparatedList(
-                                                AttributeArgument( LiteralExpression( SyntaxKind.TrueLiteralExpression ) )
-                                                    .WithNameEquals( NameEquals( IdentifierName( "ForceNotInlineable" ) ) ) ) ) ) ) ) );
-                }
 
                 isPseudoMember = false;
 
-                return node.WithAttributeLists( List( newAttributeLists ) );
+                var transformedNode = node.WithAttributeLists( List( newAttributeLists ) );
+
+                if ( forceNotInlineable )
+                {
+                    transformedNode = transformedNode.WithLinkerDeclarationFlags( LinkerDeclarationFlags.NotInlineable );
+                }
+
+                return transformedNode;
             }
 
             private MemberDeclarationSyntax ProcessPseudoIntroduction(

@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Linking
             var addAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, AspectReferenceTargetKind.EventAddAccessor );
             var removeAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, AspectReferenceTargetKind.EventRemoveAccessor );
 
-            if ( addAspectReferences.Count == 0 && removeAspectReferences.Count == 0 && !this.GetLinkerOptions( symbol ).ForceNotDiscardable )
+            if ( addAspectReferences.Count == 0 && removeAspectReferences.Count == 0 )
             {
                 return true;
             }
@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Linking
 
         private bool IsInlineable( IEventSymbol symbol )
         {
-            if ( this.GetLinkerOptions( symbol ).ForceNotInlineable )
+            if ( GetDeclarationFlags( symbol ).HasFlag( LinkerDeclarationFlags.NotInlineable) )
             {
                 return false;
             }
@@ -240,7 +240,9 @@ namespace Caravela.Framework.Impl.Linking
 
         private static MemberDeclarationSyntax GetOriginalImplEvent( EventDeclarationSyntax @event )
         {
-            return @event.WithIdentifier( Identifier( GetOriginalImplMemberName( @event.Identifier.ValueText ) ) );
+            return @event
+                .WithIdentifier( Identifier( GetOriginalImplMemberName( @event.Identifier.ValueText ) ) )
+                .WithAccessorList( @event.AccessorList.AddSourceCodeAnnotation() );
         }
 
         private static MemberDeclarationSyntax GetOriginalImplEvent( EventFieldDeclarationSyntax eventField, IEventSymbol symbol )

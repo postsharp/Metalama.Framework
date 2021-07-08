@@ -217,5 +217,25 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
             Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
+
+        [Fact]
+        public void AddPartial()
+        {
+            var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C {}" );
+
+            var syntaxTree2 = CSharpSyntaxTree.ParseText( "partial class C {}" );
+
+            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+        }
+
+        [Fact]
+        public void RemovePartial()
+        {
+            var syntaxTree1 = CSharpSyntaxTree.ParseText( "partial class C {}" );
+
+            var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C {}" );
+
+            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+        }
     }
 }

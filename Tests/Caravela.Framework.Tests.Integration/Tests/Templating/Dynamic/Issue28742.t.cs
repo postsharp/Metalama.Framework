@@ -6,5 +6,6 @@ void Method()
     global::System.Console.WriteLine($"c={value_1}");
     var value_2 = ((global::Caravela.Framework.Tests.Integration.Tests.Templating.Dynamic.Issue28742.TargetCode)(this)).B;
     global::System.Console.WriteLine($"B={value_2}");
+    _ = (object)default;
     return;
 }

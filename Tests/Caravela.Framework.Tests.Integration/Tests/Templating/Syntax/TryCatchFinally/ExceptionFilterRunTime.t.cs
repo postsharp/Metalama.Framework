@@ -3,7 +3,7 @@ int Method(int a)
     try
     {
         global::System.Console.WriteLine(1);
-        return this.Method(a);
+        return (int)this.Method(a);
     }
     catch (global::System.Exception e)when (e.GetType().Name.Contains("DivideByZero"))
     {

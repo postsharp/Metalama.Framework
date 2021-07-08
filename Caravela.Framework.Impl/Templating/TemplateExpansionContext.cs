@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.Templating
                             Block(
                                 ExpressionStatement( invocationExpression ),
                                 ReturnStatement() )
-                            .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                            .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );                    
                     case null:
                         // No return expression.
                         return ReturnStatement();
@@ -82,7 +82,9 @@ namespace Caravela.Framework.Impl.Templating
                                                 "_",
                                                 "_",
                                                 TriviaList() ) ),
-                                        returnExpression ) ),
+                                        CastExpression(
+                                            PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), 
+                                            returnExpression ) ) ),
                                 ReturnStatement() )
                             .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
                 }

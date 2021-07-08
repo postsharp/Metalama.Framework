@@ -8,12 +8,11 @@ int Method(int a)
             break;
         case 1:
         {
-            global::System.Int32 x;
-            x = this.Method(a);
+            var x = this.Method(a);
         }
 
             break;
     }
 
-    return this.Method(a);
+    return (int)this.Method(a);
 }

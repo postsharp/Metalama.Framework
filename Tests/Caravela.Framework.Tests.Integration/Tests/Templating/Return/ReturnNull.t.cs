@@ -5,7 +5,6 @@ string Method(string a, string b)
         return null;
     }
 
-    global::System.String result;
-    result = this.Method(a, b);
+    var result = this.Method(a, b);
     return (string)result;
 }

@@ -1,13 +1,13 @@
 
 <html>
     <head>
-        <link rel="stylesheet" href="https://highlightjs.org/static/demo/styles/vs.css"/>
         <style>
             .cr-CompileTime,
             .cr-Conflict,
             .cr-TemplateKeyword,
             .cr-Dynamic,
-            .cr-CompileTimeVariable
+            .cr-CompileTimeVariable,
+            .cr-GeneratedCode
             {
                 background-color: rgba(50,50,90,0.1);
             }
@@ -75,13 +75,13 @@
             <span class="cr-CompileTime cs-punctuation">{</span>
                 <span class="cr-RunTime cs-local-name">runTimeObject</span><span class="cr-RunTime cs-operator">.</span><span class="cr-RunTime cs-method-name">RunTimeMethod</span><span class="cr-RunTime cs-punctuation">();</span>
                 <span class="cr-CompileTimeVariable cs-local-name">compileTimeObject</span><span class="cr-CompileTime cs-operator">.</span><span class="cr-CompileTime cs-method-name">CompileTimeMethod</span><span class="cr-CompileTime cs-punctuation">();</span>
-                <span class="cr-TemplateKeyword cs-class-name">meta</span><span class="cr-CompileTime cs-operator">.</span><span class="cr-CompileTime cs-property-name">Method</span><span class="cr-CompileTime cs-operator">.</span><span class="cr-CompileTime cs-method-name">ToString</span><span class="cr-CompileTime cs-punctuation">();</span>
+                <span class="cr-TemplateKeyword cs-class-name">meta</span><span class="cr-CompileTime cs-operator">.</span><span class="cr-CompileTime cs-static-symbol">Method</span><span class="cr-CompileTime cs-operator">.</span><span class="cr-CompileTime cs-method-name">ToString</span><span class="cr-CompileTime cs-punctuation">();</span>
             <span class="cr-CompileTime cs-punctuation">}</span>
 
             <span class="cr-RunTime cs-keyword cs-control">return</span><span class="cr-RunTime"> </span><span class="cr-TemplateKeyword cs-static-symbol">meta</span><span class="cr-TemplateKeyword cs-operator">.</span><span class="cr-TemplateKeyword cs-static-symbol">Proceed</span><span class="cr-CompileTime cs-punctuation">()</span><span class="cr-RunTime cs-punctuation">;</span>
         <span class="cr-CompileTime cs-punctuation">}</span>
-    <span class="cr-CompileTime cs-punctuation">}</span><span class="cr-CompileTime">
-</span><span class="cs-punctuation">}</span>
+    <span class="cr-CompileTime cs-punctuation">}</span>
+<span class="cs-punctuation">}</span>
 </code></pre>
        <p class='legend'>Legend:</p>
        <pre>
@@ -93,6 +93,8 @@
 <span class='cr-TemplateKeyword'>TemplateKeyword</span>
 <span class='cr-Conflict'>Conflict</span>
 <span class='cr-Excluded'>Excluded</span>
+<span class='cr-GeneratedCode'>GeneratedCode</span>
+<span class='cr-SourceCode'>SourceCode</span>
        </pre>
    </body>
 </html>
