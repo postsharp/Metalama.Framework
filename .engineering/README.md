@@ -25,18 +25,18 @@ This repository contains common development, build and publishig scripts and con
 
 ## Installation
 
-- Enable symlinks in .git/config.
-- Add the `.engineering` subtree:
+1. Enable symlinks in .git/config.
+2. Add the `.engineering` subtree:
 
 `git subtree add --prefix .engineering https://postsharp@dev.azure.com/postsharp/Caravela/_git/Caravela.Engineering master --squash`
 
-- Check `README.md` in each directory in the `.engineering` subtree for futher installation steps.
+3. Check `README.md` in each directory in the `.engineering` subtree for futher installation steps.
 
 ## Updating
 
-- From the repository root containing the `.engineering` subtree, execute `& .engineering\PullEngineering.ps1`.
-- Follow the steps described in [the changelog](CHANGELOG.md).
-- Commit & push. (Even if there are no changes ouside the `.engineering` subtree.)
+1. From the repository root containing the `.engineering` subtree, execute `& .engineering\PullEngineering.ps1`.
+2. Follow the steps described in [the changelog](CHANGELOG.md).
+3. Commit & push. (Even if there are no changes ouside the `.engineering` subtree.)
 
 ## Features
 
