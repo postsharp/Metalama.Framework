@@ -131,19 +131,27 @@ namespace Caravela.Framework.Impl.Linking
             {
                 return originalDeclaration.GetSymbol();
             }
+            else if ( overrideTarget is MemberBuilder builder )
+            {
+                return GetFromBuilder( builder );
+            }
             else if ( overrideTarget is BuiltMember builtMember )
             {
-                var builder = builtMember.Builder;
+                return GetFromBuilder( builtMember.Builder );
+            }
+            else
+            {
+                throw new AssertionFailedException();
+            }
+
+            ISymbol? GetFromBuilder( DeclarationBuilder builder )
+            {
                 var introducedBuilder = this._builderLookup[builder];
                 var intermediateSyntaxTree = this._introducedTreeMap[((ISyntaxTreeTransformation) builder).TargetSyntaxTree];
                 var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
                 var intermediateSemanticModel = this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree );
 
                 return intermediateSemanticModel.GetDeclaredSymbol( intermediateNode );
-            }
-            else
-            {
-                throw new AssertionFailedException();
             }
         }
 
@@ -154,7 +162,19 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns>An introduced member, or <c>null</c> if the declaration represented by this symbol was not introduced.</returns>
         public LinkerIntroducedMember? GetIntroducedMemberForSymbol( ISymbol symbol )
         {
-            var declaringSyntax = symbol.DeclaringSyntaxReferences.Single().GetSyntax();
+            var declaringSyntax = symbol.GetPrimaryDeclaration().AssertNotNull();
+
+            if ( declaringSyntax == null )
+            {
+                return null;
+            }
+
+            if ( symbol is IEventSymbol && declaringSyntax is VariableDeclaratorSyntax )
+            {
+                // TODO: Move this to special method, we are going to need the same thing for fields.
+                declaringSyntax = declaringSyntax.Parent?.Parent.AssertNotNull();
+            }
+
             var annotation = declaringSyntax.GetAnnotations( IntroducedNodeIdAnnotationId ).SingleOrDefault();
 
             if ( annotation == null )

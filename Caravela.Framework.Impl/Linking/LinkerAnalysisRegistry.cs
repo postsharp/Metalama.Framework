@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
@@ -17,12 +16,12 @@ namespace Caravela.Framework.Impl.Linking
     {
         private readonly LinkerIntroductionRegistry _introductionRegistry;
         private readonly IReadOnlyDictionary<ISymbol, MethodBodyAnalysisResult> _methodBodyInfos;
-        private readonly IReadOnlyDictionary<(ISymbol Symbol, AspectReferenceTargetKind TargetKind), IReadOnlyList<AspectReferenceHandle>> _aspectReferences;
+        private readonly IReadOnlyDictionary<(ISymbol Symbol, ResolvedAspectReferenceSemantic Semantic, AspectReferenceTargetKind TargetKind), IReadOnlyList<ResolvedAspectReference>> _aspectReferences;
 
         public LinkerAnalysisRegistry(
             LinkerIntroductionRegistry introductionRegistry,
             IReadOnlyDictionary<ISymbol, MethodBodyAnalysisResult> methodBodyInfos,
-            IReadOnlyDictionary<(ISymbol Symbol, AspectReferenceTargetKind TargetKind), IReadOnlyList<AspectReferenceHandle>> aspectReferenceIndex )
+            IReadOnlyDictionary<(ISymbol Symbol, ResolvedAspectReferenceSemantic Semantic, AspectReferenceTargetKind TargetKind), IReadOnlyList<ResolvedAspectReference>> aspectReferenceIndex )
         {
             this._introductionRegistry = introductionRegistry;
             this._methodBodyInfos = methodBodyInfos;
@@ -48,21 +47,21 @@ namespace Caravela.Framework.Impl.Linking
             return this._introductionRegistry.GetOverridesForSymbol( symbol ).Count > 0;
         }
 
-        internal IReadOnlyList<AspectReferenceHandle> GetContainedAspectReferences( IMethodSymbol symbol )
+        internal IReadOnlyList<ResolvedAspectReference> GetContainedAspectReferences( IMethodSymbol symbol )
         {
             if (this._methodBodyInfos.TryGetValue(symbol, out var methodBodyInfo))
             {
                 return methodBodyInfo.AspectReferences;
             }
 
-            return Array.Empty<AspectReferenceHandle>();
+            return Array.Empty<ResolvedAspectReference>();
         }
 
-        internal IReadOnlyList<AspectReferenceHandle> GetAspectReferences( ISymbol symbol, AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self )
+        internal IReadOnlyList<ResolvedAspectReference> GetAspectReferences( ISymbol symbol, ResolvedAspectReferenceSemantic semantic, AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self )
         {
-            if ( !this._aspectReferences.TryGetValue( (symbol, targetKind), out var containedReferences ) )
+            if ( !this._aspectReferences.TryGetValue( (symbol, semantic, targetKind), out var containedReferences ) )
             {
-                return Array.Empty<AspectReferenceHandle>();
+                return Array.Empty<ResolvedAspectReference>();
             }
 
             return containedReferences;
@@ -147,6 +146,11 @@ namespace Caravela.Framework.Impl.Linking
 
                     return this._introductionRegistry.GetSymbolForIntroducedMember( lastOverride );
             }
+        }
+
+        public bool IsLastOverride(ISymbol symbol)
+        {
+            return this.IsOverride( symbol ) && SymbolEqualityComparer.Default.Equals( symbol, this.GetLastOverride( this.GetOverrideTarget( symbol ).AssertNotNull() ) );
         }
 
         /// <summary>

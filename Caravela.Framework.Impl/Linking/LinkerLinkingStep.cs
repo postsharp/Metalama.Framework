@@ -44,6 +44,7 @@ namespace Caravela.Framework.Impl.Linking
             var inliners = new Inliner[]
             {
                 new MethodAssignmentInliner(),
+                new MethodLocalDeclarationInliner(),
                 new MethodReturnStatementInliner(),
                 new MethodCastReturnStatementInliner(),
                 new MethodInvocationInliner(),

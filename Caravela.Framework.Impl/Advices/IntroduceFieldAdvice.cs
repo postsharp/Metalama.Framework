@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Advices
             this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, name, AspectLinkerOptions.FromTags( tags ) );
         }
 
-        public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( declarativeAdvices, diagnosticAdder );
         }

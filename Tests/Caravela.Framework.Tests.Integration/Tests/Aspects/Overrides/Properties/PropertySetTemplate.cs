@@ -21,7 +21,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             set
             {
                 Console.WriteLine($"This is the overridden setter.");
-                var discard = meta.Proceed();
+                meta.Proceed();
             }
         }
     }

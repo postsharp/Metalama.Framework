@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
 
-        public MemberDeclarationSyntax InsertPositionNode
+        public InsertPosition InsertPosition
         {
             get
             {
@@ -58,13 +58,13 @@ namespace Caravela.Framework.Impl.Transformations
 
                     if ( syntaxReference != null )
                     {
-                        return syntaxReference;
+                        return new InsertPosition(InsertPositionRelation.After, syntaxReference);
                     }
                 }
 
                 var typeSymbol = ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol;
 
-                return typeSymbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
+                return new InsertPosition( InsertPositionRelation.Within, typeSymbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
             }
         }
 

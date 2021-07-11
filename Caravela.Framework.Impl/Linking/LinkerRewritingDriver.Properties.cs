@@ -21,22 +21,22 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         /// <param name="symbol">Override property symbol or overridden property symbol.</param>
         /// <returns></returns>
-        private bool IsDiscarded( IPropertySymbol symbol )
+        private bool IsDiscarded( IPropertySymbol symbol, ResolvedAspectReferenceSemantic semantic )
         {
             if ( this._analysisRegistry.IsOverride( symbol ) )
             {
                 var overrideTarget = this._analysisRegistry.GetOverrideTarget( symbol );
                 var lastOverride = this._analysisRegistry.GetLastOverride( overrideTarget.AssertNotNull() );
-                var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, AspectReferenceTargetKind.PropertyGetAccessor );
-                var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, AspectReferenceTargetKind.PropertySetAccessor );
+                var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertyGetAccessor );
+                var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertySetAccessor );
 
                 if ( SymbolEqualityComparer.Default.Equals( symbol, lastOverride ) )
                 {
-                    return this.IsInlineable( symbol );
+                    return this.IsInlineable( symbol, semantic );
                 }
                 else
                 {
-                    return this.IsInlineable( symbol ) || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0);
+                    return this.IsInlineable( symbol, semantic ) || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0);
                 }
             }
             else
@@ -45,23 +45,36 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private bool IsInlineable( IPropertySymbol symbol )
+        private bool IsInlineable( IPropertySymbol symbol, ResolvedAspectReferenceSemantic semantic )
         {
             if ( GetDeclarationFlags( symbol ).HasFlag( LinkerDeclarationFlags.NotInlineable ) )
             {
                 return false;
             }
 
-            var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, AspectReferenceTargetKind.PropertyGetAccessor );
-            var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, AspectReferenceTargetKind.PropertySetAccessor );
+            if (this._analysisRegistry.IsLastOverride(symbol))
+            {
+                return true;
+            }
 
-            if ( getAspectReferences.Count > 1 || setAspectReferences.Count > 1 )
+            var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertyGetAccessor );
+            var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertySetAccessor );
+
+            if ( getAspectReferences.Count > 1 || setAspectReferences.Count > 1
+                 || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0 ) )
             {
                 return false;
             }
 
-            return ( getAspectReferences.Count == 0 || this.IsInlineableReference( getAspectReferences[0] ))
+            return (getAspectReferences.Count == 0 || this.IsInlineableReference( getAspectReferences[0] ) ) 
                 && (setAspectReferences.Count == 0 || this.IsInlineableReference( setAspectReferences[0] ) );
+        }
+
+        private bool HasAnyAspectReferences( IPropertySymbol symbol, ResolvedAspectReferenceSemantic semantic )
+        {
+            var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertyGetAccessor );
+            var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertySetAccessor );
+            return getAspectReferences.Count > 0 || setAspectReferences.Count > 0;
         }
 
         private IReadOnlyList<MemberDeclarationSyntax> RewriteProperty(PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol)
@@ -77,7 +90,7 @@ namespace Caravela.Framework.Impl.Linking
                     members.Add( GetPropertyBackingField( propertyDeclaration, symbol ) );
                 }
 
-                if ( this.IsInlineable( lastOverride ) )
+                if ( this.IsInlineable( lastOverride, ResolvedAspectReferenceSemantic.Default ) )
                 {
                     members.Add( GetLinkedDeclaration() );
                 }
@@ -86,7 +99,7 @@ namespace Caravela.Framework.Impl.Linking
                     members.Add( GetTrampolineProperty( propertyDeclaration, lastOverride ) );
                 }
 
-                if ( !this.IsInlineable( symbol ) )
+                if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original ) && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
                 {
                     members.Add( GetOriginalImplProperty( propertyDeclaration, symbol ) );
                 }
@@ -95,7 +108,7 @@ namespace Caravela.Framework.Impl.Linking
             }
             else if (this._analysisRegistry.IsOverride(symbol))
             {
-                if (this.IsDiscarded(symbol))
+                if (this.IsDiscarded(symbol, ResolvedAspectReferenceSemantic.Default))
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
@@ -189,12 +202,14 @@ namespace Caravela.Framework.Impl.Linking
         {
             return Block(
                 ReturnStatement(
+                    Token(SyntaxKind.ReturnKeyword).WithTrailingTrivia( Whitespace(" ") ),
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         symbol.IsStatic
                         ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
                         : ThisExpression(),
-                        IdentifierName( GetAutoPropertyBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ) ) );
+                        IdentifierName( GetAutoPropertyBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
+                    Token( SyntaxKind.SemicolonToken ) ) );
         }
 
         private static BlockSyntax GetImplicitSetterBody( IMethodSymbol symbol )

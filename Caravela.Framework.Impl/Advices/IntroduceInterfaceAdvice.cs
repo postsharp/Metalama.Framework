@@ -493,8 +493,7 @@ namespace Caravela.Framework.Impl.Advices
                 this,
                 this.TargetDeclaration,
                 interfaceEvent.Name,
-                !isExplicit && isEventField, // We cannot build event fields with explicit interface impl.
-                this.LinkerOptions );
+                !isExplicit && isEventField ); // We cannot build event fields with explicit interface impl.
 
             eventBuilder.EventType = interfaceEvent.EventType;
 

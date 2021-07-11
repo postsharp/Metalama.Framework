@@ -15,20 +15,20 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             SyntaxKind.ReturnStatement
         };
         
-        public override bool CanInline( IMethodSymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression )
+        public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax needs to be in form: return <annotated_property_expression>;
-            if ( contextDeclaration.AssociatedSymbol is not IPropertySymbol )
+            if ( aspectReference.ResolvedSymbol is not IPropertySymbol && (aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol is not IPropertySymbol )
             {
                 return false;
             }
 
-            if ( annotatedExpression.Parent == null || annotatedExpression.Parent is not CastExpressionSyntax castExpression )
+            if ( aspectReference.Expression.Parent == null || aspectReference.Expression.Parent is not CastExpressionSyntax castExpression )
             {
                 return false;
             }
 
-            if ( !SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( castExpression.Type ).Symbol, contextDeclaration.ReturnType ) )
+            if ( !SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( castExpression.Type ).Symbol, ((IMethodSymbol) aspectReference.ContainingSymbol).ReturnType ) )
             {
                 return false;
             }
@@ -41,20 +41,14 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             return true;
         }
 
-        public override void Inline( InliningContext context, ExpressionSyntax annotatedExpression, out SyntaxNode replacedNode, out SyntaxNode newNode )
+        public override void Inline( InliningContext context, ResolvedAspectReference aspectReference, out SyntaxNode replacedNode, out SyntaxNode newNode )
         {
-            var semanticModel = context.Compilation.GetSemanticModel( annotatedExpression.SyntaxTree );
-            var referencedSymbol = (IPropertySymbol) semanticModel.GetSymbolInfo( annotatedExpression ).Symbol.AssertNotNull();
-            var castExpression = (CastExpressionSyntax) annotatedExpression.Parent.AssertNotNull();
+            var castExpression = (CastExpressionSyntax) aspectReference.Expression.Parent.AssertNotNull();
             var returnStatement = (ReturnStatementSyntax) castExpression.Parent.AssertNotNull();
 
-            if ( !annotatedExpression.TryGetAspectReference( out var aspectReference ) )
-            {
-                throw new AssertionFailedException();
-            }
-
-            // We need to change the return variable and label of the inlined code and then generate hand-over code.
-            var targetSymbol = (IPropertySymbol)context.ReferenceResolver.Resolve( referencedSymbol, aspectReference );
+            var targetSymbol =
+                aspectReference.ResolvedSymbol as IPropertySymbol
+                ?? (IPropertySymbol) ((aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
 
             // Get the final inlined body of the target property getter. 
             var inlinedTargetBody = context.GetLinkedBody( targetSymbol.GetMethod.AssertNotNull() );

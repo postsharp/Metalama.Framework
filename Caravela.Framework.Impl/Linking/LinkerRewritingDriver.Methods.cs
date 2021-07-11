@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         /// <param name="symbol">Override method symbol or overridden method symbol.</param>
         /// <returns></returns>
-        private bool IsDiscarded( IMethodSymbol symbol )
+        private bool IsDiscarded( IMethodSymbol symbol, ResolvedAspectReferenceSemantic semantic )
         {
             if ( symbol.MethodKind != MethodKind.Ordinary )
             {
@@ -26,17 +26,17 @@ namespace Caravela.Framework.Impl.Linking
 
             if (this._analysisRegistry.IsOverride(symbol))
             {
-                var aspectReferences = this._analysisRegistry.GetAspectReferences( symbol );
+                var aspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
                 var overrideTarget = this._analysisRegistry.GetOverrideTarget( symbol );
                 var lastOverride = this._analysisRegistry.GetLastOverride( overrideTarget.AssertNotNull() );
 
                 if (SymbolEqualityComparer.Default.Equals(symbol, lastOverride))
                 {
-                    return this.IsInlineable( symbol );
+                    return this.IsInlineable( symbol, semantic );
                 }
                 else
                 {
-                    return this.IsInlineable( symbol ) || aspectReferences.Count == 0;
+                    return this.IsInlineable( symbol, semantic ) || aspectReferences.Count == 0;
                 }
             }
             else
@@ -45,26 +45,38 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private bool IsInlineable( IMethodSymbol symbol )
+        private bool IsInlineable( IMethodSymbol symbol, ResolvedAspectReferenceSemantic semantic )
         {
-            if ( symbol.MethodKind != MethodKind.Ordinary )
+            switch ( symbol.MethodKind )
             {
-                throw new AssertionFailedException();
+                case MethodKind.Ordinary:
+                case MethodKind.ExplicitInterfaceImplementation:
+                    if ( GetDeclarationFlags( symbol ).HasFlag( LinkerDeclarationFlags.NotInlineable ) )
+                    {
+                        return false;
+                    }
+
+                    if ( this._analysisRegistry.IsLastOverride( symbol ) )
+                    {
+                        return true;
+                    }
+
+                    var aspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
+
+                    if ( aspectReferences.Count != 1 )
+                    {
+                        return false;
+                    }
+
+                    return this.IsInlineableReference( aspectReferences[0] );
+                default:
+                    throw new AssertionFailedException();
             }
+        }
 
-            if ( GetDeclarationFlags( symbol ).HasFlag( LinkerDeclarationFlags.NotInlineable ) )
-            {
-                return false;
-            }
-
-            var aspectReferences = this._analysisRegistry.GetAspectReferences( symbol );
-
-            if ( aspectReferences.Count > 1 )
-            {
-                return false;
-            }
-
-            return aspectReferences.Count == 0 || this.IsInlineableReference( aspectReferences[0] );
+        private bool HasAnyAspectReferences( IMethodSymbol symbol, ResolvedAspectReferenceSemantic semantic )
+        {
+            return this._analysisRegistry.GetAspectReferences( symbol, semantic ).Count > 0;
         }
 
         public IReadOnlyList<MemberDeclarationSyntax> RewriteMethod( MethodDeclarationSyntax methodDeclaration, IMethodSymbol symbol )
@@ -74,7 +86,7 @@ namespace Caravela.Framework.Impl.Linking
                 var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = (IMethodSymbol) this._analysisRegistry.GetLastOverride( symbol );
 
-                if ( this.IsInlineable( lastOverride ) )
+                if ( this.IsInlineable( lastOverride, ResolvedAspectReferenceSemantic.Default ) )
                 {
                     members.Add( GetLinkedDeclaration() );
                 }
@@ -83,16 +95,16 @@ namespace Caravela.Framework.Impl.Linking
                     members.Add( GetTrampolineMethod( methodDeclaration, lastOverride ) );
                 }
 
-                if (!this.IsInlineable(symbol))
+                if (!this.IsInlineable(symbol, ResolvedAspectReferenceSemantic.Original ) && this.HasAnyAspectReferences(symbol, ResolvedAspectReferenceSemantic.Original ) )
                 {
                     members.Add( GetOriginalImplMethod( methodDeclaration ) );
                 }
 
                 return members;
             }
-            else if (this._analysisRegistry.IsOverride(symbol))
+            else if (this._analysisRegistry.IsOverride(symbol ) )
             {
-                if ( this.IsDiscarded( symbol ) )
+                if ( this.IsDiscarded( symbol, ResolvedAspectReferenceSemantic.Default ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }

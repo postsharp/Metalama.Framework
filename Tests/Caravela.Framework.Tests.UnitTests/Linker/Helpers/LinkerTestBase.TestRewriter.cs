@@ -169,7 +169,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         else
                         {
                             newAttributes.Add( attribute );
-                        }
+                        } 
                     }
 
                     if ( attributeList.Attributes.SequenceEqual( newAttributes ) )

@@ -115,7 +115,6 @@ namespace Caravela.Framework.Impl.Transformations
                             null ),
                         this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.Override,
-                        this.LinkerOptions,
                         this.OverriddenDeclaration )
                 };
 
@@ -181,6 +180,7 @@ namespace Caravela.Framework.Impl.Transformations
                     return Block( ReturnStatement( this.CreateGetExpression() ) );
 
                 case SyntaxKind.SetAccessorDeclaration:
+                case SyntaxKind.InitAccessorDeclaration:
                     return Block( ExpressionStatement( this.CreateSetExpression() ) );
 
                 default:

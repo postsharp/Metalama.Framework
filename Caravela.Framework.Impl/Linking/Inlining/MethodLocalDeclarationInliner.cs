@@ -1,17 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking.Inlining
 {
-    /// <summary>
-    /// Handles inlining of return statement which invokes an annotated expression.
-    /// </summary>
-    internal class MethodDiscardInliner : MethodInliner
+    internal class MethodLocalDeclarationInliner : MethodInliner
     {
         public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[]
         {
@@ -20,7 +19,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
-            // The syntax has to be in form: <local> = <annotated_method_expression( <arguments> );
+            // The syntax has to be in form: <type> <local> = <annotated_method_expression>( <arguments> );
             if ( aspectReference.ResolvedSymbol is not IMethodSymbol )
             {
                 return false;
@@ -31,25 +30,27 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            if ( invocationExpression.Parent == null || invocationExpression.Parent is not AssignmentExpressionSyntax assignmentExpression )
+            if ( invocationExpression.Parent == null || invocationExpression.Parent is not EqualsValueClauseSyntax equalsClause )
             {
                 return false;
             }
 
-            // Invocation should be on the right.
-            if ( assignmentExpression.Right != invocationExpression )
+            if ( equalsClause.Parent == null || equalsClause.Parent is not VariableDeclaratorSyntax variableDeclarator )
             {
                 return false;
             }
 
-            // Assignment should have a discard identifier on the left (TODO: ref returns).
-            if ( assignmentExpression.Left is not IdentifierNameSyntax identifierName || identifierName.Identifier.ValueText != "_" )
+            if ( variableDeclarator.Parent == null || variableDeclarator.Parent is not VariableDeclarationSyntax variableDeclaration )
             {
                 return false;
             }
 
-            // The assignment should be part of expression statement.
-            if ( assignmentExpression.Parent == null || assignmentExpression.Parent is not ExpressionStatementSyntax )
+            if (variableDeclaration.Variables.Count != 1)
+            {
+                return false;
+            }
+
+            if ( variableDeclaration.Parent == null || variableDeclaration.Parent is not LocalDeclarationStatementSyntax _ )
             {
                 return false;
             }
@@ -66,23 +67,33 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         public override void Inline( InliningContext context, ResolvedAspectReference aspectReference, out SyntaxNode replacedNode, out SyntaxNode newNode )
         {
             var invocationExpression = (InvocationExpressionSyntax) aspectReference.Expression.Parent.AssertNotNull();
-            var assignmentExpression = (AssignmentExpressionSyntax) invocationExpression.Parent.AssertNotNull();
-            var expressionStatement = (ExpressionStatementSyntax) assignmentExpression.Parent.AssertNotNull();
+            var equalsClause = (EqualsValueClauseSyntax) invocationExpression.Parent.AssertNotNull();
+            var variableDeclarator = (VariableDeclaratorSyntax) equalsClause.Parent.AssertNotNull();
+            var variableDeclaration = (VariableDeclarationSyntax) variableDeclarator.Parent.AssertNotNull();
+            var localDeclaration = (LocalDeclarationStatementSyntax) variableDeclaration.Parent.AssertNotNull();
 
             var targetSymbol = (aspectReference.ResolvedSymbol as IMethodSymbol).AssertNotNull();
 
             // Change the target local variable.
-            var contextWithDiscard = context.WithDiscard( targetSymbol );
+            var contextWithLocal = context.WithReturnLocal( targetSymbol, variableDeclarator.Identifier.ValueText );
 
             // Get the final inlined body of the target method. 
-            var inlinedTargetBody = contextWithDiscard.GetLinkedBody( targetSymbol );
+            var inlinedTargetBody = contextWithLocal.GetLinkedBody( targetSymbol );
 
             // Mark the block as flattenable.
             inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
 
             // We're replacing the whole return statement.
-            newNode = inlinedTargetBody;
-            replacedNode = expressionStatement;
+            newNode = Block(
+                LocalDeclarationStatement(
+                    VariableDeclaration(
+                        LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ReturnType ).WithTrailingTrivia( Whitespace( " " ) ),
+                        SingletonSeparatedList(
+                            VariableDeclarator( variableDeclarator.Identifier ) ) ) ),
+                inlinedTargetBody )
+                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+
+            replacedNode = localDeclaration;
         }
     }
 }

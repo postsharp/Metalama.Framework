@@ -56,11 +56,6 @@ namespace Caravela.Framework.Impl.Formatting
             // Add C# classifications
             var semanticModel = document.Project.GetCompilationAsync().Result!.GetSemanticModel( syntaxTree );
 
-            var spans = Classifier.GetClassifiedSpans(
-                semanticModel,
-                syntaxTree.GetRoot().Span,
-                document.Project!.Solution.Workspace );
-
             foreach ( var csharpSpan in Classifier.GetClassifiedSpans(
                 semanticModel,
                 syntaxTree.GetRoot().Span,
@@ -106,7 +101,7 @@ namespace Caravela.Framework.Impl.Formatting
 
                         if ( classifiedSpan.Tags.TryGetValue( _csClassTagName, out var csClassification ) )
                         {
-                            foreach ( string c in csClassification.Split( '-' ) )
+                            foreach ( var c in csClassification.Split( '-' ) )
                             {
                                 classes.Add( "cs-" + c.Trim().Replace( " ", "-" ) );
                             }

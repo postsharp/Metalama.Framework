@@ -15,10 +15,15 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             SyntaxKind.ReturnStatement
         };
         
-        public override bool CanInline( IMethodSymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression )
+        public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax has to be in form: <local> = <annotated_method_expression( <arguments> );
-            if ( annotatedExpression.Parent == null || annotatedExpression.Parent is not InvocationExpressionSyntax invocationExpression )
+            if ( aspectReference.ResolvedSymbol is not IMethodSymbol )
+            {
+                return false;
+            }
+
+            if ( aspectReference.Expression.Parent == null || aspectReference.Expression.Parent is not InvocationExpressionSyntax invocationExpression )
             {
                 return false;
             }
@@ -53,7 +58,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             }
 
             // The invocation needs to be inlineable in itself.
-            if ( IsInlineableInvocation( semanticModel, contextDeclaration, invocationExpression ) )
+            if ( IsInlineableInvocation( semanticModel, (IMethodSymbol)aspectReference.ContainingSymbol, invocationExpression ) )
             {
                 return false;
             }
@@ -61,22 +66,14 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             return true;
         }
 
-        public override void Inline( InliningContext context, ExpressionSyntax annotatedExpression, out SyntaxNode replacedNode, out SyntaxNode newNode )
+        public override void Inline( InliningContext context, ResolvedAspectReference aspectReference, out SyntaxNode replacedNode, out SyntaxNode newNode )
         {
-            var semanticModel = context.Compilation.GetSemanticModel( annotatedExpression.SyntaxTree );
-            var referencedSymbol = (IMethodSymbol) semanticModel.GetSymbolInfo( annotatedExpression ).Symbol.AssertNotNull();
-            var invocationExpression = (InvocationExpressionSyntax) annotatedExpression.Parent.AssertNotNull();
+            var invocationExpression = (InvocationExpressionSyntax) aspectReference.Expression.Parent.AssertNotNull();
             var assignmentExpression = (AssignmentExpressionSyntax) invocationExpression.Parent.AssertNotNull();
             var localVariable = (IdentifierNameSyntax) assignmentExpression.Left.AssertNotNull();
             var expressionStatement = (ExpressionStatementSyntax) assignmentExpression.Parent.AssertNotNull();
 
-            if ( !annotatedExpression.TryGetAspectReference( out var aspectReference ) )
-            {
-                throw new AssertionFailedException();
-            }
-
-            // We need to change the return variable and label of the inlined code and then generate hand-over code.
-            var targetSymbol = (IMethodSymbol) context.ReferenceResolver.Resolve( referencedSymbol, aspectReference );
+            var targetSymbol = (aspectReference.ResolvedSymbol as IMethodSymbol).AssertNotNull();
 
             // Change the target local variable.
             var contextWithLocal = context.WithReturnLocal( targetSymbol, localVariable.Identifier.ValueText );

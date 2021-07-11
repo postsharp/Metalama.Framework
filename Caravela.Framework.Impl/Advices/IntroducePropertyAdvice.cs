@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             base.Initialize( declarativeAdvices, diagnosticAdder );
 
-            // TODO: The rest (unify with methods?).
+            // TODO: Indexers.
 
             this.MemberBuilder.Type = (this.TemplateMember?.Type ?? this._getTemplateMethod?.ReturnType).AssertNotNull();
             this.MemberBuilder.Accessibility = (this.TemplateMember?.Accessibility ?? this._getTemplateMethod?.Accessibility).AssertNotNull();

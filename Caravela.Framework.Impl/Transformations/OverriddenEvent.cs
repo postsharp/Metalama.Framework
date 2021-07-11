@@ -98,7 +98,6 @@ namespace Caravela.Framework.Impl.Transformations
                                     } ) ) ),
                         this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.Override,
-                        this.LinkerOptions,
                         this.OverriddenDeclaration )
                 };
 

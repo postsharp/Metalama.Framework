@@ -41,7 +41,6 @@ namespace Caravela.Framework.Impl.Transformations
                         AccessorList( List( GetAccessors() ) ) ),
                     this.Advice.AspectLayerId,
                     IntroducedMemberSemantic.Override,
-                    this.LinkerOptions,
                     this.OverriddenDeclaration )
             };
 

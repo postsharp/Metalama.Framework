@@ -1,86 +1,76 @@
 internal class TargetClass
     {
-        [Override]
+private int _autoProperty;        [Override]
         public int AutoProperty {get    {
-    return this._autoProperty;
-    }
-
+return this._autoProperty;    }
+    
 set    {
         global::System.Console.WriteLine($"This is the overridden setter.");
-        global::System.Int32 discard;
 this._autoProperty=value;    }
-}
-private int _autoProperty;
-        [Override]
-        public static int Static_AutoProperty {get    {
-    return _static_AutoProperty;
-    }
-
-set    {
-        global::System.Console.WriteLine($"This is the overridden setter.");
-        global::System.Int32 discard;
-_static_AutoProperty=value;    }
 }
 private static int _static_AutoProperty;
         [Override]
-        public int AutoProperty_Init {get    {
-    return this._autoProperty_Init;
-    }
-
-init    {
+        public static int Static_AutoProperty {get    {
+return global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertySetTemplate.TargetClass._static_AutoProperty;    }
+    
+set    {
         global::System.Console.WriteLine($"This is the overridden setter.");
-        global::System.Int32 discard;
-this._autoProperty_Init=value;    }
+global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.PropertySetTemplate.TargetClass._static_AutoProperty=value;    }
 }
 private int _autoProperty_Init;
         [Override]
-        public int AutoProperty_GetOnly {get    {
-    return this._autoProperty_GetOnly;
-    }
+        public int AutoProperty_Init {get    {
+return this._autoProperty_Init;    }
+    
+set    {
+        global::System.Console.WriteLine($"This is the overridden setter.");
+this._autoProperty_Init=value;    }
 }
-private readonly int _autoProperty_GetOnly;
+private int _autoProperty_GetOnly;
+        [Override]
+        public int AutoProperty_GetOnly {get    {
+return this._autoProperty_GetOnly;    }
+}
+    
         [Override]
         public int Property
 {get    {
                 Console.WriteLine("This is the original getter.");
                 return 42;
     }
-
+    
 set    {
         global::System.Console.WriteLine($"This is the overridden setter.");
-        global::System.Int32 discard;
                 Console.WriteLine($"This is the original setter, setting {value}.");
     }
 }
-
+    
         [Override]
         public static int Static_Property
 {get    {
                 Console.WriteLine("This is the original getter.");
                 return 42;
     }
-
+    
 set    {
         global::System.Console.WriteLine($"This is the overridden setter.");
-        global::System.Int32 discard;
                 Console.WriteLine($"This is the original setter, setting {value}.");
     }
 }
-
+    
         [Override]
         public int InitProperty
 {get    {
                 Console.WriteLine("This is the original getter.");
                 return 42;
     }
-
-init    {
+    
+set    {
         global::System.Console.WriteLine($"This is the overridden setter.");
-        global::System.Int32 discard;
                 Console.WriteLine($"This is the original setter, setting {value}.");
     }
 }
-
+    
         [Override]
         public int Property_GetOnly
 {get    {
@@ -88,21 +78,19 @@ init    {
                 return 42;
     }
 }
-
+    
         [Override]
         public int Property_SetOnly
 {set    {
         global::System.Console.WriteLine($"This is the overridden setter.");
-        global::System.Int32 discard;
                 Console.WriteLine($"This is the original setter, setting {value}.");
     }
 }
-
+    
         [Override]
         public int Property_InitOnly
-{init    {
+{set    {
         global::System.Console.WriteLine($"This is the overridden setter.");
-        global::System.Int32 discard;
                 Console.WriteLine($"This is the original setter, setting {value}.");
     }
 }

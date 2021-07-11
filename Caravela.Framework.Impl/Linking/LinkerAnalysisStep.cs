@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Linking
         public override LinkerAnalysisStepOutput Execute( LinkerIntroductionStepOutput input )
         {
             Dictionary<ISymbol, MethodBodyAnalysisResult> methodBodyAnalysisResults = new();
-            Dictionary<(ISymbol Symbol, AspectReferenceTargetKind TargetKind), List<AspectReferenceHandle>> aspectReferences = new();
+            Dictionary<(ISymbol Symbol, ResolvedAspectReferenceSemantic Semantic, AspectReferenceTargetKind TargetKind), List<ResolvedAspectReference>> aspectReferences = new();
             var referenceResolver = new AspectReferenceResolver( input.IntroductionRegistry, input.OrderedAspectLayers );
 
             var layersId = input.OrderedAspectLayers.Select( x => x.AspectLayerId ).ToArray();
@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            var analysisRegistry = new LinkerAnalysisRegistry( input.IntroductionRegistry, methodBodyAnalysisResults, aspectReferences.ToDictionary( x => x.Key, x => (IReadOnlyList<AspectReferenceHandle>)x.Value) );
+            var analysisRegistry = new LinkerAnalysisRegistry( input.IntroductionRegistry, methodBodyAnalysisResults, aspectReferences.ToDictionary( x => x.Key, x => (IReadOnlyList<ResolvedAspectReference>)x.Value) );
 
             return new LinkerAnalysisStepOutput( input.Diagnostics, input.IntermediateCompilation, analysisRegistry, referenceResolver );
 
@@ -109,7 +109,7 @@ namespace Caravela.Framework.Impl.Linking
                 returnStatementCounter.Visit( syntax );
 
                 methodBodyAnalysisResults[symbol] = new MethodBodyAnalysisResult(                    
-                    Array.Empty<AspectReferenceHandle>(),
+                    Array.Empty<ResolvedAspectReference>(),
                     symbol.ReturnsVoid ? returnStatementCounter.ReturnStatementCount == 0 : returnStatementCounter.ReturnStatementCount <= 1 );
             }
 
@@ -127,9 +127,9 @@ namespace Caravela.Framework.Impl.Linking
 
                 foreach (var aspectReference in aspectReferenceCollector.AspectReferences)
                 {
-                    if (!aspectReferences.TryGetValue( (aspectReference.ReferencedSymbol, aspectReference.Specification.TargetKind), out var list))
+                    if (!aspectReferences.TryGetValue( (aspectReference.ResolvedSymbol, aspectReference.Semantic, aspectReference.Specification.TargetKind), out var list))
                     {
-                        aspectReferences[(aspectReference.ReferencedSymbol, aspectReference.Specification.TargetKind)] = list = new List<AspectReferenceHandle>();
+                        aspectReferences[(aspectReference.ResolvedSymbol, aspectReference.Semantic, aspectReference.Specification.TargetKind)] = list = new List<ResolvedAspectReference>();
                     }
 
                     list.Add( aspectReference );

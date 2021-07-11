@@ -68,7 +68,11 @@ namespace Caravela.Framework.Impl.Linking
                                 getAccessor != null
                                     ? AccessorDeclaration(
                                         SyntaxKind.GetAccessorDeclaration,
-                                        Block( ReturnStatement( GetInvocationTarget() ) ) )
+                                        Block( 
+                                            ReturnStatement(
+                                                Token(SyntaxKind.ReturnKeyword).WithTrailingTrivia( Whitespace(" ") ),
+                                                GetInvocationTarget(),
+                                                Token(SyntaxKind.SemicolonToken) ) ) )
                                         .NormalizeWhitespace()
                                     : null,
                                 setAccessor != null

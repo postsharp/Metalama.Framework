@@ -1,7 +1,8 @@
 [NotifyPropertyChanged]
     class Car
-: global::System.ComponentModel.INotifyPropertyChanged    {
-        public string? Make {get    {
+: global::System.ComponentModel.INotifyPropertyChanged {
+    private string? _make;
+    public string? Make {get    {
     return this._make;
     }
 
@@ -16,7 +17,7 @@ this._make=value;        }
         return;
     }
 }
-private string? _make;        public double Power {get    {
+private double _power;     public double Power {get    {
     return this._power;
     }
 
@@ -31,7 +32,6 @@ this._power=value;        }
         return;
     }
 }
-private double _power;
 
 protected void OnPropertyChanged(global::System.String name)
 {

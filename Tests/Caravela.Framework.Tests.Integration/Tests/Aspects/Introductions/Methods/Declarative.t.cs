@@ -4,7 +4,6 @@ internal class TargetClass
     public void IntroducedMethod_Void()
     {
         global::System.Console.WriteLine("This is introduced method.");
-        global::Caravela.Framework.Aspects.__Void nic;
     }
 
     public global::System.Int32 IntroducedMethod_Int()

@@ -18,10 +18,15 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             SyntaxKind.ReturnStatement
         };
         
-        public override bool CanInline( IMethodSymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression )
+        public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax has to be in form: return <annotated_method_expression( <arguments> );
-            if ( annotatedExpression.Parent == null || annotatedExpression.Parent is not InvocationExpressionSyntax invocationExpression)
+            if ( aspectReference.ResolvedSymbol is not IMethodSymbol )
+            {
+                return false;
+            }
+
+            if ( aspectReference.Expression.Parent == null || aspectReference.Expression.Parent is not InvocationExpressionSyntax invocationExpression)
             {
                 return false;
             }
@@ -31,7 +36,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            if (invocationExpression.ArgumentList.Arguments.Count != contextDeclaration.Parameters.Length)
+            // The invocation needs to be inlineable in itself.
+            if ( IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
             {
                 return false;
             }
@@ -39,20 +45,12 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             return true;
         }
 
-        public override void Inline( InliningContext context, ExpressionSyntax annotatedExpression, out SyntaxNode replacedNode, out SyntaxNode newNode )
+        public override void Inline( InliningContext context, ResolvedAspectReference aspectReference, out SyntaxNode replacedNode, out SyntaxNode newNode )
         {
-            var semanticModel = context.Compilation.GetSemanticModel( annotatedExpression.SyntaxTree );
-            var referencedSymbol = (IMethodSymbol) semanticModel.GetSymbolInfo( annotatedExpression ).Symbol.AssertNotNull();
-            var invocationExpression = (InvocationExpressionSyntax)annotatedExpression.Parent.AssertNotNull();
+            var invocationExpression = (InvocationExpressionSyntax) aspectReference.Expression.Parent.AssertNotNull();
             var returnStatement = (ReturnStatementSyntax) invocationExpression.Parent.AssertNotNull();
 
-            // Regardless of whether we are returning directly or through variable+label, we just ask for the target method body a return it.
-            if ( !annotatedExpression.TryGetAspectReference( out var aspectReference ) )
-            {
-                throw new AssertionFailedException();
-            }
-
-            var targetSymbol = (IMethodSymbol) context.ReferenceResolver.Resolve( referencedSymbol, aspectReference );
+            var targetSymbol = (aspectReference.ResolvedSymbol as IMethodSymbol).AssertNotNull();
 
             // Get the final body (after inlinings) of the target.
             var inlinedTargetBody = context.GetLinkedBody( targetSymbol );

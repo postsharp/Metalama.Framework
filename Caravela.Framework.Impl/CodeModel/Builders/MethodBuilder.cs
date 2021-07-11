@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Transformations;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -130,20 +131,25 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                             !this.ReturnParameter.ParameterType.Is( typeof(void) )
                                 ? new[]
                                 {
-                                    ReturnStatement( DefaultExpression( syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ) )
+                                    ReturnStatement(
+                                        Token(SyntaxKind.ReturnKeyword).WithTrailingTrivia( Whitespace(" ") ),
+                                        DefaultExpression( syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ),
+                                        Token(SyntaxKind.SemicolonToken) )
                                 }
                                 : new StatementSyntax[0] ) ),
                     null );
 
             return new[]
             {
-                new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this )
+                new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this )
             };
         }
 
         // TODO: Temporary
-        public override MemberDeclarationSyntax InsertPositionNode
-            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
+        public override InsertPosition InsertPosition
+            => new InsertPosition(
+                InsertPositionRelation.Within,
+                ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
 
         public void SetExplicitInterfaceImplementation( IMethod interfaceMethod )
         {

@@ -15,21 +15,21 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             SyntaxKind.ReturnStatement
         };
         
-        public override bool CanInline( IMethodSymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression )
+        public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax needs to be in form: <annotated_property_expression> -= value;
-            if ( contextDeclaration.AssociatedSymbol is not IEventSymbol )
+            if ( aspectReference.ResolvedSymbol is not IEventSymbol && (aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol is not IEventSymbol )
             {
                 return false;
             }
 
-            if ( annotatedExpression.Parent == null || annotatedExpression.Parent is not AssignmentExpressionSyntax assignmentExpression )
+            if ( aspectReference.Expression.Parent == null || aspectReference.Expression.Parent is not AssignmentExpressionSyntax assignmentExpression )
             {
                 return false;
             }
 
             // Property access should be on the left.
-            if ( assignmentExpression.Left != annotatedExpression )
+            if ( assignmentExpression.Left != aspectReference.Expression )
             {
                 return false;
             }
@@ -55,20 +55,14 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             return true;
         }
 
-        public override void Inline( InliningContext context, ExpressionSyntax annotatedExpression, out SyntaxNode replacedNode, out SyntaxNode newNode )
+        public override void Inline( InliningContext context, ResolvedAspectReference aspectReference, out SyntaxNode replacedNode, out SyntaxNode newNode )
         {
-            var semanticModel = context.Compilation.GetSemanticModel( annotatedExpression.SyntaxTree );
-            var referencedSymbol = (IEventSymbol) semanticModel.GetSymbolInfo( annotatedExpression ).Symbol.AssertNotNull();
-            var assignmentExpression = (AssignmentExpressionSyntax) annotatedExpression.Parent.AssertNotNull();
+            var assignmentExpression = (AssignmentExpressionSyntax) aspectReference.Expression.Parent.AssertNotNull();
             var expressionStatement = (ExpressionStatementSyntax) assignmentExpression.Parent.AssertNotNull();
 
-            if ( !annotatedExpression.TryGetAspectReference( out var aspectReference ) )
-            {
-                throw new AssertionFailedException();
-            }
-
-            // We need to change the return variable and label of the inlined code and then generate hand-over code.
-            var targetSymbol = (IEventSymbol) context.ReferenceResolver.Resolve( referencedSymbol, aspectReference );
+            var targetSymbol =
+                aspectReference.ResolvedSymbol as IEventSymbol
+                ?? (IEventSymbol) ((aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
 
             // Get the final inlined body of the target property setter. 
             var inlinedTargetBody = context.GetLinkedBody( targetSymbol.RemoveMethod.AssertNotNull() );

@@ -6,7 +6,6 @@ using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,7 +50,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
 
-        public abstract MemberDeclarationSyntax InsertPositionNode { get; }
+        public abstract InsertPosition InsertPosition { get; }
 
         // TODO: This is temporary.
         SyntaxTree ISyntaxTreeTransformation.TargetSyntaxTree => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;

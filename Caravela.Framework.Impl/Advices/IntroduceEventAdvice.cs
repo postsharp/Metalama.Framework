@@ -45,8 +45,7 @@ namespace Caravela.Framework.Impl.Advices
                 this,
                 this.TargetDeclaration,
                 eventTemplate?.Name ?? explicitName.AssertNotNull(),
-                eventTemplate != null && IsEventField( eventTemplate ),
-                AspectLinkerOptions.FromTags( tags ) );
+                eventTemplate != null && IsEventField( eventTemplate ) );
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )

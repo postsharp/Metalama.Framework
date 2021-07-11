@@ -3,7 +3,6 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking.Inlining
@@ -16,21 +15,20 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         public abstract IReadOnlyList<SyntaxKind> AncestorSyntaxKinds { get; }
 
         /// <summary>
-        /// Determines whether a symbol represented by an annotated expression can be inlined.
+        /// Determines whether an aspect reference can be inlined.
         /// </summary>
-        /// <param name="contextDeclaration">Symbol that contains the expression.</param>
+        /// <param name="aspectReference">Resolved aspect reference.</param>
         /// <param name="semanticModel">Semantic model for the syntax tree containing the expression.</param>
-        /// <param name="annotatedExpression">Annotated expression.</param>
         /// <returns></returns>
-        public abstract bool CanInline( IMethodSymbol contextDeclaration, SemanticModel semanticModel, ExpressionSyntax annotatedExpression );
+        public abstract bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel );
 
         /// <summary>
         /// Inlines the target of the annotated expression by specifying node to be replaced and the replacing node.
         /// </summary>
         /// <param name="context">Inlining context.</param>
-        /// <param name="annotatedExpression">Annotated expression.</param>
+        /// <param name="aspectReference">Aspect reference.</param>
         /// <param name="replacedNode">Replaced node (has to be direct ancestor of the annotated expression).</param>
         /// <param name="newNode"></param>
-        public abstract void Inline( InliningContext context, ExpressionSyntax annotatedExpression, out SyntaxNode replacedNode, out SyntaxNode newNode );
+        public abstract void Inline( InliningContext context, ResolvedAspectReference aspectReference, out SyntaxNode replacedNode, out SyntaxNode newNode );
     }
 }

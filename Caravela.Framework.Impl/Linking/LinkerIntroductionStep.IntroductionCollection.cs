@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Linking
         private class IntroductionCollection
         {
             private readonly List<LinkerIntroducedMember> _introducedMembers;
-            private readonly Dictionary<MemberDeclarationSyntax, List<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
+            private readonly Dictionary<InsertPosition, List<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
             private readonly Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>> _introducedInterfacesByTargetTypeDecl;
 
             private int _nextId;
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Linking
             public IntroductionCollection()
             {
                 this._introducedMembers = new List<LinkerIntroducedMember>();
-                this._introducedMembersByInsertPosition = new Dictionary<MemberDeclarationSyntax, List<LinkerIntroducedMember>>();
+                this._introducedMembersByInsertPosition = new Dictionary<InsertPosition, List<LinkerIntroducedMember>>();
                 this._introducedInterfacesByTargetTypeDecl = new Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>>();
             }
 
@@ -49,9 +49,9 @@ namespace Caravela.Framework.Impl.Linking
 
                     this._introducedMembers.Add( linkerIntroducedMember );
 
-                    if ( !this._introducedMembersByInsertPosition.TryGetValue( memberIntroduction.InsertPositionNode, out var nodes ) )
+                    if ( !this._introducedMembersByInsertPosition.TryGetValue( memberIntroduction.InsertPosition, out var nodes ) )
                     {
-                        this._introducedMembersByInsertPosition[memberIntroduction.InsertPositionNode] = nodes = new List<LinkerIntroducedMember>();
+                        this._introducedMembersByInsertPosition[memberIntroduction.InsertPosition] = nodes = new List<LinkerIntroducedMember>();
                     }
 
                     nodes.Add( linkerIntroducedMember );
@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.Linking
                 interfaceList.AddRange( introducedInterfaces );
             }
 
-            public IEnumerable<LinkerIntroducedMember> GetIntroducedMembersOnPosition( MemberDeclarationSyntax position )
+            public IEnumerable<LinkerIntroducedMember> GetIntroducedMembersOnPosition( InsertPosition position )
             {
                 if ( this._introducedMembersByInsertPosition.TryGetValue( position, out var introducedMembers ) )
                 {

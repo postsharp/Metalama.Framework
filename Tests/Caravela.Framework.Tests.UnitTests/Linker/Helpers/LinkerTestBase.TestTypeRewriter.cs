@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
@@ -30,6 +29,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             private readonly TestRewriter _owner;
             private TypeDeclarationSyntax? _currentType;
             private MemberDeclarationSyntax? _currentInsertPosition;
+            private InsertPositionRelation _currentInsertPositionRelation;
 
             public IReadOnlyList<IObservableTransformation> ObservableTransformations => this._observableTransformations;
 
@@ -69,6 +69,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                 this._currentType = node;
                 this._currentInsertPosition = node;
+                this._currentInsertPositionRelation = InsertPositionRelation.Within;
 
                 return node;
             }
@@ -91,6 +92,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 // Non-pseudo nodes become the next insert positions.
                 node = AssignNodeId( node );
                 this._currentInsertPosition = node;
+                this._currentInsertPositionRelation = InsertPositionRelation.After;
 
                 return node;
             }
@@ -105,6 +107,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     {
                         newNode = AssignNodeId( newNode.AssertNotNull() );
                         this._currentInsertPosition = (MemberDeclarationSyntax) newNode.AssertNotNull();
+                        this._currentInsertPositionRelation = InsertPositionRelation.After;
                     }
 
                     return newNode;
@@ -113,6 +116,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 // Non-pseudo nodes become the next insert positions.
                 node = AssignNodeId( node );
                 this._currentInsertPosition = node;
+                this._currentInsertPositionRelation = InsertPositionRelation.After;
 
                 return node;
             }
@@ -127,6 +131,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     {
                         newNode = AssignNodeId( newNode.AssertNotNull() );
                         this._currentInsertPosition = (MemberDeclarationSyntax) newNode.AssertNotNull();
+                        this._currentInsertPositionRelation = InsertPositionRelation.After;
                     }
 
                     return newNode;
@@ -135,6 +140,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 // Non-pseudo nodes become the next insert positions.
                 node = AssignNodeId( node );
                 this._currentInsertPosition = node;
+                this._currentInsertPositionRelation = InsertPositionRelation.After;
 
                 return node;
             }
@@ -149,6 +155,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     {
                         newNode = AssignNodeId( newNode.AssertNotNull() );
                         this._currentInsertPosition = (MemberDeclarationSyntax) newNode.AssertNotNull();
+                        this._currentInsertPositionRelation = InsertPositionRelation.After;
                     }
 
                     return newNode;
@@ -157,6 +164,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 // Non-pseudo nodes become the next insert positions.
                 node = AssignNodeId( node );
                 this._currentInsertPosition = node;
+                this._currentInsertPositionRelation = InsertPositionRelation.After;
 
                 return node;
             }
@@ -172,7 +180,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 AttributeSyntax? pseudoIntroductionAttribute = null;
                 AttributeSyntax? pseudoOverrideAttribute = null;
 
-                var forceNotInlineable = false;
+                var notInlineable = false;
 
                 foreach ( var attributeList in node.AttributeLists )
                 {
@@ -183,9 +191,9 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     {
                         var name = attribute.Name.ToString();
 
-                        if ( name == "PseudoForceNotInlineable" )
+                        if ( name == "PseudoNotInlineable" )
                         {
-                            forceNotInlineable = true;
+                            notInlineable = true;
                         }
                     }
 
@@ -202,7 +210,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         {
                             pseudoOverrideAttribute = attribute;
                         }
-                        else if ( name.StartsWith( "Pseudo" ) && name != "PseudoForceNotInlineable" )
+                        else if ( name.StartsWith( "Pseudo" ) && name != "PseudoNotInlineable" )
                         {
                             throw new NotSupportedException( $"Unsupported pseudo attribute {name}" );
                         }
@@ -219,32 +227,34 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     // Introduction will create a temporary declaration, that will help us to provide values for IMethod member.
                     isPseudoMember = true;
 
-                    return this.ProcessPseudoIntroduction( node, newAttributeLists, pseudoIntroductionAttribute, forceNotInlineable );
+                    return this.ProcessPseudoIntroduction( node, newAttributeLists, pseudoIntroductionAttribute, notInlineable );
                 }
                 else if ( pseudoOverrideAttribute != null )
                 {
                     isPseudoMember = true;
 
-                    return this.ProcessPseudoOverride( node, newAttributeLists, pseudoOverrideAttribute, forceNotInlineable );
+                    return this.ProcessPseudoOverride( node, newAttributeLists, pseudoOverrideAttribute, notInlineable );
                 }
-
-                isPseudoMember = false;
-
-                var transformedNode = node.WithAttributeLists( List( newAttributeLists ) );
-
-                if ( forceNotInlineable )
+                else
                 {
-                    transformedNode = transformedNode.WithLinkerDeclarationFlags( LinkerDeclarationFlags.NotInlineable );
-                }
+                    isPseudoMember = false;
 
-                return transformedNode;
+                    var transformedNode = node.WithAttributeLists( List( newAttributeLists ) );
+
+                    if ( notInlineable )
+                    {
+                        transformedNode = transformedNode.WithLinkerDeclarationFlags( LinkerDeclarationFlags.NotInlineable );
+                    }
+
+                    return transformedNode;
+                }
             }
 
             private MemberDeclarationSyntax ProcessPseudoIntroduction(
                 MemberDeclarationSyntax node,
                 List<AttributeListSyntax> newAttributeLists,
                 AttributeSyntax attribute,
-                bool forceNotInlineable )
+                bool notInlineable )
             {
                 if ( attribute.ArgumentList == null || attribute.ArgumentList.Arguments.Count < 1 || attribute.ArgumentList.Arguments.Count > 3 )
                 {
@@ -265,6 +275,11 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 var symbolHelperDeclaration = GetSymbolHelperDeclaration( node );
 
                 var introductionSyntax = node.WithAttributeLists( List( newAttributeLists ) );
+
+                if ( notInlineable )
+                {
+                    introductionSyntax = introductionSyntax.WithLinkerDeclarationFlags( LinkerDeclarationFlags.NotInlineable );
+                }
 
                 // Create transformation fake.
                 var transformation = (IMemberIntroduction) A.Fake<object>(
@@ -288,7 +303,6 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                                 introductionSyntax,
                                 new AspectLayerId( aspectName.AssertNotNull(), layerName ),
                                 IntroducedMemberSemantic.Introduction,
-                                AspectLinkerOptions.Create( forceNotInlineable ),
                                 null )
                         } );
 
@@ -296,6 +310,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
                     .Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
+                A.CallTo( () => ((ITestTransformation) transformation).InsertPositionRelation ).Returns( this._currentInsertPositionRelation );
 
                 var introducedElementName = node switch
                 {
@@ -318,7 +333,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 MemberDeclarationSyntax node,
                 List<AttributeListSyntax> newAttributeLists,
                 AttributeSyntax attribute,
-                bool forceNotInlineable )
+                bool notInlineable )
             {
                 if ( attribute.ArgumentList == null || attribute.ArgumentList.Arguments.Count < 2 || attribute.ArgumentList.Arguments.Count > 3 )
                 {
@@ -395,6 +410,11 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         throw new NotSupportedException();
                 }
 
+                if ( notInlineable )
+                {
+                    overrideSyntax = overrideSyntax.WithLinkerDeclarationFlags( LinkerDeclarationFlags.NotInlineable );
+                }
+
                 var symbolHelperDeclaration = GetSymbolHelperDeclaration( node );
 
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
@@ -416,7 +436,6 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                                     EventFieldDeclarationSyntax _ => IntroducedMemberSemantic.Override,
                                     _ => throw new NotSupportedException()
                                 },
-                                AspectLinkerOptions.Create( forceNotInlineable ),
                                 null )
                         } );
 
@@ -424,6 +443,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
                     .Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
+                A.CallTo( () => ((ITestTransformation) transformation).InsertPositionRelation ).Returns( this._currentInsertPositionRelation );
 
                 A.CallTo( () => ((ITestTransformation) transformation).OverriddenDeclarationName ).Returns( overriddenDeclarationName );
                 A.CallTo( () => ((ITestTransformation) transformation).SymbolHelperNodeId ).Returns( GetNodeId( symbolHelperDeclaration ) );

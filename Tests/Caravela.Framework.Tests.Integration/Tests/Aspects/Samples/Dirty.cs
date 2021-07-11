@@ -66,7 +66,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples
         private void OverrideSetter()
         {
             // TODO: this syntax is ugly and it will be fixed.
-            var __ = meta.Proceed();
+            meta.Proceed();
 
             if (meta.This.DirtyState == DirtyState.Clean)
             {

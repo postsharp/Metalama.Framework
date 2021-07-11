@@ -65,6 +65,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 {
                     MethodDeclarationSyntax methodDeclaration => methodDeclaration.Body,
                     AccessorDeclarationSyntax accessorDeclaration => accessorDeclaration.Body,
+                    ArrowExpressionClauseSyntax _ => null,
                     PropertyDeclarationSyntax _ => null,
                     EventDeclarationSyntax _ => null,
                     VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } => null,

@@ -42,7 +42,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
                 meta.This.OnPropertyChanged(meta.Property.Name);
 
                 // TODO: Fix after Proceed refactoring (28573).
-                var dummy = meta.Proceed();
+                meta.Proceed();
             }
 
             return value;

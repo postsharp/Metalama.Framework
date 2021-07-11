@@ -24,6 +24,7 @@ internal class TargetClass
         var property = global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle("T:Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass")).GetProperty("Property", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance);
         var constructor = ((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle("M:Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass.#ctor(System.Int32)")));
         var constructorParameter = global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle("M:Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass.#ctor(System.Int32)")).GetParameters()[0];
+        _ = (object)default;
         return;
     }
 

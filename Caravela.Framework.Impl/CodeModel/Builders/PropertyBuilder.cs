@@ -66,8 +66,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public AspectLinkerOptions? LinkerOptions { get; }
 
-        public override MemberDeclarationSyntax InsertPositionNode
-            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
+        public override InsertPosition InsertPosition
+            => new InsertPosition(
+                InsertPositionRelation.Within,
+                ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
 
         public override DeclarationKind DeclarationKind => throw new NotImplementedException();
 
@@ -165,7 +167,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             return new[]
             {
-                new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this )
+                new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this )
             };
 
             AccessorListSyntax GenerateAccessorList()
@@ -204,7 +206,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                             Token( SyntaxKind.GetKeyword ),
                             this.IsAutoPropertyOrField
                                 ? null
-                                : Block( ReturnStatement( DefaultExpression( syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
+                                : Block( 
+                                    ReturnStatement(
+                                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
+                                        DefaultExpression( syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ),
+                                        Token( SyntaxKind.SemicolonToken ) ) ),
                             null,
                             this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default )
                         .NormalizeWhitespace();

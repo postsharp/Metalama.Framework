@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking.Inlining;
 using Microsoft.CodeAnalysis;
@@ -38,42 +37,44 @@ namespace Caravela.Framework.Impl.Linking
             this.ReferenceResolver = referenceResolver;
         }
 
-        public bool IsDiscarded( ISymbol symbol )
+        public bool IsDiscarded( ISymbol symbol, ResolvedAspectReferenceSemantic semantic )
         {
             return symbol switch
             {
-                IMethodSymbol methodSymbol => this.IsDiscarded( methodSymbol ),
-                IPropertySymbol propertySymbol => this.IsDiscarded( propertySymbol ),
-                IEventSymbol eventSymbol => this.IsDiscarded( eventSymbol ),
+                IMethodSymbol methodSymbol => this.IsDiscarded( methodSymbol, semantic ),
+                IPropertySymbol propertySymbol => this.IsDiscarded( propertySymbol, semantic ),
+                IEventSymbol eventSymbol => this.IsDiscarded( eventSymbol, semantic ),
+                IFieldSymbol => false,
                 _ => throw new AssertionFailedException(),
             };
         }
 
-        private bool IsInlineable( ISymbol symbol )
+        private bool IsInlineable( ISymbol symbol, ResolvedAspectReferenceSemantic semantic )
         {
             return symbol switch
             {
-                IMethodSymbol methodSymbol => this.IsInlineable( methodSymbol ),
-                IPropertySymbol propertySymbol => this.IsInlineable( propertySymbol ),
-                IEventSymbol eventSymbol => this.IsInlineable( eventSymbol ),
+                IMethodSymbol methodSymbol => this.IsInlineable( methodSymbol, semantic ),
+                IPropertySymbol propertySymbol => this.IsInlineable( propertySymbol, semantic ),
+                IEventSymbol eventSymbol => this.IsInlineable( eventSymbol, semantic ),
+                IFieldSymbol => false,
                 _ => throw new AssertionFailedException(),
             };
         }
 
-        private bool IsInlineableReference( AspectReferenceHandle aspectReference )
+        private bool IsInlineableReference( ResolvedAspectReference aspectReference )
         {
             return
                 aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable )
                 && this.GetInliner( aspectReference, out _ );
         }
 
-        private bool GetInliner( AspectReferenceHandle aspectReference, [NotNullWhen( true )] out Inliner? matchingInliner )
+        private bool GetInliner( ResolvedAspectReference aspectReference, [NotNullWhen( true )] out Inliner? matchingInliner )
         {
             var semanticModel = this.IntermediateCompilation.GetSemanticModel( aspectReference.Expression.SyntaxTree );
 
             foreach ( var inliner in this._inliners )
             {
-                if ( inliner.CanInline( (IMethodSymbol)aspectReference.ContainingSymbol, semanticModel, aspectReference.Expression ) )
+                if ( inliner.CanInline( aspectReference, semanticModel ) )
                 {
                     // We have inliner that will be able to inline the reference.
                     matchingInliner = inliner;
@@ -122,7 +123,10 @@ namespace Caravela.Framework.Impl.Linking
                         rewrittenBody,
                         GotoStatement(
                             SyntaxKind.GotoStatement,
-                            IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ) ) )
+                            Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
+                            default,
+                            IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
+                            Token( SyntaxKind.SemicolonToken ) ) )
                     .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
             }
 
@@ -136,14 +140,14 @@ namespace Caravela.Framework.Impl.Linking
                 // Collect syntax node replacements from inliners and redirect the rest to correct targets.
                 foreach ( var aspectReference in containedAspectReferences )
                 {
-                    if ( this.IsInlineable( aspectReference.ReferencedSymbol ) )
+                    if ( this.IsInlineable( aspectReference.ResolvedSymbol, aspectReference.Semantic ) )
                     {
                         if ( !this.GetInliner( aspectReference, out var inliner ) )
                         {
                             throw new AssertionFailedException();
                         }
 
-                        inliner.Inline( inliningContext, aspectReference.Expression, out var replacedNode, out var newNode );
+                        inliner.Inline( inliningContext, aspectReference, out var replacedNode, out var newNode );
                         replacements.Add( replacedNode, newNode );
                     }
                     else
@@ -175,7 +179,10 @@ namespace Caravela.Framework.Impl.Linking
                                                 returnStatement.Expression ) ),
                                         GotoStatement(
                                             SyntaxKind.GotoStatement,
-                                            IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ) ) )
+                                            Token(SyntaxKind.GotoKeyword).WithTrailingTrivia( Space ),
+                                            default,
+                                            IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
+                                            Token( SyntaxKind.SemicolonToken) ) )
                                     .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
                             }
                             else
@@ -183,7 +190,10 @@ namespace Caravela.Framework.Impl.Linking
                                 replacements[returnStatement] =
                                     GotoStatement(
                                         SyntaxKind.GotoStatement,
-                                        IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ) );
+                                        Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
+                                        default,
+                                        IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
+                                        Token( SyntaxKind.SemicolonToken ) );
                             }
                         }
                     }
@@ -196,7 +206,10 @@ namespace Caravela.Framework.Impl.Linking
                                     ExpressionStatement( returnExpression ),
                                     GotoStatement(
                                         SyntaxKind.GotoStatement,
-                                        IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ) ) )
+                                        Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
+                                        default,
+                                        IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
+                                        Token( SyntaxKind.SemicolonToken ) ) )
                                 .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
                         }
                         else
@@ -210,7 +223,10 @@ namespace Caravela.Framework.Impl.Linking
                                             returnExpression ) ),
                                     GotoStatement(
                                         SyntaxKind.GotoStatement,
-                                        IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ) ) )
+                                        Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
+                                        default,
+                                        IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
+                                        Token( SyntaxKind.SemicolonToken ) ) )
                                 .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
                         }
                     }
@@ -400,25 +416,26 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private ExpressionSyntax GetLinkedExpression( AspectReferenceHandle aspectReference )
+        private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference )
         {
-            var resolvedSymbol = this.ReferenceResolver.Resolve( aspectReference.ReferencedSymbol, aspectReference.Specification );
-
-            if (!SymbolEqualityComparer.Default.Equals(resolvedSymbol.ContainingType, aspectReference.ReferencedSymbol.ContainingType))
+            if (!SymbolEqualityComparer.Default.Equals( aspectReference.ResolvedSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType))
             {
                 throw new AssertionFailedException();
             }
 
             var targetMemberName =
-                this._analysisRegistry.IsOverrideTarget( resolvedSymbol )
-                ? GetOriginalImplMemberName( resolvedSymbol.Name )
-                : resolvedSymbol.Name;
+                (this._analysisRegistry.IsOverrideTarget( aspectReference.ResolvedSymbol ), aspectReference.Specification.Order) switch
+                {
+                    ( true, AspectReferenceOrder.Default ) => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
+                    ( true, AspectReferenceOrder.Original ) => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
+                    _ => aspectReference.ResolvedSymbol.Name,
+                };
 
-            if ( resolvedSymbol.IsStatic )
+            if ( aspectReference.ResolvedSymbol.IsStatic )
             {
                 return MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( resolvedSymbol.ContainingType ),
+                    LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( aspectReference.ResolvedSymbol.ContainingType ),
                     IdentifierName( targetMemberName ) );
             }
             else

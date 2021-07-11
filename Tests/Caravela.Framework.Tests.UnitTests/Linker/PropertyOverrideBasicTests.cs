@@ -165,12 +165,12 @@ class T
         get
         {
             Test(""Get"");
-            return link(this.Foo);
+            return link(this.Foo.get, inline);
         }
         set
         {
             Test(""Set"");
-            link(this.Foo) = value;
+            link(this.Foo.set, inline) = value;
         }
     }
 }
@@ -183,19 +183,19 @@ class T
     {
     }
 
-    private int __Foo__BackingField;
+    private int _foo;
     int Foo
     {
         get
         {
             Test(""Get"");
-            return this.__Foo__BackingField;
+            return this._foo;
         }
 
         set
         {
             Test(""Set"");
-            this.__Foo__BackingField = value;
+            this._foo = value;
         }
     }
 }

@@ -12,9 +12,9 @@ namespace Caravela.Framework.Impl.Linking
     {
         public bool HasSimpleReturnControlFlow { get; }
 
-        public IReadOnlyList<AspectReferenceHandle> AspectReferences { get; }
+        public IReadOnlyList<ResolvedAspectReference> AspectReferences { get; }
 
-        public MethodBodyAnalysisResult( IReadOnlyList<AspectReferenceHandle> aspectReferences, bool hasSimpleReturnControlFlow )
+        public MethodBodyAnalysisResult( IReadOnlyList<ResolvedAspectReference> aspectReferences, bool hasSimpleReturnControlFlow )
         {
             this.AspectReferences = aspectReferences;
             this.HasSimpleReturnControlFlow = hasSimpleReturnControlFlow;
