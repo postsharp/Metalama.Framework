@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Reflection;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel

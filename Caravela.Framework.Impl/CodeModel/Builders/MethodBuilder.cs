@@ -80,6 +80,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         // We don't currently support adding other methods than default ones.
         public MethodKind MethodKind => MethodKind.Default;
 
+        public bool IsReadOnly { get; set; }
+
         System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
 
         IMethod IMethod.WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
@@ -103,10 +105,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         // TODO: #(28532) Implement properly.
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        {
-            return this.Name;
-        }
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.Name;
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
@@ -145,10 +144,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override MemberDeclarationSyntax InsertPositionNode
             => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
 
-        public void SetExplicitInterfaceImplementation( IMethod interfaceMethod )
-        {
-            this.ExplicitInterfaceImplementations = new[] { interfaceMethod };
-        }
+        public void SetExplicitInterfaceImplementation( IMethod interfaceMethod ) => this.ExplicitInterfaceImplementations = new[] { interfaceMethod };
 
         public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
     }

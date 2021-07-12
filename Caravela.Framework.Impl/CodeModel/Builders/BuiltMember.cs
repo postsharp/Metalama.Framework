@@ -12,18 +12,22 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         protected BuiltMember( CompilationModel compilation ) : base( compilation ) { }
 
+        public abstract MemberBuilder MemberBuilder { get; }
+
+        public sealed override DeclarationBuilder Builder => this.MemberBuilder;
+
         IMember IDeclarationRef<IMember>.Resolve( CompilationModel compilation ) => throw new NotImplementedException();
 
         ISymbol IDeclarationRef<IMember>.GetSymbol( Compilation compilation ) => throw new NotImplementedException();
 
-        public bool IsExplicitInterfaceImplementation => ((MemberBuilder) this.Builder).IsExplicitInterfaceImplementation;
+        public bool IsExplicitInterfaceImplementation => this.MemberBuilder.IsExplicitInterfaceImplementation;
 
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
-        
-        public bool IsVirtual => ((MemberBuilder) this.MemberOrNamedTypeBuilder).IsVirtual;
 
-        public bool IsAsync => ((MemberBuilder) this.MemberOrNamedTypeBuilder).IsAsync;
+        public bool IsVirtual => this.MemberBuilder.IsVirtual;
 
+        public bool IsAsync => this.MemberBuilder.IsAsync;
 
+        public bool IsOverride => this.MemberBuilder.IsOverride;
     }
 }
