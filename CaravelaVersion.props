@@ -9,7 +9,7 @@
     <!-- To create a development release build, define the properties Configuration=Release and UseLocalBuildId=True -->
 
     <PropertyGroup>
-        <MainVersion>0.3.1</MainVersion>
+        <MainVersion>0.3.2</MainVersion>
     </PropertyGroup>
     
     <PropertyGroup>
