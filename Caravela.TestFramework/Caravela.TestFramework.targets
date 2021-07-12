@@ -62,10 +62,10 @@ namespace $(RootNamespace)
     <Target Name="CleanTestOutput">
         <ItemGroup>
             <_CleanTestOutput Include="obj\\transformed\**\*.*" />
-            <_CleanTestOutput Include="obj\\highlighted\**\*.*" />
+            <_CleanTestOutput Include="obj\\html\**\*.*" />
         </ItemGroup>
         <RemoveDir Directories="obj\\transformed" />
-        <RemoveDir Directories="obj\\highlighted" />
+        <RemoveDir Directories="obj\\html" />
         <Delete Files="@(_CleanTestOutput)" />
     </Target>
 

@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel
     /// Represents a subset of a Roslyn <see cref="Microsoft.CodeAnalysis.Compilation"/>. The subset is limited
     /// to specific syntax trees.
     /// </summary>
-    internal abstract partial class PartialCompilation : IPartialCompilation
+    public abstract partial class PartialCompilation : IPartialCompilation
     {
         /// <summary>
         /// Gets the Roslyn <see cref="Microsoft.CodeAnalysis.Compilation"/>.

@@ -1,5 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <PropertyGroup>
+        <!-- Prevent Caravela.TestFramework.props to generate the attribute that ignores the test framework -->        
+        <CaravelaTestReplaceFramework Condition="'$(Obfuscate)'=='True'">False</CaravelaTestReplaceFramework>
+    </PropertyGroup>
+
     <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.props" />
 
   <PropertyGroup>
@@ -9,10 +14,11 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
      <CaravelaTestAutoExclude>False</CaravelaTestAutoExclude>
      <CaravelaTestGenerateDefaultRunner>False</CaravelaTestGenerateDefaultRunner>
+     <RootNamespace>Caravela.Framework.Tests.Templating</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-<!--    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" /> -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
     <PackageReference Include="coverlet.collector" Version="1.2.0" />
@@ -59,11 +65,10 @@
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="Tests\Formatting\Output\Introduce.t.cs" />
-    <None Include="Tests\Formatting\Output\Override.t.cs" />
-  </ItemGroup>
-
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
+
+    <ItemGroup  Condition="'$(Obfuscate)'=='True'">
+        <Compile Remove="**\*"/>
+    </ItemGroup>
   
 </Project>
