@@ -40,4 +40,5 @@ _ReSharper*/
 .idea/**/shelf
 LocalBuildId.props
 /publish/
+/tools/
 **/inspectcode.xml
