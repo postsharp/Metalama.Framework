@@ -19,10 +19,6 @@ $random = "$random1$random2"
 
 $props = "<Project><PropertyGroup><LocalBuildId>$random</LocalBuildId></PropertyGroup></Project>"
 
-if (Test-Path "artifacts\bin\Debug" -PathType Container ) {
-    del "artifacts\bin\Debug\*.nupkg"
-}
-
 $LocalBuildIdProps = "LocalBuildId.props";
 
 if ( Test-Path $LocalBuildIdProps ) {
