@@ -10,19 +10,23 @@ Make sure you have read and understood [PostSharp Engineering](../README.md) bef
     - [CreateLocalPackages.ps1](#createlocalpackagesps1)
     - [RestoreRelease.ps1](#restorereleaseps1)
     - [Kill.ps1](#killps1)
+    - [RestoreRelease.ps1](#restorereleaseps1-1)
   - [Imported scripts](#imported-scripts)
     - [AssemblyMetadata.props and AssemblyMetadata.targets](#assemblymetadataprops-and-assemblymetadatatargets)
     - [CompilerOptions.props](#compileroptionsprops)
     - [Engineering.Directories.props](#engineeringdirectoriesprops)
     - [Engineering.Versions.props](#engineeringversionsprops)
     - [SourceLink.props](#sourcelinkprops)
+  - [NuGet packages metadata](#nuget-packages-metadata)
+    - [Installation and configuration](#installation-and-configuration)
   - [Versioning](#versioning)
-    - [Installation](#installation)
+    - [Installation and configuration](#installation-and-configuration-1)
     - [Usage](#usage)
       - [Product package version and maturity configuration](#product-package-version-and-maturity-configuration)
       - [Package dependencies versions configuration](#package-dependencies-versions-configuration)
       - [Creating local development packages](#creating-local-development-packages)
   - [Continuous integration](#continuous-integration)
+    - [Instalation](#instalation)
 
 ## Executable scripts
 
@@ -37,6 +41,10 @@ Used by CI pipeline. See [Continuous integration](#continuous-integration) for d
 ### Kill.ps1
 
 Kills all processes which might hold any files from the repository.
+
+### RestoreRelease.ps1
+
+TODO: Unused?
 
 ## Imported scripts
 
@@ -64,15 +72,56 @@ Manages versioning. See [Versioning](#versioning) for details on usage of this f
 
 Enables SourceLink support.
 
+## NuGet packages metadata
+
+This section describes centralize NuGet packages metadata management.
+
+### Installation and configuration
+
+1. Create `.engineering-local\Packaging.props` file. The content should look like this:
+
+```
+<Project>
+
+    <!-- Properties of NuGet packages-->
+    <PropertyGroup>
+        <Authors>PostSharp Technologies</Authors>
+        <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
+        <PackageTags>PostSharp Caravela AOP</PackageTags>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+        <PackageIcon>PostSharpIcon.png</PackageIcon>
+        <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    </PropertyGroup>
+
+    <!-- Additional content of NuGet packages -->
+    <ItemGroup>
+        <None Include="$(MSBuildThisFileDirectory)..\PostSharpIcon.png" Visible="false" Pack="true" PackagePath="" />
+        <None Include="$(MSBuildThisFileDirectory)..\LICENSE.md" Visible="false" Pack="true" PackagePath="" />
+        <None Include="$(MSBuildThisFileDirectory)..\THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
+    </ItemGroup>
+
+</Project>
+```
+
+2. Make sure that all the files referenced in the previous step exist.
+
+3. Import the file from the first step in `Directory.Build.props`:
+
+```
+  <Import Project=".engineering-local\Packaging.props" />
+```
+
+Now all the packages creted from the repository will contain the metadata configured in the `.engineering-local\Packaging.props` file.
+
 ## Versioning
 
 This section describes centralized version management.
 
-### Installation
+### Installation and configuration
 
 1. Add `LocalBuildId.props` to `.gitignore`.
 
-2. Create `.engineering-local\Versions.props`. The content can look like:
+2. Create `.engineering-local\Versions.props` file. The content should look like:
 
 ```
 <Project>
@@ -127,4 +176,31 @@ The script generates a version suffix in `LocalBuildId.props` file and creates N
 
 ## Continuous integration
 
-TODO
+We use TeamCity as our CI/CD pipeplie at the moment. The folowing sections describe a common way to set up continous integration on TeamCity. See [PostSharp Engineering: Deployment Features](../deploy/README.md#continuous-deployment) for information about continuous deployment.
+
+### Instalation
+
+1. Create a new (sub)project using manual setup.
+   
+2. Set up versioned settings if necessary.
+
+3. Add a VCS root.
+
+4. Create build configurations. Set build agent requirements and triggers as needed.
+
+   1. Create "Debug Build and Test" build configuration using manual build steps configuration.
+
+Build steps:
+
+| # | Name | Type | Configuration |
+| - | ---- | ---- | ------------- |
+| 1 | Restore | .NET | Command: restore |
+| 2 | Build | .NET | Command: build; Projects: [projects]; Configuration: Debug; Version suffix: %build.number% |
+| 3 | Test | .NET | Command: test; Projects: [projects]; Options: Do not build the projects; Command line parameters: --no-restore |
+| 4 | Pack | .NET | Command: pack; Projects: [projects]; Version suffix: %build.number% |
+
+Artifact paths:
+
+```
+artifacts\bin\Debug\*.nupkg => artifacts/bin/Debug
+```

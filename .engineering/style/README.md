@@ -1,1 +1,46 @@
-TODO
+# PostSharp Engineering: Code Style Features
+
+Make sure you have read and understood [PostSharp Engineering](../README.md) before reading this doc.
+
+## Table of contents
+
+## Introduction
+
+This directory contains centralized code-style configuration and scripts.
+
+## Installation
+
+To install the common code style configuration:
+
+1. Execute the `& .engineering\style\LinkConfiguration.ps1` in PowerShell from the repository root. This script will link the `.editorconfig` file to the repository root and the `sln.DotSettings` next to each `.sln` solution file in the repository with a name corresponding to the solution name.
+
+> Note: `LinkConfiguration.ps1` script needs to be executed every time a solution file name is created or its name changes.
+
+2. Import the `CodeQuality.props` script to the `Directory.Build.props` script:
+
+```
+  <Import Project=".engineering\style\CodeQuality.props" />
+```
+
+## Configuration
+
+The code quality configuration is configured in the following files:
+
+- `.editorconfig`
+- `sln.DotSettings`
+- `stylecop.json`
+- `CodeQuality.props`
+
+## Code style cleanup
+
+### Installation
+
+Create `.engineering-local\Cleanup.ps1` file. The content should look like this:
+
+```
+.engineering/style/Cleanup.ps1 Caravela.sln
+```
+
+### Usage
+
+To get the source code cleaned, execute `& .engineering-local\Cleanup.ps1` in PowerShell from the repository root.
