@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// Represents a file in a <see cref="CompileTimeProject"/>. This class is serialized
     /// to Json as a part of the <see cref="CompileTimeProjectManifest"/>.
     /// </summary>
-    [Obfuscation(Exclude = true /* JSON */)]
+    [Obfuscation( Exclude = true /* JSON */ )]
     internal sealed class CompileTimeFile
     {
         // TODO: Add serialization-deserialization tests because this is brittle.

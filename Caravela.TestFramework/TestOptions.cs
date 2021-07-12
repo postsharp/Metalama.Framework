@@ -89,7 +89,7 @@ namespace Caravela.TestFramework
             this.TestRunnerFactoryType ??= directoryOptions.TestRunnerFactoryType;
 
             this.WriteInputHtml ??= directoryOptions.WriteInputHtml;
-            
+
             this.WriteOutputHtml ??= directoryOptions.WriteOutputHtml;
 
             this.AddHtmlTitles ??= directoryOptions.AddHtmlTitles;
@@ -150,11 +150,11 @@ namespace Caravela.TestFramework
                         this.WriteInputHtml = true;
 
                         break;
-                    
+
                     case "WriteOutputHtml":
                         this.WriteOutputHtml = true;
                         this.FormatOutput = true;
-                        
+
                         break;
 
                     case "AddHtmlTitles":

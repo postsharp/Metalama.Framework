@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
     /// <summary>
     /// A JSON-serializable file that contains user-defined diagnostic and suppression descriptors.
     /// </summary>
-    [Obfuscation(Exclude = true /* JSON */)] 
+    [Obfuscation( Exclude = true /* JSON */ )]
     internal class UserDiagnosticRegistrationFile
     {
         public Dictionary<string, UserDiagnosticRegistration> Diagnostics { get; } = new( StringComparer.OrdinalIgnoreCase );

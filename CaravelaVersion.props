@@ -5,13 +5,13 @@
     <!-- LocalBuildId.props is created by CreateLocalPackages.ps1. It is used on development environments only 
         (not on build servers) -->
     <Import Project="LocalBuildId.props" Condition="Exists('LocalBuildId.props')" />
-    
+
     <!-- To create a development release build, define the properties Configuration=Release and UseLocalBuildId=True -->
 
     <PropertyGroup>
         <MainVersion>0.3.2</MainVersion>
     </PropertyGroup>
-    
+
     <PropertyGroup>
         <RestoreAdditionalProjectSources>
             $(RestoreAdditionalProjectSources);
@@ -19,9 +19,12 @@
             $(MSBuildThisFileDirectory)artifacts\bin\Debug
         </RestoreAdditionalProjectSources>
     </PropertyGroup>
-    
+
     <PropertyGroup>
-        <UseLocalBuildId Condition="'$(UseLocalBuildId)'=='' AND ( '$(Configuration)'!='Release' AND '$(VersionSuffix)'=='') ">True</UseLocalBuildId>
+        <UseLocalBuildId
+            Condition="'$(UseLocalBuildId)'=='' AND ( '$(Configuration)'!='Release' AND '$(VersionSuffix)'=='') ">
+            True
+        </UseLocalBuildId>
     </PropertyGroup>
 
     <!-- The version for the release build is set manually. -->

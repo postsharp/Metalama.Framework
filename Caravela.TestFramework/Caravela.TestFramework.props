@@ -8,7 +8,8 @@
             <_Parameter1>ProjectDirectory</_Parameter1>
             <_Parameter2>$(MSBuildProjectDirectory)</_Parameter2>
         </AssemblyAttribute>
-        <AssemblyAttribute Include="Xunit.TestFrameworkAttribute" Condition="'$(CaravelaTestReplaceFramework)'!='False'">
+        <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"
+                           Condition="'$(CaravelaTestReplaceFramework)'!='False'">
             <_Parameter1>Caravela.TestFramework.AspectTestFramework</_Parameter1>
             <_Parameter2>Caravela.TestFramework</_Parameter2>
         </AssemblyAttribute>

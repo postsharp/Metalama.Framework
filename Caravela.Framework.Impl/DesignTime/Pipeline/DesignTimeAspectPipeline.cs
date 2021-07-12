@@ -117,7 +117,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 foreach ( var syntaxTree in compilation.SyntaxTrees )
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    
+
                     if ( CompileTimeCodeDetector.HasCompileTimeCode( syntaxTree.GetRoot() ) )
                     {
                         newCompileTimeSyntaxTrees = newCompileTimeSyntaxTrees.Add( syntaxTree.FilePath, syntaxTree );
@@ -132,7 +132,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 foreach ( var syntaxTree in compilation.SyntaxTrees )
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    
+
                     if ( this._compileTimeSyntaxTrees.ContainsKey( syntaxTree.FilePath ) )
                     {
                         trees.Add( syntaxTree );

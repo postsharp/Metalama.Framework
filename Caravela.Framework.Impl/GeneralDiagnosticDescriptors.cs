@@ -5,7 +5,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
-using System;
 using static Caravela.Framework.Diagnostics.Severity;
 
 #pragma warning disable SA1118

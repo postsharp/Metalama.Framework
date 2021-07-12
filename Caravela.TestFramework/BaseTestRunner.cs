@@ -136,9 +136,8 @@ namespace Caravela.TestFramework
                 visitor.Visit( syntaxTree.GetRoot() );
             }
         }
-        
-        public static string NormalizeEndOfLines( string s )
-            => _newLineRegex.Replace( s, "\n" );
+
+        public static string NormalizeEndOfLines( string s ) => _newLineRegex.Replace( s, "\n" );
 
         public static string? NormalizeTestOutput( string? s, bool preserveFormatting )
             => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting );
@@ -271,7 +270,7 @@ namespace Caravela.TestFramework
                 "obj",
                 "html",
                 Path.GetDirectoryName( testInput.RelativePath ) ?? "" );
-            
+
             if ( !Directory.Exists( htmlDirectory ) )
             {
                 Directory.CreateDirectory( htmlDirectory );

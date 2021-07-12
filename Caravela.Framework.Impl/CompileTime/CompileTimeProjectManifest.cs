@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// <summary>
     /// A serializable object that stores the manifest of a <see cref="CompileTimeProject"/>. 
     /// </summary>
-    [Obfuscation(Exclude = true /* JSON */)]
+    [Obfuscation( Exclude = true /* JSON */ )]
     internal class CompileTimeProjectManifest
     {
         public CompileTimeProjectManifest(
