@@ -70,6 +70,13 @@ namespace Caravela.Framework.Impl.Linking
 
         private bool GetInliner( ResolvedAspectReference aspectReference, [NotNullWhen( true )] out Inliner? matchingInliner )
         {
+            if (!SymbolEqualityComparer.Default.Equals(aspectReference.ContainingSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType))
+            {
+                // Never inline method from another type.
+                matchingInliner = null;
+                return false;
+            }
+
             var semanticModel = this.IntermediateCompilation.GetSemanticModel( aspectReference.Expression.SyntaxTree );
 
             foreach ( var inliner in this._inliners )
@@ -426,7 +433,7 @@ namespace Caravela.Framework.Impl.Linking
             var targetMemberName =
                 (this._analysisRegistry.IsOverrideTarget( aspectReference.ResolvedSymbol ), aspectReference.Specification.Order) switch
                 {
-                    ( true, AspectReferenceOrder.Default ) => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
+                    ( true, AspectReferenceOrder.Base ) => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
                     ( true, AspectReferenceOrder.Original ) => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
                     _ => aspectReference.ResolvedSymbol.Name,
                 };
@@ -440,11 +447,23 @@ namespace Caravela.Framework.Impl.Linking
             }
             else
             {
-                return MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    ThisExpression(),
-                    IdentifierName( targetMemberName ) );
+                if ( SymbolEqualityComparer.Default.Equals( aspectReference.ContainingSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType ) )
+                {
+                    return MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ThisExpression(),
+                        IdentifierName( targetMemberName ) );
+                }
+                else
+                {
+                    return MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        BaseExpression(),
+                        IdentifierName( targetMemberName ) );
+                }
             }
+
+
         }
 
         internal static string GetOriginalImplMemberName( string memberName ) => $"__{memberName}__OriginalImpl";

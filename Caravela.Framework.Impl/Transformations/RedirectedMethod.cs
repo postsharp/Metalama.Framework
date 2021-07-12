@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl.Transformations
                             IdentifierName( this.OverriddenDeclaration.Name ) );
 
                 return expression
-                    .WithAspectReferenceAnnotation( new AspectReferenceSpecification( this.Advice.AspectLayerId, AspectReferenceOrder.Default ) );
+                    .WithAspectReferenceAnnotation( this.Advice.AspectLayerId, AspectReferenceOrder.Base );
             }
         }
     }

@@ -96,11 +96,7 @@ namespace Caravela.Framework.Impl.Transformations
         {
             return
                 InvocationExpression(
-                    CreateInvocationTarget()
-                    .WithAspectReferenceAnnotation(
-                        this.Advice.AspectLayerId,
-                        AspectReferenceOrder.Default,
-                        flags: AspectReferenceFlags.Inlineable ),
+                    this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self ),
                     ArgumentList(
                         SeparatedList(
                             this.OverriddenDeclaration.Parameters.Select( p =>
@@ -115,16 +111,6 @@ namespace Caravela.Framework.Impl.Transformations
                                         _ => throw new AssertionFailedException(),
                                     },
                                     IdentifierName( p.Name ) ) ) ) ) );
-
-            ExpressionSyntax CreateInvocationTarget()
-            {
-                return this.OverriddenDeclaration.IsStatic
-                    ? IdentifierName( this.OverriddenDeclaration.Name )
-                    : MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        ThisExpression(),
-                        IdentifierName( this.OverriddenDeclaration.Name ) );
-            }
         }
     }
 }

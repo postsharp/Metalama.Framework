@@ -81,7 +81,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration.IsStatic
                         ? IdentifierName( this.OverriddenDeclaration.Name )
                         : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this.OverriddenDeclaration.Name ) )
-                            .WithAspectReferenceAnnotation( new AspectReferenceSpecification( this.Advice.AspectLayerId, AspectReferenceOrder.Default ) );
+                            .WithAspectReferenceAnnotation( this.Advice.AspectLayerId, AspectReferenceOrder.Base );
             }
         }
     }

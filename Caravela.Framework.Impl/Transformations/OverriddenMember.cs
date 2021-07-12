@@ -73,14 +73,28 @@ namespace Caravela.Framework.Impl.Transformations
             ExpressionSyntax expression;
             if ( !this.OverriddenDeclaration.IsStatic )
             {
-                expression = MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    ThisExpression(),
-                    IdentifierName( this.OverriddenDeclaration.Name ) );
+                if ( this.OverriddenDeclaration.IsExplicitInterfaceImplementation )
+                {
+                    var implementedInterfaceMember = this.OverriddenDeclaration.GetExplicitInterfaceImplementation();
+
+                    expression = MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ParenthesizedExpression(
+                            CastExpression( 
+                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(implementedInterfaceMember.DeclaringType.GetSymbol()),
+                                ThisExpression() ) ),
+                        IdentifierName( this.OverriddenDeclaration.Name ) );
+                }
+                else
+                {
+                    expression = MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ThisExpression(),
+                        IdentifierName( this.OverriddenDeclaration.Name ) );
+                }
             }
             else
             {
-                // TODO: Full qualification.
                 expression =
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
@@ -91,7 +105,7 @@ namespace Caravela.Framework.Impl.Transformations
             return expression
                 .WithAspectReferenceAnnotation(
                     this.Advice.AspectLayerId,
-                    AspectReferenceOrder.Default,
+                    AspectReferenceOrder.Base,
                     referenceTargetKind,
                     flags: AspectReferenceFlags.Inlineable );
         }

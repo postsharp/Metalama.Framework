@@ -34,22 +34,36 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                     var annotatedExpression = node.ArgumentList.Arguments[0].Expression;
 
-                    string? tag = null;
-
-                    if ( node.ArgumentList.Arguments.Count == 2 )
-                    {
-                        tag = node.ArgumentList.Arguments[1].ToString();
-                    }
-
                     AspectReferenceFlags flags = default;
 
-                    if (tag == "inline")
+                    // Since most of the linker tests linking normal aspects, the default order for linker tests is Base.
+                    var order = AspectReferenceOrder.Base;
+
+                    for ( var i = 1; i < node.ArgumentList.Arguments.Count; i++ )
                     {
-                        flags |= AspectReferenceFlags.Inlineable;
-                    }
-                    else if ( tag != null )
-                    {
-                        throw new ArgumentException( $"unsupported link() tag {tag}" );
+                        var tag = node.ArgumentList.Arguments[i].ToString();
+
+                        switch ( tag )
+                        {
+                            case "inline":
+                                flags |= AspectReferenceFlags.Inlineable;
+                                break;
+
+                            case "next":
+                                order = AspectReferenceOrder.Next;
+                                break;
+
+                            case "original":
+                                order = AspectReferenceOrder.Original;
+                                break;
+
+                            case "final":
+                                order = AspectReferenceOrder.Final;
+                                break;
+
+                            default:
+                                throw new ArgumentException( $"unsupported link() tag {tag}" );
+                        }
                     }
 
                     var target = AspectReferenceTargetKind.Self;
@@ -77,7 +91,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         }
                     }
 
-                    return annotatedExpression.WithAspectReferenceAnnotation( new AspectLayerId( this._aspectName, this._layerName ), AspectReferenceOrder.Default, target, flags );
+                    return annotatedExpression.WithAspectReferenceAnnotation( new AspectLayerId( this._aspectName, this._layerName ), order, target, flags );
                 }
 
                 return base.VisitInvocationExpression( node );

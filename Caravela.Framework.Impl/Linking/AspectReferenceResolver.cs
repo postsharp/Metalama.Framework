@@ -35,8 +35,8 @@ namespace Caravela.Framework.Impl.Linking
 
             switch ( referenceSpecification.Order )
             {
-                case AspectReferenceOrder.Default:
-                    referencedIntroduction = GetClosestPrecedingOverride( overrides, indexedLayers, annotationLayerIndex );
+                case AspectReferenceOrder.Next:
+                    referencedIntroduction = GetClosestSucceedingOverride( overrides, indexedLayers, annotationLayerIndex );
 
                     if (referencedIntroduction != null)
                     {
@@ -52,20 +52,17 @@ namespace Caravela.Framework.Impl.Linking
                     else
                     {
                         // There is no preceding override, this is reference to the original body.
-                        var originalSymbol = GetOriginalDeclarationSymbol( referencedSymbol );
                         return new ResolvedAspectReference(
                             containingSymbol,
                             referencedSymbol,
-                            TransitionSymbol( referencedSymbol, originalSymbol),
-                            SymbolEqualityComparer.Default.Equals(referencedSymbol, originalSymbol)
-                                ? ResolvedAspectReferenceSemantic.Original
-                                : ResolvedAspectReferenceSemantic.Default,
+                            referencedSymbol,
+                            ResolvedAspectReferenceSemantic.Default,
                             expression,
                             referenceSpecification );
                     }
 
                 case AspectReferenceOrder.Base:
-                    referencedIntroduction = GetClosestSucceedingOverride( overrides, indexedLayers, annotationLayerIndex );
+                    referencedIntroduction = GetClosestPrecedingOverride( overrides, indexedLayers, annotationLayerIndex );
 
                     if ( referencedIntroduction != null )
                     {
@@ -81,11 +78,14 @@ namespace Caravela.Framework.Impl.Linking
                     else
                     {
                         // No override after the referencing aspect, point to the final declaration.
+                        var originalSymbol = GetOriginalDeclarationSymbol( referencedSymbol );
                         return new ResolvedAspectReference(
                             containingSymbol,
                             referencedSymbol,
-                            referencedSymbol,
-                            ResolvedAspectReferenceSemantic.Default,
+                            TransitionSymbol( referencedSymbol, originalSymbol ),
+                            SymbolEqualityComparer.Default.Equals( referencedSymbol, originalSymbol )
+                                ? ResolvedAspectReferenceSemantic.Original
+                                : ResolvedAspectReferenceSemantic.Default,
                             expression,
                             referenceSpecification );
                     }

@@ -134,10 +134,15 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     foreach ( var member in node.Members )
                     {
-                        using ( var memberSuppressions = this.WithSuppressions( member ) )
+                        var visitedMember = (MemberDeclarationSyntax?)this.Visit( member );
+
+                        if (visitedMember != null)
                         {
-                            var memberWithSuppressions = this.AddSuppression( member, memberSuppressions.NewSuppressions );
-                            members.Add( memberWithSuppressions );
+                            using ( var memberSuppressions = this.WithSuppressions( member ) )
+                            {
+                                var memberWithSuppressions = this.AddSuppression( visitedMember, memberSuppressions.NewSuppressions );
+                                members.Add( memberWithSuppressions );
+                            }
                         }
 
                         // We have to call AddIntroductionsOnPosition outside of the previous suppression scope, otherwise we don't get new suppressions.

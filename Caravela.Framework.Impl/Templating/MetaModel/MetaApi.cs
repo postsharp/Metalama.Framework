@@ -66,11 +66,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             };
         }
 
-        public dynamic This => this.GetThisOrBase( "meta.This", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Default ) );
+        public dynamic This => this.GetThisOrBase( "meta.This", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
 
         public dynamic Base => this.GetThisOrBase( "meta.Base", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
-        public dynamic ThisStatic => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Default ) );
+        public dynamic ThisStatic => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
 
         public dynamic BaseStatic => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 

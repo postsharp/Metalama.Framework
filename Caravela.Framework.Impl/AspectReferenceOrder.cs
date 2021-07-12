@@ -8,10 +8,10 @@ namespace Caravela.Framework.Impl
         /// <summary>
         /// Calls the semantic in the state it is after the current aspect has been applied.
         /// </summary>
-        Default,
+        Next,
 
         /// <summary>
-        /// Gets the final state of the semantic with all transformation. If the semantic is virtual, this results in a virtual call.
+        /// Gets the final state of the semantic with all transformations. If the semantic is virtual, this results in a virtual call.
         /// Otherwise, this results in a call to the semantic with all transformations of the current class (but not of derived classes).
         /// </summary>
         Final,

@@ -22,7 +22,6 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
         public virtual dynamic? CloneImpl()
         {
             var baseMethod = meta.Type.Methods.OfExactSignature("Clone", 0, Array.Empty<IType>());
-
             return null;
         }
 
