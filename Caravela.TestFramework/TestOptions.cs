@@ -75,6 +75,11 @@ namespace Caravela.TestFramework
         public bool? FormatOutput { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether C# nullability is disabled for the compilation.
+        /// </summary>
+        public bool? NullabilityDisabled { get; set; }
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
@@ -164,6 +169,11 @@ namespace Caravela.TestFramework
 
                     case "FormatOutput":
                         this.FormatOutput = true;
+
+                        break;
+
+                    case "NullabilityDisabled":
+                        this.NullabilityDisabled = true;
 
                         break;
                 }

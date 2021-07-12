@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             var linkingOrder = order switch
             {
                 InvokerOrder.Base => AspectReferenceOrder.Base,
-                InvokerOrder.Default => AspectReferenceOrder.Default,
+                InvokerOrder.Default => AspectReferenceOrder.Final,
                 _ => throw new ArgumentOutOfRangeException( nameof(order), order, null )
             };
 

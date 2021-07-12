@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
-            return AdviceResult.Create( new OverriddenMethod( this, this.TargetDeclaration, this.TemplateMethod, this.LinkerOptions ) );
+            return AdviceResult.Create( new OverriddenMethod( this, this.TargetDeclaration, this.TemplateMethod ) );
         }
     }
 }

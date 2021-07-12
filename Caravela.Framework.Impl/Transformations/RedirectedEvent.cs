@@ -20,8 +20,8 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IEvent TargetEvent { get; }
 
-        public RedirectedEvent( Advice advice, IEvent overriddenDeclaration, IEvent targetEvent, AspectLinkerOptions? linkerOptions = null )
-            : base( advice, overriddenDeclaration, linkerOptions )
+        public RedirectedEvent( Advice advice, IEvent overriddenDeclaration, IEvent targetEvent )
+            : base( advice, overriddenDeclaration )
         {
             this.TargetEvent = targetEvent;
         }

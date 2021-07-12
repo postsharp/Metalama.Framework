@@ -7,6 +7,6 @@ void Method(int a, int bb)
         return;
     }
 
-    _ = null;
+    _ = (object)null;
     return;
 }

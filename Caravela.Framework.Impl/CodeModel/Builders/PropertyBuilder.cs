@@ -64,8 +64,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IInvokerFactory<IPropertyInvoker> Invokers => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ), false );
 
-        public AspectLinkerOptions? LinkerOptions { get; }
-
         public override InsertPosition InsertPosition
             => new InsertPosition(
                 InsertPositionRelation.Within,
@@ -86,13 +84,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             bool hasGetter,
             bool hasSetter,
             bool isAutoProperty,
-            bool hasInitOnlySetter,
-            AspectLinkerOptions? linkerOptions )
+            bool hasInitOnlySetter )
             : base( parentAdvice, targetType, name )
         {
             // TODO: Sanity checks.
-
-            this.LinkerOptions = linkerOptions;
             this.Type = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(object) );
 
             if ( hasGetter )

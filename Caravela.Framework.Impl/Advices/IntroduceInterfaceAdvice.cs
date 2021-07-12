@@ -313,13 +313,11 @@ namespace Caravela.Framework.Impl.Advices
                                     ? new OverriddenMethod(
                                         this,
                                         (IMethod) memberBuilder,
-                                        (IMethod) memberSpec.AspectInterfaceMember,
-                                        this.LinkerOptions )
+                                        (IMethod) memberSpec.AspectInterfaceMember )
                                     : new RedirectedMethod(
                                         this,
                                         (IMethod) memberBuilder,
-                                        (IMethod) memberSpec.TargetMember.AssertNotNull(),
-                                        this.LinkerOptions ) );
+                                        (IMethod) memberSpec.TargetMember.AssertNotNull() ) );
 
                             break;
 
@@ -343,13 +341,11 @@ namespace Caravela.Framework.Impl.Advices
                                             (IProperty) memberBuilder,
                                             (IProperty) memberSpec.AspectInterfaceMember,
                                             null,
-                                            null,
-                                            this.LinkerOptions )
+                                            null )
                                         : new RedirectedProperty(
                                             this,
                                             (IProperty) memberBuilder,
-                                            (IProperty) memberSpec.TargetMember.AssertNotNull(),
-                                            this.LinkerOptions ) );
+                                            (IProperty) memberSpec.TargetMember.AssertNotNull() ) );
                             }
 
                             break;
@@ -370,13 +366,11 @@ namespace Caravela.Framework.Impl.Advices
                                             (IEvent) memberBuilder,
                                             (IEvent) memberSpec.AspectInterfaceMember,
                                             null,
-                                            null,
-                                            this.LinkerOptions )
+                                            null )
                                         : new RedirectedEvent(
                                             this,
                                             (IEvent) memberBuilder,
-                                            (IEvent) memberSpec.TargetMember.AssertNotNull(),
-                                            this.LinkerOptions ) );
+                                            (IEvent) memberSpec.TargetMember.AssertNotNull() ) );
                             }
 
                             break;
@@ -389,7 +383,7 @@ namespace Caravela.Framework.Impl.Advices
                 }
 
                 result = result.WithTransformations(
-                    new IntroducedInterface( this, this.TargetDeclaration, interfaceSpec.InterfaceType, interfaceMemberMap, this.LinkerOptions ) );
+                    new IntroducedInterface( this, this.TargetDeclaration, interfaceSpec.InterfaceType, interfaceMemberMap ) );
 
                 result = result.WithTransformations( explicitImplementationBuilders.ToArray<ITransformation>() );
                 result = result.WithTransformations( overrides.ToArray<ITransformation>() );
@@ -400,7 +394,7 @@ namespace Caravela.Framework.Impl.Advices
 
         private MemberBuilder GetImplMethodBuilder( IMethod interfaceMethod, bool isExplicit )
         {
-            var methodBuilder = new MethodBuilder( this, this.TargetDeclaration, interfaceMethod.Name, this.LinkerOptions );
+            var methodBuilder = new MethodBuilder( this, this.TargetDeclaration, interfaceMethod.Name );
 
             methodBuilder.ReturnParameter.ParameterType = interfaceMethod.ReturnParameter.ParameterType;
             methodBuilder.ReturnParameter.RefKind = interfaceMethod.ReturnParameter.RefKind;
@@ -451,8 +445,7 @@ namespace Caravela.Framework.Impl.Advices
                 interfaceProperty.Getter != null || (!isExplicit && targetProperty.Getter != null),
                 interfaceProperty.Setter != null || (!isExplicit && targetProperty.Setter != null),
                 !isExplicit && isAutoProperty,
-                interfaceProperty.Writeability == Writeability.InitOnly,
-                this.LinkerOptions );
+                interfaceProperty.Writeability == Writeability.InitOnly );
 
             propertyBuilder.Type = interfaceProperty.Type;
 

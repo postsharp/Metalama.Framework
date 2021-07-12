@@ -33,8 +33,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
-        public AspectLinkerOptions? LinkerOptions { get; }
-
         public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
         {
             var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind );
@@ -89,11 +87,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
-        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, AspectLinkerOptions? linkerOptions )
+        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name )
             : base( parentAdvice, targetType, name )
         {
-            this.LinkerOptions = linkerOptions;
-
             this.ReturnParameter =
                 new ParameterBuilder(
                     this,

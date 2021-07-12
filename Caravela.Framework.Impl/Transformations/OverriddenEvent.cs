@@ -30,9 +30,8 @@ namespace Caravela.Framework.Impl.Transformations
             IEvent overriddenDeclaration,
             IEvent? templateEvent,
             IMethod? addTemplateMethod,
-            IMethod? removeTemplateMethod,
-            AspectLinkerOptions? linkerOptions = null )
-            : base( advice, overriddenDeclaration, linkerOptions )
+            IMethod? removeTemplateMethod )
+            : base( advice, overriddenDeclaration )
         {
             Invariant.Assert( advice != null );
             Invariant.Assert( overriddenDeclaration != null );

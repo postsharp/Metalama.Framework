@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Simplification;
 using System.Collections.Generic;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -57,8 +58,32 @@ namespace Caravela.Framework.Impl.CodeModel
             }
 
             public ExpressionSyntax NameExpression( INamespaceOrTypeSymbol symbol )
-                => (ExpressionSyntax) this._syntaxGenerator.NameExpression( symbol )
-                    .WithAdditionalAnnotations( Simplifier.Annotation );
+            {
+                ExpressionSyntax expression;
+                switch ( symbol )
+                {
+                    case ITypeSymbol typeSymbol:
+                        if ( typeSymbol.NullableAnnotation == NullableAnnotation.Annotated )
+                        {
+                            return NullableType( (TypeSyntax) this._syntaxGenerator.NameExpression( typeSymbol.WithNullableAnnotation( NullableAnnotation.None ) ) );
+                        }
+                        else
+                        {
+                            expression = (ExpressionSyntax) this._syntaxGenerator.NameExpression( typeSymbol );
+                        }
+
+                        break;
+
+                    case INamespaceSymbol namespaceSymbol:
+                        expression = (ExpressionSyntax) this._syntaxGenerator.NameExpression( namespaceSymbol );
+                        break;
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+                
+                return expression.WithAdditionalAnnotations( Simplifier.Annotation );
+            }
 
             public ThisExpressionSyntax ThisExpression() => (ThisExpressionSyntax) this._syntaxGenerator.ThisExpression();
 

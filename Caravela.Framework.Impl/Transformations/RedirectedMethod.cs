@@ -20,8 +20,8 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IMethod TargetMethod { get; }
 
-        public RedirectedMethod( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod, AspectLinkerOptions? linkerOptions = null )
-            : base( advice, overriddenDeclaration, linkerOptions )
+        public RedirectedMethod( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod )
+            : base( advice, overriddenDeclaration )
         {
             Invariant.Assert( targetMethod != null );
 

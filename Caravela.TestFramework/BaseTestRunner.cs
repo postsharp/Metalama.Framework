@@ -63,7 +63,7 @@ namespace Caravela.TestFramework
             // Source. Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
             // which is more difficult to test.
             var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER", "CARAVELA" );
-            var project = this.CreateProject().WithParseOptions( parseOptions );
+            var project = this.CreateProject(testInput.Options).WithParseOptions( parseOptions );
 
             Document AddDocument( string fileName, string sourceCode )
             {
@@ -245,7 +245,7 @@ namespace Caravela.TestFramework
         /// Creates a new project that is used to compile the test source.
         /// </summary>
         /// <returns>A new project instance.</returns>
-        public Project CreateProject()
+        public Project CreateProject(TestOptions options)
         {
             var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null, this._additionalAssemblies );
 
@@ -254,7 +254,10 @@ namespace Caravela.TestFramework
             var solution = workspace1.CurrentSolution;
 
             var project = solution.AddProject( guid.ToString(), guid.ToString(), LanguageNames.CSharp )
-                .WithCompilationOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )
+                .WithCompilationOptions( 
+                    new CSharpCompilationOptions( 
+                        OutputKind.DynamicallyLinkedLibrary, 
+                        nullableContextOptions: options.NullabilityDisabled == true ? NullableContextOptions.Disable : NullableContextOptions.Enable ) )
                 .AddMetadataReferences( compilation.References );
 
             // Don't add the assembly containing the code to test because it would result in duplicate symbols.

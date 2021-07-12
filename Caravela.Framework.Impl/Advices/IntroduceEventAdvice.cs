@@ -78,8 +78,7 @@ namespace Caravela.Framework.Impl.Advices
                         this.MemberBuilder,
                         this.TemplateMember,
                         this._addTemplateMethod,
-                        this._removeTemplateMethod,
-                        this.LinkerOptions ) );
+                        this._removeTemplateMethod ) );
             }
         }
 

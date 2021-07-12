@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.Linking
                     if ( symbols.Length == 0 || (symbols.Length == 1 && symbols[0] == null ) )
                     {
                         // TODO: Comment when this happens.
-                        newMembers.Add( member );
+                        newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
                         continue;
                     }
 
@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.Linking
                         else
                         {
                             // Normal member without any transformations.
-                            newMembers.Add( member );
+                            newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
                         }
                     }
                     else

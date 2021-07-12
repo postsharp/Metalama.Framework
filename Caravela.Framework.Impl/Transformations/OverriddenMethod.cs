@@ -25,8 +25,8 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IMethod TemplateMethod { get; }
 
-        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, IMethod templateMethod, AspectLinkerOptions? linkerOptions = null )
-            : base( advice, overriddenDeclaration, linkerOptions )
+        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, IMethod templateMethod )
+            : base( advice, overriddenDeclaration )
         {
             Invariant.Assert( templateMethod != null );
 

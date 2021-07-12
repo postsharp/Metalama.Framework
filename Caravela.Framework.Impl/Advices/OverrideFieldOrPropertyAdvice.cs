@@ -45,16 +45,16 @@ namespace Caravela.Framework.Impl.Advices
             // TODO: Translate templates to this compilation.
             if ( this.TargetDeclaration is IField field )
             {
-                var promotedField = new PromotedField( this, field, this.LinkerOptions );
+                var promotedField = new PromotedField( this, field );
 
                 return AdviceResult.Create(
                     promotedField,
-                    new OverriddenProperty( this, promotedField, this.TemplateProperty, this.GetTemplateMethod, this.SetTemplateMethod, this.LinkerOptions ) );
+                    new OverriddenProperty( this, promotedField, this.TemplateProperty, this.GetTemplateMethod, this.SetTemplateMethod ) );
             }
             else if ( this.TargetDeclaration is IProperty property )
             {
                 return AdviceResult.Create(
-                    new OverriddenProperty( this, property, this.TemplateProperty, this.GetTemplateMethod, this.SetTemplateMethod, this.LinkerOptions ) );
+                    new OverriddenProperty( this, property, this.TemplateProperty, this.GetTemplateMethod, this.SetTemplateMethod ) );
             }
             else
             {

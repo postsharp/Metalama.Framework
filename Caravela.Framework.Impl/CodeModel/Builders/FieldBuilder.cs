@@ -34,8 +34,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IType IFieldOrProperty.Type => throw new NotImplementedException();
 
-        public AspectLinkerOptions? LinkerOptions { get; }
-
         public Writeability Writeability => throw new NotImplementedException();
 
         public bool IsAutoPropertyOrField => throw new NotImplementedException();
@@ -45,10 +43,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 InsertPositionRelation.Within,
                 ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
 
-        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name, AspectLinkerOptions? linkerOptions )
+        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name )
             : base( parentAdvice, targetType, name )
         {
-            this.LinkerOptions = linkerOptions;
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )

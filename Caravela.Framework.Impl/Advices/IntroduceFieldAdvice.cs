@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Advices
             Dictionary<string, object?>? tags )
             : base( aspect, targetDeclaration, null, scope, overrideStrategy, layerName, tags )
         {
-            this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, name, AspectLinkerOptions.FromTags( tags ) );
+            this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, name );
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )

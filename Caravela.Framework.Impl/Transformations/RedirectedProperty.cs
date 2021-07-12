@@ -20,8 +20,8 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IProperty TargetProperty { get; }
 
-        public RedirectedProperty( Advice advice, IProperty overriddenDeclaration, IProperty targetProperty, AspectLinkerOptions? linkerOptions = null )
-            : base( advice, overriddenDeclaration, linkerOptions )
+        public RedirectedProperty( Advice advice, IProperty overriddenDeclaration, IProperty targetProperty )
+            : base( advice, overriddenDeclaration )
         {
             Invariant.Assert( targetProperty != null );
 

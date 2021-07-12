@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Advices
             Dictionary<string, object?>? tags )
             : base( aspect, targetDeclaration, templateMethod, scope, overrideStrategy, layerName, tags )
         {
-            this.MemberBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Name, this.LinkerOptions );
+            this.MemberBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Name );
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
@@ -91,7 +91,7 @@ namespace Caravela.Framework.Impl.Advices
             if ( existingDeclaration == null )
             {
                 // There is no existing declaration, we will introduce and override the introduced.
-                var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.TemplateMember, this.LinkerOptions );
+                var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.TemplateMember );
 
                 return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
             }
@@ -124,7 +124,7 @@ namespace Caravela.Framework.Impl.Advices
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.TemplateMember, this.LinkerOptions );
+                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.TemplateMember );
 
                             return AdviceResult.Create( overriddenMethod );
                         }
@@ -132,7 +132,7 @@ namespace Caravela.Framework.Impl.Advices
                         {
                             this.MemberBuilder.IsNew = true;
                             this.MemberBuilder.OverriddenMethod = existingDeclaration;
-                            var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.TemplateMember, this.LinkerOptions );
+                            var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.TemplateMember );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                         }
@@ -140,7 +140,7 @@ namespace Caravela.Framework.Impl.Advices
                     case OverrideStrategy.Override:
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.TemplateMember, this.LinkerOptions );
+                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.TemplateMember );
 
                             return AdviceResult.Create( overriddenMethod );
                         }
@@ -157,7 +157,7 @@ namespace Caravela.Framework.Impl.Advices
                         {
                             this.MemberBuilder.IsOverride = true;
                             this.MemberBuilder.OverriddenMethod = existingDeclaration;
-                            var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.TemplateMember, this.LinkerOptions );
+                            var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.TemplateMember );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                         }

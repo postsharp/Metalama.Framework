@@ -20,8 +20,6 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IMember OverriddenDeclaration { get; }
 
-        public AspectLinkerOptions? LinkerOptions { get; }
-
         IDeclaration IOverriddenDeclaration.OverriddenDeclaration => this.OverriddenDeclaration;
 
         // TODO: Temporary
@@ -30,14 +28,13 @@ namespace Caravela.Framework.Impl.Transformations
                 ? introduction.TargetSyntaxTree
                 : ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
 
-        public OverriddenMember( Advice advice, IMember overriddenDeclaration, AspectLinkerOptions? linkerOptions = null )
+        public OverriddenMember( Advice advice, IMember overriddenDeclaration )
         {
             Invariant.Assert( advice != null! );
             Invariant.Assert( overriddenDeclaration != null! );
 
             this.Advice = advice;
             this.OverriddenDeclaration = overriddenDeclaration;
-            this.LinkerOptions = linkerOptions;
         }
 
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
