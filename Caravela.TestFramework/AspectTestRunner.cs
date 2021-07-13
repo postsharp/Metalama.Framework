@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace Caravela.TestFramework
@@ -30,9 +31,9 @@ namespace Caravela.TestFramework
         /// Runs the aspect test with the given name and source.
         /// </summary>
         /// <returns>The result of the test execution.</returns>
-        public override TestResult RunTest( TestInput testInput )
+        public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
-            var testResult = base.RunTest( testInput );
+            var testResult = await base.RunTestAsync( testInput );
 
             using var testProjectOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
@@ -51,7 +52,7 @@ namespace Caravela.TestFramework
                     testResult.Report( resultCompilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
                 }
 
-                testResult.SetOutputCompilation( resultCompilation );
+                await testResult.SetOutputCompilationAsync( resultCompilation );
             }
             else
             {
@@ -60,7 +61,7 @@ namespace Caravela.TestFramework
 
             if ( testInput.Options.WriteInputHtml.GetValueOrDefault() || testInput.Options.WriteOutputHtml.GetValueOrDefault() )
             {
-                this.WriteHtml( testInput, testResult );
+                await this.WriteHtmlAsync( testInput, testResult );
             }
 
             return testResult;

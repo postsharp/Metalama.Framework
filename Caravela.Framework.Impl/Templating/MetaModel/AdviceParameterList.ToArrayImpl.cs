@@ -38,6 +38,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     array,
                     this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) ) );
             }
+
+            public IType ExpressionType => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );
         }
     }
 }

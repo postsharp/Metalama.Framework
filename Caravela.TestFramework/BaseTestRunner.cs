@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -56,14 +57,14 @@ namespace Caravela.TestFramework
         /// </summary>
         /// <param name="testInput"></param>
         /// <returns></returns>
-        public virtual TestResult RunTest( TestInput testInput )
+        public virtual async Task<TestResult> RunTestAsync( TestInput testInput )
         {
             var testResult = this.CreateTestResult();
 
             // Source. Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
             // which is more difficult to test.
             var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER", "CARAVELA" );
-            var project = this.CreateProject(testInput.Options).WithParseOptions( parseOptions );
+            var project = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions );
 
             Document AddDocument( string fileName, string sourceCode )
             {
@@ -78,7 +79,7 @@ namespace Caravela.TestFramework
             var sourceFileName = testInput.TestName + ".cs";
             var mainDocument = AddDocument( sourceFileName, testInput.SourceCode );
 
-            var syntaxTree = mainDocument.GetSyntaxTreeAsync().Result!;
+            var syntaxTree = await mainDocument.GetSyntaxTreeAsync()!;
 
             testResult.AddInputDocument( mainDocument, testInput.FullPath );
 
@@ -98,7 +99,7 @@ namespace Caravela.TestFramework
 
                 testResult.AddInputDocument( includedDocument, includedFullPath );
 
-                var includedSyntaxTree = includedDocument.GetSyntaxTreeAsync().Result!;
+                var includedSyntaxTree = await includedDocument.GetSyntaxTreeAsync()!;
                 initialCompilation = initialCompilation.AddSyntaxTrees( includedSyntaxTree );
             }
 
@@ -136,9 +137,8 @@ namespace Caravela.TestFramework
                 visitor.Visit( syntaxTree.GetRoot() );
             }
         }
-        
-        public static string NormalizeEndOfLines( string s )
-            => _newLineRegex.Replace( s, "\n" );
+
+        public static string NormalizeEndOfLines( string s ) => _newLineRegex.Replace( s, "\n" );
 
         public static string? NormalizeTestOutput( string? s, bool preserveFormatting )
             => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting );
@@ -245,7 +245,7 @@ namespace Caravela.TestFramework
         /// Creates a new project that is used to compile the test source.
         /// </summary>
         /// <returns>A new project instance.</returns>
-        public Project CreateProject(TestOptions options)
+        public Project CreateProject( TestOptions options )
         {
             var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null, this._additionalAssemblies );
 
@@ -254,9 +254,9 @@ namespace Caravela.TestFramework
             var solution = workspace1.CurrentSolution;
 
             var project = solution.AddProject( guid.ToString(), guid.ToString(), LanguageNames.CSharp )
-                .WithCompilationOptions( 
-                    new CSharpCompilationOptions( 
-                        OutputKind.DynamicallyLinkedLibrary, 
+                .WithCompilationOptions(
+                    new CSharpCompilationOptions(
+                        OutputKind.DynamicallyLinkedLibrary,
                         nullableContextOptions: options.NullabilityDisabled == true ? NullableContextOptions.Disable : NullableContextOptions.Enable ) )
                 .AddMetadataReferences( compilation.References );
 
@@ -265,7 +265,7 @@ namespace Caravela.TestFramework
             return project;
         }
 
-        protected void WriteHtml( TestInput testInput, TestResult testResult )
+        protected async Task WriteHtmlAsync( TestInput testInput, TestResult testResult )
         {
             var htmlCodeWriter = this.CreateHtmlCodeWriter( testInput.Options );
 
@@ -274,7 +274,7 @@ namespace Caravela.TestFramework
                 "obj",
                 "html",
                 Path.GetDirectoryName( testInput.RelativePath ) ?? "" );
-            
+
             if ( !Directory.Exists( htmlDirectory ) )
             {
                 Directory.CreateDirectory( htmlDirectory );
@@ -295,7 +295,7 @@ namespace Caravela.TestFramework
                 var output = testResult.GetConsolidatedTestOutput();
                 var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", output );
 
-                var formattedOutput = OutputCodeFormatter.FormatAsync( outputDocument ).Result;
+                var formattedOutput = await OutputCodeFormatter.FormatAsync( outputDocument );
                 var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.OutputHtml );
                 var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput );
 

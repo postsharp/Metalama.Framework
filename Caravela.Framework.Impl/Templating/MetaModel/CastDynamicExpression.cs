@@ -12,12 +12,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 {
     internal class CastDynamicExpression : IDynamicExpression
     {
-        private readonly IType _type;
         private readonly object? _value;
 
         public CastDynamicExpression( IType type, object? value )
         {
-            this._type = type;
+            this.ExpressionType = type;
             this._value = value;
         }
 
@@ -32,8 +31,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             };
 
             return new RuntimeExpression(
-                SyntaxFactory.ParenthesizedExpression( LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression( this._type.GetSymbol(), expression ) )
+                SyntaxFactory.ParenthesizedExpression(
+                        LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression( this.ExpressionType.GetSymbol(), expression ) )
                     .WithAdditionalAnnotations( Simplifier.Annotation ) );
         }
+
+        public IType ExpressionType { get; }
     }
 }

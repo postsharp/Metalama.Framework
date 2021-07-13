@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -24,7 +25,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             ITestOutputHelper? logger )
             : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
-        public override TestResult RunTest( TestInput testInput )
+        public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
             var tree = CSharpSyntaxTree.ParseText( testInput.SourceCode );
             TriviaAdder triviaAdder = new();
@@ -33,7 +34,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             var testInputWithAddedTrivia = TestInput.FromSource( testSourceWithAddedTrivia, testInput.FullPath );
 
-            var result = base.RunTest( testInputWithAddedTrivia );
+            var result = await base.RunTestAsync( testInputWithAddedTrivia );
 
             if ( !result.Success )
             {

@@ -28,6 +28,7 @@
 // To disable the creation of this file, define the MSBUild property 'CaravelaTestGenerateDefaultRunner' to 'False'.
 // You will have to add you own test suites by deriving from the TestSuite class.
 
+using System.Threading.Tasks;
 using Caravela.TestFramework%3B
 using Xunit%3B
 using Xunit.Abstractions%3B
@@ -40,7 +41,7 @@ namespace $(RootNamespace)
     
         [Theory]
         [CurrentProject]
-        public void Tests( string f ) => this.RunTest( f )%3B
+        public Task Tests( string f ) => this.RunTestAsync( f )%3B
     }
 }
 ]]>

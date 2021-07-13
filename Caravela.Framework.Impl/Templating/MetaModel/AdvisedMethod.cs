@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
             else if ( this.ReturnType.Is( SpecialType.Void ) )
             {
-                return new EmptyStatementDynamicExpression();
+                return new EmptyStatementDynamicExpression( this.ReturnType );
             }
             else
             {

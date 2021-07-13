@@ -6,10 +6,9 @@ public class Target
     return default;
 }
 
-    [Test]
-    public void Bar()
-    {
-        _ = (object)default;
-        return;
-    }
+        [Test]
+        public void Bar()
+{
+    return;
 }
+    }

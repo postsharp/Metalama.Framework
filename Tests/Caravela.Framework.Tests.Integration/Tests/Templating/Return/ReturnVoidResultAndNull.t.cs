@@ -1,9 +1,9 @@
-void Method(int a, int b)
+        void Method(int a, int b)
 {
     try
     {
-        global::Caravela.Framework.Aspects.__Void result;
-        result = this.Method(a, b);
+        this.Method(a, b);
+        object result = null;
         return;
     }
     catch

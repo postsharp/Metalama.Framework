@@ -75,11 +75,11 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 var testRunner = TestRunnerFactory.CreateTestRunner( testInput, this._serviceProvider, null );
 
-                var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject(testInput.Options) );
+                var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject( testInput.Options ) );
 
                 var compilationStopwatch = Stopwatch.StartNew();
 
-                var testResult = testRunner.RunTest( testInput );
+                var testResult = await testRunner.RunTestAsync( testInput );
                 compilationStopwatch.Stop();
 
                 var testSyntaxTree = testResult.SyntaxTrees.First();
@@ -106,7 +106,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                     // this.CompiledTemplatePath = testResult.TransformedTemplatePath;
 
                     // Render the transformed tree.
-                    var project3 = testRunner.CreateProject(testInput.Options);
+                    var project3 = testRunner.CreateProject( testInput.Options );
                     var document3 = project3.AddDocument( "name.cs", transformedTemplateSyntax );
                     var optionSet = (await document3.GetOptionsAsync()).WithChangedOption( FormattingOptions.IndentationSize, 4 );
 
@@ -117,23 +117,23 @@ namespace Caravela.AspectWorkbench.ViewModels
                     this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
                 }
 
-                if ( testSyntaxTree.OutputRunTimeSourceText != null )
-                {
-                    // Display the transformed code.
-                    this.TransformedTargetDocument = await syntaxColorizer.WriteSyntaxColoring( testSyntaxTree.OutputRunTimeSourceText, null );
+                var consolidatedOutputSyntax = testResult.GetConsolidatedTestOutput();
+                var consolidatedOutputText = await consolidatedOutputSyntax.SyntaxTree.GetTextAsync();
 
-                    // Compare the output and shows the result.
-                    if ( BaseTestRunner.NormalizeTestOutput( this.ExpectedOutputText, false ) ==
-                         BaseTestRunner.NormalizeTestOutput( testSyntaxTree.OutputRunTimeSourceText.ToString(), false ) )
-                    {
-                        errorsDocument.Blocks.Add(
-                            new Paragraph( new Run( "The transformed target code is equal to expectations." ) { Foreground = Brushes.Green } ) );
-                    }
-                    else
-                    {
-                        errorsDocument.Blocks.Add(
-                            new Paragraph( new Run( "The transformed target code is different than expectations." ) { Foreground = Brushes.Red } ) );
-                    }
+                // Display the transformed code.
+                this.TransformedTargetDocument = await syntaxColorizer.WriteSyntaxColoring( consolidatedOutputText, null );
+
+                // Compare the output and shows the result.
+                if ( BaseTestRunner.NormalizeTestOutput( this.ExpectedOutputText, false ) ==
+                     BaseTestRunner.NormalizeTestOutput( consolidatedOutputText.ToString(), false ) )
+                {
+                    errorsDocument.Blocks.Add(
+                        new Paragraph( new Run( "The transformed target code is equal to expectations." ) { Foreground = Brushes.Green } ) );
+                }
+                else
+                {
+                    errorsDocument.Blocks.Add(
+                        new Paragraph( new Run( "The transformed target code is different than expectations." ) { Foreground = Brushes.Red } ) );
                 }
 
                 var errors = testResult.Diagnostics;

@@ -26,6 +26,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public RuntimeExpression? CreateExpression( string? expressionText = null, Location? location = null ) => throw new NotSupportedException();
 
+        public IType ExpressionType => this._type;
+
         public RuntimeExpression CreateMemberAccessExpression( string member )
             => new( SyntaxFactory.MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,

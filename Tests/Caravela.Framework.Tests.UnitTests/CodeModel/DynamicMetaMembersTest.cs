@@ -225,18 +225,6 @@ class TargetCode
             AssertEx.DynamicEquals(
                 new AdvisedParameterList( noParameterMethod ).Values.ToArray(),
                 @"new object[]{}" );
-
-            AssertEx.DynamicEquals(
-                new AdvisedParameterList( method ).Values.ToValueTuple(),
-                @"(a, b, c, default(global::System.DateTime), e)" );
-
-            AssertEx.DynamicEquals(
-                new AdvisedParameterList( longMethod ).Values.ToValueTuple(),
-                @"(a, b, c, d, e, f, g, h, i, j, k, l)" );
-
-            AssertEx.DynamicEquals(
-                new AdvisedParameterList( noParameterMethod ).Values.ToValueTuple(),
-                @"default(global::System.ValueType)" );
         }
     }
 }

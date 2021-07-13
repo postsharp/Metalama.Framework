@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
@@ -47,7 +48,7 @@ namespace Caravela.TestFramework
         /// Executes a test.
         /// </summary>
         /// <param name="relativePath">Relative path of the file relatively to the directory of the caller code.</param>
-        protected void RunTest( string relativePath, [CallerMemberName] string? callerMemberName = null )
+        protected async Task RunTestAsync( string relativePath, [CallerMemberName] string? callerMemberName = null )
         {
             var directory = this.GetDirectory( callerMemberName! );
             using var testOptions = new TestProjectOptions();
@@ -63,7 +64,7 @@ namespace Caravela.TestFramework
             var testInput = TestInput.FromFile( directoryOptionsReader, projectRelativePath );
             testInput.Options.References.AddRange( TestAssemblyReferenceReader.GetAssemblyReferences( new ReflectionAssemblyInfo( this.GetType().Assembly ) ) );
             var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, this.Logger );
-            var testResult = testRunner.RunTest( testInput );
+            var testResult = await testRunner.RunTestAsync( testInput );
             testRunner.ExecuteAssertions( testInput, testResult );
         }
     }

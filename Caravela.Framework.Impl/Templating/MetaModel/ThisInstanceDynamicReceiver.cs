@@ -24,6 +24,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public RuntimeExpression? CreateExpression( string? expressionText, Location? location = null ) => new( ThisExpression(), this._type );
 
+        public IType ExpressionType => this._type;
+
         RuntimeExpression IDynamicReceiver.CreateMemberAccessExpression( string member )
             => new( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( Identifier( member ) ) )
                         .WithAspectReferenceAnnotation( this._linkerAnnotation ) );

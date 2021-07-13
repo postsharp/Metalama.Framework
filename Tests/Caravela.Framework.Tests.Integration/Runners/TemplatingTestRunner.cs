@@ -23,6 +23,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -76,9 +77,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// </summary>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <returns>The result of the test execution.</returns>
-        public override TestResult RunTest( TestInput testInput )
+        public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
-            var testResult = base.RunTest( testInput );
+            var testResult = await base.RunTestAsync( testInput );
 
             if ( !testResult.Success )
             {
@@ -201,7 +202,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     return testResult;
                 }
 
-                testSyntaxTree.SetRunTimeCode( targetMethod.WithBody( output! ) );
+                await testSyntaxTree.SetRunTimeCodeAsync( targetMethod.WithBody( output! ) );
             }
             catch ( Exception e )
             {
@@ -267,37 +268,38 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     proceedExpression ) );
 
             return (new TemplateExpansionContext(
-                templateInstance,
-                metaApi,
-                compilation,
-                lexicalScope,
-                this._syntaxSerializationService,
-                compilation.Factory ), roslynTargetMethod);
+                        templateInstance,
+                        metaApi,
+                        compilation,
+                        lexicalScope,
+                        this._syntaxSerializationService,
+                        compilation.Factory ), roslynTargetMethod);
 
             static ExpressionSyntax GetProceedInvocation( Code.IMethod targetMethod )
             {
                 return
                     SyntaxFactory.InvocationExpression(
                         targetMethod.IsStatic
-                        ? SyntaxFactory.IdentifierName( targetMethod.Name )
-                        : SyntaxFactory.MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            SyntaxFactory.ThisExpression(),
-                            SyntaxFactory.IdentifierName( targetMethod.Name ) ),
+                            ? SyntaxFactory.IdentifierName( targetMethod.Name )
+                            : SyntaxFactory.MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                SyntaxFactory.ThisExpression(),
+                                SyntaxFactory.IdentifierName( targetMethod.Name ) ),
                         SyntaxFactory.ArgumentList(
                             SyntaxFactory.SeparatedList(
-                                targetMethod.Parameters.Select( p =>
-                                    SyntaxFactory.Argument(
-                                        null,
-                                        p.RefKind switch
-                                        {
-                                            Code.RefKind.None => default,
-                                            Code.RefKind.In => default,
-                                            Code.RefKind.Out => SyntaxFactory.Token( SyntaxKind.OutKeyword ),
-                                            Code.RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
-                                            _ => throw new AssertionFailedException(),
-                                        }, 
-                                        SyntaxFactory.IdentifierName( p.Name ) ) ) ) ) );
+                                targetMethod.Parameters.Select(
+                                    p =>
+                                        SyntaxFactory.Argument(
+                                            null,
+                                            p.RefKind switch
+                                            {
+                                                Code.RefKind.None => default,
+                                                Code.RefKind.In => default,
+                                                Code.RefKind.Out => SyntaxFactory.Token( SyntaxKind.OutKeyword ),
+                                                Code.RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
+                                                _ => throw new AssertionFailedException()
+                                            },
+                                            SyntaxFactory.IdentifierName( p.Name ) ) ) ) ) );
             }
         }
     }
