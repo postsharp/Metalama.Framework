@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    public static class ImplementedInterfaceListExtensions
+    internal static class ImplementedInterfaceListExtensions
     {
         public static ImplementedInterfaceList ToImplementedInterfaceList( this IEnumerable<INamedType> interfaces )
         {

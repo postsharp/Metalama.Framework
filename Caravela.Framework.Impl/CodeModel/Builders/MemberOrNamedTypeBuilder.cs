@@ -19,13 +19,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         public bool IsSealed { get; set; }
 
-        public bool IsReadOnly { get; set; }
-
-        public bool IsOverride { get; set; }
-
         public bool IsNew { get; set; }
-
-        public bool IsAsync { get; set; }
 
         public INamedType DeclaringType { get; }
 
@@ -38,8 +32,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsAbstract { get; set; }
 
         public bool IsStatic { get; set; }
-
-        public bool IsVirtual { get; set; }
 
         public sealed override IDeclaration ContainingDeclaration => this.DeclaringType;
 

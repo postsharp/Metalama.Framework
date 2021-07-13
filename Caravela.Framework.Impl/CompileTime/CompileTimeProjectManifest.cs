@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Reflection;
 using System.Text;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -12,6 +13,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// <summary>
     /// A serializable object that stores the manifest of a <see cref="CompileTimeProject"/>. 
     /// </summary>
+    [Obfuscation( Exclude = true /* JSON */ )]
     internal class CompileTimeProjectManifest
     {
         public CompileTimeProjectManifest(

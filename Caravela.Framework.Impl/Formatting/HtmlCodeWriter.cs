@@ -12,7 +12,7 @@ using System.Text;
 namespace Caravela.Framework.Impl.Formatting
 {
     public sealed partial class HtmlCodeWriter
-    {        
+    {
         private const string _csClassTagName = "csharp";
         private readonly HtmlCodeWriterOptions _options;
 

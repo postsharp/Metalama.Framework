@@ -16,7 +16,7 @@ using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    public static class DeclarationExtensions
+    internal static class DeclarationExtensions
     {
         public static SyntaxTokenList GetSyntaxModifierList( this IDeclaration declaration )
         {

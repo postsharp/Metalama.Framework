@@ -59,7 +59,7 @@ namespace Caravela.TestFramework
         /// Gets the result compilation of the test project.
         /// </summary>
         public Compilation? OutputCompilation { get; internal set; }
-        
+
         /// <summary>
         /// Gets the full path of the HTML file with syntax highlighting.
         /// </summary>

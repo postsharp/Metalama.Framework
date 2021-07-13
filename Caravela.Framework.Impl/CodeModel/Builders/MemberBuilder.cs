@@ -16,5 +16,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override string ToString() => this.DeclaringType + "." + this.Name;
 
         public abstract bool IsExplicitInterfaceImplementation { get; }
+
+        public bool IsVirtual { get; set; }
+
+        public bool IsAsync { get; set; }
+
+        public bool IsOverride { get; set; }
     }
 }

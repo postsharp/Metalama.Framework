@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public MethodBuilder MethodBuilder { get; }
 
-        public override DeclarationBuilder Builder => this.MethodBuilder;
+        public override MemberBuilder MemberBuilder => this.MethodBuilder;
 
         public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.MethodBuilder;
 
@@ -39,6 +39,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 this.MethodBuilder.Parameters.AsBuilderList.Select( DeclarationRef.FromBuilder<IParameter, IParameterBuilder> ) );
 
         public MethodKind MethodKind => this.MethodBuilder.MethodKind;
+
+        public bool IsReadOnly => this.MethodBuilder.IsReadOnly;
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
