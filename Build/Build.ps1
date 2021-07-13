@@ -1,6 +1,13 @@
-﻿# This is the main build script. You MUST run it before being able to open the projects in an IDE.
-# It generates a new version number, which is then read by Version.props so that it is available
-# by other solutions that reference the NuGet packages.
+﻿# This is the main build script. It is not required to run it before loading the projects in the IDE.
+# Main use cases:
+#  1. Create development NuGet packages:
+#         Build.ps1 -local
+#  2. Run the complete test suite in a development environment:
+#         Build.ps1 -local -test
+#  3. TeamCity: build debug packages and run tests:
+#         Build.ps1 -numbered <NUMBER> -test
+#  4. TeamCity: build release packages and run tests:
+#         Build.ps1 -public -release -test
 
 
 param ( 
