@@ -1,40 +1,40 @@
 ﻿# This is the main build script. It is not required to run it before loading the projects in the IDE.
 # Main use cases:
 #  1. Create development NuGet packages:
-#         Build.ps1 -local
+#         Build.ps1 -Local
 #  2. Run the complete test suite in a development environment:
-#         Build.ps1 -local -test
+#         Build.ps1 -Local -Test
 #  3. TeamCity: build debug packages and run tests:
-#         Build.ps1 -numbered <NUMBER> -test
+#         Build.ps1 -Numbered <NUMBER> -Test
 #  4. TeamCity: build release packages and run tests:
-#         Build.ps1 -public -release -test
+#         Build.ps1 -Public -Release -Test
 
 
 param ( 
 
 # Creates a release build instead of a debug one
-[switch] $release = $false, 
+[switch] $Release = $false, 
 
 # Creates a local build with a version number based on a timestamp (typically a development build)
-[switch] $local = $false, 
+[switch] $Local = $false, 
 
 # Creates a numbered build (typically internal builds on a build server)
-[int] $numbered = -1, 
+[int] $Numbered = -1, 
 
 # Creates a public build
-[switch] $public = $false,
+[switch] $Public = $false,
 
 # Creates CaravelaVersion.props but does not build the project
-[switch] $prepare = $false,
+[switch] $Prepare = $false,
 
 # Runs the test suite,
-[switch] $test = $false
+[switch] $Test = $false
 
 )
 
 $ErrorActionPreference = "Stop" 
 
-if ( $release ) {
+if ( $Release ) {
 $configuration = "release"
 } else {
 $configuration = "debug"
@@ -55,15 +55,15 @@ function CreateVersionFile() {
     $timestamp = [System.DateTime]::Now.ToString('MMdd.HHmm')
         
 
-    if ( $local ) {
+    if ( $Local ) {
         # Local build with timestamp-based version and randomized package number.
         $packageVersion = "`$(MainVersion)-local-$([System.DateTime]::Now.Year)$timestamp-$([string]::Format( "{0:x8}", $(Get-Random) ) )-$configuration"
         $assemblyVersion = "`$(MainVersion)$timestamp"
-    } elseif ( $numbered -ge 0 ) {
+    } elseif ( $Numbered -ge 0 ) {
         # Build server build with a build number given by the build server
-        $packageVersion = "`$(MainVersion)-build-$numbered-$configuration"
-        $assemblyVersion = "`$(MainVersion).$numbered"
-    } elseif ( $public ) {
+        $packageVersion = "`$(MainVersion)-build-$Numbered-$configuration"
+        $assemblyVersion = "`$(MainVersion).$Numbered"
+    } elseif ( $Public ) {
         # Public build
         $packageVersion = "`$(MainVersion)$(PackageVersionSuffix)"
         $assemblyVersion = "`$(MainVersion)"
@@ -124,10 +124,10 @@ Clean
 CreateVersionFile
 Restore
 
-if ( -not( $prepare ) ) {
+if ( -not( $Prepare ) ) {
     Pack
 }
 
-if ( $test ) {
+if ( $Test ) {
     Test
 }
