@@ -13,7 +13,7 @@ using System.Text;
 namespace Caravela.Framework.Impl.Formatting
 {
     public sealed partial class HtmlCodeWriter
-    {        
+    {
         private const string _csClassTagName = "csharp";
         private readonly HtmlCodeWriterOptions _options;
 
@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.Formatting
                 var combinedClassification = existingSpan.Tags != null! && existingSpan.Tags.TryGetValue( _csClassTagName, out var existingClassification )
                     ? existingClassification + ";" + csharpSpan.ClassificationType
                     : csharpSpan.ClassificationType;
-                
+
                 classifiedTextSpans.SetTag( csharpSpan.TextSpan, _csClassTagName, combinedClassification );
             }
 
