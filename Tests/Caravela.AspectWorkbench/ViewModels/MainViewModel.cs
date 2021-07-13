@@ -75,7 +75,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 var testRunner = TestRunnerFactory.CreateTestRunner( testInput, this._serviceProvider, null );
 
-                var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject() );
+                var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject(testInput.Options) );
 
                 var compilationStopwatch = Stopwatch.StartNew();
 
@@ -106,7 +106,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                     // this.CompiledTemplatePath = testResult.TransformedTemplatePath;
 
                     // Render the transformed tree.
-                    var project3 = testRunner.CreateProject();
+                    var project3 = testRunner.CreateProject(testInput.Options);
                     var document3 = project3.AddDocument( "name.cs", transformedTemplateSyntax );
                     var optionSet = (await document3.GetOptionsAsync()).WithChangedOption( FormattingOptions.IndentationSize, 4 );
 
