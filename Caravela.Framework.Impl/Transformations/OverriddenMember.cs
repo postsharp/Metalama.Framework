@@ -55,19 +55,22 @@ namespace Caravela.Framework.Impl.Transformations
 
                     if ( syntaxReference != null )
                     {
-                        return new InsertPosition(InsertPositionRelation.After, syntaxReference);
+                        return new InsertPosition( InsertPositionRelation.After, syntaxReference );
                     }
                 }
 
                 var typeSymbol = ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol;
 
-                return new InsertPosition( InsertPositionRelation.Within, typeSymbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
+                return new InsertPosition(
+                    InsertPositionRelation.Within,
+                    typeSymbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
             }
         }
 
         protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind )
         {
             ExpressionSyntax expression;
+
             if ( !this.OverriddenDeclaration.IsStatic )
             {
                 if ( this.OverriddenDeclaration.IsExplicitInterfaceImplementation )
@@ -77,8 +80,8 @@ namespace Caravela.Framework.Impl.Transformations
                     expression = MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         ParenthesizedExpression(
-                            CastExpression( 
-                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(implementedInterfaceMember.DeclaringType.GetSymbol()),
+                            CastExpression(
+                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( implementedInterfaceMember.DeclaringType.GetSymbol() ),
                                 ThisExpression() ) ),
                         IdentifierName( this.OverriddenDeclaration.Name ) );
                 }

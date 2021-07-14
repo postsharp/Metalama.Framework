@@ -60,12 +60,14 @@ namespace Caravela.Framework.Impl.CodeModel
             public ExpressionSyntax NameExpression( INamespaceOrTypeSymbol symbol )
             {
                 ExpressionSyntax expression;
+
                 switch ( symbol )
                 {
                     case ITypeSymbol typeSymbol:
                         if ( typeSymbol.NullableAnnotation == NullableAnnotation.Annotated )
                         {
-                            return NullableType( (TypeSyntax) this._syntaxGenerator.NameExpression( typeSymbol.WithNullableAnnotation( NullableAnnotation.None ) ) );
+                            return NullableType(
+                                (TypeSyntax) this._syntaxGenerator.NameExpression( typeSymbol.WithNullableAnnotation( NullableAnnotation.None ) ) );
                         }
                         else
                         {
@@ -76,12 +78,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
                     case INamespaceSymbol namespaceSymbol:
                         expression = (ExpressionSyntax) this._syntaxGenerator.NameExpression( namespaceSymbol );
+
                         break;
 
                     default:
                         throw new AssertionFailedException();
                 }
-                
+
                 return expression.WithAdditionalAnnotations( Simplifier.Annotation );
             }
 

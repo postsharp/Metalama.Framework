@@ -10,15 +10,13 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 {
     internal class PropertySetValueAssignmentInliner : PropertyInliner
     {
-        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[]
-        {
-            SyntaxKind.ReturnStatement
-        };
-        
+        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[] { SyntaxKind.ReturnStatement };
+
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax needs to be in form: <annotated_property_expression> = value;
-            if ( aspectReference.ResolvedSymbol is not IPropertySymbol && (aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol is not IPropertySymbol )
+            if ( aspectReference.ResolvedSymbol is not IPropertySymbol
+                 && (aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol is not IPropertySymbol )
             {
                 return false;
             }
@@ -30,12 +28,12 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 
             // Property access should be on the left.
             if ( assignmentExpression.Left != aspectReference.Expression )
-            { 
+            {
                 return false;
             }
 
             // Assignment should have a "value" identifier on the right (TODO: ref returns).
-            if ( assignmentExpression.Right is not IdentifierNameSyntax rightIdentifier || rightIdentifier.Identifier.ValueText != "value")
+            if ( assignmentExpression.Right is not IdentifierNameSyntax rightIdentifier || rightIdentifier.Identifier.ValueText != "value" )
             {
                 return false;
             }

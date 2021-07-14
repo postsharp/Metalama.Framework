@@ -29,22 +29,27 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     case Method { ContainingDeclaration: Event } sourceAccessor:
                         this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( sourceAccessor.LookupSymbols() );
+
                         break;
 
                     case Method { ContainingDeclaration: Property } sourceAccessor:
                         this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( sourceAccessor.LookupSymbols() );
+
                         break;
 
                     case Method sourceMethod:
                         this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( sourceMethod.LookupSymbols() );
+
                         break;
 
                     case MethodBuilder { DeclaringType: NamedType containingType }:
                         this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( containingType.LookupSymbols() );
+
                         break;
 
                     case IMethod { ContainingDeclaration: MemberBuilder { DeclaringType: NamedType containingType } _ }:
                         this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( containingType.LookupSymbols() );
+
                         break;
 
                     default:

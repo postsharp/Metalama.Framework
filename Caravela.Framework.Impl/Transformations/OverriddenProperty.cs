@@ -130,7 +130,7 @@ namespace Caravela.Framework.Impl.Transformations
                     {
                         MethodKind.PropertyGet => this.CreateGetExpression(),
                         MethodKind.PropertySet => this.CreateSetExpression(),
-                        _ => throw new AssertionFailedException(),
+                        _ => throw new AssertionFailedException()
                     },
                     this.OverriddenDeclaration.Type,
                     false );

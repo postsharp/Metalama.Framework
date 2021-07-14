@@ -29,7 +29,11 @@ namespace Caravela.Framework.Impl.Linking
 
         public Compilation IntermediateCompilation { get; }
 
-        public LinkerRewritingDriver( Compilation intermediateCompilation, LinkerAnalysisRegistry analysisRegistry, AspectReferenceResolver referenceResolver, IReadOnlyList<Inliner> inliners )
+        public LinkerRewritingDriver(
+            Compilation intermediateCompilation,
+            LinkerAnalysisRegistry analysisRegistry,
+            AspectReferenceResolver referenceResolver,
+            IReadOnlyList<Inliner> inliners )
         {
             this._analysisRegistry = analysisRegistry;
             this.IntermediateCompilation = intermediateCompilation;
@@ -45,7 +49,7 @@ namespace Caravela.Framework.Impl.Linking
                 IPropertySymbol propertySymbol => this.IsDiscarded( propertySymbol, semantic ),
                 IEventSymbol eventSymbol => this.IsDiscarded( eventSymbol, semantic ),
                 IFieldSymbol => false,
-                _ => throw new AssertionFailedException(),
+                _ => throw new AssertionFailedException()
             };
         }
 
@@ -57,7 +61,7 @@ namespace Caravela.Framework.Impl.Linking
                 IPropertySymbol propertySymbol => this.IsInlineable( propertySymbol, semantic ),
                 IEventSymbol eventSymbol => this.IsInlineable( eventSymbol, semantic ),
                 IFieldSymbol => false,
-                _ => throw new AssertionFailedException(),
+                _ => throw new AssertionFailedException()
             };
         }
 
@@ -70,10 +74,11 @@ namespace Caravela.Framework.Impl.Linking
 
         private bool GetInliner( ResolvedAspectReference aspectReference, [NotNullWhen( true )] out Inliner? matchingInliner )
         {
-            if (!SymbolEqualityComparer.Default.Equals(aspectReference.ContainingSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType))
+            if ( !SymbolEqualityComparer.Default.Equals( aspectReference.ContainingSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType ) )
             {
                 // Never inline method from another type.
                 matchingInliner = null;
+
                 return false;
             }
 
@@ -85,11 +90,13 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     // We have inliner that will be able to inline the reference.
                     matchingInliner = inliner;
+
                     return true;
                 }
             }
 
             matchingInliner = null;
+
             return false;
         }
 
@@ -119,22 +126,23 @@ namespace Caravela.Framework.Impl.Linking
             // TODO: This is not a nice place to have this, but there are problems if we attempt to do this using the replacements.
             //       The replacement block would already have different statements that would not match original instances.
             //       We would need either to annotate child statements or provide special mechanism for block changes (which should be enough for now).
-            if ( inliningContext.HasIndirectReturn 
-                 && symbol.ReturnsVoid 
+            if ( inliningContext.HasIndirectReturn
+                 && symbol.ReturnsVoid
                  && !SymbolEqualityComparer.Default.Equals( symbol, inliningContext.CurrentDeclaration ) )
             {
                 // Add the implicit return for void methods.
                 inliningContext.UseLabel();
+
                 rewrittenBody =
                     Block(
-                        rewrittenBody,
-                        GotoStatement(
-                            SyntaxKind.GotoStatement,
-                            Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
-                            default,
-                            IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                            Token( SyntaxKind.SemicolonToken ) ) )
-                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                            rewrittenBody,
+                            GotoStatement(
+                                SyntaxKind.GotoStatement,
+                                Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
+                                default,
+                                IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
+                                Token( SyntaxKind.SemicolonToken ) ) )
+                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
             }
 
             return rewrittenBody;
@@ -179,18 +187,18 @@ namespace Caravela.Framework.Impl.Linking
                             {
                                 replacements[returnStatement] =
                                     Block(
-                                        ExpressionStatement(
-                                            AssignmentExpression(
-                                                SyntaxKind.SimpleAssignmentExpression,
-                                                IdentifierName( inliningContext.ReturnVariableName ?? "_" ),
-                                                returnStatement.Expression ) ),
-                                        GotoStatement(
-                                            SyntaxKind.GotoStatement,
-                                            Token(SyntaxKind.GotoKeyword).WithTrailingTrivia( Space ),
-                                            default,
-                                            IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                                            Token( SyntaxKind.SemicolonToken) ) )
-                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                                            ExpressionStatement(
+                                                AssignmentExpression(
+                                                    SyntaxKind.SimpleAssignmentExpression,
+                                                    IdentifierName( inliningContext.ReturnVariableName ?? "_" ),
+                                                    returnStatement.Expression ) ),
+                                            GotoStatement(
+                                                SyntaxKind.GotoStatement,
+                                                Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
+                                                default,
+                                                IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
+                                                Token( SyntaxKind.SemicolonToken ) ) )
+                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
                             }
                             else
                             {
@@ -204,37 +212,37 @@ namespace Caravela.Framework.Impl.Linking
                             }
                         }
                     }
-                    else if (returnNode is ExpressionSyntax returnExpression)
+                    else if ( returnNode is ExpressionSyntax returnExpression )
                     {
                         if ( symbol.ReturnsVoid )
                         {
                             replacements[returnNode] =
                                 Block(
-                                    ExpressionStatement( returnExpression ),
-                                    GotoStatement(
-                                        SyntaxKind.GotoStatement,
-                                        Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
-                                        default,
-                                        IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                                        Token( SyntaxKind.SemicolonToken ) ) )
-                                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                                        ExpressionStatement( returnExpression ),
+                                        GotoStatement(
+                                            SyntaxKind.GotoStatement,
+                                            Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
+                                            default,
+                                            IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
+                                            Token( SyntaxKind.SemicolonToken ) ) )
+                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
                         }
                         else
                         {
                             replacements[returnNode] =
                                 Block(
-                                    ExpressionStatement(
-                                        AssignmentExpression(
-                                            SyntaxKind.SimpleAssignmentExpression,
-                                            IdentifierName( inliningContext.ReturnVariableName ?? "_" ),
-                                            returnExpression ) ),
-                                    GotoStatement(
-                                        SyntaxKind.GotoStatement,
-                                        Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
-                                        default,
-                                        IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                                        Token( SyntaxKind.SemicolonToken ) ) )
-                                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                                        ExpressionStatement(
+                                            AssignmentExpression(
+                                                SyntaxKind.SimpleAssignmentExpression,
+                                                IdentifierName( inliningContext.ReturnVariableName ?? "_" ),
+                                                returnExpression ) ),
+                                        GotoStatement(
+                                            SyntaxKind.GotoStatement,
+                                            Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
+                                            default,
+                                            IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
+                                            Token( SyntaxKind.SemicolonToken ) ) )
+                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
                         }
                     }
                     else
@@ -245,23 +253,25 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private SyntaxNode GetBodyRootNode(IMethodSymbol symbol, out bool isImplicitlyLinked)
+        private SyntaxNode GetBodyRootNode( IMethodSymbol symbol, out bool isImplicitlyLinked )
         {
             var declaration = symbol.GetPrimaryDeclaration();
 
-            if (this._analysisRegistry.IsOverrideTarget(symbol)
-                || (symbol.AssociatedSymbol != null && this._analysisRegistry.IsOverrideTarget( symbol.AssociatedSymbol )) )
+            if ( this._analysisRegistry.IsOverrideTarget( symbol )
+                 || (symbol.AssociatedSymbol != null && this._analysisRegistry.IsOverrideTarget( symbol.AssociatedSymbol )) )
             {
                 // Override targets are implicitly linked, i.e. no replacement of aspect references is necessary.
                 isImplicitlyLinked = true;
+
                 switch ( declaration )
                 {
                     case MethodDeclarationSyntax methodDecl:
-                        return (SyntaxNode?)methodDecl.Body ?? methodDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) methodDecl.Body ?? methodDecl.ExpressionBody ?? throw new AssertionFailedException();
+
                     case AccessorDeclarationSyntax accessorDecl:
                         var body = (SyntaxNode?) accessorDecl.Body ?? accessorDecl.ExpressionBody;
 
-                        if (body != null)
+                        if ( body != null )
                         {
                             return body;
                         }
@@ -273,22 +283,27 @@ namespace Caravela.Framework.Impl.Linking
                     case ArrowExpressionClauseSyntax arrowExpressionClause:
                         // Expression-bodied property.
                         return arrowExpressionClause;
+
                     case VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: EventFieldDeclarationSyntax } }:
                         return GetImplicitAccessorBody( symbol );
+
                     default:
                         throw new AssertionFailedException();
                 }
             }
-            else if (this._analysisRegistry.IsOverride(symbol)
-                || (symbol.AssociatedSymbol != null && this._analysisRegistry.IsOverride( symbol.AssociatedSymbol )) )
-            {               
+            else if ( this._analysisRegistry.IsOverride( symbol )
+                      || (symbol.AssociatedSymbol != null && this._analysisRegistry.IsOverride( symbol.AssociatedSymbol )) )
+            {
                 isImplicitlyLinked = false;
+
                 switch ( declaration )
                 {
                     case MethodDeclarationSyntax methodDecl:
                         return (SyntaxNode?) methodDecl.Body ?? throw new AssertionFailedException();
+
                     case AccessorDeclarationSyntax accessorDecl:
                         return (SyntaxNode?) accessorDecl.Body ?? throw new AssertionFailedException();
+
                     default:
                         throw new AssertionFailedException();
                 }
@@ -299,29 +314,34 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private static BlockSyntax GetImplicitAccessorBody(IMethodSymbol symbol)
+        private static BlockSyntax GetImplicitAccessorBody( IMethodSymbol symbol )
         {
             switch ( symbol )
             {
                 case { MethodKind: MethodKind.PropertyGet }:
                     return GetImplicitGetterBody( symbol );
+
                 case { MethodKind: MethodKind.PropertySet }:
                     return GetImplicitSetterBody( symbol );
+
                 case { MethodKind: MethodKind.EventAdd }:
                     return GetImplicitAdderBody( symbol );
+
                 case { MethodKind: MethodKind.EventRemove }:
                     return GetImplicitRemoverBody( symbol );
+
                 default:
                     throw new InvalidOperationException();
             }
         }
 
 #pragma warning disable CA1822 // Mark members as static
-        private BlockSyntax RewriteBody( SyntaxNode bodyRootNode, IMethodSymbol symbol, Dictionary<SyntaxNode, SyntaxNode?> replacements)
+        private BlockSyntax RewriteBody( SyntaxNode bodyRootNode, IMethodSymbol symbol, Dictionary<SyntaxNode, SyntaxNode?> replacements )
 #pragma warning restore CA1822 // Mark members as static
         {
-            var rewriter = new BodyRewriter(replacements);
-            switch (bodyRootNode)
+            var rewriter = new BodyRewriter( replacements );
+
+            switch ( bodyRootNode )
             {
                 case BlockSyntax block:
                     return (BlockSyntax) rewriter.Visit( block ).AssertNotNull();
@@ -329,19 +349,17 @@ namespace Caravela.Framework.Impl.Linking
                 case ArrowExpressionClauseSyntax arrowExpressionClause:
                     if ( symbol.ReturnsVoid )
                     {
-                        return 
-                            Block( 
-                                ExpressionStatement( 
-                                    (ExpressionSyntax) rewriter.Visit( arrowExpressionClause.Expression ).AssertNotNull()) );
+                        return
+                            Block( ExpressionStatement( (ExpressionSyntax) rewriter.Visit( arrowExpressionClause.Expression ).AssertNotNull() ) );
                     }
                     else
                     {
-                        return 
-                            Block( 
+                        return
+                            Block(
                                 ReturnStatement(
                                     Token( SyntaxKind.ReturnKeyword ).WithLeadingTrivia( Whitespace( " " ) ),
-                                    ( ExpressionSyntax) rewriter.Visit( arrowExpressionClause.Expression ).AssertNotNull(),
-                                    Token( SyntaxKind.SemicolonToken) ) );
+                                    (ExpressionSyntax) rewriter.Visit( arrowExpressionClause.Expression ).AssertNotNull(),
+                                    Token( SyntaxKind.SemicolonToken ) ) );
                     }
 
                 default:
@@ -356,9 +374,12 @@ namespace Caravela.Framework.Impl.Linking
                 case BlockSyntax block:
                     var walker = new ReturnStatementWalker();
                     walker.Visit( block );
+
                     return walker.ReturnStatements;
+
                 case ArrowExpressionClauseSyntax arrowExpressionClause:
                     return new[] { arrowExpressionClause.Expression };
+
                 default:
                     throw new NotImplementedException();
             }
@@ -385,17 +406,17 @@ namespace Caravela.Framework.Impl.Linking
             switch ( symbol )
             {
                 case IMethodSymbol methodSymbol:
-                    return this.RewriteMethod( (MethodDeclarationSyntax)syntax, methodSymbol );
+                    return this.RewriteMethod( (MethodDeclarationSyntax) syntax, methodSymbol );
 
                 case IPropertySymbol propertySymbol:
-                    return this.RewriteProperty( (PropertyDeclarationSyntax)syntax, propertySymbol );
+                    return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol );
 
                 case IEventSymbol eventSymbol:
                     return syntax switch
                     {
                         EventDeclarationSyntax eventSyntax => this.RewriteEvent( eventSyntax, eventSymbol ),
                         EventFieldDeclarationSyntax eventFieldSyntax => this.RewriteEventField( eventFieldSyntax, eventSymbol ),
-                        _ => throw new InvalidOperationException(),
+                        _ => throw new InvalidOperationException()
                     };
 
                 default:
@@ -409,7 +430,7 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        private IMethodSymbol GetBodySource(IMethodSymbol symbol )
+        private IMethodSymbol GetBodySource( IMethodSymbol symbol )
         {
             if ( this._analysisRegistry.IsOverride( symbol ) )
             {
@@ -427,7 +448,7 @@ namespace Caravela.Framework.Impl.Linking
 
         private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference )
         {
-            if (!SymbolEqualityComparer.Default.Equals( aspectReference.ResolvedSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType))
+            if ( !SymbolEqualityComparer.Default.Equals( aspectReference.ResolvedSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType ) )
             {
                 throw new AssertionFailedException();
             }
@@ -435,9 +456,9 @@ namespace Caravela.Framework.Impl.Linking
             var targetMemberName =
                 (this._analysisRegistry.IsOverrideTarget( aspectReference.ResolvedSymbol ), aspectReference.Specification.Order) switch
                 {
-                    ( true, AspectReferenceOrder.Base ) => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
-                    ( true, AspectReferenceOrder.Original ) => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
-                    _ => aspectReference.ResolvedSymbol.Name,
+                    (true, AspectReferenceOrder.Base) => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
+                    (true, AspectReferenceOrder.Original) => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
+                    _ => aspectReference.ResolvedSymbol.Name
                 };
 
             if ( aspectReference.ResolvedSymbol.IsStatic )
@@ -468,9 +489,11 @@ namespace Caravela.Framework.Impl.Linking
 
         internal static string GetOriginalImplMemberName( string memberName ) => $"__{memberName}__OriginalImpl";
 
-        private static LinkerDeclarationFlags GetDeclarationFlags(ISymbol symbol)
+        private static LinkerDeclarationFlags GetDeclarationFlags( ISymbol symbol )
         {
-            return symbol.DeclaringSyntaxReferences.Select( dsr => (dsr.GetSyntax() as MemberDeclarationSyntax)?.GetLinkerDeclarationFlags() ?? LinkerDeclarationFlags.None ).SingleOrDefault();
+            return symbol.DeclaringSyntaxReferences
+                .Select( dsr => (dsr.GetSyntax() as MemberDeclarationSyntax)?.GetLinkerDeclarationFlags() ?? LinkerDeclarationFlags.None )
+                .SingleOrDefault();
         }
-    }    
+    }
 }

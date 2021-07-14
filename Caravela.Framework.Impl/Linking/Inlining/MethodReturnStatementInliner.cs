@@ -13,11 +13,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
     /// </summary>
     internal class MethodReturnStatementInliner : MethodInliner
     {
-        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[]
-        {
-            SyntaxKind.ReturnStatement
-        };
-        
+        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[] { SyntaxKind.ReturnStatement };
+
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax has to be in form: return <annotated_method_expression( <arguments> );
@@ -26,12 +23,12 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            if ( aspectReference.Expression.Parent == null || aspectReference.Expression.Parent is not InvocationExpressionSyntax invocationExpression)
+            if ( aspectReference.Expression.Parent == null || aspectReference.Expression.Parent is not InvocationExpressionSyntax invocationExpression )
             {
                 return false;
             }
 
-            if ( invocationExpression.Parent == null || invocationExpression.Parent is not ReturnStatementSyntax)
+            if ( invocationExpression.Parent == null || invocationExpression.Parent is not ReturnStatementSyntax )
             {
                 return false;
             }

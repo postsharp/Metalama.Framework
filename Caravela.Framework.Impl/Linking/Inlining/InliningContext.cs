@@ -63,24 +63,24 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             {
                 return
                     Block(
-                        new StatementSyntax?[]
-                        {
-                            this.DeclaresReturnVariable
-                            ? LocalDeclarationStatement(
-                                VariableDeclaration( 
-                                    LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(targetSymbol.ReturnType), 
-                                    SingletonSeparatedList( VariableDeclarator( this.ReturnVariableName.AssertNotNull() ) ) ) )
-                            : null,
-                            linkedBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable ),
-                            this._labelUsed 
-                            ? LabeledStatement(
-                                Identifier( this.ReturnLabelName.AssertNotNull() ),
-                                ExpressionStatement(
-                                    IdentifierName( MissingToken( SyntaxKind.IdentifierToken ) ) )
-                                .WithSemicolonToken( MissingToken( SyntaxKind.SemicolonToken ) ) )
-                            : null
-                        }.Where( x => x != null ).AssertNoneNull() )
-                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                            new StatementSyntax?[]
+                                {
+                                    this.DeclaresReturnVariable
+                                        ? LocalDeclarationStatement(
+                                            VariableDeclaration(
+                                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ReturnType ),
+                                                SingletonSeparatedList( VariableDeclarator( this.ReturnVariableName.AssertNotNull() ) ) ) )
+                                        : null,
+                                    linkedBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable ),
+                                    this._labelUsed
+                                        ? LabeledStatement(
+                                            Identifier( this.ReturnLabelName.AssertNotNull() ),
+                                            ExpressionStatement( IdentifierName( MissingToken( SyntaxKind.IdentifierToken ) ) )
+                                                .WithSemicolonToken( MissingToken( SyntaxKind.SemicolonToken ) ) )
+                                        : null
+                                }.Where( x => x != null )
+                                .AssertNoneNull() )
+                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
             }
             else
             {
@@ -90,22 +90,22 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 
         public static InliningContext Create( LinkerRewritingDriver rewritingDriver, IMethodSymbol targetDeclaration )
         {
-            return new InliningContext( rewritingDriver, targetDeclaration );
+            return new( rewritingDriver, targetDeclaration );
         }
 
         public InliningContext WithDeclaredReturnLocal( IMethodSymbol currentDeclaration )
         {
-            return new InliningContext( this, currentDeclaration, $"__aspect_return_{this._depth}", true );
+            return new( this, currentDeclaration, $"__aspect_return_{this._depth}", true );
         }
 
         public InliningContext WithReturnLocal( IMethodSymbol currentDeclaration, string valueText )
         {
-            return new InliningContext( this, currentDeclaration, valueText );
+            return new( this, currentDeclaration, valueText );
         }
 
         internal InliningContext WithDiscard( IMethodSymbol currentDeclaration )
         {
-            return new InliningContext( this, currentDeclaration, null );
+            return new( this, currentDeclaration, null );
         }
 
         public void UseLabel()

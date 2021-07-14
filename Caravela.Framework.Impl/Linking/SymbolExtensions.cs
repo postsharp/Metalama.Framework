@@ -15,7 +15,8 @@ namespace Caravela.Framework.Impl.Linking
             {
                 case IMethodSymbol { AssociatedSymbol: not null } methodSymbol:
                     return symbol.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax()
-                        ?? methodSymbol.AssociatedSymbol.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax();
+                           ?? methodSymbol.AssociatedSymbol.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax();
+
                 default:
                     return symbol.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax();
             }

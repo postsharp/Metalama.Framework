@@ -129,7 +129,7 @@ namespace Caravela.Framework.Impl.Templating
 
         // This overload is called when the expression of 'return' is a dynamic expression, not a compile-time expression returning a dynamic value.
         public static StatementSyntax DynamicReturnStatement( ExpressionSyntax? returnExpression, string? expressionText = null, Location? location = null )
-            => ExpansionContext.CreateReturnStatement( returnExpression);
+            => ExpansionContext.CreateReturnStatement( returnExpression );
 
         // This overload is called when the value of a local is a compile-time expression returning a dynamic value.
         // This overload does not do anything special.
@@ -146,7 +146,8 @@ namespace Caravela.Framework.Impl.Templating
                         SyntaxFactory.VariableDeclarator(
                             identifier,
                             null,
-                            SyntaxFactory.EqualsValueClause( value ?? throw new AssertionFailedException("TODO: Produce error when dynamic local does not have initializer.") ) ) ) ) );
+                            SyntaxFactory.EqualsValueClause(
+                                value ?? throw new AssertionFailedException( "TODO: Produce error when dynamic local does not have initializer." ) ) ) ) ) );
 
         // This overload is called when the value of a local is a dynamic expression but not a compile-time expression returning a dynamic value.
         public static StatementSyntax DynamicLocalDeclaration(

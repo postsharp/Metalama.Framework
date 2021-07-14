@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.Linking
                 return false;
             }
 
-            if (this._analysisRegistry.IsLastOverride(symbol))
+            if ( this._analysisRegistry.IsLastOverride( symbol ) )
             {
                 return true;
             }
@@ -61,25 +61,26 @@ namespace Caravela.Framework.Impl.Linking
             var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertySetAccessor );
 
             if ( getAspectReferences.Count > 1 || setAspectReferences.Count > 1
-                 || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0 ) )
+                                               || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0) )
             {
                 return false;
             }
 
-            return (getAspectReferences.Count == 0 || this.IsInlineableReference( getAspectReferences[0] ) ) 
-                && (setAspectReferences.Count == 0 || this.IsInlineableReference( setAspectReferences[0] ) );
+            return (getAspectReferences.Count == 0 || this.IsInlineableReference( getAspectReferences[0] ))
+                   && (setAspectReferences.Count == 0 || this.IsInlineableReference( setAspectReferences[0] ));
         }
 
         private bool HasAnyAspectReferences( IPropertySymbol symbol, ResolvedAspectReferenceSemantic semantic )
         {
             var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertyGetAccessor );
             var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertySetAccessor );
+
             return getAspectReferences.Count > 0 || setAspectReferences.Count > 0;
         }
 
-        private IReadOnlyList<MemberDeclarationSyntax> RewriteProperty(PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol)
+        private IReadOnlyList<MemberDeclarationSyntax> RewriteProperty( PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol )
         {
-            if (this._analysisRegistry.IsOverrideTarget(symbol))
+            if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = (IPropertySymbol) this._analysisRegistry.GetLastOverride( symbol );
@@ -99,24 +100,22 @@ namespace Caravela.Framework.Impl.Linking
                     members.Add( GetTrampolineProperty( propertyDeclaration, lastOverride ) );
                 }
 
-                if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original ) && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
+                if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original )
+                     && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
                 {
                     members.Add( GetOriginalImplProperty( propertyDeclaration, symbol ) );
                 }
 
                 return members;
             }
-            else if (this._analysisRegistry.IsOverride(symbol))
+            else if ( this._analysisRegistry.IsOverride( symbol ) )
             {
-                if (this.IsDiscarded(symbol, ResolvedAspectReferenceSemantic.Default))
+                if ( this.IsDiscarded( symbol, ResolvedAspectReferenceSemantic.Default ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
 
-                return new[]
-                {
-                    GetLinkedDeclaration()
-                };
+                return new[] { GetLinkedDeclaration() };
             }
             else
             {
@@ -129,7 +128,6 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( symbol.GetMethod != null )
                 {
-
                     switch ( symbol.GetMethod.GetPrimaryDeclaration().AssertNotNull() )
                     {
                         case AccessorDeclarationSyntax getAccessorDeclaration:
@@ -138,9 +136,10 @@ namespace Caravela.Framework.Impl.Linking
                                     SyntaxKind.GetAccessorDeclaration,
                                     getAccessorDeclaration.AttributeLists,
                                     getAccessorDeclaration.Modifiers,
-                                    this.GetLinkedBody( 
-                                        this.GetBodySource( symbol.GetMethod ), 
+                                    this.GetLinkedBody(
+                                        this.GetBodySource( symbol.GetMethod ),
                                         InliningContext.Create( this, symbol.GetMethod ) ) ) );
+
                             break;
 
                         case ArrowExpressionClauseSyntax:
@@ -150,8 +149,9 @@ namespace Caravela.Framework.Impl.Linking
                                     List<AttributeListSyntax>(),
                                     TokenList(),
                                     this.GetLinkedBody(
-                                        this.GetBodySource( symbol.GetMethod ), 
+                                        this.GetBodySource( symbol.GetMethod ),
                                         InliningContext.Create( this, symbol.GetMethod ) ) ) );
+
                             break;
                     }
                 }
@@ -166,11 +166,11 @@ namespace Caravela.Framework.Impl.Linking
                             setDeclaration.AttributeLists,
                             setDeclaration.Modifiers,
                             this.GetLinkedBody(
-                                this.GetBodySource( symbol.SetMethod ), 
+                                this.GetBodySource( symbol.SetMethod ),
                                 InliningContext.Create( this, symbol.SetMethod ) ) ) );
                 }
 
-                return 
+                return
                     propertyDeclaration
                         .WithAccessorList( AccessorList( List( transformedAccessors ) ) )
                         .WithLeadingTrivia( propertyDeclaration.GetLeadingTrivia() )
@@ -182,32 +182,31 @@ namespace Caravela.Framework.Impl.Linking
 
         private static FieldDeclarationSyntax GetPropertyBackingField( PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol )
         {
-            return 
+            return
                 FieldDeclaration(
-                    List<AttributeListSyntax>(),
-                    symbol.IsStatic
-                    ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                    : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                    VariableDeclaration(
-                        propertyDeclaration.Type,
-                        SingletonSeparatedList(
-                            VariableDeclarator( Identifier( GetAutoPropertyBackingFieldName( symbol ) ) ) ) ) )
-                .WithLeadingTrivia( LineFeed )
-                .WithTrailingTrivia( LineFeed, LineFeed )
-                .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode )
-                .NormalizeWhitespace();
+                        List<AttributeListSyntax>(),
+                        symbol.IsStatic
+                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        VariableDeclaration(
+                            propertyDeclaration.Type,
+                            SingletonSeparatedList( VariableDeclarator( Identifier( GetAutoPropertyBackingFieldName( symbol ) ) ) ) ) )
+                    .WithLeadingTrivia( LineFeed )
+                    .WithTrailingTrivia( LineFeed, LineFeed )
+                    .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode )
+                    .NormalizeWhitespace();
         }
 
-        private static BlockSyntax GetImplicitGetterBody(IMethodSymbol symbol)
+        private static BlockSyntax GetImplicitGetterBody( IMethodSymbol symbol )
         {
             return Block(
                 ReturnStatement(
-                    Token(SyntaxKind.ReturnKeyword).WithTrailingTrivia( Whitespace(" ") ),
+                    Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         symbol.IsStatic
-                        ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
-                        : ThisExpression(),
+                            ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
+                            : ThisExpression(),
                         IdentifierName( GetAutoPropertyBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                     Token( SyntaxKind.SemicolonToken ) ) );
         }
@@ -221,8 +220,8 @@ namespace Caravela.Framework.Impl.Linking
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
-                            ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
-                            : ThisExpression(),
+                                ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
+                                : ThisExpression(),
                             IdentifierName( GetAutoPropertyBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ) ) );
         }
@@ -280,31 +279,32 @@ namespace Caravela.Framework.Impl.Linking
             {
                 return
                     property
-                    .WithIdentifier( Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ) )
-                    .WithAccessorList(
-                        AccessorList(
-                            List(
-                                new[]
-                                {
-                                    symbol.GetMethod != null
-                                    ? AccessorDeclaration(
-                                        SyntaxKind.GetAccessorDeclaration,
-                                        GetImplicitGetterBody(symbol.GetMethod))
-                                    : null,
-                                    symbol.SetMethod != null
-                                    ? AccessorDeclaration(
-                                        SyntaxKind.SetAccessorDeclaration,
-                                        GetImplicitSetterBody(symbol.SetMethod))
-                                    : null,
-                                }.Where( a => a != null ).AssertNoneNull() ) ) )
+                        .WithIdentifier( Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ) )
+                        .WithAccessorList(
+                            AccessorList(
+                                List(
+                                    new[]
+                                        {
+                                            symbol.GetMethod != null
+                                                ? AccessorDeclaration(
+                                                    SyntaxKind.GetAccessorDeclaration,
+                                                    GetImplicitGetterBody( symbol.GetMethod ) )
+                                                : null,
+                                            symbol.SetMethod != null
+                                                ? AccessorDeclaration(
+                                                    SyntaxKind.SetAccessorDeclaration,
+                                                    GetImplicitSetterBody( symbol.SetMethod ) )
+                                                : null
+                                        }.Where( a => a != null )
+                                        .AssertNoneNull() ) ) )
                     ;
             }
             else
             {
-                return 
+                return
                     property.WithIdentifier( Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ) )
-                    .WithInitializer( property.Initializer.AddSourceCodeAnnotation() )
-                    .WithAccessorList( property.AccessorList.AddSourceCodeAnnotation() );
+                        .WithInitializer( property.Initializer.AddSourceCodeAnnotation() )
+                        .WithAccessorList( property.AccessorList.AddSourceCodeAnnotation() );
             }
         }
     }

@@ -10,11 +10,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 {
     internal class EventRemoveAssignmentInliner : PropertyInliner
     {
-        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[]
-        {
-            SyntaxKind.ReturnStatement
-        };
-        
+        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[] { SyntaxKind.ReturnStatement };
+
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax needs to be in form: <annotated_property_expression> -= value;

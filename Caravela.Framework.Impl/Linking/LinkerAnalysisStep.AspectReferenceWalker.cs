@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Linking
 
             public List<ResolvedAspectReference> AspectReferences { get; }
 
-            public AspectReferenceWalker( AspectReferenceResolver referenceResolver, SemanticModel semanticModel, ISymbol containingSymbol)
+            public AspectReferenceWalker( AspectReferenceResolver referenceResolver, SemanticModel semanticModel, ISymbol containingSymbol )
             {
                 this._referenceResolver = referenceResolver;
                 this._semanticModel = semanticModel;
@@ -38,10 +38,16 @@ namespace Caravela.Framework.Impl.Linking
                     return;
                 }
 
-                if (node.TryGetAspectReference(out var aspectReference))
+                if ( node.TryGetAspectReference( out var aspectReference ) )
                 {
-                    var referencedSymbol = this._semanticModel.GetSymbolInfo(node).Symbol.AssertNotNull();
-                    var resolvedReference = this._referenceResolver.Resolve( this._containingSymbol, referencedSymbol, (ExpressionSyntax)node, aspectReference );
+                    var referencedSymbol = this._semanticModel.GetSymbolInfo( node ).Symbol.AssertNotNull();
+
+                    var resolvedReference = this._referenceResolver.Resolve(
+                        this._containingSymbol,
+                        referencedSymbol,
+                        (ExpressionSyntax) node,
+                        aspectReference );
+
                     this.AspectReferences.Add( resolvedReference );
                 }
 

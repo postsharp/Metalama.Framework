@@ -310,6 +310,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
                     .Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
+
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionRelation ).Returns( this._currentInsertPositionRelation );
 
                 var introducedElementName = node switch
@@ -443,6 +444,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
                     .Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
+
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionRelation ).Returns( this._currentInsertPositionRelation );
 
                 A.CallTo( () => ((ITestTransformation) transformation).OverriddenDeclarationName ).Returns( overriddenDeclarationName );
@@ -472,7 +474,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             {
                 return field
                     .WithAttributeLists( List<AttributeListSyntax>() )
-                    .WithDeclaration( 
+                    .WithDeclaration(
                         field.Declaration.WithVariables(
                             SeparatedList(
                                 field.Declaration.Variables.Select( v => v.WithIdentifier( Identifier( v.Identifier.ValueText + "__SymbolHelper" ) ) ) ) ) );
@@ -537,10 +539,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 return @event
                     .WithAttributeLists( List<AttributeListSyntax>() )
                     .WithIdentifier( Identifier( @event.Identifier.ValueText + "__SymbolHelper" ) )
-                    .WithAccessorList(
-                        AccessorList(
-                            List(
-                                @event.AccessorList.AssertNotNull().Accessors.Select( a => a.WithBody( Block() ) ) ) ) );
+                    .WithAccessorList( AccessorList( List( @event.AccessorList.AssertNotNull().Accessors.Select( a => a.WithBody( Block() ) ) ) ) );
             }
 
             private static SyntaxNode GetSymbolHelperEventField( EventFieldDeclarationSyntax eventField )
@@ -550,7 +549,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     .WithDeclaration(
                         eventField.Declaration.WithVariables(
                             SeparatedList(
-                                eventField.Declaration.Variables.Select( v => v.WithIdentifier( Identifier( v.Identifier.ValueText + "__SymbolHelper" ) ) ) ) ) );
+                                eventField.Declaration.Variables.Select(
+                                    v => v.WithIdentifier( Identifier( v.Identifier.ValueText + "__SymbolHelper" ) ) ) ) ) );
             }
         }
     }

@@ -12,11 +12,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 {
     internal class MethodLocalDeclarationInliner : MethodInliner
     {
-        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[]
-        {
-            SyntaxKind.ReturnStatement
-        };
-        
+        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[] { SyntaxKind.ReturnStatement };
+
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax has to be in form: <type> <local> = <annotated_method_expression>( <arguments> );
@@ -45,7 +42,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            if (variableDeclaration.Variables.Count != 1)
+            if ( variableDeclaration.Variables.Count != 1 )
             {
                 return false;
             }
@@ -85,12 +82,11 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 
             // We're replacing the whole return statement.
             newNode = Block(
-                LocalDeclarationStatement(
-                    VariableDeclaration(
-                        LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ReturnType ).WithTrailingTrivia( Whitespace( " " ) ),
-                        SingletonSeparatedList(
-                            VariableDeclarator( variableDeclarator.Identifier ) ) ) ),
-                inlinedTargetBody )
+                    LocalDeclarationStatement(
+                        VariableDeclaration(
+                            LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ReturnType ).WithTrailingTrivia( Whitespace( " " ) ),
+                            SingletonSeparatedList( VariableDeclarator( variableDeclarator.Identifier ) ) ) ),
+                    inlinedTargetBody )
                 .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
 
             replacedNode = localDeclaration;

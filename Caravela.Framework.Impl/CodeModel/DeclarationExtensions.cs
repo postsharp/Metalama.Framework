@@ -334,10 +334,13 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 case IMethod method:
                     return method.ExplicitInterfaceImplementations.Single();
+
                 case IProperty property:
                     return property.ExplicitInterfaceImplementations.Single();
+
                 case IEvent @event:
                     return @event.ExplicitInterfaceImplementations.Single();
+
                 default:
                     throw new AssertionFailedException();
             }

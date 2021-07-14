@@ -3,7 +3,5 @@
 
 namespace Caravela.Framework.Impl.Linking.Inlining
 {
-    internal abstract class PropertyInliner : Inliner
-    {
-    }
+    internal abstract class PropertyInliner : Inliner { }
 }

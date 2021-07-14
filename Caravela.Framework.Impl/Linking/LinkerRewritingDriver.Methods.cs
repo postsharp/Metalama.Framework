@@ -24,13 +24,13 @@ namespace Caravela.Framework.Impl.Linking
                 throw new AssertionFailedException();
             }
 
-            if (this._analysisRegistry.IsOverride(symbol))
+            if ( this._analysisRegistry.IsOverride( symbol ) )
             {
                 var aspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
                 var overrideTarget = this._analysisRegistry.GetOverrideTarget( symbol );
                 var lastOverride = this._analysisRegistry.GetLastOverride( overrideTarget.AssertNotNull() );
 
-                if (SymbolEqualityComparer.Default.Equals(symbol, lastOverride))
+                if ( SymbolEqualityComparer.Default.Equals( symbol, lastOverride ) )
                 {
                     return this.IsInlineable( symbol, semantic );
                 }
@@ -69,6 +69,7 @@ namespace Caravela.Framework.Impl.Linking
                     }
 
                     return this.IsInlineableReference( aspectReferences[0] );
+
                 default:
                     throw new AssertionFailedException();
             }
@@ -95,24 +96,22 @@ namespace Caravela.Framework.Impl.Linking
                     members.Add( GetTrampolineMethod( methodDeclaration, lastOverride ) );
                 }
 
-                if (!this.IsInlineable(symbol, ResolvedAspectReferenceSemantic.Original ) && this.HasAnyAspectReferences(symbol, ResolvedAspectReferenceSemantic.Original ) )
+                if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original )
+                     && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
                 {
                     members.Add( GetOriginalImplMethod( methodDeclaration ) );
                 }
 
                 return members;
             }
-            else if (this._analysisRegistry.IsOverride(symbol ) )
+            else if ( this._analysisRegistry.IsOverride( symbol ) )
             {
                 if ( this.IsDiscarded( symbol, ResolvedAspectReferenceSemantic.Default ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
 
-                return new[]
-                {
-                    GetLinkedDeclaration()
-                };
+                return new[] { GetLinkedDeclaration() };
             }
             else
             {
@@ -123,8 +122,8 @@ namespace Caravela.Framework.Impl.Linking
             {
                 return methodDeclaration
                     .WithBody(
-                        this.GetLinkedBody( 
-                            this.GetBodySource( symbol ), 
+                        this.GetLinkedBody(
+                            this.GetBodySource( symbol ),
                             InliningContext.Create( this, symbol ) ) )
                     .WithLeadingTrivia( methodDeclaration.GetLeadingTrivia() )
                     .WithTrailingTrivia( methodDeclaration.GetTrailingTrivia() );

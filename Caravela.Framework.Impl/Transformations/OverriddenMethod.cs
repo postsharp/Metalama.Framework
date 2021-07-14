@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.Advice.Aspect.Aspect,
                     metaApi,
                     this.OverriddenDeclaration.Compilation,
-                    context.LexicalScopeProvider.GetLexicalScope(this.OverriddenDeclaration),
+                    context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
                     (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
 
@@ -99,18 +99,19 @@ namespace Caravela.Framework.Impl.Transformations
                     this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self ),
                     ArgumentList(
                         SeparatedList(
-                            this.OverriddenDeclaration.Parameters.Select( p =>
-                                Argument(
-                                    null,
-                                    p.RefKind switch
-                                    {
-                                        RefKind.None => default,
-                                        RefKind.In => default,
-                                        RefKind.Out => Token( SyntaxKind.OutKeyword ),
-                                        RefKind.Ref => Token( SyntaxKind.RefKeyword ),
-                                        _ => throw new AssertionFailedException(),
-                                    },
-                                    IdentifierName( p.Name ) ) ) ) ) );
+                            this.OverriddenDeclaration.Parameters.Select(
+                                p =>
+                                    Argument(
+                                        null,
+                                        p.RefKind switch
+                                        {
+                                            RefKind.None => default,
+                                            RefKind.In => default,
+                                            RefKind.Out => Token( SyntaxKind.OutKeyword ),
+                                            RefKind.Ref => Token( SyntaxKind.RefKeyword ),
+                                            _ => throw new AssertionFailedException()
+                                        },
+                                        IdentifierName( p.Name ) ) ) ) ) );
         }
     }
 }

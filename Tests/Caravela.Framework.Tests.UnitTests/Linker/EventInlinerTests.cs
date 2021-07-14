@@ -10,7 +10,6 @@ namespace Caravela.Framework.Tests.UnitTests.Linker
 {
     public class EventInlinerTests : LinkerTestBase
     {
-
         [Fact]
         public void AddAssignment()
         {

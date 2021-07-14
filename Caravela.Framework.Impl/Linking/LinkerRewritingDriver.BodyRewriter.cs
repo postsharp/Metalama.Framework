@@ -22,13 +22,13 @@ namespace Caravela.Framework.Impl.Linking
                 var nodes = new HashSet<SyntaxNode>( replacements.Select( x => x.Key ) );
 
                 // Temporary restriction.                
-                foreach (var node in nodes)
+                foreach ( var node in nodes )
                 {
                     var current = node.Parent;
 
-                    while (current != null)
+                    while ( current != null )
                     {
-                        if (nodes.Contains(current))
+                        if ( nodes.Contains( current ) )
                         {
                             throw new AssertionFailedException();
                         }
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Linking
 
             public override SyntaxNode? Visit( SyntaxNode? node )
             {
-                if (node == null)
+                if ( node == null )
                 {
                     return null;
                 }
@@ -56,5 +56,5 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
         }
-    }    
+    }
 }

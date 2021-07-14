@@ -12,8 +12,10 @@ namespace Caravela.Framework.Impl.Linking.Inlining
     /// </summary>
     internal abstract class MethodInliner : Inliner
     {
-
-        protected static bool IsInlineableInvocation( SemanticModel semanticModel, IMethodSymbol contextMethod, InvocationExpressionSyntax invocationExpression )
+        protected static bool IsInlineableInvocation(
+            SemanticModel semanticModel,
+            IMethodSymbol contextMethod,
+            InvocationExpressionSyntax invocationExpression )
         {
             return
                 invocationExpression.ArgumentList.Arguments.Count != contextMethod.Parameters.Length

@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IInvokerFactory<IPropertyInvoker> Invokers => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ), false );
 
         public override InsertPosition InsertPosition
-            => new InsertPosition(
+            => new(
                 InsertPositionRelation.Within,
                 ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
 
@@ -160,10 +160,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     null,
                     null );
 
-            return new[]
-            {
-                new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this )
-            };
+            return new[] { new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
 
             AccessorListSyntax GenerateAccessorList()
             {
@@ -201,7 +198,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                             Token( SyntaxKind.GetKeyword ),
                             this.IsAutoPropertyOrField
                                 ? null
-                                : Block( 
+                                : Block(
                                     ReturnStatement(
                                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
                                         DefaultExpression( syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ),

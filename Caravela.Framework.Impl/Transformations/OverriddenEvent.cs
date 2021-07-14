@@ -113,7 +113,7 @@ namespace Caravela.Framework.Impl.Transformations
                     {
                         MethodKind.EventAdd => this.CreateAddExpression(),
                         MethodKind.EventRemove => this.CreateRemoveExpression(),
-                        _ => throw new AssertionFailedException(),
+                        _ => throw new AssertionFailedException()
                     },
                     this.OverriddenDeclaration.EventType,
                     false );
@@ -127,13 +127,13 @@ namespace Caravela.Framework.Impl.Transformations
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
                         context.ServiceProvider.GetService<AspectPipelineDescription>(),
-                        proceedExpression) );
+                        proceedExpression ) );
 
                 var expansionContext = new TemplateExpansionContext(
                     this.Advice.Aspect.Aspect,
                     metaApi,
                     this.OverriddenDeclaration.Compilation,
-                    context.LexicalScopeProvider.GetLexicalScope(accessor),
+                    context.LexicalScopeProvider.GetLexicalScope( accessor ),
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
                     (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
 
@@ -159,7 +159,7 @@ namespace Caravela.Framework.Impl.Transformations
             switch ( accessorDeclarationKind )
             {
                 case SyntaxKind.AddAccessorDeclaration:
-                    return Block( ExpressionStatement( this.CreateAddExpression() ) ); 
+                    return Block( ExpressionStatement( this.CreateAddExpression() ) );
 
                 case SyntaxKind.RemoveAccessorDeclaration:
                     return Block( ExpressionStatement( this.CreateRemoveExpression() ) );
