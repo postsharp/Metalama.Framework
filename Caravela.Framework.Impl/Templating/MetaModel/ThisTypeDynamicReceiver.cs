@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this._linkerAnnotation = linkerAnnotation;
         }
 
-        public RuntimeExpression? CreateExpression( string? expressionText = null, Location? location = null ) => throw new NotSupportedException();
+        public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null ) => throw new NotSupportedException();
 
         public IType ExpressionType => this._type;
 

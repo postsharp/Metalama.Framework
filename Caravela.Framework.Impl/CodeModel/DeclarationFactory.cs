@@ -150,9 +150,9 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
             };
 
-        dynamic? ITypeFactory.DefaultValue( IType type ) => new DefaultDynamicExpression( type );
+        object? ITypeFactory.DefaultValue( IType type ) => new DefaultDynamicExpression( type );
 
-        dynamic? ITypeFactory.Cast( IType type, object? value ) => new CastDynamicExpression( type, value );
+        object? ITypeFactory.Cast( IType type, object? value ) => new CastDynamicExpression( type, value );
 
         internal IAttribute GetAttribute( AttributeBuilder attributeBuilder )
             => (IAttribute) this._cache.GetOrAdd(

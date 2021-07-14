@@ -1,6 +1,6 @@
 int Method(int a)
 {
-    object y = a;
+    object? y = a;
     var x = 0;
     global::System.Console.WriteLine(x);
     if (y == null)

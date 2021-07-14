@@ -622,6 +622,18 @@ namespace Caravela.Framework.Impl.Templating
 
         protected override ExpressionSyntax TransformExpressionStatement( ExpressionStatementSyntax node )
         {
+            if ( node.Expression is AssignmentExpressionSyntax { Left: IdentifierNameSyntax { Identifier: { Text: "_" } } } assignment &&
+                 this.IsCompileTimeDynamic( assignment.Right ) )
+            {
+                // Process the statement "_ = meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
+                
+                var invocationExpression = InvocationExpression(
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicDiscardAssignment) ) )
+                    .AddArgumentListArguments( Argument( assignment.Right ) );
+                
+                return this.WithCallToAddSimplifierAnnotation( invocationExpression );
+            }
+            
             var expression = this.Transform( node.Expression );
 
             var toArrayStatementExpression = InvocationExpression(
@@ -1227,15 +1239,16 @@ namespace Caravela.Framework.Impl.Templating
         /// <summary>
         /// Determines if the expression will be transformed into syntax that instantiates an <see cref="IDynamicExpression"/>.
         /// </summary>
-        private bool TransformsToDynamicExpression( ExpressionSyntax? expression )
-            => expression is { } and not IdentifierNameSyntax and not LiteralExpressionSyntax
-               && this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol;
+        private bool IsCompileTimeDynamic( ExpressionSyntax? expression )
+            => expression != null
+               && this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol
+               && this.GetTransformationKind( expression ) != TransformationKind.Transform;
 
         public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
         {
             InvocationExpressionSyntax invocationExpression;
 
-            if ( this.TransformsToDynamicExpression( node.Expression ) )
+            if ( this.IsCompileTimeDynamic( node.Expression ) )
             {
                 // We have a dynamic parameter. We need to call the second overload of ReturnStatement, the one that accepts the IDynamicExpression
                 // itself and not the syntax.
@@ -1259,7 +1272,7 @@ namespace Caravela.Framework.Impl.Templating
 
             return this.WithCallToAddSimplifierAnnotation( invocationExpression );
         }
-
+        
         public override SyntaxNode VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
         {
             var declaration = node.Declaration;
@@ -1270,7 +1283,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( declarator.Initializer != null )
                 {
-                    if ( this.TransformsToDynamicExpression( declarator.Initializer.Value ) )
+                    if ( this.IsCompileTimeDynamic( declarator.Initializer.Value ) )
                     {
                         var invocationExpression = InvocationExpression(
                                 this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicLocalDeclaration) ) )

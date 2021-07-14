@@ -42,6 +42,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IAdviseParameterValueList Values => this;
 
-        dynamic IAdviseParameterValueList.ToArray() => new ToArrayImpl( this );
+        object IAdviseParameterValueList.ToArray() => new ToArrayImpl( this );
     }
 }

@@ -23,6 +23,6 @@ namespace Caravela.Framework.Code.Invokers
         [return: RunTimeOnly]
         dynamic RemoveDelegate( dynamic? instance, dynamic? handler );
 
-        dynamic Raise( dynamic? instance, params dynamic?[] args );
+        dynamic? Raise( dynamic? instance, params dynamic?[] args );
     }
 }

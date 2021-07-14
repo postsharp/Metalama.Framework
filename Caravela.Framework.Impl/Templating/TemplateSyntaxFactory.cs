@@ -127,27 +127,25 @@ namespace Caravela.Framework.Impl.Templating
         public static StatementSyntax DynamicReturnStatement( IDynamicExpression? returnExpression, string? expressionText = null, Location? location = null )
             => ExpansionContext.CreateReturnStatement( returnExpression, expressionText, location );
 
-        // This overload is called when the expression of 'return' is a dynamic expression, not a compile-time expression returning a dynamic value.
-        public static StatementSyntax DynamicReturnStatement( ExpressionSyntax? returnExpression, string? expressionText = null, Location? location = null )
-            => ExpansionContext.CreateReturnStatement( returnExpression );
-
-        // This overload is called when the value of a local is a compile-time expression returning a dynamic value.
-        // This overload does not do anything special.
-        public static StatementSyntax DynamicLocalDeclaration(
-            TypeSyntax type,
-            SyntaxToken identifier,
-            ExpressionSyntax? value,
-            string? expressionText = null,
-            Location? location = null )
-            => SyntaxFactory.LocalDeclarationStatement(
-                SyntaxFactory.VariableDeclaration(
-                    type,
-                    SyntaxFactory.SingletonSeparatedList(
-                        SyntaxFactory.VariableDeclarator(
-                            identifier,
-                            null,
-                            SyntaxFactory.EqualsValueClause(
-                                value ?? throw new AssertionFailedException( "TODO: Produce error when dynamic local does not have initializer." ) ) ) ) ) );
+        public static StatementSyntax DynamicDiscardAssignment( IDynamicExpression? expression, string? expressionText = null, Location? location = null )
+        {
+            if ( expression == null )
+            {
+                return SyntaxFactoryEx.EmptyStatement;
+            }
+            else if ( expression.ExpressionType.Is( SpecialType.Void ) )
+            {
+                return SyntaxFactory.ExpressionStatement( expression.CreateExpression( expressionText, location ) );
+            }
+            else
+            {
+                return SyntaxFactory.ExpressionStatement(
+                    SyntaxFactory.AssignmentExpression(
+                        SyntaxKind.SimpleAssignmentExpression,
+                        SyntaxFactoryEx.DiscardToken,
+                        expression.CreateExpression( expressionText, location ) ) );
+            }
+        }
 
         // This overload is called when the value of a local is a dynamic expression but not a compile-time expression returning a dynamic value.
         public static StatementSyntax DynamicLocalDeclaration(
@@ -186,7 +184,7 @@ namespace Caravela.Framework.Impl.Templating
                 }
 
                 return SyntaxFactory.Block(
-                        SyntaxFactory.ExpressionStatement( value.CreateExpression( expressionText, location )! ),
+                        SyntaxFactory.ExpressionStatement( value.CreateExpression( expressionText, location ) ),
                         SyntaxFactory.LocalDeclarationStatement(
                                 SyntaxFactory.VariableDeclaration(
                                     variableType,
@@ -207,7 +205,7 @@ namespace Caravela.Framework.Impl.Templating
                             SyntaxFactory.VariableDeclarator(
                                 identifier,
                                 null,
-                                SyntaxFactory.EqualsValueClause( value.CreateExpression( expressionText, location )! ) ) ) ) );
+                                SyntaxFactory.EqualsValueClause( value.CreateExpression( expressionText, location ) ) ) ) ) );
             }
         }
 
@@ -219,11 +217,6 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             var expression = dynamicExpression.CreateExpression();
-
-            if ( expression == null )
-            {
-                return null;
-            }
 
             return new RuntimeExpression(
                 SyntaxFactory.MemberAccessExpression(

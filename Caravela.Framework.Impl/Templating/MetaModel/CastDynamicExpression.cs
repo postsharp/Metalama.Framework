@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this._value = value;
         }
 
-        public RuntimeExpression? CreateExpression( string? expressionText = null, Location? location = null )
+        public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null )
         {
             var expression = this._value switch
             {

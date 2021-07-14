@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         DeclarationOrigin IDeclaration.Origin => this.Underlying.Origin;
 
-        public dynamic Value
+        public object? Value
         {
             get => new DynamicExpression( SyntaxFactory.IdentifierName( this.Underlying.Name! ), this.Underlying.ParameterType, true );
             set => throw new NotImplementedException();

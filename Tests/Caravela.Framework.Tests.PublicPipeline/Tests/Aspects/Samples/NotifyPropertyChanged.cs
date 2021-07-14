@@ -33,7 +33,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
         }
 
         [Template]
-        public dynamic SetPropertyTemplate()
+        public dynamic? SetPropertyTemplate()
         {
             var value = meta.Parameters[0].Value;
 
