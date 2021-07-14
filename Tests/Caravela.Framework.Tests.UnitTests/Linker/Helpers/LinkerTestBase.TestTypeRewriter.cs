@@ -184,8 +184,6 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                 foreach ( var attributeList in node.AttributeLists )
                 {
-                    var newAttributes = new List<AttributeSyntax>();
-
                     // First pass: option attributes
                     foreach ( var attribute in attributeList.Attributes )
                     {
@@ -214,11 +212,6 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         {
                             throw new NotSupportedException( $"Unsupported pseudo attribute {name}" );
                         }
-                    }
-
-                    if ( newAttributes.Count > 0 )
-                    {
-                        newAttributeLists.Add( attributeList.WithAttributes( SeparatedList( newAttributes ) ) );
                     }
                 }
 

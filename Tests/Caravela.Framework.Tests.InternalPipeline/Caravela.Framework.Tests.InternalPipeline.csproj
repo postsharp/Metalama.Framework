@@ -14,7 +14,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
      <CaravelaTestAutoExclude>False</CaravelaTestAutoExclude>
      <CaravelaTestGenerateDefaultRunner>False</CaravelaTestGenerateDefaultRunner>
-     <RootNamespace>Caravela.Framework.Tests.Templating</RootNamespace>
+     <RootNamespace>Caravela.Framework.Tests.Integration</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -67,8 +67,8 @@
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
 
-    <ItemGroup  Condition="'$(Obfuscate)'=='True'">
-        <Compile Remove="**\*"/>
+    <ItemGroup Condition="'$(Obfuscate)'=='True'">
+        <Compile Remove="**\*" />
     </ItemGroup>
   
 </Project>
