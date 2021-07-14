@@ -19,16 +19,13 @@ namespace Caravela.Framework.Impl.Linking
         private class LinkingRewriter : CSharpSyntaxRewriter
         {
             private readonly Compilation _intermediateCompilation;
-            private readonly LinkerAnalysisRegistry _analysisRegistry;
             private readonly LinkerRewritingDriver _rewritingDriver;
 
             public LinkingRewriter(
                 Compilation intermediateCompilation,
-                LinkerAnalysisRegistry analysisRegistry,
                 LinkerRewritingDriver rewritingDriver )
             {
                 this._intermediateCompilation = intermediateCompilation;
-                this._analysisRegistry = analysisRegistry;
                 this._rewritingDriver = rewritingDriver;
             }
 
@@ -52,7 +49,7 @@ namespace Caravela.Framework.Impl.Linking
                     var symbols =
                         member switch
                         {
-                            MethodDeclarationSyntax methodDecl => new[] { semanticModel.GetDeclaredSymbol( methodDecl ) },
+                            MethodDeclarationSyntax methodDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( methodDecl ) },
                             BasePropertyDeclarationSyntax basePropertyDecl => new[] { semanticModel.GetDeclaredSymbol( basePropertyDecl ) },
                             FieldDeclarationSyntax fieldDecl =>
                                 fieldDecl.Declaration.Variables.Select( v => semanticModel.GetDeclaredSymbol( v ) ).ToArray(),

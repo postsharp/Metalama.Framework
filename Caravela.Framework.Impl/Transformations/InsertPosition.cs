@@ -6,7 +6,7 @@ using System;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal struct InsertPosition : IEquatable<InsertPosition>
+    internal readonly struct InsertPosition : IEquatable<InsertPosition>
     {
         /// <summary>
         /// Gets the relation of the insert position to the specified node.

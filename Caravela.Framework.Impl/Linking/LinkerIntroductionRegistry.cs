@@ -80,7 +80,7 @@ namespace Caravela.Framework.Impl.Linking
             // TODO: Optimize.
             var declaringSyntax = symbol.GetPrimaryDeclaration();
 
-            if (declaringSyntax == null)
+            if ( declaringSyntax == null )
             {
                 // Code is outside of the current compilation, so it cannot have overrides.
                 // TODO: This should be checked more thoroughly.

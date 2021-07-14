@@ -5,7 +5,6 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.CodeModel.Builders;
-using Caravela.Framework.Impl.Diagnostics;
 using System;
 using System.Collections.Generic;
 
@@ -31,11 +30,6 @@ namespace Caravela.Framework.Impl.Advices
             : base( aspect, targetDeclaration, null, scope, overrideStrategy, layerName, tags )
         {
             this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, name );
-        }
-
-        public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
-        {
-            base.Initialize( declarativeAdvices, diagnosticAdder );
         }
 
         public override AdviceResult ToResult( ICompilation compilation )

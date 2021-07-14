@@ -8,6 +8,7 @@ using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Runners
 {
+    // ReSharper disable once UnusedType.Global
     internal class DesignTimeTestRunnerFactory : ITestRunnerFactory
     {
         public BaseTestRunner CreateTestRunner(

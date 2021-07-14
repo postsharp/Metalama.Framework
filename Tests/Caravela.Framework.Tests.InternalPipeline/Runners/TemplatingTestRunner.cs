@@ -130,7 +130,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var transformedTemplateText = transformedTemplateSyntax!.SyntaxTree.GetText();
             Directory.CreateDirectory( Path.GetDirectoryName( transformedTemplatePath ) );
 
-            using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
+            await using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
             {
                 transformedTemplateText.Write( textWriter );
             }

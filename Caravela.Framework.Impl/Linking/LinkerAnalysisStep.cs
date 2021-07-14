@@ -26,8 +26,6 @@ namespace Caravela.Framework.Impl.Linking
 
             var referenceResolver = new AspectReferenceResolver( input.IntroductionRegistry, input.OrderedAspectLayers );
 
-            var layersId = input.OrderedAspectLayers.Select( x => x.AspectLayerId ).ToArray();
-
             // TODO: Do this on demand in analysis registry (provide the implementing class to the registry, let the registry manage the cache).
             // Analyze introduced method bodies.
             foreach ( var introducedMember in input.IntroductionRegistry.GetIntroducedMembers() )
