@@ -1,4 +1,4 @@
-// @IncludeFinalDiagnostics
+// @ReportOutputWarnings
 
 
 

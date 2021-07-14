@@ -149,7 +149,7 @@ namespace Caravela.Obfuscator
                             hashablePath = mutableSourceDocument.FileName;
                         }
 
-                        mutableSourceDocument.FileName = this._currentObfuscationTable.CreateHash( hashablePath, false );
+                        mutableSourceDocument.FileName = this._currentObfuscationTable.CreateHash( hashablePath );
                     }
                 }
             }
@@ -426,7 +426,7 @@ namespace Caravela.Obfuscator
                 else
                 {
                     // Obfuscate the name of the current method.
-                    this._obfuscatedDeclarations.Add( method, this._currentObfuscationTable.CreateHash( method.Name, false ) );
+                    this._obfuscatedDeclarations.Add( method, this._currentObfuscationTable.CreateHash( method.Name ) );
                 }
 
                 if ( !method.IsPublic() )
@@ -505,7 +505,7 @@ namespace Caravela.Obfuscator
                     continue;
                 }
 
-                this._obfuscatedDeclarations.Add( field, this._currentObfuscationTable.CreateHash( field.Name, false ) );
+                this._obfuscatedDeclarations.Add( field, this._currentObfuscationTable.CreateHash( field.Name ) );
             }
         }
 
