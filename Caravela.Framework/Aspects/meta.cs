@@ -140,6 +140,7 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="ThisStatic"/>
         /// <seealso href="@templates"/>
         [RunTimeOnly]
+        [TemplateKeyword]
         public static dynamic This => CurrentContext.This;
 
         /// <summary>
@@ -152,6 +153,7 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="BaseStatic"/>
         /// <seealso href="@templates"/>
         [RunTimeOnly]
+        [TemplateKeyword]
         public static dynamic Base => CurrentContext.Base;
 
         /// <summary>
@@ -164,6 +166,7 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="BaseStatic"/>
         /// <seealso href="@templates"/>
         [RunTimeOnly]
+        [TemplateKeyword]
         public static dynamic ThisStatic => CurrentContext.ThisStatic;
 
         /// <summary>
@@ -176,6 +179,7 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="ThisStatic"/>
         /// <seealso href="@templates"/>
         [RunTimeOnly]
+        [TemplateKeyword]
         public static dynamic BaseStatic => CurrentContext.BaseStatic;
 
         /// <summary>

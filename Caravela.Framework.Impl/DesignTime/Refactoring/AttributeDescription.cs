@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.DesignTime.Refactoring
 {
-    public class AttributeDescription
+    internal class AttributeDescription
     {
         public AttributeDescription(
             string name,

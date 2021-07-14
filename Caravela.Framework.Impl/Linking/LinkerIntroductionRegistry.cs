@@ -175,7 +175,7 @@ namespace Caravela.Framework.Impl.Linking
                 declaringSyntax = declaringSyntax.Parent?.Parent.AssertNotNull();
             }
 
-            var annotation = declaringSyntax.GetAnnotations( IntroducedNodeIdAnnotationId ).SingleOrDefault();
+            var annotation = declaringSyntax.AssertNotNull().GetAnnotations( IntroducedNodeIdAnnotationId ).SingleOrDefault();
 
             if ( annotation == null )
             {

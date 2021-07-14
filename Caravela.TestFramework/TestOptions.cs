@@ -94,7 +94,7 @@ namespace Caravela.TestFramework
             this.TestRunnerFactoryType ??= directoryOptions.TestRunnerFactoryType;
 
             this.WriteInputHtml ??= directoryOptions.WriteInputHtml;
-            
+
             this.WriteOutputHtml ??= directoryOptions.WriteOutputHtml;
 
             this.AddHtmlTitles ??= directoryOptions.AddHtmlTitles;
@@ -147,7 +147,7 @@ namespace Caravela.TestFramework
 
                     case "DesignTime":
                         this.TestRunnerFactoryType =
-                            "Caravela.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory, Caravela.Framework.Tests.Integration";
+                            "Caravela.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory, Caravela.Framework.Tests.PublicPipeline";
 
                         break;
 
@@ -155,11 +155,11 @@ namespace Caravela.TestFramework
                         this.WriteInputHtml = true;
 
                         break;
-                    
+
                     case "WriteOutputHtml":
                         this.WriteOutputHtml = true;
                         this.FormatOutput = true;
-                        
+
                         break;
 
                     case "AddHtmlTitles":

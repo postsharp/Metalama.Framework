@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// with location information although user code does not pass this location. Any code calling user code should set
     /// the current context using the <see cref="WithDefaultLocation"/> method.
     /// </summary>
-    public static partial class DiagnosticContext
+    internal static partial class DiagnosticContext
     {
         private static readonly AsyncLocal<IDiagnosticLocation?> _current = new();
 

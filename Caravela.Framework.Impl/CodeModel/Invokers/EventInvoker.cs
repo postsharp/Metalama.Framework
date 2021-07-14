@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             return new DynamicExpression( expression, this.Member.EventType, false );
         }
 
-        public object Raise( dynamic? instance, params dynamic?[] args )
+        public object? Raise( object? instance, params object?[] args )
         {
             var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ) );
 

@@ -15,7 +15,7 @@ namespace Caravela.TestFramework
         /// </summary>
         private class InactiveCodeRemover : CSharpSyntaxRewriter
         {
-            private Stack<bool> _branchStack;
+            private readonly Stack<bool> _branchStack;
 
             public InactiveCodeRemover() : base( true ) 
             {

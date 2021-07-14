@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.References
 {
@@ -16,6 +17,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
         /// <summary>
         /// Gets the member name without resolving to the target.
         /// </summary>
+        [Obfuscation( Exclude = true )] // Working around an obfuscator bug. 
         string Name { get; }
     }
 }

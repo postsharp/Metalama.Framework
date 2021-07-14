@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Templating
     /// <summary>
     /// Helper methods that would ideally be in the <see cref="SyntaxFactory"/> class.
     /// </summary>
-    internal static class SyntaxFactoryEx
+    public static class SyntaxFactoryEx
     {
         public static LiteralExpressionSyntax Null => SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression );
 

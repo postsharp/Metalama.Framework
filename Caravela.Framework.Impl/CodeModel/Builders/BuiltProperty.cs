@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public PropertyBuilder PropertyBuilder { get; }
 
-        public override DeclarationBuilder Builder => this.PropertyBuilder;
+        public override MemberBuilder MemberBuilder => this.PropertyBuilder;
 
         public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.PropertyBuilder;
 
@@ -61,16 +61,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => Array.Empty<IProperty>();
 
         [return: RunTimeOnly]
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
 
         [return: RunTimeOnly]
-        public PropertyInfo ToPropertyInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public PropertyInfo ToPropertyInfo() => throw new NotImplementedException();
 
         IProperty IDeclarationRef<IProperty>.Resolve( CompilationModel compilation ) => (IProperty) this.GetForCompilation( compilation );
 

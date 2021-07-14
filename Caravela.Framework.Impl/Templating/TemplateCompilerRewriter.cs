@@ -1228,7 +1228,12 @@ namespace Caravela.Framework.Impl.Templating
 
             this.Unindent();
 
-            return ForEachStatement( node.Type, node.Identifier, node.Expression, statement );
+            // It seems that trivia can be lost upstream, there can be a missing one between the 'in' keyword and the expression. Add them to be sure.
+            return ForEachStatement(
+                node.Type.WithTrailingTrivia( Space ),
+                node.Identifier.WithTrailingTrivia( Space ),
+                node.Expression.WithLeadingTrivia( Space ),
+                statement );
         }
 
         /// <summary>
@@ -1285,7 +1290,7 @@ namespace Caravela.Framework.Impl.Templating
                             .AddArgumentListArguments(
                                 Argument( (ExpressionSyntax) this.Visit( declaration.Type )! ),
                                 Argument( this.Transform( declarator.Identifier ) ),
-                                Argument( (ExpressionSyntax) this.Visit( declarator.Initializer.Value ) ) );
+                                Argument( (ExpressionSyntax) this.Visit( declarator.Initializer.Value )! ) );
 
                         return this.WithCallToAddSimplifierAnnotation( invocationExpression );
 

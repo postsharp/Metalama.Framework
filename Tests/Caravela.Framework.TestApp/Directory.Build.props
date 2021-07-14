@@ -16,13 +16,6 @@
     
   </PropertyGroup>
 
-  
-  <!-- Internal NuGet reposority source -->
-  <PropertyGroup>
-    <RestoreAdditionalProjectSources>$(MSBuildThisFileDirectory)..\..\artifacts\bin\$(Configuration)</RestoreAdditionalProjectSources>
-  </PropertyGroup>
-
-
 
   <Target Name="ValidateVersion">
     <Error Text="The CaravelaVersion property is not defined. Check that Directory.Build.props have been properly imported." Condition="'$(CaravelaVersion)'==''"/>

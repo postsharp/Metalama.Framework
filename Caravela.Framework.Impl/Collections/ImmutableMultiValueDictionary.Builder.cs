@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Collections
 {
-    public partial class ImmutableMultiValueDictionary<TKey, TValue>
+    internal partial class ImmutableMultiValueDictionary<TKey, TValue>
     {
         public readonly struct Builder
         {

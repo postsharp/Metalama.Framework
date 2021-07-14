@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// <summary>
     /// Exposes the list of diagnostics and suppressions defined in the project.
     /// </summary>
-    public sealed class DiagnosticManifest
+    internal sealed class DiagnosticManifest
     {
         private readonly ImmutableHashSet<string> _definedDiagnostics;
         private readonly ImmutableHashSet<string> _definedSuppressions;

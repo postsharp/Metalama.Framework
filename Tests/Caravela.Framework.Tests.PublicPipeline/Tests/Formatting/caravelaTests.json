@@ -1,0 +1,4 @@
+{
+  "TestRunnerFactoryType": "Caravela.Framework.Tests.Integration.Runners.HighlightingTestRunnerFactory, Caravela.Framework.Tests.PublicPipeline",
+  "WriteInputHtml": true
+}

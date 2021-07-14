@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    public class ImplementedInterfaceList : List<INamedType>, IImplementedInterfaceList
+    internal class ImplementedInterfaceList : List<INamedType>, IImplementedInterfaceList
     {
         public ImplementedInterfaceList( IEnumerable<INamedType> interfaces ) : base( interfaces ) { }
 

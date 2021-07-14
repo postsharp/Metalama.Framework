@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.Linking
     /// </summary>
     /// <typeparam name="TInput">Input of the step.</typeparam>
     /// <typeparam name="TOutput">Output of the step.</typeparam>
-    public abstract class AspectLinkerPipelineStep<TInput, TOutput>
+    internal abstract class AspectLinkerPipelineStep<TInput, TOutput>
     {
         public abstract TOutput Execute( TInput input );
     }

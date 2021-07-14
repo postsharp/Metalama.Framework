@@ -167,7 +167,7 @@ namespace Caravela.Framework.Impl.Linking
 
             void AddReturnNodeReplacements()
             {
-                foreach ( var returnNode in this.GetReturnNodes( bodyRootNode ) )
+                foreach ( var returnNode in GetReturnNodes( bodyRootNode ) )
                 {
                     if ( returnNode is ReturnStatementSyntax returnStatement )
                     {
@@ -267,14 +267,14 @@ namespace Caravela.Framework.Impl.Linking
                         }
                         else
                         {
-                            return this.GetImplicitAccessorBody( symbol );
+                            return GetImplicitAccessorBody( symbol );
                         }
 
                     case ArrowExpressionClauseSyntax arrowExpressionClause:
                         // Expression-bodied property.
                         return arrowExpressionClause;
                     case VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: EventFieldDeclarationSyntax } }:
-                        return this.GetImplicitAccessorBody( symbol );
+                        return GetImplicitAccessorBody( symbol );
                     default:
                         throw new AssertionFailedException();
                 }
@@ -299,7 +299,7 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private BlockSyntax GetImplicitAccessorBody(IMethodSymbol symbol)
+        private static BlockSyntax GetImplicitAccessorBody(IMethodSymbol symbol)
         {
             switch ( symbol )
             {
@@ -316,7 +316,9 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
+#pragma warning disable CA1822 // Mark members as static
         private BlockSyntax RewriteBody( SyntaxNode bodyRootNode, IMethodSymbol symbol, Dictionary<SyntaxNode, SyntaxNode?> replacements)
+#pragma warning restore CA1822 // Mark members as static
         {
             var rewriter = new BodyRewriter(replacements);
             switch (bodyRootNode)
@@ -347,7 +349,7 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private IEnumerable<SyntaxNode> GetReturnNodes( SyntaxNode? rootNode )
+        private static IEnumerable<SyntaxNode> GetReturnNodes( SyntaxNode? rootNode )
         {
             switch ( rootNode )
             {
@@ -462,8 +464,6 @@ namespace Caravela.Framework.Impl.Linking
                         IdentifierName( targetMemberName ) );
                 }
             }
-
-
         }
 
         internal static string GetOriginalImplMemberName( string memberName ) => $"__{memberName}__OriginalImpl";
