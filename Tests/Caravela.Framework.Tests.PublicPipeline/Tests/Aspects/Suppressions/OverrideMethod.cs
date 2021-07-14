@@ -1,4 +1,4 @@
-// @IncludeFinalDiagnostics
+// @ReportOutputWarnings
 
 #if !TESTRUNNER
 // Disable the warning in the main build, not during tests.

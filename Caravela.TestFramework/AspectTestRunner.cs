@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,10 +47,18 @@ namespace Caravela.TestFramework
             if ( pipeline.TryExecute( testResult, testResult.InputCompilation!, CancellationToken.None, out var resultCompilation, out _ ) )
             {
                 testResult.OutputCompilation = resultCompilation;
+                var minimalVerbosity = testInput.Options.ReportOutputWarnings.GetValueOrDefault() ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
 
-                if ( testInput.Options.IncludeFinalDiagnostics.GetValueOrDefault() )
+                bool MustBeReported( Diagnostic d ) => d.Severity >= minimalVerbosity && !testInput.Options.IgnoredDiagnostics.Contains( d.Id );
+
+                if ( !testInput.Options.OutputCompilationDisabled.GetValueOrDefault() )
                 {
-                    testResult.Report( resultCompilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
+                    var emitResult = resultCompilation.Emit( Stream.Null );
+                    testResult.Report( emitResult.Diagnostics.Where( MustBeReported ) );
+                }
+                else
+                {
+                    testResult.Report( resultCompilation.GetDiagnostics().Where( MustBeReported ) );
                 }
 
                 await testResult.SetOutputCompilationAsync( resultCompilation );
