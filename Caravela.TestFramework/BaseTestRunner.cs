@@ -65,7 +65,7 @@ namespace Caravela.TestFramework
                     "Invalid option(s) in source code: " +
                     string.Join( ", ", testInput.Options.InvalidSourceOptions ) );
             }
-            
+
             var testResult = this.CreateTestResult();
 
             // Source. Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,

@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <Compile Remove="Tests\Aspects\Introductions\Methods\ExistingConflictOverrideBaseSealed - Copy.t.cs" />
+    <Compile Remove="Tests\Aspects\Samples\Dirty - Copy.t.cs" />
   </ItemGroup>
 
 
@@ -45,6 +46,7 @@
 
   <ItemGroup>
     <None Include="Tests\Aspects\Introductions\Methods\ExistingConflictOverrideBaseNonVirtual.t.cs" />
+    <None Include="Tests\Aspects\Samples\CompileTimeIf.t.cs" />
   </ItemGroup>
 
 

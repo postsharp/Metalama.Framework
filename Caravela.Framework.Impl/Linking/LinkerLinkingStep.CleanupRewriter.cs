@@ -63,15 +63,15 @@ namespace Caravela.Framework.Impl.Linking
                 var finalStatements = new List<StatementSyntax>();
 
                 // Process labeled statements.
-                for (var i = 0; i < newStatements.Count; i++ )
+                for ( var i = 0; i < newStatements.Count; i++ )
                 {
                     var statement = newStatements[i];
 
-                    if (statement.GetLinkerGeneratedFlags().HasFlag(LinkerGeneratedFlags.EmptyLabeledStatement))
+                    if ( statement.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.EmptyLabeledStatement ) )
                     {
                         var labeledStatement = (statement as LabeledStatementSyntax).AssertNotNull();
 
-                        if (i == newStatements.Count - 1)
+                        if ( i == newStatements.Count - 1 )
                         {
                             finalStatements.Add( labeledStatement );
                         }
@@ -100,11 +100,11 @@ namespace Caravela.Framework.Impl.Linking
                     return node;
                 }
 
-                void AddFlattenedBlockStatements(BlockSyntax block, List<StatementSyntax> statements)
+                void AddFlattenedBlockStatements( BlockSyntax block, List<StatementSyntax> statements )
                 {
-                    foreach (var statement in block.Statements)
+                    foreach ( var statement in block.Statements )
                     {
-                        if (statement is BlockSyntax innerBlock && innerBlock.GetLinkerGeneratedFlags().HasFlag(LinkerGeneratedFlags.FlattenableBlock))
+                        if ( statement is BlockSyntax innerBlock && innerBlock.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.FlattenableBlock ) )
                         {
                             AddFlattenedBlockStatements( innerBlock, statements );
                         }

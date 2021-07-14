@@ -61,11 +61,11 @@ namespace Caravela.Framework.Impl.CodeModel
             var syntaxReference = this.Symbol.DeclaringSyntaxReferences[0];
             var semanticModel = this.Compilation.RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
 
-            SyntaxNode? bodyNode =
+            var bodyNode =
                 syntaxReference.GetSyntax() switch
                 {
-                    MethodDeclarationSyntax methodDeclaration => (SyntaxNode?)methodDeclaration.Body ?? methodDeclaration.ExpressionBody,
-                    AccessorDeclarationSyntax accessorDeclaration => (SyntaxNode?)accessorDeclaration.Body ?? accessorDeclaration.ExpressionBody,
+                    MethodDeclarationSyntax methodDeclaration => (SyntaxNode?) methodDeclaration.Body ?? methodDeclaration.ExpressionBody,
+                    AccessorDeclarationSyntax accessorDeclaration => (SyntaxNode?) accessorDeclaration.Body ?? accessorDeclaration.ExpressionBody,
                     ArrowExpressionClauseSyntax _ => null,
                     PropertyDeclarationSyntax _ => null,
                     EventDeclarationSyntax _ => null,
@@ -76,16 +76,18 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var implicitSymbols =
                 bodyNode != null
-                ? Enumerable.Empty<ISymbol>()
-                : this.Symbol switch
-                {
-                    IMethodSymbol { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } methodSymbol => methodSymbol.Parameters,
-                    _ => Enumerable.Empty<ISymbol>(),
-                };
+                    ? Enumerable.Empty<ISymbol>()
+                    : this.Symbol switch
+                    {
+                        IMethodSymbol
+                                { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } methodSymbol =>
+                            methodSymbol.Parameters,
+                        _ => Enumerable.Empty<ISymbol>()
+                    };
 
             var lookupPosition = bodyNode != null ? bodyNode.Span.Start : syntaxReference.Span.Start;
 
-            return semanticModel.LookupSymbols( lookupPosition ).AddRange(implicitSymbols);
+            return semanticModel.LookupSymbols( lookupPosition ).AddRange( implicitSymbols );
         }
 
         IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();

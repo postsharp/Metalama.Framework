@@ -70,9 +70,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public object Base => this.GetThisOrBase( "meta.Base", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
-        public object ThisStatic => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
+        public object ThisStatic
+            => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
 
-        public object BaseStatic => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
+        public object BaseStatic
+            => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
         public object? Proceed() => this._common.ProceedExpression;
 

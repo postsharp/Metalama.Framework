@@ -31,98 +31,111 @@ namespace Caravela.Framework.Impl.Linking
         {
             // TODO: Other things than methods.
             var overrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
-            var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (AspectLayerId: o.AspectLayerId, Index: i) ).ToReadOnlyList();
-            var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceSpecification.AspectLayerId ).Index;
-
-            // TODO: Optimize.
-            LinkerIntroducedMember? referencedIntroduction;
-
-            switch ( referenceSpecification.Order )
+            if ( overrides.Count > 0 )
             {
-                case AspectReferenceOrder.Next:
-                    referencedIntroduction = GetClosestSucceedingOverride( overrides, indexedLayers, annotationLayerIndex );
+                var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (AspectLayerId: o.AspectLayerId, Index: i) ).ToReadOnlyList();
+                var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceSpecification.AspectLayerId ).Index;
 
-                    if ( referencedIntroduction != null )
-                    {
-                        // There is a preceding override, resolve to override symbol.
+                // TODO: Optimize.
+                LinkerIntroducedMember? referencedIntroduction;
+
+                switch ( referenceSpecification.Order )
+                {
+                    case AspectReferenceOrder.Next:
+                        referencedIntroduction = GetClosestSucceedingOverride( overrides, indexedLayers, annotationLayerIndex );
+
+                        if ( referencedIntroduction != null )
+                        {
+                            // There is a preceding override, resolve to override symbol.
+                            return new ResolvedAspectReference(
+                                containingSymbol,
+                                referencedSymbol,
+                                this.GetSymbolFromIntroducedMember( referencedSymbol, referencedIntroduction ),
+                                ResolvedAspectReferenceSemantic.Default,
+                                expression,
+                                referenceSpecification );
+                        }
+                        else
+                        {
+                            // There is no preceding override, this is reference to the original body.
+                            return new ResolvedAspectReference(
+                                containingSymbol,
+                                referencedSymbol,
+                                referencedSymbol,
+                                ResolvedAspectReferenceSemantic.Default,
+                                expression,
+                                referenceSpecification );
+                        }
+
+                    case AspectReferenceOrder.Base:
+                        referencedIntroduction = GetClosestPrecedingOverride( overrides, indexedLayers, annotationLayerIndex );
+
+                        if ( referencedIntroduction != null )
+                        {
+                            // There is a succeeding override, resolve to override symbol.
+                            return new ResolvedAspectReference(
+                                containingSymbol,
+                                referencedSymbol,
+                                this.GetSymbolFromIntroducedMember( referencedSymbol, referencedIntroduction ),
+                                ResolvedAspectReferenceSemantic.Default,
+                                expression,
+                                referenceSpecification );
+                        }
+                        else
+                        {
+                            // No override after the referencing aspect, point to the final declaration.
+                            var originalSymbol = GetOriginalDeclarationSymbol( referencedSymbol );
+
+                            return new ResolvedAspectReference(
+                                containingSymbol,
+                                referencedSymbol,
+                                TransitionSymbol( referencedSymbol, originalSymbol ),
+                                SymbolEqualityComparer.Default.Equals( referencedSymbol, originalSymbol )
+                                    ? ResolvedAspectReferenceSemantic.Original
+                                    : ResolvedAspectReferenceSemantic.Default,
+                                expression,
+                                referenceSpecification );
+                        }
+
+                    case AspectReferenceOrder.Final:
+                        // Final reference order is always resolved to the final declaration.
                         return new ResolvedAspectReference(
                             containingSymbol,
                             referencedSymbol,
-                            this.GetSymbolFromIntroducedMember( referencedSymbol, referencedIntroduction ),
+                            referencedSymbol,
                             ResolvedAspectReferenceSemantic.Default,
                             expression,
                             referenceSpecification );
-                    }
-                    else
-                    {
-                        // There is no preceding override, this is reference to the original body.
-                        return new ResolvedAspectReference(
-                            containingSymbol,
-                            referencedSymbol,
-                            referencedSymbol,
-                            ResolvedAspectReferenceSemantic.Default,
-                            expression,
-                            referenceSpecification );
-                    }
 
-                case AspectReferenceOrder.Base:
-                    referencedIntroduction = GetClosestPrecedingOverride( overrides, indexedLayers, annotationLayerIndex );
+                    case AspectReferenceOrder.Original:
+                        {
+                            // Original reference order is always to the original declaration.
+                            var originalSymbol = GetOriginalDeclarationSymbol( referencedSymbol );
 
-                    if ( referencedIntroduction != null )
-                    {
-                        // There is a succeeding override, resolve to override symbol.
-                        return new ResolvedAspectReference(
-                            containingSymbol,
-                            referencedSymbol,
-                            this.GetSymbolFromIntroducedMember( referencedSymbol, referencedIntroduction ),
-                            ResolvedAspectReferenceSemantic.Default,
-                            expression,
-                            referenceSpecification );
-                    }
-                    else
-                    {
-                        // No override after the referencing aspect, point to the final declaration.
-                        var originalSymbol = GetOriginalDeclarationSymbol( referencedSymbol );
+                            return new ResolvedAspectReference(
+                                containingSymbol,
+                                referencedSymbol,
+                                TransitionSymbol( referencedSymbol, originalSymbol ),
+                                SymbolEqualityComparer.Default.Equals( referencedSymbol, originalSymbol )
+                                    ? ResolvedAspectReferenceSemantic.Original
+                                    : ResolvedAspectReferenceSemantic.Default,
+                                expression,
+                                referenceSpecification );
+                        }
 
-                        return new ResolvedAspectReference(
-                            containingSymbol,
-                            referencedSymbol,
-                            TransitionSymbol( referencedSymbol, originalSymbol ),
-                            SymbolEqualityComparer.Default.Equals( referencedSymbol, originalSymbol )
-                                ? ResolvedAspectReferenceSemantic.Original
-                                : ResolvedAspectReferenceSemantic.Default,
-                            expression,
-                            referenceSpecification );
-                    }
-
-                case AspectReferenceOrder.Final:
-                    // Final reference order is always resolved to the final declaration.
-                    return new ResolvedAspectReference(
-                        containingSymbol,
-                        referencedSymbol,
-                        referencedSymbol,
-                        ResolvedAspectReferenceSemantic.Default,
-                        expression,
-                        referenceSpecification );
-
-                case AspectReferenceOrder.Original:
-                    {
-                        // Original reference order is always to the original declaration.
-                        var originalSymbol = GetOriginalDeclarationSymbol( referencedSymbol );
-
-                        return new ResolvedAspectReference(
-                            containingSymbol,
-                            referencedSymbol,
-                            TransitionSymbol( referencedSymbol, originalSymbol ),
-                            SymbolEqualityComparer.Default.Equals( referencedSymbol, originalSymbol )
-                                ? ResolvedAspectReferenceSemantic.Original
-                                : ResolvedAspectReferenceSemantic.Default,
-                            expression,
-                            referenceSpecification );
-                    }
-
-                default:
-                    throw new AssertionFailedException();
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+            else
+            {
+                return new ResolvedAspectReference(
+                   containingSymbol,
+                   referencedSymbol,
+                   referencedSymbol,
+                   ResolvedAspectReferenceSemantic.Default,
+                   expression,
+                   referenceSpecification );
             }
 
             static bool TryGetHiddenSymbol( ISymbol symbol, [NotNullWhen( true )] out ISymbol? hiddenSymbol )

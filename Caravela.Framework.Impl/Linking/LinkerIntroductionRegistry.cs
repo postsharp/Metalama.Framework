@@ -78,7 +78,15 @@ namespace Caravela.Framework.Impl.Linking
         public IReadOnlyList<LinkerIntroducedMember> GetOverridesForSymbol( ISymbol symbol )
         {
             // TODO: Optimize.
-            var declaringSyntax = symbol.DeclaringSyntaxReferences.Single().GetSyntax();
+            var declaringSyntax = symbol.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax();
+
+            if (declaringSyntax == null)
+            {
+                // Code is outside of the current compilation, so it cannot have overrides.
+                // TODO: This should be checked more thoroughly.
+                return Array.Empty<LinkerIntroducedMember>();
+            }
+
             var annotation = declaringSyntax.GetAnnotations( IntroducedNodeIdAnnotationId ).SingleOrDefault();
 
             if ( annotation == null )
@@ -162,7 +170,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns>An introduced member, or <c>null</c> if the declaration represented by this symbol was not introduced.</returns>
         public LinkerIntroducedMember? GetIntroducedMemberForSymbol( ISymbol symbol )
         {
-            var declaringSyntax = symbol.GetPrimaryDeclaration().AssertNotNull();
+            var declaringSyntax = symbol.GetPrimaryDeclaration();
 
             if ( declaringSyntax == null )
             {

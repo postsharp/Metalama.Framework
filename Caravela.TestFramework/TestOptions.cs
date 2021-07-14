@@ -25,7 +25,7 @@ namespace Caravela.TestFramework
         /// This is useful when diagnostic suppression is being tested.
         /// </summary>
         public bool? ReportOutputWarnings { get; set; }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the output file must be compiled into a binary (e.g. emitted).
         /// </summary>
@@ -89,12 +89,12 @@ namespace Caravela.TestFramework
         /// Gets a list of warnings that are not reported even if <see cref="ReportOutputWarnings"/> is set to <c>true</c>.
         /// </summary>
         public List<string> IgnoredDiagnostics { get; } = new();
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the list of <see cref="IgnoredDiagnostics"/> inherited from the parent level (directory or base directory)
         /// must be cleared before new diagnostics are added to this list. This option is not inherited from the base level.
         /// </summary>
-        public bool? ClearIgnoredDiagnostics { get; set; } 
+        public bool? ClearIgnoredDiagnostics { get; set; }
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -121,7 +121,7 @@ namespace Caravela.TestFramework
             this.ReportErrorMessage ??= baseOptions.ReportErrorMessage;
 
             this.FormatOutput ??= baseOptions.FormatOutput;
-            
+
             this.IncludedFiles.AddRange( baseOptions.IncludedFiles );
 
             this.References.AddRange( baseOptions.References );
@@ -155,7 +155,7 @@ namespace Caravela.TestFramework
                         this.ReportOutputWarnings = true;
 
                         break;
-                    
+
                     case "OutputCompilationDisabled":
                         this.OutputCompilationDisabled = true;
 
@@ -205,22 +205,22 @@ namespace Caravela.TestFramework
 
                     case "NullabilityDisabled":
                         this.NullabilityDisabled = true;
-                        
+
                         break;
-                    
+
                     case "IgnoredDiagnostic":
                         this.IgnoredDiagnostics.Add( optionArg );
-                        
+
                         break;
-                    
+
                     case "ClearIgnoredDiagnostics":
                         this.ClearIgnoredDiagnostics = true;
-                        
+
                         break;
-                    
+
                     default:
                         this._invalidSourceOptions.Add( "@" + optionName );
-                        
+
                         break;
                 }
             }

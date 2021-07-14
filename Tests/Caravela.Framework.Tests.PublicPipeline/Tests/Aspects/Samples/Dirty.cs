@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples
+namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
 {
     public class DirtyAttribute : Attribute, IAspect<INamedType>
     {

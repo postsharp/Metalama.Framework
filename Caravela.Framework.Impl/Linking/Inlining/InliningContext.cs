@@ -73,9 +73,9 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                                     linkedBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                                     this._labelUsed
                                         ? LabeledStatement(
-                                            Identifier( this.ReturnLabelName.AssertNotNull() ),
-                                            EmptyStatement() )
-                                        .AddLinkerGeneratedFlags(LinkerGeneratedFlags.EmptyLabeledStatement)
+                                                Identifier( this.ReturnLabelName.AssertNotNull() ),
+                                                EmptyStatement() )
+                                            .AddLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyLabeledStatement )
                                         : null
                                 }.Where( x => x != null )
                                 .AssertNoneNull() )

@@ -626,14 +626,14 @@ namespace Caravela.Framework.Impl.Templating
                  this.IsCompileTimeDynamic( assignment.Right ) )
             {
                 // Process the statement "_ = meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
-                
+
                 var invocationExpression = InvocationExpression(
                         this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicDiscardAssignment) ) )
                     .AddArgumentListArguments( Argument( assignment.Right ) );
-                
+
                 return this.WithCallToAddSimplifierAnnotation( invocationExpression );
             }
-            
+
             var expression = this.Transform( node.Expression );
 
             var toArrayStatementExpression = InvocationExpression(
@@ -1272,7 +1272,7 @@ namespace Caravela.Framework.Impl.Templating
 
             return this.WithCallToAddSimplifierAnnotation( invocationExpression );
         }
-        
+
         public override SyntaxNode VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
         {
             var declaration = node.Declaration;
