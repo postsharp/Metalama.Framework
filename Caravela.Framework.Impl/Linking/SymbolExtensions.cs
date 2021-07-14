@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 case IMethodSymbol { AssociatedSymbol: not null } methodSymbol:
                     return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault()
-                           ?? methodSymbol.AssociatedSymbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault();
+                           ?? methodSymbol.AssociatedSymbol!.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault();
 
                 default:
                     return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault();
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 case IMethodSymbol { AssociatedSymbol: not null } methodSymbol:
                     return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault()?.GetSyntax()
-                           ?? methodSymbol.AssociatedSymbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault()?.GetSyntax();
+                           ?? methodSymbol.AssociatedSymbol!.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault()?.GetSyntax();
 
                 default:
                     return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault()?.GetSyntax();
