@@ -92,5 +92,17 @@ namespace Caravela.Framework.Impl.Templating
                 RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
                 _ => default
             };
+        
+        /// <summary>
+        /// Generates a string that contains C# code that instantiates the given node
+        /// using SyntaxFactory. Used for debugging.
+        /// </summary>
+        public static string ToSyntaxFactoryDebug( this SyntaxNode node, Compilation compilation )
+        {
+            MetaSyntaxRewriter rewriter = new MetaSyntaxRewriter( compilation );
+            var transformedNode = rewriter.Visit( node );
+
+            return transformedNode.ToFullString();
+        }
     }
 }

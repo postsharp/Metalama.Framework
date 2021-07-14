@@ -174,6 +174,16 @@ namespace Caravela.TestFramework
                 throw new InvalidOperationException( "This method cannot be called when the test path is unknown." );
             }
 
+            /* ** Use this trick to find invisible problems in the syntax tree **  
+            foreach ( var syntaxTree in testResult.SyntaxTrees )
+            {
+                string actualSyntaxFactory = syntaxTree.OutputRunTimeSyntaxRoot.ToSyntaxFactoryDebug( testResult.OutputCompilation );
+                string reparsed = CSharpSyntaxTree.ParseText(  syntaxTree.OutputRunTimeSyntaxRoot.ToString() ).GetRoot(  ).ToSyntaxFactoryDebug( testResult.OutputCompilation );
+                
+                Assert.Equal( reparsed, actualSyntaxFactory );
+            }
+            */
+
             var formatCode = testInput.Options.FormatOutput.GetValueOrDefault( true );
 
             // Compare the "Target" region of the transformed code to the expected output.
