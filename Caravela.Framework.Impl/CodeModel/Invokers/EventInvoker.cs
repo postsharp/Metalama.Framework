@@ -66,8 +66,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             var arguments = this.Member.GetArguments( this.Member.Signature.Parameters, RuntimeExpression.FromValue( args ) );
 
-            var expression = InvocationExpression( ConditionalAccessExpression( eventAccess, MemberBindingExpression( IdentifierName( "Invoke" ) ) ) )
-                .AddArgumentListArguments( arguments );
+            var expression = ConditionalAccessExpression( eventAccess, InvocationExpression( MemberBindingExpression( IdentifierName( "Invoke" ) ) ).AddArgumentListArguments( arguments ) );
 
             return new DynamicExpression(
                 expression,

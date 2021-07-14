@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    internal abstract partial class MetaSyntaxRewriter
+    internal partial class MetaSyntaxRewriter
     {
         private class IndentRewriter : CSharpSyntaxRewriter
         {

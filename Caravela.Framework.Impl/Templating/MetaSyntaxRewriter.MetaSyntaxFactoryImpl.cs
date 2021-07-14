@@ -9,7 +9,7 @@ using System;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    internal abstract partial class MetaSyntaxRewriter
+    internal partial class MetaSyntaxRewriter
     {
         protected partial class MetaSyntaxFactoryImpl
         {
