@@ -334,7 +334,7 @@ class T
         result = x;
         goto __aspect_return_1;
         __aspect_return_1:
-        Test(""After"");
+            Test(""After"");
         return result;
     }
 }
@@ -397,6 +397,7 @@ class T
             result = x;
             goto __aspect_return_1;
             __aspect_return_1:
+                ;
         }
 
         Test(""After"");
@@ -468,7 +469,7 @@ class T
             result = x;
             goto __aspect_return_1;
             __aspect_return_1:
-            k += result;
+                k += result;
             i++;
         }
 

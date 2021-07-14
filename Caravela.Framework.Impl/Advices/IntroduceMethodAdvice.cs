@@ -144,7 +144,7 @@ namespace Caravela.Framework.Impl.Advices
 
                             return AdviceResult.Create( overriddenMethod );
                         }
-                        else if ( existingDeclaration.IsSealed )
+                        else if ( existingDeclaration.IsSealed || !existingDeclaration.IsVirtual )
                         {
                             return
                                 AdviceResult.Create(

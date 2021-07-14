@@ -12,19 +12,6 @@
             return 27;
 }
     
-    
-public override global::System.Int32 BaseMethod()
-{
-    global::System.Console.WriteLine("This is introduced method.");
-    return (int)base.BaseMethod();
-}
-    
-public static override global::System.Int32 BaseMethod_Static()
-{
-    global::System.Console.WriteLine("This is introduced method.");
-    return (int)global::Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictOverride.BaseClass.BaseMethod_Static();
-}
-    
 public global::System.Int32 NonExistingMethod()
 {
     global::System.Console.WriteLine("This is introduced method.");

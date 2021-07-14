@@ -467,12 +467,26 @@ namespace Caravela.Framework.Impl.Advices
 
                 if ( propertyBuilder.Getter != null )
                 {
-                    propertyBuilder.Getter.Accessibility = targetProperty.Getter.AssertNotNull().Accessibility;
+                    if ( interfaceProperty.Getter != null )
+                    {
+                        propertyBuilder.Getter.Accessibility = Accessibility.Public;
+                    }
+                    else
+                    {
+                        propertyBuilder.Getter.Accessibility = targetProperty.Getter.AssertNotNull().Accessibility;
+                    }
                 }
 
                 if ( propertyBuilder.Setter != null )
                 {
-                    propertyBuilder.Setter.Accessibility = targetProperty.Setter.AssertNotNull().Accessibility;
+                    if ( interfaceProperty.Setter != null )
+                    {
+                        propertyBuilder.Setter.Accessibility = Accessibility.Public;
+                    }
+                    else
+                    {
+                        propertyBuilder.Setter.Accessibility = targetProperty.Setter.AssertNotNull().Accessibility;
+                    }
                 }
             }
 

@@ -243,7 +243,7 @@ class T
             x = 42;
             goto __aspect_return_1;
             __aspect_return_1:
-            Test(""After"");
+                Test(""After"");
             return x;
         }
     }

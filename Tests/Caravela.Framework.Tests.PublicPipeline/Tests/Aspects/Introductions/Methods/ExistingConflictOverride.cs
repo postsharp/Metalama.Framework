@@ -7,25 +7,6 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-       
-
-       
-        
-        
-        [Introduce(WhenExists = OverrideStrategy.Override)]
-        public int BaseMethod()
-        {
-            Console.WriteLine("This is introduced method.");
-            return meta.Proceed();
-        }
-
-        [Introduce(WhenExists = OverrideStrategy.Override)]
-        public static int BaseMethod_Static()
-        {
-            Console.WriteLine("This is introduced method.");
-            return meta.Proceed();
-        }
-
         [Introduce(WhenExists = OverrideStrategy.Override)]
         public int ExistingMethod()
         {
@@ -56,15 +37,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
     }
 
     internal class BaseClass
-    { 
-        public int BaseMethod()
-        {
-            return 13;
-        }
-        public static int BaseMethod_Static()
-        {
-            return 13;
-        }
+    {
     }
 
     // <target>
@@ -75,6 +48,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
         {
             return 27;
         }
+
         public static int ExistingMethod_Static()
         {
             return 27;

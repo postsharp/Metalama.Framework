@@ -58,7 +58,7 @@ class T
 
         Test(""Original End"");
         __aspect_return_1:
-        Test(""After"");
+            Test(""After"");
     }
 }
 ";
@@ -128,7 +128,7 @@ class T
 
         Test(""Original End"");
         __aspect_return_2:
-        Test(""After1"");
+            Test(""After1"");
         Test(""After2"");
     }
 }
@@ -198,7 +198,7 @@ class T
         Test(""Original"");
         Test(""After1"");
         __aspect_return_1:
-        Test(""After2"");
+            Test(""After2"");
     }
 }
 ";
@@ -278,9 +278,9 @@ class T
 
         Test(""Original End"");
         __aspect_return_2:
-        Test(""After1"");
+            Test(""After1"");
         __aspect_return_1:
-        Test(""After2"");
+            Test(""After2"");
     }
 }
 ";
@@ -348,7 +348,7 @@ class T
         result = x;
         goto __aspect_return_1;
         __aspect_return_1:
-        Test(""After"");
+            Test(""After"");
         return result;
     }
 }
