@@ -191,10 +191,11 @@ namespace Caravela.Framework.Impl.Linking
                         VariableDeclaration(
                             propertyDeclaration.Type,
                             SingletonSeparatedList( VariableDeclarator( Identifier( GetAutoPropertyBackingFieldName( symbol ) ) ) ) ) )
+                    .NormalizeWhitespace()
                     .WithLeadingTrivia( LineFeed )
                     .WithTrailingTrivia( LineFeed, LineFeed )
-                    .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode )
-                    .NormalizeWhitespace();
+                    .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
+
         }
 
         private static BlockSyntax GetImplicitGetterBody( IMethodSymbol symbol )
