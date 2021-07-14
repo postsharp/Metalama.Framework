@@ -12,6 +12,18 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private static ServiceProvider? _sharedInstance;
 
+        /// <summary>
+        /// Registers a global service, which will be available in the <see cref="Shared"/> provider and in all
+        /// instances returned by <see cref="GetServiceProvider"/>. This method is used by TryCaravela to register hooks.
+        /// </summary>
+        public static void RegisterGlobalService<T>( T service ) 
+            where T : IService
+        {
+            var newServices = new ServiceProvider( Shared );
+            newServices.AddService( service );
+            _sharedInstance = newServices;
+        }
+
         private static ServiceProvider CreateBasicServices( IDirectoryOptions directoryOptions, bool freeze )
         {
             ServiceProvider serviceProvider = new();

@@ -32,6 +32,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
         private readonly IDirectoryOptions _directoryOptions;
         private readonly ICompileTimeCompilationBuilderSpy? _spy;
+        private readonly ICompileTimeCompilationRewriter? _rewriter;
 
         private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
 
@@ -43,6 +44,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this._serviceProvider = serviceProvider;
             this._domain = domain;
             this._spy = serviceProvider.GetOptionalService<ICompileTimeCompilationBuilderSpy>();
+            this._rewriter = serviceProvider.GetOptionalService<ICompileTimeCompilationRewriter>();
         }
 
         private static ulong ComputeSourceHash( IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log = null )
@@ -269,10 +271,26 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 EmitResult emitResult;
 
-                using ( var peStream = File.Create( outputInfo.Pe ) )
-                using ( var pdbStream = File.Create( outputInfo.Pdb ) )
+                if ( this._rewriter != null )
                 {
-                    emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
+                    // TryCaravela defines a binary rewriter to inject Unbreakable.
+                    
+                    MemoryStream memoryStream = new();
+                    emitResult = compileTimeCompilation.Emit( memoryStream, null, options: emitOptions, cancellationToken: cancellationToken );
+                    memoryStream.Seek( 0, SeekOrigin.Begin );
+
+                    using ( var peStream = File.Create( outputInfo.Pe ) )
+                    {
+                        this._rewriter.Rewrite( memoryStream, peStream );
+                    }
+                }
+                else
+                {
+                    using ( var peStream = File.Create( outputInfo.Pe ) )
+                    using ( var pdbStream = File.Create( outputInfo.Pdb ) )
+                    {
+                        emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
+                    }
                 }
 
                 // Reports a diagnostic in the original syntax tree.
