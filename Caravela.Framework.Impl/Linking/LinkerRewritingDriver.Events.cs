@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Linking
 
         private bool IsInlineable( IEventSymbol symbol, ResolvedAspectReferenceSemantic semantic )
         {
-            if ( GetDeclarationFlags( symbol ).HasFlag( LinkerDeclarationFlags.NotInlineable) )
+            if ( GetDeclarationFlags( symbol ).HasFlag( LinkerDeclarationFlags.NotInlineable ) )
             {
                 return false;
             }
@@ -62,14 +62,15 @@ namespace Caravela.Framework.Impl.Linking
                 return false;
             }
 
-            return (addAspectReferences.Count == 0 || this.IsInlineableReference( addAspectReferences[0] )) 
-                && (removeAspectReferences.Count == 0 || this.IsInlineableReference( removeAspectReferences[0] ));
+            return (addAspectReferences.Count == 0 || this.IsInlineableReference( addAspectReferences[0] ))
+                   && (removeAspectReferences.Count == 0 || this.IsInlineableReference( removeAspectReferences[0] ));
         }
 
         private bool HasAnyAspectReferences( IEventSymbol symbol, ResolvedAspectReferenceSemantic semantic )
         {
             var addAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventAddAccessor );
             var removeAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventRemoveAccessor );
+
             return addAspectReferences.Count > 0 || removeAspectReferences.Count > 0;
         }
 
@@ -77,17 +78,15 @@ namespace Caravela.Framework.Impl.Linking
         {
             if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
             {
-                var members = new List<MemberDeclarationSyntax>
-                {
-                    GetLinkedDeclaration()
-                };
+                var members = new List<MemberDeclarationSyntax> { GetLinkedDeclaration() };
 
                 if ( !this.IsInlineable( (IEventSymbol) this._analysisRegistry.GetLastOverride( symbol ), ResolvedAspectReferenceSemantic.Default ) )
                 {
                     members.Add( GetTrampolineEvent( eventDeclaration, symbol ) );
                 }
 
-                if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original ) && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
+                if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original )
+                     && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
                 {
                     members.Add( GetOriginalImplEvent( eventDeclaration ) );
                 }
@@ -101,23 +100,20 @@ namespace Caravela.Framework.Impl.Linking
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
 
-                return new[]
-                {
-                    GetLinkedDeclaration()
-                };
+                return new[] { GetLinkedDeclaration() };
             }
 
             MemberDeclarationSyntax GetLinkedDeclaration()
             {
-                var addDeclaration = (AccessorDeclarationSyntax)symbol.AddMethod.AssertNotNull().GetPrimaryDeclaration().AssertNotNull();
+                var addDeclaration = (AccessorDeclarationSyntax) symbol.AddMethod.AssertNotNull().GetPrimaryDeclaration().AssertNotNull();
 
                 var transformedAdd =
                     AccessorDeclaration(
                         SyntaxKind.AddAccessorDeclaration,
                         addDeclaration.AttributeLists,
                         TokenList(),
-                        this.GetLinkedBody( 
-                            this.GetBodySource( symbol.AddMethod.AssertNotNull() ), 
+                        this.GetLinkedBody(
+                            this.GetBodySource( symbol.AddMethod.AssertNotNull() ),
                             InliningContext.Create( this, symbol.AddMethod.AssertNotNull() ) ) );
 
                 var removeDeclaration = (AccessorDeclarationSyntax) symbol.RemoveMethod.AssertNotNull().GetPrimaryDeclaration().AssertNotNull();
@@ -128,13 +124,13 @@ namespace Caravela.Framework.Impl.Linking
                         removeDeclaration.AttributeLists,
                         TokenList(),
                         this.GetLinkedBody(
-                            this.GetBodySource( symbol.RemoveMethod.AssertNotNull() ), 
+                            this.GetBodySource( symbol.RemoveMethod.AssertNotNull() ),
                             InliningContext.Create( this, symbol.RemoveMethod.AssertNotNull() ) ) );
 
                 return eventDeclaration
-                        .WithAccessorList( AccessorList( List( new[] { transformedAdd, transformedRemove } ) ) )
-                        .WithLeadingTrivia( eventDeclaration.GetLeadingTrivia() )
-                        .WithTrailingTrivia( eventDeclaration.GetTrailingTrivia() );
+                    .WithAccessorList( AccessorList( List( new[] { transformedAdd, transformedRemove } ) ) )
+                    .WithLeadingTrivia( eventDeclaration.GetLeadingTrivia() )
+                    .WithTrailingTrivia( eventDeclaration.GetTrailingTrivia() );
             }
         }
 
@@ -142,18 +138,15 @@ namespace Caravela.Framework.Impl.Linking
         {
             if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
             {
-                var members = new List<MemberDeclarationSyntax>
-                {
-                    GetEventBackingField(eventFieldDeclaration, symbol),
-                    GetLinkedDeclaration(),
-                };
+                var members = new List<MemberDeclarationSyntax> { GetEventBackingField( eventFieldDeclaration, symbol ), GetLinkedDeclaration() };
 
                 if ( !this.IsInlineable( (IEventSymbol) this._analysisRegistry.GetLastOverride( symbol ), ResolvedAspectReferenceSemantic.Default ) )
                 {
                     members.Add( GetTrampolineEvent( eventFieldDeclaration, symbol ) );
                 }
 
-                if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original ) && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
+                if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original )
+                     && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
                 {
                     members.Add( GetOriginalImplEvent( eventFieldDeclaration, symbol ) );
                 }
@@ -167,10 +160,7 @@ namespace Caravela.Framework.Impl.Linking
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
 
-                return new[]
-                {
-                    GetLinkedDeclaration()
-                };
+                return new[] { GetLinkedDeclaration() };
             }
 
             MemberDeclarationSyntax GetLinkedDeclaration()
@@ -180,8 +170,8 @@ namespace Caravela.Framework.Impl.Linking
                         SyntaxKind.AddAccessorDeclaration,
                         List<AttributeListSyntax>(),
                         TokenList(),
-                        this.GetLinkedBody( 
-                            this.GetBodySource( symbol.AddMethod.AssertNotNull() ), 
+                        this.GetLinkedBody(
+                            this.GetBodySource( symbol.AddMethod.AssertNotNull() ),
                             InliningContext.Create( this, symbol.AddMethod.AssertNotNull() ) ) );
 
                 var transformedRemove =
@@ -189,20 +179,20 @@ namespace Caravela.Framework.Impl.Linking
                         SyntaxKind.RemoveAccessorDeclaration,
                         List<AttributeListSyntax>(),
                         TokenList(),
-                        this.GetLinkedBody( 
-                            this.GetBodySource( symbol.RemoveMethod.AssertNotNull() ), 
+                        this.GetLinkedBody(
+                            this.GetBodySource( symbol.RemoveMethod.AssertNotNull() ),
                             InliningContext.Create( this, symbol.RemoveMethod.AssertNotNull() ) ) );
 
-                return 
+                return
                     EventDeclaration(
-                        List<AttributeListSyntax>(),
-                        eventFieldDeclaration.Modifiers,
-                        eventFieldDeclaration.Declaration.Type,
-                        null,
-                        Identifier(symbol.Name),
-                        AccessorList( List( new[] { transformedAdd, transformedRemove } ) ) )
-                    .WithLeadingTrivia( eventFieldDeclaration.GetLeadingTrivia() )
-                    .WithTrailingTrivia( eventFieldDeclaration.GetTrailingTrivia() );
+                            List<AttributeListSyntax>(),
+                            eventFieldDeclaration.Modifiers,
+                            eventFieldDeclaration.Declaration.Type,
+                            null,
+                            Identifier( symbol.Name ),
+                            AccessorList( List( new[] { transformedAdd, transformedRemove } ) ) )
+                        .WithLeadingTrivia( eventFieldDeclaration.GetLeadingTrivia() )
+                        .WithTrailingTrivia( eventFieldDeclaration.GetTrailingTrivia() );
             }
         }
 
@@ -215,8 +205,8 @@ namespace Caravela.Framework.Impl.Linking
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
-                            ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
-                            : ThisExpression(),
+                                ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
+                                : ThisExpression(),
                             IdentifierName( GetEventFieldBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ) ) );
         }
@@ -230,8 +220,8 @@ namespace Caravela.Framework.Impl.Linking
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
-                            ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
-                            : ThisExpression(),
+                                ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
+                                : ThisExpression(),
                             IdentifierName( GetEventFieldBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ) ) );
         }
@@ -247,12 +237,11 @@ namespace Caravela.Framework.Impl.Linking
                 FieldDeclaration(
                     List<AttributeListSyntax>(),
                     symbol.IsStatic
-                    ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                    : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
                     VariableDeclaration(
                         eventFieldDeclaration.Declaration.Type,
-                        SingletonSeparatedList(
-                            VariableDeclarator( Identifier( GetEventFieldBackingFieldName( symbol ) ) ) ) ) );
+                        SingletonSeparatedList( VariableDeclarator( Identifier( GetEventFieldBackingFieldName( symbol ) ) ) ) ) );
         }
 
         private static MemberDeclarationSyntax GetOriginalImplEvent( EventDeclarationSyntax @event )
@@ -276,7 +265,7 @@ namespace Caravela.Framework.Impl.Linking
                             new[]
                             {
                                 AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull() ) ),
-                                AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) ),
+                                AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) )
                             } ) ) );
         }
     }

@@ -19,6 +19,6 @@ namespace Caravela.Framework.Impl
         /// <summary>
         /// The reference is not inlineable.
         /// </summary>
-        Inlineable = 1,
+        Inlineable = 1
     }
 }

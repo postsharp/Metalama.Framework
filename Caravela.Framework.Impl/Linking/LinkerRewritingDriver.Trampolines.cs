@@ -13,7 +13,6 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal partial class LinkerRewritingDriver
     {
-
         private static MethodDeclarationSyntax GetTrampolineMethod( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
         {
             // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
@@ -64,30 +63,30 @@ namespace Caravela.Framework.Impl.Linking
                     AccessorList(
                         List(
                             new[]
-                            {
-                                getAccessor != null
-                                    ? AccessorDeclaration(
-                                        SyntaxKind.GetAccessorDeclaration,
-                                        Block( 
-                                            ReturnStatement(
-                                                Token(SyntaxKind.ReturnKeyword).WithTrailingTrivia( Whitespace(" ") ),
-                                                GetInvocationTarget(),
-                                                Token(SyntaxKind.SemicolonToken) ) ) )
-                                        .NormalizeWhitespace()
-                                    : null,
-                                setAccessor != null
-                                    ? AccessorDeclaration(
-                                        SyntaxKind.SetAccessorDeclaration,
-                                        Block(
-                                            ExpressionStatement(
-                                                AssignmentExpression(
-                                                    SyntaxKind.SimpleAssignmentExpression,
-                                                    GetInvocationTarget(),
-                                                    IdentifierName( "value" ) ) ) ) )
-                                        .NormalizeWhitespace()
-                                    : null
-                            }.Where( a => a != null )
-                            .AssertNoneNull() ) ) )
+                                {
+                                    getAccessor != null
+                                        ? AccessorDeclaration(
+                                                SyntaxKind.GetAccessorDeclaration,
+                                                Block(
+                                                    ReturnStatement(
+                                                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
+                                                        GetInvocationTarget(),
+                                                        Token( SyntaxKind.SemicolonToken ) ) ) )
+                                            .NormalizeWhitespace()
+                                        : null,
+                                    setAccessor != null
+                                        ? AccessorDeclaration(
+                                                SyntaxKind.SetAccessorDeclaration,
+                                                Block(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
+                                                            SyntaxKind.SimpleAssignmentExpression,
+                                                            GetInvocationTarget(),
+                                                            IdentifierName( "value" ) ) ) ) )
+                                            .NormalizeWhitespace()
+                                        : null
+                                }.Where( a => a != null )
+                                .AssertNoneNull() ) ) )
                 .WithLeadingTrivia( property.GetLeadingTrivia() )
                 .WithTrailingTrivia( property.GetTrailingTrivia() );
 
@@ -114,31 +113,31 @@ namespace Caravela.Framework.Impl.Linking
                     AccessorList(
                         List(
                             new[]
-                            {
-                                addAccessor != null
-                                    ? AccessorDeclaration(
-                                        SyntaxKind.AddAccessorDeclaration,
-                                        Block(
-                                            ExpressionStatement(
-                                                AssignmentExpression(
-                                                    SyntaxKind.AddAssignmentExpression,
-                                                    GetInvocationTarget(),
-                                                    IdentifierName( "value" ) ) ) ) )
-                                        .NormalizeWhitespace()
-                                    : null,
-                                removeAccessor != null
-                                    ? AccessorDeclaration(
-                                        SyntaxKind.RemoveAccessorDeclaration,
-                                        Block(
-                                            ExpressionStatement(
-                                                AssignmentExpression(
-                                                    SyntaxKind.SubtractAssignmentExpression,
-                                                    GetInvocationTarget(),
-                                                    IdentifierName( "value" ) ) ) ) )
-                                        .NormalizeWhitespace()
-                                            : null
-                            }.Where( a => a != null )
-                            .AssertNoneNull() ) ) )
+                                {
+                                    addAccessor != null
+                                        ? AccessorDeclaration(
+                                                SyntaxKind.AddAccessorDeclaration,
+                                                Block(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
+                                                            SyntaxKind.AddAssignmentExpression,
+                                                            GetInvocationTarget(),
+                                                            IdentifierName( "value" ) ) ) ) )
+                                            .NormalizeWhitespace()
+                                        : null,
+                                    removeAccessor != null
+                                        ? AccessorDeclaration(
+                                                SyntaxKind.RemoveAccessorDeclaration,
+                                                Block(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
+                                                            SyntaxKind.SubtractAssignmentExpression,
+                                                            GetInvocationTarget(),
+                                                            IdentifierName( "value" ) ) ) ) )
+                                            .NormalizeWhitespace()
+                                        : null
+                                }.Where( a => a != null )
+                                .AssertNoneNull() ) ) )
                 .WithLeadingTrivia( @event.GetLeadingTrivia() )
                 .WithTrailingTrivia( @event.GetTrailingTrivia() );
 
@@ -161,37 +160,37 @@ namespace Caravela.Framework.Impl.Linking
 
             return
                 EventDeclaration(
-                    List<AttributeListSyntax>(),
-                    eventField.Modifiers,
-                    eventField.Declaration.Type,
-                    null,
-                    Identifier(targetSymbol.Name),
-                    AccessorList(
-                        List(
-                            new[]
-                            {
-                                AccessorDeclaration(
-                                    SyntaxKind.AddAccessorDeclaration,
-                                    Block(
-                                        ExpressionStatement(
-                                            AssignmentExpression(
-                                                SyntaxKind.AddAssignmentExpression,
-                                                GetInvocationTarget(),
-                                                IdentifierName( "value" ) ) ) ) )
-                                    .NormalizeWhitespace(),
-                                AccessorDeclaration(
-                                    SyntaxKind.RemoveAccessorDeclaration,
-                                    Block(
-                                        ExpressionStatement(
-                                            AssignmentExpression(
-                                                SyntaxKind.SubtractAssignmentExpression,
-                                                GetInvocationTarget(),
-                                                IdentifierName( "value" ) ) ) ) )
-                                    .NormalizeWhitespace()
-                            }.Where( a => a != null )
-                            .AssertNoneNull() ) ) )
-                .WithLeadingTrivia( eventField.GetLeadingTrivia() )
-                .WithTrailingTrivia( eventField.GetTrailingTrivia() );
+                        List<AttributeListSyntax>(),
+                        eventField.Modifiers,
+                        eventField.Declaration.Type,
+                        null,
+                        Identifier( targetSymbol.Name ),
+                        AccessorList(
+                            List(
+                                new[]
+                                    {
+                                        AccessorDeclaration(
+                                                SyntaxKind.AddAccessorDeclaration,
+                                                Block(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
+                                                            SyntaxKind.AddAssignmentExpression,
+                                                            GetInvocationTarget(),
+                                                            IdentifierName( "value" ) ) ) ) )
+                                            .NormalizeWhitespace(),
+                                        AccessorDeclaration(
+                                                SyntaxKind.RemoveAccessorDeclaration,
+                                                Block(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
+                                                            SyntaxKind.SubtractAssignmentExpression,
+                                                            GetInvocationTarget(),
+                                                            IdentifierName( "value" ) ) ) ) )
+                                            .NormalizeWhitespace()
+                                    }.Where( a => a != null )
+                                    .AssertNoneNull() ) ) )
+                    .WithLeadingTrivia( eventField.GetLeadingTrivia() )
+                    .WithTrailingTrivia( eventField.GetTrailingTrivia() );
 
             ExpressionSyntax GetInvocationTarget()
             {
@@ -205,5 +204,5 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
         }
-    }    
+    }
 }

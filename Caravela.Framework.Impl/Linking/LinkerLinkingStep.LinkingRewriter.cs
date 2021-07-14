@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Linking
 
             public LinkingRewriter(
                 Compilation intermediateCompilation,
-                LinkerAnalysisRegistry analysisRegistry, 
+                LinkerAnalysisRegistry analysisRegistry,
                 LinkerRewritingDriver rewritingDriver )
             {
                 this._intermediateCompilation = intermediateCompilation;
@@ -48,26 +48,28 @@ namespace Caravela.Framework.Impl.Linking
                     //  * Otherwise create a stub that calls the last override.
 
                     var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
+
                     var symbols =
                         member switch
                         {
                             MethodDeclarationSyntax methodDecl => new[] { semanticModel.GetDeclaredSymbol( methodDecl ) },
                             BasePropertyDeclarationSyntax basePropertyDecl => new[] { semanticModel.GetDeclaredSymbol( basePropertyDecl ) },
                             FieldDeclarationSyntax fieldDecl =>
-                                fieldDecl.Declaration.Variables.Select( v => semanticModel.GetDeclaredSymbol(v)).ToArray(),
+                                fieldDecl.Declaration.Variables.Select( v => semanticModel.GetDeclaredSymbol( v ) ).ToArray(),
                             EventFieldDeclarationSyntax eventFieldDecl =>
                                 eventFieldDecl.Declaration.Variables.Select( v => semanticModel.GetDeclaredSymbol( v ) ).ToArray(),
                             _ => Array.Empty<ISymbol>()
                         };
 
-                    if ( symbols.Length == 0 || (symbols.Length == 1 && symbols[0] == null ) )
+                    if ( symbols.Length == 0 || (symbols.Length == 1 && symbols[0] == null) )
                     {
                         // TODO: Comment when this happens.
                         newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
+
                         continue;
                     }
 
-                    if (symbols.Length == 1)
+                    if ( symbols.Length == 1 )
                     {
                         // Simple case where the declaration declares a single symbol.
                         if ( this._rewritingDriver.IsRewriteTarget( symbols[0].AssertNotNull() ) )
@@ -83,11 +85,11 @@ namespace Caravela.Framework.Impl.Linking
                     }
                     else
                     {
-                        var remainingSymbols = new HashSet<ISymbol>(SymbolEqualityComparer.Default);
+                        var remainingSymbols = new HashSet<ISymbol>( SymbolEqualityComparer.Default );
 
-                        foreach (var symbol in symbols)
+                        foreach ( var symbol in symbols )
                         {
-                            if (this._rewritingDriver.IsRewriteTarget(symbol.AssertNotNull()))
+                            if ( this._rewritingDriver.IsRewriteTarget( symbol.AssertNotNull() ) )
                             {
                                 newMembers.AddRange( this._rewritingDriver.RewriteMember( member, symbol.AssertNotNull() ) );
                             }
@@ -97,12 +99,12 @@ namespace Caravela.Framework.Impl.Linking
                             }
                         }
 
-                        if (remainingSymbols.Count == symbols.Length)
+                        if ( remainingSymbols.Count == symbols.Length )
                         {
                             // No change.
                             newMembers.Add( member );
                         }
-                        else if ( remainingSymbols.Count > 0)
+                        else if ( remainingSymbols.Count > 0 )
                         {
                             // Remove declarators that were rewritten.
                             switch ( member )
@@ -113,8 +115,10 @@ namespace Caravela.Framework.Impl.Linking
                                             fieldDecl.Declaration.WithVariables(
                                                 SeparatedList(
                                                     fieldDecl.Declaration.Variables
-                                                    .Where( v => 
-                                                        remainingSymbols.Contains( semanticModel.GetDeclaredSymbol( v ).AssertNotNull() ) ) ) ) ) );
+                                                        .Where(
+                                                            v =>
+                                                                remainingSymbols.Contains( semanticModel.GetDeclaredSymbol( v ).AssertNotNull() ) ) ) ) ) );
+
                                     break;
 
                                 case EventFieldDeclarationSyntax eventFieldDecl:
@@ -123,8 +127,10 @@ namespace Caravela.Framework.Impl.Linking
                                             eventFieldDecl.Declaration.WithVariables(
                                                 SeparatedList(
                                                     eventFieldDecl.Declaration.Variables
-                                                    .Where( v =>
-                                                        remainingSymbols.Contains( semanticModel.GetDeclaredSymbol( v ).AssertNotNull() ) ) ) ) ) );
+                                                        .Where(
+                                                            v =>
+                                                                remainingSymbols.Contains( semanticModel.GetDeclaredSymbol( v ).AssertNotNull() ) ) ) ) ) );
+
                                     break;
 
                                 default:

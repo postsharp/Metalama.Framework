@@ -60,15 +60,15 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 return
                     InvocationExpression(
-                            GetInvocationTargetExpression(),
-                            ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) );
+                        GetInvocationTargetExpression(),
+                        ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) );
             }
 
             ExpressionSyntax GetInvocationTargetExpression()
             {
                 var expression =
                     this.OverriddenDeclaration.IsStatic
-                        ? (ExpressionSyntax)IdentifierName( this.OverriddenDeclaration.Name )
+                        ? (ExpressionSyntax) IdentifierName( this.OverriddenDeclaration.Name )
                         : MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             ThisExpression(),

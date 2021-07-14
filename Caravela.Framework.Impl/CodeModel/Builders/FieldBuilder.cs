@@ -39,14 +39,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsAutoPropertyOrField => throw new NotImplementedException();
 
         public override InsertPosition InsertPosition
-            => new InsertPosition(
+            => new(
                 InsertPositionRelation.Within,
                 ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
 
         public FieldBuilder( Advice parentAdvice, INamedType targetType, string name )
-            : base( parentAdvice, targetType, name )
-        {
-        }
+            : base( parentAdvice, targetType, name ) { }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {

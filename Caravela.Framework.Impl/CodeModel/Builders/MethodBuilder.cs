@@ -127,22 +127,19 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                                 ? new[]
                                 {
                                     ReturnStatement(
-                                        Token(SyntaxKind.ReturnKeyword).WithTrailingTrivia( Whitespace(" ") ),
+                                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
                                         DefaultExpression( syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ),
-                                        Token(SyntaxKind.SemicolonToken) )
+                                        Token( SyntaxKind.SemicolonToken ) )
                                 }
                                 : new StatementSyntax[0] ) ),
                     null );
 
-            return new[]
-            {
-                new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this )
-            };
+            return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
         }
 
         // TODO: Temporary
         public override InsertPosition InsertPosition
-            => new InsertPosition(
+            => new(
                 InsertPositionRelation.Within,
                 ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
 

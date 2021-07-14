@@ -13,6 +13,6 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Original version of the symbol. Relevant only for override targets.
         /// </summary>
-        Original,
+        Original
     }
 }

@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Linking
         /// Gets the symbol the reference was originally pointing to.
         /// </summary>
         public ISymbol OriginalSymbol { get; }
-        
+
         /// <summary>
         /// Gets the symbol that is the target of the reference.
         /// </summary>
@@ -38,7 +38,13 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         public AspectReferenceSpecification Specification { get; }
 
-        public ResolvedAspectReference(ISymbol containingSymbol, ISymbol originalSymbol, ISymbol referencedSymbol, ResolvedAspectReferenceSemantic semantic,  ExpressionSyntax expression, AspectReferenceSpecification specification )
+        public ResolvedAspectReference(
+            ISymbol containingSymbol,
+            ISymbol originalSymbol,
+            ISymbol referencedSymbol,
+            ResolvedAspectReferenceSemantic semantic,
+            ExpressionSyntax expression,
+            AspectReferenceSpecification specification )
         {
             this.ContainingSymbol = containingSymbol;
             this.OriginalSymbol = originalSymbol;

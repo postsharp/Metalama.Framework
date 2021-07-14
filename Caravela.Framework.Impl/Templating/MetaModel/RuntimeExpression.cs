@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -32,6 +33,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         /// </summary>
         /// <param name="runtimeExpression"></param>
         /// <returns></returns>
+        [return: NotNullIfNotNull( "runtimeExpression" )]
         public static implicit operator ExpressionSyntax?( RuntimeExpression? runtimeExpression ) => runtimeExpression?.Syntax;
 
         private ITypeSymbol? GetExpressionType( ITypeFactory typeFactory )

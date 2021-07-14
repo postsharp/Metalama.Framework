@@ -170,7 +170,9 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                     var overridenMember = symbolToCodeElement[overridenMemberSymbol];
 
-                    A.CallTo( () => ((IMemberIntroduction) overriddenDeclaration).InsertPosition ).Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode) );
+                    A.CallTo( () => ((IMemberIntroduction) overriddenDeclaration).InsertPosition )
+                        .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
+
                     A.CallTo( () => overriddenDeclaration.OverriddenDeclaration ).Returns( overridenMember );
                     A.CallTo( () => ((IMemberIntroduction) overriddenDeclaration).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
                 }

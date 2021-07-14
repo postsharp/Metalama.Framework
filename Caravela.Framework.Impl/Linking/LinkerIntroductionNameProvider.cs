@@ -13,6 +13,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             var cleanAspectName = aspectLayer.AspectName.Replace( "_", "__" ).Replace( ".", "_" );
             var cleanLayerName = aspectLayer.LayerName?.Replace( "_", "__" ).Replace( ".", "_" );
+
             if ( overriddenDeclaration.IsExplicitInterfaceImplementation )
             {
                 var interfaceMember = overriddenDeclaration.GetExplicitInterfaceImplementation();

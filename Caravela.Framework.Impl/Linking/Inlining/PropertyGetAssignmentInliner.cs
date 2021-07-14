@@ -10,15 +10,13 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 {
     internal class PropertyGetAssignmentInliner : PropertyInliner
     {
-        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[]
-        {
-            SyntaxKind.ReturnStatement
-        };
-        
+        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[] { SyntaxKind.ReturnStatement };
+
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax needs to be in form: <variable> = <annotated_property_expression>;
-            if ( aspectReference.ResolvedSymbol is not IPropertySymbol && (aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol is not IPropertySymbol )
+            if ( aspectReference.ResolvedSymbol is not IPropertySymbol
+                 && (aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol is not IPropertySymbol )
             {
                 return false;
             }
@@ -35,7 +33,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 
             // Property access should be on the right.
             if ( assignmentExpression.Right != aspectReference.Expression )
-            { 
+            {
                 return false;
             }
 
@@ -46,7 +44,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             }
 
             // Assignment should have a local on the left (TODO: ref returns).
-            if ( assignmentExpression.Left is not IdentifierNameSyntax || semanticModel.GetSymbolInfo(assignmentExpression.Left).Symbol is not ILocalSymbol)
+            if ( assignmentExpression.Left is not IdentifierNameSyntax || semanticModel.GetSymbolInfo( assignmentExpression.Left ).Symbol is not ILocalSymbol )
             {
                 return false;
             }
@@ -68,7 +66,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 
             var targetSymbol =
                 aspectReference.ResolvedSymbol as IPropertySymbol
-                ?? ( IPropertySymbol) ((aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
+                ?? (IPropertySymbol) ((aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
 
             // Change the target local variable.
             var contextWithLocal = context.WithReturnLocal( targetSymbol.GetMethod.AssertNotNull(), localVariable.Identifier.ValueText );

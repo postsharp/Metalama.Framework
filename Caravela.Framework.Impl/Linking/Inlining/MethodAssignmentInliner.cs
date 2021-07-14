@@ -10,11 +10,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 {
     internal class MethodAssignmentInliner : MethodInliner
     {
-        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[]
-        {
-            SyntaxKind.ReturnStatement
-        };
-        
+        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[] { SyntaxKind.ReturnStatement };
+
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax has to be in form: <local> = <annotated_method_expression( <arguments> );
@@ -34,13 +31,13 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             }
 
             // Invocation should be on the right.
-            if ( assignmentExpression.Right != invocationExpression)
+            if ( assignmentExpression.Right != invocationExpression )
             {
                 return false;
             }
 
             // Assignment should have a local on the left.
-            if ( assignmentExpression.Left is not IdentifierNameSyntax || semanticModel.GetSymbolInfo(assignmentExpression.Left).Symbol is not ILocalSymbol)
+            if ( assignmentExpression.Left is not IdentifierNameSyntax || semanticModel.GetSymbolInfo( assignmentExpression.Left ).Symbol is not ILocalSymbol )
             {
                 return false;
             }
@@ -58,7 +55,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             }
 
             // The invocation needs to be inlineable in itself.
-            if ( IsInlineableInvocation( semanticModel, (IMethodSymbol)aspectReference.ContainingSymbol, invocationExpression ) )
+            if ( IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
             {
                 return false;
             }

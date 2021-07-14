@@ -134,9 +134,9 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     foreach ( var member in node.Members )
                     {
-                        var visitedMember = (MemberDeclarationSyntax?)this.Visit( member );
+                        var visitedMember = (MemberDeclarationSyntax?) this.Visit( member );
 
-                        if (visitedMember != null)
+                        if ( visitedMember != null )
                         {
                             using ( var memberSuppressions = this.WithSuppressions( member ) )
                             {
@@ -149,7 +149,7 @@ namespace Caravela.Framework.Impl.Linking
                         AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ) );
                     }
 
-                    AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node) );
+                    AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ) );
 
                     node = this.AddSuppression( node, classSuppressions.NewSuppressions ).WithMembers( List( members ) );
 

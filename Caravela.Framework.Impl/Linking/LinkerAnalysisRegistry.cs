@@ -16,12 +16,16 @@ namespace Caravela.Framework.Impl.Linking
     {
         private readonly LinkerIntroductionRegistry _introductionRegistry;
         private readonly IReadOnlyDictionary<ISymbol, MethodBodyAnalysisResult> _methodBodyInfos;
-        private readonly IReadOnlyDictionary<(ISymbol Symbol, ResolvedAspectReferenceSemantic Semantic, AspectReferenceTargetKind TargetKind), IReadOnlyList<ResolvedAspectReference>> _aspectReferences;
+
+        private readonly
+            IReadOnlyDictionary<(ISymbol Symbol, ResolvedAspectReferenceSemantic Semantic, AspectReferenceTargetKind TargetKind),
+                IReadOnlyList<ResolvedAspectReference>> _aspectReferences;
 
         public LinkerAnalysisRegistry(
             LinkerIntroductionRegistry introductionRegistry,
             IReadOnlyDictionary<ISymbol, MethodBodyAnalysisResult> methodBodyInfos,
-            IReadOnlyDictionary<(ISymbol Symbol, ResolvedAspectReferenceSemantic Semantic, AspectReferenceTargetKind TargetKind), IReadOnlyList<ResolvedAspectReference>> aspectReferenceIndex )
+            IReadOnlyDictionary<(ISymbol Symbol, ResolvedAspectReferenceSemantic Semantic, AspectReferenceTargetKind TargetKind),
+                IReadOnlyList<ResolvedAspectReference>> aspectReferenceIndex )
         {
             this._introductionRegistry = introductionRegistry;
             this._methodBodyInfos = methodBodyInfos;
@@ -36,10 +40,10 @@ namespace Caravela.Framework.Impl.Linking
         public bool IsOverrideTarget( ISymbol symbol )
         {
             if ( symbol is IMethodSymbol methodSymbol
-                && (methodSymbol.MethodKind == MethodKind.PropertyGet
-                    || methodSymbol.MethodKind == MethodKind.PropertySet
-                    || methodSymbol.MethodKind == MethodKind.EventAdd
-                    || methodSymbol.MethodKind == MethodKind.EventRemove) )
+                 && (methodSymbol.MethodKind == MethodKind.PropertyGet
+                     || methodSymbol.MethodKind == MethodKind.PropertySet
+                     || methodSymbol.MethodKind == MethodKind.EventAdd
+                     || methodSymbol.MethodKind == MethodKind.EventRemove) )
             {
                 return this.IsOverrideTarget( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }
@@ -49,7 +53,7 @@ namespace Caravela.Framework.Impl.Linking
 
         internal IReadOnlyList<ResolvedAspectReference> GetContainedAspectReferences( IMethodSymbol symbol )
         {
-            if (this._methodBodyInfos.TryGetValue(symbol, out var methodBodyInfo))
+            if ( this._methodBodyInfos.TryGetValue( symbol, out var methodBodyInfo ) )
             {
                 return methodBodyInfo.AspectReferences;
             }
@@ -57,7 +61,10 @@ namespace Caravela.Framework.Impl.Linking
             return Array.Empty<ResolvedAspectReference>();
         }
 
-        internal IReadOnlyList<ResolvedAspectReference> GetAspectReferences( ISymbol symbol, ResolvedAspectReferenceSemantic semantic, AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self )
+        internal IReadOnlyList<ResolvedAspectReference> GetAspectReferences(
+            ISymbol symbol,
+            ResolvedAspectReferenceSemantic semantic,
+            AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self )
         {
             if ( !this._aspectReferences.TryGetValue( (symbol, semantic, targetKind), out var containedReferences ) )
             {
@@ -74,11 +81,11 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns></returns>
         public bool IsOverride( ISymbol symbol )
         {
-            if (symbol is IMethodSymbol methodSymbol
-                && (methodSymbol.MethodKind == MethodKind.PropertyGet
-                    || methodSymbol.MethodKind == MethodKind.PropertySet
-                    || methodSymbol.MethodKind == MethodKind.EventAdd
-                    || methodSymbol.MethodKind == MethodKind.EventRemove) )
+            if ( symbol is IMethodSymbol methodSymbol
+                 && (methodSymbol.MethodKind == MethodKind.PropertyGet
+                     || methodSymbol.MethodKind == MethodKind.PropertySet
+                     || methodSymbol.MethodKind == MethodKind.EventAdd
+                     || methodSymbol.MethodKind == MethodKind.EventRemove) )
             {
                 return this.IsOverride( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }
@@ -99,12 +106,16 @@ namespace Caravela.Framework.Impl.Linking
             {
                 case IMethodSymbol { MethodKind: MethodKind.PropertyGet } getterSymbol:
                     return ((IPropertySymbol?) this.GetOverrideTarget( getterSymbol.AssociatedSymbol.AssertNotNull() ))?.GetMethod;
+
                 case IMethodSymbol { MethodKind: MethodKind.PropertySet } setterSymbol:
                     return ((IPropertySymbol?) this.GetOverrideTarget( setterSymbol.AssociatedSymbol.AssertNotNull() ))?.SetMethod;
+
                 case IMethodSymbol { MethodKind: MethodKind.EventAdd } adderSymbol:
                     return ((IEventSymbol?) this.GetOverrideTarget( adderSymbol.AssociatedSymbol.AssertNotNull() ))?.AddMethod;
+
                 case IMethodSymbol { MethodKind: MethodKind.EventRemove } removerSymbol:
                     return ((IEventSymbol?) this.GetOverrideTarget( removerSymbol.AssociatedSymbol.AssertNotNull() ))?.RemoveMethod;
+
                 default:
                     var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
 
@@ -124,17 +135,20 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns>Symbol.</returns>
         public ISymbol GetLastOverride( ISymbol symbol )
         {
-
             switch ( symbol )
             {
                 case IMethodSymbol { MethodKind: MethodKind.PropertyGet } getterSymbol:
                     return ((IPropertySymbol) this.GetLastOverride( getterSymbol.AssociatedSymbol.AssertNotNull() )).GetMethod.AssertNotNull();
+
                 case IMethodSymbol { MethodKind: MethodKind.PropertySet } setterSymbol:
                     return ((IPropertySymbol) this.GetLastOverride( setterSymbol.AssociatedSymbol.AssertNotNull() )).SetMethod.AssertNotNull();
+
                 case IMethodSymbol { MethodKind: MethodKind.EventAdd } adderSymbol:
                     return ((IEventSymbol) this.GetLastOverride( adderSymbol.AssociatedSymbol.AssertNotNull() )).AddMethod.AssertNotNull();
+
                 case IMethodSymbol { MethodKind: MethodKind.EventRemove } removerSymbol:
                     return ((IEventSymbol) this.GetLastOverride( removerSymbol.AssociatedSymbol.AssertNotNull() )).RemoveMethod.AssertNotNull();
+
                 default:
                     var overrides = this._introductionRegistry.GetOverridesForSymbol( symbol );
                     var lastOverride = overrides.LastOrDefault();
@@ -148,9 +162,11 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        public bool IsLastOverride(ISymbol symbol)
+        public bool IsLastOverride( ISymbol symbol )
         {
-            return this.IsOverride( symbol ) && SymbolEqualityComparer.Default.Equals( symbol, this.GetLastOverride( this.GetOverrideTarget( symbol ).AssertNotNull() ) );
+            return this.IsOverride( symbol ) && SymbolEqualityComparer.Default.Equals(
+                symbol,
+                this.GetLastOverride( this.GetOverrideTarget( symbol ).AssertNotNull() ) );
         }
 
         /// <summary>
@@ -172,21 +188,22 @@ namespace Caravela.Framework.Impl.Linking
         internal ISymbol? GetPreviousOverride( ISymbol symbol )
         {
             var overrideTarget = this.GetOverrideTarget( symbol );
-            if (overrideTarget != null)
+
+            if ( overrideTarget != null )
             {
                 var overrides = this._introductionRegistry.GetOverridesForSymbol( overrideTarget );
                 var matched = false;
 
-                foreach (var introducedMember in overrides.Reverse())
+                foreach ( var introducedMember in overrides.Reverse() )
                 {
                     var overrideSymbol = this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember );
 
-                    if (matched)
+                    if ( matched )
                     {
                         return overrideSymbol;
                     }
 
-                    if ( SymbolEqualityComparer.Default.Equals( overrideSymbol, symbol) )
+                    if ( SymbolEqualityComparer.Default.Equals( overrideSymbol, symbol ) )
                     {
                         matched = true;
                     }

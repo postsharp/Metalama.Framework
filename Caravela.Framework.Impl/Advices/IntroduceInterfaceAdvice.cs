@@ -382,8 +382,7 @@ namespace Caravela.Framework.Impl.Advices
                     explicitImplementationBuilders.Add( memberBuilder );
                 }
 
-                result = result.WithTransformations(
-                    new IntroducedInterface( this, this.TargetDeclaration, interfaceSpec.InterfaceType, interfaceMemberMap ) );
+                result = result.WithTransformations( new IntroducedInterface( this, this.TargetDeclaration, interfaceSpec.InterfaceType, interfaceMemberMap ) );
 
                 result = result.WithTransformations( explicitImplementationBuilders.ToArray<ITransformation>() );
                 result = result.WithTransformations( overrides.ToArray<ITransformation>() );

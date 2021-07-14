@@ -54,11 +54,17 @@ namespace Caravela.Framework.Impl.Linking
                 new PropertyGetCastReturnInliner(),
                 new PropertySetValueAssignmentInliner(),
                 new EventAddAssignmentInliner(),
-                new EventRemoveAssignmentInliner(),
+                new EventRemoveAssignmentInliner()
             };
 
             var finalCompilation = input.IntermediateCompilation.Compilation;
-            var rewritingDriver = new LinkerRewritingDriver(input.IntermediateCompilation.Compilation, input.AnalysisRegistry, input.ReferenceResolver, inliners );
+
+            var rewritingDriver = new LinkerRewritingDriver(
+                input.IntermediateCompilation.Compilation,
+                input.AnalysisRegistry,
+                input.ReferenceResolver,
+                inliners );
+
             var linkingRewriter = new LinkingRewriter( input.IntermediateCompilation.Compilation, input.AnalysisRegistry, rewritingDriver );
             var cleanupRewriter = new CleanupRewriter();
 

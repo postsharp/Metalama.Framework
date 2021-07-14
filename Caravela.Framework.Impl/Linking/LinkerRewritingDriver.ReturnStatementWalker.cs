@@ -25,5 +25,5 @@ namespace Caravela.Framework.Impl.Linking
                 this._returnStatements.Add( node );
             }
         }
-    }    
+    }
 }

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
@@ -26,6 +27,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Tests.Integration.Runners
 {
@@ -275,7 +277,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                         this._syntaxSerializationService,
                         compilation.Factory ), roslynTargetMethod);
 
-            static ExpressionSyntax GetProceedInvocation( Code.IMethod targetMethod )
+            static ExpressionSyntax GetProceedInvocation( IMethod targetMethod )
             {
                 return
                     SyntaxFactory.InvocationExpression(
@@ -293,10 +295,10 @@ namespace Caravela.Framework.Tests.Integration.Runners
                                             null,
                                             p.RefKind switch
                                             {
-                                                Code.RefKind.None => default,
-                                                Code.RefKind.In => default,
-                                                Code.RefKind.Out => SyntaxFactory.Token( SyntaxKind.OutKeyword ),
-                                                Code.RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
+                                                RefKind.None => default,
+                                                RefKind.In => default,
+                                                RefKind.Out => SyntaxFactory.Token( SyntaxKind.OutKeyword ),
+                                                RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
                                                 _ => throw new AssertionFailedException()
                                             },
                                             SyntaxFactory.IdentifierName( p.Name ) ) ) ) ) );

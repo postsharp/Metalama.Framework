@@ -17,7 +17,7 @@ namespace Caravela.TestFramework
         {
             private readonly Stack<bool> _branchStack;
 
-            public InactiveCodeRemover() : base( true ) 
+            public InactiveCodeRemover() : base( true )
             {
                 this._branchStack = new Stack<bool>();
             }
@@ -28,7 +28,8 @@ namespace Caravela.TestFramework
                 {
                     var state = this._branchStack.Peek();
 
-                    if ( !state && (!trivia.HasStructure || (trivia.GetStructure() is not BranchingDirectiveTriviaSyntax && trivia.GetStructure() is not EndIfDirectiveTriviaSyntax)) )
+                    if ( !state && (!trivia.HasStructure || (trivia.GetStructure() is not BranchingDirectiveTriviaSyntax
+                                                             && trivia.GetStructure() is not EndIfDirectiveTriviaSyntax)) )
                     {
                         return SyntaxFactory.Whitespace( "" );
                     }
@@ -40,6 +41,7 @@ namespace Caravela.TestFramework
             public override SyntaxNode? VisitIfDirectiveTrivia( IfDirectiveTriviaSyntax node )
             {
                 this._branchStack.Push( node.BranchTaken );
+
                 return null;
             }
 
@@ -47,6 +49,7 @@ namespace Caravela.TestFramework
             {
                 this._branchStack.Pop();
                 this._branchStack.Push( node.BranchTaken );
+
                 return null;
             }
 
@@ -54,12 +57,14 @@ namespace Caravela.TestFramework
             {
                 this._branchStack.Pop();
                 this._branchStack.Push( node.BranchTaken );
+
                 return null;
             }
 
             public override SyntaxNode? VisitEndIfDirectiveTrivia( EndIfDirectiveTriviaSyntax node )
             {
                 this._branchStack.Pop();
+
                 return null;
             }
         }

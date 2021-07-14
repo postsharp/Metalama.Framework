@@ -13,11 +13,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
     /// </summary>
     internal class MethodCastReturnStatementInliner : MethodInliner
     {
-        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[]
-        {
-            SyntaxKind.ReturnStatement
-        };
-        
+        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[] { SyntaxKind.ReturnStatement };
+
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax has to be in form: return (<type>)<annotated_method_expression( <arguments> );
@@ -26,7 +23,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            if ( aspectReference.Expression.Parent == null || aspectReference.Expression.Parent is not InvocationExpressionSyntax invocationExpression)
+            if ( aspectReference.Expression.Parent == null || aspectReference.Expression.Parent is not InvocationExpressionSyntax invocationExpression )
             {
                 return false;
             }
@@ -36,12 +33,14 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            if ( !SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo(castExpression.Type).Symbol, ((IMethodSymbol)aspectReference.ContainingSymbol).ReturnType) )
+            if ( !SymbolEqualityComparer.Default.Equals(
+                semanticModel.GetSymbolInfo( castExpression.Type ).Symbol,
+                ((IMethodSymbol) aspectReference.ContainingSymbol).ReturnType ) )
             {
                 return false;
             }
 
-            if ( castExpression.Parent == null || castExpression.Parent is not ReturnStatementSyntax)
+            if ( castExpression.Parent == null || castExpression.Parent is not ReturnStatementSyntax )
             {
                 return false;
             }

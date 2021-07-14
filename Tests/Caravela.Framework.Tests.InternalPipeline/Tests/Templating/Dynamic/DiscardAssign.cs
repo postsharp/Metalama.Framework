@@ -9,7 +9,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DiscardAssign
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             _ = meta.Proceed();
             

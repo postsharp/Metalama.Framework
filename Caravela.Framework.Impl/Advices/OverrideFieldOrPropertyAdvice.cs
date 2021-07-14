@@ -53,8 +53,7 @@ namespace Caravela.Framework.Impl.Advices
             }
             else if ( this.TargetDeclaration is IProperty property )
             {
-                return AdviceResult.Create(
-                    new OverriddenProperty( this, property, this.TemplateProperty, this.GetTemplateMethod, this.SetTemplateMethod ) );
+                return AdviceResult.Create( new OverriddenProperty( this, property, this.TemplateProperty, this.GetTemplateMethod, this.SetTemplateMethod ) );
             }
             else
             {

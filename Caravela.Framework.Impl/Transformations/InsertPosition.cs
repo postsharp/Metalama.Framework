@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Transformations
         /// </summary>
         public MemberDeclarationSyntax Node { get; }
 
-        public InsertPosition(InsertPositionRelation relation, MemberDeclarationSyntax node)
+        public InsertPosition( InsertPositionRelation relation, MemberDeclarationSyntax node )
         {
             this.Relation = relation;
             this.Node = node;

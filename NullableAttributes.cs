@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 #if !NETCOREAPP3_1
-
 using System.Reflection;
 
 #pragma warning disable SA1642, SA1028, IDE0021, SA1649, SA1623, SA1402

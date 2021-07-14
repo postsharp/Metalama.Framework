@@ -10,6 +10,6 @@ namespace Caravela.Framework.Impl.Linking
     {
         None = 0,
         EventField = 1,
-        NotInlineable = 1 << 15,
+        NotInlineable = 1 << 15
     }
 }

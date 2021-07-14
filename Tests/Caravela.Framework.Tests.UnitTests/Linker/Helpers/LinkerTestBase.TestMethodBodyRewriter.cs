@@ -47,18 +47,22 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         {
                             case "inline":
                                 flags |= AspectReferenceFlags.Inlineable;
+
                                 break;
 
                             case "next":
                                 order = AspectReferenceOrder.Next;
+
                                 break;
 
                             case "original":
                                 order = AspectReferenceOrder.Original;
+
                                 break;
 
                             case "final":
                                 order = AspectReferenceOrder.Final;
+
                                 break;
 
                             default:
@@ -68,25 +72,32 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                     var target = AspectReferenceTargetKind.Self;
 
-                    if ( annotatedExpression is MemberAccessExpressionSyntax memberAccess)
+                    if ( annotatedExpression is MemberAccessExpressionSyntax memberAccess )
                     {
                         switch ( memberAccess.Name.Identifier.ValueText )
                         {
                             case "get":
                                 annotatedExpression = memberAccess.Expression;
                                 target = AspectReferenceTargetKind.PropertyGetAccessor;
+
                                 break;
+
                             case "set":
                                 annotatedExpression = memberAccess.Expression;
                                 target = AspectReferenceTargetKind.PropertySetAccessor;
+
                                 break;
+
                             case "add":
                                 annotatedExpression = memberAccess.Expression;
                                 target = AspectReferenceTargetKind.EventAddAccessor;
+
                                 break;
+
                             case "remove":
                                 annotatedExpression = memberAccess.Expression;
                                 target = AspectReferenceTargetKind.EventRemoveAccessor;
+
                                 break;
                         }
                     }

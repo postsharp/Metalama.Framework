@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             Advice parentAdvice,
             INamedType targetType,
             string name,
-            bool isEventField)
+            bool isEventField )
             : base( parentAdvice, targetType, name )
         {
             this._isEventField = isEventField;
@@ -50,8 +50,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IInvokerFactory<IEventInvoker> Invokers => new InvokerFactory<IEventInvoker>( order => new EventInvoker( this, order ), false );
 
         public override InsertPosition InsertPosition
-            => new InsertPosition( 
-                InsertPositionRelation.Within, 
+            => new(
+                InsertPositionRelation.Within,
                 ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
@@ -105,10 +105,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 @event = @event.WithLinkerDeclarationFlags( LinkerDeclarationFlags.EventField );
             }
 
-            return new[]
-            {
-                new IntroducedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this )
-            };
+            return new[] { new IntroducedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
 
             AccessorListSyntax GenerateAccessorList()
             {

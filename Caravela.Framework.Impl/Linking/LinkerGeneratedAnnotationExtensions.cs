@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Linking
 
             LinkerGeneratedFlags flags = default;
 
-            foreach (var annotation in annotations)
+            foreach ( var annotation in annotations )
             {
                 if ( annotation?.Data != null )
                 {

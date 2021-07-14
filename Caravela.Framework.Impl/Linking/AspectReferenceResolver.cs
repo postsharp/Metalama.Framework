@@ -23,7 +23,11 @@ namespace Caravela.Framework.Impl.Linking
             this._orderedAspectLayers = orderedAspectLayers;
         }
 
-        public ResolvedAspectReference Resolve( ISymbol containingSymbol, ISymbol referencedSymbol, ExpressionSyntax expression, AspectReferenceSpecification referenceSpecification )
+        public ResolvedAspectReference Resolve(
+            ISymbol containingSymbol,
+            ISymbol referencedSymbol,
+            ExpressionSyntax expression,
+            AspectReferenceSpecification referenceSpecification )
         {
             // TODO: Other things than methods.
             var overrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
@@ -38,13 +42,13 @@ namespace Caravela.Framework.Impl.Linking
                 case AspectReferenceOrder.Next:
                     referencedIntroduction = GetClosestSucceedingOverride( overrides, indexedLayers, annotationLayerIndex );
 
-                    if (referencedIntroduction != null)
+                    if ( referencedIntroduction != null )
                     {
                         // There is a preceding override, resolve to override symbol.
                         return new ResolvedAspectReference(
                             containingSymbol,
                             referencedSymbol,
-                            this.GetSymbolFromIntroducedMember(referencedSymbol, referencedIntroduction),
+                            this.GetSymbolFromIntroducedMember( referencedSymbol, referencedIntroduction ),
                             ResolvedAspectReferenceSemantic.Default,
                             expression,
                             referenceSpecification );
@@ -79,6 +83,7 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         // No override after the referencing aspect, point to the final declaration.
                         var originalSymbol = GetOriginalDeclarationSymbol( referencedSymbol );
+
                         return new ResolvedAspectReference(
                             containingSymbol,
                             referencedSymbol,
@@ -189,30 +194,36 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private static LinkerIntroducedMember? GetClosestSucceedingOverride( IReadOnlyList<LinkerIntroducedMember>? overrides, IReadOnlyList<(AspectLayerId AspectLayerId, int Index)>? indexedLayers, int annotationLayerIndex )
+        private static LinkerIntroducedMember? GetClosestSucceedingOverride(
+            IReadOnlyList<LinkerIntroducedMember>? overrides,
+            IReadOnlyList<(AspectLayerId AspectLayerId, int Index)>? indexedLayers,
+            int annotationLayerIndex )
         {
             return
-                (
-                    from o in overrides
-                    join oal in indexedLayers
-                        on o.AspectLayerId equals oal.AspectLayerId
-                    where oal.Index > annotationLayerIndex
-                    orderby oal.Index
-                    select o
-                ).LastOrDefault();
+            (
+                from o in overrides
+                join oal in indexedLayers
+                    on o.AspectLayerId equals oal.AspectLayerId
+                where oal.Index > annotationLayerIndex
+                orderby oal.Index
+                select o
+            ).LastOrDefault();
         }
 
-        private static LinkerIntroducedMember? GetClosestPrecedingOverride( IReadOnlyList<LinkerIntroducedMember>? overrides, IReadOnlyList<(AspectLayerId AspectLayerId, int Index)>? indexedLayers, int annotationLayerIndex )
+        private static LinkerIntroducedMember? GetClosestPrecedingOverride(
+            IReadOnlyList<LinkerIntroducedMember>? overrides,
+            IReadOnlyList<(AspectLayerId AspectLayerId, int Index)>? indexedLayers,
+            int annotationLayerIndex )
         {
             return
-                (
-                    from o in overrides
-                    join oal in indexedLayers
-                        on o.AspectLayerId equals oal.AspectLayerId
-                    where oal.Index < annotationLayerIndex
-                    orderby oal.Index
-                    select o
-                ).LastOrDefault();
+            (
+                from o in overrides
+                join oal in indexedLayers
+                    on o.AspectLayerId equals oal.AspectLayerId
+                where oal.Index < annotationLayerIndex
+                orderby oal.Index
+                select o
+            ).LastOrDefault();
         }
 
         private ISymbol GetSymbolFromIntroducedMember( ISymbol referencedSymbol, LinkerIntroducedMember resolvedIntroduction )
@@ -226,20 +237,26 @@ namespace Caravela.Framework.Impl.Linking
         {
             switch (referencedSymbol, resolvedSymbol)
             {
-                case (IMethodSymbol { MethodKind: MethodKind.Ordinary }, IMethodSymbol { MethodKind: MethodKind.Ordinary } ):
-                case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation } ):
-                case (IPropertySymbol, IPropertySymbol ):
-                case (IEventSymbol, IEventSymbol ):
-                case (IFieldSymbol, IFieldSymbol ):
+                case (IMethodSymbol { MethodKind: MethodKind.Ordinary }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
+                case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol
+                    { MethodKind: MethodKind.ExplicitInterfaceImplementation }):
+                case (IPropertySymbol, IPropertySymbol):
+                case (IEventSymbol, IEventSymbol):
+                case (IFieldSymbol, IFieldSymbol):
                     return resolvedSymbol;
-                case (IMethodSymbol { MethodKind: MethodKind.PropertyGet }, IPropertySymbol propertySymbol ):
+
+                case (IMethodSymbol { MethodKind: MethodKind.PropertyGet }, IPropertySymbol propertySymbol):
                     return propertySymbol.GetMethod.AssertNotNull();
-                case (IMethodSymbol { MethodKind: MethodKind.PropertySet }, IPropertySymbol propertySymbol ):
+
+                case (IMethodSymbol { MethodKind: MethodKind.PropertySet }, IPropertySymbol propertySymbol):
                     return propertySymbol.SetMethod.AssertNotNull();
-                case (IMethodSymbol { MethodKind: MethodKind.EventAdd }, IEventSymbol eventSymbol ):
+
+                case (IMethodSymbol { MethodKind: MethodKind.EventAdd }, IEventSymbol eventSymbol):
                     return eventSymbol.AddMethod.AssertNotNull();
-                case (IMethodSymbol { MethodKind: MethodKind.EventRemove }, IEventSymbol eventSymbol ):
+
+                case (IMethodSymbol { MethodKind: MethodKind.EventRemove }, IEventSymbol eventSymbol):
                     return eventSymbol.RemoveMethod.AssertNotNull();
+
                 default:
                     throw new AssertionFailedException();
             }
