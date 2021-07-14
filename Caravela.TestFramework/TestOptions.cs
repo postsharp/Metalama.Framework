@@ -89,38 +89,47 @@ namespace Caravela.TestFramework
         /// Gets a list of warnings that are not reported even if <see cref="ReportOutputWarnings"/> is set to <c>true</c>.
         /// </summary>
         public List<string> IgnoredDiagnostics { get; } = new();
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether the list of <see cref="IgnoredDiagnostics"/> inherited from the parent level (directory or base directory)
+        /// must be cleared before new diagnostics are added to this list. This option is not inherited from the base level.
+        /// </summary>
+        public bool? ClearIgnoredDiagnostics { get; set; } 
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
-        internal virtual void ApplyDirectoryOptions( TestDirectoryOptions directoryOptions )
+        internal virtual void ApplyBaseOptions( TestDirectoryOptions baseOptions )
         {
-            this.SkipReason ??= directoryOptions.SkipReason;
+            this.SkipReason ??= baseOptions.SkipReason;
 
-            this.ReportOutputWarnings ??= directoryOptions.ReportOutputWarnings;
+            this.ReportOutputWarnings ??= baseOptions.ReportOutputWarnings;
 
-            this.OutputCompilationDisabled ??= directoryOptions.OutputCompilationDisabled;
+            this.OutputCompilationDisabled ??= baseOptions.OutputCompilationDisabled;
 
-            this.IncludeAllSeverities ??= directoryOptions.IncludeAllSeverities;
+            this.IncludeAllSeverities ??= baseOptions.IncludeAllSeverities;
 
-            this.TestRunnerFactoryType ??= directoryOptions.TestRunnerFactoryType;
+            this.TestRunnerFactoryType ??= baseOptions.TestRunnerFactoryType;
 
-            this.WriteInputHtml ??= directoryOptions.WriteInputHtml;
+            this.WriteInputHtml ??= baseOptions.WriteInputHtml;
 
-            this.WriteOutputHtml ??= directoryOptions.WriteOutputHtml;
+            this.WriteOutputHtml ??= baseOptions.WriteOutputHtml;
 
-            this.AddHtmlTitles ??= directoryOptions.AddHtmlTitles;
+            this.AddHtmlTitles ??= baseOptions.AddHtmlTitles;
 
-            this.ReportErrorMessage ??= directoryOptions.ReportErrorMessage;
+            this.ReportErrorMessage ??= baseOptions.ReportErrorMessage;
 
-            this.FormatOutput ??= directoryOptions.FormatOutput;
-
-            this.IncludedFiles.AddRange( directoryOptions.IncludedFiles );
-
-            this.References.AddRange( directoryOptions.References );
+            this.FormatOutput ??= baseOptions.FormatOutput;
             
-            this.IgnoredDiagnostics.AddRange( directoryOptions.IgnoredDiagnostics );
+            this.IncludedFiles.AddRange( baseOptions.IncludedFiles );
+
+            this.References.AddRange( baseOptions.References );
+
+            if ( !this.ClearIgnoredDiagnostics.GetValueOrDefault() )
+            {
+                this.IgnoredDiagnostics.AddRange( baseOptions.IgnoredDiagnostics );
+            }
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -204,6 +213,11 @@ namespace Caravela.TestFramework
                         
                         break;
                     
+                    case "ClearIgnoredDiagnostics":
+                        this.ClearIgnoredDiagnostics = true;
+                        
+                        break;
+                    
                     default:
                         this._invalidSourceOptions.Add( "@" + optionName );
                         
@@ -218,7 +232,7 @@ namespace Caravela.TestFramework
         internal void ApplyOptions( string sourceCode, string path, TestDirectoryOptionsReader optionsReader )
         {
             this.ApplySourceDirectives( sourceCode );
-            this.ApplyDirectoryOptions( optionsReader.GetDirectoryOptions( Path.GetDirectoryName( path )! ) );
+            this.ApplyBaseOptions( optionsReader.GetDirectoryOptions( Path.GetDirectoryName( path )! ) );
         }
     }
 }

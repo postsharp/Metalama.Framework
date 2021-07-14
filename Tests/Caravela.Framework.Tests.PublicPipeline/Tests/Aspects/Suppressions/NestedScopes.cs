@@ -1,6 +1,5 @@
 // @ReportOutputWarnings
-
-
+// @ClearIgnoredDiagnostics
 
 using System;
 using Caravela.Framework.Aspects;
