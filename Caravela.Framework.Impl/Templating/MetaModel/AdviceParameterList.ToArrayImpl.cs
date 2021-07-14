@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 this._parent = parent;
             }
 
-            public RuntimeExpression? CreateExpression( string? expressionText, Location? location = null )
+            public RuntimeExpression CreateExpression( string? expressionText, Location? location = null )
             {
                 var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 

@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this.ExpressionType = type;
         }
 
-        public RuntimeExpression? CreateExpression( string? expressionText = null, Location? location = null )
+        public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null )
         {
             var typeSymbol = this.ExpressionType.GetSymbol();
             var expression = LanguageServiceFactory.CSharpSyntaxGenerator.DefaultExpression( typeSymbol );
