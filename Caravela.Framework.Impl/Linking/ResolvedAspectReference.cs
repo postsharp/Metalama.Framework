@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Gets the original specification of the reference.
         /// </summary>
-        public AspectReferenceSpecification Specification { get; }
+        public AspectReferenceSpecification Specification { get; } // TODO: Remove, all information should be translated.
 
         public ResolvedAspectReference(
             ISymbol containingSymbol,

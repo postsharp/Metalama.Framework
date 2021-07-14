@@ -491,6 +491,7 @@ namespace Caravela.Framework.Impl.Linking
 
         private static LinkerDeclarationFlags GetDeclarationFlags( ISymbol symbol )
         {
+            // TODO: Partials?
             return symbol.DeclaringSyntaxReferences
                 .Select( dsr => (dsr.GetSyntax() as MemberDeclarationSyntax)?.GetLinkerDeclarationFlags() ?? LinkerDeclarationFlags.None )
                 .SingleOrDefault();

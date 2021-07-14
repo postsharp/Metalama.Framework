@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.Linking
         public IReadOnlyList<LinkerIntroducedMember> GetOverridesForSymbol( ISymbol symbol )
         {
             // TODO: Optimize.
-            var declaringSyntax = symbol.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax();
+            var declaringSyntax = symbol.GetPrimaryDeclaration();
 
             if (declaringSyntax == null)
             {

@@ -8,17 +8,31 @@ namespace Caravela.Framework.Impl.Linking
 {
     public static class SymbolExtensions
     {
-        public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol )
+        // TODO: Partial methods etc.
+
+        public static SyntaxReference? GetPrimarySyntaxReference( this ISymbol symbol )
         {
-            // TODO: Partials.
             switch ( symbol )
             {
                 case IMethodSymbol { AssociatedSymbol: not null } methodSymbol:
-                    return symbol.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax()
-                           ?? methodSymbol.AssociatedSymbol.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax();
+                    return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault()
+                           ?? methodSymbol.AssociatedSymbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault();
 
                 default:
-                    return symbol.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax();
+                    return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault();
+            }
+        }
+
+        public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol )
+        {
+            switch ( symbol )
+            {
+                case IMethodSymbol { AssociatedSymbol: not null } methodSymbol:
+                    return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault()?.GetSyntax()
+                           ?? methodSymbol.AssociatedSymbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault()?.GetSyntax();
+
+                default:
+                    return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault()?.GetSyntax();
             }
         }
     }
