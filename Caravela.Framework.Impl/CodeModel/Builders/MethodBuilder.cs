@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Transformations;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -31,8 +32,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethod? OverriddenMethod { get; set; }
 
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
-
-        public AspectLinkerOptions? LinkerOptions { get; }
 
         public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
         {
@@ -80,6 +79,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         // We don't currently support adding other methods than default ones.
         public MethodKind MethodKind => MethodKind.Default;
 
+        public bool IsReadOnly { get; set; }
+
         System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
 
         IMethod IMethod.WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
@@ -88,11 +89,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
-        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, AspectLinkerOptions? linkerOptions )
+        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name )
             : base( parentAdvice, targetType, name )
         {
-            this.LinkerOptions = linkerOptions;
-
             this.ReturnParameter =
                 new ParameterBuilder(
                     this,
@@ -103,10 +102,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         // TODO: #(28532) Implement properly.
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        {
-            return this.Name;
-        }
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.Name;
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
@@ -130,25 +126,24 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                             !this.ReturnParameter.ParameterType.Is( typeof(void) )
                                 ? new[]
                                 {
-                                    ReturnStatement( DefaultExpression( syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ) )
+                                    ReturnStatement(
+                                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
+                                        DefaultExpression( syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ),
+                                        Token( SyntaxKind.SemicolonToken ) )
                                 }
                                 : new StatementSyntax[0] ) ),
                     null );
 
-            return new[]
-            {
-                new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this )
-            };
+            return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
         }
 
         // TODO: Temporary
-        public override MemberDeclarationSyntax InsertPositionNode
-            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
+        public override InsertPosition InsertPosition
+            => new(
+                InsertPositionRelation.Within,
+                ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
 
-        public void SetExplicitInterfaceImplementation( IMethod interfaceMethod )
-        {
-            this.ExplicitInterfaceImplementations = new[] { interfaceMethod };
-        }
+        public void SetExplicitInterfaceImplementation( IMethod interfaceMethod ) => this.ExplicitInterfaceImplementations = new[] { interfaceMethod };
 
         public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
     }

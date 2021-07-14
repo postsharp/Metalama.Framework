@@ -8,8 +8,10 @@ using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace Caravela.TestFramework
@@ -30,9 +32,9 @@ namespace Caravela.TestFramework
         /// Runs the aspect test with the given name and source.
         /// </summary>
         /// <returns>The result of the test execution.</returns>
-        public override TestResult RunTest( TestInput testInput )
+        public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
-            var testResult = base.RunTest( testInput );
+            var testResult = await base.RunTestAsync( testInput );
 
             using var testProjectOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
@@ -45,13 +47,21 @@ namespace Caravela.TestFramework
             if ( pipeline.TryExecute( testResult, testResult.InputCompilation!, CancellationToken.None, out var resultCompilation, out _ ) )
             {
                 testResult.OutputCompilation = resultCompilation;
+                var minimalVerbosity = testInput.Options.ReportOutputWarnings.GetValueOrDefault() ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
 
-                if ( testInput.Options.IncludeFinalDiagnostics.GetValueOrDefault() )
+                bool MustBeReported( Diagnostic d ) => d.Severity >= minimalVerbosity && !testInput.Options.IgnoredDiagnostics.Contains( d.Id );
+
+                if ( !testInput.Options.OutputCompilationDisabled.GetValueOrDefault() )
                 {
-                    testResult.Report( resultCompilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
+                    var emitResult = resultCompilation.Emit( Stream.Null );
+                    testResult.Report( emitResult.Diagnostics.Where( MustBeReported ) );
+                }
+                else
+                {
+                    testResult.Report( resultCompilation.GetDiagnostics().Where( MustBeReported ) );
                 }
 
-                testResult.SetOutputCompilation( resultCompilation );
+                await testResult.SetOutputCompilationAsync( resultCompilation );
             }
             else
             {
@@ -60,7 +70,7 @@ namespace Caravela.TestFramework
 
             if ( testInput.Options.WriteInputHtml.GetValueOrDefault() || testInput.Options.WriteOutputHtml.GetValueOrDefault() )
             {
-                this.WriteHtml( testInput, testResult );
+                await this.WriteHtmlAsync( testInput, testResult );
             }
 
             return testResult;

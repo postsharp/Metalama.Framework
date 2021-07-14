@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.Underlying.ToFieldOrPropertyInfo();
 
-        public dynamic Value
+        public object? Value
         {
             get
             {

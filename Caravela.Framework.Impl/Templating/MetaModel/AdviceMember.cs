@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Linking;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
@@ -39,6 +38,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IDynamicReceiver This
             => new ThisInstanceDynamicReceiver(
                 this.DeclaringType,
-                new LinkerAnnotation( this.Underlying.GetCompilationModel().AspectLayerId, LinkingOrder.Base ) );
+                new AspectReferenceSpecification( this.Underlying.GetCompilationModel().AspectLayerId, AspectReferenceOrder.Base ) );
     }
 }

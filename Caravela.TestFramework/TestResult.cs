@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Caravela.TestFramework
 {
@@ -59,7 +60,7 @@ namespace Caravela.TestFramework
         /// Gets the result compilation of the test project.
         /// </summary>
         public Compilation? OutputCompilation { get; internal set; }
-        
+
         /// <summary>
         /// Gets the full path of the HTML file with syntax highlighting.
         /// </summary>
@@ -100,7 +101,7 @@ namespace Caravela.TestFramework
             return string.Join( Environment.NewLine, lines );
         }
 
-        internal void SetOutputCompilation( Compilation runTimeCompilation )
+        internal async Task SetOutputCompilationAsync( Compilation runTimeCompilation )
         {
             if ( this.InputCompilation == null ||
                  this.TestInput == null ||
@@ -115,10 +116,10 @@ namespace Caravela.TestFramework
             {
                 i++;
 
-                var syntaxNode = syntaxTree.GetRoot();
+                var syntaxNode = await syntaxTree.GetRootAsync();
 
                 // Format the output code.
-                this.SyntaxTrees[i].SetRunTimeCode( syntaxNode );
+                await this.SyntaxTrees[i].SetRunTimeCodeAsync( syntaxNode );
             }
         }
 
@@ -188,7 +189,9 @@ namespace Caravela.TestFramework
                     syntaxNode
                         .DescendantNodesAndSelf( _ => true )
                         .OfType<MemberDeclarationSyntax>()
-                        .Where( m => m.GetLeadingTrivia().ToString().Contains( "<target>" ) )
+                        .Where(
+                            m => m.GetLeadingTrivia().ToString().Contains( "<target>" ) ||
+                                 m.AttributeLists.Any( a => a.GetLeadingTrivia().ToString().Contains( "<target>" ) ) )
                         .ToList();
 
                 var outputNode = outputNodes.FirstOrDefault() ?? (SyntaxNode) syntaxNode;

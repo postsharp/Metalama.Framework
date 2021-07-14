@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Templating
     /// Most of this class is machine-generated. This class is meant to be inherited. See the only
     /// inheritor: <see cref="TemplateCompilerRewriter"/>.
     /// </remarks>
-    internal abstract partial class MetaSyntaxRewriter : CSharpSyntaxRewriter
+    internal partial class MetaSyntaxRewriter : CSharpSyntaxRewriter
     {
         private readonly Stack<string> _indentTriviaStack = new();
         private readonly IndentRewriter _indentRewriter;
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="compileTimeCompilation">The <see cref="Compilation"/> used to create the compile-time assembly,
         /// possibly with no source code, but with metadata references. Used to resolve symbols in the compile-time assembly.</param>
-        protected MetaSyntaxRewriter( Compilation compileTimeCompilation )
+        public MetaSyntaxRewriter( Compilation compileTimeCompilation )
         {
             this._indentTriviaStack.Push( "" );
             this._indentRewriter = new IndentRewriter( this );
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        protected abstract TransformationKind GetTransformationKind( SyntaxNode node );
+        protected virtual TransformationKind GetTransformationKind( SyntaxNode node ) => TransformationKind.Transform;
 
         protected void Indent( int level = 1 )
         {

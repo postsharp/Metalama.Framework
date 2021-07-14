@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Linking.Inlining;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -40,8 +41,31 @@ namespace Caravela.Framework.Impl.Linking
 
         public override AspectLinkerResult Execute( LinkerAnalysisStepOutput input )
         {
+            var inliners = new Inliner[]
+            {
+                new MethodAssignmentInliner(),
+                new MethodLocalDeclarationInliner(),
+                new MethodReturnStatementInliner(),
+                new MethodCastReturnStatementInliner(),
+                new MethodInvocationInliner(),
+                new MethodDiscardInliner(),
+                new PropertyGetAssignmentInliner(),
+                new PropertyGetReturnInliner(),
+                new PropertyGetCastReturnInliner(),
+                new PropertySetValueAssignmentInliner(),
+                new EventAddAssignmentInliner(),
+                new EventRemoveAssignmentInliner()
+            };
+
             var finalCompilation = input.IntermediateCompilation.Compilation;
-            var linkingRewriter = new LinkingRewriter( input.IntermediateCompilation.Compilation, input.AnalysisRegistry );
+
+            var rewritingDriver = new LinkerRewritingDriver(
+                input.IntermediateCompilation.Compilation,
+                input.AnalysisRegistry,
+                input.ReferenceResolver,
+                inliners );
+
+            var linkingRewriter = new LinkingRewriter( input.IntermediateCompilation.Compilation, rewritingDriver );
             var cleanupRewriter = new CleanupRewriter();
 
             List<SyntaxTree> newTrees = new();

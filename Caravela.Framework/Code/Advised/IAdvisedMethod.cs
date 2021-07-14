@@ -16,7 +16,7 @@ namespace Caravela.Framework.Code.Advised
         /// Invokes the method.
         /// </summary>
         [return: RunTimeOnly]
-        dynamic Invoke( params dynamic?[] args );
+        dynamic? Invoke( params dynamic?[] args );
 
         /// <summary>
         /// Gets the list of method parameters.

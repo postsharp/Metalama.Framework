@@ -23,7 +23,7 @@ class T
     [PseudoOverride(Foo, TestAspect)]
     void Foo_Override()
     {
-        link(this.Foo());
+        link(this.Foo, inline)();
     }
 }
 ";
@@ -58,7 +58,7 @@ class T
     [PseudoOverride(Foo, TestAspect)]
     void Foo_Override(int x)
     {
-        link(this.Foo(x));
+        link(this.Foo, inline)(x);
     }
 }
 ";
@@ -94,7 +94,7 @@ class T
     [PseudoOverride(Foo, TestAspect)]
     void Foo_Override()
     {
-        return link(this.Foo());
+        return link(this.Foo, inline)();
     }
 }
 ";
@@ -131,7 +131,7 @@ class T
     [PseudoOverride(Foo, TestAspect)]
     void Foo_Override(int x)
     {
-        return link(this.Foo(x));
+        return link(this.Foo, inline)(x);
     }
 }
 ";

@@ -14,6 +14,12 @@ namespace Caravela.Framework.Impl.Formatting
 {
     public sealed class OutputCodeFormatter
     {
+        /// <summary>
+        /// Annotation used to mark locals and 'return;' statement that may be redundant. Currently we are not doing anything with them,
+        /// but we could.
+        /// </summary>
+        public static readonly SyntaxAnnotation PossibleRedundantAnnotation = new( "Caravela_PossibleRedundant" );
+
         public static async ValueTask<CompilationUnitSyntax> FormatAsync(
             Document document,
             bool reformatAll = true,

@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -33,22 +32,77 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         throw new ArgumentException( "link method should have 1 or 2 arguments." );
                     }
 
-                    var callExpression = node.ArgumentList.Arguments[0].Expression;
+                    var annotatedExpression = node.ArgumentList.Arguments[0].Expression;
 
-                    string? tag = null;
+                    AspectReferenceFlags flags = default;
 
-                    if ( node.ArgumentList.Arguments.Count == 2 )
+                    // Since most of the linker tests linking normal aspects, the default order for linker tests is Base.
+                    var order = AspectReferenceOrder.Base;
+
+                    for ( var i = 1; i < node.ArgumentList.Arguments.Count; i++ )
                     {
-                        tag = node.ArgumentList.Arguments[1].ToString();
+                        var tag = node.ArgumentList.Arguments[i].ToString();
+
+                        switch ( tag )
+                        {
+                            case "inline":
+                                flags |= AspectReferenceFlags.Inlineable;
+
+                                break;
+
+                            case "next":
+                                order = AspectReferenceOrder.Next;
+
+                                break;
+
+                            case "original":
+                                order = AspectReferenceOrder.Original;
+
+                                break;
+
+                            case "final":
+                                order = AspectReferenceOrder.Final;
+
+                                break;
+
+                            default:
+                                throw new ArgumentException( $"unsupported link() tag {tag}" );
+                        }
                     }
 
-                    if ( tag != null )
+                    var target = AspectReferenceTargetKind.Self;
+
+                    if ( annotatedExpression is MemberAccessExpressionSyntax memberAccess )
                     {
-                        throw new ArgumentException( $"unsupported link() tag {tag}" );
+                        switch ( memberAccess.Name.Identifier.ValueText )
+                        {
+                            case "get":
+                                annotatedExpression = memberAccess.Expression;
+                                target = AspectReferenceTargetKind.PropertyGetAccessor;
+
+                                break;
+
+                            case "set":
+                                annotatedExpression = memberAccess.Expression;
+                                target = AspectReferenceTargetKind.PropertySetAccessor;
+
+                                break;
+
+                            case "add":
+                                annotatedExpression = memberAccess.Expression;
+                                target = AspectReferenceTargetKind.EventAddAccessor;
+
+                                break;
+
+                            case "remove":
+                                annotatedExpression = memberAccess.Expression;
+                                target = AspectReferenceTargetKind.EventRemoveAccessor;
+
+                                break;
+                        }
                     }
 
-                    return callExpression.AddLinkerAnnotation(
-                        new LinkerAnnotation( new AspectLayerId( this._aspectName, this._layerName ), LinkingOrder.Default ) );
+                    return annotatedExpression.WithAspectReferenceAnnotation( new AspectLayerId( this._aspectName, this._layerName ), order, target, flags );
                 }
 
                 return base.VisitInvocationExpression( node );

@@ -49,15 +49,14 @@ namespace Caravela.Framework.Impl.Advices
                 hasGet,
                 hasSet,
                 this.TemplateMember != null && this.TemplateMember.IsAutoPropertyOrField,
-                this.TemplateMember != null && this.TemplateMember.Writeability == Writeability.InitOnly,
-                AspectLinkerOptions.FromTags( tags ) );
+                this.TemplateMember != null && this.TemplateMember.Writeability == Writeability.InitOnly );
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( declarativeAdvices, diagnosticAdder );
 
-            // TODO: The rest (unify with methods?).
+            // TODO: Indexers.
 
             this.MemberBuilder.Type = (this.TemplateMember?.Type ?? this._getTemplateMethod?.ReturnType).AssertNotNull();
             this.MemberBuilder.Accessibility = (this.TemplateMember?.Accessibility ?? this._getTemplateMethod?.Accessibility).AssertNotNull();
@@ -67,7 +66,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             return AdviceResult.Create(
                 this.MemberBuilder,
-                new OverriddenProperty( this, this.MemberBuilder, this.TemplateMember, this._getTemplateMethod, this._setTemplateMethod, this.LinkerOptions ) );
+                new OverriddenProperty( this, this.MemberBuilder, this.TemplateMember, this._getTemplateMethod, this._setTemplateMethod ) );
         }
     }
 }

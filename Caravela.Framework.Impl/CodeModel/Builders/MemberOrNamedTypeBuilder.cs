@@ -6,7 +6,6 @@ using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,13 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         public bool IsSealed { get; set; }
 
-        public bool IsReadOnly { get; set; }
-
-        public bool IsOverride { get; set; }
-
         public bool IsNew { get; set; }
-
-        public bool IsAsync { get; set; }
 
         public INamedType DeclaringType { get; }
 
@@ -39,8 +32,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsStatic { get; set; }
 
-        public bool IsVirtual { get; set; }
-
         public sealed override IDeclaration ContainingDeclaration => this.DeclaringType;
 
         public MemberOrNamedTypeBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice )
@@ -51,7 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
 
-        public abstract MemberDeclarationSyntax InsertPositionNode { get; }
+        public abstract InsertPosition InsertPosition { get; }
 
         // TODO: This is temporary.
         SyntaxTree ISyntaxTreeTransformation.TargetSyntaxTree => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;

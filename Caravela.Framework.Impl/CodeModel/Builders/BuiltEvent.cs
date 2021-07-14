@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public EventBuilder EventBuilder { get; }
 
-        public override DeclarationBuilder Builder => this.EventBuilder;
+        public override MemberBuilder MemberBuilder => this.EventBuilder;
 
         public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.EventBuilder;
 
@@ -46,10 +46,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IReadOnlyList<IEvent> ExplicitInterfaceImplementations => Array.Empty<IEvent>();
 
         [return: RunTimeOnly]
-        public EventInfo ToEventInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public EventInfo ToEventInfo() => throw new NotImplementedException();
 
         IEvent IDeclarationRef<IEvent>.Resolve( CompilationModel compilation ) => (IEvent) this.GetForCompilation( compilation );
 

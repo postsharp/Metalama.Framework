@@ -5,5 +5,5 @@ using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
-    public record AspectPipelineDescription ( AspectExecutionScenario ExecutionScenario, bool IsTest ) : IService;
+    internal record AspectPipelineDescription ( AspectExecutionScenario ExecutionScenario, bool IsTest ) : IService;
 }

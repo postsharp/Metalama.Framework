@@ -274,6 +274,22 @@ namespace Caravela.Framework.Impl.Templating
             return base.Transform( token );
         }
 
+        protected override ExpressionSyntax TransformVariableDeclaration( VariableDeclarationSyntax node )
+        {
+            switch ( node )
+            {
+                case { Type: NullableTypeSyntax { ElementType: IdentifierNameSyntax { Identifier: { Text: "dynamic" } } } }:
+                    // Variable of dynamic? type needs to become var type (without the ?).
+                    return base.TransformVariableDeclaration(
+                        VariableDeclaration(
+                            IdentifierName( Identifier( "var" ) ),
+                            node.Variables ) );
+
+                default:
+                    return base.TransformVariableDeclaration( node );
+            }
+        }
+
         protected override ExpressionSyntax TransformIdentifierName( IdentifierNameSyntax node )
         {
             switch ( node.Identifier.Kind() )
@@ -302,6 +318,19 @@ namespace Caravela.Framework.Impl.Templating
                 // is child level of Template method f.e. local function etc.
                 return SymbolEqualityComparer.Default.Equals( symbol.ContainingSymbol, this._rootTemplateSymbol )
                        || this.IsDeclaredWithinTemplate( symbol.ContainingSymbol );
+            }
+        }
+
+        protected override ExpressionSyntax TransformNullableType( NullableTypeSyntax node )
+        {
+            if ( node.ElementType is IdentifierNameSyntax identifier && identifier.Identifier.Text == "dynamic" )
+            {
+                // Avoid transforming "dynamic?" into "var?".
+                return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
+            }
+            else
+            {
+                return base.TransformNullableType( node );
             }
         }
 
@@ -380,10 +409,7 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression )
-        {
-            return this.CreateRunTimeExpression( expression );
-        }
+        protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression ) => this.CreateRunTimeExpression( expression );
 
         /// <summary>
         /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="RuntimeExpression"/>
@@ -462,15 +488,6 @@ namespace Caravela.Framework.Impl.Templating
             switch ( type?.Name )
             {
                 case "dynamic":
-                    if ( this._templateMemberClassifier.IsProceed( expression ) )
-                    {
-                        this.Report(
-                            TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic(
-                                this._syntaxTreeAnnotationMap.GetLocation( expression ),
-                                "" ) );
-
-                        return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
-                    }
 
                     ArgumentListSyntax arguments;
 
@@ -519,8 +536,7 @@ namespace Caravela.Framework.Impl.Templating
                                     .AddArgumentListArguments(
                                         Argument(
                                             InvocationExpression(
-                                                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember(
-                                                        nameof(TemplateSyntaxFactory.BooleanKeyword) ) )
+                                                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.Boolean) ) )
                                                 .AddArgumentListArguments( Argument( expression ) ) ) ) ),
                             Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateReferenceId( type ) ) ) ) );
 
@@ -559,7 +575,7 @@ namespace Caravela.Framework.Impl.Templating
                  this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol )
             {
                 return InvocationExpression(
-                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.CreateDynamicMemberAccessExpression) ),
+                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicMemberAccessExpression) ),
                     ArgumentList(
                         SeparatedList(
                             new[]
@@ -606,6 +622,18 @@ namespace Caravela.Framework.Impl.Templating
 
         protected override ExpressionSyntax TransformExpressionStatement( ExpressionStatementSyntax node )
         {
+            if ( node.Expression is AssignmentExpressionSyntax { Left: IdentifierNameSyntax { Identifier: { Text: "_" } } } assignment &&
+                 this.IsCompileTimeDynamic( assignment.Right ) )
+            {
+                // Process the statement "_ = meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
+
+                var invocationExpression = InvocationExpression(
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicDiscardAssignment) ) )
+                    .AddArgumentListArguments( Argument( assignment.Right ) );
+
+                return this.WithCallToAddSimplifierAnnotation( invocationExpression );
+            }
+
             var expression = this.Transform( node.Expression );
 
             var toArrayStatementExpression = InvocationExpression(
@@ -673,13 +701,6 @@ namespace Caravela.Framework.Impl.Templating
             else if ( this._templateMemberClassifier.IsDynamicType( node.Expression ) )
             {
                 // We are in an invocation like: `meta.This.Foo(...)`.
-            }
-            else if ( this._templateMemberClassifier.IsProceed( node.Expression ) )
-            {
-                // We cannot call proceed in an unsupported statement.
-                this.Report( TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic( node.Expression.GetLocation(), "" ) );
-
-                return LiteralExpression( SyntaxKind.NullLiteralExpression );
             }
             else if ( this._templateMemberClassifier.IsRunTimeMethod( node.Expression ) )
             {
@@ -807,8 +828,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax body )
-        {
-            return MethodDeclaration(
+            => MethodDeclaration(
                     this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ),
                     Identifier( this._templateName ) )
                 .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
@@ -816,7 +836,6 @@ namespace Caravela.Framework.Impl.Templating
                 .WithBody( body )
                 .WithLeadingTrivia( node.GetLeadingTrivia() )
                 .WithTrailingTrivia( LineFeed, LineFeed );
-        }
 
         public override SyntaxNode VisitBlock( BlockSyntax node )
         {
@@ -850,9 +869,7 @@ namespace Caravela.Framework.Impl.Templating
         /// (in this case, a return statement is returned).</param>
         /// <returns></returns>
         private SyntaxNode BuildRunTimeBlock( ExpressionSyntax node, bool generateExpression )
-        {
-            return this.BuildRunTimeBlock( () => this.ToMetaStatements( ReturnStatement( node ) ), generateExpression );
-        }
+            => this.BuildRunTimeBlock( () => this.ToMetaStatements( ReturnStatement( node ) ), generateExpression );
 
         /// <summary>
         /// Generates a run-time block.
@@ -863,9 +880,7 @@ namespace Caravela.Framework.Impl.Templating
         /// (in this case, a return statement is returned).</param>
         /// <returns></returns>
         private SyntaxNode BuildRunTimeBlock( BlockSyntax node, bool generateExpression )
-        {
-            return this.BuildRunTimeBlock( () => this.ToMetaStatements( node.Statements ).ToList(), generateExpression );
-        }
+            => this.BuildRunTimeBlock( () => this.ToMetaStatements( node.Statements ).ToList(), generateExpression );
 
         /// <summary>
         /// Generates a run-time block.
@@ -1213,99 +1228,78 @@ namespace Caravela.Framework.Impl.Templating
 
             this.Unindent();
 
-            return ForEachStatement( node.Type, node.Identifier, node.Expression, statement );
+            // It seems that trivia can be lost upstream, there can be a missing one between the 'in' keyword and the expression. Add them to be sure.
+            return ForEachStatement(
+                node.Type.WithTrailingTrivia( Space ),
+                node.Identifier.WithTrailingTrivia( Space ),
+                node.Expression.WithLeadingTrivia( Space ),
+                statement );
         }
 
-        public override SyntaxNode VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
-        {
-            var proceedAssignments =
-                node.Declaration.Variables
-                    .Where( n => n.Initializer != null && this._templateMemberClassifier.IsProceed( n.Initializer.Value ) )
-                    .ToList();
-
-            if ( proceedAssignments.Count == 0 )
-            {
-                return base.VisitLocalDeclarationStatement( node );
-            }
-            else if ( proceedAssignments.Count > 1 )
-            {
-                throw new AssertionFailedException();
-            }
-            else
-            {
-                // Special processing of the `var result = meta.Proceed()` statement.
-
-                // Transform the variable identifier.
-                var returnVariableIdentifier = this.Transform( proceedAssignments[0].Identifier )!;
-
-                var callCreateSyntaxType = InvocationExpression(
-                    MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        ParenthesizedExpression(
-                            CastFromDynamic(
-                                this.MetaSyntaxFactory.Type( typeof(IProceedImpl) ),
-                                proceedAssignments[0].Initializer!.Value ) ),
-                        IdentifierName( nameof(IProceedImpl.CreateTypeSyntax) ) ),
-                    ArgumentList() );
-
-                var variableDeclarator = this.MetaSyntaxFactory.VariableDeclarator( returnVariableIdentifier );
-
-                var variableDeclaration = this.MetaSyntaxFactory.VariableDeclaration(
-                    callCreateSyntaxType,
-                    this.MetaSyntaxFactory.SeparatedList2<VariableDeclaratorSyntax>( new[] { variableDeclarator } ) );
-
-                var localDeclarationStatement = this.MetaSyntaxFactory.LocalDeclarationStatement( variableDeclaration );
-
-                var callProceed = InvocationExpression(
-                    MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        ParenthesizedExpression(
-                            CastFromDynamic(
-                                this.MetaSyntaxFactory.Type( typeof(IProceedImpl) ),
-                                proceedAssignments[0].Initializer!.Value ) ),
-                        IdentifierName( nameof(IProceedImpl.CreateAssignStatement) ) ),
-                    ArgumentList( SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[] { Argument( returnVariableIdentifier ) } ) ) );
-
-                var createBlock = this.MetaSyntaxFactory.Block( localDeclarationStatement, callProceed );
-
-                createBlock = this.DeepIndent( createBlock );
-
-                // Annotate the block for removal.
-                return InvocationExpression(
-                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.WithFlattenBlockAnnotation) ),
-                    ArgumentList( SingletonSeparatedList( Argument( createBlock ) ) ) );
-            }
-        }
+        /// <summary>
+        /// Determines if the expression will be transformed into syntax that instantiates an <see cref="IDynamicExpression"/>.
+        /// </summary>
+        private bool IsCompileTimeDynamic( ExpressionSyntax? expression )
+            => expression != null
+               && this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol
+               && this.GetTransformationKind( expression ) != TransformationKind.Transform;
 
         public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
         {
             InvocationExpressionSyntax invocationExpression;
 
-            if ( node.Expression != null && this._templateMemberClassifier.IsProceed( node.Expression ) )
+            if ( this.IsCompileTimeDynamic( node.Expression ) )
             {
-                var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression );
+                // We have a dynamic parameter. We need to call the second overload of ReturnStatement, the one that accepts the IDynamicExpression
+                // itself and not the syntax.
 
-                if ( expressionType == null )
-                {
-                    // We need the expression type.
-                    throw new AssertionFailedException( "The type of the return expression was not found." );
-                }
+                var expression = (ExpressionSyntax) this.Visit( node.Expression )!;
 
                 invocationExpression = InvocationExpression(
-                    MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        ParenthesizedExpression( CastFromDynamic( this.MetaSyntaxFactory.Type( typeof(IProceedImpl) ), node.Expression ) ),
-                        IdentifierName( nameof(IProceedImpl.CreateReturnStatement) ) ),
-                    ArgumentList() );
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicReturnStatement) ) )
+                    .AddArgumentListArguments( Argument( expression ) );
+
+                // TODO: pass expressionText and Location
             }
             else
             {
+                var expression = this.Transform( node.Expression );
+
                 invocationExpression = InvocationExpression(
-                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.TemplateReturnStatement) ) )
-                    .AddArgumentListArguments( Argument( this.Transform( node.Expression ) ) );
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ReturnStatement) ) )
+                    .AddArgumentListArguments( Argument( expression ) );
             }
 
-            return this.AddCallToSimplifierAnnotations( invocationExpression );
+            return this.WithCallToAddSimplifierAnnotation( invocationExpression );
+        }
+
+        public override SyntaxNode VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
+        {
+            var declaration = node.Declaration;
+
+            if ( declaration.Variables.Count == 1 )
+            {
+                var declarator = declaration.Variables[0];
+
+                if ( declarator.Initializer != null )
+                {
+                    if ( this.IsCompileTimeDynamic( declarator.Initializer.Value ) )
+                    {
+                        var invocationExpression = InvocationExpression(
+                                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicLocalDeclaration) ) )
+                            .AddArgumentListArguments(
+                                Argument( (ExpressionSyntax) this.Visit( declaration.Type )! ),
+                                Argument( this.Transform( declarator.Identifier ) ),
+                                Argument( (ExpressionSyntax) this.Visit( declarator.Initializer.Value )! ) );
+
+                        return this.WithCallToAddSimplifierAnnotation( invocationExpression );
+
+                        // TODO: pass expressionText and Location
+                    }
+                }
+            }
+
+            return base.VisitLocalDeclarationStatement( node );
         }
 
         public override SyntaxNode VisitIdentifierName( IdentifierNameSyntax node )
@@ -1340,7 +1334,7 @@ namespace Caravela.Framework.Impl.Templating
             return base.VisitIdentifierName( node );
         }
 
-        private ExpressionSyntax AddCallToSimplifierAnnotations( ExpressionSyntax expression )
+        private ExpressionSyntax WithCallToAddSimplifierAnnotation( ExpressionSyntax expression )
             => InvocationExpression(
                 this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddSimplifierAnnotations) ),
                 ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
@@ -1362,7 +1356,7 @@ namespace Caravela.Framework.Impl.Templating
                     var nameExpression = LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( namespaceOrType );
 
                     transformedNode = this.GetTransformationKind( node ) == TransformationKind.Transform
-                        ? this.AddCallToSimplifierAnnotations( this.Transform( nameExpression ) )
+                        ? this.WithCallToAddSimplifierAnnotation( this.Transform( nameExpression ) )
                         : nameExpression;
 
                     return true;
@@ -1392,7 +1386,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( node.HasAnnotation( Simplifier.Annotation ) )
             {
-                transformed = this.AddCallToSimplifierAnnotations( transformed );
+                transformed = this.WithCallToAddSimplifierAnnotation( transformed );
             }
 
             return transformed;

@@ -177,7 +177,7 @@ namespace Caravela.Framework.Impl.Templating
                 = new(
                     "CR0221",
                     "Cannot use 'this' when a run-time expression is expected.",
-                    "Cannot use 'this' in expression '{0}' because a run-time expression is expected, and 'this' " 
+                    "Cannot use 'this' in expression '{0}' because a run-time expression is expected, and 'this' "
                     + "in a template is a compile-time keyword. Use 'meta.This' instead.",
                     _category,
                     Error );

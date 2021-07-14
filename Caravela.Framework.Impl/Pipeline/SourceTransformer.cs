@@ -17,11 +17,11 @@ namespace Caravela.Framework.Impl.Pipeline
     /// <summary>
     /// The main compile-time entry point of Caravela. An implementation of Caravela.Compiler's <see cref="ISourceTransformer"/>.
     /// </summary>
-    internal sealed class SourceTransformer : ISourceTransformer
+    public sealed class SourceTransformer : ISourceTransformer
     {
-        public Compilation Execute( TransformerContext transformerContext )
+        public Compilation Execute( TransformerContext context )
         {
-            var projectOptions = new ProjectOptions( transformerContext.GlobalOptions, transformerContext.Plugins );
+            var projectOptions = new ProjectOptions( context.GlobalOptions, context.Plugins );
 
             try
             {
@@ -30,23 +30,23 @@ namespace Caravela.Framework.Impl.Pipeline
                     new CompileTimeDomain(),
                     false,
                     null,
-                    new CompilationAssemblyLocator( transformerContext.Compilation ) );
+                    new CompilationAssemblyLocator( context.Compilation ) );
 
                 if ( pipeline.TryExecute(
-                    new DiagnosticAdder( transformerContext.ReportDiagnostic ),
-                    transformerContext.Compilation,
+                    new DiagnosticAdder( context.ReportDiagnostic ),
+                    context.Compilation,
                     CancellationToken.None,
                     out var compilation,
                     out var additionalResources ) )
                 {
-                    transformerContext.ManifestResources.AddRange( additionalResources );
+                    context.ManifestResources.AddRange( additionalResources );
 
                     return compilation;
                 }
                 else
                 {
                     // The pipeline failed.
-                    return transformerContext.Compilation;
+                    return context.Compilation;
                 }
             }
             catch ( Exception e )
@@ -65,9 +65,9 @@ namespace Caravela.Framework.Impl.Pipeline
                 var reportFile = Path.Combine( tempPath, $"exception-{Guid.NewGuid()}.txt" );
                 File.WriteAllText( reportFile, e.ToString() );
 
-                transformerContext.ReportDiagnostic( GeneralDiagnosticDescriptors.UnhandledException.CreateDiagnostic( null, (e.Message, reportFile) ) );
+                context.ReportDiagnostic( GeneralDiagnosticDescriptors.UnhandledException.CreateDiagnostic( null, (e.Message, reportFile) ) );
 
-                return transformerContext.Compilation;
+                return context.Compilation;
             }
         }
     }

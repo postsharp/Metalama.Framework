@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Templating
             var errorCountBefore = templateExpansionContext.DiagnosticSink.ErrorCount;
 
             using ( TemplateSyntaxFactory.WithContext( templateExpansionContext ) )
-            using ( meta.WithContext( templateExpansionContext.MetaApi, templateExpansionContext.ProceedImplementation ) )
+            using ( meta.WithContext( templateExpansionContext.MetaApi ) )
             {
                 SyntaxNode output;
 

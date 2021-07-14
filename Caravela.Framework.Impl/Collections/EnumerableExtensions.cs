@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Collections
     /// <summary>
     /// Provides extension methods to the <see cref="IEnumerable{T}"/> and similar interfaces.
     /// </summary>
-    public static class EnumerableExtensions
+    internal static class EnumerableExtensions
     {
         /// <summary>
         /// Converts an <see cref="IEnumerable{T}"/> to an <see cref="IReadOnlyList{T}"/>, but calls <see cref="Enumerable.ToList{TSource}"/>

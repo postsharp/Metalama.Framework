@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 
 namespace Caravela.TestFramework
 {
@@ -14,18 +15,58 @@ namespace Caravela.TestFramework
         /// </summary>
         private class InactiveCodeRemover : CSharpSyntaxRewriter
         {
-            public InactiveCodeRemover() : base( true ) { }
+            private readonly Stack<bool> _branchStack;
+
+            public InactiveCodeRemover() : base( true )
+            {
+                this._branchStack = new Stack<bool>();
+            }
 
             public override SyntaxTrivia VisitTrivia( SyntaxTrivia trivia )
-                => trivia.Kind() == SyntaxKind.DisabledTextTrivia ? SyntaxFactory.Whitespace( "" ) : base.VisitTrivia( trivia );
+            {
+                if ( this._branchStack.Count > 0 )
+                {
+                    var state = this._branchStack.Peek();
 
-            public override SyntaxNode? VisitElifDirectiveTrivia( ElifDirectiveTriviaSyntax node ) => null;
+                    if ( !state && (!trivia.HasStructure || (trivia.GetStructure() is not BranchingDirectiveTriviaSyntax
+                                                             && trivia.GetStructure() is not EndIfDirectiveTriviaSyntax)) )
+                    {
+                        return SyntaxFactory.Whitespace( "" );
+                    }
+                }
 
-            public override SyntaxNode? VisitIfDirectiveTrivia( IfDirectiveTriviaSyntax node ) => null;
+                return base.VisitTrivia( trivia );
+            }
 
-            public override SyntaxNode? VisitElseDirectiveTrivia( ElseDirectiveTriviaSyntax node ) => null;
+            public override SyntaxNode? VisitIfDirectiveTrivia( IfDirectiveTriviaSyntax node )
+            {
+                this._branchStack.Push( node.BranchTaken );
 
-            public override SyntaxNode? VisitEndIfDirectiveTrivia( EndIfDirectiveTriviaSyntax node ) => null;
+                return null;
+            }
+
+            public override SyntaxNode? VisitElifDirectiveTrivia( ElifDirectiveTriviaSyntax node )
+            {
+                this._branchStack.Pop();
+                this._branchStack.Push( node.BranchTaken );
+
+                return null;
+            }
+
+            public override SyntaxNode? VisitElseDirectiveTrivia( ElseDirectiveTriviaSyntax node )
+            {
+                this._branchStack.Pop();
+                this._branchStack.Push( node.BranchTaken );
+
+                return null;
+            }
+
+            public override SyntaxNode? VisitEndIfDirectiveTrivia( EndIfDirectiveTriviaSyntax node )
+            {
+                this._branchStack.Pop();
+
+                return null;
+            }
         }
     }
 }

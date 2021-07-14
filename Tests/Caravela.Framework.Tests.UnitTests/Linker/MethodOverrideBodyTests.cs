@@ -29,7 +29,7 @@ class T
     void Foo_Override()
     {
         Test(""Before"");
-        link(this.Foo());
+        link(this.Foo, inline)();
         Test(""After"");
     }
 }
@@ -80,7 +80,7 @@ class T
         Test(""Before"");
         if (true)
         {
-            link(this.Foo());
+            link(this.Foo, inline)();
         }
 
         Test(""After"");
@@ -138,7 +138,7 @@ class T
         int i;
         while (i < 5)
         {
-            link(this.Foo());
+            link(this.Foo, inline)();
             i++;
         }
 
@@ -198,7 +198,7 @@ class T
         Test(""Before"");
         for (int i = 0; i < 5; i++)
         {
-            link(this.Foo());
+            link(this.Foo, inline)();
         }
 
         Test(""After"");
@@ -255,7 +255,7 @@ class T
         Test(""Before"");
         foreach (var i in new[]{1, 2, 3, 4, 5})
         {
-            link(this.Foo());
+            link(this.Foo, inline)();
         }
 
         Test(""After"");
@@ -312,7 +312,7 @@ class T
     {
         Test(""Before"");
         int result;
-        result = link(this.Foo(x));
+        result = link(this.Foo, inline)(x);
         Test(""After"");
         return result;
     }
@@ -332,7 +332,9 @@ class T
         int result;
         Test(""Original"");
         result = x;
-        Test(""After"");
+        goto __aspect_return_1;
+        __aspect_return_1:
+            Test(""After"");
         return result;
     }
 }
@@ -369,7 +371,7 @@ class T
         int result = 0;
         if (x == 0)
         {
-            result = link(this.Foo(x));
+            result = link(this.Foo, inline)(x);
         }
 
         Test(""After"");
@@ -393,6 +395,9 @@ class T
         {
             Test(""Original"");
             result = x;
+            goto __aspect_return_1;
+            __aspect_return_1:
+                ;
         }
 
         Test(""After"");
@@ -434,7 +439,7 @@ class T
         while (i < 0)
         {
             int result;
-            result = link(this.Foo(x));
+            result = link(this.Foo, inline)(x);
             k += result;
             i++;
         }
@@ -462,7 +467,9 @@ class T
             int result;
             Test(""Original"");
             result = x;
-            k += result;
+            goto __aspect_return_1;
+            __aspect_return_1:
+                k += result;
             i++;
         }
 

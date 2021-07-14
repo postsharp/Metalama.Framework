@@ -4,11 +4,15 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Formatting;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -24,7 +28,6 @@ namespace Caravela.Framework.Impl.Templating
             object templateInstance,
             MetaApi metaApi,
             ICompilation compilation,
-            IProceedImpl proceedImpl,
             TemplateLexicalScope lexicalScope,
             SyntaxSerializationService syntaxSerializationService,
             ICompilationElementFactory syntaxFactory )
@@ -32,7 +35,6 @@ namespace Caravela.Framework.Impl.Templating
             this.TemplateInstance = templateInstance;
             this.MetaApi = metaApi;
             this.Compilation = compilation;
-            this.ProceedImplementation = proceedImpl;
             this.SyntaxSerializationService = syntaxSerializationService;
             this.SyntaxFactory = syntaxFactory;
             this.LexicalScope = lexicalScope;
@@ -41,8 +43,6 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public object TemplateInstance { get; }
-
-        public IProceedImpl ProceedImplementation { get; }
 
         public ICompilation Compilation { get; }
 
@@ -57,9 +57,45 @@ namespace Caravela.Framework.Impl.Templating
                 return ReturnStatement();
             }
 
-            if ( this.MetaApi.Method.ReturnType.Is( typeof(void) ) )
+            if ( this.MetaApi.Method.ReturnType.Is( SpecialType.Void ) )
             {
-                return ReturnStatement();
+                switch ( returnExpression )
+                {
+                    case InvocationExpressionSyntax invocationExpression:
+                        // Do not use discard on invocations, because it may be void.
+                        return
+                            Block(
+                                    ExpressionStatement( invocationExpression ),
+                                    ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
+                                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                    case null:
+                    case LiteralExpressionSyntax:
+                    case IdentifierNameSyntax:
+                        // No need to call the expression  because we are guaranteed to have no side effect and we don't 
+                        // care about the value.
+                        return ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
+
+                    default:
+                        // Anything else should use discard.
+                        return
+                            Block(
+                                    ExpressionStatement(
+                                        AssignmentExpression(
+                                            SyntaxKind.SimpleAssignmentExpression,
+                                            IdentifierName(
+                                                Identifier(
+                                                    TriviaList(),
+                                                    SyntaxKind.UnderscoreToken,
+                                                    "_",
+                                                    "_",
+                                                    TriviaList() ) ),
+                                            CastExpression(
+                                                PredefinedType( Token( SyntaxKind.ObjectKeyword ) ),
+                                                returnExpression ) ) ),
+                                    ReturnStatement() )
+                                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                }
             }
 
             var returnExpressionKind = returnExpression.Kind();
@@ -77,5 +113,33 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public UserDiagnosticSink DiagnosticSink => this.MetaApi.Diagnostics;
+
+        public StatementSyntax CreateReturnStatement( IDynamicExpression? returnExpression, string? expressionText = null, Location? location = null )
+        {
+            if ( returnExpression == null )
+            {
+                return ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
+            }
+            else if ( returnExpression.ExpressionType.Is( SpecialType.Void ) )
+            {
+                if ( this.MetaApi.Method.ReturnType.Is( SpecialType.Void ) )
+                {
+                    return
+                        Block(
+                                ExpressionStatement( returnExpression.CreateExpression( expressionText, location )! ),
+                                ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
+                            .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                }
+                else
+                {
+                    // TODO: Emit error.
+                    throw new AssertionFailedException();
+                }
+            }
+            else
+            {
+                return this.CreateReturnStatement( returnExpression.CreateExpression( expressionText, location ) );
+            }
+        }
     }
 }
