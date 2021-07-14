@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Caravela.Framework.Impl.Utilities
 {
-    public static class HashUtilities
+    internal static class HashUtilities
     {
         public static string HashString( string s ) => XXH64.DigestOf( Encoding.UTF8.GetBytes( s ) ).ToString( "x16" );
 

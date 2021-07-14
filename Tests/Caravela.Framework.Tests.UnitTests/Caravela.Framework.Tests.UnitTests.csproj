@@ -31,4 +31,11 @@
     <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" />
   </ItemGroup>
 
+
+    <!-- Disable this project when obfuscation is enabled -->
+    <ItemGroup  Condition="'$(Obfuscate)'=='True'">
+        <Compile Remove="**\*"/>
+    </ItemGroup>
+  
+
 </Project>

@@ -6,7 +6,7 @@ using System;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-    public static partial class DiagnosticContext
+    internal static partial class DiagnosticContext
     {
         private class Cookie : IDisposable
         {

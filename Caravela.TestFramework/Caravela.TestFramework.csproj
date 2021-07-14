@@ -23,7 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration" />
+    <InternalsVisibleTo Include="Caravela.Framework.Tests.InternalPipeline" />
+    <InternalsVisibleTo Include="Caravela.Framework.Tests.PublicPipeline" />
     <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests" />
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
   </ItemGroup>

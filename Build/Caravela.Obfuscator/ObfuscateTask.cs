@@ -198,15 +198,9 @@ namespace Caravela.Obfuscator
 
         private readonly TagId _excludeObfuscationTag = TagId.Register( "1F50C631-989F-48F9-B680-D64D374ED9F3" );
 
-        private void ExcludeObfuscation( MetadataDeclaration declaration )
-        {
-            declaration.SetTag<object>( this._excludeObfuscationTag, "exclude" );
-        }
+        private void ExcludeObfuscation( MetadataDeclaration declaration ) => declaration.SetTag<object>( this._excludeObfuscationTag, "exclude" );
 
-        private bool IsObfuscationExcluded( MetadataDeclaration declaration )
-        {
-            return this.IsObfuscationExcluded( declaration, false );
-        }
+        private bool IsObfuscationExcluded( MetadataDeclaration declaration ) => this.IsObfuscationExcluded( declaration, false );
 
         private bool IsObfuscationExcluded( MetadataDeclaration declaration, bool inherited )
         {
@@ -279,7 +273,7 @@ namespace Caravela.Obfuscator
                  (type.Attributes & TypeAttributes.Serializable) == 0 &&
                  !this.IsObfuscationExcluded( type ) )
             {
-                this._obfuscatedDeclarations.Add( type, this._currentObfuscationTable.CreateHash( type.Name, true ) );
+                this._obfuscatedDeclarations.Add( type, this._currentObfuscationTable.CreateHash( type.Name, type.DeclaringType == null ) );
             }
 
             // Obfuscate generic parameter names.
@@ -447,6 +441,38 @@ namespace Caravela.Obfuscator
                     foreach ( var genericParameter in method.GenericParameters )
                     {
                         genericParameter.Name = string.Format( "??{0:x}", genericParameter.Ordinal );
+                    }
+                }
+            }
+
+            // Check that implementations of interfaces implemented by the current type are actually in the current type and not in a base type.
+            // We don't support the case where the implementation is inherited.
+            foreach ( var interfaceImpl in type.InterfaceImplementations )
+            {
+                if ( !interfaceImpl.ImplementedInterface.GetTypeDefinition().IsPublic() )
+                {
+                    continue;
+                }
+
+                foreach ( var interfaceMethod in interfaceImpl.ImplementedInterface.GetTypeDefinition().Methods )
+                {
+                    var implementations = interfaceMethod.FindGenericInterfaceOverride( type, true );
+
+                    foreach ( var implementation in implementations )
+                    {
+                        if ( implementation.DeclaringType != type &&
+                             implementation.Method.Visibility == Visibility.Public &&
+                             this._obfuscatedDeclarations.ContainsKey( implementation.Method ) )
+                        {
+                            Message.Write(
+                                implementation.Method,
+                                SeverityType.Error,
+                                "OB002",
+                                "Method {0} implements the public interface method {1} in type {2} and must be manually excluded from obfuscation",
+                                implementation.Method,
+                                interfaceMethod,
+                                type );
+                        }
                     }
                 }
             }

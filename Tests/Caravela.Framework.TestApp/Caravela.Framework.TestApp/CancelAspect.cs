@@ -10,8 +10,6 @@ namespace Caravela.Framework.TestApp
 {
     internal class CancelAspect : OverrideMethodAspect
     {
-        private static bool TypeIsCancellationToken( IAdviceParameter p ) => p.ParameterType.Is( typeof( CancellationToken ) );
-
         public override dynamic OverrideMethod()
         {
             
