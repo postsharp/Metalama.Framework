@@ -13,9 +13,12 @@
     </PropertyGroup>
 
     <PropertyGroup>
+        <RestoreAdditionalProjectSources Condition="Exists('$(MSBuildThisFileDirectory)artifacts\bin\Release')">
+            $(RestoreAdditionalProjectSources);
+            $(MSBuildThisFileDirectory)artifacts\bin\Release
+        </RestoreAdditionalProjectSources>
         <RestoreAdditionalProjectSources>
             $(RestoreAdditionalProjectSources);
-            $(MSBuildThisFileDirectory)artifacts\bin\Release;
             $(MSBuildThisFileDirectory)artifacts\bin\Debug
         </RestoreAdditionalProjectSources>
     </PropertyGroup>

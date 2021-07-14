@@ -79,7 +79,7 @@ namespace Caravela.TestFramework
             var sourceFileName = testInput.TestName + ".cs";
             var mainDocument = AddDocument( sourceFileName, testInput.SourceCode );
 
-            var syntaxTree = await mainDocument.GetSyntaxTreeAsync()!;
+            var syntaxTree = (await mainDocument.GetSyntaxTreeAsync())!;
 
             testResult.AddInputDocument( mainDocument, testInput.FullPath );
 
@@ -99,7 +99,7 @@ namespace Caravela.TestFramework
 
                 testResult.AddInputDocument( includedDocument, includedFullPath );
 
-                var includedSyntaxTree = await includedDocument.GetSyntaxTreeAsync()!;
+                var includedSyntaxTree = (await includedDocument.GetSyntaxTreeAsync())!;
                 initialCompilation = initialCompilation.AddSyntaxTrees( includedSyntaxTree );
             }
 

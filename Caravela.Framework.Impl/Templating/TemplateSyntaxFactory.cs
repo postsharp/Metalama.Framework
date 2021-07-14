@@ -146,7 +146,7 @@ namespace Caravela.Framework.Impl.Templating
                         SyntaxFactory.VariableDeclarator(
                             identifier,
                             null,
-                            SyntaxFactory.EqualsValueClause( value ) ) ) ) );
+                            SyntaxFactory.EqualsValueClause( value ?? throw new AssertionFailedException("TODO: Produce error when dynamic local does not have initializer.") ) ) ) ) );
 
         // This overload is called when the value of a local is a dynamic expression but not a compile-time expression returning a dynamic value.
         public static StatementSyntax DynamicLocalDeclaration(

@@ -1277,7 +1277,7 @@ namespace Caravela.Framework.Impl.Templating
                             .AddArgumentListArguments(
                                 Argument( (ExpressionSyntax) this.Visit( declaration.Type )! ),
                                 Argument( this.Transform( declarator.Identifier ) ),
-                                Argument( (ExpressionSyntax) this.Visit( declarator.Initializer.Value ) ) );
+                                Argument( (ExpressionSyntax) this.Visit( declarator.Initializer.Value )! ) );
 
                         return this.WithCallToAddSimplifierAnnotation( invocationExpression );
 
