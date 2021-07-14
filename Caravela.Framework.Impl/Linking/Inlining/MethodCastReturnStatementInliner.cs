@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 
             var targetSymbol = (aspectReference.ResolvedSymbol as IMethodSymbol).AssertNotNull();
 
-            // Get the final body (after inlinings) of the target.
+            // Get the final body (after inlining) of the target.
             var inlinedTargetBody = context.GetLinkedBody( targetSymbol );
 
             // Mark the block as flattenable.
