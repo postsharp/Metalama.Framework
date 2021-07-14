@@ -426,7 +426,7 @@ namespace Caravela.Framework.Impl.Linking
 
         /// <summary>
         /// Gets a method symbol that will be the source for the body of the specified declaration. For example, source for the overridden declaration is the last override and source
-        /// for the first override is the original delcaration.
+        /// for the first override is the original declaration.
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>

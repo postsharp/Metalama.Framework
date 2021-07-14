@@ -31,9 +31,10 @@ namespace Caravela.Framework.Impl.Linking
         {
             // TODO: Other things than methods.
             var overrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
+
             if ( overrides.Count > 0 )
             {
-                var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (AspectLayerId: o.AspectLayerId, Index: i) ).ToReadOnlyList();
+                var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (o.AspectLayerId, Index: i) ).ToReadOnlyList();
                 var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceSpecification.AspectLayerId ).Index;
 
                 // TODO: Optimize.
@@ -130,12 +131,12 @@ namespace Caravela.Framework.Impl.Linking
             else
             {
                 return new ResolvedAspectReference(
-                   containingSymbol,
-                   referencedSymbol,
-                   referencedSymbol,
-                   ResolvedAspectReferenceSemantic.Default,
-                   expression,
-                   referenceSpecification );
+                    containingSymbol,
+                    referencedSymbol,
+                    referencedSymbol,
+                    ResolvedAspectReferenceSemantic.Default,
+                    expression,
+                    referenceSpecification );
             }
 
             static bool TryGetHiddenSymbol( ISymbol symbol, [NotNullWhen( true )] out ISymbol? hiddenSymbol )

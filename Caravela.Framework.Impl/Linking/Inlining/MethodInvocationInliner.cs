@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             // If this is non-void method, we will discard all results.
             var discardingContext = context.WithDiscard( targetSymbol );
 
-            // Get the final body (after inlinings) of the target.
+            // Get the final body (after inlining) of the target.
             var inlinedTargetBody = discardingContext.GetLinkedBody( targetSymbol );
 
             // Mark the block as flattenable.

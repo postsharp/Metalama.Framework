@@ -195,7 +195,6 @@ namespace Caravela.Framework.Impl.Linking
                     .WithLeadingTrivia( LineFeed )
                     .WithTrailingTrivia( LineFeed, LineFeed )
                     .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
-
         }
 
         private static BlockSyntax GetImplicitGetterBody( IMethodSymbol symbol )

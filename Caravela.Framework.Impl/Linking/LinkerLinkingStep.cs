@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.Linking
                 input.ReferenceResolver,
                 inliners );
 
-            var linkingRewriter = new LinkingRewriter( input.IntermediateCompilation.Compilation, input.AnalysisRegistry, rewritingDriver );
+            var linkingRewriter = new LinkingRewriter( input.IntermediateCompilation.Compilation, rewritingDriver );
             var cleanupRewriter = new CleanupRewriter();
 
             List<SyntaxTree> newTrees = new();

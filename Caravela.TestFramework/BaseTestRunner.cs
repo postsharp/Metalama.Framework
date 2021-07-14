@@ -178,9 +178,9 @@ namespace Caravela.TestFramework
             foreach ( var syntaxTree in testResult.SyntaxTrees )
             {
                 string actualSyntaxFactory = syntaxTree.OutputRunTimeSyntaxRoot.ToSyntaxFactoryDebug( testResult.OutputCompilation );
-                string reparsed = CSharpSyntaxTree.ParseText(  syntaxTree.OutputRunTimeSyntaxRoot.ToString() ).GetRoot(  ).ToSyntaxFactoryDebug( testResult.OutputCompilation );
+                string parsedFromText = CSharpSyntaxTree.ParseText(  syntaxTree.OutputRunTimeSyntaxRoot.ToString() ).GetRoot(  ).ToSyntaxFactoryDebug( testResult.OutputCompilation );
                 
-                Assert.Equal( reparsed, actualSyntaxFactory );
+                Assert.Equal( parsedFromText, actualSyntaxFactory );
             }
             */
 
@@ -316,7 +316,7 @@ namespace Caravela.TestFramework
                 var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.OutputHtml );
                 var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput );
 
-                using ( var outputHtml = File.CreateText( outputHtmlPath ) )
+                await using ( var outputHtml = File.CreateText( outputHtmlPath ) )
                 {
                     htmlCodeWriter.Write( formattedOutputDocument, null, outputHtml );
                 }

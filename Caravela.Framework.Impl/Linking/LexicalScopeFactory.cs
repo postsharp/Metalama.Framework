@@ -12,12 +12,10 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal sealed class LexicalScopeFactory : ITemplateLexicalScopeProvider
     {
-        private readonly CompilationModel _compilation;
         private readonly Dictionary<IDeclaration, TemplateLexicalScope> _scopes;
 
         public LexicalScopeFactory( CompilationModel compilation )
         {
-            this._compilation = compilation;
             this._scopes = new Dictionary<IDeclaration, TemplateLexicalScope>( compilation.InvariantComparer );
         }
 
