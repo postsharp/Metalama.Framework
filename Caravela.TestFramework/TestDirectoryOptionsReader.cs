@@ -56,7 +56,7 @@ namespace Caravela.TestFramework
             if ( !directory.Equals( this.ProjectDirectory, StringComparison.OrdinalIgnoreCase ) )
             {
                 var baseOptions = this.GetDirectoryOptions( Path.GetDirectoryName( directory )! );
-                options.ApplyDirectoryOptions( baseOptions );
+                options.ApplyBaseOptions( baseOptions );
             }
 
             return options;
