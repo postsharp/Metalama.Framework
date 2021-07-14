@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -71,20 +70,20 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                                                 LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ReturnType ),
                                                 SingletonSeparatedList( VariableDeclarator( this.ReturnVariableName.AssertNotNull() ) ) ) )
                                         : null,
-                                    linkedBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable ),
+                                    linkedBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                                     this._labelUsed
                                         ? LabeledStatement(
                                             Identifier( this.ReturnLabelName.AssertNotNull() ),
-                                            ExpressionStatement( IdentifierName( MissingToken( SyntaxKind.IdentifierToken ) ) )
-                                                .WithSemicolonToken( MissingToken( SyntaxKind.SemicolonToken ) ) )
+                                            EmptyStatement() )
+                                        .AddLinkerGeneratedFlags(LinkerGeneratedFlags.EmptyLabeledStatement)
                                         : null
                                 }.Where( x => x != null )
                                 .AssertNoneNull() )
-                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
             else
             {
-                return linkedBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                return linkedBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
         }
 

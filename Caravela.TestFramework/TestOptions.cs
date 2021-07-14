@@ -86,9 +86,9 @@ namespace Caravela.TestFramework
         public bool? NullabilityDisabled { get; set; }
 
         /// <summary>
-        /// Gets or sets a list of warnings that are not reported even if <see cref="ReportOutputWarnings"/> is set to <c>true</c>.
+        /// Gets a list of warnings that are not reported even if <see cref="ReportOutputWarnings"/> is set to <c>true</c>.
         /// </summary>
-        public List<string> IgnoredDiagnostics { get; } = new ();
+        public List<string> IgnoredDiagnostics { get; } = new();
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property

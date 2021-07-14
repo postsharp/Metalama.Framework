@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var inlinedTargetBody = contextWithLocal.GetLinkedBody( targetSymbol );
 
             // Mark the block as flattenable.
-            inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+            inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             // We're replacing the whole return statement.
             newNode = Block(
@@ -87,7 +87,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                             LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ReturnType ).WithTrailingTrivia( Whitespace( " " ) ),
                             SingletonSeparatedList( VariableDeclarator( variableDeclarator.Identifier ) ) ) ),
                     inlinedTargetBody )
-                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             replacedNode = localDeclaration;
         }

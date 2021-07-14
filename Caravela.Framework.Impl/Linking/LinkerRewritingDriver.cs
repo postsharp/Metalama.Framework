@@ -142,7 +142,7 @@ namespace Caravela.Framework.Impl.Linking
                                 default,
                                 IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
                                 Token( SyntaxKind.SemicolonToken ) ) )
-                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
 
             return rewrittenBody;
@@ -198,7 +198,7 @@ namespace Caravela.Framework.Impl.Linking
                                                 default,
                                                 IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
                                                 Token( SyntaxKind.SemicolonToken ) ) )
-                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                             }
                             else
                             {
@@ -225,7 +225,7 @@ namespace Caravela.Framework.Impl.Linking
                                             default,
                                             IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
                                             Token( SyntaxKind.SemicolonToken ) ) )
-                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
                         {
@@ -242,7 +242,7 @@ namespace Caravela.Framework.Impl.Linking
                                             default,
                                             IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
                                             Token( SyntaxKind.SemicolonToken ) ) )
-                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                     }
                     else

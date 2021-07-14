@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var inlinedTargetBody = context.GetLinkedBody( targetSymbol );
 
             // Mark the block as flattenable.
-            inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+            inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             replacedNode = returnStatement;
             newNode = inlinedTargetBody;

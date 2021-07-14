@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.Templating
                             Block(
                                     ExpressionStatement( invocationExpression ),
                                     ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
-                                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                     case null:
                     case LiteralExpressionSyntax:
@@ -94,7 +94,7 @@ namespace Caravela.Framework.Impl.Templating
                                                 PredefinedType( Token( SyntaxKind.ObjectKeyword ) ),
                                                 returnExpression ) ) ),
                                     ReturnStatement() )
-                                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
             }
 
@@ -128,7 +128,7 @@ namespace Caravela.Framework.Impl.Templating
                         Block(
                                 ExpressionStatement( returnExpression.CreateExpression( expressionText, location )! ),
                                 ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
-                            .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                            .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
                 else
                 {

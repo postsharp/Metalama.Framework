@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var inlinedTargetBody = context.GetLinkedBody( targetSymbol.GetMethod.AssertNotNull() );
 
             // Mark the block as flattenable.
-            inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+            inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             newNode = inlinedTargetBody;
             replacedNode = expressionStatement;
