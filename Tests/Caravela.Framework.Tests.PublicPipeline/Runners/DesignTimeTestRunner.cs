@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Runners
@@ -24,9 +25,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
             ITestOutputHelper? logger )
             : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
-        public override TestResult RunTest( TestInput testInput )
+        public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
-            var testResult = base.RunTest( testInput );
+            var testResult = await base.RunTestAsync( testInput );
 
             using var buildOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
@@ -39,7 +40,12 @@ namespace Caravela.Framework.Tests.Integration.Runners
             if ( pipelineResult.Success )
             {
                 var introducedSyntaxTree = pipelineResult.IntroducedSyntaxTrees.SingleOrDefault();
-                testResult.SyntaxTrees.Single().SetRunTimeCode( introducedSyntaxTree?.GeneratedSyntaxTree.GetRoot() ?? SyntaxFactoryEx.EmptyStatement );
+
+                var introducedSyntaxRoot = introducedSyntaxTree == null
+                    ? SyntaxFactoryEx.EmptyStatement
+                    : await introducedSyntaxTree.GeneratedSyntaxTree.GetRootAsync();
+
+                await testResult.SyntaxTrees.Single().SetRunTimeCodeAsync( introducedSyntaxRoot );
             }
             else
             {

@@ -13,7 +13,6 @@ internal class TargetClass
         set
         {
             global::System.Console.WriteLine("This is the overridden setter.");
-            global::System.Int32 discard;
             this._field = value;
         }
     }

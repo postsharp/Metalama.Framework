@@ -1,7 +1,6 @@
 string Method(object a)
 {
-    global::System.String result;
-    result = this.Method(a);
+    var result = this.Method(a);
     if (result == null)
     {
         return (string)"";

@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -133,17 +134,22 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     foreach ( var member in node.Members )
                     {
-                        using ( var memberSuppressions = this.WithSuppressions( member ) )
+                        var visitedMember = (MemberDeclarationSyntax?) this.Visit( member );
+
+                        if ( visitedMember != null )
                         {
-                            var memberWithSuppressions = this.AddSuppression( member, memberSuppressions.NewSuppressions );
-                            members.Add( memberWithSuppressions );
+                            using ( var memberSuppressions = this.WithSuppressions( member ) )
+                            {
+                                var memberWithSuppressions = this.AddSuppression( visitedMember, memberSuppressions.NewSuppressions );
+                                members.Add( memberWithSuppressions );
+                            }
                         }
 
                         // We have to call AddIntroductionsOnPosition outside of the previous suppression scope, otherwise we don't get new suppressions.
-                        AddIntroductionsOnPosition( member );
+                        AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ) );
                     }
 
-                    AddIntroductionsOnPosition( node );
+                    AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ) );
 
                     node = this.AddSuppression( node, classSuppressions.NewSuppressions ).WithMembers( List( members ) );
 
@@ -160,7 +166,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 // TODO: Try to avoid closure allocation.
-                void AddIntroductionsOnPosition( MemberDeclarationSyntax position )
+                void AddIntroductionsOnPosition( InsertPosition position )
                 {
                     foreach ( var introducedMember in this._introducedMemberCollection.GetIntroducedMembersOnPosition( position ) )
                     {

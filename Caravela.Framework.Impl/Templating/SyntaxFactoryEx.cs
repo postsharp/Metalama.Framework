@@ -17,6 +17,9 @@ namespace Caravela.Framework.Impl.Templating
         public static LiteralExpressionSyntax Null => SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression );
 
         public static LiteralExpressionSyntax LiteralExpression( object? obj )
+            => LiteralExpressionOrNull( obj ) ?? throw new ArgumentOutOfRangeException( nameof(obj) );
+
+        public static LiteralExpressionSyntax? LiteralExpressionOrNull( object? obj )
             => obj switch
             {
                 string s => LiteralExpression( s ),
@@ -30,7 +33,7 @@ namespace Caravela.Framework.Impl.Templating
                 double s => LiteralExpression( s ),
                 float s => LiteralExpression( s ),
                 decimal s => LiteralExpression( s ),
-                _ => throw new ArgumentOutOfRangeException()
+                _ => null
             };
 
         public static LiteralExpressionSyntax LiteralExpression( string? s )
@@ -66,9 +69,20 @@ namespace Caravela.Framework.Impl.Templating
         public static LiteralExpressionSyntax LiteralExpression( char c )
             => SyntaxFactory.LiteralExpression( SyntaxKind.CharacterLiteralExpression, SyntaxFactory.Literal( c ) );
 
+        private static ExpressionSyntax EmptyExpression => SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) );
+
         public static StatementSyntax EmptyStatement
-            => SyntaxFactory.ExpressionStatement( SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) ) )
+            => SyntaxFactory.ExpressionStatement( EmptyExpression )
                 .WithSemicolonToken( SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
+
+        public static IdentifierNameSyntax DiscardToken
+            => SyntaxFactory.IdentifierName(
+                SyntaxFactory.Identifier(
+                    default,
+                    SyntaxKind.UnderscoreToken,
+                    "_",
+                    "_",
+                    default ) );
 
         public static SyntaxToken RefKindToken( RefKind refKind )
             => refKind switch
@@ -78,5 +92,17 @@ namespace Caravela.Framework.Impl.Templating
                 RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
                 _ => default
             };
+
+        /// <summary>
+        /// Generates a string that contains C# code that instantiates the given node
+        /// using SyntaxFactory. Used for debugging.
+        /// </summary>
+        public static string ToSyntaxFactoryDebug( this SyntaxNode node, Compilation compilation )
+        {
+            MetaSyntaxRewriter rewriter = new( compilation );
+            var transformedNode = rewriter.Visit( node );
+
+            return transformedNode.ToFullString();
+        }
     }
 }

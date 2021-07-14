@@ -5,8 +5,9 @@ public class Target
 {get    {
         return default;
     }
-
+    
 set    {
+        global::System.Console.WriteLine("nothing");
         return;
     }
 }

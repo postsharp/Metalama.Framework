@@ -5,5 +5,5 @@ int Method(int a)
     var rt = $"Value={a, -5:x}";
     var both = $"field={a}";
     global::System.Console.WriteLine(ct);
-    return this.Method(a);
+    return (int)this.Method(a);
 }

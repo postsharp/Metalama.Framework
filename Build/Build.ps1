@@ -81,9 +81,13 @@ function CreateVersionFile() {
         <CaravelaAssemblyVersion>$assemblyVersion</CaravelaAssemblyVersion>
     </PropertyGroup>
     <PropertyGroup>
-        <RestoreAdditionalProjectSources>
+        <!-- Adds the local output directories as nuget sources for referencing projects. -->
+        <RestoreAdditionalProjectSources Condition="Exists('`$(MSBuildThisFileDirectory)artifacts\bin\Release')">
             `$(RestoreAdditionalProjectSources);
-            `$(MSBuildThisFileDirectory)artifacts\bin\Release;
+            `$(MSBuildThisFileDirectory)artifacts\bin\Release
+        </RestoreAdditionalProjectSources>
+        <RestoreAdditionalProjectSources Condition="Exists('`$(MSBuildThisFileDirectory)artifacts\bin\Debug')">
+            `$(RestoreAdditionalProjectSources);
             `$(MSBuildThisFileDirectory)artifacts\bin\Debug
         </RestoreAdditionalProjectSources>
     </PropertyGroup>

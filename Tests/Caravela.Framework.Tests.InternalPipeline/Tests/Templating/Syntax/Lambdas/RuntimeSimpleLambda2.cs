@@ -7,11 +7,11 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.RuntimeSimpleLa
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
-            Action<object> action = a => Console.WriteLine(a.ToString());
+            Action<object?> action = a => Console.WriteLine(a?.ToString());
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
 
             action(result);
 

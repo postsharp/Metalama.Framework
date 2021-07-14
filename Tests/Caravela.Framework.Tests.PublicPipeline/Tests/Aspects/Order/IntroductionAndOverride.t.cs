@@ -49,7 +49,6 @@ internal class TargetClass
             }
 
             __aspect_return_1:
-                ;
             return;
         }
         finally

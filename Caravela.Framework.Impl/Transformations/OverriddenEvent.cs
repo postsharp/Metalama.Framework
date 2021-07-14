@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
@@ -31,9 +30,8 @@ namespace Caravela.Framework.Impl.Transformations
             IEvent overriddenDeclaration,
             IEvent? templateEvent,
             IMethod? addTemplateMethod,
-            IMethod? removeTemplateMethod,
-            AspectLinkerOptions? linkerOptions = null )
-            : base( advice, overriddenDeclaration, linkerOptions )
+            IMethod? removeTemplateMethod )
+            : base( advice, overriddenDeclaration )
         {
             Invariant.Assert( advice != null );
             Invariant.Assert( overriddenDeclaration != null );
@@ -64,12 +62,12 @@ namespace Caravela.Framework.Impl.Transformations
                 var addAccessorBody =
                     addTemplateMethod != null
                         ? this.ExpandAccessorTemplate( context, addTemplateMethod, this.OverriddenDeclaration.Adder )
-                        : this.GetIdentityAccessorBody( SyntaxKind.AddAccessorDeclaration );
+                        : this.CreateIdentityAccessorBody( SyntaxKind.AddAccessorDeclaration );
 
                 var removeAccessorBody =
                     removeTemplateMethod != null
                         ? this.ExpandAccessorTemplate( context, removeTemplateMethod, this.OverriddenDeclaration.Remover )
-                        : this.GetIdentityAccessorBody( SyntaxKind.RemoveAccessorDeclaration );
+                        : this.CreateIdentityAccessorBody( SyntaxKind.RemoveAccessorDeclaration );
 
                 // TODO: Do not throw exception when template expansion fails.
                 var overrides = new[]
@@ -99,7 +97,6 @@ namespace Caravela.Framework.Impl.Transformations
                                     } ) ) ),
                         this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.Override,
-                        this.LinkerOptions,
                         this.OverriddenDeclaration )
                 };
 
@@ -111,6 +108,16 @@ namespace Caravela.Framework.Impl.Transformations
         {
             using ( context.DiagnosticSink.WithDefaultScope( accessor ) )
             {
+                var proceedExpression = new DynamicExpression(
+                    accessor.MethodKind switch
+                    {
+                        MethodKind.EventAdd => this.CreateAddExpression(),
+                        MethodKind.EventRemove => this.CreateRemoveExpression(),
+                        _ => throw new AssertionFailedException()
+                    },
+                    this.OverriddenDeclaration.EventType,
+                    false );
+
                 var metaApi = MetaApi.ForEvent(
                     this.OverriddenDeclaration,
                     accessor,
@@ -119,18 +126,14 @@ namespace Caravela.Framework.Impl.Transformations
                         accessorTemplate.GetSymbol(),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
-                        context.ServiceProvider.GetService<AspectPipelineDescription>() ) );
+                        context.ServiceProvider.GetService<AspectPipelineDescription>(),
+                        proceedExpression ) );
 
                 var expansionContext = new TemplateExpansionContext(
                     this.Advice.Aspect.Aspect,
                     metaApi,
                     this.OverriddenDeclaration.Compilation,
-                    new LinkerOverrideEventProceedImpl(
-                        this.Advice.AspectLayerId,
-                        accessor,
-                        LinkingOrder.Default,
-                        context.SyntaxFactory ),
-                    context.LexicalScope,
+                    context.LexicalScopeProvider.GetLexicalScope( accessor ),
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
                     (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
 
@@ -151,55 +154,37 @@ namespace Caravela.Framework.Impl.Transformations
         /// </summary>
         /// <param name="accessorDeclarationKind"></param>
         /// <returns></returns>
-        private BlockSyntax? GetIdentityAccessorBody( SyntaxKind accessorDeclarationKind )
+        private BlockSyntax? CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind )
         {
             switch ( accessorDeclarationKind )
             {
-                case SyntaxKind.GetAccessorDeclaration:
-                    return
-                        Block(
-                            ReturnStatement(
-                                GetPropertyAccessExpression()
-                                    .AddLinkerAnnotation(
-                                        new LinkerAnnotation(
-                                            this.Advice.AspectLayerId,
-                                            LinkingOrder.Default,
-                                            LinkerAnnotationTargetKind.PropertySetAccessor ) ) ) );
+                case SyntaxKind.AddAccessorDeclaration:
+                    return Block( ExpressionStatement( this.CreateAddExpression() ) );
 
-                case SyntaxKind.SetAccessorDeclaration:
-                case SyntaxKind.InitAccessorDeclaration:
-                    return
-                        Block(
-                            ExpressionStatement(
-                                AssignmentExpression(
-                                    SyntaxKind.SimpleAssignmentExpression,
-                                    GetPropertyAccessExpression()
-                                        .AddLinkerAnnotation(
-                                            new LinkerAnnotation(
-                                                this.Advice.AspectLayerId,
-                                                LinkingOrder.Default,
-                                                LinkerAnnotationTargetKind.PropertySetAccessor ) ),
-                                    IdentifierName( "value" ) ) ) );
+                case SyntaxKind.RemoveAccessorDeclaration:
+                    return Block( ExpressionStatement( this.CreateRemoveExpression() ) );
 
                 default:
                     throw new AssertionFailedException();
             }
+        }
 
-            ExpressionSyntax GetPropertyAccessExpression()
-            {
-                if ( !this.OverriddenDeclaration.IsStatic )
-                {
-                    return MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        ThisExpression(),
-                        IdentifierName( this.OverriddenDeclaration.Name ) );
-                }
-                else
-                {
-                    // TODO: Full qualification.
-                    return IdentifierName( this.OverriddenDeclaration.Name );
-                }
-            }
+        private ExpressionSyntax CreateAddExpression()
+        {
+            return
+                AssignmentExpression(
+                    SyntaxKind.AddAssignmentExpression,
+                    this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventAddAccessor ),
+                    IdentifierName( "value" ) );
+        }
+
+        private ExpressionSyntax CreateRemoveExpression()
+        {
+            return
+                AssignmentExpression(
+                    SyntaxKind.SubtractAssignmentExpression,
+                    this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventRemoveAccessor ),
+                    IdentifierName( "value" ) );
         }
     }
 }

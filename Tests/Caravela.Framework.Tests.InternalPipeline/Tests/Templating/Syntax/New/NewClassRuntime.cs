@@ -7,7 +7,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.RunTimeNewC
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var o = new TargetCode();
             Console.WriteLine(o.GetType().ToString());

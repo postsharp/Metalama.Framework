@@ -7,11 +7,11 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.Runtime
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             Func<int, int> action = x => x + 1;
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
 
             action(result);
 

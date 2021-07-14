@@ -8,12 +8,13 @@ namespace Caravela.Framework.Tests.Integration.Templating.Pragma.CommentInEmptyB
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             if ( false )
             {
                 meta.Comment("Oops 1");
             }
+
             return meta.Proceed();
         }
     }

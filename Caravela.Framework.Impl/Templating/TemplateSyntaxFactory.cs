@@ -1,6 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -11,9 +14,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.Templating
 {
+    // ReSharper disable UnusedMember.Global
+
     /// <summary>
     /// This class is used at *run-time* by the generated template code. Do not remove or refactor
     /// without analysing impact on generated code.
@@ -25,7 +31,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private static readonly AsyncLocal<TemplateExpansionContext?> _expansionContext = new();
 
-        internal static TemplateExpansionContext ExpansionContext
+        private static TemplateExpansionContext ExpansionContext
             => _expansionContext.Value ?? throw new InvalidOperationException( "ExpansionContext cannot be null." );
 
         internal static IDisposable WithContext( TemplateExpansionContext expansionContext )
@@ -108,17 +114,102 @@ namespace Caravela.Framework.Impl.Templating
 
         public static bool HasFlattenBlockAnnotation( this BlockSyntax block ) => block.HasAnnotation( _flattenBlockAnnotation );
 
-        // ReSharper disable once UnusedMember.Global
         public static SeparatedSyntaxList<T> SeparatedList<T>( params T[] items )
             where T : SyntaxNode
             => SyntaxFactory.SeparatedList( items );
 
-        public static SyntaxKind BooleanKeyword( bool value ) => value ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression;
+        public static SyntaxKind Boolean( bool value ) => value ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression;
 
-        public static StatementSyntax TemplateReturnStatement( ExpressionSyntax? returnExpression )
-            => ExpansionContext.CreateReturnStatement( returnExpression );
+        // This method is called when the expression of 'return' is a non-dynamic expression.
+        public static StatementSyntax ReturnStatement( ExpressionSyntax? returnExpression ) => ExpansionContext.CreateReturnStatement( returnExpression );
 
-        public static RuntimeExpression? CreateDynamicMemberAccessExpression( IDynamicExpression dynamicExpression, string member )
+        // This overload is called when the expression of 'return' is a compile-time expression returning a dynamic value.
+        public static StatementSyntax DynamicReturnStatement( IDynamicExpression? returnExpression, string? expressionText = null, Location? location = null )
+            => ExpansionContext.CreateReturnStatement( returnExpression, expressionText, location );
+
+        public static StatementSyntax DynamicDiscardAssignment( IDynamicExpression? expression, string? expressionText = null, Location? location = null )
+        {
+            if ( expression == null )
+            {
+                return SyntaxFactoryEx.EmptyStatement;
+            }
+            else if ( expression.ExpressionType.Is( SpecialType.Void ) )
+            {
+                return SyntaxFactory.ExpressionStatement( expression.CreateExpression( expressionText, location ) );
+            }
+            else
+            {
+                return SyntaxFactory.ExpressionStatement(
+                    SyntaxFactory.AssignmentExpression(
+                        SyntaxKind.SimpleAssignmentExpression,
+                        SyntaxFactoryEx.DiscardToken,
+                        expression.CreateExpression( expressionText, location ) ) );
+            }
+        }
+
+        // This overload is called when the value of a local is a dynamic expression but not a compile-time expression returning a dynamic value.
+        public static StatementSyntax DynamicLocalDeclaration(
+            TypeSyntax type,
+            SyntaxToken identifier,
+            IDynamicExpression? value,
+            string? expressionText = null,
+            Location? location = null )
+        {
+            if ( value == null )
+            {
+                // Don't know how to process this case. Find an example first.
+                throw new AssertionFailedException();
+            }
+
+            if ( value.ExpressionType.Is( SpecialType.Void ) )
+            {
+                // If the method is void, we invoke the method as a statement (so we don't loose the side effect) and we define a local that
+                // we assign to the default value. The local is necessary because it may be referenced later.
+                TypeSyntax variableType;
+                ExpressionSyntax variableValue;
+
+                switch ( type )
+                {
+                    case IdentifierNameSyntax { IsVar: true }:
+                        variableType = LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( Microsoft.CodeAnalysis.SpecialType.System_Object );
+                        variableValue = SyntaxFactoryEx.Null;
+
+                        break;
+
+                    default:
+                        variableType = type;
+                        variableValue = SyntaxFactory.DefaultExpression( variableType );
+
+                        break;
+                }
+
+                return SyntaxFactory.Block(
+                        SyntaxFactory.ExpressionStatement( value.CreateExpression( expressionText, location ) ),
+                        SyntaxFactory.LocalDeclarationStatement(
+                                SyntaxFactory.VariableDeclaration(
+                                    variableType,
+                                    SyntaxFactory.SingletonSeparatedList(
+                                        SyntaxFactory.VariableDeclarator(
+                                            identifier,
+                                            null,
+                                            SyntaxFactory.EqualsValueClause( variableValue ) ) ) ) )
+                            .WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
+                    .WithFlattenBlockAnnotation();
+            }
+            else
+            {
+                return SyntaxFactory.LocalDeclarationStatement(
+                    SyntaxFactory.VariableDeclaration(
+                        type,
+                        SyntaxFactory.SingletonSeparatedList(
+                            SyntaxFactory.VariableDeclarator(
+                                identifier,
+                                null,
+                                SyntaxFactory.EqualsValueClause( value.CreateExpression( expressionText, location ) ) ) ) ) );
+            }
+        }
+
+        public static RuntimeExpression? DynamicMemberAccessExpression( IDynamicExpression dynamicExpression, string member )
         {
             if ( dynamicExpression is IDynamicReceiver dynamicMemberAccess )
             {
@@ -126,11 +217,6 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             var expression = dynamicExpression.CreateExpression();
-
-            if ( expression == null )
-            {
-                return null;
-            }
 
             return new RuntimeExpression(
                 SyntaxFactory.MemberAccessExpression(
@@ -204,10 +290,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private class InitializeCookie : IDisposable
         {
-            public void Dispose()
-            {
-                _expansionContext.Value = null;
-            }
+            public void Dispose() => _expansionContext.Value = null;
         }
     }
 }

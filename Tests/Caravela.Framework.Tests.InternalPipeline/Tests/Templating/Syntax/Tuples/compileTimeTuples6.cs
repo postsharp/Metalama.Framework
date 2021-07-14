@@ -7,7 +7,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Tuples.CompileT
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             (int a, byte b) left = meta.CompileTime((5, (byte)10));
             Console.WriteLine(left.a);

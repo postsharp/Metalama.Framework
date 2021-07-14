@@ -15,19 +15,6 @@ namespace Caravela.Framework.Impl.Linking
     /// </summary>
     internal static class LinkerAnnotationExtensions
     {
-        public const string AnnotationKind = "CaravelaAspectLinker";
-
-        public static LinkerAnnotation? GetLinkerAnnotation( this SyntaxNode node )
-        {
-            var annotationValue = node.GetAnnotations( AnnotationKind ).SingleOrDefault()?.Data;
-
-            return annotationValue != null ? LinkerAnnotation.FromString( annotationValue ) : null;
-        }
-
-        public static T AddLinkerAnnotation<T>( this T node, in LinkerAnnotation annotation )
-            where T : SyntaxNode
-            => node.WithAdditionalAnnotations( new SyntaxAnnotation( AnnotationKind, annotation.ToString() ) );
-
         [return: NotNullIfNotNull( "node" )]
         public static T? AddSourceCodeAnnotation<T>( this T? node )
             where T : SyntaxNode

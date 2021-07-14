@@ -7,9 +7,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.RunTimeSwitchEx
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
-        {
-             
+        dynamic? Template()
+        {    
             object o = new ();
             
             var y = o switch 

@@ -8,14 +8,14 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Loca
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
-            void LocalFunc(dynamic p)
+            void LocalFunc(dynamic? p)
             {
-                Console.WriteLine(p.ToString());
+                Console.WriteLine(p?.ToString());
             }
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
 
             LocalFunc(result);
 

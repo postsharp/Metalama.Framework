@@ -10,7 +10,6 @@ string Method(object a, object b)
         throw new global::System.ArgumentNullException("b");
     }
 
-    global::System.String result;
-    result = this.Method(a, b);
+    var result = this.Method(a, b);
     return (string)result;
 }

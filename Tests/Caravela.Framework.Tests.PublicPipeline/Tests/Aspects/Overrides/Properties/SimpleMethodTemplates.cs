@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         
         
         [Template]
-        public dynamic GetTemplate()
+        public dynamic? GetTemplate()
         {
             Console.WriteLine("This is the overridden getter.");
             return meta.Proceed();
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         public void SetTemplate()
         {
             Console.WriteLine("This is the overridden setter.");
-            var discard = meta.Proceed();
+            meta.Proceed();
         }
     }
 

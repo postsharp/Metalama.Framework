@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.MagicKeywords.GenericC
         class Aspect
         {
             [TestTemplate]
-            dynamic Template()
+            dynamic? Template()
             {
                 var x = meta.CompileTime<TargetCode?>(null);
                 var y = meta.CompileTime<TargetCode>(null);

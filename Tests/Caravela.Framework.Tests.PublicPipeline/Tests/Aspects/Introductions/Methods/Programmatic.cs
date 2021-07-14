@@ -47,7 +47,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
         
         
         [Template]
-        public dynamic Template()
+        public dynamic? Template()
         {
             Console.WriteLine("This is introduced method.");
             return meta.Proceed();

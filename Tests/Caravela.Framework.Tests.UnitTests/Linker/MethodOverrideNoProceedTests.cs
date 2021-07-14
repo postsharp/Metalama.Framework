@@ -74,7 +74,7 @@ class T
     void Foo_Override1(int x)
     {
         Test(""Override1 Start"");
-        link(this.Foo(x));
+        link(this.Foo, inline)(x);
         Test(""Override1 End"");
     }
 
@@ -133,7 +133,7 @@ class T
     void Foo_Override2(int x)
     {
         Test(""Override2 Start"");
-        link(this.Foo(x));
+        link(this.Foo, inline)(x);
         Test(""Override2 End"");
     }
 }

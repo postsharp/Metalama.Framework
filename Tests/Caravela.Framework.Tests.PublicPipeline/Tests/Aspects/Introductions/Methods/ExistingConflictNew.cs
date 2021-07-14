@@ -7,11 +7,6 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-       
-
-       
-        
-        
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClassMethod()
         {

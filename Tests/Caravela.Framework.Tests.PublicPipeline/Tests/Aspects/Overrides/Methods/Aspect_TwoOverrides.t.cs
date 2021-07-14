@@ -8,8 +8,7 @@ internal class TargetClass
         global::System.Console.WriteLine("This is the inner overriding template method.");
         Console.WriteLine("This is the original method.");
         goto __aspect_return_1;
-        __aspect_return_1:
-            ;
+    __aspect_return_1:
         return;
     }
 
@@ -21,8 +20,7 @@ internal class TargetClass
         global::System.Console.WriteLine("This is the inner overriding template method.");
         Console.WriteLine($"This is the original method {x} {y}.");
         goto __aspect_return_1;
-        __aspect_return_1:
-            ;
+    __aspect_return_1:
         return;
     }
 

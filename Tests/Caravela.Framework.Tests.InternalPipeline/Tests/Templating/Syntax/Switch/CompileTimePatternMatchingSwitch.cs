@@ -17,10 +17,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.CompileT
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
-            
-
             switch (meta.Parameters)
             {
                 case null:

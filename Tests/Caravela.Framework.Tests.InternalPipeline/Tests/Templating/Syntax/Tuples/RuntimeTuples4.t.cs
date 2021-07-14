@@ -4,5 +4,5 @@ int Method(int a)
     var b = 2;
     var namedItems = (a: a_1, b: b);
     global::System.Console.WriteLine(namedItems.a);
-    return this.Method(a);
+    return (int)this.Method(a);
 }

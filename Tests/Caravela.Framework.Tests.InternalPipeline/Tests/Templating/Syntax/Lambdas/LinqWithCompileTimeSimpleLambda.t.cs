@@ -6,5 +6,5 @@ int Method(int a, int b)
     list.Add(5);
     var p = global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Where(list, a_1 => a_1 > 2));
     global::System.Console.WriteLine(p);
-    return this.Method(a, b);
+    return (int)this.Method(a, b);
 }

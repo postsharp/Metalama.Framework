@@ -417,8 +417,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     if ( node.AccessorList != null )
                     {
-                        var addAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.AddAccessorDeclaration );
-                        var removeAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.RemoveAccessorDeclaration );
+                        var addAccessor = node.AccessorList.Accessors.Single( a => a.Kind() == SyntaxKind.AddAccessorDeclaration );
+                        var removeAccessor = node.AccessorList.Accessors.Single( a => a.Kind() == SyntaxKind.RemoveAccessorDeclaration );
 
                         success = success &&
                                   this._templateCompiler.TryCompile(

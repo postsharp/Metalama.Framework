@@ -38,12 +38,12 @@ class T
         get
         {
             Test(""Get"");
-            return link(this.Foo);
+            return link(this.Foo.get, inline);
         }
         set
         {
             Test(""Set"");
-            link(this.Foo) = value;
+            link(this.Foo.set, inline) = value;
         }
     }
 }
@@ -103,12 +103,12 @@ class T
         get
         {
             Test(""Get"");
-            return link(this.Foo);
+            return link(this.Foo.get, inline);
         }
         set
         {
             Test(""Set"");
-            link(this.Foo) = value;
+            link(this.Foo.set, inline) = value;
         }
     }
 }
@@ -147,7 +147,7 @@ class T
             Assert.Equal( expectedCode.Trim(), transformedText );
         }
 
-        [Fact( Skip = "Auto properties not fully implemented in the linker." )]
+        [Fact]
         public void AutoProperty()
         {
             var code = @"
@@ -165,12 +165,12 @@ class T
         get
         {
             Test(""Get"");
-            return link(this.Foo);
+            return link(this.Foo.get, inline);
         }
         set
         {
             Test(""Set"");
-            link(this.Foo) = value;
+            link(this.Foo.set, inline) = value;
         }
     }
 }
@@ -183,19 +183,19 @@ class T
     {
     }
 
-    int __foo__BackingField;
+    private int _foo;
     int Foo
     {
         get
         {
             Test(""Get"");
-            return this.__foo__BackingField;
+            return this._foo;
         }
 
         set
         {
             Test(""Set"");
-            this.__foo__BackingField = value;
+            this._foo = value;
         }
     }
 }

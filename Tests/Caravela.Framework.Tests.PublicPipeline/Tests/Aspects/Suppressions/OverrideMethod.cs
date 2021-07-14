@@ -1,4 +1,5 @@
-// @IncludeFinalDiagnostics
+// @ReportOutputWarnings
+// @ClearIgnoredDiagnostics
 
 #if !TESTRUNNER
 // Disable the warning in the main build, not during tests.
@@ -23,7 +24,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMet
         }
         
         [Template]
-        public dynamic Override()
+        public dynamic? Override()
         {
             int a = 0;
             return meta.Proceed();
@@ -31,13 +32,10 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMet
         
         public void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            builder.AdviceFactory.OverrideMethod( builder.TargetDeclaration, nameof(Override), new () { {"__ForceNotInlineable", true } } );
+            builder.AdviceFactory.OverrideMethod( builder.TargetDeclaration, nameof(Override) );
             builder.Diagnostics.Suppress( null, _suppression );
         }
-
-       
-        
-            }
+    }
     
     // <target>
     internal class TargetClass

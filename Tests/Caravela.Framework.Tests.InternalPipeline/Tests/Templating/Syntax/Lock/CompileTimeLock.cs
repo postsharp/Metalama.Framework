@@ -6,7 +6,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lock.CompileTim
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             lock (meta.Compilation)
             {

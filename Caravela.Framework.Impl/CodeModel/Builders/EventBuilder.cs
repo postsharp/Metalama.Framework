@@ -23,18 +23,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         private readonly bool _isEventField;
 
-        public AspectLinkerOptions? LinkerOptions { get; }
-
         public EventBuilder(
             Advice parentAdvice,
             INamedType targetType,
             string name,
-            bool isEventField,
-            AspectLinkerOptions? linkerOptions )
+            bool isEventField )
             : base( parentAdvice, targetType, name )
         {
             this._isEventField = isEventField;
-            this.LinkerOptions = linkerOptions;
             this.EventType = (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(EventHandler) );
         }
 
@@ -53,9 +49,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IInvokerFactory<IEventInvoker> Invokers => new InvokerFactory<IEventInvoker>( order => new EventInvoker( this, order ), false );
 
-        [Memo]
-        public override MemberDeclarationSyntax InsertPositionNode
-            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
+        public override InsertPosition InsertPosition
+            => new(
+                InsertPositionRelation.Within,
+                ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 
@@ -105,13 +102,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             if ( this._isEventField && this.ExplicitInterfaceImplementations.Count > 0 )
             {
                 // Add annotation to the explicit annotation that the linker should treat this an event field.
-                @event = @event.AddLinkerDeclarationFlags( LinkerDeclarationFlags.EventField );
+                @event = @event.WithLinkerDeclarationFlags( LinkerDeclarationFlags.EventField );
             }
 
-            return new[]
-            {
-                new IntroducedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this )
-            };
+            return new[] { new IntroducedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
 
             AccessorListSyntax GenerateAccessorList()
             {

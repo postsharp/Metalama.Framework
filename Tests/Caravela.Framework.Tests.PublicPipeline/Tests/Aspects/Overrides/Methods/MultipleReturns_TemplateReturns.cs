@@ -9,7 +9,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Multiple
 
     public class OverrideAttribute : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             Console.WriteLine("Override.");
             return meta.Proceed();

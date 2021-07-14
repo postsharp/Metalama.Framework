@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Using.CompileTi
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             using ( new DisposableClass() )
             {

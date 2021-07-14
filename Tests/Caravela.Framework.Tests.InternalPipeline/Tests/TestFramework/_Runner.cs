@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Caravela.TestFramework;
 using Xunit;
 using Xunit.Abstractions;
@@ -9,6 +10,6 @@ namespace Caravela.Framework.Tests.Integration.Tests.TestFramework
         public _Runner( ITestOutputHelper logger) : base( logger ) { }
         
         [Theory, CurrentDirectory]
-        public void Test( string f ) => this.RunTest( f );
+        public Task Test( string f ) => this.RunTestAsync( f );
     }
 }

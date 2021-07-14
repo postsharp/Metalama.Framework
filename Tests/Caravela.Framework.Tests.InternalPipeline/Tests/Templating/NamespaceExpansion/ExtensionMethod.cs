@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
         class Aspect
         {
             [TestTemplate]
-            dynamic Template()
+            dynamic? Template()
             {
                 var list = new List<int>();
 

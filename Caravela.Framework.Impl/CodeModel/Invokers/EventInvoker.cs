@@ -60,14 +60,15 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             return new DynamicExpression( expression, this.Member.EventType, false );
         }
 
-        public object Raise( object? instance, params object?[] args )
+        public object? Raise( object? instance, params object?[] args )
         {
             var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ) );
 
             var arguments = this.Member.GetArguments( this.Member.Signature.Parameters, RuntimeExpression.FromValue( args ) );
 
-            var expression = InvocationExpression( ConditionalAccessExpression( eventAccess, MemberBindingExpression( IdentifierName( "Invoke" ) ) ) )
-                .AddArgumentListArguments( arguments );
+            var expression = ConditionalAccessExpression(
+                eventAccess,
+                InvocationExpression( MemberBindingExpression( IdentifierName( "Invoke" ) ) ).AddArgumentListArguments( arguments ) );
 
             return new DynamicExpression(
                 expression,

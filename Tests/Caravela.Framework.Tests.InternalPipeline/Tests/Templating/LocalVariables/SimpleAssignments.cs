@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.SimpleA
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var n = meta.Parameters.Count; // build-time
                                              //var n = meta.RunTime(target.Method.Parameters.Count); // run-time

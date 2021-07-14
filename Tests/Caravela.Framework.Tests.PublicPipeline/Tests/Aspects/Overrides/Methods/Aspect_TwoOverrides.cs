@@ -11,7 +11,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_T
 
     public class InnerOverrideAttribute : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             Console.WriteLine("This is the inner overriding template method.");
             return meta.Proceed();
@@ -20,7 +20,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_T
 
     public class OuterOverrideAttribute : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             Console.WriteLine("This is the outer overriding template method.");
             return meta.Proceed();

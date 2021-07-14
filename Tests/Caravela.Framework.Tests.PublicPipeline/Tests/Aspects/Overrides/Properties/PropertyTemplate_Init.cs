@@ -1,6 +1,4 @@
-﻿// Ignored because not all declarations listed here are curretnly supported (the test should be be split into a few smaller ones).
-
-using Caravela.Framework.Aspects;
+﻿using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
 using System;
 
@@ -24,7 +22,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             set
             {
                 Console.WriteLine($"This is the overridden setter.");
-                var discard = meta.Proceed();
+                meta.Proceed();
             }
         }
     }

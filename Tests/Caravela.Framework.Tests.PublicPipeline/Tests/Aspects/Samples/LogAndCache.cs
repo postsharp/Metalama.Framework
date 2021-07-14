@@ -26,13 +26,13 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogA
 
     public class LogAttribute : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             Console.WriteLine(meta.Method.ToDisplayString() + " started.");
 
             try
             {
-                dynamic result = meta.Proceed();
+                dynamic? result = meta.Proceed();
 
                 Console.WriteLine(meta.Method.ToDisplayString() + " succeeded.");
                 return result;
@@ -48,7 +48,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogA
 
     public class CacheAttribute : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             // Builds the caching string.
             var stringBuilder = meta.CompileTime(new StringBuilder());
@@ -86,7 +86,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogA
             else
             {
                 Console.WriteLine("Cache miss.");
-                dynamic result = meta.Proceed();
+                dynamic? result = meta.Proceed();
 
                 // Add to cache.
                 SampleCache.Cache.TryAdd(cacheKey, result);

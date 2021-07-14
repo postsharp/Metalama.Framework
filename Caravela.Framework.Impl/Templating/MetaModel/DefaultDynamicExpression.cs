@@ -10,16 +10,14 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 {
     internal class DefaultDynamicExpression : IDynamicExpression
     {
-        private readonly IType _type;
-
         public DefaultDynamicExpression( IType type )
         {
-            this._type = type;
+            this.ExpressionType = type;
         }
 
-        public RuntimeExpression? CreateExpression( string? expressionText = null, Location? location = null )
+        public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null )
         {
-            var typeSymbol = this._type.GetSymbol();
+            var typeSymbol = this.ExpressionType.GetSymbol();
             var expression = LanguageServiceFactory.CSharpSyntaxGenerator.DefaultExpression( typeSymbol );
 
             if ( expression is not DefaultExpressionSyntax )
@@ -32,5 +30,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
             return new RuntimeExpression( expression );
         }
+
+        public IType ExpressionType { get; }
     }
 }

@@ -8,8 +8,7 @@ string Method(string a)
         global::System.Console.WriteLine(s);
     }
 
-    global::System.String result;
-    result = this.Method(a);
+    var result = this.Method(a);
     object obj = result;
     string text = obj as string;
     if (text != null)

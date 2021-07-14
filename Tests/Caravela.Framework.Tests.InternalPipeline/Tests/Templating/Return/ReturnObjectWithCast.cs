@@ -7,9 +7,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.ReturnStatements.Retur
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
-            object x = meta.Parameters[0].Value;
+            object? x = meta.Parameters[0].Value;
             return x;
         }
     }

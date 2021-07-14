@@ -4,11 +4,11 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,14 +19,14 @@ namespace Caravela.Framework.Impl.Transformations
     /// <summary>
     /// Method override, which expands a template.
     /// </summary>
-    internal class OverriddenMethod : OverriddenMember
+    internal sealed class OverriddenMethod : OverriddenMember
     {
         public new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 
         public IMethod TemplateMethod { get; }
 
-        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, IMethod templateMethod, AspectLinkerOptions? linkerOptions = null )
-            : base( advice, overriddenDeclaration, linkerOptions )
+        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, IMethod templateMethod )
+            : base( advice, overriddenDeclaration )
         {
             Invariant.Assert( templateMethod != null );
 
@@ -37,7 +37,10 @@ namespace Caravela.Framework.Impl.Transformations
         {
             using ( context.DiagnosticSink.WithDefaultScope( this.OverriddenDeclaration ) )
             {
-                var methodName = context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration );
+                var proceedExpression = new DynamicExpression(
+                    this.CreateInvocationExpression(),
+                    this.OverriddenDeclaration.ReturnType,
+                    false );
 
                 var metaApi = MetaApi.ForMethod(
                     this.OverriddenDeclaration,
@@ -46,18 +49,14 @@ namespace Caravela.Framework.Impl.Transformations
                         this.TemplateMethod.GetSymbol(),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
-                        context.ServiceProvider.GetService<AspectPipelineDescription>() ) );
+                        context.ServiceProvider.GetService<AspectPipelineDescription>(),
+                        proceedExpression ) );
 
                 var expansionContext = new TemplateExpansionContext(
                     this.Advice.Aspect.Aspect,
                     metaApi,
                     this.OverriddenDeclaration.Compilation,
-                    new LinkerOverrideMethodProceedImpl(
-                        this.Advice.AspectLayerId,
-                        this.OverriddenDeclaration,
-                        LinkingOrder.Default,
-                        context.SyntaxFactory ),
-                    context.LexicalScope,
+                    context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
                     (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
 
@@ -78,7 +77,7 @@ namespace Caravela.Framework.Impl.Transformations
                             this.OverriddenDeclaration.GetSyntaxModifierList(),
                             this.OverriddenDeclaration.GetSyntaxReturnType(),
                             null,
-                            Identifier( methodName ),
+                            Identifier( context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration ) ),
                             this.OverriddenDeclaration.GetSyntaxTypeParameterList(),
                             this.OverriddenDeclaration.GetSyntaxParameterList(),
                             this.OverriddenDeclaration.GetSyntaxConstraintClauses(),
@@ -86,12 +85,33 @@ namespace Caravela.Framework.Impl.Transformations
                             null ),
                         this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.Override,
-                        this.LinkerOptions,
                         this.OverriddenDeclaration )
                 };
 
                 return overrides;
             }
+        }
+
+        private ExpressionSyntax CreateInvocationExpression()
+        {
+            return
+                InvocationExpression(
+                    this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self ),
+                    ArgumentList(
+                        SeparatedList(
+                            this.OverriddenDeclaration.Parameters.Select(
+                                p =>
+                                    Argument(
+                                        null,
+                                        p.RefKind switch
+                                        {
+                                            RefKind.None => default,
+                                            RefKind.In => default,
+                                            RefKind.Out => Token( SyntaxKind.OutKeyword ),
+                                            RefKind.Ref => Token( SyntaxKind.RefKeyword ),
+                                            _ => throw new AssertionFailedException()
+                                        },
+                                        IdentifierName( p.Name ) ) ) ) ) );
         }
     }
 }

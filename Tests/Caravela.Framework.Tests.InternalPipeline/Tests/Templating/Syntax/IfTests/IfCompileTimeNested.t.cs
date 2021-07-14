@@ -1,7 +1,7 @@
 void Method(string aBc)
 {
     global::System.Console.WriteLine(42);
-    global::Caravela.Framework.Aspects.__Void result;
-    result = this.Method(aBc);
+    this.Method(aBc);
+    object result = null;
     return;
 }

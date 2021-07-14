@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Using.RunTimeUs
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             using (new MemoryStream())
             {

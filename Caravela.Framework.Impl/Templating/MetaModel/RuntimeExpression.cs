@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -32,6 +33,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         /// </summary>
         /// <param name="runtimeExpression"></param>
         /// <returns></returns>
+        [return: NotNullIfNotNull( "runtimeExpression" )]
         public static implicit operator ExpressionSyntax?( RuntimeExpression? runtimeExpression ) => runtimeExpression?.Syntax;
 
         private ITypeSymbol? GetExpressionType( ITypeFactory typeFactory )
@@ -93,20 +95,36 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             => FromValue( value )?.Syntax ?? SyntaxFactory.LiteralExpression( SyntaxKind.NullKeyword );
 
         public static RuntimeExpression? FromValue( object? value )
-            => value switch
+        {
+            switch ( value )
             {
-                null => null,
-                RuntimeExpression runtimeExpression => runtimeExpression,
+                case null:
+                    return null;
 
-                // This case is used to simplify tests.
-                IDynamicExpression dynamicMember => dynamicMember.CreateExpression(),
+                case RuntimeExpression runtimeExpression:
+                    return runtimeExpression;
 
-                ExpressionSyntax syntax => new RuntimeExpression( syntax ),
+                case IDynamicExpression dynamicMember:
+                    return dynamicMember.CreateExpression();
 
-                _ => throw new ArgumentOutOfRangeException(
-                    nameof(value),
-                    $"Cannot convert an instance of type {value.GetType().Name} to a run-time expression." )
-            };
+                case ExpressionSyntax syntax:
+                    return new RuntimeExpression( syntax );
+
+                default:
+                    var expression = SyntaxFactoryEx.LiteralExpressionOrNull( value );
+
+                    if ( expression != null )
+                    {
+                        return new RuntimeExpression( expression );
+                    }
+                    else
+                    {
+                        throw new ArgumentOutOfRangeException(
+                            nameof(value),
+                            $"Cannot convert an instance of type {value.GetType().Name} to a run-time expression." );
+                    }
+            }
+        }
 
         public static RuntimeExpression[]? FromValue( object?[]? array )
         {

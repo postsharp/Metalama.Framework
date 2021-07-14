@@ -6,7 +6,6 @@
         public void IntroducedMethod_Void()
         {
             Console.WriteLine("This is introduced method.");
-            __Void nic;
         }
 
         public int IntroducedMethod_Int()

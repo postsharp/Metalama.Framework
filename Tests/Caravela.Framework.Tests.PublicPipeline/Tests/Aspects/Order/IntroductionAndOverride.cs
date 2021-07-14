@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
         }
 
         [Template]
-        public dynamic OverrideTemplate()
+        public dynamic? OverrideTemplate()
         {
             try
             {
@@ -63,7 +63,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
         }
 
         [Template]
-        public dynamic OverrideTemplate()
+        public dynamic? OverrideTemplate()
         {
             try
             {
@@ -97,7 +97,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
         }
 
         [Template]
-        public dynamic OverrideTemplate()
+        public dynamic? OverrideTemplate()
         {
             try
             {

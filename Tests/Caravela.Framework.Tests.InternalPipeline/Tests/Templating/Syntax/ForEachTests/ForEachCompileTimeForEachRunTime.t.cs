@@ -17,7 +17,6 @@ int Method(int a, int b)
         }
     }
 
-    global::System.Int32 result;
-    result = this.Method(a, b);
+    var result = this.Method(a, b);
     return (int)result;
 }

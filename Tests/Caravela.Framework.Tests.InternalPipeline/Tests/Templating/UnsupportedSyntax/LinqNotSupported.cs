@@ -9,9 +9,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Linq
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
 
             IEnumerable<int> list = from i in new int[] { 1, 2, 3 } select i * i;
             if (result == null)

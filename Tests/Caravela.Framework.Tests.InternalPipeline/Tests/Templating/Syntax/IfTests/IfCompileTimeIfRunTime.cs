@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfCompi
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var p = meta.Parameters[0];
             if (meta.Method.Name == "NotNullMethod")

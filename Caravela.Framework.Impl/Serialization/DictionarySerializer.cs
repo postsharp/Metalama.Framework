@@ -29,6 +29,7 @@ namespace Caravela.Framework.Impl.Serialization
 
             var creationExpression = ObjectCreationExpression( syntaxFactory.GetTypeSyntax( dictionaryType ) );
 
+            // TODO: Don't use dynamic typing here.
             dynamic dictionary = obj;
             object defaultComparer = GetDefaultComparer( dictionary );
             object actualComparer = dictionary.Comparer;

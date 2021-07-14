@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitc
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var i = meta.CompileTime(SwitchEnum.one);
 

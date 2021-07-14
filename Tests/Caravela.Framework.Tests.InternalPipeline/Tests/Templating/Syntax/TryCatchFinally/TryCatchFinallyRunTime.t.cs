@@ -3,8 +3,7 @@ int Method(int a)
     try
     {
         global::System.Console.WriteLine("try");
-        global::System.Int32 result;
-        result = this.Method(a);
+        var result = this.Method(a);
         global::System.Console.WriteLine("success");
         return (int)result;
     }

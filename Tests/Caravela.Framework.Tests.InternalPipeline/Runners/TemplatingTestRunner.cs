@@ -2,11 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
@@ -24,8 +24,10 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Tests.Integration.Runners
 {
@@ -77,9 +79,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// </summary>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <returns>The result of the test execution.</returns>
-        public override TestResult RunTest( TestInput testInput )
+        public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
-            var testResult = base.RunTest( testInput );
+            var testResult = await base.RunTestAsync( testInput );
 
             if ( !testResult.Success )
             {
@@ -128,7 +130,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var transformedTemplateText = transformedTemplateSyntax!.SyntaxTree.GetText();
             Directory.CreateDirectory( Path.GetDirectoryName( transformedTemplatePath ) );
 
-            using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
+            await using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
             {
                 transformedTemplateText.Write( textWriter );
             }
@@ -202,7 +204,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     return testResult;
                 }
 
-                testSyntaxTree.SetRunTimeCode( targetMethod.WithBody( output! ) );
+                await testSyntaxTree.SetRunTimeCodeAsync( targetMethod.WithBody( output! ) );
             }
             catch ( Exception e )
             {
@@ -251,6 +253,12 @@ namespace Caravela.Framework.Tests.Integration.Runners
             // ReSharper disable once SuspiciousTypeConversion.Global
             var lexicalScope = new TemplateLexicalScope( ((Declaration) targetMethod).LookupSymbols() );
 
+            var proceedExpression =
+                new DynamicExpression(
+                    GetProceedInvocation( targetMethod ),
+                    targetMethod.ReturnType,
+                    false );
+
             var metaApi = MetaApi.ForMethod(
                 targetMethod,
                 new MetaApiProperties(
@@ -258,20 +266,43 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     templateMethod,
                     ImmutableDictionary.Create<string, object?>().Add( "TestKey", "TestValue" ),
                     default,
-                    new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ) ) );
+                    new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ),
+                    proceedExpression ) );
 
             return (new TemplateExpansionContext(
                         templateInstance,
                         metaApi,
                         compilation,
-                        new LinkerOverrideMethodProceedImpl(
-                            default,
-                            targetMethod,
-                            LinkingOrder.Default,
-                            compilation.Factory ),
                         lexicalScope,
                         this._syntaxSerializationService,
                         compilation.Factory ), roslynTargetMethod);
+
+            static ExpressionSyntax GetProceedInvocation( IMethod targetMethod )
+            {
+                return
+                    SyntaxFactory.InvocationExpression(
+                        targetMethod.IsStatic
+                            ? SyntaxFactory.IdentifierName( targetMethod.Name )
+                            : SyntaxFactory.MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                SyntaxFactory.ThisExpression(),
+                                SyntaxFactory.IdentifierName( targetMethod.Name ) ),
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList(
+                                targetMethod.Parameters.Select(
+                                    p =>
+                                        SyntaxFactory.Argument(
+                                            null,
+                                            p.RefKind switch
+                                            {
+                                                RefKind.None => default,
+                                                RefKind.In => default,
+                                                RefKind.Out => SyntaxFactory.Token( SyntaxKind.OutKeyword ),
+                                                RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
+                                                _ => throw new AssertionFailedException()
+                                            },
+                                            SyntaxFactory.IdentifierName( p.Name ) ) ) ) ) );
+            }
         }
     }
 }

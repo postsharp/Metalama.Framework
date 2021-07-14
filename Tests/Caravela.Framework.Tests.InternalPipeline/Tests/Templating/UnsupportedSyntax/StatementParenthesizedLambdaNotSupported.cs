@@ -7,14 +7,14 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsuportedSyntax.State
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             Action<object> action = (object p) =>
             {
                 Console.WriteLine(p.ToString());
             };
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
 
             action(result);
 

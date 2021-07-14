@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.DoNo
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             int i = 0;
             do
@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.DoNo
 
             Console.WriteLine("Test result = " + i);
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
             return result;
         }
     }

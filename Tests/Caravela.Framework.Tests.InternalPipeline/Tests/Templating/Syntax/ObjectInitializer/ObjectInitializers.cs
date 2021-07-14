@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.ObjectIni
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var a = new Entity1
             {
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.ObjectIni
 
             var b = a with { Property1 = 2 };
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
             return result;
         }
     }

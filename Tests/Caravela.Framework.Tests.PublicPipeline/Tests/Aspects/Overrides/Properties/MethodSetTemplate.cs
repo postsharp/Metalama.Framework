@@ -16,10 +16,10 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
 
         [Template]
-        public dynamic? SetProperty()
+        public void SetProperty()
         {
             Console.WriteLine($"This is the overridden setter.");
-            return meta.Proceed();
+            meta.Proceed();
         }
     }
 

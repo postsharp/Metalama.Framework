@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Caravela.TestFramework;
 using Xunit;
 using Xunit.Abstractions;
@@ -9,12 +10,12 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects
         public _Runner( ITestOutputHelper logger) : base( logger ) { }
         
         [Theory, CurrentDirectory("Introductions")]
-        public void Introductions( string f ) => this.RunTest( f );
+        public Task Introductions( string f ) => this.RunTestAsync( f );
         
         [Theory, CurrentDirectory("Overrides")]
-        public void Overrides( string f ) => this.RunTest( f );
+        public Task Overrides( string f ) => this.RunTestAsync( f );
         
         [Theory, CurrentDirectory]
-        public void Other( string f ) => this.RunTest( f );
+        public Task Other( string f ) => this.RunTestAsync( f );
     }
 }

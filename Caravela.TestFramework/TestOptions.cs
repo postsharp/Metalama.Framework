@@ -8,12 +8,13 @@ using System.Text.RegularExpressions;
 namespace Caravela.TestFramework
 {
     /// <summary>
-    /// A set of test options, which can be included in the source text of tests using special comments like <c>// @IncludeFinalDiagnostics</c>.
+    /// A set of test options, which can be included in the source text of tests using special comments like <c>// @ReportOutputWarnings</c>.
     /// This class is JSON-serializable.
     /// </summary>
     public class TestOptions
     {
-        private static readonly Regex _directivesRegex = new( @"^\s*//\s*@(?<name>\w+)\s*(\((?<arg>[^\)]*)\))?", RegexOptions.Multiline );
+        private static readonly Regex _optionRegex = new( @"^\s*//\s*@(?<name>\w+)\s*(\((?<arg>[^\)]*)\))?", RegexOptions.Multiline );
+        private readonly List<string> _invalidSourceOptions = new();
 
         public string? SkipReason { get; set; }
 
@@ -23,7 +24,12 @@ namespace Caravela.TestFramework
         /// Gets or sets a value indicating whether the diagnostics of the compilation of the transformed target code should be included in the test result.
         /// This is useful when diagnostic suppression is being tested.
         /// </summary>
-        public bool? IncludeFinalDiagnostics { get; set; }
+        public bool? ReportOutputWarnings { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the output file must be compiled into a binary (e.g. emitted).
+        /// </summary>
+        public bool? OutputCompilationDisabled { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether diagnostics of all severities should be included in the rest result. By default, only
@@ -75,53 +81,83 @@ namespace Caravela.TestFramework
         public bool? FormatOutput { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether C# nullability is disabled for the compilation.
+        /// </summary>
+        public bool? NullabilityDisabled { get; set; }
+
+        /// <summary>
+        /// Gets a list of warnings that are not reported even if <see cref="ReportOutputWarnings"/> is set to <c>true</c>.
+        /// </summary>
+        public List<string> IgnoredDiagnostics { get; } = new();
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the list of <see cref="IgnoredDiagnostics"/> inherited from the parent level (directory or base directory)
+        /// must be cleared before new diagnostics are added to this list. This option is not inherited from the base level.
+        /// </summary>
+        public bool? ClearIgnoredDiagnostics { get; set; }
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
-        internal virtual void ApplyDirectoryOptions( TestDirectoryOptions directoryOptions )
+        internal virtual void ApplyBaseOptions( TestDirectoryOptions baseOptions )
         {
-            this.SkipReason ??= directoryOptions.SkipReason;
+            this.SkipReason ??= baseOptions.SkipReason;
 
-            this.IncludeFinalDiagnostics ??= directoryOptions.IncludeFinalDiagnostics;
+            this.ReportOutputWarnings ??= baseOptions.ReportOutputWarnings;
 
-            this.IncludeAllSeverities ??= directoryOptions.IncludeAllSeverities;
+            this.OutputCompilationDisabled ??= baseOptions.OutputCompilationDisabled;
 
-            this.TestRunnerFactoryType ??= directoryOptions.TestRunnerFactoryType;
+            this.IncludeAllSeverities ??= baseOptions.IncludeAllSeverities;
 
-            this.WriteInputHtml ??= directoryOptions.WriteInputHtml;
+            this.TestRunnerFactoryType ??= baseOptions.TestRunnerFactoryType;
 
-            this.WriteOutputHtml ??= directoryOptions.WriteOutputHtml;
+            this.WriteInputHtml ??= baseOptions.WriteInputHtml;
 
-            this.AddHtmlTitles ??= directoryOptions.AddHtmlTitles;
+            this.WriteOutputHtml ??= baseOptions.WriteOutputHtml;
 
-            this.ReportErrorMessage ??= directoryOptions.ReportErrorMessage;
+            this.AddHtmlTitles ??= baseOptions.AddHtmlTitles;
 
-            this.FormatOutput ??= directoryOptions.FormatOutput;
+            this.ReportErrorMessage ??= baseOptions.ReportErrorMessage;
 
-            this.IncludedFiles.AddRange( directoryOptions.IncludedFiles );
+            this.FormatOutput ??= baseOptions.FormatOutput;
 
-            this.References.AddRange( directoryOptions.References );
+            this.IncludedFiles.AddRange( baseOptions.IncludedFiles );
+
+            this.References.AddRange( baseOptions.References );
+
+            if ( !this.ClearIgnoredDiagnostics.GetValueOrDefault() )
+            {
+                this.IgnoredDiagnostics.AddRange( baseOptions.IgnoredDiagnostics );
+            }
         }
+
+        public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
 
         /// <summary>
         /// Parses <c>// @</c> directives from source code and apply them to the current object. 
         /// </summary>
         internal void ApplySourceDirectives( string sourceCode )
         {
-            foreach ( Match? directive in _directivesRegex.Matches( sourceCode ) )
+            foreach ( Match? option in _optionRegex.Matches( sourceCode ) )
             {
-                if ( directive == null )
+                if ( option == null )
                 {
                     continue;
                 }
 
-                var directiveName = directive.Groups["name"].Value;
-                var directiveArg = (directive.Groups["arg"]?.Value ?? "").Trim();
+                var optionName = option.Groups["name"].Value;
+                var optionArg = (option.Groups["arg"]?.Value ?? "").Trim();
 
-                switch ( directiveName )
+                switch ( optionName )
                 {
-                    case "IncludeFinalDiagnostics":
-                        this.IncludeFinalDiagnostics = true;
+                    case "ReportOutputWarnings":
+                        this.ReportOutputWarnings = true;
+
+                        break;
+
+                    case "OutputCompilationDisabled":
+                        this.OutputCompilationDisabled = true;
 
                         break;
 
@@ -131,12 +167,12 @@ namespace Caravela.TestFramework
                         break;
 
                     case "Skipped":
-                        this.SkipReason = string.IsNullOrEmpty( directiveArg ) ? "Skipped by directive in source code." : directiveArg;
+                        this.SkipReason = string.IsNullOrEmpty( optionArg ) ? "Skipped by directive in source code." : optionArg;
 
                         break;
 
                     case "Include":
-                        this.IncludedFiles.Add( directiveArg );
+                        this.IncludedFiles.Add( optionArg );
 
                         break;
 
@@ -166,6 +202,26 @@ namespace Caravela.TestFramework
                         this.FormatOutput = true;
 
                         break;
+
+                    case "NullabilityDisabled":
+                        this.NullabilityDisabled = true;
+
+                        break;
+
+                    case "IgnoredDiagnostic":
+                        this.IgnoredDiagnostics.Add( optionArg );
+
+                        break;
+
+                    case "ClearIgnoredDiagnostics":
+                        this.ClearIgnoredDiagnostics = true;
+
+                        break;
+
+                    default:
+                        this._invalidSourceOptions.Add( "@" + optionName );
+
+                        break;
                 }
             }
         }
@@ -176,7 +232,7 @@ namespace Caravela.TestFramework
         internal void ApplyOptions( string sourceCode, string path, TestDirectoryOptionsReader optionsReader )
         {
             this.ApplySourceDirectives( sourceCode );
-            this.ApplyDirectoryOptions( optionsReader.GetDirectoryOptions( Path.GetDirectoryName( path )! ) );
+            this.ApplyBaseOptions( optionsReader.GetDirectoryOptions( Path.GetDirectoryName( path )! ) );
         }
     }
 }

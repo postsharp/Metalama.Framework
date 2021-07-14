@@ -8,11 +8,11 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Awai
     class Aspect
     {
         [TestTemplate]
-        async Task<T> Template<T>()
+        async Task<T?> Template<T>()
         {
             await Task.Yield();
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
             return result;
         }
     }

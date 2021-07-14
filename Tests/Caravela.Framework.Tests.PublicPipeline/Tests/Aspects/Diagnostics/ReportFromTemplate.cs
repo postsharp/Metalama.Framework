@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromTem
     {
         private static readonly DiagnosticDefinition _definition = new( "MY001", Severity.Error, "Invalid method." );
         
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             meta.Diagnostics.Report( _definition );
 

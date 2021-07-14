@@ -7,12 +7,10 @@ namespace Caravela.Framework.Tests.Integration.PatternMatching.PropertyPatternSc
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
-                  var rt = new object();
-
-var a3 = rt is IParameter p3 && p3.DefaultValue.IsNull;
-
+            var rt = new object();
+            var a3 = rt is IParameter p3 && p3.DefaultValue.IsNull;
                     
             return meta.Proceed();
         }

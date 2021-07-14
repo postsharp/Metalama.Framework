@@ -7,7 +7,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.BreakInRu
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             int i = 0;
             while (i < meta.Parameters.Count)
@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.BreakInRu
 
             Console.WriteLine("Test result = " + i);
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
             return result;
         }
     }

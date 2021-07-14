@@ -12,7 +12,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.MethodRef
         public string GetParameterName() => meta.Parameters.First().Name;
         public static string GetParameterNameStatic(IParameter p) => p.Name;
     
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
            Console.WriteLine( this.GetParameterName() );
            Console.WriteLine( GetParameterNameStatic(meta.Parameters.First()) );

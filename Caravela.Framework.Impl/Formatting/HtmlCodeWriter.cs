@@ -110,9 +110,9 @@ namespace Caravela.Framework.Impl.Formatting
 
                         if ( classifiedSpan.Tags.TryGetValue( _csClassTagName, out var csClassification ) )
                         {
-                            foreach ( string classification in csClassification.Split( ';' ) )
+                            foreach ( var classification in csClassification.Split( ';' ) )
                             {
-                                foreach ( string c in classification.Split( '-' ) )
+                                foreach ( var c in classification.Split( '-' ) )
                                 {
                                     classes.Add( "cs-" + c.Trim().Replace( " ", "-" ) );
                                 }

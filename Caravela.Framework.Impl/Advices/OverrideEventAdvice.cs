@@ -47,8 +47,7 @@ namespace Caravela.Framework.Impl.Advices
                     this.TargetDeclaration,
                     this.TemplateEvent,
                     this.AddTemplateMethod,
-                    this.RemoveTemplateMethod,
-                    this.LinkerOptions ) );
+                    this.RemoveTemplateMethod ) );
         }
     }
 }

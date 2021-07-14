@@ -9,7 +9,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.LinqWit
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var list = new List<int>();
             list.Add(1);

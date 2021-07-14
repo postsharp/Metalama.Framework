@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfCompi
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             int t = meta.CompileTime(0);
             string name = meta.Parameters[0].Name;
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfCompi
             }
 
             Console.WriteLine(t);
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
             return result;
         }
     }

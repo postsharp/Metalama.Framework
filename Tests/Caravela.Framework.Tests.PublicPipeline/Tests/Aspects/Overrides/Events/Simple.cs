@@ -10,13 +10,13 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
         public override void OverrideAdd(dynamic handler)
         {
             Console.WriteLine("This is the add template.");
-            var __ = meta.Proceed();
+            meta.Proceed();
         }
 
         public override void OverrideRemove(dynamic handler)
         {
             Console.WriteLine("This is the remove template.");
-            var __ = meta.Proceed();
+            meta.Proceed();
         }
     }
 

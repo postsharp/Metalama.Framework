@@ -7,7 +7,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             meta.CompileTime( 0 );
             meta.CompileTime<long>( 0 );

@@ -26,20 +26,16 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IReadOnlyDictionary<IMember, IMember> MemberMap { get; }
 
-        public AspectLinkerOptions? LinkerOptions { get; }
-
         public IntroducedInterface(
             ImplementInterfaceAdvice implementInterfaceAdvice,
             INamedType targetType,
             INamedType interfaceType,
-            Dictionary<IMember, IMember> memberMap,
-            AspectLinkerOptions? linkerOptions )
+            Dictionary<IMember, IMember> memberMap )
         {
             this.Advice = implementInterfaceAdvice;
             this.TargetType = targetType;
             this.InterfaceType = interfaceType;
             this.MemberMap = memberMap;
-            this.LinkerOptions = linkerOptions;
         }
 
         public IEnumerable<BaseTypeSyntax> GetIntroducedInterfaceImplementations()

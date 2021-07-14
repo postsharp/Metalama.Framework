@@ -38,7 +38,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.TwoIAspectImpl
             set
             {
                 Console.WriteLine("Assigning " + meta.Method.ToDisplayString());
-                var _ = meta.Proceed();
+                meta.Proceed();
             }
         }
     }

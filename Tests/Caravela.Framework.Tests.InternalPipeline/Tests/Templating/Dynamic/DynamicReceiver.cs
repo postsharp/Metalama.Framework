@@ -1,6 +1,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicReceiver
 {

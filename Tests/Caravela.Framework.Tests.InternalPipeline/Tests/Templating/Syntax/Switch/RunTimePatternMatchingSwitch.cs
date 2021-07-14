@@ -9,7 +9,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.Runtimea
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var o = new object();
 

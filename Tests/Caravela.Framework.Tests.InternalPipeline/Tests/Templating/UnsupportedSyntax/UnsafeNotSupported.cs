@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Unsa
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             int i = meta.Parameters.Count;
             unsafe
@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Unsa
 
             Console.WriteLine("Test result = " + i);
 
-            dynamic result = meta.Proceed();
+            dynamic? result = meta.Proceed();
             return result;
         }
     }

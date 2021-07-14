@@ -8,10 +8,10 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.NameCla
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var n = meta.Parameters.Count; // build-time
-            object y = meta.Parameters[0].Value; // run-time
+            object? y = meta.Parameters[0].Value; // run-time
 
             if (n == 1)
             {

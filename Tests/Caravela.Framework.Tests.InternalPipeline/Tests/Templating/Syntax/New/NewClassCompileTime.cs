@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.CompileTime
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var c = meta.CompileTime(new CompileTimeClass());
             Console.WriteLine(c.String);

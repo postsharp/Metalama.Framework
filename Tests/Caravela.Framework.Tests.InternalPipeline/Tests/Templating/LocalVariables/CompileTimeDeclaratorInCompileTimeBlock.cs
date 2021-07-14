@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.Compile
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             if (meta.Parameters.Count > 0)
             {

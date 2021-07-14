@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples
+namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
 {
     public class DirtyAttribute : Attribute, IAspect<INamedType>
     {
@@ -66,7 +66,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples
         private void OverrideSetter()
         {
             // TODO: this syntax is ugly and it will be fixed.
-            var __ = meta.Proceed();
+            meta.Proceed();
 
             if (meta.This.DirtyState == DirtyState.Clean)
             {
