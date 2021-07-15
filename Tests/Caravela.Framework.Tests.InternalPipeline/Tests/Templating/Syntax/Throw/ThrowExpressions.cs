@@ -9,7 +9,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Throw.ThrowExpr
         private dynamic? Template()
         {
             // Run-time
-            object a = null;
+            object? a = null;
             var b = a == null ? 1 : throw new Exception();
             var c = a ?? throw new Exception();
 

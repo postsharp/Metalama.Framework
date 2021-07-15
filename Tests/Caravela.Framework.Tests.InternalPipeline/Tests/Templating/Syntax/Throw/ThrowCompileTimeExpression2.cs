@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Throw.ThrowComp
         {
              
             // Compile-time
-            object r = meta.CompileTime<object>(null);
+            object? r = meta.CompileTime<object>(null);
             
             var t = r ?? throw new Exception();
         
