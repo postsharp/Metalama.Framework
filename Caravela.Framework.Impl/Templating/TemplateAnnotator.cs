@@ -134,7 +134,8 @@ namespace Caravela.Framework.Impl.Templating
             else if ( symbol is IParameterSymbol parameter )
             {
                 if ( parameter.ContainingSymbol.Equals( this._currentTemplateMember ) ||
-                     parameter.ContainingSymbol.Equals( this._currentTemplateMember?.ContainingSymbol ) )
+                     (parameter.ContainingSymbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol }
+                      && associatedSymbol.Equals( this._currentTemplateMember )) )
                 {
                     // In the future, we may have parameters on the template parameters changing their meaning. However, now, all template
                     // parameters map to run-time parameters of the same name.

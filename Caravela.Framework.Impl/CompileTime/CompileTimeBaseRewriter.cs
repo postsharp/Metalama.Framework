@@ -161,12 +161,5 @@ namespace Caravela.Framework.Impl.CompileTime
                 ObjectCreationExpression( ParseTypeName( "System.NotSupportedException" ) )
                     .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( message ) ) ) ) );
         }
-
-        protected TemplatingScope GetTemplatingScope( MemberDeclarationSyntax node )
-        {
-            var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
-
-            return this.SymbolClassifier.GetTemplatingScope( symbol );
-        }
     }
 }
