@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Pipeline
 {
     public static class ServiceProviderFactory
     {
-        private static readonly AsyncLocal<ServiceProvider?> _asyncLocalInstance = new ();
+        private static readonly AsyncLocal<ServiceProvider?> _asyncLocalInstance = new();
         private static ServiceProvider? _globalInstance;
         
         /// <summary>
@@ -60,7 +60,6 @@ namespace Caravela.Framework.Impl.Pipeline
             
             _asyncLocalInstance.Value = newServices;
         }
-
 
         private static ServiceProvider CreateBaseServiceProvider( IDirectoryOptions directoryOptions, bool freeze )
         {

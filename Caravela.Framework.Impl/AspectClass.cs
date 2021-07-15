@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl
         private readonly Dictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
 
         private readonly IServiceProvider _serviceProvider;
-        private UserCodeInvoker _userCodeInvoker;
+        private readonly UserCodeInvoker _userCodeInvoker;
         private readonly IAspectDriver? _aspectDriver;
 
         private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.

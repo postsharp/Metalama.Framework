@@ -131,7 +131,7 @@ namespace Caravela.Framework.Impl
                 {
                     var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (this.AspectType, e.GetType().Name, e.Format( 5 ) ) );
+                        (this.AspectType, e.GetType().Name, e.Format( 5 )) );
 
                     return CreateResultForError( diagnostic );
                 }
