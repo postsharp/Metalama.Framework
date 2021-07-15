@@ -114,7 +114,7 @@ namespace Caravela.TestFramework.XunitFramework
                     var firstDotPosition = fileName.IndexOf( '.', StringComparison.Ordinal );
                     var extension = fileName.Substring( firstDotPosition );
 
-                    if ( extension != ".cs" )
+                    if ( !string.Equals( extension, ".cs", StringComparison.Ordinal ) )
                     {
                         // Skipping.
 

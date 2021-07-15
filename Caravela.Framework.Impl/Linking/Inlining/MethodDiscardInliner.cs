@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking.Inlining
@@ -40,7 +41,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             }
 
             // Assignment should have a discard identifier on the left (TODO: ref returns).
-            if ( assignmentExpression.Left is not IdentifierNameSyntax identifierName || identifierName.Identifier.ValueText != "_" )
+            if ( assignmentExpression.Left is not IdentifierNameSyntax identifierName || 
+                 !string.Equals( identifierName.Identifier.ValueText, "_", StringComparison.Ordinal ) )
             {
                 return false;
             }
