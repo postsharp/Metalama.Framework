@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfCompi
         dynamic? Template()
         {
             var p = meta.Parameters[0];
-            if (meta.Method.Name == "NotNullMethod")
+            if (string.Equals( meta.Method.Name, "NotNullMethod", StringComparison.Ordinal ))
             {
                 if (p.Value == null)
                 {

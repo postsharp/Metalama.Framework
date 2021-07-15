@@ -42,7 +42,7 @@ namespace Caravela.TestFramework.XunitFramework
         {
             var projectDirectoryAttributes = this._assembly
                 .GetCustomAttributes( typeof(AssemblyMetadataAttribute) )
-                .Where( a => (string) a.GetConstructorArguments().First() == "ProjectDirectory" )
+                .Where( a => string.Equals( (string) a.GetConstructorArguments().First(), "ProjectDirectory", StringComparison.Ordinal ) )
                 .ToList();
 
             var projectDirectoryAttribute = projectDirectoryAttributes.FirstOrDefault();
@@ -111,10 +111,10 @@ namespace Caravela.TestFramework.XunitFramework
                 foreach ( var testPath in Directory.EnumerateFiles( directory, "*.cs" ) )
                 {
                     var fileName = Path.GetFileName( testPath );
-                    var firstDotPosition = fileName.IndexOf( '.' );
+                    var firstDotPosition = fileName.IndexOf( '.', StringComparison.Ordinal );
                     var extension = fileName.Substring( firstDotPosition );
 
-                    if ( extension != ".cs" )
+                    if ( !string.Equals( extension, ".cs", StringComparison.Ordinal ) )
                     {
                         // Skipping.
 

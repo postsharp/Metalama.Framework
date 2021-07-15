@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -13,7 +14,8 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
 {
     internal class Program
     {
-        private static string RemoveSuffix( string s, string suffix ) => s.EndsWith( suffix ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
+        private static string RemoveSuffix( string s, string suffix )
+            => s.EndsWith( suffix, StringComparison.Ordinal ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
 
         // private static string RemovePrefix( string s, string prefix )
         // {
@@ -47,7 +49,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
             // Generate Visit* and Transform* methods.
             foreach ( var method in typeof(CSharpSyntaxRewriter).GetMethods( BindingFlags.Public | BindingFlags.Instance ).OrderBy( m => m.Name ) )
             {
-                if ( !method.Name.StartsWith( "Visit" ) || method.ReturnType != typeof(SyntaxNode) )
+                if ( !method.Name.StartsWith( "Visit", StringComparison.Ordinal ) || method.ReturnType != typeof(SyntaxNode) )
                 {
                     continue;
                 }
@@ -87,7 +89,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
 
                 string FindProperty( ParameterInfo parameter )
                 {
-                    if ( parameter.Name == "kind" )
+                    if ( string.Equals( parameter.Name, "kind", StringComparison.Ordinal ) )
                     {
                         return "node.Kind()";
                     }
@@ -329,7 +331,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
 
                         foreach ( var method in methodsWithSameParameterCount.OrderBy( m => m.ToString() ) )
                         {
-                            WriteSyntaxFactoryMethod( method, i++.ToString() );
+                            WriteSyntaxFactoryMethod( method, i++.ToString( CultureInfo.InvariantCulture ) );
                         }
                     }
                 }

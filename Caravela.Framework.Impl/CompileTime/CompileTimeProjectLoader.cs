@@ -348,7 +348,7 @@ namespace Caravela.Framework.Impl.CompileTime
             // Read source files.
             List<SyntaxTree> syntaxTrees = new();
 
-            foreach ( var entry in archive.Entries.Where( e => Path.GetExtension( e.Name ) == ".cs" ) )
+            foreach ( var entry in archive.Entries.Where( e => string.Equals( Path.GetExtension( e.Name ), ".cs", StringComparison.OrdinalIgnoreCase ) ) )
             {
                 using var sourceReader = new StreamReader( entry.Open(), Encoding.UTF8 );
                 var sourceText = sourceReader.ReadToEnd();

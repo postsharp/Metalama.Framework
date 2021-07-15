@@ -20,6 +20,8 @@ using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
 
+#pragma warning disable CA1307 // Specify StringComparison for clarity
+
 namespace Caravela.Framework.Tests.UnitTests.DesignTime
 {
     public class PipelineIntegrationTests

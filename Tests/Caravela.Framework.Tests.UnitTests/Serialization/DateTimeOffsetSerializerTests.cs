@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Globalization;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization
@@ -20,7 +21,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         private void AssertDateTimeSerialization( DateTimeOffset dateTime )
         {
             var dt = dateTime;
-            Assert.Equal( dateTime, DateTimeOffset.Parse( dateTime.ToString( "o" ) ) );
+            Assert.Equal( dateTime, DateTimeOffset.Parse( dateTime.ToString( "o" ), CultureInfo.InvariantCulture ) );
             Assert.Equal( "global::System.DateTimeOffset.Parse(\"" + dateTime.ToString( "o" ) + "\")", this.Serialize( dt ).ToString() );
         }
     }

@@ -190,8 +190,8 @@ namespace Caravela.TestFramework
                         .DescendantNodesAndSelf( _ => true )
                         .OfType<MemberDeclarationSyntax>()
                         .Where(
-                            m => m.GetLeadingTrivia().ToString().Contains( "<target>" ) ||
-                                 m.AttributeLists.Any( a => a.GetLeadingTrivia().ToString().Contains( "<target>" ) ) )
+                            m => m.GetLeadingTrivia().ToString().Contains( "<target>", StringComparison.Ordinal ) ||
+                                 m.AttributeLists.Any( a => a.GetLeadingTrivia().ToString().Contains( "<target>", StringComparison.Ordinal ) ) )
                         .ToList();
 
                 var outputNode = outputNodes.FirstOrDefault() ?? (SyntaxNode) syntaxNode;
