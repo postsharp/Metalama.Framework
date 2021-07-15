@@ -240,7 +240,7 @@ public class VersionedClass
 {
     public static int Version => $version;
 }
-".Replace( "$version", version.ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal );
+".Replace( "$version", version.ToString( CultureInfo.InvariantCulture ), StringComparison.Ordinal );
 
             var classA = @"
 

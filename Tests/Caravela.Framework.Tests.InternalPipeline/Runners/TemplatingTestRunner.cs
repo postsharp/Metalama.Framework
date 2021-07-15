@@ -185,7 +185,10 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var compiledAspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
                 var compiledTemplateMethod = compiledAspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
 
-                var templateMethod = testResult.InputCompilation!.Assembly.GetTypes().Single( t => string.Equals( t.Name, "Aspect", StringComparison.Ordinal ) ).GetMembers( "Template" ).Single();
+                var templateMethod = testResult.InputCompilation!.Assembly.GetTypes()
+                    .Single( t => string.Equals( t.Name, "Aspect", StringComparison.Ordinal ) )
+                    .GetMembers( "Template" )
+                    .Single();
 
                 Invariant.Assert( compiledTemplateMethod != null );
                 var driver = new TemplateDriver( null!, templateMethod, compiledTemplateMethod );

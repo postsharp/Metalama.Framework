@@ -14,7 +14,8 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
 {
     internal class Program
     {
-        private static string RemoveSuffix( string s, string suffix ) => s.EndsWith( suffix, StringComparison.Ordinal ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
+        private static string RemoveSuffix( string s, string suffix )
+            => s.EndsWith( suffix, StringComparison.Ordinal ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
 
         // private static string RemovePrefix( string s, string prefix )
         // {
@@ -330,7 +331,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
 
                         foreach ( var method in methodsWithSameParameterCount.OrderBy( m => m.ToString() ) )
                         {
-                            WriteSyntaxFactoryMethod( method, i++.ToString(CultureInfo.InvariantCulture) );
+                            WriteSyntaxFactoryMethod( method, i++.ToString( CultureInfo.InvariantCulture ) );
                         }
                     }
                 }

@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests
             // Test that the formatting strings are valid.
             foreach ( var descriptor in DesignTimeDiagnosticDefinitions.StandardDiagnosticDescriptors.Values )
             {
-                var formattingString = descriptor.MessageFormat.ToString(CultureInfo.InvariantCulture);
+                var formattingString = descriptor.MessageFormat.ToString( CultureInfo.InvariantCulture );
                 _ = string.Format( CultureInfo.InvariantCulture, formattingString, args );
             }
         }

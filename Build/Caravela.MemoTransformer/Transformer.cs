@@ -42,8 +42,9 @@ namespace Caravela.MemoTransformer
             public override SyntaxNode VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             {
                 if ( !node.AttributeLists.SelectMany( al => al.Attributes )
-                    .Any( a => string.Equals( a.Name.ToString(), "Memo", StringComparison.Ordinal ) || 
-                               string.Equals( a.Name.ToString(), "MemoAttribute", StringComparison.Ordinal ) ) )
+                    .Any(
+                        a => string.Equals( a.Name.ToString(), "Memo", StringComparison.Ordinal ) ||
+                             string.Equals( a.Name.ToString(), "MemoAttribute", StringComparison.Ordinal ) ) )
                 {
                     return node;
                 }

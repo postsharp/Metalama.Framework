@@ -208,7 +208,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         {
                             pseudoOverrideAttribute = attribute;
                         }
-                        else if ( name.StartsWith( "Pseudo", StringComparison.Ordinal ) && 
+                        else if ( name.StartsWith( "Pseudo", StringComparison.Ordinal ) &&
                                   !string.Equals( name, "PseudoNotInlineable", StringComparison.Ordinal ) )
                         {
                             throw new NotSupportedException( $"Unsupported pseudo attribute {name}" );
