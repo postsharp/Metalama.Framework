@@ -289,7 +289,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             switch ( symbol )
             {
-                case ITypeSymbol type when type.Name == "dynamic":
+                case ITypeSymbol type when string.Equals( type.Name, "dynamic", StringComparison.Ordinal ):
                     return AddToCache( TemplatingScope.RunTimeOnly );
 
                 case ITypeSymbol type:

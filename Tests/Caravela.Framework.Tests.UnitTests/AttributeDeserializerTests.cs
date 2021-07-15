@@ -10,6 +10,8 @@ using System;
 using System.Linq;
 using Xunit;
 
+#pragma warning disable CA1018 // Mark attributes with AttributeUsageAttribute
+
 namespace Caravela.Framework.Tests.UnitTests
 {
     public class AttributeDeserializerTests : TestBase

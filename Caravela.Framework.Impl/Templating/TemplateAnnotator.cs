@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -742,7 +743,7 @@ namespace Caravela.Framework.Impl.Templating
                         using ( this.WithScopeContext(
                             ScopeContext.CreatePreferredRunTimeScope(
                                 this._currentScopeContext,
-                                $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString()}'" ) ) )
+                                $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString( CultureInfo.InvariantCulture )}'" ) ) )
                         {
                             transformedArgumentValue = this.Visit( argument.Expression )!;
                         }

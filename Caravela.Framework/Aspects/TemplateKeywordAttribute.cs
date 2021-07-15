@@ -8,6 +8,7 @@ namespace Caravela.Framework.Aspects
     /// <summary>
     /// Marks members that must be highlighted as "template keywords" in the IDE.
     /// </summary>
+    [AttributeUsage( AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Class )]
     internal class TemplateKeywordAttribute : Attribute
     {
         // TODO: This attribute and the Proceed attribute could be merged into one, if this attribute has a parameter

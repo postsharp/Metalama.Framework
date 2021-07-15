@@ -154,7 +154,7 @@ namespace Caravela.TestFramework
         {
             if ( preserveFormatting )
             {
-                return syntaxNode.ToFullString().Replace( "\r\n", "\n" );
+                return syntaxNode.ToFullString().Replace( "\r\n", "\n", StringComparison.Ordinal );
             }
             else
             {

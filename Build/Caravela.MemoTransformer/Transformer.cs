@@ -5,6 +5,7 @@ using Caravela.Compiler;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -41,7 +42,9 @@ namespace Caravela.MemoTransformer
             public override SyntaxNode VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             {
                 if ( !node.AttributeLists.SelectMany( al => al.Attributes )
-                    .Any( a => a.Name.ToString() == "Memo" || a.Name.ToString() == "MemoAttribute" ) )
+                    .Any(
+                        a => string.Equals( a.Name.ToString(), "Memo", StringComparison.Ordinal ) ||
+                             string.Equals( a.Name.ToString(), "MemoAttribute", StringComparison.Ordinal ) ) )
                 {
                     return node;
                 }

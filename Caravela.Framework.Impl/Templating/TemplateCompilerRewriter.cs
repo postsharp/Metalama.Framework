@@ -323,7 +323,7 @@ namespace Caravela.Framework.Impl.Templating
 
         protected override ExpressionSyntax TransformNullableType( NullableTypeSyntax node )
         {
-            if ( node.ElementType is IdentifierNameSyntax identifier && identifier.Identifier.Text == "dynamic" )
+            if ( node.ElementType is IdentifierNameSyntax identifier && string.Equals( identifier.Identifier.Text, "dynamic", StringComparison.Ordinal ) )
             {
                 // Avoid transforming "dynamic?" into "var?".
                 return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
@@ -336,7 +336,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private ExpressionSyntax TransformIdentifierToken( IdentifierNameSyntax node )
         {
-            if ( node.Identifier.Text == "dynamic" )
+            if ( string.Equals( node.Identifier.Text, "dynamic", StringComparison.Ordinal ) )
             {
                 // We change all dynamic into var in the template.
                 return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );

@@ -131,7 +131,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                                         DefaultExpression( syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ),
                                         Token( SyntaxKind.SemicolonToken ) )
                                 }
-                                : new StatementSyntax[0] ) ),
+                                : Array.Empty<StatementSyntax>() ) ),
                     null );
 
             return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };

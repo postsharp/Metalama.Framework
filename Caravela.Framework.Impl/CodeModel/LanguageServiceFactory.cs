@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis.Editing;
+using System;
 using System.Linq;
 using System.Reflection;
 
@@ -15,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             var version =
                 typeof(LanguageServiceFactory).Assembly.GetReferencedAssemblies()
-                    .Single( a => a.Name == "Microsoft.CodeAnalysis.Workspaces" )
+                    .Single( a => string.Equals( a.Name, "Microsoft.CodeAnalysis.Workspaces", StringComparison.OrdinalIgnoreCase ) )
                     .Version;
 
             var assembly = Assembly.Load( "Microsoft.CodeAnalysis.CSharp.Workspaces, Version=" + version );
