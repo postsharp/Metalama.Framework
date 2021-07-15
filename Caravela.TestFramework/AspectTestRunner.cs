@@ -47,7 +47,11 @@ namespace Caravela.TestFramework
             if ( pipeline.TryExecute( testResult, testResult.InputCompilation!, CancellationToken.None, out var resultCompilation, out _ ) )
             {
                 testResult.OutputCompilation = resultCompilation;
+                testResult.HasOutputCode = true;
+
                 var minimalVerbosity = testInput.Options.ReportOutputWarnings.GetValueOrDefault() ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
+
+                await testResult.SetOutputCompilationAsync( resultCompilation );
 
                 bool MustBeReported( Diagnostic d ) => d.Severity >= minimalVerbosity && !testInput.Options.IgnoredDiagnostics.Contains( d.Id );
 
@@ -55,13 +59,16 @@ namespace Caravela.TestFramework
                 {
                     var emitResult = resultCompilation.Emit( Stream.Null );
                     testResult.Report( emitResult.Diagnostics.Where( MustBeReported ) );
+
+                    if ( !emitResult.Success )
+                    {
+                        testResult.SetFailed( "Final Compilation.Emit failed." );
+                    }
                 }
                 else
                 {
                     testResult.Report( resultCompilation.GetDiagnostics().Where( MustBeReported ) );
                 }
-
-                await testResult.SetOutputCompilationAsync( resultCompilation );
             }
             else
             {
