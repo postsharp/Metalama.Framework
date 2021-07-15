@@ -1,0 +1,13 @@
+{
+    "help": "https://go.microsoft.com/fwlink/?linkid=866610",
+    "dependentFileProviders": {
+        "add": {
+            "extensionToExtension": {
+                "add": {
+                    ".t.cs": [ ".cs" ],
+                    ".cs.html": [ ".cs" ]
+                }
+            }
+        }
+    }
+}
