@@ -27,6 +27,8 @@ namespace Caravela.Framework.Impl
     {
         private readonly Dictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
 
+        private readonly IServiceProvider _serviceProvider;
+        private UserCodeInvoker _userCodeInvoker;
         private readonly IAspectDriver? _aspectDriver;
 
         private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
@@ -72,6 +74,7 @@ namespace Caravela.Framework.Impl
         /// <param name="aspectTypeSymbol"></param>
         /// <param name="aspectDriver">Can be null for testing.</param>
         private AspectClass(
+            IServiceProvider serviceProvider,
             INamedTypeSymbol aspectTypeSymbol,
             AspectClass? baseClass,
             IAspectDriver? aspectDriver,
@@ -84,6 +87,8 @@ namespace Caravela.Framework.Impl
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.BaseClass = baseClass;
             this.Project = project;
+            this._serviceProvider = serviceProvider;
+            this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
             this._aspectDriver = aspectDriver;
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
             this.AspectType = aspectType;
@@ -96,7 +101,7 @@ namespace Caravela.Framework.Impl
             if ( this._prototypeAspectInstance != null )
             {
                 var builder = new AspectClassBuilder( this );
-                this._prototypeAspectInstance.BuildAspectClass( builder );
+                this._userCodeInvoker.Invoke( () => this._prototypeAspectInstance.BuildAspectClass( builder ) );
 
                 this._layers = builder.Layers.As<string?>().Prepend( null ).Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
             }
@@ -116,6 +121,7 @@ namespace Caravela.Framework.Impl
         /// Creates an instance of the <see cref="AspectClass"/> class.
         /// </summary>
         public static bool TryCreate(
+            IServiceProvider serviceProvider,
             INamedTypeSymbol aspectNamedType,
             AspectClass? baseAspectType,
             IAspectDriver? aspectDriver,
@@ -126,7 +132,7 @@ namespace Caravela.Framework.Impl
             var aspectType = compileTimeProject.GetType( aspectNamedType.GetReflectionNameSafe() ).AssertNotNull();
             var prototype = aspectNamedType.IsAbstract ? null : (IAspect) FormatterServices.GetUninitializedObject( aspectType ).AssertNotNull();
 
-            aspectClass = new AspectClass( aspectNamedType, baseAspectType, aspectDriver, compileTimeProject, aspectType, prototype );
+            aspectClass = new AspectClass( serviceProvider, aspectNamedType, baseAspectType, aspectDriver, compileTimeProject, aspectType, prototype );
             aspectClass.Initialize();
 
             return true;
@@ -150,7 +156,7 @@ namespace Caravela.Framework.Impl
                 throw new AssertionFailedException( $"Could not find the compile template for {sourceTemplate}." );
             }
 
-            templateDriver = new TemplateDriver( this, sourceTemplate.GetSymbol().AssertNotNull(), compiledTemplateMethodInfo );
+            templateDriver = new TemplateDriver( this._serviceProvider, this, sourceTemplate.GetSymbol().AssertNotNull(), compiledTemplateMethodInfo );
             this._templateDrivers.Add( id, templateDriver );
 
             return templateDriver;

@@ -77,8 +77,8 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             // Create aspect types.
-            var driverFactory = new AspectDriverFactory( compilation.Compilation, this.ProjectOptions.PlugIns );
-            var aspectTypeFactory = new AspectClassMetadataFactory( driverFactory );
+            var driverFactory = new AspectDriverFactory( this.ServiceProvider, compilation.Compilation, this.ProjectOptions.PlugIns );
+            var aspectTypeFactory = new AspectClassMetadataFactory( this.ServiceProvider, driverFactory );
 
             var aspectTypes = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
 

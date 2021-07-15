@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Pipeline
         private readonly Dictionary<Type, object> _services = new();
         private bool _frozen;
 
-        public void ReplaceServiceForTest<T>( T service )
+        public void ReplaceService<T>( T service )
             where T : IService
         {
             if ( this._frozen )
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 throw new InvalidOperationException();
             }
 
-            this._services.Add( typeof(T), service );
+            this._services[typeof(T)] = service;
         }
 
         public object? GetService( Type serviceType )

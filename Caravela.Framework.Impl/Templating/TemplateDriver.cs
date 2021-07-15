@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -19,12 +20,14 @@ namespace Caravela.Framework.Impl.Templating
 {
     internal class TemplateDriver
     {
+        private readonly UserCodeInvoker _userCodeInvoker;
         private readonly ISymbol _sourceTemplateSymbol;
         private readonly MethodInfo _templateMethod;
         private readonly AspectClass _aspectClass;
 
-        public TemplateDriver( AspectClass aspectClass, ISymbol sourceTemplateSymbol, MethodInfo compiledTemplateMethodInfo )
+        public TemplateDriver( IServiceProvider serviceProvider, AspectClass aspectClass, ISymbol sourceTemplateSymbol, MethodInfo compiledTemplateMethodInfo )
         {
+            this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
             this._sourceTemplateSymbol = sourceTemplateSymbol;
             this._templateMethod = compiledTemplateMethodInfo ?? throw new ArgumentNullException( nameof(compiledTemplateMethodInfo) );
             this._aspectClass = aspectClass;
@@ -48,7 +51,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     try
                     {
-                        output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() );
+                        output = this._userCodeInvoker.Invoke( () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() ) );
                     }
                     catch ( TargetInvocationException ex ) when ( ex.InnerException != null )
                     {

@@ -17,12 +17,14 @@ namespace Caravela.Framework.Impl
     /// </summary>
     internal class AspectClassMetadataFactory
     {
+        private readonly IServiceProvider _serviceProvider;
         private readonly AspectDriverFactory _aspectDriverFactory;
 
         private readonly Dictionary<INamedTypeSymbol, AspectClass> _aspectClasses = new();
 
-        public AspectClassMetadataFactory( AspectDriverFactory aspectDriverFactory )
+        public AspectClassMetadataFactory( IServiceProvider serviceProvider, AspectDriverFactory aspectDriverFactory )
         {
+            this._serviceProvider = serviceProvider;
             this._aspectDriverFactory = aspectDriverFactory;
         }
 
@@ -104,7 +106,7 @@ namespace Caravela.Framework.Impl
 
                 var aspectDriver = this._aspectDriverFactory.GetAspectDriver( aspectType );
 
-                if ( !AspectClass.TryCreate( aspectType, baseAspectClass, aspectDriver, project, diagnosticAdder, out metadata ) )
+                if ( !AspectClass.TryCreate( this._serviceProvider, aspectType, baseAspectClass, aspectDriver, project, diagnosticAdder, out metadata ) )
                 {
                     return false;
                 }

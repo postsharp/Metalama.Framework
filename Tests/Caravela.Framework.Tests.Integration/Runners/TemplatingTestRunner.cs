@@ -186,7 +186,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var templateMethod = testResult.InputCompilation!.Assembly.GetTypes().Single( t => t.Name == "Aspect" ).GetMembers( "Template" ).Single();
 
                 Invariant.Assert( compiledTemplateMethod != null );
-                var driver = new TemplateDriver( null!, templateMethod, compiledTemplateMethod );
+                var driver = new TemplateDriver( this.ServiceProvider, null!, templateMethod, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InputCompilation );
                 var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( assembly, compilationModel, templateMethod );

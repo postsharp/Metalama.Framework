@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
@@ -21,13 +22,15 @@ namespace Caravela.Framework.Impl
     /// </summary>
     internal class AspectDriver : IAspectDriver
     {
+        private readonly UserCodeInvoker _userCodeInvoker;
         private readonly Compilation _compilation;
         private readonly List<(AttributeData Attribute, ISymbol Member)> _declarativeAdviceAttributes;
 
         public INamedTypeSymbol AspectType { get; }
 
-        public AspectDriver( INamedTypeSymbol aspectType, Compilation compilation )
+        public AspectDriver( IServiceProvider serviceProvider, INamedTypeSymbol aspectType, Compilation compilation )
         {
+            this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
             this._compilation = compilation;
             this.AspectType = aspectType;
 
@@ -111,7 +114,7 @@ namespace Caravela.Framework.Impl
 
                 try
                 {
-                    aspectOfT.BuildAspect( aspectBuilder );
+                    this._userCodeInvoker.Invoke( () => aspectOfT.BuildAspect( aspectBuilder ) );
                 }
                 catch ( InvalidUserCodeException e )
                 {
