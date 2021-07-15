@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -136,7 +137,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 if ( indexOfQuote >= 0 )
                 {
                     var arityString = type.Name.Substring( indexOfQuote + 1 );
-                    arity = int.Parse( arityString );
+                    arity = int.Parse( arityString, CultureInfo.InvariantCulture );
                 }
 
                 var declaringTypeGenericArguments = genericArguments.Take( genericArguments.Length - arity ).ToArray();

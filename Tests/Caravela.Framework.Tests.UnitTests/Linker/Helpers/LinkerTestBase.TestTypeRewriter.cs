@@ -171,7 +171,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
             private static bool HasPseudoAttribute( MemberDeclarationSyntax node )
             {
-                return node.AttributeLists.SelectMany( x => x.Attributes ).Any( x => x.Name.ToString().StartsWith( "Pseudo" ) );
+                return node.AttributeLists.SelectMany( x => x.Attributes ).Any( x => x.Name.ToString().StartsWith( "Pseudo", StringComparison.Ordinal ) );
             }
 
             private SyntaxNode? ProcessPseudoAttributeNode( MemberDeclarationSyntax node, out bool isPseudoMember )
@@ -200,15 +200,16 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     {
                         var name = attribute.Name.ToString();
 
-                        if ( name == "PseudoIntroduction" )
+                        if ( string.Equals( name, "PseudoIntroduction", StringComparison.Ordinal ) )
                         {
                             pseudoIntroductionAttribute = attribute;
                         }
-                        else if ( name == "PseudoOverride" )
+                        else if ( string.Equals( name, "PseudoOverride", StringComparison.Ordinal ) )
                         {
                             pseudoOverrideAttribute = attribute;
                         }
-                        else if ( name.StartsWith( "Pseudo" ) && name != "PseudoNotInlineable" )
+                        else if ( name.StartsWith( "Pseudo", StringComparison.Ordinal ) &&
+                                  !string.Equals( name, "PseudoNotInlineable", StringComparison.Ordinal ) )
                         {
                             throw new NotSupportedException( $"Unsupported pseudo attribute {name}" );
                         }

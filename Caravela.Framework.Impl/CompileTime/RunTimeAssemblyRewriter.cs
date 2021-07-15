@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
-            if ( this.GetTemplatingScope( node ) == TemplatingScope.CompileTimeOnly )
+            if ( this.MustReplaceByThrow( node ) )
             {
                 return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
             }
@@ -56,9 +56,17 @@ namespace Caravela.Framework.Impl.CompileTime
             return node;
         }
 
+        private bool MustReplaceByThrow( SyntaxNode node )
+        {
+            var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+
+            return this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
+                   this.SymbolClassifier.GetTemplateMemberKind( symbol ) != TemplateMemberKind.None;
+        }
+
         public override SyntaxNode? VisitIndexerDeclaration( IndexerDeclarationSyntax node )
         {
-            if ( this.GetTemplatingScope( node ) is TemplatingScope.CompileTimeOnly )
+            if ( this.MustReplaceByThrow( node ) )
             {
                 return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
             }
@@ -75,7 +83,7 @@ namespace Caravela.Framework.Impl.CompileTime
             //  * Expression body:                                          int Foo => 42;
             //  * Accessors and initializer and backing field:              int Foo { get; } = 42;
 
-            if ( this.GetTemplatingScope( node ) is TemplatingScope.CompileTimeOnly )
+            if ( this.MustReplaceByThrow( node ) )
             {
                 if ( node.Modifiers.All( x => x.Kind() != SyntaxKind.AbstractKeyword )
                      && node.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true )
@@ -92,7 +100,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
         {
-            if ( this.GetTemplatingScope( node ) is TemplatingScope.CompileTimeOnly )
+            if ( this.MustReplaceByThrow( node ) )
             {
                 return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
             }

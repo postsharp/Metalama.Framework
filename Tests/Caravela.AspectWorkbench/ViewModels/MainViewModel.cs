@@ -68,7 +68,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                         .Select( r => new TestAssemblyReference { Path = r.FilePath } ) );
 
                 // This is a dirty trick. We should read options from the directory instead.
-                if ( this.TestText.Contains( "[TestTemplate]" ) )
+                if ( this.TestText.Contains( "[TestTemplate]", StringComparison.Ordinal ) )
                 {
                     testInput.Options.TestRunnerFactoryType = typeof(TemplatingTestRunnerFactory).AssemblyQualifiedName;
                 }

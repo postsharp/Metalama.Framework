@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 
@@ -43,7 +44,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 foreach ( var introducedMember in introducedMembers )
                 {
-                    var id = Interlocked.Increment( ref this._nextId ).ToString();
+                    var id = Interlocked.Increment( ref this._nextId ).ToString( CultureInfo.InvariantCulture );
                     var idAnnotation = new SyntaxAnnotation( LinkerIntroductionRegistry.IntroducedNodeIdAnnotationId, id );
 
                     // TODO: Roslyn adds Id annotation to nodes that are tracked, which we may use instead of our own annotation.

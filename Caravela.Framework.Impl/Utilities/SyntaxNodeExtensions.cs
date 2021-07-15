@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Utilities
     {
         public static bool IsNameOf( this InvocationExpressionSyntax node )
             => node.Expression.Kind() == SyntaxKind.NameOfKeyword ||
-               (node.Expression is IdentifierNameSyntax identifierName && identifierName.Identifier.Text == "nameof");
+               (node.Expression is IdentifierNameSyntax identifierName && string.Equals( identifierName.Identifier.Text, "nameof", StringComparison.Ordinal ));
 
         public static string GetNameOfValue( this InvocationExpressionSyntax node )
             => node.ArgumentList.Arguments[0].Expression switch

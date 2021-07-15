@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
-        public bool IsIndexer => this.Name == "Items";
+        public bool IsIndexer => string.Equals( this.Name, "Items", StringComparison.Ordinal );
 
         public PropertyBuilder(
             Advice parentAdvice,

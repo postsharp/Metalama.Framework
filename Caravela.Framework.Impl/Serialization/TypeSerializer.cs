@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Serialization
                 var arraySymbol = (IArrayTypeSymbol) symbol;
 
                 var makeArrayTypeArguments = arraySymbol.IsSZArray
-                    ? new ArgumentSyntax[0]
+                    ? Array.Empty<ArgumentSyntax>()
                     : new[] { Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( arraySymbol.Rank ) ) ) };
 
                 var innerTypeCreation = this.SerializeTypeSymbolRecursive( arraySymbol.ElementType, syntaxFactory );

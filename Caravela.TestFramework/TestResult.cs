@@ -76,6 +76,12 @@ namespace Caravela.TestFramework
         /// </summary>
         public Exception? Exception { get; private set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the output run-time code should be included in the result of
+        ///  <see cref="GetConsolidatedTestOutput"/>.
+        /// </summary>
+        internal bool HasOutputCode { get; set; }
+
         internal void AddInputDocument( Document document, string? path ) => this._syntaxTrees.Add( new TestSyntaxTree( path, document, this ) );
 
         private static string CleanMessage( string text )
@@ -170,31 +176,24 @@ namespace Caravela.TestFramework
 
             var consolidatedCompilationUnit = SyntaxFactory.CompilationUnit();
 
-            // Adding the syntax.
-            if ( this.Success && this.SyntaxTrees.Any() )
+            // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
+            var outputSyntaxRoot = this.SyntaxTrees.FirstOrDefault()?.OutputRunTimeSyntaxRoot;
+
+            if ( this.HasOutputCode && outputSyntaxRoot != null )
             {
-                var syntaxTree = this.SyntaxTrees.First();
-
-                if ( syntaxTree.OutputRunTimeSyntaxRoot == null )
-                {
-                    throw new InvalidOperationException();
-                }
-
-                var syntaxNode = syntaxTree.OutputRunTimeSyntaxRoot!;
-
                 // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
                 // passed to this method.
 
                 var outputNodes =
-                    syntaxNode
+                    outputSyntaxRoot
                         .DescendantNodesAndSelf( _ => true )
                         .OfType<MemberDeclarationSyntax>()
                         .Where(
-                            m => m.GetLeadingTrivia().ToString().Contains( "<target>" ) ||
-                                 m.AttributeLists.Any( a => a.GetLeadingTrivia().ToString().Contains( "<target>" ) ) )
+                            m => m.GetLeadingTrivia().ToString().Contains( "<target>", StringComparison.Ordinal ) ||
+                                 m.AttributeLists.Any( a => a.GetLeadingTrivia().ToString().Contains( "<target>", StringComparison.Ordinal ) ) )
                         .ToList();
 
-                var outputNode = outputNodes.FirstOrDefault() ?? (SyntaxNode) syntaxNode;
+                var outputNode = outputNodes.FirstOrDefault() ?? (SyntaxNode) outputSyntaxRoot;
 
                 switch ( outputNode )
                 {

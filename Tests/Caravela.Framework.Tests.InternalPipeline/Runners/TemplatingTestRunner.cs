@@ -144,6 +144,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
                 return testResult;
             }
+            
+            testResult.HasOutputCode = true;
 
             // Create a SyntaxTree that maps to the file we have just written.
             var oldTransformedTemplateSyntaxTree = transformedTemplateSyntax.SyntaxTree;
@@ -185,7 +187,10 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var compiledAspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
                 var compiledTemplateMethod = compiledAspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
 
-                var templateMethod = testResult.InputCompilation!.Assembly.GetTypes().Single( t => t.Name == "Aspect" ).GetMembers( "Template" ).Single();
+                var templateMethod = testResult.InputCompilation!.Assembly.GetTypes()
+                    .Single( t => string.Equals( t.Name, "Aspect", StringComparison.Ordinal ) )
+                    .GetMembers( "Template" )
+                    .Single();
 
                 Invariant.Assert( compiledTemplateMethod != null );
                 var driver = new TemplateDriver( null!, templateMethod, compiledTemplateMethod );
@@ -230,14 +235,14 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             var targetType = assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
             var targetCaravelaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! )!;
-            var targetMethod = targetCaravelaType.Methods.Single( m => m.Name == "Method" );
+            var targetMethod = targetCaravelaType.Methods.Single( m => string.Equals( m.Name, "Method", StringComparison.Ordinal ) );
 
             var diagnostics = new UserDiagnosticSink( null, targetMethod );
 
             var roslynTargetType = roslynCompilation.Assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
 
             var roslynTargetMethod = (MethodDeclarationSyntax) roslynTargetType.GetMembers()
-                .Single( m => m.Name == "Method" )
+                .Single( m => string.Equals( m.Name, "Method", StringComparison.Ordinal ) )
                 .DeclaringSyntaxReferences
                 .Select( r => (CSharpSyntaxNode) r.GetSyntax() )
                 .Single();

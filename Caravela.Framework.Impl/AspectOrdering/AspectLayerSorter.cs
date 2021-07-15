@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                     // to specify ordering for aspects that exist but are not necessarily a part of the current compilation.
                     ImmutableArray<int> currentIndices;
 
-                    if ( matchExpression.EndsWith( ":*" ) )
+                    if ( matchExpression.EndsWith( ":*", StringComparison.Ordinal ) )
                     {
                         var aspectName = matchExpression.Substring( 0, matchExpression.Length - 2 );
                         currentIndices = aspectNameToIndicesMapping[aspectName];

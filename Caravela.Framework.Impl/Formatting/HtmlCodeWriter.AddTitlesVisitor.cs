@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using System;
 
 namespace Caravela.Framework.Impl.Formatting
 {
@@ -24,7 +25,7 @@ namespace Caravela.Framework.Impl.Formatting
             private void ProcessNode<T>( T node, TextSpan span )
                 where T : SyntaxNode
             {
-                if ( node.ToString() == "var" )
+                if ( string.Equals( node.ToString(), "var", StringComparison.Ordinal ) )
                 {
                     return;
                 }

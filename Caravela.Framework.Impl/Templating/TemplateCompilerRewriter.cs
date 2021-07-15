@@ -323,7 +323,7 @@ namespace Caravela.Framework.Impl.Templating
 
         protected override ExpressionSyntax TransformNullableType( NullableTypeSyntax node )
         {
-            if ( node.ElementType is IdentifierNameSyntax identifier && identifier.Identifier.Text == "dynamic" )
+            if ( node.ElementType is IdentifierNameSyntax identifier && string.Equals( identifier.Identifier.Text, "dynamic", StringComparison.Ordinal ) )
             {
                 // Avoid transforming "dynamic?" into "var?".
                 return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
@@ -336,7 +336,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private ExpressionSyntax TransformIdentifierToken( IdentifierNameSyntax node )
         {
-            if ( node.Identifier.Text == "dynamic" )
+            if ( string.Equals( node.Identifier.Text, "dynamic", StringComparison.Ordinal ) )
             {
                 // We change all dynamic into var in the template.
                 return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
@@ -869,7 +869,20 @@ namespace Caravela.Framework.Impl.Templating
         /// (in this case, a return statement is returned).</param>
         /// <returns></returns>
         private SyntaxNode BuildRunTimeBlock( ExpressionSyntax node, bool generateExpression )
-            => this.BuildRunTimeBlock( () => this.ToMetaStatements( ReturnStatement( node ) ), generateExpression );
+        {
+            StatementSyntax statement;
+
+            if ( node is ThrowExpressionSyntax throwExpression )
+            {
+                statement = ThrowStatement( throwExpression.ThrowKeyword, throwExpression.Expression, Token( SyntaxKind.SemicolonToken ) );
+            }
+            else
+            {
+                statement = ReturnStatement( node );
+            }
+
+            return this.BuildRunTimeBlock( () => this.ToMetaStatements( statement ), generateExpression );
+        }
 
         /// <summary>
         /// Generates a run-time block.
@@ -1418,6 +1431,12 @@ namespace Caravela.Framework.Impl.Templating
 
         protected override ExpressionSyntax TransformConditionalExpression( ConditionalExpressionSyntax node )
         {
+            if ( node.WhenFalse is ThrowExpressionSyntax || node.WhenTrue is ThrowExpressionSyntax )
+            {
+                // If any of the expressions if a throw exception, we cannot reduce it at compile time because it would generate incorrect syntax.
+                return base.TransformConditionalExpression( node );
+            }
+
             var transformedCondition = this.Transform( node.Condition );
             var transformedWhenTrue = this.Transform( node.WhenTrue );
             var transformedWhenFalse = this.Transform( node.WhenFalse );

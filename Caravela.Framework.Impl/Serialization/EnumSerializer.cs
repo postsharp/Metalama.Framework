@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Globalization;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -31,7 +32,10 @@ namespace Caravela.Framework.Impl.Serialization
             }
 
             var underlyingType = Enum.GetUnderlyingType( o.GetType() );
-            var literal = _unsignedTypes.Contains( underlyingType ) ? Literal( Convert.ToUInt64( o ) ) : Literal( Convert.ToInt64( o ) );
+
+            var literal = _unsignedTypes.Contains( underlyingType )
+                ? Literal( Convert.ToUInt64( o, CultureInfo.InvariantCulture ) )
+                : Literal( Convert.ToInt64( o, CultureInfo.InvariantCulture ) );
 
             return CastExpression(
                 typeName,
