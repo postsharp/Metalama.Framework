@@ -5,10 +5,12 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
 {
@@ -18,8 +20,6 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IMember OverriddenDeclaration { get; }
 
-        public AspectLinkerOptions? LinkerOptions { get; }
-
         IDeclaration IOverriddenDeclaration.OverriddenDeclaration => this.OverriddenDeclaration;
 
         // TODO: Temporary
@@ -28,19 +28,18 @@ namespace Caravela.Framework.Impl.Transformations
                 ? introduction.TargetSyntaxTree
                 : ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
 
-        public OverriddenMember( Advice advice, IMember overriddenDeclaration, AspectLinkerOptions? linkerOptions = null )
+        public OverriddenMember( Advice advice, IMember overriddenDeclaration )
         {
             Invariant.Assert( advice != null! );
             Invariant.Assert( overriddenDeclaration != null! );
 
             this.Advice = advice;
             this.OverriddenDeclaration = overriddenDeclaration;
-            this.LinkerOptions = linkerOptions;
         }
 
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
 
-        public MemberDeclarationSyntax InsertPositionNode
+        public InsertPosition InsertPosition
         {
             get
             {
@@ -56,14 +55,59 @@ namespace Caravela.Framework.Impl.Transformations
 
                     if ( syntaxReference != null )
                     {
-                        return syntaxReference;
+                        return new InsertPosition( InsertPositionRelation.After, syntaxReference );
                     }
                 }
 
                 var typeSymbol = ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol;
 
-                return typeSymbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
+                return new InsertPosition(
+                    InsertPositionRelation.Within,
+                    typeSymbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
             }
+        }
+
+        protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind )
+        {
+            ExpressionSyntax expression;
+
+            if ( !this.OverriddenDeclaration.IsStatic )
+            {
+                if ( this.OverriddenDeclaration.IsExplicitInterfaceImplementation )
+                {
+                    var implementedInterfaceMember = this.OverriddenDeclaration.GetExplicitInterfaceImplementation();
+
+                    expression = MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ParenthesizedExpression(
+                            CastExpression(
+                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( implementedInterfaceMember.DeclaringType.GetSymbol() ),
+                                ThisExpression() ) ),
+                        IdentifierName( this.OverriddenDeclaration.Name ) );
+                }
+                else
+                {
+                    expression = MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ThisExpression(),
+                        IdentifierName( this.OverriddenDeclaration.Name ) );
+                }
+            }
+            else
+            {
+                expression =
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.OverriddenDeclaration.DeclaringType.GetSymbol() ),
+                        IdentifierName( this.OverriddenDeclaration.Name ) );
+            }
+
+            return expression
+                .WithAspectReferenceAnnotation(
+                    this.Advice.AspectLayerId,
+                    AspectReferenceOrder.Base,
+                    referenceTargetKind,
+                    flags: AspectReferenceFlags.Inlineable );
         }
     }
 }

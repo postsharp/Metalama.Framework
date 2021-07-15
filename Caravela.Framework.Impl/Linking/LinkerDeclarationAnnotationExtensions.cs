@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Linking
             return annotationValue != null ? LinkerDeclarationAnnotation.FromString( annotationValue ).Flags : LinkerDeclarationFlags.None;
         }
 
-        public static T AddLinkerDeclarationFlags<T>( this T node, in LinkerDeclarationFlags flags )
+        public static T WithLinkerDeclarationFlags<T>( this T node, in LinkerDeclarationFlags flags )
             where T : MemberDeclarationSyntax
         {
             return node.WithAdditionalAnnotations( new SyntaxAnnotation( AnnotationKind, new LinkerDeclarationAnnotation( flags ).ToString() ) );

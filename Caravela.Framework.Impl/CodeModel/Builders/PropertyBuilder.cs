@@ -64,10 +64,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IInvokerFactory<IPropertyInvoker> Invokers => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ), false );
 
-        public AspectLinkerOptions? LinkerOptions { get; }
-
-        public override MemberDeclarationSyntax InsertPositionNode
-            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
+        public override InsertPosition InsertPosition
+            => new(
+                InsertPositionRelation.Within,
+                ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
 
         public override DeclarationKind DeclarationKind => throw new NotImplementedException();
 
@@ -84,13 +84,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             bool hasGetter,
             bool hasSetter,
             bool isAutoProperty,
-            bool hasInitOnlySetter,
-            AspectLinkerOptions? linkerOptions )
+            bool hasInitOnlySetter )
             : base( parentAdvice, targetType, name )
         {
             // TODO: Sanity checks.
-
-            this.LinkerOptions = linkerOptions;
             this.Type = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(object) );
 
             if ( hasGetter )
@@ -163,10 +160,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     null,
                     null );
 
-            return new[]
-            {
-                new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this )
-            };
+            return new[] { new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
 
             AccessorListSyntax GenerateAccessorList()
             {
@@ -204,7 +198,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                             Token( SyntaxKind.GetKeyword ),
                             this.IsAutoPropertyOrField
                                 ? null
-                                : Block( ReturnStatement( DefaultExpression( syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
+                                : Block(
+                                    ReturnStatement(
+                                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
+                                        DefaultExpression( syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ),
+                                        Token( SyntaxKind.SemicolonToken ) ) ),
                             null,
                             this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default )
                         .NormalizeWhitespace();

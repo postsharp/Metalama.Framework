@@ -20,7 +20,6 @@ class T
     {
     }
 
-    [PseudoForceNotInlineable]
     void Foo()
     {
         Test(""Original"");
@@ -30,7 +29,7 @@ class T
     void Foo_Override()
     {
         Test(""Before"");
-        link(this.Foo());
+        link(this.Foo)();
         Test(""After"");
     }
 }
@@ -80,12 +79,12 @@ class T
         Test(""Original"");
     }
 
-    [PseudoForceNotInlineable]
+    [PseudoNotInlineable]
     [PseudoOverride(Foo, TestAspect)]
     void Foo_Override()
     {
         Test(""Before"");
-        link(this.Foo());
+        link(this.Foo, inline)();
         Test(""After"");
     }
 }
@@ -130,18 +129,17 @@ class T
     {
     }
 
-    [PseudoForceNotInlineable]
     void Foo()
     {
         Test(""Original"");
     }
 
     [PseudoOverride(Foo, TestAspect)]
-    [PseudoForceNotInlineable]
+    [PseudoNotInlineable]
     void Foo_Override()
     {
         Test(""Before"");
-        link(this.Foo());
+        link(this.Foo)();
         Test(""After"");
     }
 }
@@ -191,7 +189,7 @@ class T
     {
     }
 
-    [PseudoForceNotInlineable]
+    [PseudoNotInlineable]
     void Foo()
     {
         Test(""Original"");
@@ -201,16 +199,16 @@ class T
     void Foo_Override1()
     {
         Test(""Before1"");
-        link(this.Foo());
+        link(this.Foo)();
         Test(""After1"");
     }
 
     [PseudoOverride(Foo, TestAspect2)]
-    [PseudoForceNotInlineable]
+    [PseudoNotInlineable]
     void Foo_Override2()
     {
         Test(""Before2"");
-        link(this.Foo());
+        link(this.Foo, inline)();
         Test(""After2"");
     }
 }
@@ -268,11 +266,10 @@ class T
     }
 
     [PseudoOverride(Foo, TestAspect1)]
-    [PseudoForceNotInlineable]
     void Foo_Override1()
     {
         Test(""Before1"");
-        link(this.Foo());
+        link(this.Foo, inline)();
         Test(""After1"");
     }
 
@@ -280,7 +277,7 @@ class T
     void Foo_Override2()
     {
         Test(""Before2"");
-        link(this.Foo());
+        link(this.Foo)();
         Test(""After2"");
     }
 }
@@ -327,7 +324,6 @@ class T
     {
     }
 
-    [PseudoForceNotInlineable]
     int Foo()
     {
         Test(""Original"");
@@ -339,7 +335,7 @@ class T
     {
         Test(""Before"");
         int result;
-        result = link(this.Foo());
+        result = link(this.Foo)();
         Test(""After"");
         return result;
     }

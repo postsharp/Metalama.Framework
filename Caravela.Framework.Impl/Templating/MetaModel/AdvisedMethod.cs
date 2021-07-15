@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IMethodList LocalFunctions => this.Underlying.LocalFunctions;
 
-        public dynamic Invoke( params dynamic?[] args )
+        public object? Invoke( params object?[] args )
         {
             if ( this.Invokers.Base != null )
             {
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
             else if ( this.ReturnType.Is( SpecialType.Void ) )
             {
-                return new EmptyStatementDynamicExpression();
+                return null;
             }
             else
             {

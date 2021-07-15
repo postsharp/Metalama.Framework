@@ -5,7 +5,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
-using System;
 using static Caravela.Framework.Diagnostics.Severity;
 
 #pragma warning disable SA1118
@@ -89,7 +88,7 @@ namespace Caravela.Framework.Impl
             _category,
             Error );
 
-        public static readonly DiagnosticDefinition<(INamedTypeSymbol AspectType, string ExceptionType, Exception Exception)> ExceptionInUserCode = new(
+        public static readonly DiagnosticDefinition<(INamedTypeSymbol AspectType, string ExceptionType, string Exception)> ExceptionInUserCode = new(
             "CR0026", _category, "The aspect '{0}' has thrown an exception of the '{1}': {2}", Error, "The aspect has thrown an exception." );
 
         public static readonly DiagnosticDefinition<AssemblyIdentity> CannotFindCompileTimeAssembly = new(

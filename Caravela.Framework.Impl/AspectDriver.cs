@@ -129,9 +129,14 @@ namespace Caravela.Framework.Impl
                 }
                 catch ( Exception e )
                 {
+                    // Remove the last line from the exception string because it includes an obfuscated method name. It does not 
+                    // help the user and it breaks the tests.
+                    var lines = e.ToString().Split( '\n' ).Select( l => l.TrimEnd() ).ToList();
+                    lines.RemoveAt( lines.Count - 1 );
+
                     var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (this.AspectType, e.GetType().Name, e) );
+                        (this.AspectType, e.GetType().Name, string.Join( Environment.NewLine, lines )) );
 
                     return CreateResultForError( diagnostic );
                 }

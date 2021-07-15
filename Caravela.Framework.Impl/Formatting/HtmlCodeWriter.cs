@@ -7,12 +7,13 @@ using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace Caravela.Framework.Impl.Formatting
 {
     public sealed partial class HtmlCodeWriter
-    {        
+    {
         private const string _csClassTagName = "csharp";
         private readonly HtmlCodeWriterOptions _options;
 
@@ -57,11 +58,19 @@ namespace Caravela.Framework.Impl.Formatting
             var semanticModel = document.Project.GetCompilationAsync().Result!.GetSemanticModel( syntaxTree );
 
             foreach ( var csharpSpan in Classifier.GetClassifiedSpans(
-                semanticModel,
-                syntaxTree.GetRoot().Span,
-                document.Project!.Solution.Workspace ) )
+                    semanticModel,
+                    syntaxTree.GetRoot().Span,
+                    document.Project!.Solution.Workspace )
+                .OrderBy( c => c.TextSpan.Start )
+                .ThenBy( c => c.ClassificationType ) )
             {
-                classifiedTextSpans.SetTag( csharpSpan.TextSpan, _csClassTagName, csharpSpan.ClassificationType );
+                var existingSpan = classifiedTextSpans.GetClassifiedSpans( csharpSpan.TextSpan ).SingleOrDefault();
+
+                var combinedClassification = existingSpan.Tags != null! && existingSpan.Tags.TryGetValue( _csClassTagName, out var existingClassification )
+                    ? existingClassification + ";" + csharpSpan.ClassificationType
+                    : csharpSpan.ClassificationType;
+
+                classifiedTextSpans.SetTag( csharpSpan.TextSpan, _csClassTagName, combinedClassification );
             }
 
             // Add XML doc based on the input compilation.
@@ -101,9 +110,12 @@ namespace Caravela.Framework.Impl.Formatting
 
                         if ( classifiedSpan.Tags.TryGetValue( _csClassTagName, out var csClassification ) )
                         {
-                            foreach ( string c in csClassification.Split( '-' ) )
+                            foreach ( var classification in csClassification.Split( ';' ) )
                             {
-                                classes.Add( "cs-" + c.Trim().Replace( " ", "-" ) );
+                                foreach ( var c in classification.Split( '-' ) )
+                                {
+                                    classes.Add( "cs-" + c.Trim().Replace( " ", "-" ) );
+                                }
                             }
                         }
 

@@ -39,3 +39,5 @@ _ReSharper*/
 .idea/**/tasks.xml
 .idea/**/shelf
 LocalBuildId.props
+/publish/
+CaravelaVersion.props

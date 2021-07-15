@@ -12,13 +12,12 @@ using Caravela.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class FieldBuilder : MemberBuilder, IFieldBuilder
     {
-        public override MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
-
         public override DeclarationKind DeclarationKind => throw new NotImplementedException();
 
         public IType Type { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -35,17 +34,17 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IType IFieldOrProperty.Type => throw new NotImplementedException();
 
-        public AspectLinkerOptions? LinkerOptions { get; }
-
         public Writeability Writeability => throw new NotImplementedException();
 
         public bool IsAutoPropertyOrField => throw new NotImplementedException();
 
-        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name, AspectLinkerOptions? linkerOptions )
-            : base( parentAdvice, targetType, name )
-        {
-            this.LinkerOptions = linkerOptions;
-        }
+        public override InsertPosition InsertPosition
+            => new(
+                InsertPositionRelation.Within,
+                ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
+
+        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name )
+            : base( parentAdvice, targetType, name ) { }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {

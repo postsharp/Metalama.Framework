@@ -20,8 +20,6 @@ namespace Caravela.Framework.Impl.Advices
 
         public ImmutableDictionary<string, object?> ReadOnlyTags => this.Tags?.ToImmutableDictionary() ?? ImmutableDictionary<string, object?>.Empty;
 
-        public AspectLinkerOptions LinkerOptions => AspectLinkerOptions.FromTags( this.Tags );
-
         protected Advice( AspectInstance aspect, IDeclaration targetDeclaration, string? layerName, Dictionary<string, object?>? tags )
         {
             this.Tags = tags;

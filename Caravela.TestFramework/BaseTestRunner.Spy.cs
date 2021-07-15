@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Caravela.TestFramework
 {
@@ -20,9 +21,7 @@ namespace Caravela.TestFramework
             }
 
             public void ReportCompileTimeCompilation( Compilation compilation )
-            {
-                this._testResult.SetOutputCompilation( compilation );
-            }
+                => Task.Run( () => this._testResult.SetOutputCompilationAsync( compilation ) ).Wait();
 
             public void ReportAnnotatedSyntaxNode( SyntaxNode sourceSyntaxRoot, SyntaxNode annotatedSyntaxRoot )
             {

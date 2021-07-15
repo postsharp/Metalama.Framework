@@ -17,12 +17,5 @@ namespace Caravela.Framework.Code.Advised
         /// <returns></returns>
         [return: RunTimeOnly]
         dynamic ToArray();
-
-        /// <summary>
-        /// Generates syntax that represents the current parameter list as a tuple, like <c>(a, b)</c>.
-        /// </summary>
-        /// <returns></returns>
-        [return: RunTimeOnly]
-        dynamic ToValueTuple();
     }
 }

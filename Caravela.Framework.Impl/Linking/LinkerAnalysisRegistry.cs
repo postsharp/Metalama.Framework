@@ -1,15 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.AspectOrdering;
-using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Linking
@@ -20,21 +15,21 @@ namespace Caravela.Framework.Impl.Linking
     internal class LinkerAnalysisRegistry
     {
         private readonly LinkerIntroductionRegistry _introductionRegistry;
-        private readonly IReadOnlyDictionary<SymbolVersion, int> _symbolVersionReferenceCounts;
-        private readonly IReadOnlyDictionary<ISymbol, MemberAnalysisResult> _methodBodyInfos;
-        private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
-        public static readonly SyntaxAnnotation DoNotInlineAnnotation = new( "Caravela_DoNotInline" );
+        private readonly IReadOnlyDictionary<ISymbol, MethodBodyAnalysisResult> _methodBodyInfos;
+
+        private readonly
+            IReadOnlyDictionary<(ISymbol Symbol, ResolvedAspectReferenceSemantic Semantic, AspectReferenceTargetKind TargetKind),
+                IReadOnlyList<ResolvedAspectReference>> _aspectReferences;
 
         public LinkerAnalysisRegistry(
             LinkerIntroductionRegistry introductionRegistry,
-            IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
-            IReadOnlyDictionary<SymbolVersion, int> symbolVersionReferenceCounts,
-            IReadOnlyDictionary<ISymbol, MemberAnalysisResult> methodBodyInfos )
+            IReadOnlyDictionary<ISymbol, MethodBodyAnalysisResult> methodBodyInfos,
+            IReadOnlyDictionary<(ISymbol Symbol, ResolvedAspectReferenceSemantic Semantic, AspectReferenceTargetKind TargetKind),
+                IReadOnlyList<ResolvedAspectReference>> aspectReferenceIndex )
         {
-            this._orderedAspectLayers = orderedAspectLayers;
             this._introductionRegistry = introductionRegistry;
-            this._symbolVersionReferenceCounts = symbolVersionReferenceCounts;
             this._methodBodyInfos = methodBodyInfos;
+            this._aspectReferences = aspectReferenceIndex;
         }
 
         /// <summary>
@@ -44,118 +39,39 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns><c>True</c> if the method is override target, otherwise <c>false</c>.</returns>
         public bool IsOverrideTarget( ISymbol symbol )
         {
+            if ( symbol is IMethodSymbol methodSymbol
+                 && (methodSymbol.MethodKind == MethodKind.PropertyGet
+                     || methodSymbol.MethodKind == MethodKind.PropertySet
+                     || methodSymbol.MethodKind == MethodKind.EventAdd
+                     || methodSymbol.MethodKind == MethodKind.EventRemove) )
+            {
+                return this.IsOverrideTarget( methodSymbol.AssociatedSymbol.AssertNotNull() );
+            }
+
             return this._introductionRegistry.GetOverridesForSymbol( symbol ).Count > 0;
         }
 
-        /// <summary>
-        /// Determines whether the symbol represents introduced interface implementation.
-        /// </summary>
-        /// <param name="symbol">Symbol.</param>
-        /// <returns></returns>
-        public bool IsInterfaceImplementation( ISymbol symbol )
+        internal IReadOnlyList<ResolvedAspectReference> GetContainedAspectReferences( IMethodSymbol symbol )
         {
-            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
+            if ( this._methodBodyInfos.TryGetValue( symbol, out var methodBodyInfo ) )
+            {
+                return methodBodyInfo.AspectReferences;
+            }
 
-            if ( introducedMember == null )
-            {
-                return false;
-            }
-            else
-            {
-                return introducedMember.Semantic == IntroducedMemberSemantic.InterfaceImplementation;
-            }
+            return Array.Empty<ResolvedAspectReference>();
         }
 
-        public ISymbol GetImplementedInterfaceMember( ISymbol symbol )
+        internal IReadOnlyList<ResolvedAspectReference> GetAspectReferences(
+            ISymbol symbol,
+            ResolvedAspectReferenceSemantic semantic,
+            AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self )
         {
-            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
-
-            if ( introducedMember == null || introducedMember.Semantic != IntroducedMemberSemantic.InterfaceImplementation )
+            if ( !this._aspectReferences.TryGetValue( (symbol, semantic, targetKind), out var containedReferences ) )
             {
-                throw new AssertionFailedException();
+                return Array.Empty<ResolvedAspectReference>();
             }
 
-            return (introducedMember.Declaration?.GetSymbol()).AssertNotNull();
-        }
-
-        /// <summary>
-        /// Determines whether the method body is inlineable.
-        /// </summary>
-        /// <param name="symbol">Method symbol.</param>
-        /// <returns><c>True</c> if the method body can be inlined, otherwise <c>false</c>.</returns>
-        public bool IsInlineable( ISymbol symbol )
-        {
-            // TODO: Inlineability also depends on parameters passed. 
-            //       Method/indexer is inlineable if only if:
-            //           * Call's argument expressions match parameter names of the caller.
-            //           * Parameter names of the caller match parameter names of the callee.
-            //           * Caller and callee signatures are equal.
-            //       This is satisfied for all proceed().
-
-            if ( this.IsOverrideTarget( symbol ) )
-            {
-                // Check for the presence of a magic comment that is only used in tests.
-                if ( symbol.DeclaringSyntaxReferences.Any( r => r.GetSyntax().HasAnnotation( DoNotInlineAnnotation ) ) )
-                {
-                    // Inlining is explicitly disabled for the declaration.
-                    return false;
-                }
-
-                return this.HasSingleReference( symbol, null );
-            }
-            else if ( this.IsOverride( symbol ) )
-            {
-                var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
-
-                if ( introducedMember == null )
-                {
-                    throw new AssertionFailedException();
-                }
-
-                if ( introducedMember.LinkerOptions?.ForceNotInlineable == true )
-                {
-                    return false;
-                }
-
-                return this.HasSingleReference( symbol, introducedMember.AspectLayerId );
-            }
-            else
-            {
-                // Base methods are not inlineable.
-
-                return false;
-            }
-        }
-
-        private bool HasSingleReference( ISymbol symbol, AspectLayerId? aspectLayerId )
-        {
-            switch ( symbol )
-            {
-                case IMethodSymbol { AssociatedSymbol: null }:
-                    return this.HasSingleReference( symbol, aspectLayerId, LinkerAnnotationTargetKind.Self );
-
-                case IPropertySymbol propertySymbol:
-                    return this.HasSingleReference( propertySymbol, aspectLayerId, LinkerAnnotationTargetKind.PropertyGetAccessor )
-                           && this.HasSingleReference( propertySymbol, aspectLayerId, LinkerAnnotationTargetKind.PropertySetAccessor );
-
-                case IEventSymbol eventSymbol:
-                    return this.HasSingleReference( eventSymbol, aspectLayerId, LinkerAnnotationTargetKind.EventAddAccessor )
-                           && this.HasSingleReference( eventSymbol, aspectLayerId, LinkerAnnotationTargetKind.EventRemoveAccessor );
-
-                default:
-                    throw new NotSupportedException( $"{symbol}" );
-            }
-        }
-
-        private bool HasSingleReference( ISymbol symbol, AspectLayerId? aspectLayerId, LinkerAnnotationTargetKind targetKind )
-        {
-            if ( !this._symbolVersionReferenceCounts.TryGetValue( new SymbolVersion( symbol, aspectLayerId, targetKind ), out var counter ) )
-            {
-                // Method is not referenced in multiple places.
-                return true;
-            }
-
-            return counter <= 1;
+            return containedReferences;
         }
 
         /// <summary>
@@ -165,6 +81,15 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns></returns>
         public bool IsOverride( ISymbol symbol )
         {
+            if ( symbol is IMethodSymbol methodSymbol
+                 && (methodSymbol.MethodKind == MethodKind.PropertyGet
+                     || methodSymbol.MethodKind == MethodKind.PropertySet
+                     || methodSymbol.MethodKind == MethodKind.EventAdd
+                     || methodSymbol.MethodKind == MethodKind.EventRemove) )
+            {
+                return this.IsOverride( methodSymbol.AssociatedSymbol.AssertNotNull() );
+            }
+
             var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
 
             if ( introducedMember == null )
@@ -175,16 +100,32 @@ namespace Caravela.Framework.Impl.Linking
             return introducedMember.Semantic == IntroducedMemberSemantic.Override;
         }
 
-        public ISymbol? GetOverrideTarget( ISymbol overrideSymbol )
+        public ISymbol? GetOverrideTarget( ISymbol symbol )
         {
-            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( overrideSymbol );
-
-            if ( introducedMember == null )
+            switch ( symbol )
             {
-                return null;
-            }
+                case IMethodSymbol { MethodKind: MethodKind.PropertyGet } getterSymbol:
+                    return ((IPropertySymbol?) this.GetOverrideTarget( getterSymbol.AssociatedSymbol.AssertNotNull() ))?.GetMethod;
 
-            return this._introductionRegistry.GetOverrideTarget( introducedMember );
+                case IMethodSymbol { MethodKind: MethodKind.PropertySet } setterSymbol:
+                    return ((IPropertySymbol?) this.GetOverrideTarget( setterSymbol.AssociatedSymbol.AssertNotNull() ))?.SetMethod;
+
+                case IMethodSymbol { MethodKind: MethodKind.EventAdd } adderSymbol:
+                    return ((IEventSymbol?) this.GetOverrideTarget( adderSymbol.AssociatedSymbol.AssertNotNull() ))?.AddMethod;
+
+                case IMethodSymbol { MethodKind: MethodKind.EventRemove } removerSymbol:
+                    return ((IEventSymbol?) this.GetOverrideTarget( removerSymbol.AssociatedSymbol.AssertNotNull() ))?.RemoveMethod;
+
+                default:
+                    var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
+
+                    if ( introducedMember == null )
+                    {
+                        return null;
+                    }
+
+                    return this._introductionRegistry.GetOverrideTarget( introducedMember );
+            }
         }
 
         /// <summary>
@@ -194,97 +135,38 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns>Symbol.</returns>
         public ISymbol GetLastOverride( ISymbol symbol )
         {
-            var overrides = this._introductionRegistry.GetOverridesForSymbol( symbol );
-            var lastOverride = overrides.LastOrDefault();
-
-            if ( lastOverride == null )
+            switch ( symbol )
             {
-                return symbol;
-            }
+                case IMethodSymbol { MethodKind: MethodKind.PropertyGet } getterSymbol:
+                    return ((IPropertySymbol) this.GetLastOverride( getterSymbol.AssociatedSymbol.AssertNotNull() )).GetMethod.AssertNotNull();
 
-            return this._introductionRegistry.GetSymbolForIntroducedMember( lastOverride );
+                case IMethodSymbol { MethodKind: MethodKind.PropertySet } setterSymbol:
+                    return ((IPropertySymbol) this.GetLastOverride( setterSymbol.AssociatedSymbol.AssertNotNull() )).SetMethod.AssertNotNull();
+
+                case IMethodSymbol { MethodKind: MethodKind.EventAdd } adderSymbol:
+                    return ((IEventSymbol) this.GetLastOverride( adderSymbol.AssociatedSymbol.AssertNotNull() )).AddMethod.AssertNotNull();
+
+                case IMethodSymbol { MethodKind: MethodKind.EventRemove } removerSymbol:
+                    return ((IEventSymbol) this.GetLastOverride( removerSymbol.AssociatedSymbol.AssertNotNull() )).RemoveMethod.AssertNotNull();
+
+                default:
+                    var overrides = this._introductionRegistry.GetOverridesForSymbol( symbol );
+                    var lastOverride = overrides.LastOrDefault();
+
+                    if ( lastOverride == null )
+                    {
+                        return symbol;
+                    }
+
+                    return this._introductionRegistry.GetSymbolForIntroducedMember( lastOverride );
+            }
         }
 
-        /// <summary>
-        /// Resolves an annotated symbol referenced by an introduced method body, while respecting aspect layer ordering.
-        /// </summary>
-        /// <param name="contextSymbol">Symbol of the method body which contains the reference.</param>
-        /// <param name="referencedSymbol">Symbol of the reference method (usually the original declaration).</param>
-        /// <param name="referenceAnnotation">Annotation on the referencing node.</param>
-        /// <returns>Symbol of the introduced declaration visible to the context method (previous aspect layer that transformed this declaration).</returns>
-        public ISymbol ResolveSymbolReference( ISymbol contextSymbol, ISymbol referencedSymbol, LinkerAnnotation referenceAnnotation )
+        public bool IsLastOverride( ISymbol symbol )
         {
-            // TODO: Other things than methods.
-            var overrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
-            var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (o.AspectLayerId, Index: i) ).ToReadOnlyList();
-            var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceAnnotation.AspectLayerId ).Index;
-
-            // TODO: Optimize.
-            var previousLayerOverride = (
-                from o in overrides
-                join oal in indexedLayers
-                    on o.AspectLayerId equals oal.AspectLayerId
-                where oal.Index < annotationLayerIndex
-                orderby oal.Index
-                select o
-            ).LastOrDefault();
-
-            if ( previousLayerOverride == null )
-            {
-                if ( referencedSymbol is IMethodSymbol methodSymbol )
-                {
-                    if ( methodSymbol.OverriddenMethod != null )
-                    {
-                        return methodSymbol.OverriddenMethod;
-                    }
-                    else if ( TryGetHiddenSymbol( methodSymbol, out var hiddenSymbol ) )
-                    {
-                        return hiddenSymbol;
-                    }
-                }
-                else if ( referencedSymbol is IPropertySymbol propertySymbol )
-                {
-                    var overridenAccessor = propertySymbol.GetMethod?.OverriddenMethod ?? propertySymbol.SetMethod?.OverriddenMethod;
-
-                    if ( overridenAccessor != null )
-                    {
-                        return overridenAccessor.AssociatedSymbol.AssertNotNull();
-                    }
-                    else if ( TryGetHiddenSymbol( propertySymbol, out var hiddenSymbol ) )
-                    {
-                        return hiddenSymbol;
-                    }
-                }
-
-                return referencedSymbol;
-            }
-
-            return this._introductionRegistry.GetSymbolForIntroducedMember( previousLayerOverride );
-        }
-
-        private static bool TryGetHiddenSymbol( ISymbol symbol, [NotNullWhen( true )] out ISymbol? hiddenSymbol )
-        {
-            var currentType = symbol.ContainingType.BaseType;
-
-            while ( currentType != null )
-            {
-                // TODO: Optimize - lookup by name first instead of equating all members.
-                foreach ( var member in currentType.GetMembers() )
-                {
-                    if ( StructuralSymbolComparer.Signature.Equals( symbol, member ) )
-                    {
-                        hiddenSymbol = (IMethodSymbol) member;
-
-                        return true;
-                    }
-                }
-
-                currentType = currentType.BaseType;
-            }
-
-            hiddenSymbol = null;
-
-            return false;
+            return this.IsOverride( symbol ) && SymbolEqualityComparer.Default.Equals(
+                symbol,
+                this.GetLastOverride( this.GetOverrideTarget( symbol ).AssertNotNull() ) );
         }
 
         /// <summary>
@@ -301,6 +183,38 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             return result.HasSimpleReturnControlFlow;
+        }
+
+        internal ISymbol? GetPreviousOverride( ISymbol symbol )
+        {
+            var overrideTarget = this.GetOverrideTarget( symbol );
+
+            if ( overrideTarget != null )
+            {
+                var overrides = this._introductionRegistry.GetOverridesForSymbol( overrideTarget );
+                var matched = false;
+
+                foreach ( var introducedMember in overrides.Reverse() )
+                {
+                    var overrideSymbol = this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember );
+
+                    if ( matched )
+                    {
+                        return overrideSymbol;
+                    }
+
+                    if ( SymbolEqualityComparer.Default.Equals( overrideSymbol, symbol ) )
+                    {
+                        matched = true;
+                    }
+                }
+
+                return null;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

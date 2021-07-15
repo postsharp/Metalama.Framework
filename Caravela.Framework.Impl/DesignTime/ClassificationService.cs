@@ -15,7 +15,10 @@ namespace Caravela.Framework.Impl.DesignTime
     /// <summary>
     /// The implementation of <see cref="IClassificationService"/>.
     /// </summary>
-    internal class ClassificationService : IClassificationService
+    /// <remarks>
+    /// This class is public because it is used by Try.Caravela.
+    /// </remarks>
+    public class ClassificationService : IClassificationService
     {
         private readonly IServiceProvider _serviceProvider;
 

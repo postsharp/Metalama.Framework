@@ -14,6 +14,7 @@ namespace Caravela.Framework.Impl.Linking
         private class CleanupRewriter : CSharpSyntaxRewriter
         {
             // TODO: Prune what we visit.
+            // TODO: Optimize (this reallocates multiple times.
 
             public override SyntaxNode? VisitBlock( BlockSyntax node )
             {
@@ -26,14 +27,11 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         var innerBlockFlags = innerBlock.GetLinkerGeneratedFlags();
 
-                        if ( innerBlockFlags.HasFlag( LinkerGeneratedFlags.Flattenable ) )
+                        if ( innerBlockFlags.HasFlag( LinkerGeneratedFlags.FlattenableBlock ) )
                         {
                             anyRewrittenStatement = true;
 
-                            foreach ( var innerBlockStatement in ((BlockSyntax) this.VisitBlock( innerBlock ).AssertNotNull()).Statements )
-                            {
-                                newStatements.Add( innerBlockStatement );
-                            }
+                            AddFlattenedBlockStatements( innerBlock, newStatements );
 
                             // TODO: Solve trivia!
                         }
@@ -62,13 +60,64 @@ namespace Caravela.Framework.Impl.Linking
                     }
                 }
 
+                var finalStatements = new List<StatementSyntax>();
+
+                // Process labeled statements.
+                for ( var i = 0; i < newStatements.Count; i++ )
+                {
+                    var statement = newStatements[i];
+
+                    if ( statement.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.EmptyLabeledStatement ) )
+                    {
+                        var labeledStatement = (statement as LabeledStatementSyntax).AssertNotNull();
+
+                        if ( i == newStatements.Count - 1 )
+                        {
+                            finalStatements.Add( labeledStatement );
+                        }
+                        else
+                        {
+                            finalStatements.Add(
+                                LabeledStatement(
+                                    labeledStatement.Identifier,
+                                    newStatements[i + 1] ) );
+
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        finalStatements.Add( statement );
+                    }
+                }
+
                 if ( anyRewrittenStatement )
                 {
-                    return node.Update( node.OpenBraceToken, List( newStatements ), node.CloseBraceToken );
+                    return node.Update( node.OpenBraceToken, List( finalStatements ), node.CloseBraceToken );
                 }
                 else
                 {
                     return node;
+                }
+
+                void AddFlattenedBlockStatements( BlockSyntax block, List<StatementSyntax> statements )
+                {
+                    foreach ( var statement in block.Statements )
+                    {
+                        if ( statement is BlockSyntax innerBlock && innerBlock.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.FlattenableBlock ) )
+                        {
+                            AddFlattenedBlockStatements( innerBlock, statements );
+                        }
+                        else
+                        {
+                            var visitedStatement = (StatementSyntax?) this.Visit( statement );
+
+                            if ( visitedStatement != null )
+                            {
+                                statements.Add( visitedStatement );
+                            }
+                        }
+                    }
                 }
             }
         }

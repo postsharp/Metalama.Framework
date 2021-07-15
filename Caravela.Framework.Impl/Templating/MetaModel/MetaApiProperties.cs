@@ -16,5 +16,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         ISymbol TemplateSymbol,
         IReadOnlyDictionary<string, object?> Tags,
         AspectLayerId AspectLayerId,
-        AspectPipelineDescription PipelineDescription );
+        AspectPipelineDescription PipelineDescription,
+        IDynamicExpression ProceedExpression );
 }

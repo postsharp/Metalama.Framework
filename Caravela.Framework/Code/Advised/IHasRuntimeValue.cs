@@ -16,6 +16,6 @@ namespace Caravela.Framework.Code.Advised
         /// Gets or sets the value at run time.
         /// </summary>
         [RunTimeOnly]
-        dynamic Value { get; set; }
+        dynamic? Value { get; set; }
     }
 }

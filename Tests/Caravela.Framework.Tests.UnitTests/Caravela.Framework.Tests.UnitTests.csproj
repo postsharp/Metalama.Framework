@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+	<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+		<_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
+	</AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FakeItEasy" Version="6.2.1" />
     <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
@@ -24,5 +30,12 @@
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
     <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" />
   </ItemGroup>
+
+
+    <!-- Disable this project when obfuscation is enabled -->
+    <ItemGroup  Condition="'$(Obfuscate)'=='True'">
+        <Compile Remove="**\*"/>
+    </ItemGroup>
+  
 
 </Project>
