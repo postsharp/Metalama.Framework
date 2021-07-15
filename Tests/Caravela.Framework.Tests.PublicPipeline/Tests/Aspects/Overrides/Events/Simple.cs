@@ -3,6 +3,8 @@ using Caravela.TestFramework;
 using System;
 using System.Collections.Generic;
 
+#pragma warning disable CS0067
+
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Events.Simple
 {
     public class OverrideAttribute : OverrideEventAspect
@@ -40,5 +42,8 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
                 this.handlers.Remove(value);
             }
         }
+
+        [Override]
+        public event EventHandler? EventField;
     }
 }

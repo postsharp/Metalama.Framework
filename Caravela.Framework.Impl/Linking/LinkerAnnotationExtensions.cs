@@ -40,5 +40,10 @@ namespace Caravela.Framework.Impl.Linking
                     node.Accessors.Select(
                         a => a.WithBody( a.Body.AddSourceCodeAnnotation() )
                             .WithExpressionBody( a.ExpressionBody.AddSourceCodeAnnotation() ) ) ) );
+
+        [return: NotNullIfNotNull( "node" )]
+        public static T? AddGeneratedCodeAnnotation<T>( this T? node )
+            where T : MemberDeclarationSyntax
+            => node?.WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
     }
 }

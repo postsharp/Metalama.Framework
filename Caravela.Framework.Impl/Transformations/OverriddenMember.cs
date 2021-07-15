@@ -7,7 +7,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -48,14 +47,16 @@ namespace Caravela.Framework.Impl.Transformations
 
                 if ( memberSymbol != null )
                 {
-                    var syntaxReference = (MemberDeclarationSyntax?) memberSymbol.DeclaringSyntaxReferences
-                        .OrderBy( dsr => dsr.SyntaxTree.FilePath, StringComparer.Ordinal )
-                        .FirstOrDefault()
-                        ?.GetSyntax();
+                    var declaration = memberSymbol.GetPrimaryDeclaration();
 
-                    if ( syntaxReference != null )
+                    switch ( declaration )
                     {
-                        return new InsertPosition( InsertPositionRelation.After, syntaxReference );
+                        case MemberDeclarationSyntax memberDeclaration:
+                            return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
+                        case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax eventFieldDeclaration } }:
+                            return new InsertPosition( InsertPositionRelation.After, eventFieldDeclaration );
+                        case VariableDeclaratorSyntax { Parent: { Parent: FieldDeclarationSyntax fieldDeclaration } }:
+                            return new InsertPosition( InsertPositionRelation.After, fieldDeclaration );
                     }
                 }
 

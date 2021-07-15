@@ -102,14 +102,19 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( returnExpressionKind == SyntaxKind.DefaultLiteralExpression || returnExpressionKind == SyntaxKind.NullLiteralExpression )
             {
-                return ReturnStatement( returnExpression );
+                return 
+                    ReturnStatement(
+                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                        returnExpression,
+                        Token( SyntaxKind.SemicolonToken ) );
             }
 
             // TODO: validate the returnExpression according to the method's return type.
-            return ReturnStatement(
-                Token( SyntaxKind.ReturnKeyword ).WithLeadingTrivia( Whitespace( " " ) ),
-                CastExpression( ParseTypeName( this.MetaApi.Method.ReturnType.ToDisplayString() ), returnExpression ),
-                Token( SyntaxKind.SemicolonToken ) );
+            return 
+                ReturnStatement(
+                    Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                    CastExpression( ParseTypeName( this.MetaApi.Method.ReturnType.ToDisplayString() ), returnExpression ),
+                    Token( SyntaxKind.SemicolonToken ) );
         }
 
         public UserDiagnosticSink DiagnosticSink => this.MetaApi.Diagnostics;

@@ -11,6 +11,8 @@ using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
@@ -59,15 +61,34 @@ namespace Caravela.Framework.Impl.Transformations
                 var addTemplateMethod = this.TemplateEvent != null ? this.TemplateEvent.Adder : this.AddTemplateMethod;
                 var removeTemplateMethod = this.TemplateEvent != null ? this.TemplateEvent.Remover : this.RemoveTemplateMethod;
 
-                var addAccessorBody =
-                    addTemplateMethod != null
-                        ? this.ExpandAccessorTemplate( context, addTemplateMethod, this.OverriddenDeclaration.Adder )
-                        : this.CreateIdentityAccessorBody( SyntaxKind.AddAccessorDeclaration );
+                var templateExpansionError = false;
+                BlockSyntax? addAccessorBody = null;
 
-                var removeAccessorBody =
-                    removeTemplateMethod != null
-                        ? this.ExpandAccessorTemplate( context, removeTemplateMethod, this.OverriddenDeclaration.Remover )
-                        : this.CreateIdentityAccessorBody( SyntaxKind.RemoveAccessorDeclaration );
+                if ( addTemplateMethod != null )
+                {
+                    templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate( context, addTemplateMethod, this.OverriddenDeclaration.Adder, out addAccessorBody );
+                }
+                else
+                {
+                    addAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration );
+                }
+
+                BlockSyntax? removeAccessorBody = null;
+
+                if ( removeTemplateMethod != null )
+                {
+                    templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate( context, removeTemplateMethod, this.OverriddenDeclaration.Remover, out removeAccessorBody );
+                }
+                else
+                {
+                    removeAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration );
+                }
+
+                if ( templateExpansionError )
+                {
+                    // Template expansion error.
+                    return Enumerable.Empty<IntroducedMember>();
+                }
 
                 // TODO: Do not throw exception when template expansion fails.
                 var overrides = new[]
@@ -104,7 +125,7 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-        private BlockSyntax? ExpandAccessorTemplate( in MemberIntroductionContext context, IMethod accessorTemplate, IMethod accessor )
+        private bool TryExpandAccessorTemplate( in MemberIntroductionContext context, IMethod accessorTemplate, IMethod accessor, [NotNullWhen( true )] out BlockSyntax? body )
         {
             using ( context.DiagnosticSink.WithDefaultScope( accessor ) )
             {
@@ -139,13 +160,7 @@ namespace Caravela.Framework.Impl.Transformations
 
                 var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( accessorTemplate );
 
-                if ( !templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out var newMethodBody ) )
-                {
-                    // Template expansion error.
-                    return null;
-                }
-
-                return newMethodBody;
+                return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out body );
             }
         }
 

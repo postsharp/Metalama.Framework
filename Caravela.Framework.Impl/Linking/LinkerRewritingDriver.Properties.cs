@@ -57,8 +57,15 @@ namespace Caravela.Framework.Impl.Linking
                 return true;
             }
 
+            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.Self );
             var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertyGetAccessor );
             var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertySetAccessor );
+
+            if ( selfAspectReferences.Count > 0 )
+            {
+                // TODO: We may need to deal with this case.
+                return false;
+            }
 
             if ( getAspectReferences.Count > 1 || setAspectReferences.Count > 1
                                                || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0) )
@@ -72,10 +79,11 @@ namespace Caravela.Framework.Impl.Linking
 
         private bool HasAnyAspectReferences( IPropertySymbol symbol, ResolvedAspectReferenceSemantic semantic )
         {
+            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.Self );
             var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertyGetAccessor );
             var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertySetAccessor );
 
-            return getAspectReferences.Count > 0 || setAspectReferences.Count > 0;
+            return selfAspectReferences.Count > 0 || getAspectReferences.Count > 0 || setAspectReferences.Count > 0;
         }
 
         private IReadOnlyList<MemberDeclarationSyntax> RewriteProperty( PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol )
@@ -201,7 +209,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             return Block(
                 ReturnStatement(
-                    Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
+                    Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         symbol.IsStatic
@@ -275,37 +283,47 @@ namespace Caravela.Framework.Impl.Linking
 
         private static MemberDeclarationSyntax GetOriginalImplProperty( PropertyDeclarationSyntax property, IPropertySymbol symbol )
         {
-            if ( IsAutoPropertyDeclaration( property ) )
-            {
-                return
-                    property
-                        .WithIdentifier( Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ) )
-                        .WithAccessorList(
-                            AccessorList(
-                                List(
-                                    new[]
-                                        {
-                                            symbol.GetMethod != null
-                                                ? AccessorDeclaration(
-                                                    SyntaxKind.GetAccessorDeclaration,
-                                                    GetImplicitGetterBody( symbol.GetMethod ) )
-                                                : null,
-                                            symbol.SetMethod != null
-                                                ? AccessorDeclaration(
-                                                    SyntaxKind.SetAccessorDeclaration,
-                                                    GetImplicitSetterBody( symbol.SetMethod ) )
-                                                : null
-                                        }.Where( a => a != null )
-                                        .AssertNoneNull() ) ) )
-                    ;
-            }
-            else
-            {
-                return
-                    property.WithIdentifier( Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ) )
-                        .WithInitializer( property.Initializer.AddSourceCodeAnnotation() )
-                        .WithAccessorList( property.AccessorList.AddSourceCodeAnnotation() );
-            }
+            var accessorList =
+                IsAutoPropertyDeclaration( property )
+                ? AccessorList(
+                    List(
+                        new[]
+                        {
+                            symbol.GetMethod != null
+                                ? AccessorDeclaration(
+                                    SyntaxKind.GetAccessorDeclaration,
+                                    GetImplicitGetterBody( symbol.GetMethod ) )
+                                : null,
+                            symbol.SetMethod != null
+                                ? AccessorDeclaration(
+                                    SyntaxKind.SetAccessorDeclaration,
+                                    GetImplicitSetterBody( symbol.SetMethod ) )
+                                : null
+                        }.Where( a => a != null )
+                        .AssertNoneNull() ) )
+                .NormalizeWhitespace()
+                : property.AccessorList.AddSourceCodeAnnotation();
+
+            var initializer =
+                property.Initializer?.AddSourceCodeAnnotation();
+
+            return
+                PropertyDeclaration(
+                    List<AttributeListSyntax>(),
+                    symbol.IsStatic
+                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                    property.Type,
+                    null,
+                    Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ),
+                    null,
+                    null,
+                    null )
+                .NormalizeWhitespace()
+                .WithLeadingTrivia( ElasticLineFeed )
+                .WithInitializer( initializer )
+                .WithTrailingTrivia( ElasticLineFeed )
+                .WithAccessorList( accessorList );
         }
     }
 }

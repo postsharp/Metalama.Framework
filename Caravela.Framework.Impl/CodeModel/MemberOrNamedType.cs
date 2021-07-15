@@ -18,14 +18,24 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             get
             {
-                var syntaxReference = this.Symbol.DeclaringSyntaxReferences.FirstOrDefault();
+                var syntaxReference = this.Symbol.GetPrimarySyntaxReference();
 
                 if ( syntaxReference == null )
                 {
                     return false;
                 }
 
-                return ((MemberDeclarationSyntax) syntaxReference.GetSyntax()).Modifiers.Any( m => m.Kind() == SyntaxKind.NewKeyword );
+                switch ( syntaxReference.GetSyntax() )
+                {
+                    case MemberDeclarationSyntax memberDeclaration:
+                        return memberDeclaration.Modifiers.Any( m => m.Kind() == SyntaxKind.NewKeyword );
+                    case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax eventFieldDeclaration } }:
+                        return eventFieldDeclaration.Modifiers.Any( m => m.Kind() == SyntaxKind.NewKeyword );
+                    case VariableDeclaratorSyntax { Parent: { Parent: FieldDeclarationSyntax fieldDeclaration } }:
+                        return fieldDeclaration.Modifiers.Any( m => m.Kind() == SyntaxKind.NewKeyword );
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
         }
 

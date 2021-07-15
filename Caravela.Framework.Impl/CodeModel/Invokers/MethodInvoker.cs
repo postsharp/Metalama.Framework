@@ -21,8 +21,6 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         public object Invoke( object? instance, params object?[] args )
         {
-            // TODO: Use LinkerAnnotation.
-
             if ( this._method.IsOpenGeneric )
             {
                 throw GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember.CreateException( this._method );
@@ -46,7 +44,10 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                 }
 
                 return new DynamicExpression(
-                    SyntaxFactory.InvocationExpression( name ).AddArgumentListArguments( arguments ),
+                    SyntaxFactory.InvocationExpression( 
+                        name
+                        .WithAspectReferenceAnnotation( this.AspectReference ) )
+                    .AddArgumentListArguments( arguments ),
                     this._method.ReturnType,
                     false );
             }
@@ -54,8 +55,10 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromValue( instance! ) );
 
             return new DynamicExpression(
-                SyntaxFactory.InvocationExpression( SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name ) )
-                    .AddArgumentListArguments( arguments ),
+                SyntaxFactory.InvocationExpression( 
+                    SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name )
+                    .WithAspectReferenceAnnotation( this.AspectReference ) )
+                .AddArgumentListArguments( arguments ),
                 this._method.ReturnType,
                 false );
         }

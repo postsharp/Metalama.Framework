@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         protected virtual void AssertNoArgument() { }
 
-        private ExpressionSyntax CreatePropertyExpression( RuntimeExpression? instance )
+        private ExpressionSyntax CreatePropertyExpression( RuntimeExpression? instance, AspectReferenceTargetKind targetKind )
         {
             if ( this.Member.DeclaringType!.IsOpenGeneric )
             {
@@ -34,20 +34,18 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             return MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
                 this.Member.GetReceiverSyntax( instance ),
-                IdentifierName( this.Member.Name ) );
+                IdentifierName( this.Member.Name ) )
+                .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind(targetKind) );
         }
 
         public object GetValue( object? instance )
         {
-            // TODO: Use LinkerAnnotation.
-            return new DynamicExpression( this.CreatePropertyExpression( RuntimeExpression.FromValue( instance ) ), this.Member.Type, this.Member is Field );
+            return new DynamicExpression( this.CreatePropertyExpression( RuntimeExpression.FromValue( instance ), AspectReferenceTargetKind.PropertyGetAccessor ), this.Member.Type, this.Member is Field );
         }
 
         public object SetValue( object? instance, object? value )
         {
-            // TODO: Use LinkerAnnotation.
-
-            var propertyAccess = this.CreatePropertyExpression( RuntimeExpression.FromValue( instance ) );
+            var propertyAccess = this.CreatePropertyExpression( RuntimeExpression.FromValue( instance ), AspectReferenceTargetKind.PropertySetAccessor );
 
             var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.GetSyntaxFromValue( value ) );
 

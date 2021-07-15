@@ -32,7 +32,11 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( !targetSymbol.ReturnsVoid )
                 {
-                    return Block( ReturnStatement( invocation ) );
+                    return Block(
+                        ReturnStatement(
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                            invocation,
+                            Token( SyntaxKind.SemicolonToken ) ) );
                 }
                 else
                 {
@@ -69,7 +73,7 @@ namespace Caravela.Framework.Impl.Linking
                                                 SyntaxKind.GetAccessorDeclaration,
                                                 Block(
                                                     ReturnStatement(
-                                                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
+                                                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                                                         GetInvocationTarget(),
                                                         Token( SyntaxKind.SemicolonToken ) ) ) )
                                             .NormalizeWhitespace()

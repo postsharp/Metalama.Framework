@@ -31,6 +31,11 @@ namespace Caravela.Framework.Impl
         /// <summary>
         /// Target the remove accessor of the referenced event.
         /// </summary>
-        EventRemoveAccessor
+        EventRemoveAccessor,
+
+        /// <summary>
+        /// Target the raiseaccessor of the referenced event.
+        /// </summary>
+        EventRaiseAccessor
     }
 }

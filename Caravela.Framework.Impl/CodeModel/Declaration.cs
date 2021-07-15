@@ -9,7 +9,6 @@ using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -53,12 +52,29 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IReadOnlyList<ISymbol> LookupSymbols()
         {
-            if ( this.Symbol.DeclaringSyntaxReferences.Length == 0 )
+            var declaredSymbol = this.Symbol;
+
+            // Event fields have accessors without declaring syntax references.
+            if ( this.Symbol.GetPrimarySyntaxReference() == null )
             {
-                throw new InvalidOperationException();
+                switch ( this.Symbol )
+                {
+                    case IMethodSymbol { MethodKind: RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } eventAccessorSymbol:
+                        declaredSymbol = eventAccessorSymbol.AssociatedSymbol.AssertNotNull();
+
+                        if ( declaredSymbol.GetPrimarySyntaxReference() == null )
+                        {
+                            throw new AssertionFailedException();
+                        }
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
 
-            var syntaxReference = this.Symbol.DeclaringSyntaxReferences[0];
+            var syntaxReference = declaredSymbol.GetPrimarySyntaxReference().AssertNotNull();
             var semanticModel = this.Compilation.RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
 
             var bodyNode =
@@ -74,6 +90,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     _ => throw new AssertionFailedException()
                 };
 
+            // Accessors have implicit "value" parameter.
             var implicitSymbols =
                 bodyNode != null
                     ? Enumerable.Empty<ISymbol>()
