@@ -24,6 +24,8 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public abstract class AspectPipeline : IDisposable
     {
+        private readonly bool _ownsDomain;
+
         public IProjectOptions ProjectOptions { get; }
 
         private readonly CompileTimeDomain _domain;
@@ -32,15 +34,24 @@ namespace Caravela.Framework.Impl.Pipeline
 
         protected AspectPipeline(
             IProjectOptions projectOptions,
-            CompileTimeDomain domain,
             AspectExecutionScenario executionScenario,
             bool isTest,
+            CompileTimeDomain? domain, 
             IDirectoryOptions? directoryOptions = null,
             IAssemblyLocator? assemblyLocator = null )
         {
-            this._domain = domain;
             this.ProjectOptions = projectOptions;
             this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( directoryOptions, assemblyLocator );
+
+            if ( domain != null )
+            {
+                this._domain = domain;
+            }
+            else
+            {
+                this._domain = this.ServiceProvider.GetService<ICompileTimeDomainFactory>().GetDomain();
+                this._ownsDomain = true;
+            }
 
             // ReSharper disable once VirtualMemberCallInConstructor
             this.ServiceProvider.AddService( new AspectPipelineDescription( executionScenario, isTest ) );
@@ -212,7 +223,13 @@ namespace Caravela.Framework.Impl.Pipeline
             }
         }
 
-        protected virtual void Dispose( bool disposing ) { }
+        protected virtual void Dispose( bool disposing )
+        {
+            if ( this._ownsDomain )
+            {
+                this._domain.Dispose();
+            }
+        }
 
         /// <inheritdoc/>
         public void Dispose() => this.Dispose( true );

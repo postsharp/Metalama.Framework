@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
@@ -126,8 +125,8 @@ namespace Caravela.Framework.Impl.Transformations
                         accessorTemplate.GetSymbol(),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
-                        context.ServiceProvider.GetService<AspectPipelineDescription>(),
-                        proceedExpression ) );
+                        proceedExpression,
+                        context.ServiceProvider ) );
 
                 var expansionContext = new TemplateExpansionContext(
                     this.Advice.Aspect.Aspect,

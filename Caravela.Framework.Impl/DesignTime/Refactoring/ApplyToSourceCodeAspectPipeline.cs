@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             IProjectOptions projectOptions,
             CompileTimeDomain domain,
             AspectClass aspectClass,
-            ISymbol targetSymbol ) : base( projectOptions, domain, AspectExecutionScenario.ApplyToSourceCode, false )
+            ISymbol targetSymbol ) : base( projectOptions, AspectExecutionScenario.ApplyToSourceCode, false, domain )
         {
             this._source = new InteractiveAspectSource( aspectClass, targetSymbol );
         }

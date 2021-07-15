@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 
 namespace Caravela.Framework.CompilerExtensions
@@ -26,57 +27,79 @@ namespace Caravela.Framework.CompilerExtensions
         /// </summary>
         public static object CreateInstance( string name )
         {
-            if ( !_initialized )
+            try
             {
-                lock ( _initializeLock )
+                if ( !_initialized )
                 {
-                    if ( !_initialized )
+                    lock ( _initializeLock )
                     {
-                        // To debug, uncomment the next line.
-                        // Debugger.Launch();
-
-                        var currentAssembly = Assembly.GetCallingAssembly();
-
-                        AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
-
-                        // Get a temp directory. AssemblyName.GetAssemblyName does not support long paths.
-                        _snapshotDirectory = TempPathHelper.GetTempPath( "Extract" );
-
-                        // Extract embedded assemblies to a temp directory.
-                        ExtractEmbeddedAssemblies( currentAssembly );
-
-                        // Load assemblies from the temp directory.
-                        foreach ( var file in Directory.GetFiles( _snapshotDirectory, "*.dll" ) )
+                        if ( !_initialized )
                         {
-                            var assemblyName = RetryHelper.Retry( () => AssemblyName.GetAssemblyName( file ) );
-                            _embeddedAssemblies[assemblyName.Name] = (assemblyName, file);
+                            // To debug, uncomment the next line.
+                            // Debugger.Launch();
+
+                            var currentAssembly = Assembly.GetCallingAssembly();
+
+                            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+
+                            // Get a temp directory. AssemblyName.GetAssemblyName does not support long paths.
+                            _snapshotDirectory = TempPathHelper.GetTempPath( "Extract" );
+
+                            // Extract embedded assemblies to a temp directory.
+                            ExtractEmbeddedAssemblies( currentAssembly );
+
+                            // Load assemblies from the temp directory.
+                            foreach ( var file in Directory.GetFiles( _snapshotDirectory, "*.dll" ) )
+                            {
+                                var assemblyName = RetryHelper.Retry( () => AssemblyName.GetAssemblyName( file ) );
+                                _embeddedAssemblies[assemblyName.Name] = (assemblyName, file);
+                            }
+
+                            _caravelaImplementationAssembly = Assembly.Load( _embeddedAssemblies["Caravela.Framework.Impl"].AssemblyName );
+
+                            _initialized = true;
                         }
-
-                        _caravelaImplementationAssembly = Assembly.Load( _embeddedAssemblies["Caravela.Framework.Impl"].AssemblyName );
-
-                        _initialized = true;
                     }
                 }
+
+                var type = _caravelaImplementationAssembly!.GetType( name, true );
+
+                return Activator.CreateInstance( type );
             }
+            catch ( Exception e )
+            {
+                var directory = TempPathHelper.GetTempPath( "ExtractExceptions" );
 
-            var type = _caravelaImplementationAssembly!.GetType( name, true );
+                if ( !Directory.Exists( directory ) )
+                {
+                    Directory.CreateDirectory( directory );
+                }
+                
+                var path = Path.Combine( directory, Guid.NewGuid().ToString() + ".txt" );
 
-            return Activator.CreateInstance( type );
+                File.WriteAllText( path, e.ToString() );
+
+                throw;
+            }
         }
 
         private static void ExtractEmbeddedAssemblies( Assembly currentAssembly )
         {
             // Extract managed resources to a snapshot directory.
+            var completedFilePath = Path.Combine( _snapshotDirectory, ".completed" );
 
-            if ( !Directory.Exists( _snapshotDirectory ) )
+            if ( !File.Exists( completedFilePath ) )
             {
+                StringBuilder log = new();
+                log.AppendLine( $"Extracting resources from assembly {currentAssembly.Location}." );
+                
                 // We cannot use MutexHelper because of dependencies on an embedded assembly.
                 using var extractMutex = new Mutex( false, "Global\\Caravela_Extract_" + AssemblyMetadataReader.BuildId );
                 extractMutex.WaitOne();
 
                 try
                 {
-                    if ( !Directory.Exists( _snapshotDirectory ) )
+                    if ( !File.Exists( completedFilePath ) )
                     {
                         Directory.CreateDirectory( _snapshotDirectory );
 
@@ -84,6 +107,8 @@ namespace Caravela.Framework.CompilerExtensions
                         {
                             if ( resourceName.EndsWith( ".dll", StringComparison.OrdinalIgnoreCase ) )
                             {
+                                log.AppendLine( $"Extracting resource " + resourceName );
+                                    
                                 // Extract the file to disk.
                                 using var stream = currentAssembly.GetManifestResourceStream( resourceName )!;
                                 var file = Path.Combine( _snapshotDirectory, resourceName );
@@ -96,9 +121,25 @@ namespace Caravela.Framework.CompilerExtensions
                                 // Rename the assembly to the match the assembly name.
                                 var assemblyName = AssemblyName.GetAssemblyName( file );
                                 var renamedFile = Path.Combine( _snapshotDirectory, assemblyName.Name + ".dll" );
-                                RetryHelper.Retry( () => File.Move( file, renamedFile ) );
+
+                                RetryHelper.Retry(
+                                    () =>
+                                    {
+                                        if ( File.Exists( renamedFile ) )
+                                        {
+                                            File.Delete( renamedFile );
+                                        }
+
+                                        File.Move( file, renamedFile );
+                                    } );
+                            }
+                            else
+                            {
+                                log.AppendLine( "Ignoring resource " + resourceName );
                             }
                         }
+
+                        File.WriteAllText( completedFilePath, log.ToString() );
                     }
                 }
                 finally

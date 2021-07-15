@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         public ServiceProvider() { }
-
+        
         public ServiceProvider( ServiceProvider prototype )
         {
             this._services = new Dictionary<Type, object>( prototype._services );

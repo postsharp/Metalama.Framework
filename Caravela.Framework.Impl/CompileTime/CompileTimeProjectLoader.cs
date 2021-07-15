@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this._serviceProvider = serviceProvider;
             this._builder = new CompileTimeCompilationBuilder( serviceProvider, domain );
             this._runTimeAssemblyLocator = serviceProvider.GetOptionalService<IAssemblyLocator>();
-            this.AttributeDeserializer = new AttributeDeserializer( this );
+            this.AttributeDeserializer = new AttributeDeserializer( serviceProvider, this );
             this._systemTypeResolver = serviceProvider.GetService<SystemTypeResolver>();
         }
 

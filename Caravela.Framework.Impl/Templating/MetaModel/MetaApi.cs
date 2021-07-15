@@ -84,6 +84,13 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public void DebugBreak()
         {
+            var trustOptions = this._common.ServiceProvider.GetService<ITrustOptions>();
+
+            if ( !trustOptions.IsTrusted )
+            {
+                return;
+            }
+            
             if ( Debugger.IsAttached )
             {
                 Debugger.Break();

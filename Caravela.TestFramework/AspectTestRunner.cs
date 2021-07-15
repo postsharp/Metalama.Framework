@@ -39,7 +39,7 @@ namespace Caravela.TestFramework
             using var testProjectOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
 
-            var pipeline = new CompileTimeAspectPipeline( testProjectOptions, domain, true, testProjectOptions );
+            var pipeline = new CompileTimeAspectPipeline( testProjectOptions, true, domain, testProjectOptions );
             var spy = new Spy( testResult );
             pipeline.ServiceProvider.AddService<ICompileTimeCompilationBuilderSpy>( spy );
             pipeline.ServiceProvider.AddService<ITemplateCompilerSpy>( spy );

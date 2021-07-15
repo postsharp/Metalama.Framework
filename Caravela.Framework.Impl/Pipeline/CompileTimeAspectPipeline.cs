@@ -24,14 +24,14 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public CompileTimeAspectPipeline(
             IProjectOptions projectOptions,
-            CompileTimeDomain domain,
             bool isTest,
+            CompileTimeDomain? domain = null,
             IDirectoryOptions? directoryOptions = null,
             IAssemblyLocator? assemblyLocator = null ) : base(
             projectOptions,
-            domain,
             AspectExecutionScenario.CompileTime,
             isTest,
+            domain,
             directoryOptions,
             assemblyLocator )
         {

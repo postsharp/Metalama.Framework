@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
@@ -20,10 +21,12 @@ namespace Caravela.Framework.Impl.CompileTime
     internal class AttributeDeserializer
     {
         private readonly ICompileTimeTypeResolver _compileTimeTypeResolver;
+        private readonly UserCodeInvoker _userCodeInvoker;
 
-        public AttributeDeserializer( ICompileTimeTypeResolver compileTimeTypeResolver )
+        public AttributeDeserializer( IServiceProvider serviceProvider, ICompileTimeTypeResolver compileTimeTypeResolver )
         {
             this._compileTimeTypeResolver = compileTimeTypeResolver;
+            this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
         }
 
         public bool TryCreateAttribute<T>( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
@@ -140,7 +143,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 parameters[i] = translatedArg;
             }
 
-            attributeInstance = (Attribute) constructor.Invoke( parameters ).AssertNotNull();
+            var localAttributeInstance = attributeInstance =
+                attributeInstance = this._userCodeInvoker.Invoke( () => (Attribute) constructor.Invoke( parameters ) ).AssertNotNull();
 
             foreach ( var (name, value) in attribute.NamedArguments )
             {
@@ -156,7 +160,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         return false;
                     }
 
-                    property.SetValue( attributeInstance, translatedValue );
+                    this._userCodeInvoker.Invoke( () => property.SetValue( localAttributeInstance, translatedValue ) );
                 }
                 else if ( (field = type.GetField( name )) != null )
                 {
@@ -167,7 +171,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         return false;
                     }
 
-                    field.SetValue( attributeInstance, translatedValue );
+                    this._userCodeInvoker.Invoke( () => field.SetValue( localAttributeInstance, translatedValue ) );
                 }
                 else
                 {

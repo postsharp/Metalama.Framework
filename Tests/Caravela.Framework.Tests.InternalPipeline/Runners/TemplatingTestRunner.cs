@@ -144,7 +144,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
                 return testResult;
             }
-            
+
             testResult.HasOutputCode = true;
 
             // Create a SyntaxTree that maps to the file we have just written.
@@ -196,7 +196,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var driver = new TemplateDriver( this.ServiceProvider, null!, templateMethod, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InputCompilation );
-                var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( assembly, compilationModel, templateMethod );
+                var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( this.ServiceProvider, assembly, compilationModel, templateMethod );
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult, out var output );
 
@@ -224,6 +224,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
         }
 
         private (TemplateExpansionContext Context, MethodDeclarationSyntax TargetMethod) CreateTemplateExpansionContext(
+            IServiceProvider serviceProvider,
             Assembly assembly,
             CompilationModel compilation,
             ISymbol templateMethod )
@@ -264,6 +265,10 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     targetMethod.ReturnType,
                     false );
 
+            var additionalServices = new ServiceProvider();
+            additionalServices.AddService( new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ) );
+            var augmentedServiceProvider = new AggregateServiceProvider( serviceProvider, additionalServices );
+
             var metaApi = MetaApi.ForMethod(
                 targetMethod,
                 new MetaApiProperties(
@@ -271,8 +276,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     templateMethod,
                     ImmutableDictionary.Create<string, object?>().Add( "TestKey", "TestValue" ),
                     default,
-                    new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ),
-                    proceedExpression ) );
+                    proceedExpression,
+                    augmentedServiceProvider ) );
 
             return (new TemplateExpansionContext(
                         templateInstance,
@@ -308,6 +313,18 @@ namespace Caravela.Framework.Tests.Integration.Runners
                                             },
                                             SyntaxFactory.IdentifierName( p.Name ) ) ) ) ) );
             }
+        }
+
+        private class AggregateServiceProvider : IServiceProvider
+        {
+            private readonly IReadOnlyList<IServiceProvider> _children;
+
+            public AggregateServiceProvider( params IServiceProvider[] children )
+            {
+                this._children = children;
+            }
+
+            public object GetService( Type serviceType ) => this._children.Select( c => c.GetService( serviceType ) ).First( s => s != null );
         }
     }
 }

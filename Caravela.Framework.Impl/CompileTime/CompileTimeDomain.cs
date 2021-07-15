@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// depends on the scenario: typically one per project at compile time, one per <see cref="AppDomain"/> at design time, and one per test
     /// at testing time.
     /// </summary>
-    public class CompileTimeDomain : IDisposable
+    public class CompileTimeDomain : IDisposable, ICompileTimeDomainFactory
     {
         private static int _nextDomainId;
         private readonly ConcurrentDictionary<AssemblyIdentity, Assembly> _assemblyCache = new();
@@ -54,6 +54,8 @@ namespace Caravela.Framework.Impl.CompileTime
             => this._assemblyCache.GetOrAdd( compileTimeIdentity, _ => this.LoadAssembly( path ) );
 
         public override string ToString() => this._domainId.ToString( CultureInfo.InvariantCulture );
+
+        CompileTimeDomain ICompileTimeDomainFactory.GetDomain() => this;
 
         public virtual void Dispose( bool disposing )
         {
