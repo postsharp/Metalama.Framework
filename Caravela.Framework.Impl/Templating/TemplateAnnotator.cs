@@ -1299,6 +1299,9 @@ namespace Caravela.Framework.Impl.Templating
                     var transformedNode = node.WithLeft( annotatedExpression ).WithRight( annotatedType );
 
                     return this.AnnotateCastExpression( transformedNode, annotatedType!, annotatedExpression! );
+
+                case SyntaxKind.CoalesceExpression:
+                    return this.VisitCoalesceExpression( node );
             }
 
             var visitedNode = base.VisitBinaryExpression( node );
@@ -1319,6 +1322,39 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             return transformedCastNode;
+        }
+
+        private SyntaxNode? VisitCoalesceExpression( BinaryExpressionSyntax node )
+        {
+            // The scope is determined by the left part. The right part must follow.
+
+            var annotatedLeft = this.Visit( node.Left );
+            var leftScope = this.GetNodeScope( annotatedLeft );
+
+            ScopeContext context;
+
+            if ( leftScope == TemplatingScope.CompileTimeOnly )
+            {
+                context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"right part of the compile-time '{node.Left} ??'" );
+            }
+            else if ( leftScope.IsRunTime() )
+            {
+                context = ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, $"right part of the run-time '{node.Left} ??'" );
+            }
+            else
+            {
+                // Use the default rule.
+                var visitedNode = base.VisitBinaryExpression( node );
+
+                return this.AddScopeAnnotationToVisitedNode( node, visitedNode );
+            }
+
+            using ( this.WithScopeContext( context ) )
+            {
+                var annotatedRight = this.Visit( node.Right );
+
+                return node.Update( annotatedLeft, node.OperatorToken, annotatedRight ).AddScopeAnnotation( leftScope );
+            }
         }
 
         public override SyntaxNode? VisitForStatement( ForStatementSyntax node )

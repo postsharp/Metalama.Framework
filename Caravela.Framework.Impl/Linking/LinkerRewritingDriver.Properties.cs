@@ -257,7 +257,7 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         var candidate = hint + i;
 
-                        if ( !property.ContainingType.GetMembers(candidate).Any() )
+                        if ( !property.ContainingType.GetMembers( candidate ).Any() )
                         {
                             return candidate;
                         }
