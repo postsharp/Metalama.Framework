@@ -12,6 +12,8 @@ using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
+#pragma warning disable CA1305 // Specify IFormatProvider
+
 namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 {
     public partial class LinkerTestBase

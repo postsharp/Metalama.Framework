@@ -28,7 +28,7 @@ namespace Caravela.TestFramework
         {
             var attribute = assembly
                 .GetCustomAttributes( typeof(AssemblyMetadataAttribute) )
-                .SingleOrDefault( a => (string) a.GetConstructorArguments().First<object>() == "ReferenceAssemblyList" );
+                .SingleOrDefault( a => string.Equals( (string) a.GetConstructorArguments().First<object>(), "ReferenceAssemblyList", StringComparison.Ordinal ) );
 
             if ( attribute == null )
             {

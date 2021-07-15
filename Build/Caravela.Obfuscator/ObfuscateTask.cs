@@ -9,6 +9,7 @@ using PostSharp.Sdk.Collections;
 using PostSharp.Sdk.Extensibility;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 
@@ -279,7 +280,7 @@ namespace Caravela.Obfuscator
             // Obfuscate generic parameter names.
             foreach ( var genericParameter in type.GenericParameters )
             {
-                genericParameter.Name = string.Format( "!{0:x}", genericParameter.Ordinal );
+                genericParameter.Name = string.Format( CultureInfo.InvariantCulture, "!{0:x}", genericParameter.Ordinal );
             }
 
             // Don't do anything else for delegates.
@@ -434,13 +435,13 @@ namespace Caravela.Obfuscator
                     // Obfuscate parameter names.
                     foreach ( var parameter in method.Parameters )
                     {
-                        parameter.Name = string.Format( "_{0:x}", parameter.Ordinal );
+                        parameter.Name = string.Format(CultureInfo.InvariantCulture, "_{0:x}", parameter.Ordinal );
                     }
 
                     // Obfuscate generic parameter names.
                     foreach ( var genericParameter in method.GenericParameters )
                     {
-                        genericParameter.Name = string.Format( "??{0:x}", genericParameter.Ordinal );
+                        genericParameter.Name = string.Format(CultureInfo.InvariantCulture, "??{0:x}", genericParameter.Ordinal );
                     }
                 }
             }

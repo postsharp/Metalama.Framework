@@ -9,6 +9,7 @@ using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -239,7 +240,7 @@ public class VersionedClass
 {
     public static int Version => $version;
 }
-".Replace( "$version", version.ToString() );
+".Replace( "$version", version.ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal );
 
             var classA = @"
 

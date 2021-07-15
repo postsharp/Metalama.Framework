@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
+using System;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization
@@ -18,7 +19,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
                 this.Serialize( "Hello,\n world!" )
                     .NormalizeWhitespace()
                     .ToString()
-                    .Replace( "\\r", "" ) );
+                    .Replace( "\\r", "", StringComparison.Ordinal ) );
 
             Assert.Equal( "\"Hello, world!\"", this.Serialize( $@"Hello, {"world"}!" ).NormalizeWhitespace().ToString() );
         }
