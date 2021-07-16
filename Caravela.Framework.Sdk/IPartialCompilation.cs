@@ -3,6 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Sdk
 {
@@ -20,7 +21,7 @@ namespace Caravela.Framework.Sdk
         /// <summary>
         /// Gets the list of syntax trees in the current subset.
         /// </summary>
-        IReadOnlyCollection<SyntaxTree> SyntaxTrees { get; }
+        ImmutableDictionary<string, SyntaxTree> SyntaxTrees { get; }
 
         /// <summary>
         /// Gets a value indicating whether the current <see cref="IPartialCompilation"/> is actually partial, or represents a complete compilation.
@@ -32,7 +33,7 @@ namespace Caravela.Framework.Sdk
         /// representing the modified object.
         /// </summary>
         public IPartialCompilation UpdateSyntaxTrees(
-            IReadOnlyList<(SyntaxTree OldTree, SyntaxTree NewTree)> replacements,
-            IReadOnlyList<SyntaxTree> addedTrees );
+            IReadOnlyList<ModifiedSyntaxTree>? replacements = null,
+            IReadOnlyList<SyntaxTree>? addedTrees = null );
     }
 }

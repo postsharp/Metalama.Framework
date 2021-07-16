@@ -10,6 +10,7 @@
         <CompilerVisibleProperty Include="CaravelaProjectId" />
         <CompilerVisibleProperty Include="CaravelaBuildTouchFile" />
         <CompilerVisibleProperty Include="CaravelaEnabled" />
+        <CompilerVisibleProperty Include="CaravelaFormatOutput" />
         <CompilerVisibleProperty Include="AssemblyName" />
     </ItemGroup>
 

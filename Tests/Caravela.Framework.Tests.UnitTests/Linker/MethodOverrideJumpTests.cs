@@ -67,7 +67,7 @@ class T
             var linker = new AspectLinker( this.ServiceProvider, linkerInput );
             var result = linker.ToResult();
 
-            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
+            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().Value.GetNormalizedText();
             Assert.Equal( expectedCode.Trim(), transformedText );
         }
 
@@ -138,7 +138,7 @@ class T
             var linker = new AspectLinker( this.ServiceProvider, linkerInput );
             var result = linker.ToResult();
 
-            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
+            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().Value.GetNormalizedText();
             Assert.Equal( expectedCode.Trim(), transformedText );
         }
 
@@ -207,7 +207,7 @@ class T
             var linker = new AspectLinker( this.ServiceProvider, linkerInput );
             var result = linker.ToResult();
 
-            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
+            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().Value.GetNormalizedText();
             Assert.Equal( expectedCode.Trim(), transformedText );
         }
 
@@ -289,7 +289,7 @@ class T
             var linker = new AspectLinker( this.ServiceProvider, linkerInput );
             var result = linker.ToResult();
 
-            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
+            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().Value.GetNormalizedText();
             Assert.Equal( expectedCode.Trim(), transformedText );
         }
 
@@ -358,7 +358,7 @@ class T
             var linker = new AspectLinker( this.ServiceProvider, linkerInput );
             var result = linker.ToResult();
 
-            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
+            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().Value.GetNormalizedText();
             Assert.Equal( expectedCode.Trim(), transformedText );
         }
     }

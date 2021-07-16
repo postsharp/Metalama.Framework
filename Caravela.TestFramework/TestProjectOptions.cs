@@ -39,6 +39,8 @@ namespace Caravela.TestFramework
 
         public bool IsFrameworkEnabled => true;
 
+        public bool FormatOutput => false;
+
         public void Dispose()
         {
             if ( Directory.Exists( this.CompileTimeProjectCacheDirectory ) )

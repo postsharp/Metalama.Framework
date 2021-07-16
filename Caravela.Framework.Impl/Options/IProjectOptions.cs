@@ -24,5 +24,10 @@ namespace Caravela.Framework.Impl.Options
         /// the project will not be modified. 
         /// </summary>
         bool IsFrameworkEnabled { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the output syntax trees must be formatted.
+        /// </summary>
+        bool FormatOutput { get; }
     }
 }

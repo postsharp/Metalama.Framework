@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -119,14 +120,13 @@ namespace Caravela.Framework.Impl.Linking
             var intermediateCompilation = input.InitialCompilation;
             Rewriter addIntroducedElementsRewriter = new( introducedCollection, suppressionsByTarget, input.CompilationModel );
 
-            foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees )
+            foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees.Values )
             {
                 var oldRoot = initialSyntaxTree.GetRoot();
                 var newRoot = addIntroducedElementsRewriter.Visit( oldRoot );
 
                 if ( oldRoot != newRoot )
                 {
-                    // TODO: Add an annotation to modified syntax roots so that they can be differentiated from unmodified ones and skipped by the next visitors.
                     var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 
                     syntaxTreeMapping.Add( initialSyntaxTree, intermediateSyntaxTree );
@@ -134,7 +134,7 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             intermediateCompilation = intermediateCompilation.UpdateSyntaxTrees(
-                syntaxTreeMapping.Select( p => (p.Key, p.Value) ).ToList(),
+                syntaxTreeMapping.Select( p => new ModifiedSyntaxTree( p.Key, p.Value ) ).ToList(),
                 Array.Empty<SyntaxTree>() );
 
             var introductionRegistry = new LinkerIntroductionRegistry(

@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
@@ -13,7 +14,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -91,6 +94,15 @@ namespace Caravela.Framework.Impl.Pipeline
                     return false;
                 }
 
+                var resultCompilation = result.PartialCompilation;
+
+                // Format the output.
+                if ( this.ProjectOptions.FormatOutput && CanFormatOutput() )
+                {
+                    // ReSharper disable once AccessToModifiedClosure
+                    resultCompilation = Task.Run( () => OutputCodeFormatter.FormatAsync( resultCompilation, cancellationToken ), cancellationToken ).Result;
+                }
+
                 // Add managed resources.
                 foreach ( var resource in result.Resources )
                 {
@@ -102,7 +114,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     additionalResourcesBuilder.Add( configuration.CompileTimeProject!.ToResource() );
                 }
 
-                outputCompilation = RunTimeAssemblyRewriter.Rewrite( result.PartialCompilation.Compilation, this.ServiceProvider );
+                outputCompilation = RunTimeAssemblyRewriter.Rewrite( resultCompilation.Compilation, this.ServiceProvider );
                 additionalResources = additionalResourcesBuilder;
 
                 return true;
@@ -119,6 +131,15 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 return false;
             }
+        }
+
+        private static bool CanFormatOutput()
+        {
+            // HACK: We cannot format the output if the current AppDomain does not contain the workspace assemblies.
+            // Code formatting is used by TryCaravela only now. Somehow TryCaravela also builds through the command line for some
+            // initialization, which triggers an error because we don't ship all necessary assemblies.
+
+            return AppDomain.CurrentDomain.GetAssemblies().Any( a => a.GetName().Name == "Microsoft.CodeAnalysis.Workspaces" );
         }
 
         private protected override HighLevelPipelineStage CreateStage(

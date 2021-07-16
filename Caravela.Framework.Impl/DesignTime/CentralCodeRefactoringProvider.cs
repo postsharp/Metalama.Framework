@@ -6,7 +6,6 @@ using Caravela.Framework.Impl.DesignTime.Refactoring;
 using Caravela.Framework.Impl.DesignTime.Utilities;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
@@ -136,24 +135,16 @@ namespace Caravela.Framework.Impl.DesignTime
                 var project = targetDocument.Project;
                 var solution = project.Solution;
 
-                foreach ( var document in project.Documents )
+                foreach ( var modifiedSyntaxTree in outputCompilation.ModifiedSyntaxTrees )
                 {
-                    // TODO: This is not an efficient strategy when there are a lot of documents, but we would need more 'diff' info in the output
-                    // to have a better implementation.
+                    var document = project.GetDocument( modifiedSyntaxTree.Value.OldTree )!;
 
                     if ( !document.SupportsSyntaxTree )
                     {
                         continue;
                     }
 
-                    var newSyntaxTree = outputCompilation.SyntaxTrees.Single( t => t.FilePath == document.FilePath );
-
-                    var newSyntaxRoot = await newSyntaxTree!.GetRootAsync( cancellationToken );
-
-                    if ( !newSyntaxRoot.HasAnnotation( AspectPipelineAnnotations.ModifiedSyntaxTree ) )
-                    {
-                        continue;
-                    }
+                    var newSyntaxRoot = await modifiedSyntaxTree.Value.NewTree.GetRootAsync( cancellationToken );
 
                     var newDocument = document.WithSyntaxRoot( newSyntaxRoot );
                     var formattedSyntaxRoot = await OutputCodeFormatter.FormatAsync( newDocument, false, cancellationToken );
