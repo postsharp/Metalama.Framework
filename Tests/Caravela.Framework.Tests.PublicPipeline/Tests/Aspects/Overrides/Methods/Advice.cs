@@ -4,7 +4,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programmatic
+namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Advice
 {
     public class OverrideAttribute : Attribute, IAspect<INamedType>
     {

@@ -34,9 +34,7 @@ namespace Caravela.Framework.Impl.Diagnostics
                 return null;
             }
 
-            var bestDeclaration = symbol.DeclaringSyntaxReferences
-                .OrderByDescending( r => r.SyntaxTree.FilePath.Length )
-                .FirstOrDefault();
+            var bestDeclaration = symbol.GetPrimarySyntaxReference();
 
             var syntax = bestDeclaration?.GetSyntax();
 

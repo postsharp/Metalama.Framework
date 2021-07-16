@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
@@ -99,6 +100,26 @@ namespace Caravela.Framework.Impl
 
                 return false;
             }
+        }
+
+        // TODO: Partial methods etc.
+
+        public static SyntaxReference? GetPrimarySyntaxReference( this ISymbol symbol )
+        {
+            switch ( symbol )
+            {
+                case IMethodSymbol { AssociatedSymbol: not null } methodSymbol:
+                    return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault()
+                           ?? methodSymbol.AssociatedSymbol!.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault();
+
+                default:
+                    return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault();
+            }
+        }
+
+        public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol )
+        {
+            return symbol.GetPrimarySyntaxReference()?.GetSyntax();
         }
     }
 }

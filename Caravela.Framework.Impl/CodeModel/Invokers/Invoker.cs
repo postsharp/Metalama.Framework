@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 {
     internal abstract class Invoker : IInvoker
     {
-        protected AspectReferenceSpecification LinkerAnnotation { get; }
+        protected AspectReferenceSpecification AspectReference { get; }
 
         protected Invoker( IDeclaration declaration, InvokerOrder order )
         {
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                 _ => throw new ArgumentOutOfRangeException( nameof(order), order, null )
             };
 
-            this.LinkerAnnotation = new AspectReferenceSpecification(
+            this.AspectReference = new AspectReferenceSpecification(
                 declaration.GetCompilationModel().AspectLayerId,
                 linkingOrder );
         }

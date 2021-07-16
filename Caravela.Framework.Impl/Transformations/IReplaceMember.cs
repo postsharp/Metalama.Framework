@@ -6,7 +6,7 @@ using Caravela.Framework.Impl.CodeModel.References;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal interface IReplaceMemberTransformation : IObservableTransformation
+    internal interface IReplaceMember : IObservableTransformation
     {
         MemberRef<IMemberOrNamedType> ReplacedMember { get; }
     }

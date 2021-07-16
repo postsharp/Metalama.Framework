@@ -50,6 +50,7 @@ namespace Caravela.Framework.Impl.Linking
                 new PropertyGetAssignmentInliner(),
                 new PropertyGetReturnInliner(),
                 new PropertyGetCastReturnInliner(),
+                new PropertyGetLocalDeclarationInliner(),
                 new PropertySetValueAssignmentInliner(),
                 new EventAddAssignmentInliner(),
                 new EventRemoveAssignmentInliner()

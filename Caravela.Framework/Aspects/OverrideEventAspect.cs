@@ -26,11 +26,12 @@ namespace Caravela.Framework.Aspects
                 null );
         }
 
+        // TODO: When template parameters are properly resolved during expansion, the parameter name here should change to "handler".
         [Template]
-        public abstract void OverrideAdd( dynamic handler );
+        public abstract void OverrideAdd( dynamic value );
 
         [Template]
-        public abstract void OverrideRemove( dynamic handler );
+        public abstract void OverrideRemove( dynamic value );
 
         // TODO: Add this back after invoke overrides are implemented.
         // [Template]

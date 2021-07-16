@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.Linking.Inlining;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -99,7 +100,7 @@ namespace Caravela.Framework.Impl.Linking
                 if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original )
                      && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
                 {
-                    members.Add( GetOriginalImplMethod( methodDeclaration ) );
+                    members.Add( GetOriginalImplMethod( methodDeclaration, symbol ) );
                 }
 
                 return members;
@@ -121,6 +122,7 @@ namespace Caravela.Framework.Impl.Linking
             MethodDeclarationSyntax GetLinkedDeclaration()
             {
                 return methodDeclaration
+                    .WithExpressionBody( null )
                     .WithBody(
                         this.GetLinkedBody(
                             this.GetBodySource( symbol ),
@@ -130,12 +132,27 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private static MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method )
+        private static MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
         {
-            return method
-                .WithIdentifier( Identifier( GetOriginalImplMemberName( method.Identifier.ValueText ) ) )
-                .WithBody( method.Body.AddSourceCodeAnnotation() )
-                .WithExpressionBody( method.ExpressionBody.AddSourceCodeAnnotation() );
+            return
+                MethodDeclaration(
+                        List<AttributeListSyntax>(),
+                        symbol.IsStatic
+                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        method.ReturnType,
+                        null,
+                        Identifier( GetOriginalImplMemberName( method.Identifier.ValueText ) ),
+                        method.TypeParameterList,
+                        method.ParameterList,
+                        method.ConstraintClauses,
+                        null,
+                        null )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( ElasticLineFeed )
+                    .WithTrailingTrivia( ElasticLineFeed )
+                    .WithBody( method.Body.AddSourceCodeAnnotation() )
+                    .WithExpressionBody( method.ExpressionBody.AddSourceCodeAnnotation() );
         }
     }
 }

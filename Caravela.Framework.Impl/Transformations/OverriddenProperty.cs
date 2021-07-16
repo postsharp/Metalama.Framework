@@ -10,6 +10,7 @@ using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -49,7 +50,10 @@ namespace Caravela.Framework.Impl.Transformations
         {
             using ( context.DiagnosticSink.WithDefaultScope( this.OverriddenDeclaration ) )
             {
-                var propertyName = context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration );
+                var propertyName = context.IntroductionNameProvider.GetOverrideName(
+                    this.OverriddenDeclaration.DeclaringType,
+                    this.Advice.AspectLayerId,
+                    this.OverriddenDeclaration );
 
                 var getTemplateMethod =
                     this.TemplateProperty != null && !this.TemplateProperty.IsAutoPropertyOrField
@@ -65,19 +69,56 @@ namespace Caravela.Framework.Impl.Transformations
                     ? SyntaxKind.InitAccessorDeclaration
                     : SyntaxKind.SetAccessorDeclaration;
 
-                var getAccessorBody =
-                    this.OverriddenDeclaration.Getter != null
-                        ? getTemplateMethod != null
-                            ? this.ExpandAccessorTemplate( context, getTemplateMethod, this.OverriddenDeclaration.Getter )
-                            : this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration )
-                        : null;
+                var templateExpansionError = false;
+                BlockSyntax? getAccessorBody = null;
 
-                var setAccessorBody =
-                    this.OverriddenDeclaration.Setter != null
-                        ? setTemplateMethod != null
-                            ? this.ExpandAccessorTemplate( context, setTemplateMethod, this.OverriddenDeclaration.Setter )
-                            : this.CreateIdentityAccessorBody( setAccessorDeclarationKind )
-                        : null;
+                if ( this.OverriddenDeclaration.Getter != null )
+                {
+                    if ( getTemplateMethod != null )
+                    {
+                        templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
+                            context,
+                            getTemplateMethod,
+                            this.OverriddenDeclaration.Getter,
+                            out getAccessorBody );
+                    }
+                    else
+                    {
+                        getAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration );
+                    }
+                }
+                else
+                {
+                    getAccessorBody = null;
+                }
+
+                BlockSyntax? setAccessorBody = null;
+
+                if ( this.OverriddenDeclaration.Setter != null )
+                {
+                    if ( setTemplateMethod != null )
+                    {
+                        templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
+                            context,
+                            setTemplateMethod,
+                            this.OverriddenDeclaration.Setter,
+                            out setAccessorBody );
+                    }
+                    else
+                    {
+                        setAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration );
+                    }
+                }
+                else
+                {
+                    setAccessorBody = null;
+                }
+
+                if ( templateExpansionError )
+                {
+                    // Template expansion error.
+                    return Enumerable.Empty<IntroducedMember>();
+                }
 
                 var overrides = new[]
                 {
@@ -120,7 +161,11 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-        private BlockSyntax? ExpandAccessorTemplate( in MemberIntroductionContext context, IMethod accessorTemplate, IMethod accessor )
+        private bool TryExpandAccessorTemplate(
+            in MemberIntroductionContext context,
+            IMethod accessorTemplate,
+            IMethod accessor,
+            [NotNullWhen( true )] out BlockSyntax? body )
         {
             using ( context.DiagnosticSink.WithDefaultScope( accessor ) )
             {
@@ -155,13 +200,7 @@ namespace Caravela.Framework.Impl.Transformations
 
                 var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( accessorTemplate );
 
-                if ( !templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out var newMethodBody ) )
-                {
-                    // Template expansion error.
-                    return null;
-                }
-
-                return newMethodBody;
+                return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out body );
             }
         }
 

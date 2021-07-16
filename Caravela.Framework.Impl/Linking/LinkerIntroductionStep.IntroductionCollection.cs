@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -20,19 +21,23 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         private class IntroductionCollection
         {
+            private readonly CompilationModel _compilationModel;
             private readonly List<LinkerIntroducedMember> _introducedMembers;
             private readonly Dictionary<InsertPosition, List<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
             private readonly Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>> _introducedInterfacesByTargetTypeDecl;
+            private readonly List<MemberDeclarationSyntax> _replacedMembers;
 
             private int _nextId;
 
             public IReadOnlyList<LinkerIntroducedMember> IntroducedMembers => this._introducedMembers;
 
-            public IntroductionCollection()
+            public IntroductionCollection( CompilationModel compilationModel )
             {
+                this._compilationModel = compilationModel;
                 this._introducedMembers = new List<LinkerIntroducedMember>();
                 this._introducedMembersByInsertPosition = new Dictionary<InsertPosition, List<LinkerIntroducedMember>>();
                 this._introducedInterfacesByTargetTypeDecl = new Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>>();
+                this._replacedMembers = new List<MemberDeclarationSyntax>();
             }
 
             public void Add( IMemberIntroduction memberIntroduction, IEnumerable<IntroducedMember> introducedMembers )
@@ -72,6 +77,12 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 interfaceList.AddRange( introducedInterfaces );
+            }
+
+            public void Add( IReplaceMember replaceMember )
+            {
+                var resolvedMember = replaceMember.ReplacedMember.Resolve( this._compilationModel );
+                _ = resolvedMember;
             }
 
             public IEnumerable<LinkerIntroducedMember> GetIntroducedMembersOnPosition( InsertPosition position )

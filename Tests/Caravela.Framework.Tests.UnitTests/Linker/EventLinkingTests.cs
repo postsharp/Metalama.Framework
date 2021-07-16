@@ -72,7 +72,7 @@ class T
         }
     }
 
-    event Handler __Foo__OriginalImpl
+    private event Handler __Foo__OriginalImpl
     {
         add
         {

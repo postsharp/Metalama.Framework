@@ -173,7 +173,7 @@ class T
         }
     }
 
-    int __Foo__OriginalImpl
+    private int __Foo__OriginalImpl
     {
         get
         {
@@ -259,6 +259,136 @@ class T
         }
 
         [Fact]
+        public void GetterLocalDeclaration()
+        {
+            var code = @"
+class T
+{
+    void Test(string s)
+    {
+    }
+
+    int Foo
+    {
+        get 
+        {
+            Test(""Original"");
+            return 42;
+        }
+    }
+
+    [PseudoOverride(Foo, TestAspect)]
+    int Foo_Override
+    {
+        get
+        {
+            Test(""Before"");
+            int x = link(this.Foo.get, inline);
+            Test(""After"");
+            return x;
+        }
+    }
+}
+";
+
+            var expectedCode = @"
+class T
+{
+    void Test(string s)
+    {
+    }
+
+    int Foo
+    {
+        get
+        {
+            Test(""Before"");
+            global::System.Int32 x;
+            Test(""Original"");
+            x = 42;
+            goto __aspect_return_1;
+            __aspect_return_1:
+                Test(""After"");
+            return x;
+        }
+    }
+}
+";
+
+            var linkerInput = CreateLinkerInput( code );
+            var linker = new AspectLinker( this.ServiceProvider, linkerInput );
+            var result = linker.ToResult();
+
+            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
+            Assert.Equal( expectedCode.Trim(), transformedText );
+        }
+
+        [Fact]
+        public void GetterLocalDeclaration_Var()
+        {
+            var code = @"
+class T
+{
+    void Test(string s)
+    {
+    }
+
+    int Foo
+    {
+        get 
+        {
+            Test(""Original"");
+            return 42;
+        }
+    }
+
+    [PseudoOverride(Foo, TestAspect)]
+    int Foo_Override
+    {
+        get
+        {
+            Test(""Before"");
+            var x = link(this.Foo.get, inline);
+            Test(""After"");
+            return x;
+        }
+    }
+}
+";
+
+            var expectedCode = @"
+class T
+{
+    void Test(string s)
+    {
+    }
+
+    int Foo
+    {
+        get
+        {
+            Test(""Before"");
+            global::System.Int32 x;
+            Test(""Original"");
+            x = 42;
+            goto __aspect_return_1;
+            __aspect_return_1:
+                Test(""After"");
+            return x;
+        }
+    }
+}
+";
+
+            var linkerInput = CreateLinkerInput( code );
+            var linker = new AspectLinker( this.ServiceProvider, linkerInput );
+            var result = linker.ToResult();
+
+            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
+            Assert.Equal( expectedCode.Trim(), transformedText );
+        }
+
+        [Fact]
         public void GetterAssignment_AddAssignment()
         {
             var code = @"
@@ -311,7 +441,7 @@ class T
         }
     }
 
-    int __Foo__OriginalImpl
+    private int __Foo__OriginalImpl
     {
         get
         {

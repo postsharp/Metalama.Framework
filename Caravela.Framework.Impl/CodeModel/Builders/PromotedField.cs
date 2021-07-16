@@ -8,11 +8,11 @@ using Caravela.Framework.Impl.Transformations;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class PromotedField : PropertyBuilder, IReplaceMemberTransformation
+    internal class PromotedField : PropertyBuilder, IReplaceMember
     {
         public IField ReplacedField { get; }
 
-        MemberRef<IMemberOrNamedType> IReplaceMemberTransformation.ReplacedMember => this.ReplacedField.ToMemberLink<IMemberOrNamedType>();
+        MemberRef<IMemberOrNamedType> IReplaceMember.ReplacedMember => this.ReplacedField.ToMemberLink<IMemberOrNamedType>();
 
         public PromotedField( Advice parentAdvice, IField field )
             : base( parentAdvice, field.DeclaringType, field.Name, true, true, true, false )

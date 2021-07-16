@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking.Inlining;
+using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -49,8 +50,15 @@ namespace Caravela.Framework.Impl.Linking
                 return true;
             }
 
+            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.Self );
             var addAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventAddAccessor );
             var removeAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventRemoveAccessor );
+
+            if ( selfAspectReferences.Count > 0 )
+            {
+                // TODO: We may need to deal with this case.
+                return false;
+            }
 
             if ( addAspectReferences.Count > 1 || removeAspectReferences.Count > 1 )
             {
@@ -68,10 +76,11 @@ namespace Caravela.Framework.Impl.Linking
 
         private bool HasAnyAspectReferences( IEventSymbol symbol, ResolvedAspectReferenceSemantic semantic )
         {
+            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.Self );
             var addAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventAddAccessor );
             var removeAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventRemoveAccessor );
 
-            return addAspectReferences.Count > 0 || removeAspectReferences.Count > 0;
+            return selfAspectReferences.Count > 0 || addAspectReferences.Count > 0 || removeAspectReferences.Count > 0;
         }
 
         private IReadOnlyList<MemberDeclarationSyntax> RewriteEvent( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
@@ -88,7 +97,7 @@ namespace Caravela.Framework.Impl.Linking
                 if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original )
                      && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
                 {
-                    members.Add( GetOriginalImplEvent( eventDeclaration ) );
+                    members.Add( GetOriginalImplEvent( eventDeclaration, symbol ) );
                 }
 
                 return members;
@@ -187,10 +196,12 @@ namespace Caravela.Framework.Impl.Linking
                     EventDeclaration(
                             List<AttributeListSyntax>(),
                             eventFieldDeclaration.Modifiers,
+                            Token( SyntaxKind.EventKeyword ).WithTrailingTrivia( ElasticSpace ),
                             eventFieldDeclaration.Declaration.Type,
                             null,
                             Identifier( symbol.Name ),
-                            AccessorList( List( new[] { transformedAdd, transformedRemove } ) ) )
+                            AccessorList( List( new[] { transformedAdd, transformedRemove } ) ),
+                            MissingToken( SyntaxKind.SemicolonToken ) )
                         .WithLeadingTrivia( eventFieldDeclaration.GetLeadingTrivia() )
                         .WithTrailingTrivia( eventFieldDeclaration.GetTrailingTrivia() );
             }
@@ -235,38 +246,62 @@ namespace Caravela.Framework.Impl.Linking
         {
             return
                 FieldDeclaration(
-                    List<AttributeListSyntax>(),
-                    symbol.IsStatic
-                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                    VariableDeclaration(
-                        eventFieldDeclaration.Declaration.Type,
-                        SingletonSeparatedList( VariableDeclarator( Identifier( GetEventFieldBackingFieldName( symbol ) ) ) ) ) );
+                        List<AttributeListSyntax>(),
+                        symbol.IsStatic
+                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        VariableDeclaration(
+                            eventFieldDeclaration.Declaration.Type,
+                            SingletonSeparatedList( VariableDeclarator( Identifier( GetEventFieldBackingFieldName( symbol ) ) ) ) ) )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( ElasticLineFeed )
+                    .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
+                    .AddGeneratedCodeAnnotation();
         }
 
-        private static MemberDeclarationSyntax GetOriginalImplEvent( EventDeclarationSyntax @event )
+        private static MemberDeclarationSyntax GetOriginalImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )
         {
-            return @event
-                .WithIdentifier( Identifier( GetOriginalImplMemberName( @event.Identifier.ValueText ) ) )
-                .WithAccessorList( @event.AccessorList.AddSourceCodeAnnotation() );
+            return
+                EventDeclaration(
+                        List<AttributeListSyntax>(),
+                        symbol.IsStatic
+                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        @event.Type,
+                        null,
+                        Identifier( GetOriginalImplMemberName( symbol.Name ) ),
+                        null )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( ElasticLineFeed )
+                    .WithTrailingTrivia( ElasticLineFeed )
+                    .WithAccessorList( @event.AccessorList.AddSourceCodeAnnotation() )
+                    .AddGeneratedCodeAnnotation();
         }
 
         private static MemberDeclarationSyntax GetOriginalImplEvent( EventFieldDeclarationSyntax eventField, IEventSymbol symbol )
         {
             return
                 EventDeclaration(
-                    eventField.AttributeLists,
-                    eventField.Modifiers,
-                    eventField.Declaration.Type,
-                    null,
-                    Identifier( GetOriginalImplMemberName( symbol.Name ) ),
-                    AccessorList(
-                        List(
-                            new[]
-                            {
-                                AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull() ) ),
-                                AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) )
-                            } ) ) );
+                        List<AttributeListSyntax>(),
+                        symbol.IsStatic
+                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        eventField.Declaration.Type,
+                        null,
+                        Identifier( GetOriginalImplMemberName( symbol.Name ) ),
+                        AccessorList(
+                            List(
+                                new[]
+                                {
+                                    AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull() ) ),
+                                    AccessorDeclaration(
+                                        SyntaxKind.RemoveAccessorDeclaration,
+                                        GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) )
+                                } ) ) )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( ElasticLineFeed )
+                    .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
+                    .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
         }
     }
 }

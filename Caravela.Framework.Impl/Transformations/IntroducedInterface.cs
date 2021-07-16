@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public INamedType TargetType { get; }
 
-        public SyntaxTree TargetSyntaxTree => this.TargetType.GetSymbol().DeclaringSyntaxReferences.First().SyntaxTree;
+        public SyntaxTree TargetSyntaxTree => this.TargetType.GetSymbol().GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
 
         public IReadOnlyDictionary<IMember, IMember> MemberMap { get; }
 
