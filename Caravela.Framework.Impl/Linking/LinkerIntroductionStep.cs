@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.Linking
             var diagnostics = new UserDiagnosticSink( input.CompileTimeProject );
             var nameProvider = new LinkerIntroductionNameProvider();
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
-            var introducedCollection = new IntroductionCollection();
+            var introductionCollection = new IntroductionCollection( input.CompilationModel );
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
             var syntaxFactory = ReflectionMapper.GetInstance( input.CompilationModel.RoslynCompilation );
 
@@ -99,7 +99,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
-                introducedCollection.Add( memberIntroduction, introducedMembers );
+                introductionCollection.Add( memberIntroduction, introducedMembers );
             }
 
             // Visit all interface introductions.
@@ -107,7 +107,12 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var introducedInterfaces = interfaceIntroduction.GetIntroducedInterfaceImplementations();
 
-                introducedCollection.Add( interfaceIntroduction, introducedInterfaces );
+                introductionCollection.Add( interfaceIntroduction, introducedInterfaces );
+            }
+
+            foreach ( var memberReplacement in allTransformations.OfType<IReplaceMember>() )
+            {
+                introductionCollection.Add( memberReplacement );
             }
 
             // Group diagnostic suppressions by target.
@@ -117,7 +122,7 @@ namespace Caravela.Framework.Impl.Linking
 
             // Process syntax trees one by one.
             var intermediateCompilation = input.InitialCompilation;
-            Rewriter addIntroducedElementsRewriter = new( introducedCollection, suppressionsByTarget, input.CompilationModel );
+            Rewriter addIntroducedElementsRewriter = new( introductionCollection, suppressionsByTarget, input.CompilationModel );
 
             foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees )
             {
@@ -141,7 +146,7 @@ namespace Caravela.Framework.Impl.Linking
                 input.CompilationModel,
                 intermediateCompilation.Compilation,
                 syntaxTreeMapping,
-                introducedCollection.IntroducedMembers );
+                introductionCollection.IntroducedMembers );
 
             return new LinkerIntroductionStepOutput( diagnostics.ToImmutable(), intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
         }

@@ -9,7 +9,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 // TODO: A lot methods here are called multiple times. Optimize.
@@ -136,12 +135,7 @@ namespace Caravela.Framework.Impl.Linking
                 rewrittenBody =
                     Block(
                             rewrittenBody,
-                            GotoStatement(
-                                SyntaxKind.GotoStatement,
-                                Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
-                                default,
-                                IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                                Token( SyntaxKind.SemicolonToken ) ) )
+                            CreateGotoStatement() )
                         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
 
@@ -192,39 +186,25 @@ namespace Caravela.Framework.Impl.Linking
                                                     SyntaxKind.SimpleAssignmentExpression,
                                                     IdentifierName( inliningContext.ReturnVariableName ?? "_" ),
                                                     returnStatement.Expression ) ),
-                                            GotoStatement(
-                                                SyntaxKind.GotoStatement,
-                                                Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
-                                                default,
-                                                IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                                                Token( SyntaxKind.SemicolonToken ) ) )
+                                            CreateGotoStatement() )
                                         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                             }
                             else
                             {
-                                replacements[returnStatement] =
-                                    GotoStatement(
-                                        SyntaxKind.GotoStatement,
-                                        Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
-                                        default,
-                                        IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                                        Token( SyntaxKind.SemicolonToken ) );
+                                replacements[returnStatement] = CreateGotoStatement();
                             }
                         }
                     }
                     else if ( returnNode is ExpressionSyntax returnExpression )
                     {
+                        inliningContext.UseLabel();
+
                         if ( symbol.ReturnsVoid )
                         {
                             replacements[returnNode] =
                                 Block(
                                         ExpressionStatement( returnExpression ),
-                                        GotoStatement(
-                                            SyntaxKind.GotoStatement,
-                                            Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
-                                            default,
-                                            IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                                            Token( SyntaxKind.SemicolonToken ) ) )
+                                        CreateGotoStatement() )
                                     .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
@@ -236,12 +216,7 @@ namespace Caravela.Framework.Impl.Linking
                                                 SyntaxKind.SimpleAssignmentExpression,
                                                 IdentifierName( inliningContext.ReturnVariableName ?? "_" ),
                                                 returnExpression ) ),
-                                        GotoStatement(
-                                            SyntaxKind.GotoStatement,
-                                            Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( Space ),
-                                            default,
-                                            IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                                            Token( SyntaxKind.SemicolonToken ) ) )
+                                        CreateGotoStatement() )
                                     .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                     }
@@ -250,6 +225,17 @@ namespace Caravela.Framework.Impl.Linking
                         throw new AssertionFailedException();
                     }
                 }
+            }
+
+            GotoStatementSyntax CreateGotoStatement()
+            {
+                return
+                    GotoStatement(
+                        SyntaxKind.GotoStatement,
+                        Token( SyntaxKind.GotoKeyword ).WithLeadingTrivia( ElasticLineFeed ).WithTrailingTrivia( ElasticSpace ),
+                        default,
+                        IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
+                        Token( SyntaxKind.SemicolonToken ) );
             }
         }
 
@@ -347,19 +333,57 @@ namespace Caravela.Framework.Impl.Linking
                     return (BlockSyntax) rewriter.Visit( block ).AssertNotNull();
 
                 case ArrowExpressionClauseSyntax arrowExpressionClause:
+                    var rewrittenNode = rewriter.Visit( arrowExpressionClause.Expression );
+
                     if ( symbol.ReturnsVoid )
                     {
-                        return
-                            Block( ExpressionStatement( (ExpressionSyntax) rewriter.Visit( arrowExpressionClause.Expression ).AssertNotNull() ) );
+                        switch ( rewrittenNode )
+                        {
+                            case null:
+                                return
+                                    Block()
+                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                            case ExpressionSyntax rewrittenExpression:
+                                return
+                                    Block( ExpressionStatement( rewrittenExpression ) )
+                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                            case BlockSyntax rewrittenBlock:
+                                return rewrittenBlock;
+
+                            default:
+                                throw new AssertionFailedException();
+                        }
                     }
                     else
                     {
-                        return
-                            Block(
-                                ReturnStatement(
-                                    Token( SyntaxKind.ReturnKeyword ).WithLeadingTrivia( Whitespace( " " ) ),
-                                    (ExpressionSyntax) rewriter.Visit( arrowExpressionClause.Expression ).AssertNotNull(),
-                                    Token( SyntaxKind.SemicolonToken ) ) );
+                        switch ( rewrittenNode )
+                        {
+                            case null:
+                                return
+                                    Block(
+                                            ReturnStatement(
+                                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                                                LiteralExpression( SyntaxKind.DefaultLiteralExpression ),
+                                                Token( SyntaxKind.SemicolonToken ) ) )
+                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                            case ExpressionSyntax rewrittenExpression:
+                                return
+                                    Block(
+                                            ReturnStatement(
+                                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                                                rewrittenExpression,
+                                                Token( SyntaxKind.SemicolonToken ) ) )
+                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                            case BlockSyntax rewrittenBlock:
+                                return rewrittenBlock;
+
+                            default:
+                                throw new AssertionFailedException();
+                        }
                     }
 
                 default:
@@ -492,9 +516,22 @@ namespace Caravela.Framework.Impl.Linking
         private static LinkerDeclarationFlags GetDeclarationFlags( ISymbol symbol )
         {
             // TODO: Partials?
-            return symbol.DeclaringSyntaxReferences
-                .Select( dsr => (dsr.GetSyntax() as MemberDeclarationSyntax)?.GetLinkerDeclarationFlags() ?? LinkerDeclarationFlags.None )
-                .SingleOrDefault();
+            var declaration = symbol.GetPrimaryDeclaration();
+
+            switch ( declaration )
+            {
+                case MemberDeclarationSyntax memberDeclaration:
+                    return memberDeclaration.GetLinkerDeclarationFlags();
+
+                case VariableDeclaratorSyntax variableDeclarator:
+                    return ((MemberDeclarationSyntax?) variableDeclarator?.Parent?.Parent).AssertNotNull().GetLinkerDeclarationFlags();
+
+                case null:
+                    return default;
+
+                default:
+                    throw new AssertionFailedException();
+            }
         }
     }
 }

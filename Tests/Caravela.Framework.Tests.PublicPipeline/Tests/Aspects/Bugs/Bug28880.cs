@@ -37,10 +37,10 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Bugs.Bug28880
     
     class EventAspect : OverrideEventAspect
     {
-        public override void OverrideAdd(dynamic handler)
+        public override void OverrideAdd(dynamic value)
          => throw new NotImplementedException();
 
-        public override void OverrideRemove(dynamic handler)
+        public override void OverrideRemove(dynamic value)
          => throw new NotImplementedException();
         
     }

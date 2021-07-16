@@ -146,7 +146,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             get
             {
-                var syntaxReference = this.TypeSymbol.DeclaringSyntaxReferences.FirstOrDefault();
+                var syntaxReference = this.TypeSymbol.GetPrimarySyntaxReference();
 
                 if ( syntaxReference == null )
                 {

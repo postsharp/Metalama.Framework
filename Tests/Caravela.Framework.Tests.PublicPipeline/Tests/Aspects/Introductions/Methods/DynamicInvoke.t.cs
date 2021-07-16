@@ -1,26 +1,36 @@
 [Introduction]
-internal class TargetClass
+    internal class TargetClass
+    {
+        public int OverrideInt() 
 {
-    public int OverrideInt()
-    {
-        global::System.Console.WriteLine("Introduced");
-        return (int)this.OverrideInt();
-    }
-
-    public void OverrideVoid()
-    {
-        global::System.Console.WriteLine("Introduced");
-        this.OverrideVoid();
-    }
-
-    public void IntroduceVoid()
-    {
-        global::System.Console.WriteLine("Introduced");
-    }
-
-    public global::System.Int32 IntroduceInt()
-    {
-        global::System.Console.WriteLine("Introduced");
-        return (int)0;
-    }
+    global::System.Console.WriteLine("Introduced");
+    return (int)this.__OverrideInt__OriginalImpl();
 }
+    
+private int __OverrideInt__OriginalImpl()
+        {
+            return 1;
+        }
+            
+        public void OverrideVoid()
+{
+    global::System.Console.WriteLine("Introduced");
+this.__OverrideVoid__OriginalImpl();
+}
+    
+private void __OverrideVoid__OriginalImpl()
+        {
+        }
+    
+    
+public void IntroduceVoid()
+{
+    global::System.Console.WriteLine("Introduced");
+}
+    
+public global::System.Int32 IntroduceInt()
+{
+    global::System.Console.WriteLine("Introduced");
+    return (int)0;
+}        
+    }

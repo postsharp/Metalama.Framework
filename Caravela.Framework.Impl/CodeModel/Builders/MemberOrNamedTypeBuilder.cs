@@ -8,7 +8,6 @@ using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Accessibility = Caravela.Framework.Code.Accessibility;
 
@@ -45,6 +44,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public abstract InsertPosition InsertPosition { get; }
 
         // TODO: This is temporary.
-        SyntaxTree ISyntaxTreeTransformation.TargetSyntaxTree => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
+        SyntaxTree ISyntaxTreeTransformation.TargetSyntaxTree => ((NamedType) this.DeclaringType).Symbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
     }
 }

@@ -40,7 +40,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             if ( pipelineResult.Success )
             {
                 testResult.HasOutputCode = true;
-                
+
                 var introducedSyntaxTree = pipelineResult.IntroducedSyntaxTrees.SingleOrDefault();
 
                 var introducedSyntaxRoot = introducedSyntaxTree == null

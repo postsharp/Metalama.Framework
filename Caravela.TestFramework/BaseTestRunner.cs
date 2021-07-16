@@ -23,7 +23,7 @@ namespace Caravela.TestFramework
     public abstract partial class BaseTestRunner
     {
         private static readonly Regex _spaceRegex = new( " +", RegexOptions.Compiled );
-        private static readonly Regex _newLineRegex = new( "[\n|\r]+", RegexOptions.Compiled );
+        private static readonly Regex _newLineRegex = new( "( *[\n|\r])+", RegexOptions.Compiled );
         private readonly MetadataReference[] _additionalAssemblies;
 
         public IServiceProvider ServiceProvider { get; }

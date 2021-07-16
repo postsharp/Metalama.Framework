@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         protected virtual void AssertNoArgument() { }
 
-        private ExpressionSyntax CreateEventExpression( RuntimeExpression? instance )
+        private ExpressionSyntax CreateEventExpression( RuntimeExpression? instance, AspectReferenceTargetKind targetKind )
         {
             if ( this.Member.DeclaringType!.IsOpenGeneric )
             {
@@ -32,17 +32,17 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             this.AssertNoArgument();
 
-            return MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                this.Member.GetReceiverSyntax( instance ),
-                IdentifierName( this.Member.Name ) );
+            return
+                MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        this.Member.GetReceiverSyntax( instance ),
+                        IdentifierName( this.Member.Name ) )
+                    .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
         }
 
         public object AddDelegate( object? instance, object? value )
         {
-            // TODO: Use LinkerAnnotation.
-
-            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ) );
+            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ), AspectReferenceTargetKind.EventAddAccessor );
 
             var expression = AssignmentExpression( SyntaxKind.AddAssignmentExpression, eventAccess, RuntimeExpression.GetSyntaxFromValue( value ) );
 
@@ -51,9 +51,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         public object RemoveDelegate( object? instance, object? value )
         {
-            // TODO: Use LinkerAnnotation.
-
-            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ) );
+            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ), AspectReferenceTargetKind.EventRemoveAccessor );
 
             var expression = AssignmentExpression( SyntaxKind.SubtractAssignmentExpression, eventAccess, RuntimeExpression.GetSyntaxFromValue( value ) );
 
@@ -62,7 +60,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         public object? Raise( object? instance, params object?[] args )
         {
-            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ) );
+            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ), AspectReferenceTargetKind.EventRaiseAccessor );
 
             var arguments = this.Member.GetArguments( this.Member.Signature.Parameters, RuntimeExpression.FromValue( args ) );
 

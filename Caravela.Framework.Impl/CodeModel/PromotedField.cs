@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel
     /// <summary>
     /// Represent a source-code field promoted to a property by an aspect.
     /// </summary>
-    internal sealed class PromotedField : Member, IProperty, IReplaceMemberTransformation
+    internal sealed class PromotedField : Member, IProperty, IReplaceMember
     {
         private readonly IFieldSymbol _symbol;
 
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
 
-        MemberRef<IMemberOrNamedType> IReplaceMemberTransformation.ReplacedMember => new( this._symbol );
+        MemberRef<IMemberOrNamedType> IReplaceMember.ReplacedMember => new( this._symbol );
 
         IDeclaration IObservableTransformation.ContainingDeclaration => this.ContainingDeclaration.AssertNotNull();
     }

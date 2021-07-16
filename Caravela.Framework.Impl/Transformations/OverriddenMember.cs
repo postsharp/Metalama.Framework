@@ -7,9 +7,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
@@ -26,7 +24,7 @@ namespace Caravela.Framework.Impl.Transformations
         public SyntaxTree TargetSyntaxTree
             => this.OverriddenDeclaration is ISyntaxTreeTransformation introduction
                 ? introduction.TargetSyntaxTree
-                : ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
+                : ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
 
         public OverriddenMember( Advice advice, IMember overriddenDeclaration )
         {
@@ -48,14 +46,18 @@ namespace Caravela.Framework.Impl.Transformations
 
                 if ( memberSymbol != null )
                 {
-                    var syntaxReference = (MemberDeclarationSyntax?) memberSymbol.DeclaringSyntaxReferences
-                        .OrderBy( dsr => dsr.SyntaxTree.FilePath, StringComparer.Ordinal )
-                        .FirstOrDefault()
-                        ?.GetSyntax();
+                    var declaration = memberSymbol.GetPrimaryDeclaration();
 
-                    if ( syntaxReference != null )
+                    switch ( declaration )
                     {
-                        return new InsertPosition( InsertPositionRelation.After, syntaxReference );
+                        case MemberDeclarationSyntax memberDeclaration:
+                            return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
+
+                        case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax eventFieldDeclaration } }:
+                            return new InsertPosition( InsertPositionRelation.After, eventFieldDeclaration );
+
+                        case VariableDeclaratorSyntax { Parent: { Parent: FieldDeclarationSyntax fieldDeclaration } }:
+                            return new InsertPosition( InsertPositionRelation.After, fieldDeclaration );
                     }
                 }
 
@@ -63,7 +65,7 @@ namespace Caravela.Framework.Impl.Transformations
 
                 return new InsertPosition(
                     InsertPositionRelation.Within,
-                    typeSymbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
+                    (MemberDeclarationSyntax) typeSymbol.GetPrimaryDeclaration().AssertNotNull() );
             }
         }
 

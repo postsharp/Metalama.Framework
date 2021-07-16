@@ -49,7 +49,7 @@ class T
         Test(""After"");
     }
 
-    void __Foo__OriginalImpl()
+    private void __Foo__OriginalImpl()
     {
         Test(""Original"");
     }
@@ -157,7 +157,7 @@ class T
         this.Foo_Override();
     }
 
-    void __Foo__OriginalImpl()
+    private void __Foo__OriginalImpl()
     {
         Test(""Original"");
     }
@@ -226,7 +226,7 @@ class T
         this.Foo_Override2();
     }
 
-    void __Foo__OriginalImpl()
+    private void __Foo__OriginalImpl()
     {
         Test(""Original"");
     }
@@ -358,7 +358,7 @@ class T
         return result;
     }
 
-    int __Foo__OriginalImpl()
+    private int __Foo__OriginalImpl()
     {
         Test(""Original"");
         return 42;

@@ -42,6 +42,15 @@ namespace Caravela.Framework.Impl
             this.Flags = flags;
         }
 
+        internal AspectReferenceSpecification WithTargetKind( AspectReferenceTargetKind targetKind )
+        {
+            return new(
+                this.AspectLayerId,
+                this.Order,
+                targetKind,
+                this.Flags );
+        }
+
         public static AspectReferenceSpecification FromString( string str )
         {
             var parts = str.Split( '$' );
