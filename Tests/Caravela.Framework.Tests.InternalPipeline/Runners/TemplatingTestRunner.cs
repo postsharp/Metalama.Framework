@@ -144,7 +144,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
                 return testResult;
             }
-            
+
             testResult.HasOutputCode = true;
 
             // Create a SyntaxTree that maps to the file we have just written.

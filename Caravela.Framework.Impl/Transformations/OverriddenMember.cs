@@ -8,7 +8,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
@@ -53,8 +52,10 @@ namespace Caravela.Framework.Impl.Transformations
                     {
                         case MemberDeclarationSyntax memberDeclaration:
                             return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
+
                         case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax eventFieldDeclaration } }:
                             return new InsertPosition( InsertPositionRelation.After, eventFieldDeclaration );
+
                         case VariableDeclaratorSyntax { Parent: { Parent: FieldDeclarationSyntax fieldDeclaration } }:
                             return new InsertPosition( InsertPositionRelation.After, fieldDeclaration );
                     }

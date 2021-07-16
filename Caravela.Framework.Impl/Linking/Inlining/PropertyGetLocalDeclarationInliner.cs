@@ -72,14 +72,14 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             // We're replacing the whole return statement.
-            newNode = 
+            newNode =
                 Block(
-                    LocalDeclarationStatement(
-                        VariableDeclaration(
-                            LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.Type ).WithTrailingTrivia( Whitespace( " " ) ),
-                            SingletonSeparatedList( VariableDeclarator( variableDeclarator.Identifier ) ) ) ),
-                    inlinedTargetBody )
-                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                        LocalDeclarationStatement(
+                            VariableDeclaration(
+                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.Type ).WithTrailingTrivia( Whitespace( " " ) ),
+                                SingletonSeparatedList( VariableDeclarator( variableDeclarator.Identifier ) ) ) ),
+                        inlinedTargetBody )
+                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             replacedNode = localDeclaration;
         }

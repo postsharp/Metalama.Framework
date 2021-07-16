@@ -32,12 +32,12 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             this.AssertNoArgument();
 
-            return 
+            return
                 MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    this.Member.GetReceiverSyntax( instance ),
-                    IdentifierName( this.Member.Name ) )
-                .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        this.Member.GetReceiverSyntax( instance ),
+                        IdentifierName( this.Member.Name ) )
+                    .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
         }
 
         public object AddDelegate( object? instance, object? value )

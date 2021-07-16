@@ -44,10 +44,10 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                 }
 
                 return new DynamicExpression(
-                    SyntaxFactory.InvocationExpression( 
-                        name
-                        .WithAspectReferenceAnnotation( this.AspectReference ) )
-                    .AddArgumentListArguments( arguments ),
+                    SyntaxFactory.InvocationExpression(
+                            name
+                                .WithAspectReferenceAnnotation( this.AspectReference ) )
+                        .AddArgumentListArguments( arguments ),
                     this._method.ReturnType,
                     false );
             }
@@ -55,10 +55,10 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromValue( instance! ) );
 
             return new DynamicExpression(
-                SyntaxFactory.InvocationExpression( 
-                    SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name )
-                    .WithAspectReferenceAnnotation( this.AspectReference ) )
-                .AddArgumentListArguments( arguments ),
+                SyntaxFactory.InvocationExpression(
+                        SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name )
+                            .WithAspectReferenceAnnotation( this.AspectReference ) )
+                    .AddArgumentListArguments( arguments ),
                 this._method.ReturnType,
                 false );
         }

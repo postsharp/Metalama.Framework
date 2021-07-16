@@ -201,7 +201,7 @@ namespace Caravela.Framework.Impl.Linking
                             null,
                             Identifier( symbol.Name ),
                             AccessorList( List( new[] { transformedAdd, transformedRemove } ) ),
-                            MissingToken(SyntaxKind.SemicolonToken) )
+                            MissingToken( SyntaxKind.SemicolonToken ) )
                         .WithLeadingTrivia( eventFieldDeclaration.GetLeadingTrivia() )
                         .WithTrailingTrivia( eventFieldDeclaration.GetTrailingTrivia() );
             }
@@ -246,60 +246,62 @@ namespace Caravela.Framework.Impl.Linking
         {
             return
                 FieldDeclaration(
-                    List<AttributeListSyntax>(),
-                    symbol.IsStatic
-                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                    VariableDeclaration(
-                        eventFieldDeclaration.Declaration.Type,
-                        SingletonSeparatedList( VariableDeclarator( Identifier( GetEventFieldBackingFieldName( symbol ) ) ) ) ) )
-                .NormalizeWhitespace()
-                .WithLeadingTrivia( ElasticLineFeed )
-                .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
-                .AddGeneratedCodeAnnotation();
+                        List<AttributeListSyntax>(),
+                        symbol.IsStatic
+                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        VariableDeclaration(
+                            eventFieldDeclaration.Declaration.Type,
+                            SingletonSeparatedList( VariableDeclarator( Identifier( GetEventFieldBackingFieldName( symbol ) ) ) ) ) )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( ElasticLineFeed )
+                    .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
+                    .AddGeneratedCodeAnnotation();
         }
 
         private static MemberDeclarationSyntax GetOriginalImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )
         {
-            return 
+            return
                 EventDeclaration(
-                    List<AttributeListSyntax>(),
-                    symbol.IsStatic
-                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                    @event.Type,
-                    null,
-                    Identifier( GetOriginalImplMemberName( symbol.Name ) ),
-                    null )
-                .NormalizeWhitespace()
-                .WithLeadingTrivia( ElasticLineFeed )
-                .WithTrailingTrivia( ElasticLineFeed )
-                .WithAccessorList( @event.AccessorList.AddSourceCodeAnnotation() )
-                .AddGeneratedCodeAnnotation();
+                        List<AttributeListSyntax>(),
+                        symbol.IsStatic
+                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        @event.Type,
+                        null,
+                        Identifier( GetOriginalImplMemberName( symbol.Name ) ),
+                        null )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( ElasticLineFeed )
+                    .WithTrailingTrivia( ElasticLineFeed )
+                    .WithAccessorList( @event.AccessorList.AddSourceCodeAnnotation() )
+                    .AddGeneratedCodeAnnotation();
         }
 
         private static MemberDeclarationSyntax GetOriginalImplEvent( EventFieldDeclarationSyntax eventField, IEventSymbol symbol )
         {
             return
                 EventDeclaration(
-                    List<AttributeListSyntax>(),
-                    symbol.IsStatic
-                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                    eventField.Declaration.Type,
-                    null,
-                    Identifier( GetOriginalImplMemberName( symbol.Name ) ),
-                    AccessorList(
-                        List(
-                            new[]
-                            {
-                                AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull() ) ),
-                                AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) )
-                            } ) ) )
-                .NormalizeWhitespace()
-                .WithLeadingTrivia( ElasticLineFeed )
-                .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
-                .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
+                        List<AttributeListSyntax>(),
+                        symbol.IsStatic
+                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        eventField.Declaration.Type,
+                        null,
+                        Identifier( GetOriginalImplMemberName( symbol.Name ) ),
+                        AccessorList(
+                            List(
+                                new[]
+                                {
+                                    AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull() ) ),
+                                    AccessorDeclaration(
+                                        SyntaxKind.RemoveAccessorDeclaration,
+                                        GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) )
+                                } ) ) )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( ElasticLineFeed )
+                    .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
+                    .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
         }
     }
 }

@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.Linking
             var diagnostics = new UserDiagnosticSink( input.CompileTimeProject );
             var nameProvider = new LinkerIntroductionNameProvider();
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
-            var introductionCollection = new IntroductionCollection(input.CompilationModel);
+            var introductionCollection = new IntroductionCollection( input.CompilationModel );
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
             var syntaxFactory = ReflectionMapper.GetInstance( input.CompilationModel.RoslynCompilation );
 
@@ -110,7 +110,7 @@ namespace Caravela.Framework.Impl.Linking
                 introductionCollection.Add( interfaceIntroduction, introducedInterfaces );
             }
 
-            foreach ( var memberReplacement in allTransformations.OfType<IReplaceMember>())
+            foreach ( var memberReplacement in allTransformations.OfType<IReplaceMember>() )
             {
                 introductionCollection.Add( memberReplacement );
             }

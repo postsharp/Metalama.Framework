@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Linking
 
         internal override string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenDeclaration )
         {
-            var shortAspectName = aspectLayer.AspectName.Split('.').Last();
+            var shortAspectName = aspectLayer.AspectName.Split( '.' ).Last();
             var shortLayerName = aspectLayer.LayerName?.Split( '.' )?.Last();
 
             string nameHint;
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Linking
                 var interfaceMember = overriddenDeclaration.GetExplicitInterfaceImplementation();
                 var cleanInterfaceName = interfaceMember.DeclaringType.Name.Replace( "_", "__" ).Replace( ".", "_" );
 
-                nameHint = 
+                nameHint =
                     shortLayerName != null
                         ? $"__Override__{cleanInterfaceName}__{interfaceMember.Name}__By__{shortAspectName}__{shortLayerName}"
                         : $"__Override__{cleanInterfaceName}__{interfaceMember.Name}__By__{shortAspectName}";
@@ -51,9 +51,10 @@ namespace Caravela.Framework.Impl.Linking
 
         private string FindUniqueName( INamedType containingType, string hint )
         {
-            if ( CheckName(hint) )
+            if ( CheckName( hint ) )
             {
                 AddName( hint );
+
                 return hint;
             }
             else
@@ -65,25 +66,26 @@ namespace Caravela.Framework.Impl.Linking
                     if ( CheckName( candidate ) )
                     {
                         AddName( candidate );
+
                         return candidate;
                     }
                 }
             }
 
-            void AddName(string name)
+            void AddName( string name )
             {
-                if (!this._overrideNames.TryGetValue( containingType, out var names))
+                if ( !this._overrideNames.TryGetValue( containingType, out var names ) )
                 {
                     this._overrideNames[containingType] = names = new HashSet<string>();
                 }
 
-                if (!names.Add( name ))
+                if ( !names.Add( name ) )
                 {
                     throw new AssertionFailedException();
                 }
             }
 
-            bool CheckName(string name)
+            bool CheckName( string name )
             {
                 if ( containingType.FieldsAndProperties.OfName( name ).Any() )
                 {
@@ -105,8 +107,8 @@ namespace Caravela.Framework.Impl.Linking
                     return false;
                 }
 
-                if (this._overrideNames.TryGetValue(containingType, out var names)
-                    && names.Where( x => StringComparer.Ordinal.Equals(x, name )).Any() )
+                if ( this._overrideNames.TryGetValue( containingType, out var names )
+                     && names.Where( x => StringComparer.Ordinal.Equals( x, name ) ).Any() )
                 {
                     return false;
                 }

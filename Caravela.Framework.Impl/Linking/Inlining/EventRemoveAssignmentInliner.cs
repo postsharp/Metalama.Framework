@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             }
 
             // Assignment should have a "value" identifier on the right (TODO: ref returns).
-            if ( assignmentExpression.Right is not IdentifierNameSyntax rightIdentifier || 
+            if ( assignmentExpression.Right is not IdentifierNameSyntax rightIdentifier ||
                  !string.Equals( rightIdentifier.Identifier.ValueText, "value", StringComparison.Ordinal ) )
             {
                 return false;

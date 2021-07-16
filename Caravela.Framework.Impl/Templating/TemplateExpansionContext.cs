@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( returnExpressionKind == SyntaxKind.DefaultLiteralExpression || returnExpressionKind == SyntaxKind.NullLiteralExpression )
             {
-                return 
+                return
                     ReturnStatement(
                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                         returnExpression,
@@ -110,7 +110,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // TODO: validate the returnExpression according to the method's return type.
-            return 
+            return
                 ReturnStatement(
                     Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                     CastExpression( ParseTypeName( this.MetaApi.Method.ReturnType.ToDisplayString() ), returnExpression ),

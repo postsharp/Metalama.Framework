@@ -66,9 +66,9 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                                 {
                                     this.DeclaresReturnVariable
                                         ? LocalDeclarationStatement(
-                                            VariableDeclaration(
-                                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ReturnType ),
-                                                SingletonSeparatedList( VariableDeclarator( this.ReturnVariableName.AssertNotNull() ) ) ) )
+                                                VariableDeclaration(
+                                                    LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ReturnType ),
+                                                    SingletonSeparatedList( VariableDeclarator( this.ReturnVariableName.AssertNotNull() ) ) ) )
                                             .WithLeadingTrivia( ElasticLineFeed )
                                         : null,
                                     linkedBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),

@@ -122,7 +122,7 @@ namespace Caravela.Framework.Impl.Linking
             MethodDeclarationSyntax GetLinkedDeclaration()
             {
                 return methodDeclaration
-                    .WithExpressionBody(null)
+                    .WithExpressionBody( null )
                     .WithBody(
                         this.GetLinkedBody(
                             this.GetBodySource( symbol ),
@@ -134,25 +134,25 @@ namespace Caravela.Framework.Impl.Linking
 
         private static MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
         {
-            return 
+            return
                 MethodDeclaration(
-                    List<AttributeListSyntax>(),
-                    symbol.IsStatic
-                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                    method.ReturnType,
-                    null,
-                    Identifier( GetOriginalImplMemberName( method.Identifier.ValueText ) ),
-                    method.TypeParameterList,
-                    method.ParameterList,
-                    method.ConstraintClauses,
-                    null,
-                    null )
-                .NormalizeWhitespace()
-                .WithLeadingTrivia( ElasticLineFeed )
-                .WithTrailingTrivia( ElasticLineFeed )
-                .WithBody( method.Body.AddSourceCodeAnnotation() )
-                .WithExpressionBody( method.ExpressionBody.AddSourceCodeAnnotation() );
+                        List<AttributeListSyntax>(),
+                        symbol.IsStatic
+                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        method.ReturnType,
+                        null,
+                        Identifier( GetOriginalImplMemberName( method.Identifier.ValueText ) ),
+                        method.TypeParameterList,
+                        method.ParameterList,
+                        method.ConstraintClauses,
+                        null,
+                        null )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( ElasticLineFeed )
+                    .WithTrailingTrivia( ElasticLineFeed )
+                    .WithBody( method.Body.AddSourceCodeAnnotation() )
+                    .WithExpressionBody( method.ExpressionBody.AddSourceCodeAnnotation() );
         }
     }
 }

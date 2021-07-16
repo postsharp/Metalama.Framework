@@ -9,7 +9,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 // TODO: A lot methods here are called multiple times. Optimize.
@@ -135,9 +134,9 @@ namespace Caravela.Framework.Impl.Linking
 
                 rewrittenBody =
                     Block(
-                        rewrittenBody,
-                        CreateGotoStatement() )
-                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                            rewrittenBody,
+                            CreateGotoStatement() )
+                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
 
             return rewrittenBody;
@@ -204,21 +203,21 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             replacements[returnNode] =
                                 Block(
-                                    ExpressionStatement( returnExpression ),
-                                    CreateGotoStatement() )
-                                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        ExpressionStatement( returnExpression ),
+                                        CreateGotoStatement() )
+                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
                         {
                             replacements[returnNode] =
                                 Block(
-                                    ExpressionStatement(
-                                        AssignmentExpression(
-                                            SyntaxKind.SimpleAssignmentExpression,
-                                            IdentifierName( inliningContext.ReturnVariableName ?? "_" ),
-                                            returnExpression ) ),
-                                    CreateGotoStatement() )
-                                .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        ExpressionStatement(
+                                            AssignmentExpression(
+                                                SyntaxKind.SimpleAssignmentExpression,
+                                                IdentifierName( inliningContext.ReturnVariableName ?? "_" ),
+                                                returnExpression ) ),
+                                        CreateGotoStatement() )
+                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                     }
                     else
@@ -341,15 +340,18 @@ namespace Caravela.Framework.Impl.Linking
                         switch ( rewrittenNode )
                         {
                             case null:
-                                return 
+                                return
                                     Block()
-                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
                             case ExpressionSyntax rewrittenExpression:
                                 return
                                     Block( ExpressionStatement( rewrittenExpression ) )
-                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
                             case BlockSyntax rewrittenBlock:
                                 return rewrittenBlock;
+
                             default:
                                 throw new AssertionFailedException();
                         }
@@ -359,23 +361,26 @@ namespace Caravela.Framework.Impl.Linking
                         switch ( rewrittenNode )
                         {
                             case null:
-                                return 
+                                return
                                     Block(
-                                        ReturnStatement(
-                                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
-                                            LiteralExpression( SyntaxKind.DefaultLiteralExpression ),
-                                            Token( SyntaxKind.SemicolonToken ) ) )
-                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                            ReturnStatement(
+                                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                                                LiteralExpression( SyntaxKind.DefaultLiteralExpression ),
+                                                Token( SyntaxKind.SemicolonToken ) ) )
+                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
                             case ExpressionSyntax rewrittenExpression:
                                 return
                                     Block(
-                                        ReturnStatement(
-                                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
-                                            rewrittenExpression,
-                                            Token( SyntaxKind.SemicolonToken ) ) )
-                                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                            ReturnStatement(
+                                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                                                rewrittenExpression,
+                                                Token( SyntaxKind.SemicolonToken ) ) )
+                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
                             case BlockSyntax rewrittenBlock:
                                 return rewrittenBlock;
+
                             default:
                                 throw new AssertionFailedException();
                         }
@@ -517,10 +522,13 @@ namespace Caravela.Framework.Impl.Linking
             {
                 case MemberDeclarationSyntax memberDeclaration:
                     return memberDeclaration.GetLinkerDeclarationFlags();
+
                 case VariableDeclaratorSyntax variableDeclarator:
                     return ((MemberDeclarationSyntax?) variableDeclarator?.Parent?.Parent).AssertNotNull().GetLinkerDeclarationFlags();
+
                 case null:
                     return default;
+
                 default:
                     throw new AssertionFailedException();
             }

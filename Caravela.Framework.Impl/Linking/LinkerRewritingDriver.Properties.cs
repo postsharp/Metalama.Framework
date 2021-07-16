@@ -285,45 +285,45 @@ namespace Caravela.Framework.Impl.Linking
         {
             var accessorList =
                 IsAutoPropertyDeclaration( property )
-                ? AccessorList(
-                    List(
-                        new[]
-                        {
-                            symbol.GetMethod != null
-                                ? AccessorDeclaration(
-                                    SyntaxKind.GetAccessorDeclaration,
-                                    GetImplicitGetterBody( symbol.GetMethod ) )
-                                : null,
-                            symbol.SetMethod != null
-                                ? AccessorDeclaration(
-                                    SyntaxKind.SetAccessorDeclaration,
-                                    GetImplicitSetterBody( symbol.SetMethod ) )
-                                : null
-                        }.Where( a => a != null )
-                        .AssertNoneNull() ) )
-                .NormalizeWhitespace()
-                : property.AccessorList.AddSourceCodeAnnotation();
+                    ? AccessorList(
+                            List(
+                                new[]
+                                    {
+                                        symbol.GetMethod != null
+                                            ? AccessorDeclaration(
+                                                SyntaxKind.GetAccessorDeclaration,
+                                                GetImplicitGetterBody( symbol.GetMethod ) )
+                                            : null,
+                                        symbol.SetMethod != null
+                                            ? AccessorDeclaration(
+                                                SyntaxKind.SetAccessorDeclaration,
+                                                GetImplicitSetterBody( symbol.SetMethod ) )
+                                            : null
+                                    }.Where( a => a != null )
+                                    .AssertNoneNull() ) )
+                        .NormalizeWhitespace()
+                    : property.AccessorList.AddSourceCodeAnnotation();
 
             var initializer =
                 property.Initializer?.AddSourceCodeAnnotation();
 
             return
                 PropertyDeclaration(
-                    List<AttributeListSyntax>(),
-                    symbol.IsStatic
-                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                    property.Type,
-                    null,
-                    Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ),
-                    null,
-                    null,
-                    null )
-                .NormalizeWhitespace()
-                .WithLeadingTrivia( ElasticLineFeed )
-                .WithInitializer( initializer )
-                .WithTrailingTrivia( ElasticLineFeed )
-                .WithAccessorList( accessorList );
+                        List<AttributeListSyntax>(),
+                        symbol.IsStatic
+                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        property.Type,
+                        null,
+                        Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ),
+                        null,
+                        null,
+                        null )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( ElasticLineFeed )
+                    .WithInitializer( initializer )
+                    .WithTrailingTrivia( ElasticLineFeed )
+                    .WithAccessorList( accessorList );
         }
     }
 }

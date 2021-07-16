@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Linking
 
             public IReadOnlyList<LinkerIntroducedMember> IntroducedMembers => this._introducedMembers;
 
-            public IntroductionCollection(CompilationModel compilationModel)
+            public IntroductionCollection( CompilationModel compilationModel )
             {
                 this._compilationModel = compilationModel;
                 this._introducedMembers = new List<LinkerIntroducedMember>();
@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.Linking
                 interfaceList.AddRange( introducedInterfaces );
             }
 
-            public void Add( IReplaceMember replaceMember)
+            public void Add( IReplaceMember replaceMember )
             {
                 var resolvedMember = replaceMember.ReplacedMember.Resolve( this._compilationModel );
                 _ = resolvedMember;

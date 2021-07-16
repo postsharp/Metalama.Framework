@@ -53,8 +53,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             => new(
                 InsertPositionRelation.Within,
                 this.IsEventField()
-                ? ((MemberDeclarationSyntax?) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration()?.Parent?.Parent).AssertNotNull()
-                : ((MemberDeclarationSyntax?) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration() ).AssertNotNull() );
+                    ? ((MemberDeclarationSyntax?) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration()?.Parent?.Parent).AssertNotNull()
+                    : ((MemberDeclarationSyntax?) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration()).AssertNotNull() );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 

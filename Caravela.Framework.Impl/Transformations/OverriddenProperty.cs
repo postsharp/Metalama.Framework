@@ -51,7 +51,10 @@ namespace Caravela.Framework.Impl.Transformations
         {
             using ( context.DiagnosticSink.WithDefaultScope( this.OverriddenDeclaration ) )
             {
-                var propertyName = context.IntroductionNameProvider.GetOverrideName( this.OverriddenDeclaration.DeclaringType, this.Advice.AspectLayerId, this.OverriddenDeclaration );
+                var propertyName = context.IntroductionNameProvider.GetOverrideName(
+                    this.OverriddenDeclaration.DeclaringType,
+                    this.Advice.AspectLayerId,
+                    this.OverriddenDeclaration );
 
                 var getTemplateMethod =
                     this.TemplateProperty != null && !this.TemplateProperty.IsAutoPropertyOrField
@@ -74,7 +77,11 @@ namespace Caravela.Framework.Impl.Transformations
                 {
                     if ( getTemplateMethod != null )
                     {
-                        templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate( context, getTemplateMethod, this.OverriddenDeclaration.Getter, out getAccessorBody );
+                        templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
+                            context,
+                            getTemplateMethod,
+                            this.OverriddenDeclaration.Getter,
+                            out getAccessorBody );
                     }
                     else
                     {
@@ -92,7 +99,11 @@ namespace Caravela.Framework.Impl.Transformations
                 {
                     if ( setTemplateMethod != null )
                     {
-                        templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate( context, setTemplateMethod, this.OverriddenDeclaration.Setter, out setAccessorBody );
+                        templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
+                            context,
+                            setTemplateMethod,
+                            this.OverriddenDeclaration.Setter,
+                            out setAccessorBody );
                     }
                     else
                     {
@@ -104,7 +115,7 @@ namespace Caravela.Framework.Impl.Transformations
                     setAccessorBody = null;
                 }
 
-                if (templateExpansionError)
+                if ( templateExpansionError )
                 {
                     // Template expansion error.
                     return Enumerable.Empty<IntroducedMember>();
@@ -151,7 +162,11 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-        private bool TryExpandAccessorTemplate( in MemberIntroductionContext context, IMethod accessorTemplate, IMethod accessor, [NotNullWhen(true)] out BlockSyntax? body )
+        private bool TryExpandAccessorTemplate(
+            in MemberIntroductionContext context,
+            IMethod accessorTemplate,
+            IMethod accessor,
+            [NotNullWhen( true )] out BlockSyntax? body )
         {
             using ( context.DiagnosticSink.WithDefaultScope( accessor ) )
             {

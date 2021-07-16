@@ -32,15 +32,18 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             this.AssertNoArgument();
 
             return MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                this.Member.GetReceiverSyntax( instance ),
-                IdentifierName( this.Member.Name ) )
-                .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind(targetKind) );
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    this.Member.GetReceiverSyntax( instance ),
+                    IdentifierName( this.Member.Name ) )
+                .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
         }
 
         public object GetValue( object? instance )
         {
-            return new DynamicExpression( this.CreatePropertyExpression( RuntimeExpression.FromValue( instance ), AspectReferenceTargetKind.PropertyGetAccessor ), this.Member.Type, this.Member is Field );
+            return new DynamicExpression(
+                this.CreatePropertyExpression( RuntimeExpression.FromValue( instance ), AspectReferenceTargetKind.PropertyGetAccessor ),
+                this.Member.Type,
+                this.Member is Field );
         }
 
         public object SetValue( object? instance, object? value )
