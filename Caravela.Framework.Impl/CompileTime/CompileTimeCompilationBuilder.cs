@@ -286,16 +286,15 @@ namespace Caravela.Framework.Impl.CompileTime
                     MemoryStream memoryStream = new();
                     emitResult = compileTimeCompilation.Emit( memoryStream, null, options: emitOptions, cancellationToken: cancellationToken );
 
-                    if (emitResult.Success)
+                    if ( emitResult.Success )
                     {
-                        memoryStream.Seek(0, SeekOrigin.Begin);
+                        memoryStream.Seek( 0, SeekOrigin.Begin );
 
-                        using (var peStream = File.Create(outputInfo.Pe))
+                        using ( var peStream = File.Create( outputInfo.Pe ) )
                         {
-                            this._rewriter.Rewrite(memoryStream, peStream, outputInfo.Pe );
+                            this._rewriter.Rewrite( memoryStream, peStream, outputInfo.Pe );
                         }
                     }
-
                 }
                 else
                 {

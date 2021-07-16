@@ -43,9 +43,9 @@ namespace Caravela.Framework.Impl.Options
 
         public bool IsFrameworkEnabled => this.GetBooleanOption( "CaravelaEnabled", true );
 
-        public bool FormatOutput => this.GetBooleanOption( "CaravelaFormatOutput", false );
+        public bool FormatOutput => this.GetBooleanOption( "CaravelaFormatOutput" );
 
-        public bool FormatCompileTimeCode => this.GetBooleanOption( "CaravelaFormatCompileTimeCode", false );
+        public bool FormatCompileTimeCode => this.GetBooleanOption( "CaravelaFormatCompileTimeCode" );
 
         public bool IsUserCodeTrusted => this.GetBooleanOption( "CaravelaUserCodeTrusted", true );
 

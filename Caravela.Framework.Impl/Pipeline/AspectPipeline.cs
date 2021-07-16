@@ -49,19 +49,18 @@ namespace Caravela.Framework.Impl.Pipeline
             IDirectoryOptions? directoryOptions = null,
             IAssemblyLocator? assemblyLocator = null )
         {
-            this.ProjectOptions = projectOptions;
             this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( directoryOptions, assemblyLocator );
 
             var existingProjectOptions = this.ServiceProvider.GetOptionalService<IProjectOptions>();
-            if ( existingProjectOptions == null )
-            {
-                this.ServiceProvider.AddService( projectOptions );
-            }
-            else
+            
+            if ( existingProjectOptions != null )
             {
                 // TryCaravela uses this scenario to define options.
-                this.ServiceProvider.AddService( existingProjectOptions.Apply(projectOptions ) );
+                projectOptions = existingProjectOptions.Apply( projectOptions );
             }
+            
+            this.ServiceProvider.AddService( projectOptions );
+            this.ProjectOptions = projectOptions;
 
             if ( domain != null )
             {

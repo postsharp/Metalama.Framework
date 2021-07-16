@@ -25,7 +25,6 @@ namespace Caravela.Framework.Impl.Linking
             private readonly List<LinkerIntroducedMember> _introducedMembers;
             private readonly Dictionary<InsertPosition, List<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
             private readonly Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>> _introducedInterfacesByTargetTypeDecl;
-            private readonly List<MemberDeclarationSyntax> _replacedMembers;
 
             private int _nextId;
 
@@ -37,7 +36,6 @@ namespace Caravela.Framework.Impl.Linking
                 this._introducedMembers = new List<LinkerIntroducedMember>();
                 this._introducedMembersByInsertPosition = new Dictionary<InsertPosition, List<LinkerIntroducedMember>>();
                 this._introducedInterfacesByTargetTypeDecl = new Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>>();
-                this._replacedMembers = new List<MemberDeclarationSyntax>();
             }
 
             public void Add( IMemberIntroduction memberIntroduction, IEnumerable<IntroducedMember> introducedMembers )
