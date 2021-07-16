@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.Advices
                 this,
                 this.TargetDeclaration,
                 eventTemplate?.Name ?? explicitName.AssertNotNull(),
-                eventTemplate != null && IsEventField( eventTemplate ) );
+                eventTemplate != null && eventTemplate.IsEventField() );
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             // TODO: Override transformations.
 
-            if ( this.TemplateMember != null && IsEventField( this.TemplateMember ) )
+            if ( this.TemplateMember != null && this.TemplateMember.IsEventField() )
             {
                 return AdviceResult.Create( this.MemberBuilder );
             }
@@ -80,20 +80,6 @@ namespace Caravela.Framework.Impl.Advices
                         this._addTemplateMethod,
                         this._removeTemplateMethod ) );
             }
-        }
-
-        private static bool IsEventField( IEvent templateEvent )
-        {
-            var symbol = (IEventSymbol) templateEvent.GetSymbol().AssertNotNull();
-            var syntax = symbol.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax(); // TODO: Partial?
-
-            if ( syntax == null )
-            {
-                // TODO: How to detect without source code?
-                return false;
-            }
-
-            return syntax is VariableDeclaratorSyntax;
         }
     }
 }

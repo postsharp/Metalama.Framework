@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override InsertPosition InsertPosition
             => new(
                 InsertPositionRelation.Within,
-                ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
+                (MemberDeclarationSyntax) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration().AssertNotNull() );
 
         public FieldBuilder( Advice parentAdvice, INamedType targetType, string name )
             : base( parentAdvice, targetType, name ) { }

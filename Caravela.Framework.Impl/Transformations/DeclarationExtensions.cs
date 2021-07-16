@@ -236,7 +236,7 @@ namespace Caravela.Framework.Impl.Transformations
             if ( eventSymbol != null )
             {
                 // TODO: partial events.
-                var eventDeclarationSyntax = eventSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
+                var eventDeclarationSyntax = eventSymbol.GetPrimaryDeclaration();
 
                 if ( eventDeclarationSyntax is VariableDeclaratorSyntax )
                 {

@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Transformations
         public SyntaxTree TargetSyntaxTree
             => this.OverriddenDeclaration is ISyntaxTreeTransformation introduction
                 ? introduction.TargetSyntaxTree
-                : ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
+                : ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
 
         public OverriddenMember( Advice advice, IMember overriddenDeclaration )
         {
@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.Transformations
 
                 return new InsertPosition(
                     InsertPositionRelation.Within,
-                    typeSymbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
+                    (MemberDeclarationSyntax) typeSymbol.GetPrimaryDeclaration().AssertNotNull() );
             }
         }
 

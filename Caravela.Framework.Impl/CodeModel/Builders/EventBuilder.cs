@@ -52,7 +52,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override InsertPosition InsertPosition
             => new(
                 InsertPositionRelation.Within,
-                ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First() );
+                this.IsEventField()
+                ? ((MemberDeclarationSyntax?) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration()?.Parent?.Parent).AssertNotNull()
+                : ((MemberDeclarationSyntax?) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration() ).AssertNotNull() );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 

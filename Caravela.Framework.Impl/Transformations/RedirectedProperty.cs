@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Transformations
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
                         this.OverriddenDeclaration.GetSyntaxReturnType(),
                         null,
-                        Identifier( context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration ) ),
+                        Identifier( context.IntroductionNameProvider.GetOverrideName( this.OverriddenDeclaration.DeclaringType, this.Advice.AspectLayerId, this.OverriddenDeclaration ) ),
                         AccessorList( List( GetAccessors() ) ),
                         null,
                         null ),

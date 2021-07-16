@@ -45,6 +45,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public abstract InsertPosition InsertPosition { get; }
 
         // TODO: This is temporary.
-        SyntaxTree ISyntaxTreeTransformation.TargetSyntaxTree => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
+        SyntaxTree ISyntaxTreeTransformation.TargetSyntaxTree => ((NamedType) this.DeclaringType).Symbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
     }
 }

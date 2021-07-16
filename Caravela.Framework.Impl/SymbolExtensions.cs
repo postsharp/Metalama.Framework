@@ -119,15 +119,7 @@ namespace Caravela.Framework.Impl
 
         public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol )
         {
-            switch ( symbol )
-            {
-                case IMethodSymbol { AssociatedSymbol: not null } methodSymbol:
-                    return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault()?.GetSyntax()
-                           ?? methodSymbol.AssociatedSymbol!.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault()?.GetSyntax();
-
-                default:
-                    return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault()?.GetSyntax();
-            }
+            return symbol.GetPrimarySyntaxReference()?.GetSyntax();
         }
     }
 }

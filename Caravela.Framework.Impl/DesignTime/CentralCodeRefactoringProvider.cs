@@ -166,7 +166,7 @@ namespace Caravela.Framework.Impl.DesignTime
             else
             {
                 // How to report errors here? We will add a comment to the target symbol.
-                var targetNode = await targetSymbol.DeclaringSyntaxReferences.First().GetSyntaxAsync( cancellationToken );
+                var targetNode = await targetSymbol.GetPrimarySyntaxReference().AssertNotNull().GetSyntaxAsync( cancellationToken );
 
                 var commentedNode = targetNode.WithLeadingTrivia(
                     diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error )

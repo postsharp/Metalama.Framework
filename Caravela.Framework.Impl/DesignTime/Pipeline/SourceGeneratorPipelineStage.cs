@@ -44,6 +44,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             var additionalSyntaxTrees = new List<IntroducedSyntaxTree>();
 
             LexicalScopeFactory lexicalScopeFactory = new( pipelineStepResult.Compilation );
+            var introductionNameProvider = new LinkerIntroductionNameProvider();
 
             foreach ( var transformationGroup in transformations )
             {
@@ -84,7 +85,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                         // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything .
                         var introductionContext = new MemberIntroductionContext(
                             diagnostics,
-                            new LinkerIntroductionNameProvider(),
+                            introductionNameProvider,
                             lexicalScopeFactory,
                             syntaxFactory,
                             this.ServiceProvider );
