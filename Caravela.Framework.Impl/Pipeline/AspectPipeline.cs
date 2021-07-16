@@ -24,23 +24,54 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public abstract class AspectPipeline : IDisposable
     {
+        private readonly bool _ownsDomain;
+
         public IProjectOptions ProjectOptions { get; }
 
         private readonly CompileTimeDomain _domain;
 
         public ServiceProvider ServiceProvider { get; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AspectPipeline"/> class.
+        /// </summary>
+        /// <param name="projectOptions"></param>
+        /// <param name="executionScenario"></param>
+        /// <param name="isTest"></param>
+        /// <param name="domain">If <c>null</c>, the instance is created from the <see cref="ICompileTimeDomainFactory"/> service.</param>
+        /// <param name="directoryOptions"></param>
+        /// <param name="assemblyLocator"></param>
         protected AspectPipeline(
             IProjectOptions projectOptions,
-            CompileTimeDomain domain,
             AspectExecutionScenario executionScenario,
             bool isTest,
+            CompileTimeDomain? domain, 
             IDirectoryOptions? directoryOptions = null,
             IAssemblyLocator? assemblyLocator = null )
         {
-            this._domain = domain;
             this.ProjectOptions = projectOptions;
             this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( directoryOptions, assemblyLocator );
+
+            var existingProjectOptions = this.ServiceProvider.GetOptionalService<IProjectOptions>();
+            if ( existingProjectOptions == null )
+            {
+                this.ServiceProvider.AddService( projectOptions );
+            }
+            else
+            {
+                // TryCaravela uses this scenario to define options.
+                this.ServiceProvider.AddService( existingProjectOptions.Apply(projectOptions ) );
+            }
+
+            if ( domain != null )
+            {
+                this._domain = domain;
+            }
+            else
+            {
+                this._domain = this.ServiceProvider.GetService<ICompileTimeDomainFactory>().CreateDomain();
+                this._ownsDomain = true;
+            }
 
             // ReSharper disable once VirtualMemberCallInConstructor
             this.ServiceProvider.AddService( new AspectPipelineDescription( executionScenario, isTest ) );
@@ -77,8 +108,8 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             // Create aspect types.
-            var driverFactory = new AspectDriverFactory( compilation.Compilation, this.ProjectOptions.PlugIns );
-            var aspectTypeFactory = new AspectClassMetadataFactory( driverFactory );
+            var driverFactory = new AspectDriverFactory( this.ServiceProvider, compilation.Compilation, this.ProjectOptions.PlugIns );
+            var aspectTypeFactory = new AspectClassMetadataFactory( this.ServiceProvider, driverFactory );
 
             var aspectTypes = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
 
@@ -212,7 +243,13 @@ namespace Caravela.Framework.Impl.Pipeline
             }
         }
 
-        protected virtual void Dispose( bool disposing ) { }
+        protected virtual void Dispose( bool disposing )
+        {
+            if ( this._ownsDomain )
+            {
+                this._domain.Dispose();
+            }
+        }
 
         /// <inheritdoc/>
         public void Dispose() => this.Dispose( true );

@@ -1,10 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -39,10 +37,10 @@ namespace Caravela.TestFramework
             using var testProjectOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
 
-            var pipeline = new CompileTimeAspectPipeline( testProjectOptions, domain, true, testProjectOptions );
+            var pipeline = new CompileTimeAspectPipeline( testProjectOptions, true, domain, testProjectOptions );
             var spy = new Spy( testResult );
-            pipeline.ServiceProvider.AddService<ICompileTimeCompilationBuilderSpy>( spy );
-            pipeline.ServiceProvider.AddService<ITemplateCompilerSpy>( spy );
+            pipeline.ServiceProvider.AddService( spy );
+            pipeline.ServiceProvider.AddService( spy );
 
             if ( pipeline.TryExecute( testResult, testResult.InputCompilation!, CancellationToken.None, out var resultCompilation, out _ ) )
             {

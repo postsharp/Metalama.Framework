@@ -47,12 +47,9 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         /// <returns></returns>
         private static IEnumerable<SyntaxTreeResult> SplitResultsByTree( PartialCompilation compilation, DesignTimeAspectPipelineResult results )
         {
-            var inputPaths = compilation.SyntaxTrees
-                .ToDictionary( p => p.FilePath, p => p );
-
-            var resultsByTree = results
+            var resultBuilders = results
                 .InputSyntaxTrees
-                .ToDictionary( r => r.FilePath, syntaxTree => new SyntaxTreeResultBuilder( syntaxTree ) );
+                .ToDictionary( r => r.Key, syntaxTree => new SyntaxTreeResultBuilder( syntaxTree.Value ) );
 
             // Split diagnostic by syntax tree.
             foreach ( var diagnostic in results.Diagnostics.ReportedDiagnostics )
@@ -61,7 +58,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
 
                 if ( filePath != null )
                 {
-                    if ( resultsByTree.TryGetValue( filePath, out var builder ) )
+                    if ( resultBuilders.TryGetValue( filePath, out var builder ) )
                     {
                         builder.Diagnostics ??= ImmutableArray.CreateBuilder<Diagnostic>();
                         builder.Diagnostics.Add( diagnostic );
@@ -80,7 +77,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 {
                     if ( !string.IsNullOrEmpty( path ) )
                     {
-                        var builder = resultsByTree[path!];
+                        var builder = resultBuilders[path!];
                         builder.Suppressions ??= ImmutableArray.CreateBuilder<CacheableScopedSuppression>();
                         builder.Suppressions.Add( new CacheableScopedSuppression( suppression ) );
                     }
@@ -112,24 +109,26 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             foreach ( var introduction in results.IntroducedSyntaxTrees )
             {
                 var filePath = introduction.SourceSyntaxTree.FilePath;
-                var builder = resultsByTree[filePath];
+                var builder = resultBuilders[filePath];
                 builder.Introductions ??= ImmutableArray.CreateBuilder<IntroducedSyntaxTree>();
                 builder.Introductions.Add( introduction );
             }
 
             // Add syntax trees with empty output to it gets cached too.
-            foreach ( var path in resultsByTree.Keys )
+            var inputTreesWithoutOutput = compilation.SyntaxTrees.ToBuilder();
+
+            foreach ( var path in resultBuilders.Keys )
             {
-                inputPaths.Remove( path );
+                inputTreesWithoutOutput.Remove( path );
             }
 
-            foreach ( var empty in inputPaths )
+            foreach ( var empty in inputTreesWithoutOutput )
             {
-                resultsByTree.Add( empty.Key, new SyntaxTreeResultBuilder( empty.Value ) );
+                resultBuilders.Add( empty.Key, new SyntaxTreeResultBuilder( empty.Value ) );
             }
 
             // Return an immutable copy.
-            return resultsByTree.Select( b => b.Value.ToImmutable( compilation.Compilation ) );
+            return resultBuilders.Select( b => b.Value.ToImmutable( compilation.Compilation ) );
         }
 
         public bool TryGetResult( SyntaxTree syntaxTree, [NotNullWhen( true )] out SyntaxTreeResult? result )

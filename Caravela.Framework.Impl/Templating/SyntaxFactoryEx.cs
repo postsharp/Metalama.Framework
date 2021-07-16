@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Linq;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.Templating
@@ -100,9 +101,69 @@ namespace Caravela.Framework.Impl.Templating
         public static string ToSyntaxFactoryDebug( this SyntaxNode node, Compilation compilation )
         {
             MetaSyntaxRewriter rewriter = new( compilation );
-            var transformedNode = rewriter.Visit( node );
+            var normalized = NormalizeRewriter.Instance.Visit( node );
+            var transformedNode = rewriter.Visit( normalized );
 
             return transformedNode.ToFullString();
+        }
+
+        private class NormalizeRewriter : CSharpSyntaxRewriter
+        {
+            public static readonly NormalizeRewriter Instance = new();
+
+            public NormalizeRewriter() : base( true ) { }
+
+            public override SyntaxNode? VisitQualifiedName( QualifiedNameSyntax node )
+            {
+                if ( node.Parent == null )
+                {
+                    throw new AssertionFailedException();
+                }
+
+                // The following list of exceptions is incomplete. If you get into an InvalidCastException in the rewriter, you have to extend it.
+                if ( !node.AncestorsAndSelf()
+                    .Any(
+                        a =>
+                            a is GenericNameSyntax or UsingDirectiveSyntax ||
+                            (a.Parent is NamespaceDeclarationSyntax namespaceDeclaration && namespaceDeclaration.Name == a) ||
+                            (a.Parent is MethodDeclarationSyntax methodDeclaration && methodDeclaration.ReturnType == a) ||
+                            (a.Parent is VariableDeclarationSyntax variable && variable.Type == a) ||
+                            (a.Parent is TypeConstraintSyntax typeConstraint && typeConstraint.Type == a) ||
+                            (a.Parent is ArrayTypeSyntax arrayType && arrayType.ElementType == a) ||
+                            (a.Parent is ObjectCreationExpressionSyntax objectCreation && objectCreation.Type == a) ||
+                            (a.Parent is DefaultExpressionSyntax defaultExpression && defaultExpression.Type == a) ||
+                            (a.Parent is CastExpressionSyntax castExpression && castExpression.Type == a) ) )
+                {
+                    return SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        (ExpressionSyntax) this.Visit( node.Left ),
+                        node.DotToken,
+                        node.Right );
+                }
+                else
+                {
+                    return base.VisitQualifiedName( node );
+                }
+            }
+
+            public override SyntaxNode? VisitXmlComment( XmlCommentSyntax node ) => null;
+
+            public override SyntaxNode? VisitDocumentationCommentTrivia( DocumentationCommentTriviaSyntax node ) => null;
+
+            public override SyntaxTrivia VisitTrivia( SyntaxTrivia trivia )
+            {
+                switch ( trivia.Kind() )
+                {
+                    case SyntaxKind.SingleLineCommentTrivia:
+                    case SyntaxKind.MultiLineCommentTrivia:
+                        return default;
+
+                    default:
+                        return trivia;
+                }
+            }
+
+            public override SyntaxNode? VisitPragmaWarningDirectiveTrivia( PragmaWarningDirectiveTriviaSyntax node ) => null;
         }
     }
 }

@@ -43,6 +43,12 @@ namespace Caravela.Framework.Impl.Options
 
         public bool IsFrameworkEnabled => this.GetBooleanOption( "CaravelaEnabled", true );
 
+        public bool FormatOutput => this.GetBooleanOption( "CaravelaFormatOutput", false );
+
+        public bool FormatCompileTimeCode => this.GetBooleanOption( "CaravelaFormatCompileTimeCode", false );
+
+        public bool IsUserCodeTrusted => this.GetBooleanOption( "CaravelaUserCodeTrusted", true );
+
         private bool GetBooleanOption( string name, bool defaultValue = false )
         {
             if ( this._source.TryGetValue( $"build_property.{name}", out var flagString ) && bool.TryParse( flagString, out var flagValue ) )

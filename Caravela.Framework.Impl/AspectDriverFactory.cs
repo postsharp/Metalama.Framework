@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
@@ -13,11 +14,13 @@ namespace Caravela.Framework.Impl
 {
     internal class AspectDriverFactory
     {
+        private readonly IServiceProvider _serviceProvider;
         private readonly Compilation _compilation;
         private readonly ILookup<string, IAspectWeaver> _weaverTypes;
 
-        public AspectDriverFactory( Compilation compilation, ImmutableArray<object> plugins )
+        public AspectDriverFactory( IServiceProvider serviceProvider, Compilation compilation, ImmutableArray<object> plugins )
         {
+            this._serviceProvider = serviceProvider;
             this._compilation = compilation;
 
             this._weaverTypes = plugins.OfType<IAspectWeaver>()
@@ -38,7 +41,7 @@ namespace Caravela.Framework.Impl
                 return weavers.Single();
             }
 
-            return new AspectDriver( type, this._compilation );
+            return new AspectDriver( this._serviceProvider, type, this._compilation );
         }
     }
 }

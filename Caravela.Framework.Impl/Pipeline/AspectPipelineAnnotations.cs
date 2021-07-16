@@ -18,10 +18,5 @@ namespace Caravela.Framework.Impl.Pipeline
         /// with <see cref="GeneratedCode"/>.
         /// </summary>
         public static readonly SyntaxAnnotation SourceCode = new( "Caravela_SourceCode" );
-
-        /// <summary>
-        /// Annotation that must be be on the root node of a <see cref="SyntaxTree"/> and that means that it has been modified.
-        /// </summary>
-        public static readonly SyntaxAnnotation ModifiedSyntaxTree = new( "Caravela_Modified" );
     }
 }

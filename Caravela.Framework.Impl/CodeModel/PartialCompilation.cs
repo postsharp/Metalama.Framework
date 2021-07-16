@@ -17,6 +17,20 @@ namespace Caravela.Framework.Impl.CodeModel
     public abstract partial class PartialCompilation : IPartialCompilation
     {
         /// <summary>
+        /// Gets the compilation with respect to which the <see cref="ModifiedSyntaxTrees"/> has been constructed.
+        /// Typically, this is the argument of the <see cref="CreateComplete"/> or <see cref="CreatePartial(Microsoft.CodeAnalysis.Compilation,Microsoft.CodeAnalysis.SyntaxTree)"/>
+        /// method, ignoring any modification done by <see cref="UpdateSyntaxTrees(System.Collections.Generic.IReadOnlyList{ModifiedSyntaxTree}?,System.Collections.Generic.IReadOnlyList{Microsoft.CodeAnalysis.SyntaxTree}?)"/>.
+        /// </summary>
+        public Compilation InitialCompilation { get; }
+
+        /// <summary>
+        /// Gets the set of modifications present in the current compilation compared to the <see cref="InitialCompilation"/>.
+        /// The key of the dictionary is the <see cref="SyntaxTree.FilePath"/> and the value is a <see cref="SyntaxTree"/>
+        /// of <see cref="Compilation"/>. 
+        /// </summary>
+        public ImmutableDictionary<string, ModifiedSyntaxTree> ModifiedSyntaxTrees { get; }
+
+        /// <summary>
         /// Gets the Roslyn <see cref="Microsoft.CodeAnalysis.Compilation"/>.
         /// </summary>
         public Compilation Compilation { get; }
@@ -24,7 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <summary>
         /// Gets the list of syntax trees in the current subset.
         /// </summary>
-        public abstract IReadOnlyCollection<SyntaxTree> SyntaxTrees { get; }
+        public abstract ImmutableDictionary<string, SyntaxTree> SyntaxTrees { get; }
 
         /// <summary>
         /// Gets the types declared in the current subset.
@@ -38,8 +52,48 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsEmpty => this.SyntaxTrees.Count == 0;
 
+        // Initial constructor.
         private PartialCompilation( Compilation compilation )
         {
+            this.Compilation = this.InitialCompilation = compilation;
+            this.ModifiedSyntaxTrees = ImmutableDictionary<string, ModifiedSyntaxTree>.Empty;
+        }
+
+        // Incremental constructor.
+        private PartialCompilation(
+            PartialCompilation baseCompilation,
+            IReadOnlyList<ModifiedSyntaxTree>? modifiedSyntaxTrees,
+            IReadOnlyList<SyntaxTree>? addedSyntaxTrees )
+        {
+            this.InitialCompilation = baseCompilation.InitialCompilation;
+            var compilation = baseCompilation.Compilation;
+
+            var modifiedTreeBuilder = baseCompilation.ModifiedSyntaxTrees.ToBuilder();
+
+            if ( addedSyntaxTrees != null )
+            {
+                compilation = compilation.AddSyntaxTrees( addedSyntaxTrees );
+
+                modifiedTreeBuilder.AddRange(
+                    addedSyntaxTrees.Select( t => new KeyValuePair<string, ModifiedSyntaxTree>( t.FilePath, new ModifiedSyntaxTree( t ) ) ) );
+            }
+
+            if ( modifiedSyntaxTrees != null )
+            {
+                foreach ( var replacement in modifiedSyntaxTrees )
+                {
+                    var oldTree = replacement.OldTree.AssertNotNull();
+                    compilation = compilation.ReplaceSyntaxTree( oldTree, replacement.NewTree );
+
+                    var initialTree = baseCompilation.SyntaxTrees.TryGetValue( replacement.FilePath, out var initialTreeReplacement )
+                        ? initialTreeReplacement
+                        : replacement.OldTree;
+
+                    modifiedTreeBuilder[replacement.FilePath] = new ModifiedSyntaxTree( replacement.NewTree, initialTree );
+                }
+            }
+
+            this.ModifiedSyntaxTrees = modifiedTreeBuilder.ToImmutable();
             this.Compilation = compilation;
         }
 
@@ -49,12 +103,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public static PartialCompilation CreateComplete( Compilation compilation ) => new CompleteImpl( compilation );
 
         /// <summary>
-        /// Creates a <see cref="PartialCompilation"/> for a given subset of syntax trees and its closure.
-        /// </summary>
-        public static PartialCompilation CreatePartial( Compilation compilation, IEnumerable<SyntaxTree> syntaxTrees )
-            => new PartialImpl( compilation, syntaxTrees.ToImmutableHashSet() );
-
-        /// <summary>
         /// Creates a <see cref="PartialCompilation"/> for a single syntax tree and its closure.
         /// </summary>
         public static PartialCompilation CreatePartial( Compilation compilation, SyntaxTree syntaxTree )
@@ -62,7 +110,7 @@ namespace Caravela.Framework.Impl.CodeModel
             var syntaxTrees = new[] { syntaxTree };
             var closure = GetClosure( compilation, syntaxTrees );
 
-            return new PartialImpl( compilation, closure.Trees.ToImmutableHashSet(), closure.Types.ToImmutableArray() );
+            return new PartialImpl( compilation, closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ), closure.Types.ToImmutableArray() );
         }
 
         /// <summary>
@@ -77,12 +125,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var closure = GetClosure( compilation, syntaxTrees );
 
-            return new PartialImpl( compilation, closure.Trees.ToImmutableHashSet(), closure.Types.ToImmutableArray() );
+            return new PartialImpl( compilation, closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ), closure.Types.ToImmutableArray() );
         }
 
         IPartialCompilation IPartialCompilation.UpdateSyntaxTrees(
-            IReadOnlyList<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees,
-            IReadOnlyList<SyntaxTree> addedTrees )
+            IReadOnlyList<ModifiedSyntaxTree>? replacedTrees,
+            IReadOnlyList<SyntaxTree>? addedTrees )
             => this.UpdateSyntaxTrees( replacedTrees, addedTrees );
 
         /// <summary>
@@ -90,8 +138,8 @@ namespace Caravela.Framework.Impl.CodeModel
         /// representing the modified object.
         /// </summary>
         public abstract PartialCompilation UpdateSyntaxTrees(
-            IReadOnlyList<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees,
-            IReadOnlyList<SyntaxTree> addedTrees );
+            IReadOnlyList<ModifiedSyntaxTree>? replacedTrees = null,
+            IReadOnlyList<SyntaxTree>? addedTrees = null );
 
         /// <summary>
         /// Gets a closure of the syntax trees declaring all base types and interfaces of all types declared in input syntax trees.

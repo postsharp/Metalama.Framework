@@ -11,26 +11,29 @@ namespace Caravela.Framework.Impl.Pipeline
         private readonly Dictionary<Type, object> _services = new();
         private bool _frozen;
 
-        public void ReplaceServiceForTest<T>( T service )
-            where T : IService
+        public void AddService( IService service )
         {
             if ( this._frozen )
             {
                 throw new InvalidOperationException();
             }
 
-            this._services[typeof(T)] = service;
-        }
+            Type[] interfaces = service.GetType().GetInterfaces();
 
-        public void AddService<T>( T service )
-            where T : IService
-        {
-            if ( this._frozen )
+            foreach ( Type interfaceType in interfaces )
             {
-                throw new InvalidOperationException();
+                if ( typeof(IService).IsAssignableFrom( interfaceType ) )
+                {
+                    this._services[interfaceType] = service;
+                }
             }
 
-            this._services.Add( typeof(T), service );
+            for ( Type cursorType = service.GetType();
+                  cursorType != null && typeof(IService).IsAssignableFrom( cursorType );
+                  cursorType = cursorType.BaseType )
+            {
+                this._services[cursorType] = service;
+            }
         }
 
         public object? GetService( Type serviceType )

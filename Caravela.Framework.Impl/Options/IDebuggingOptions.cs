@@ -6,7 +6,7 @@ namespace Caravela.Framework.Impl.Options
     /// <summary>
     /// Exposes options allowing to attach a debugger to different compile-time or design-time processes.
     /// </summary>
-    public interface IDebuggingOptions
+    public interface IDebuggingOptions : IService
     {
         /// <summary>
         /// Gets a value indicating whether the debugger should be attached to the compiler process.
