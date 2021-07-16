@@ -45,7 +45,7 @@ namespace Caravela.TestFramework
 
         public bool IsUserCodeTrusted => true;
 
-        public IProjectOptions Apply( IProjectOptions options ) => throw new NotImplementedException();
+        public IProjectOptions Apply( IProjectOptions options ) => options;
 
         public void Dispose()
         {
