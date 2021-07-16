@@ -52,17 +52,17 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IReadOnlyList<ISymbol> LookupSymbols()
         {
-            var declaredSymbol = this.Symbol;
+            var syntaxReference = this.Symbol.GetPrimarySyntaxReference();
 
             // Event fields have accessors without declaring syntax references.
-            if ( this.Symbol.GetPrimarySyntaxReference() == null )
+            if ( syntaxReference == null )
             {
                 switch ( this.Symbol )
                 {
                     case IMethodSymbol { MethodKind: RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } eventAccessorSymbol:
-                        declaredSymbol = eventAccessorSymbol.AssociatedSymbol.AssertNotNull();
+                        syntaxReference = eventAccessorSymbol.AssociatedSymbol.AssertNotNull().GetPrimarySyntaxReference();
 
-                        if ( declaredSymbol.GetPrimarySyntaxReference() == null )
+                        if ( syntaxReference == null )
                         {
                             throw new AssertionFailedException();
                         }
@@ -74,7 +74,6 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
             }
 
-            var syntaxReference = declaredSymbol.GetPrimarySyntaxReference().AssertNotNull();
             var semanticModel = this.Compilation.RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
 
             var bodyNode =

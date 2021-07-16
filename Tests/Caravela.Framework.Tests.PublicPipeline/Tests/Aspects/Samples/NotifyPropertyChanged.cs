@@ -37,7 +37,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
         {
             var value = meta.Parameters[0].Value;
 
-            if (value != meta.Property.Invokers.Final.GetValue(meta.This))
+            if (value != meta.Property.Value)
             {
                 meta.This.OnPropertyChanged(meta.Property.Name);
 

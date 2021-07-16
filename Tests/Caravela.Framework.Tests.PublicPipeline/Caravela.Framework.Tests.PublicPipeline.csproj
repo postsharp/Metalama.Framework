@@ -12,21 +12,6 @@
      <RootNamespace>Caravela.Framework.Tests.Integration</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Tests\Aspects\Introductions\Methods\ExistingConflictOverrideBaseSealed - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Invokers\Events\AdvisedSource_BaseInvoker.t.cs" />
-    <Compile Remove="Tests\Aspects\Invokers\Events\AdvisedSource_FinalInvoker.t.cs" />
-    <Compile Remove="Tests\Aspects\Invokers\Events\AdvisedSource_Value.t.cs" />
-    <Compile Remove="Tests\Aspects\Invokers\Events\Existing_Value - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Invokers\Properties\Existing_Value - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Invokers\Properties\TargetValue - Copy - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Invokers\Properties\TargetValue - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Invokers\Properties\Visibility.t.cs" />
-    <Compile Remove="Tests\Aspects\Overrides\Methods\Simple - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Overrides\Methods\VoidTarget - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Samples\Dirty - Copy.t.cs" />
-  </ItemGroup>
-
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
@@ -53,30 +38,6 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Tests\Aspects\Introductions\Methods\ExistingConflictOverrideBaseNonVirtual.t.cs" />
-    <None Include="Tests\Aspects\Invokers\Events\AdvisedSource_BaseInvoker.t.cs" />
-    <None Include="Tests\Aspects\Invokers\Events\AdvisedSource_FinalInvoker.t.cs" />
-    <None Include="Tests\Aspects\Invokers\Events\AdvisedSource_Value.t.cs" />
-    <None Include="Tests\Aspects\Invokers\Events\Existing_Value - Copy.t.cs">
-      <DependentUpon>AdvisedSource_Value.t.cs</DependentUpon>
-    </None>
-    <None Include="Tests\Aspects\Invokers\Properties\Existing_Value - Copy.t.cs">
-      <DependentUpon>AdvisedSource_Value.t.cs</DependentUpon>
-    </None>
-    <None Include="Tests\Aspects\Invokers\Properties\TargetValue - Copy - Copy.t.cs">
-      <DependentUpon>TargetValue - Copy.t.cs</DependentUpon>
-    </None>
-    <None Include="Tests\Aspects\Invokers\Properties\TargetValue - Copy.t.cs">
-      <DependentUpon>AdvisedSource_Value.t.cs</DependentUpon>
-    </None>
-    <None Include="Tests\Aspects\Invokers\Properties\AdvisedSource_Value.t.cs" />
-    <None Include="Tests\Aspects\Overrides\Methods\SimpleExpressionBody.t.cs" />
-    <None Include="Tests\Aspects\Overrides\Methods\Simple.t.cs" />
-    <None Include="Tests\Aspects\Samples\CompileTimeIf.t.cs" />
-  </ItemGroup>
-
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
   
