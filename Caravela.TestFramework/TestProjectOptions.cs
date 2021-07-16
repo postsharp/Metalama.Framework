@@ -41,7 +41,11 @@ namespace Caravela.TestFramework
 
         public bool FormatOutput => false;
 
+        public bool FormatCompileTimeCode => false;
+
         public bool IsUserCodeTrusted => true;
+
+        public IProjectOptions Apply( IProjectOptions options ) => throw new NotImplementedException();
 
         public void Dispose()
         {

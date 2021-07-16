@@ -161,6 +161,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             var buildTimeAssemblyStream = new MemoryStream();
             var buildTimeDebugStream = new MemoryStream();
+            
+            SyntaxTreeStructureVerifier.Verify( compileTimeCompilation );
 
             var emitResult = compileTimeCompilation.Emit(
                 buildTimeAssemblyStream,

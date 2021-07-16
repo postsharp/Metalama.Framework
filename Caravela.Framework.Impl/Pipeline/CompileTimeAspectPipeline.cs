@@ -97,7 +97,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 var resultCompilation = result.PartialCompilation;
 
                 // Format the output.
-                if ( this.ProjectOptions.FormatOutput && CanFormatOutput() )
+                if ( this.ProjectOptions.FormatOutput && OutputCodeFormatter.CanFormat )
                 {
                     // ReSharper disable once AccessToModifiedClosure
                     resultCompilation = Task.Run( () => OutputCodeFormatter.FormatAsync( resultCompilation, cancellationToken ), cancellationToken ).Result;
@@ -132,16 +132,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 return false;
             }
         }
-
-        private static bool CanFormatOutput()
-        {
-            // HACK: We cannot format the output if the current AppDomain does not contain the workspace assemblies.
-            // Code formatting is used by TryCaravela only now. Somehow TryCaravela also builds through the command line for some
-            // initialization, which triggers an error because we don't ship all necessary assemblies.
-
-            return AppDomain.CurrentDomain.GetAssemblies().Any( a => a.GetName().Name == "Microsoft.CodeAnalysis.Workspaces" );
-        }
-
+        
         private protected override HighLevelPipelineStage CreateStage(
             IReadOnlyList<OrderedAspectLayer> parts,
             CompileTimeProject compileTimeProject,

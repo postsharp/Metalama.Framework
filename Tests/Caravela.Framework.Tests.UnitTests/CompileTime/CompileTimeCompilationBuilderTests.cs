@@ -488,7 +488,7 @@ public class Anything
             Assert.True( rewriter.IsInvoked );
         }
 
-        private class Rewriter : ICompileTimeCompilationRewriter
+        private class Rewriter : ICompileTimeAssemblyBinaryRewriter
         {
             public bool IsInvoked { get; private set; }
 

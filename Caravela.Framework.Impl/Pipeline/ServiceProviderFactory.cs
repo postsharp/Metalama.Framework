@@ -36,9 +36,9 @@ namespace Caravela.Framework.Impl.Pipeline
         /// of <see cref="IDirectoryOptions"/> than the default one cannot call <see cref="GetServiceProvider"/>
         /// because it does not control the calling point. A typical consumer of this method is TryCaravela.
         /// </summary>
-        public static void InitializeAsyncLocalProvider( IDirectoryOptions directoryOptions )
+        public static void InitializeAsyncLocalProvider( IDirectoryOptions? directoryOptions = null )
         {
-            _asyncLocalInstance.Value = CreateBaseServiceProvider( directoryOptions, true );
+            _asyncLocalInstance.Value = CreateBaseServiceProvider( directoryOptions ?? DefaultDirectoryOptions.Instance, true );
         }
 
         public static bool HasAsyncLocalProvider => _asyncLocalInstance.Value != null;

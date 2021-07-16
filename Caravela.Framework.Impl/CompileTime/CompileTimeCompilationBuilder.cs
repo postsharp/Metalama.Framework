@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.Mapping;
@@ -31,8 +32,9 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly CompileTimeDomain _domain;
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
         private readonly IDirectoryOptions _directoryOptions;
+        private readonly IProjectOptions? _projectOptions;
         private readonly ICompileTimeCompilationBuilderSpy? _spy;
-        private readonly ICompileTimeCompilationRewriter? _rewriter;
+        private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
 
         private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
 
@@ -44,7 +46,8 @@ namespace Caravela.Framework.Impl.CompileTime
             this._serviceProvider = serviceProvider;
             this._domain = domain;
             this._spy = serviceProvider.GetOptionalService<ICompileTimeCompilationBuilderSpy>();
-            this._rewriter = serviceProvider.GetOptionalService<ICompileTimeCompilationRewriter>();
+            this._rewriter = serviceProvider.GetOptionalService<ICompileTimeAssemblyBinaryRewriter>();
+            this._projectOptions = serviceProvider.GetOptionalService<IProjectOptions>();
         }
 
         private static ulong ComputeSourceHash( IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log = null )
@@ -168,6 +171,11 @@ namespace Caravela.Framework.Impl.CompileTime
 
             compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitTrees( compileTimeCompilation );
 
+            if ( this._projectOptions is { FormatCompileTimeCode: true } && OutputCodeFormatter.CanFormat )
+            {
+                compileTimeCompilation = OutputCodeFormatter.FormatAll( compileTimeCompilation );
+            }
+
             return true;
         }
 
@@ -277,12 +285,17 @@ namespace Caravela.Framework.Impl.CompileTime
 
                     MemoryStream memoryStream = new();
                     emitResult = compileTimeCompilation.Emit( memoryStream, null, options: emitOptions, cancellationToken: cancellationToken );
-                    memoryStream.Seek( 0, SeekOrigin.Begin );
 
-                    using ( var peStream = File.Create( outputInfo.Pe ) )
+                    if (emitResult.Success)
                     {
-                        this._rewriter.Rewrite( memoryStream, peStream, outputInfo.Directory );
+                        memoryStream.Seek(0, SeekOrigin.Begin);
+
+                        using (var peStream = File.Create(outputInfo.Pe))
+                        {
+                            this._rewriter.Rewrite(memoryStream, peStream, outputInfo.Pe );
+                        }
                     }
+
                 }
                 else
                 {

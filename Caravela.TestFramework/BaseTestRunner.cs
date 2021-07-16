@@ -145,7 +145,7 @@ namespace Caravela.TestFramework
             }
         }
 
-        public static string NormalizeEndOfLines( string s ) => _newLineRegex.Replace( s, "\n" );
+        public static string NormalizeEndOfLines( string s ) => _newLineRegex.Replace( s, "\n" ).Trim();
 
         public static string? NormalizeTestOutput( string? s, bool preserveFormatting )
             => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting );
@@ -173,16 +173,6 @@ namespace Caravela.TestFramework
             {
                 throw new InvalidOperationException( "This method cannot be called when the test path is unknown." );
             }
-
-            /* ** Use this trick to find invisible problems in the syntax tree **  
-            foreach ( var syntaxTree in testResult.SyntaxTrees )
-            {
-                string actualSyntaxFactory = syntaxTree.OutputRunTimeSyntaxRoot.ToSyntaxFactoryDebug( testResult.OutputCompilation );
-                string parsedFromText = CSharpSyntaxTree.ParseText(  syntaxTree.OutputRunTimeSyntaxRoot.ToString() ).GetRoot(  ).ToSyntaxFactoryDebug( testResult.OutputCompilation );
-                
-                Assert.Equal( parsedFromText, actualSyntaxFactory );
-            }
-            */
 
             var formatCode = testInput.Options.FormatOutput.GetValueOrDefault( true );
 

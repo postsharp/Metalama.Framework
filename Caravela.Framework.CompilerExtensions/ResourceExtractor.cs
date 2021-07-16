@@ -38,7 +38,7 @@ namespace Caravela.Framework.CompilerExtensions
                             // To debug, uncomment the next line.
                             // Debugger.Launch();
 
-                            var currentAssembly = Assembly.GetCallingAssembly();
+                            var currentAssembly = typeof(ResourceExtractor).Assembly;
 
                             AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
 
@@ -91,7 +91,7 @@ namespace Caravela.Framework.CompilerExtensions
             if ( !File.Exists( completedFilePath ) )
             {
                 StringBuilder log = new();
-                log.AppendLine( $"Extracting resources from assembly {currentAssembly.Location}." );
+                log.AppendLine( $"Extracting resources from assembly '{currentAssembly.GetName()}', Path='{currentAssembly.Location}'." );
                 
                 // We cannot use MutexHelper because of dependencies on an embedded assembly.
                 using var extractMutex = new Mutex( false, "Global\\Caravela_Extract_" + AssemblyMetadataReader.BuildId );

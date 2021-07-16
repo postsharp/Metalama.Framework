@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -75,6 +76,35 @@ namespace Caravela.Framework.Impl.Formatting
             return compilation.UpdateSyntaxTrees( syntaxTreeReplacements, Array.Empty<SyntaxTree>() );
         }
 
+        public static Compilation FormatAll( Compilation compilation, CancellationToken cancellationToken = default )
+            => Task.Run( () => FormatAllAsync( compilation, cancellationToken ), cancellationToken ).Result;
+
+        public static async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
+        {
+            var formattedCompilation = compilation;
+            var (project, syntaxTreeMap) = await CreateProjectFromCompilation( compilation, cancellationToken );
+
+            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            {
+                var documentId = syntaxTreeMap[syntaxTree];
+
+                var document = project.GetDocument( documentId )!;
+
+                if ( !document.SupportsSyntaxTree )
+                {
+                    continue;
+                }
+
+                var formattedSyntaxRoot = await FormatAsync( document, true, cancellationToken );
+
+                formattedCompilation = formattedCompilation.ReplaceSyntaxTree(
+                    syntaxTree,
+                    syntaxTree.WithRootAndOptions( formattedSyntaxRoot, syntaxTree.Options ) );
+            }
+
+            return formattedCompilation;
+        }
+
         private static async Task<(Project Project, Dictionary<SyntaxTree, DocumentId> SyntaxTreeMap)> CreateProjectFromCompilation(
             Compilation compilation,
             CancellationToken cancellationToken )
@@ -101,5 +131,12 @@ namespace Caravela.Framework.Impl.Formatting
 
             return (project, syntaxTreeMap);
         }
+
+        // HACK: We cannot format the output if the current AppDomain does not contain the workspace assemblies.
+        // Code formatting is used by TryCaravela only now. Somehow TryCaravela also builds through the command line for some
+        // initialization, which triggers an error because we don't ship all necessary assemblies.
+
+        public static bool CanFormat =>
+            AppDomain.CurrentDomain.GetAssemblies().Any( a => a.GetName().Name == "Microsoft.CodeAnalysis.Workspaces" );
     }
 }
