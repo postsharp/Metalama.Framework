@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.Formatting
 
                 var formattedSyntaxRoot = await FormatAsync( document, false, cancellationToken );
 
-                syntaxTreeReplacements.Add( new ModifiedSyntaxTree( syntaxTree, syntaxTree.WithRootAndOptions( formattedSyntaxRoot, syntaxTree.Options ) ) );
+                syntaxTreeReplacements.Add( new ModifiedSyntaxTree( syntaxTree.WithRootAndOptions( formattedSyntaxRoot, syntaxTree.Options ), syntaxTree ) );
             }
 
             return compilation.UpdateSyntaxTrees( syntaxTreeReplacements, Array.Empty<SyntaxTree>() );

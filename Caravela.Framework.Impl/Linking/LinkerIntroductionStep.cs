@@ -134,7 +134,7 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             intermediateCompilation = intermediateCompilation.UpdateSyntaxTrees(
-                syntaxTreeMapping.Select( p => new ModifiedSyntaxTree( p.Key, p.Value ) ).ToList(),
+                syntaxTreeMapping.Select( p => new ModifiedSyntaxTree( p.Value, p.Key ) ).ToList(),
                 Array.Empty<SyntaxTree>() );
 
             var introductionRegistry = new LinkerIntroductionRegistry(

@@ -41,6 +41,8 @@ namespace Caravela.TestFramework
 
         public bool FormatOutput => false;
 
+        public bool IsUserCodeTrusted => true;
+
         public void Dispose()
         {
             if ( Directory.Exists( this.CompileTimeProjectCacheDirectory ) )

@@ -274,14 +274,14 @@ namespace Caravela.Framework.Impl.CompileTime
                 if ( this._rewriter != null )
                 {
                     // TryCaravela defines a binary rewriter to inject Unbreakable.
-                    
+
                     MemoryStream memoryStream = new();
                     emitResult = compileTimeCompilation.Emit( memoryStream, null, options: emitOptions, cancellationToken: cancellationToken );
                     memoryStream.Seek( 0, SeekOrigin.Begin );
 
                     using ( var peStream = File.Create( outputInfo.Pe ) )
                     {
-                        this._rewriter.Rewrite( memoryStream, peStream );
+                        this._rewriter.Rewrite( memoryStream, peStream, outputInfo.Directory );
                     }
                 }
                 else

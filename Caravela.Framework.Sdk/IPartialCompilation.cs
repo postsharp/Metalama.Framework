@@ -11,6 +11,7 @@ namespace Caravela.Framework.Sdk
     /// Represents a subset of a Roslyn <see cref="Microsoft.CodeAnalysis.Compilation"/>. The subset is limited
     /// to specific syntax trees.
     /// </summary>
+    /// <seealso cref="PartialCompilationExtensions"/>
     public interface IPartialCompilation
     {
         /// <summary>

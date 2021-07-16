@@ -29,5 +29,10 @@ namespace Caravela.Framework.Impl.Options
         /// Gets a value indicating whether the output syntax trees must be formatted.
         /// </summary>
         bool FormatOutput { get; }
+        
+        /// <summary>
+        /// Gets a value indicating whether the user code processed by Caravela is trusted.
+        /// </summary>
+        bool IsUserCodeTrusted { get; }
     }
 }

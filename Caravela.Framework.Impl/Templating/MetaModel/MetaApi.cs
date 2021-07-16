@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Options;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -84,9 +85,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public void DebugBreak()
         {
-            var trustOptions = this._common.ServiceProvider.GetService<ITrustOptions>();
+            var trustOptions = this._common.ServiceProvider.GetService<IProjectOptions>();
 
-            if ( !trustOptions.IsTrusted )
+            if ( !trustOptions.IsUserCodeTrusted )
             {
                 return;
             }

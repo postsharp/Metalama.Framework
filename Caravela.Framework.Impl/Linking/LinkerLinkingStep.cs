@@ -76,7 +76,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 var newSyntaxTree = syntaxTree.WithRootAndOptions( cleanRoot, syntaxTree.Options );
 
-                replacedTrees.Add( new ModifiedSyntaxTree( syntaxTree, newSyntaxTree ) );
+                replacedTrees.Add( new ModifiedSyntaxTree( newSyntaxTree, syntaxTree ) );
             }
 
             return new AspectLinkerResult( input.IntermediateCompilation.UpdateSyntaxTrees( replacedTrees ), input.Diagnostics );

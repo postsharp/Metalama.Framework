@@ -14,9 +14,9 @@ namespace Caravela.Framework.Sdk
         public string FilePath => this.NewTree.FilePath;
 
         /// <summary>
-        /// Gets the old syntax tree.
+        /// Gets the old syntax tree, or <c>null</c> if this is a new tree.
         /// </summary>
-        public SyntaxTree OldTree { get; }
+        public SyntaxTree? OldTree { get; }
 
         /// <summary>
         /// Gets the new syntax tree.
@@ -26,9 +26,9 @@ namespace Caravela.Framework.Sdk
         /// <summary>
         /// Initializes a new instance of the <see cref="ModifiedSyntaxTree"/> struct.
         /// </summary>
-        public ModifiedSyntaxTree( SyntaxTree oldTree, SyntaxTree newTree )
+        public ModifiedSyntaxTree( SyntaxTree newTree, SyntaxTree? oldTree = null )
         {
-            if ( !string.Equals( oldTree.FilePath, newTree.FilePath, StringComparison.Ordinal ) )
+            if ( oldTree != null && !string.Equals( oldTree.FilePath, newTree.FilePath, StringComparison.Ordinal ) )
             {
                 throw new ArgumentOutOfRangeException( nameof(newTree), "The FilePath property of both trees must be equal." );
             }

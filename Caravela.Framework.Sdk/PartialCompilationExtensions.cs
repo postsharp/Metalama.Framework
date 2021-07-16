@@ -27,7 +27,7 @@ namespace Caravela.Framework.Sdk
             Func<SyntaxTree, CancellationToken, SyntaxTree> getNewTree,
             CancellationToken cancellationToken = default )
             => compilation.UpdateSyntaxTrees(
-                compilation.SyntaxTrees.Values.Select( t => new ModifiedSyntaxTree( t, getNewTree( t, cancellationToken ) ) )
+                compilation.SyntaxTrees.Values.Select( t => new ModifiedSyntaxTree( getNewTree( t, cancellationToken ), t ) )
                     .Where( t => t.NewTree != t.OldTree )
                     .ToList(),
                 Array.Empty<SyntaxTree>() );
@@ -47,7 +47,7 @@ namespace Caravela.Framework.Sdk
             => compilation.UpdateSyntaxTrees(
                 compilation.SyntaxTrees.Values.Select( t => (OldTree: t, NewRoot: getNewSyntaxRoot( t.GetRoot( cancellationToken ), cancellationToken )) )
                     .Where( x => x.OldTree.GetRoot( cancellationToken ) != x.NewRoot )
-                    .Select( x => new ModifiedSyntaxTree( x.OldTree, x.OldTree.WithRootAndOptions( x.NewRoot, (CSharpParseOptions) x.OldTree.Options ) ) )
+                    .Select( x => new ModifiedSyntaxTree( x.OldTree.WithRootAndOptions( x.NewRoot, (CSharpParseOptions) x.OldTree.Options ), x.OldTree ) )
                     .ToList(),
                 Array.Empty<SyntaxTree>() );
     }

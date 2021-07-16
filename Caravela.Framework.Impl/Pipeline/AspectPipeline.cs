@@ -32,6 +32,15 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public ServiceProvider ServiceProvider { get; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AspectPipeline"/> class.
+        /// </summary>
+        /// <param name="projectOptions"></param>
+        /// <param name="executionScenario"></param>
+        /// <param name="isTest"></param>
+        /// <param name="domain">If <c>null</c>, the instance is created from the <see cref="ICompileTimeDomainFactory"/> service.</param>
+        /// <param name="directoryOptions"></param>
+        /// <param name="assemblyLocator"></param>
         protected AspectPipeline(
             IProjectOptions projectOptions,
             AspectExecutionScenario executionScenario,
@@ -42,6 +51,7 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             this.ProjectOptions = projectOptions;
             this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( directoryOptions, assemblyLocator );
+            this.ServiceProvider.AddService( projectOptions );
 
             if ( domain != null )
             {
@@ -49,7 +59,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
             else
             {
-                this._domain = this.ServiceProvider.GetService<ICompileTimeDomainFactory>().GetDomain();
+                this._domain = this.ServiceProvider.GetService<ICompileTimeDomainFactory>().CreateDomain();
                 this._ownsDomain = true;
             }
 

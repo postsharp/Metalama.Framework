@@ -4,7 +4,6 @@
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Serialization;
-using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
 using System.Threading;
 
@@ -14,23 +13,23 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private static readonly AsyncLocal<ServiceProvider?> _asyncLocalInstance = new();
         private static ServiceProvider? _globalInstance;
-        
+
         /// <summary>
         /// Registers a global service, which will be available in the <see cref="GlobalProvider"/> provider and in all
         /// instances returned by <see cref="GetServiceProvider"/>. This method is used by TryCaravela to register hooks.
         /// </summary>
-        public static void AddGlobalService<T>( T service ) 
+        public static void AddGlobalService<T>( T service )
             where T : IService
         {
             var newServices = new ServiceProvider( GlobalProvider );
             newServices.AddService( service );
             newServices.Freeze();
-            
+
             _globalInstance = newServices;
-            
+
             _asyncLocalInstance.Value = null;
         }
-        
+
         /// <summary>
         /// Replaces the async-local <see cref="ServiceProvider"/> by a newly created provider, with a new instances
         /// of all services. This method must be called when the consumer needs to pass a different implementation
@@ -48,19 +47,18 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             _asyncLocalInstance.Value = null;
         }
-        
+
         /// <summary>
         /// Add a service to the async-local <see cref="ServiceProvider"/>, which is used as a prototype by the
         /// <see cref="GetServiceProvider"/> method to create instances in the current async context. If no async-local
         /// context is defined yet, it is cloned from <see cref="GlobalProvider"/>.
         /// </summary>
-        public static void AddOrReplaceAsyncLocalService<T>( T service ) 
-            where T : IService
+        public static void AddAsyncLocalService( IService service )
         {
             var newServices = new ServiceProvider( AsyncLocalProvider );
-            newServices.ReplaceService( service );
+            newServices.AddService( service );
             newServices.Freeze();
-            
+
             _asyncLocalInstance.Value = newServices;
         }
 
@@ -72,9 +70,8 @@ namespace Caravela.Framework.Impl.Pipeline
             serviceProvider.AddService( new SymbolClassificationService( serviceProvider ) );
             serviceProvider.AddService( new SyntaxSerializationService() );
             serviceProvider.AddService( new SystemTypeResolver( serviceProvider ) );
-            serviceProvider.AddService<ICompileTimeDomainFactory>( new DefaultCompileTimeDomainFactory() );
-            serviceProvider.AddService<ITrustOptions>( new DefaultTrustOptions() );
-
+            serviceProvider.AddService( new DefaultCompileTimeDomainFactory() );
+            
             if ( freeze )
             {
                 serviceProvider.Freeze();
@@ -89,12 +86,12 @@ namespace Caravela.Framework.Impl.Pipeline
         public static ServiceProvider GlobalProvider
             => LazyInitializer.EnsureInitialized( ref _globalInstance, () => CreateBaseServiceProvider( DefaultDirectoryOptions.Instance, true ) )!;
 
-        private static ServiceProvider AsyncLocalProvider => _asyncLocalInstance.Value ??= GlobalProvider; 
+        private static ServiceProvider AsyncLocalProvider => _asyncLocalInstance.Value ??= GlobalProvider;
 
         /// <summary>
         /// Gets a new instance of the <see cref="ServiceProvider"/>. If an implementation of <see cref="IDirectoryOptions"/> is provided,
         /// the new <see cref="ServiceProvider"/> gets a new implementation of all shared service (i.e. <see cref="AddGlobalService{T}"/> and
-        /// <see cref="AddOrReplaceAsyncLocalService{T}"/> are ignored). This scenario is used in tests. Otherwise, a shallow clone of the async-local or the global
+        /// <see cref="AddAsyncLocalService"/> are ignored). This scenario is used in tests. Otherwise, a shallow clone of the async-local or the global
         /// provider is provided.
         /// </summary>
         public static ServiceProvider GetServiceProvider( IDirectoryOptions? directoryOptions = null, IAssemblyLocator? assemblyLocator = null )

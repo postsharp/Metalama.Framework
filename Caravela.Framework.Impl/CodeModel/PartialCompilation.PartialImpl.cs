@@ -22,10 +22,20 @@ namespace Caravela.Framework.Impl.CodeModel
             public PartialImpl(
                 Compilation compilation,
                 ImmutableDictionary<string, SyntaxTree> syntaxTrees,
+                ImmutableArray<ITypeSymbol>? types )
+                : base( compilation )
+            {
+                this._types = types;
+                this._syntaxTrees = syntaxTrees;
+            }
+
+            public PartialImpl(
+                ImmutableDictionary<string, SyntaxTree> syntaxTrees,
                 ImmutableArray<ITypeSymbol>? types,
-                PartialCompilation? baseCompilation,
-                IReadOnlyList<ModifiedSyntaxTree>? modifiedSyntaxTrees )
-                : base( compilation, baseCompilation, modifiedSyntaxTrees )
+                PartialCompilation baseCompilation,
+                IReadOnlyList<ModifiedSyntaxTree>? modifiedSyntaxTrees,
+                IReadOnlyList<SyntaxTree>? addedTrees )
+                : base( baseCompilation, modifiedSyntaxTrees, addedTrees )
             {
                 this._types = types;
                 this._syntaxTrees = syntaxTrees;
@@ -41,8 +51,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 IReadOnlyList<ModifiedSyntaxTree>? replacedTrees = null,
                 IReadOnlyList<SyntaxTree>? addedTrees = null )
             {
-                var compilation = this.Compilation;
-                var syntaxTrees = this._syntaxTrees;
+                var syntaxTrees = this._syntaxTrees.ToBuilder();
 
                 if ( replacedTrees != null )
                 {
@@ -53,22 +62,19 @@ namespace Caravela.Framework.Impl.CodeModel
                             throw new KeyNotFoundException();
                         }
 
-                        compilation = compilation.ReplaceSyntaxTree( replacement.OldTree, replacement.NewTree );
-                        syntaxTrees = syntaxTrees.SetItem( replacement.FilePath, replacement.NewTree );
+                        syntaxTrees[replacement.FilePath] = replacement.NewTree;
                     }
                 }
 
                 if ( addedTrees != null )
                 {
-                    compilation = compilation.AddSyntaxTrees( addedTrees );
-
                     foreach ( var addedTree in addedTrees )
                     {
-                        syntaxTrees = syntaxTrees.Add( addedTree.FilePath, addedTree );
+                        syntaxTrees.Add( addedTree.FilePath, addedTree );
                     }
                 }
 
-                return new PartialImpl( compilation, syntaxTrees, null, this, replacedTrees );
+                return new PartialImpl( syntaxTrees.ToImmutable(), null, this, replacedTrees, addedTrees );
             }
         }
     }
