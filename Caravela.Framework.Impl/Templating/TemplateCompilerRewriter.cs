@@ -281,7 +281,6 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             return transformedToken;
-
         }
 
         protected override ExpressionSyntax TransformVariableDeclaration( VariableDeclarationSyntax node )

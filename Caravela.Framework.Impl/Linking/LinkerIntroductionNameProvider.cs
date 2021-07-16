@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Linking
         internal override string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenDeclaration )
         {
             var shortAspectName = aspectLayer.AspectName.Split( '.' ).Last();
-            var shortLayerName = aspectLayer.LayerName?.Split( '.' )?.Last();
+            var shortLayerName = aspectLayer.LayerName?.Split( '.' ).Last();
 
             string nameHint;
 
