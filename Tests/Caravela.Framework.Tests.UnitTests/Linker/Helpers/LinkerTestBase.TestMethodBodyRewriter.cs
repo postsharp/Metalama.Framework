@@ -55,6 +55,11 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                                 break;
 
+                            case "base":
+                                order = AspectReferenceOrder.Base;
+
+                                break;
+
                             case "original":
                                 order = AspectReferenceOrder.Original;
 

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.Linker
 {
-    public class EventLinkingTests : LinkerTestBase
+    public class EventOverrideNotInlineableTests : LinkerTestBase
     {
         [Fact]
         public void Single()

@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <Compile Remove="Tests\Aspects\Overrides\Properties\SimpleMethodTemplates - Copy.t.cs" />
+    <Compile Remove="Tests\Aspects\Samples\Dirty - Copy.t.cs" />
   </ItemGroup>
 
 
@@ -45,6 +46,7 @@
 
   <ItemGroup>
     <None Include="Tests\Aspects\Overrides\Properties\Uninlineable.t.cs" />
+    <None Include="Tests\Aspects\Samples\DeepClone.t.cs" />
   </ItemGroup>
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />

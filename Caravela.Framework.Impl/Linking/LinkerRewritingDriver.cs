@@ -161,7 +161,7 @@ namespace Caravela.Framework.Impl.Linking
                     }
                     else
                     {
-                        var linkedExpression = this.GetLinkedExpression( aspectReference );
+                        var linkedExpression = GetLinkedExpression( aspectReference );
                         replacements.Add( aspectReference.Expression, linkedExpression );
                     }
                 }
@@ -470,44 +470,75 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference )
+        private static ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference )
         {
             if ( !SymbolEqualityComparer.Default.Equals( aspectReference.ResolvedSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType ) )
             {
                 throw new AssertionFailedException();
             }
 
+            // Determine the target name. Specifically, handle case when the resolved symbol points to the original implementation.
             var targetMemberName =
-                (this._analysisRegistry.IsOverrideTarget( aspectReference.ResolvedSymbol ), aspectReference.Specification.Order) switch
+                aspectReference.Semantic switch
                 {
-                    (true, AspectReferenceOrder.Base) => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
-                    (true, AspectReferenceOrder.Original) => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
+                    ResolvedAspectReferenceSemantic.Original => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
                     _ => aspectReference.ResolvedSymbol.Name
                 };
 
-            if ( aspectReference.ResolvedSymbol.IsStatic )
+            // Presume that all (annotated) aspect references are member access expressions.
+            switch ( aspectReference.Expression )
             {
-                return MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( aspectReference.ResolvedSymbol.ContainingType ),
-                    IdentifierName( targetMemberName ) );
-            }
-            else
-            {
-                if ( SymbolEqualityComparer.Default.Equals( aspectReference.ContainingSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType ) )
-                {
-                    return MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        ThisExpression(),
-                        IdentifierName( targetMemberName ) );
-                }
-                else
-                {
-                    return MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        BaseExpression(),
-                        IdentifierName( targetMemberName ) );
-                }
+                case MemberAccessExpressionSyntax memberAccessExpression:
+                    // The reference expression is member access.
+
+                    if ( SymbolEqualityComparer.Default.Equals( aspectReference.ContainingSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType ) )
+                    {
+                        // This is the same type, we can just change the identifier in the expression.
+                        // TODO: Is the target always accessible?
+                        return memberAccessExpression.WithName( IdentifierName( targetMemberName ) );
+                    }
+                    else
+                    {
+                        if ( aspectReference.ResolvedSymbol.IsStatic )
+                        {
+                            // Static member access where the target is a different type.
+                            return MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( aspectReference.ResolvedSymbol.ContainingType ),
+                                IdentifierName( targetMemberName ) );
+                        }
+                        else
+                        {
+                            if ( aspectReference.ResolvedSymbol.ContainingType.Is( aspectReference.ContainingSymbol.ContainingType ) )
+                            {
+                                throw new AssertionFailedException( "Resolved symbol is declared in a derived class." );
+                            }
+                            else if ( aspectReference.ContainingSymbol.ContainingType.Is( aspectReference.ResolvedSymbol.ContainingType ) )
+                            {
+                                // Resolved symbol is declared in a base class.
+                                switch ( memberAccessExpression.Expression )
+                                {
+                                    case IdentifierNameSyntax:
+                                    case BaseExpressionSyntax:
+                                    case ThisExpressionSyntax:
+                                        return MemberAccessExpression(
+                                            SyntaxKind.SimpleMemberAccessExpression,
+                                            BaseExpression(),
+                                            IdentifierName( targetMemberName ) );
+                                    default:
+                                        throw new AssertionFailedException( "Cannot reference symbol defined on base typee with a different expression than \"this\" or \"base\"." );
+                                }
+                            }
+                            else
+                            {
+                                // Resolved symbol is unrelated to the containing symbol.
+                                return memberAccessExpression.WithName( IdentifierName( targetMemberName ) );
+                            }
+                        }
+                    }
+
+                default:
+                    throw new AssertionFailedException();
             }
         }
 
