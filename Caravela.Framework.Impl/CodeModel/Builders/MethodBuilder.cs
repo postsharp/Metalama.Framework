@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public GenericParameterBuilderList GenericParameters { get; } = new();
 
         [Memo]
-        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), false );
+        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), this.OverriddenMethod != null );
 
         public IMethod? OverriddenMethod { get; set; }
 

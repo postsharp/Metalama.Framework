@@ -4,6 +4,7 @@
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
@@ -40,7 +41,8 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
                 typeof(DesignTimeDiagnosticDescriptors),
                 typeof(GeneralDiagnosticDescriptors),
                 typeof(SerializationDiagnosticDescriptors),
-                typeof(AdviceDiagnosticDescriptors) )
+                typeof(AdviceDiagnosticDescriptors),
+                typeof(AspectLinkerDiagnosticDescriptors) )
             .Select( d => d.ToRoslynDescriptor() )
             .ToImmutableDictionary( d => d.Id, d => d, StringComparer.CurrentCultureIgnoreCase );
 

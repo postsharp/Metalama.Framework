@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking.Inlining;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -21,6 +22,7 @@ namespace Caravela.Framework.Impl.Linking
     /// </summary>
     internal partial class LinkerRewritingDriver
     {
+        private readonly LinkerIntroductionRegistry _introductionRegistry;
         private readonly LinkerAnalysisRegistry _analysisRegistry;
         private readonly IReadOnlyList<Inliner> _inliners;
 
@@ -28,15 +30,21 @@ namespace Caravela.Framework.Impl.Linking
 
         public Compilation IntermediateCompilation { get; }
 
+        public UserDiagnosticSink DiagnosticSink { get; }
+
         public LinkerRewritingDriver(
             Compilation intermediateCompilation,
+            LinkerIntroductionRegistry introductionRegistry,
             LinkerAnalysisRegistry analysisRegistry,
             AspectReferenceResolver referenceResolver,
+            UserDiagnosticSink diagnosticSink,
             IReadOnlyList<Inliner> inliners )
         {
+            this._introductionRegistry = introductionRegistry;
             this._analysisRegistry = analysisRegistry;
             this.IntermediateCompilation = intermediateCompilation;
             this._inliners = inliners;
+            this.DiagnosticSink = diagnosticSink;
             this.ReferenceResolver = referenceResolver;
         }
 
@@ -161,7 +169,7 @@ namespace Caravela.Framework.Impl.Linking
                     }
                     else
                     {
-                        var linkedExpression = GetLinkedExpression( aspectReference );
+                        var linkedExpression = this.GetLinkedExpression( aspectReference );
                         replacements.Add( aspectReference.Expression, linkedExpression );
                     }
                 }
@@ -470,7 +478,7 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private static ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference )
+        private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference )
         {
             if ( !SymbolEqualityComparer.Default.Equals( aspectReference.ResolvedSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType ) )
             {
@@ -526,7 +534,14 @@ namespace Caravela.Framework.Impl.Linking
                                             BaseExpression(),
                                             IdentifierName( targetMemberName ) );
                                     default:
-                                        throw new AssertionFailedException( "Cannot reference symbol defined on base typee with a different expression than \"this\" or \"base\"." );
+                                        var aspectInstance = this.ResolveAspectInstance( aspectReference );
+
+                                        this.DiagnosticSink.Report(
+                                            AspectLinkerDiagnosticDescriptors.CannotUseBaseInvokerWithInstanceExpression.CreateDiagnostic(
+                                            aspectInstance.TargetDeclaration.GetDiagnosticLocation(),
+                                            (aspectInstance.AspectClass.DisplayName, aspectInstance.TargetDeclaration) ) );
+
+                                        return aspectReference.Expression;
                                 }
                             }
                             else
@@ -540,6 +555,12 @@ namespace Caravela.Framework.Impl.Linking
                 default:
                     throw new AssertionFailedException();
             }
+        }
+
+        private AspectInstance ResolveAspectInstance( ResolvedAspectReference aspectReference )
+        {
+            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( aspectReference.ContainingSymbol );
+            return introducedMember.AssertNotNull().Introduction.Advice.Aspect;
         }
 
         internal static string GetOriginalImplMemberName( string memberName ) => $"__{memberName}__OriginalImpl";

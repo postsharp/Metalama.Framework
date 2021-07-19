@@ -5,15 +5,8 @@ using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictFail
 {
-    // TODO: Will be fixed as part of #28322 Handle conflicts and overrides.
-
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-       
-        
-        
-       
-
         [Introduce(WhenExists = OverrideStrategy.Fail)]
         public int ExistingMethod()
         {

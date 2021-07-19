@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
+using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
@@ -71,5 +72,7 @@ namespace Caravela.Framework.Impl.CodeModel
         MemberRef<IMemberOrNamedType> IReplaceMember.ReplacedMember => new( this._symbol );
 
         IDeclaration IObservableTransformation.ContainingDeclaration => this.ContainingDeclaration.AssertNotNull();
+
+        Advice ITransformation.Advice => throw new NotImplementedException();
     }
 }

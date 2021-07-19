@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 
 #pragma warning disable CS0067
+#pragma warning disable CS0169
 
 namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
 {

@@ -58,8 +58,10 @@ namespace Caravela.Framework.Impl.Linking
 
             var rewritingDriver = new LinkerRewritingDriver(
                 input.IntermediateCompilation.Compilation,
+                input.IntroductionRegistry,
                 input.AnalysisRegistry,
                 input.ReferenceResolver,
+                input.DiagnosticSink,
                 inliners );
 
             var linkingRewriter = new LinkingRewriter( input.IntermediateCompilation.Compilation, rewritingDriver );
@@ -80,7 +82,7 @@ namespace Caravela.Framework.Impl.Linking
                 replacedTrees.Add( new ModifiedSyntaxTree( newSyntaxTree, syntaxTree ) );
             }
 
-            return new AspectLinkerResult( input.IntermediateCompilation.UpdateSyntaxTrees( replacedTrees ), input.Diagnostics );
+            return new AspectLinkerResult( input.IntermediateCompilation.UpdateSyntaxTrees( replacedTrees ), input.DiagnosticSink.ToImmutable() );
         }
     }
 }
