@@ -301,7 +301,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                                     +
                                     $"\t\t\t\t\tSyntaxFactory.InitializerExpression( SyntaxKind.ArrayInitializerExpression, SyntaxFactory.SeparatedList( @{parameter.Name} ))\n"
                                     +
-                                    "\t\t\t\t))" );
+                                    "\t\t\t\t)).NormalizeWhitespace()" );
                             }
                             else
                             {

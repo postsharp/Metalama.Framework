@@ -92,15 +92,17 @@ namespace Caravela.Framework.Impl.Templating
                                                     SyntaxFactory.SeparatedList(
                                                         new[] { SyntaxFactory.Argument( start ), SyntaxFactory.Argument( end ) } ) ) ) ),
                                     SyntaxFactory.Argument(
-                                        SyntaxFactory.ObjectCreationExpression( this._metaSyntaxFactory.Type( typeof(LinePositionSpan) ) )
-                                            .WithArgumentList(
-                                                SyntaxFactory.ArgumentList(
-                                                    SyntaxFactory.SeparatedList(
-                                                        new[]
-                                                        {
-                                                            SyntaxFactory.Argument( this.LinePosition( lineSpan.StartLinePosition ) ),
-                                                            SyntaxFactory.Argument( this.LinePosition( lineSpan.EndLinePosition ) )
-                                                        } ) ) ) )
+                                        SyntaxFactory.ObjectCreationExpression(
+                                            SyntaxFactory.Token( SyntaxKind.NewKeyword ).WithTrailingTrivia( SyntaxFactory.Space ),
+                                            this._metaSyntaxFactory.Type( typeof(LinePositionSpan) ),
+                                            SyntaxFactory.ArgumentList(
+                                                SyntaxFactory.SeparatedList(
+                                                    new[]
+                                                    {
+                                                        SyntaxFactory.Argument( this.LinePosition( lineSpan.StartLinePosition ) ),
+                                                        SyntaxFactory.Argument( this.LinePosition( lineSpan.EndLinePosition ) )
+                                                    } ) ),
+                                            null ) )
                                 } ) ) );
 
                 return invocation;
@@ -110,10 +112,12 @@ namespace Caravela.Framework.Impl.Templating
                 => this.LinePosition( SyntaxFactoryEx.LiteralExpression( linePosition.Line ), SyntaxFactoryEx.LiteralExpression( linePosition.Character ) );
 
             public ObjectCreationExpressionSyntax LinePosition( ExpressionSyntax startLine, ExpressionSyntax startChar )
-                => SyntaxFactory.ObjectCreationExpression( this._metaSyntaxFactory.Type( typeof(LinePosition) ) )
-                    .WithArgumentList(
-                        SyntaxFactory.ArgumentList(
-                            SyntaxFactory.SeparatedList( new[] { SyntaxFactory.Argument( startLine ), SyntaxFactory.Argument( startChar ) } ) ) );
+                => SyntaxFactory.ObjectCreationExpression(
+                    SyntaxFactory.Token( SyntaxKind.NewKeyword ).WithTrailingTrivia( SyntaxFactory.Space ),
+                    this._metaSyntaxFactory.Type( typeof(LinePosition) ),
+                    SyntaxFactory.ArgumentList(
+                        SyntaxFactory.SeparatedList( new[] { SyntaxFactory.Argument( startLine ), SyntaxFactory.Argument( startChar ) } ) ),
+                    null );
         }
     }
 }

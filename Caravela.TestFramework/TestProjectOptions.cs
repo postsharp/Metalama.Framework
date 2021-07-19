@@ -15,7 +15,7 @@ namespace Caravela.TestFramework
     {
         public TestProjectOptions()
         {
-            var directory = Path.Combine( Path.GetTempPath(), "Caravela.TestFramework", Guid.NewGuid().ToString() );
+            var directory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
             this.CompileTimeProjectCacheDirectory = directory;
 
             Directory.CreateDirectory( directory );

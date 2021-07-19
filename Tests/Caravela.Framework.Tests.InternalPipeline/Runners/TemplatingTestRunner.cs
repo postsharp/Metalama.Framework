@@ -129,7 +129,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             // Write the transformed code to disk.
             var transformedTemplatePath = Path.Combine( GeneratedDirectoryPath, Path.ChangeExtension( testInput.TestName, ".cs" ) );
-            var transformedTemplateText = transformedTemplateSyntax!.SyntaxTree.GetText();
+            var transformedTemplateText = await transformedTemplateSyntax!.SyntaxTree.GetTextAsync();
             Directory.CreateDirectory( Path.GetDirectoryName( transformedTemplatePath ) );
 
             await using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
@@ -164,7 +164,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var buildTimeAssemblyStream = new MemoryStream();
             var buildTimeDebugStream = new MemoryStream();
 
-            SyntaxTreeStructureVerifier.Verify( compileTimeCompilation );
+            // SyntaxTreeStructureVerifier.Verify( compileTimeCompilation );
 
             var emitResult = compileTimeCompilation.Emit(
                 buildTimeAssemblyStream,

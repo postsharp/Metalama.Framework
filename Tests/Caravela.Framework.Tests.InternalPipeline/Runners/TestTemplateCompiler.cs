@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Xunit;
 
 namespace Caravela.Framework.Tests.Integration.Runners
 {
@@ -31,10 +32,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
         public bool HasError { get; private set; }
 
-        private static bool IsTemplate( ISymbol symbol )
-        {
-            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(TestTemplateAttribute) );
-        }
+        private static bool IsTemplate( ISymbol symbol ) => symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(TestTemplateAttribute) );
 
         private bool IsTemplate( SyntaxNode node )
         {
@@ -56,7 +54,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 visitor.Visit( rootNode );
 
                 annotatedNode = new Rewriter( this, 0 ).Visit( rootNode )!;
-                transformedNode = new Rewriter( this, 1 ).Visit( rootNode )!.NormalizeWhitespace();
+                transformedNode = new Rewriter( this, 1 ).Visit( rootNode );
 
                 return !this.HasError;
             }
@@ -96,6 +94,15 @@ namespace Caravela.Framework.Tests.Integration.Runners
                         out var transformedNode ) )
                     {
                         this._parent.HasError = true;
+                    }
+
+                    if ( transformedNode != null )
+                    {
+                        var transformedTemplateText = transformedNode!.ToFullString();
+
+                        // ReSharper disable StringLiteralTypo
+                        Assert.DoesNotContain( "returnglobal", transformedTemplateText, StringComparison.Ordinal );
+                        Assert.DoesNotContain( "newglobal", transformedTemplateText, StringComparison.Ordinal );
                     }
 
                     this._parent._transformedNodes.Add( node, new[] { annotatedNode!, transformedNode! } );

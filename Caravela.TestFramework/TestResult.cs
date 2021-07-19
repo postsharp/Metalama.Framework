@@ -229,11 +229,14 @@ namespace Caravela.TestFramework
                 comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
             }
 
+            // We exclude CR0222 from the results because it contains randomly-generated info and tests need to be deterministic.
+            
             comments.AddRange(
                 this.Diagnostics
                     .Where(
-                        d => this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
-                             || d.Severity >= DiagnosticSeverity.Warning )
+                        d => d.Id != "CR0222" &&
+                             (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
+                              || d.Severity >= DiagnosticSeverity.Warning) )
                     .Select( d => $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
                     .OrderByDescending( s => s )
                     .Select( SyntaxFactory.Comment )

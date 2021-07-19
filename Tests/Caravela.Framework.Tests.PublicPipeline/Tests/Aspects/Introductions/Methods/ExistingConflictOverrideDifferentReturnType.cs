@@ -3,7 +3,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictOverrideBaseSealed
+namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictOverrideDifferentReturnType
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
@@ -17,15 +17,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
 
     internal class BaseClass
     {
-        public virtual int ExistingMethod()
-        {
-            return default;
-        }
-    }
-
-    internal class DerivedClass : BaseClass
-    {
-        public sealed override int ExistingMethod()
+        public virtual object? ExistingMethod()
         {
             return default;
         }
@@ -33,7 +25,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
 
     // <target>
     [Introduction]
-    internal class TargetClass : DerivedClass
+    internal class TargetClass : BaseClass
     {
     }
 }

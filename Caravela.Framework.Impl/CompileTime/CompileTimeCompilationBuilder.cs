@@ -342,9 +342,36 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( !emitResult.Success )
                 {
+                    // When the compile-time assembly is invalid, to enable troubleshooting, we store the source files and the list of diagnostics
+                    // to a directory that will not be deleted after the build.
+                    var troubleshootingDirectory = Path.Combine(
+                        TempPathHelper.GetTempPath( "CompileTimeTroubleshooting" ),
+                        Guid.NewGuid().ToString() );
+
+                    Directory.CreateDirectory( troubleshootingDirectory );
+
+                    foreach ( var syntaxTree in compileTimeCompilation.SyntaxTrees )
+                    {
+                        var path = Path.Combine( troubleshootingDirectory, Path.GetFileName( syntaxTree.FilePath ) );
+
+                        using ( var writer = File.CreateText( path ) )
+                        {
+                            syntaxTree.GetText().Write( writer );
+                        }
+                    }
+
+                    var diagnosticPath = Path.Combine( troubleshootingDirectory, "errors.txt" );
+                    var diagnostics = emitResult.Diagnostics.Select( d => d.ToString() ).ToArray();
+                    File.WriteAllLines( diagnosticPath, diagnostics );
+
                     Logger.Instance?.Write(
                         $"TryEmit( '{compileTimeCompilation.AssemblyName}' ): failure: " +
                         string.Join( Environment.NewLine, emitResult.Diagnostics ) );
+
+                    diagnosticSink.Report(
+                        TemplatingDiagnosticDescriptors.CannotEmitCompileTimeAssembly.CreateDiagnostic(
+                            null,
+                            troubleshootingDirectory ) );
 
                     ReportDiagnostics( emitResult.Diagnostics.Where( d => d.Severity >= DiagnosticSeverity.Error ) );
 
