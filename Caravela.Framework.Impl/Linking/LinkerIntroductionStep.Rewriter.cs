@@ -155,11 +155,19 @@ namespace Caravela.Framework.Impl.Linking
 
                     if ( additionalBaseList.Any() )
                     {
-                        node = node.WithBaseList(
-                                node.BaseList != null
-                                    ? BaseList( node.BaseList.Types.AddRange( additionalBaseList ) )
-                                    : BaseList( SeparatedList( additionalBaseList ) ).NormalizeWhitespace() )
-                            .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
+                        if ( node.BaseList == null )
+                        {
+                            node = node
+                                .WithIdentifier( node.Identifier.WithTrailingTrivia() )
+                                .WithBaseList( BaseList( SeparatedList( additionalBaseList ) ) )
+                                .WithTrailingTrivia( node.Identifier.TrailingTrivia );
+                        }
+                        else
+                        {
+                            node = node.WithBaseList( BaseList( node.BaseList.Types.AddRange( additionalBaseList ) ) );
+                        }
+
+                        node = node.WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
                     }
 
                     return node;
@@ -210,12 +218,14 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 static string GetErrorCode( ExpressionSyntax expression )
-                    => expression switch
+                {
+                    return expression switch
                     {
                         IdentifierNameSyntax identifier => identifier.Identifier.Text,
                         LiteralExpressionSyntax literal => $"CS{literal.Token.Value:0000}",
                         _ => throw new AssertionFailedException()
                     };
+                }
             }
 
             // The following methods remove the #if code and replaces with its content, but it's not sure that this is the right

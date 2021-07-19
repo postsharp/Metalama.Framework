@@ -203,6 +203,7 @@ namespace Caravela.Framework.Impl.Templating
                         SingletonSeparatedList(
                             Argument(
                                 ArrayCreationExpression(
+                                    Token( SyntaxKind.NewKeyword ).WithTrailingTrivia( Space ),
                                     this.MetaSyntaxFactory.ArrayType<T>(),
                                     InitializerExpression(
                                         SyntaxKind.ArrayInitializerExpression,
