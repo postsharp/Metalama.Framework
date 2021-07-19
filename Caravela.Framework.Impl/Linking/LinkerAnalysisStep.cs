@@ -104,7 +104,7 @@ namespace Caravela.Framework.Impl.Linking
                 methodBodyAnalysisResults,
                 aspectReferences.ToDictionary( x => x.Key, x => (IReadOnlyList<ResolvedAspectReference>) x.Value ) );
 
-            return new LinkerAnalysisStepOutput( input.Diagnostics, input.IntermediateCompilation, analysisRegistry, referenceResolver );
+            return new LinkerAnalysisStepOutput( input.DiagnosticSink, input.IntermediateCompilation, input.IntroductionRegistry, analysisRegistry, referenceResolver );
 
             void AnalyzeOverriddenBody( IMethodSymbol symbol )
             {

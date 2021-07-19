@@ -13,7 +13,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Tests\Aspects\Introductions\Methods\ExistingConflictOverrideBaseSealed - Copy.t.cs" />
+    <Compile Remove="Tests\Aspects\Introductions\Properties\ExistingConflictFail.t.cs" />
+    <Compile Remove="Tests\Aspects\Introductions\Properties\ExistingConflictIgnore.t.cs" />
+    <Compile Remove="Tests\Aspects\Introductions\Properties\ExistingConflictNew.t.cs" />
+    <Compile Remove="Tests\Aspects\Introductions\Properties\ExistingConflictOverride.t.cs" />
+    <Compile Remove="Tests\Aspects\Introductions\Properties\ExistingConflictOverrideBaseNonVirtual.t.cs" />
+    <Compile Remove="Tests\Aspects\Introductions\Properties\ExistingConflictOverrideBaseSealed.t.cs" />
+    <Compile Remove="Tests\Aspects\Introductions\Properties\ExistingConflictOverrideDifferentReturnType.t.cs" />
+    <Compile Remove="Tests\Aspects\Invokers\Methods\AdvisedSource_BaseInvoker.t.cs" />
     <Compile Remove="Tests\Aspects\Overrides\Properties\SimpleMethodTemplates - Copy.t.cs" />
+    <Compile Remove="Tests\Aspects\Samples\Dirty - Copy.t.cs" />
   </ItemGroup>
 
 
@@ -44,7 +54,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Tests\Aspects\Introductions\Methods\ExistingConflictOverrideDifferentReturnType.t.cs" />
+    <None Include="Tests\Aspects\Introductions\Properties\ExistingConflictFail.t.cs" />
+    <None Include="Tests\Aspects\Introductions\Properties\ExistingConflictIgnore.t.cs" />
+    <None Include="Tests\Aspects\Introductions\Properties\ExistingConflictNew.t.cs" />
+    <None Include="Tests\Aspects\Introductions\Properties\ExistingConflictOverride.t.cs" />
+    <None Include="Tests\Aspects\Introductions\Properties\ExistingConflictOverrideBaseNonVirtual.t.cs" />
+    <None Include="Tests\Aspects\Introductions\Properties\ExistingConflictOverrideBaseSealed.t.cs" />
+    <None Include="Tests\Aspects\Introductions\Properties\ExistingConflictOverrideDifferentReturnType.t.cs" />
+    <None Include="Tests\Aspects\Invokers\Methods\AnotherInstance_BaseInvoker_error.t.cs" />
     <None Include="Tests\Aspects\Overrides\Properties\Uninlineable.t.cs" />
+    <None Include="Tests\Aspects\Samples\DeepClone.t.cs" />
   </ItemGroup>
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />

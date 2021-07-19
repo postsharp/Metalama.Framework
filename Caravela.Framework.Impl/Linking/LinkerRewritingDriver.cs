@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking.Inlining;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -21,6 +22,7 @@ namespace Caravela.Framework.Impl.Linking
     /// </summary>
     internal partial class LinkerRewritingDriver
     {
+        private readonly LinkerIntroductionRegistry _introductionRegistry;
         private readonly LinkerAnalysisRegistry _analysisRegistry;
         private readonly IReadOnlyList<Inliner> _inliners;
 
@@ -28,15 +30,21 @@ namespace Caravela.Framework.Impl.Linking
 
         public Compilation IntermediateCompilation { get; }
 
+        public UserDiagnosticSink DiagnosticSink { get; }
+
         public LinkerRewritingDriver(
             Compilation intermediateCompilation,
+            LinkerIntroductionRegistry introductionRegistry,
             LinkerAnalysisRegistry analysisRegistry,
             AspectReferenceResolver referenceResolver,
+            UserDiagnosticSink diagnosticSink,
             IReadOnlyList<Inliner> inliners )
         {
+            this._introductionRegistry = introductionRegistry;
             this._analysisRegistry = analysisRegistry;
             this.IntermediateCompilation = intermediateCompilation;
             this._inliners = inliners;
+            this.DiagnosticSink = diagnosticSink;
             this.ReferenceResolver = referenceResolver;
         }
 
@@ -477,38 +485,82 @@ namespace Caravela.Framework.Impl.Linking
                 throw new AssertionFailedException();
             }
 
+            // Determine the target name. Specifically, handle case when the resolved symbol points to the original implementation.
             var targetMemberName =
-                (this._analysisRegistry.IsOverrideTarget( aspectReference.ResolvedSymbol ), aspectReference.Specification.Order) switch
+                aspectReference.Semantic switch
                 {
-                    (true, AspectReferenceOrder.Base) => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
-                    (true, AspectReferenceOrder.Original) => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
+                    ResolvedAspectReferenceSemantic.Original => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
                     _ => aspectReference.ResolvedSymbol.Name
                 };
 
-            if ( aspectReference.ResolvedSymbol.IsStatic )
+            // Presume that all (annotated) aspect references are member access expressions.
+            switch ( aspectReference.Expression )
             {
-                return MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( aspectReference.ResolvedSymbol.ContainingType ),
-                    IdentifierName( targetMemberName ) );
+                case MemberAccessExpressionSyntax memberAccessExpression:
+                    // The reference expression is member access.
+
+                    if ( SymbolEqualityComparer.Default.Equals( aspectReference.ContainingSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType ) )
+                    {
+                        // This is the same type, we can just change the identifier in the expression.
+                        // TODO: Is the target always accessible?
+                        return memberAccessExpression.WithName( IdentifierName( targetMemberName ) );
+                    }
+                    else
+                    {
+                        if ( aspectReference.ResolvedSymbol.IsStatic )
+                        {
+                            // Static member access where the target is a different type.
+                            return MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( aspectReference.ResolvedSymbol.ContainingType ),
+                                IdentifierName( targetMemberName ) );
+                        }
+                        else
+                        {
+                            if ( aspectReference.ResolvedSymbol.ContainingType.Is( aspectReference.ContainingSymbol.ContainingType ) )
+                            {
+                                throw new AssertionFailedException( "Resolved symbol is declared in a derived class." );
+                            }
+                            else if ( aspectReference.ContainingSymbol.ContainingType.Is( aspectReference.ResolvedSymbol.ContainingType ) )
+                            {
+                                // Resolved symbol is declared in a base class.
+                                switch ( memberAccessExpression.Expression )
+                                {
+                                    case IdentifierNameSyntax:
+                                    case BaseExpressionSyntax:
+                                    case ThisExpressionSyntax:
+                                        return MemberAccessExpression(
+                                            SyntaxKind.SimpleMemberAccessExpression,
+                                            BaseExpression(),
+                                            IdentifierName( targetMemberName ) );
+                                    default:
+                                        var aspectInstance = this.ResolveAspectInstance( aspectReference );
+
+                                        this.DiagnosticSink.Report(
+                                            AspectLinkerDiagnosticDescriptors.CannotUseBaseInvokerWithInstanceExpression.CreateDiagnostic(
+                                            aspectInstance.TargetDeclaration.GetDiagnosticLocation(),
+                                            (aspectInstance.AspectClass.DisplayName, aspectInstance.TargetDeclaration) ) );
+
+                                        return aspectReference.Expression;
+                                }
+                            }
+                            else
+                            {
+                                // Resolved symbol is unrelated to the containing symbol.
+                                return memberAccessExpression.WithName( IdentifierName( targetMemberName ) );
+                            }
+                        }
+                    }
+
+                default:
+                    throw new AssertionFailedException();
             }
-            else
-            {
-                if ( SymbolEqualityComparer.Default.Equals( aspectReference.ContainingSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType ) )
-                {
-                    return MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        ThisExpression(),
-                        IdentifierName( targetMemberName ) );
-                }
-                else
-                {
-                    return MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        BaseExpression(),
-                        IdentifierName( targetMemberName ) );
-                }
-            }
+        }
+
+        private AspectInstance ResolveAspectInstance( ResolvedAspectReference aspectReference )
+        {
+            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( aspectReference.ContainingSymbol );
+            return introducedMember.AssertNotNull().Introduction.Advice.Aspect;
         }
 
         internal static string GetOriginalImplMemberName( string memberName ) => $"__{memberName}__OriginalImpl";
