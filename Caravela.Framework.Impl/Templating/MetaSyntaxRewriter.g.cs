@@ -1,5 +1,4 @@
 #pragma warning disable CS8669 // Nullability
-
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -5908,8 +5907,8 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @refKindKeyword ), 
 				SyntaxFactory.Argument( @expression )})));
 
-            public InvocationExpressionSyntax Argument(ExpressionSyntax? @expression)
-            => SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Argument" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+		public InvocationExpressionSyntax Argument(ExpressionSyntax @expression)
+			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Argument" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @expression )})));
 
 		public InvocationExpressionSyntax ArgumentList(ExpressionSyntax @openParenToken, ExpressionSyntax @arguments, ExpressionSyntax @closeParenToken)
@@ -7836,7 +7835,7 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument(SyntaxFactory.ArrayCreationExpression( 
 					SyntaxFactory.ArrayType( this.Type(typeof(TNode)) ).WithRankSpecifiers(SyntaxFactory.SingletonList(SyntaxFactory.ArrayRankSpecifier(SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(SyntaxFactory.OmittedArraySizeExpression() ) ) ) ), 
 					SyntaxFactory.InitializerExpression( SyntaxKind.ArrayInitializerExpression, SyntaxFactory.SeparatedList( @nodes ))
-				))})));
+				)).NormalizeWhitespace()})));
 
 		public InvocationExpressionSyntax Literal(ExpressionSyntax @value)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Literal" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
@@ -8913,25 +8912,25 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument(SyntaxFactory.ArrayCreationExpression( 
 					SyntaxFactory.ArrayType( this.Type(typeof(SyntaxNodeOrToken)) ).WithRankSpecifiers(SyntaxFactory.SingletonList(SyntaxFactory.ArrayRankSpecifier(SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(SyntaxFactory.OmittedArraySizeExpression() ) ) ) ), 
 					SyntaxFactory.InitializerExpression( SyntaxKind.ArrayInitializerExpression, SyntaxFactory.SeparatedList( @nodesAndTokens ))
-				))})));
+				)).NormalizeWhitespace()})));
 
 		public InvocationExpressionSyntax SeparatedList2<TNode>(IEnumerable<ExpressionSyntax> @nodes)
 			=> SyntaxFactory.InvocationExpression( this.GenericSyntaxFactoryMethod( "SeparatedList", this.Type(typeof(TNode)) ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument(SyntaxFactory.ArrayCreationExpression( 
 					SyntaxFactory.ArrayType( this.Type(typeof(TNode)) ).WithRankSpecifiers(SyntaxFactory.SingletonList(SyntaxFactory.ArrayRankSpecifier(SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(SyntaxFactory.OmittedArraySizeExpression() ) ) ) ), 
 					SyntaxFactory.InitializerExpression( SyntaxKind.ArrayInitializerExpression, SyntaxFactory.SeparatedList( @nodes ))
-				))})));
+				)).NormalizeWhitespace()})));
 
 		public InvocationExpressionSyntax SeparatedList<TNode>(IEnumerable<ExpressionSyntax> @nodes, IEnumerable<ExpressionSyntax> @separators)
 			=> SyntaxFactory.InvocationExpression( this.GenericSyntaxFactoryMethod( "SeparatedList", this.Type(typeof(TNode)) ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument(SyntaxFactory.ArrayCreationExpression( 
 					SyntaxFactory.ArrayType( this.Type(typeof(TNode)) ).WithRankSpecifiers(SyntaxFactory.SingletonList(SyntaxFactory.ArrayRankSpecifier(SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(SyntaxFactory.OmittedArraySizeExpression() ) ) ) ), 
 					SyntaxFactory.InitializerExpression( SyntaxKind.ArrayInitializerExpression, SyntaxFactory.SeparatedList( @nodes ))
-				)), 
+				)).NormalizeWhitespace(), 
 				SyntaxFactory.Argument(SyntaxFactory.ArrayCreationExpression( 
 					SyntaxFactory.ArrayType( this.Type(typeof(SyntaxToken)) ).WithRankSpecifiers(SyntaxFactory.SingletonList(SyntaxFactory.ArrayRankSpecifier(SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(SyntaxFactory.OmittedArraySizeExpression() ) ) ) ), 
 					SyntaxFactory.InitializerExpression( SyntaxKind.ArrayInitializerExpression, SyntaxFactory.SeparatedList( @separators ))
-				))})));
+				)).NormalizeWhitespace()})));
 
 		public InvocationExpressionSyntax ShebangDirectiveTrivia(ExpressionSyntax @hashToken, ExpressionSyntax @exclamationToken, ExpressionSyntax @endOfDirectiveToken, ExpressionSyntax @isActive)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "ShebangDirectiveTrivia" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{

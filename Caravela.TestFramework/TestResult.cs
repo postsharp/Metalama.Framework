@@ -232,8 +232,9 @@ namespace Caravela.TestFramework
             comments.AddRange(
                 this.Diagnostics
                     .Where(
-                        d => this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
-                             || d.Severity >= DiagnosticSeverity.Warning )
+                        d => d.Id != "CR0222" &&
+                             (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
+                              || d.Severity >= DiagnosticSeverity.Warning) )
                     .Select( d => $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
                     .OrderByDescending( s => s )
                     .Select( SyntaxFactory.Comment )
