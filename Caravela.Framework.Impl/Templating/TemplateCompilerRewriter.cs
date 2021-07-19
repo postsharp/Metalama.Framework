@@ -271,7 +271,16 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
 
-            return base.Transform( token );
+            var transformedToken = base.Transform( token );
+            
+            var tokenKind = transformedToken.Kind().ToString();
+            
+            if ( tokenKind.EndsWith( "Keyword", StringComparison.Ordinal ) )
+            {
+                transformedToken = transformedToken.WithTrailingTrivia( Space );
+            }
+
+            return transformedToken;
         }
 
         protected override ExpressionSyntax TransformVariableDeclaration( VariableDeclarationSyntax node )

@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         internal IReadOnlyList<AspectClass>? AspectClasses => this._lastKnownConfiguration?.AspectClasses;
 
         public DesignTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain, bool isTest )
-            : base( projectOptions, domain, AspectExecutionScenario.DesignTime, isTest )
+            : base( projectOptions, AspectExecutionScenario.DesignTime, isTest, domain )
         {
             if ( projectOptions.BuildTouchFile != null )
             {

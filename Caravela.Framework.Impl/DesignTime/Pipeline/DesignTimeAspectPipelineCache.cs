@@ -241,7 +241,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             Compilation inputCompilation,
             ISymbol targetSymbol,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out Compilation? outputCompilation,
+            [NotNullWhen( true )] out PartialCompilation? outputCompilation,
             out ImmutableArray<Diagnostic> diagnostics )
         {
             var designTimePipeline = this.GetOrCreatePipeline( projectOptions, cancellationToken );

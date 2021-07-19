@@ -15,7 +15,10 @@ namespace Caravela.Framework.Impl.DesignTime
     /// <summary>
     /// The implementation of <see cref="IClassificationService"/>.
     /// </summary>
-    internal class ClassificationService : IClassificationService
+    /// <remarks>
+    /// This class is public because it is used by Try.Caravela.
+    /// </remarks>
+    public class ClassificationService : IClassificationService
     {
         private readonly IServiceProvider _serviceProvider;
 
@@ -25,7 +28,7 @@ namespace Caravela.Framework.Impl.DesignTime
         }
 
         public bool TryGetClassifiedTextSpans(
-            SemanticModel semanticModel,
+            SemanticModel model,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans )
         {
@@ -33,13 +36,13 @@ namespace Caravela.Framework.Impl.DesignTime
 
             var diagnostics = new DiagnosticList();
 
-            var templateCompiler = new TemplateCompiler( this._serviceProvider, semanticModel.Compilation );
+            var templateCompiler = new TemplateCompiler( this._serviceProvider, model.Compilation );
 
-            _ = templateCompiler.TryAnnotate( semanticModel.SyntaxTree.GetRoot(), semanticModel, diagnostics, cancellationToken, out var annotatedSyntaxRoot );
+            _ = templateCompiler.TryAnnotate( model.SyntaxTree.GetRoot(), model, diagnostics, cancellationToken, out var annotatedSyntaxRoot );
 
             if ( annotatedSyntaxRoot != null )
             {
-                var text = semanticModel.SyntaxTree.GetText();
+                var text = model.SyntaxTree.GetText();
                 var classifier = new TextSpanClassifier( text );
                 classifier.Visit( annotatedSyntaxRoot );
                 classifiedTextSpans = classifier.ClassifiedTextSpans;

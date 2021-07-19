@@ -10,6 +10,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represent a declaration.
     /// </summary>
+    /// <seealso cref="DeclarationExtensions"/>
     [CompileTimeOnly]
     public interface IDeclaration : IDisplayable, IDiagnosticScope, ICompilationElement
     {

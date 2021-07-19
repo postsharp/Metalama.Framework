@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.Linking
                 return true;
             }
 
-            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.Self );
+            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
             var addAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventAddAccessor );
             var removeAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventRemoveAccessor );
 
@@ -76,7 +76,7 @@ namespace Caravela.Framework.Impl.Linking
 
         private bool HasAnyAspectReferences( IEventSymbol symbol, ResolvedAspectReferenceSemantic semantic )
         {
-            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.Self );
+            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
             var addAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventAddAccessor );
             var removeAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventRemoveAccessor );
 

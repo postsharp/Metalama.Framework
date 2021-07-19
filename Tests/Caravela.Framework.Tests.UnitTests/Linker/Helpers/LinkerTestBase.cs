@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Sdk;
 using FakeItEasy;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -88,14 +89,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
         internal static PartialCompilation GetCleanCompilation( PartialCompilation compilation )
         {
-            var cleanCompilation = compilation;
             var rewriter = new CleaningRewriter();
-
-            foreach ( var syntaxTree in compilation.SyntaxTrees )
-            {
-                var cleanSyntaxTree = syntaxTree.WithRootAndOptions( rewriter.Visit( syntaxTree.GetRoot() ).AssertNotNull(), syntaxTree.Options );
-                cleanCompilation = cleanCompilation.UpdateSyntaxTrees( new[] { (syntaxTree, cleanSyntaxTree) }, Array.Empty<SyntaxTree>() );
-            }
+            var cleanCompilation = (PartialCompilation) compilation.UpdateSyntaxTrees( ( syntaxRoot, _ ) => rewriter.Visit( syntaxRoot ).AssertNotNull() );
 
             return cleanCompilation;
         }

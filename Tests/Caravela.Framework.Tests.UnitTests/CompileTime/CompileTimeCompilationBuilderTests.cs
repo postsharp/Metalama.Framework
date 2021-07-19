@@ -168,7 +168,7 @@ class ReferencingClass
             {
                 using var isolatedTest = this.WithIsolatedTest();
                 var testAssemblyLocator = new TestAssemblyLocator();
-                isolatedTest.ServiceProvider.AddService<IAssemblyLocator>( testAssemblyLocator );
+                isolatedTest.ServiceProvider.AddService( testAssemblyLocator );
 
                 PortableExecutableReference CompileProject( string code, params MetadataReference[] references )
                 {
@@ -460,6 +460,43 @@ public class CompileTimeOnlyClass
             Assert.Equal( expected, transformed );
 
             // We are not testing the rewriting of typeof in a template because this is done by the template compiler and covered by template tests.
+        }
+
+        [Fact]
+        public void TestRewriter()
+        {
+            using var isolatedTest = this.WithIsolatedTest();
+            var rewriter = new Rewriter();
+            isolatedTest.ServiceProvider.AddService( rewriter );
+
+            var code = @"
+using System;
+using Caravela.Framework.Aspects;
+
+[CompileTimeOnly]
+public class Anything
+{
+}
+
+";
+
+            var roslynCompilation = CreateCSharpCompilation( code );
+            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            DiagnosticList diagnosticList = new();
+            Assert.True( loader1.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, false, CancellationToken.None, out _ ) );
+
+            Assert.True( rewriter.IsInvoked );
+        }
+
+        private class Rewriter : ICompileTimeAssemblyBinaryRewriter
+        {
+            public bool IsInvoked { get; private set; }
+
+            public void Rewrite( Stream input, Stream output, string directory )
+            {
+                input.CopyTo( output );
+                this.IsInvoked = true;
+            }
         }
     }
 }

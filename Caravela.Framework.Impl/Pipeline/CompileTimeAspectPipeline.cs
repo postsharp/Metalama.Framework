@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
@@ -14,6 +15,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -24,14 +26,14 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public CompileTimeAspectPipeline(
             IProjectOptions projectOptions,
-            CompileTimeDomain domain,
             bool isTest,
+            CompileTimeDomain? domain = null,
             IDirectoryOptions? directoryOptions = null,
             IAssemblyLocator? assemblyLocator = null ) : base(
             projectOptions,
-            domain,
             AspectExecutionScenario.CompileTime,
             isTest,
+            domain,
             directoryOptions,
             assemblyLocator )
         {
@@ -91,6 +93,15 @@ namespace Caravela.Framework.Impl.Pipeline
                     return false;
                 }
 
+                var resultCompilation = result.PartialCompilation;
+
+                // Format the output.
+                if ( this.ProjectOptions.FormatOutput && OutputCodeFormatter.CanFormat )
+                {
+                    // ReSharper disable once AccessToModifiedClosure
+                    resultCompilation = Task.Run( () => OutputCodeFormatter.FormatAsync( resultCompilation, cancellationToken ), cancellationToken ).Result;
+                }
+
                 // Add managed resources.
                 foreach ( var resource in result.Resources )
                 {
@@ -102,7 +113,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     additionalResourcesBuilder.Add( configuration.CompileTimeProject!.ToResource() );
                 }
 
-                outputCompilation = RunTimeAssemblyRewriter.Rewrite( result.PartialCompilation.Compilation, this.ServiceProvider );
+                outputCompilation = RunTimeAssemblyRewriter.Rewrite( resultCompilation.Compilation, this.ServiceProvider );
                 additionalResources = additionalResourcesBuilder;
 
                 return true;
@@ -120,7 +131,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 return false;
             }
         }
-
+        
         private protected override HighLevelPipelineStage CreateStage(
             IReadOnlyList<OrderedAspectLayer> parts,
             CompileTimeProject compileTimeProject,

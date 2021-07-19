@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
@@ -16,6 +17,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         ISymbol TemplateSymbol,
         IReadOnlyDictionary<string, object?> Tags,
         AspectLayerId AspectLayerId,
-        AspectPipelineDescription PipelineDescription,
-        IDynamicExpression ProceedExpression );
+        IDynamicExpression ProceedExpression,
+        IServiceProvider ServiceProvider )
+    {
+        public AspectPipelineDescription PipelineDescription { get; } = ServiceProvider.GetService<AspectPipelineDescription>();
+    }
 }

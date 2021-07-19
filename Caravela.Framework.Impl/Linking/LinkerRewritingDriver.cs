@@ -555,7 +555,7 @@ namespace Caravela.Framework.Impl.Linking
                     return memberDeclaration.GetLinkerDeclarationFlags();
 
                 case VariableDeclaratorSyntax variableDeclarator:
-                    return ((MemberDeclarationSyntax?) variableDeclarator?.Parent?.Parent).AssertNotNull().GetLinkerDeclarationFlags();
+                    return ((MemberDeclarationSyntax?) variableDeclarator.Parent?.Parent).AssertNotNull().GetLinkerDeclarationFlags();
 
                 case null:
                     return default;

@@ -27,10 +27,8 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 using CompileTimeAspectPipeline pipeline = new(
                     projectOptions,
-                    new CompileTimeDomain(),
                     false,
-                    null,
-                    new CompilationAssemblyLocator( context.Compilation ) );
+                    assemblyLocator: new CompilationAssemblyLocator( context.Compilation ) );
 
                 if ( pipeline.TryExecute(
                     new DiagnosticAdder( context.ReportDiagnostic ),
