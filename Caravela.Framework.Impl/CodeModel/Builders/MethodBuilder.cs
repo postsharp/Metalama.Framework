@@ -28,7 +28,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers
-            => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ), , this.OverriddenMethod != null );
+            => new InvokerFactory<IMethodInvoker>(
+                ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ),
+                this.OverriddenMethod != null );
 
         public IMethod? OverriddenMethod { get; set; }
 

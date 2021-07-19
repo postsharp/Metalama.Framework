@@ -76,10 +76,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public void RemoveAttributes( INamedType type ) => throw new NotImplementedException();
 
-        public virtual void Freeze()
-        {
-            this.IsFrozen = true;
-        }
+        public virtual void Freeze() => this.IsFrozen = true;
 
         public IDiagnosticLocation? DiagnosticLocation => this.ContainingDeclaration?.DiagnosticLocation;
 
