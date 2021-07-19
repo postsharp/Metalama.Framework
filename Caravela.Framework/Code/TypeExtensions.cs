@@ -28,6 +28,10 @@ namespace Caravela.Framework.Code
         /// <returns>An unsafe pointer type <c>*T</c> where <c>T</c> is the current type.</returns>
         public static IPointerType MakePointerType( this IType pointedType ) => pointedType.Compilation.TypeFactory.MakePointerType( pointedType );
 
+        public static T MakeNullable<T>( this T type )
+            where T : IType
+            => type.Compilation.TypeFactory.MakeNullable( type );
+
         /// <summary>
         /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,
         /// given as an <see cref="IType"/>.

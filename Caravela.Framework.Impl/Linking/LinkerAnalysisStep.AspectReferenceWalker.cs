@@ -40,7 +40,13 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( node.TryGetAspectReference( out var aspectReference ) )
                 {
-                    var referencedSymbol = this._semanticModel.GetSymbolInfo( node ).Symbol.AssertNotNull();
+                    var nodeWithSymbol = node switch
+                    {
+                        ConditionalAccessExpressionSyntax conditionalAccess => conditionalAccess.WhenNotNull,
+                        _ => node
+                    };
+                    
+                    var referencedSymbol = this._semanticModel.GetSymbolInfo( nodeWithSymbol ).Symbol.AssertNotNull();
 
                     var resolvedReference = this._referenceResolver.Resolve(
                         this._containingSymbol,

@@ -7,16 +7,20 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel.Invokers
 {
     internal class FieldOrPropertyInvoker : Invoker, IFieldOrPropertyInvoker
     {
+        private readonly InvokerOperator _invokerOperator;
+
         public IFieldOrProperty Member { get; }
 
-        public FieldOrPropertyInvoker( IFieldOrProperty member, InvokerOrder linkerOrder ) : base( member, linkerOrder )
+        public FieldOrPropertyInvoker( IFieldOrProperty member, InvokerOrder linkerOrder, InvokerOperator invokerOperator ) : base( member, linkerOrder )
         {
+            this._invokerOperator = invokerOperator;
             this.Member = member;
         }
 
@@ -31,23 +35,34 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             this.AssertNoArgument();
 
-            return MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    this.Member.GetReceiverSyntax( instance ),
-                    IdentifierName( this.Member.Name ) )
-                .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
+            var receiver = this.Member.GetReceiverSyntax( instance );
+            var name = IdentifierName( this.Member.Name );
+
+            if ( this._invokerOperator == InvokerOperator.Default )
+            {
+                return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name )
+                    .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
+            }
+            else
+            {
+                return ConditionalAccessExpression( receiver, MemberBindingExpression( name ) )
+                    .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
+            }
         }
 
         public object GetValue( object? instance )
-        {
-            return new DynamicExpression(
+            => new DynamicExpression(
                 this.CreatePropertyExpression( RuntimeExpression.FromValue( instance ), AspectReferenceTargetKind.PropertyGetAccessor ),
-                this.Member.Type,
+                this._invokerOperator == InvokerOperator.Default ? this.Member.Type : this.Member.Type.MakeNullable(),
                 this.Member is Field );
-        }
 
         public object SetValue( object? instance, object? value )
         {
+            if ( this._invokerOperator == InvokerOperator.Conditional )
+            {
+                throw new NotSupportedException( "Conditional access is not supported for SetValue." );
+            }
+
             var propertyAccess = this.CreatePropertyExpression( RuntimeExpression.FromValue( instance ), AspectReferenceTargetKind.PropertySetAccessor );
 
             var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.GetSyntaxFromValue( value ) );

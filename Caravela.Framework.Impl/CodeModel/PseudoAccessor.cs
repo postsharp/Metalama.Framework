@@ -46,7 +46,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsOpenGeneric => this._containingMember.DeclaringType.IsOpenGeneric;
 
         [Memo]
-        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ) );
+        public IInvokerFactory<IMethodInvoker> Invokers
+            => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
 
         public IMethod? OverriddenMethod => null;
 
@@ -115,22 +116,13 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
 
         [return: RunTimeOnly]
-        public MemberInfo ToMemberInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
         [return: RunTimeOnly]
-        public System.Reflection.MethodBase ToMethodBase()
-        {
-            throw new NotImplementedException();
-        }
+        public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
         [return: RunTimeOnly]
-        public MethodInfo ToMethodInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
         public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotSupportedException();
     }

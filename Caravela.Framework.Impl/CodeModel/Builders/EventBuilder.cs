@@ -47,7 +47,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethodBuilder? Raiser => null;
 
         [Memo]
-        public IInvokerFactory<IEventInvoker> Invokers => new InvokerFactory<IEventInvoker>( order => new EventInvoker( this, order ), false );
+        public IInvokerFactory<IEventInvoker> Invokers
+            => new InvokerFactory<IEventInvoker>( ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ), false );
 
         public override InsertPosition InsertPosition
             => new(
@@ -141,15 +142,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         [return: RunTimeOnly]
-        public EventInfo ToEventInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public EventInfo ToEventInfo() => throw new NotImplementedException();
 
-        public void SetExplicitInterfaceImplementation( IEvent interfaceEvent )
-        {
-            this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
-        }
+        public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
 
         public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
     }

@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
-            => new InvokerFactory<IFieldOrPropertyInvoker>( order => new FieldOrPropertyInvoker( this, order ), false );
+            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ), false );
 
         IType IFieldOrProperty.Type => throw new NotImplementedException();
 
@@ -45,15 +45,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public FieldBuilder( Advice parentAdvice, INamedType targetType, string name )
             : base( parentAdvice, targetType, name ) { }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
-        {
-            throw new NotImplementedException();
-        }
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context ) => throw new NotImplementedException();
 
         [return: RunTimeOnly]
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
     }
 }

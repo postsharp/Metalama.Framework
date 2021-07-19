@@ -163,7 +163,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             var buildTimeAssemblyStream = new MemoryStream();
             var buildTimeDebugStream = new MemoryStream();
-            
+
             SyntaxTreeStructureVerifier.Verify( compileTimeCompilation );
 
             var emitResult = compileTimeCompilation.Emit(
@@ -235,8 +235,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
         private static void VerifyNoDynamicCode( MemoryStream stream )
         {
             stream.Seek( 0, SeekOrigin.Begin );
-            using PEReader peReader = new PEReader( stream, PEStreamOptions.LeaveOpen );
-            MetadataReader metadataReader = peReader.GetMetadataReader();
+            using var peReader = new PEReader( stream, PEStreamOptions.LeaveOpen );
+            var metadataReader = peReader.GetMetadataReader();
 
             foreach ( var typeRefHandle in metadataReader.TypeReferences )
             {
@@ -244,7 +244,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var ns = metadataReader.GetString( typeRef.Namespace );
                 var typeName = metadataReader.GetString( typeRef.Name );
 
-                if ( ns.Contains( "Microsoft.CSharp.RuntimeBinder" ) && typeName == "CSharpArgumentInfo" )
+                if ( ns.Contains( "Microsoft.CSharp.RuntimeBinder", StringComparison.Ordinal ) &&
+                     string.Equals( typeName, "CSharpArgumentInfo", StringComparison.Ordinal ) )
                 {
                     var directory = Path.Combine( Path.GetTempPath(), "Caravela", "InvalidAssemblies" );
 
@@ -252,7 +253,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     {
                         Directory.CreateDirectory( directory );
                     }
-                    
+
                     var diagnosticFile = Path.Combine( directory, Guid.NewGuid().ToString() + ".dll" );
 
                     using ( var diagnosticStream = File.Create( diagnosticFile ) )

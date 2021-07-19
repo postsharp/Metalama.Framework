@@ -52,6 +52,12 @@ class TargetCode
                 @"((global::TargetCode)(this)).ToString((global::System.String)(""x""))" );
 
             AssertEx.DynamicEquals(
+                toString.Invokers.FinalConditional.Invoke(
+                    new RuntimeExpression( generator.IdentifierName( "a" ) ),
+                    new RuntimeExpression( generator.LiteralExpression( "x" ) ) ),
+                @"((global::TargetCode)(a))?.ToString((global::System.String)(""x""))" );
+
+            AssertEx.DynamicEquals(
                 toString.Invokers.Final.Invoke(
                     new RuntimeExpression( generator.LiteralExpression( 42 ) ),
                     new RuntimeExpression( generator.LiteralExpression( 43 ) ) ),
@@ -186,6 +192,10 @@ class TargetCode
             RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression() );
 
             AssertEx.DynamicEquals( property.Invokers.Final.GetValue( thisExpression ), @"((global::TargetCode)(this)).P" );
+
+            AssertEx.DynamicEquals(
+                property.Invokers.FinalConditional.GetValue( SyntaxFactory.IdentifierName( "a" ) ),
+                @"((global::TargetCode)(a))?.P" );
 
             AssertEx.DynamicEquals(
                 property.Invokers.Final.GetValue( property.Invokers.Final.GetValue( thisExpression ) ),

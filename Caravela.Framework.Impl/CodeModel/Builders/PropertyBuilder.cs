@@ -61,7 +61,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         IMethod? IFieldOrProperty.Setter => this.Setter;
 
         [Memo]
-        public IInvokerFactory<IPropertyInvoker> Invokers => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ), false );
+        public IInvokerFactory<IPropertyInvoker> Invokers
+            => new InvokerFactory<IPropertyInvoker>( ( order, invokerOperator ) => new PropertyInvoker( this, order, invokerOperator ), false );
 
         public override InsertPosition InsertPosition
             => new(
@@ -231,20 +232,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         [return: RunTimeOnly]
-        public PropertyInfo ToPropertyInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public PropertyInfo ToPropertyInfo() => throw new NotImplementedException();
 
         [return: RunTimeOnly]
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
 
-        public void SetExplicitInterfaceImplementation( IProperty interfaceProperty )
-        {
-            this.ExplicitInterfaceImplementations = new[] { interfaceProperty };
-        }
+        public void SetExplicitInterfaceImplementation( IProperty interfaceProperty ) => this.ExplicitInterfaceImplementations = new[] { interfaceProperty };
     }
 }

@@ -25,7 +25,8 @@ namespace Caravela.Framework.Impl.CodeModel
         private readonly IFieldSymbol _symbol;
 
         [Memo]
-        public IInvokerFactory<IPropertyInvoker> Invokers => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ) );
+        public IInvokerFactory<IPropertyInvoker> Invokers
+            => new InvokerFactory<IPropertyInvoker>( ( order, invokerOperator ) => new PropertyInvoker( this, order, invokerOperator ) );
 
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 

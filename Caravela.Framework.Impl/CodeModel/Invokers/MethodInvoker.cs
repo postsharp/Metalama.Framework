@@ -13,10 +13,12 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
     internal class MethodInvoker : Invoker, IMethodInvoker
     {
         private readonly IMethod _method;
+        private readonly InvokerOperator _invokerOperator;
 
-        public MethodInvoker( IMethod method, InvokerOrder order ) : base( method, order )
+        public MethodInvoker( IMethod method, InvokerOrder order, InvokerOperator invokerOperator ) : base( method, order )
         {
             this._method = method;
+            this._invokerOperator = invokerOperator;
         }
 
         public object Invoke( object? instance, params object?[] args )
@@ -54,13 +56,25 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromValue( instance! ) );
 
-            return new DynamicExpression(
-                SyntaxFactory.InvocationExpression(
+            if ( this._invokerOperator == InvokerOperator.Default )
+            {
+                var invocationExpression = SyntaxFactory.InvocationExpression(
                         SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name )
                             .WithAspectReferenceAnnotation( this.AspectReference ) )
-                    .AddArgumentListArguments( arguments ),
-                this._method.ReturnType,
-                false );
+                    .AddArgumentListArguments( arguments );
+
+                return new DynamicExpression( invocationExpression, this._method.ReturnType, false );
+            }
+            else
+            {
+                var invocationExpression = SyntaxFactory.ConditionalAccessExpression(
+                        receiver,
+                        SyntaxFactory.InvocationExpression( SyntaxFactory.MemberBindingExpression( name ) )
+                            .AddArgumentListArguments( arguments ) )
+                    .WithAspectReferenceAnnotation( this.AspectReference );
+
+                return new DynamicExpression( invocationExpression, this._method.ReturnType.MakeNullable(), false );
+            }
         }
     }
 }

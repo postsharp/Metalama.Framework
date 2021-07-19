@@ -143,6 +143,10 @@ namespace Caravela.Framework.Impl.CodeModel
         IPointerType ITypeFactory.MakePointerType( IType pointedType )
             => (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ITypeInternal) pointedType).TypeSymbol.AssertNotNull() ) );
 
+        public T MakeNullable<T>( T type )
+            where T : IType
+            => (T) this.GetIType( ((ITypeInternal) type).TypeSymbol.AssertNotNull().WithNullableAnnotation( NullableAnnotation.Annotated ) );
+
         public IType GetSpecialType( SpecialType specialType )
             => specialType switch
             {
@@ -240,10 +244,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        public IConstructor GetConstructor( IConstructor attributeBuilderConstructor )
-        {
-            return this.GetDeclaration( attributeBuilderConstructor );
-        }
+        public IConstructor GetConstructor( IConstructor attributeBuilderConstructor ) => this.GetDeclaration( attributeBuilderConstructor );
 
         public IParameter GetReturnParameter( IMethodSymbol methodSymbol ) => this.GetMethod( methodSymbol ).ReturnParameter;
 
