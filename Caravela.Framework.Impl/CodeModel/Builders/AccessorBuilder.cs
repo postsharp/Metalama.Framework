@@ -177,5 +177,16 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             throw new NotImplementedException();
         }
+
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+            => this._containingDeclaration.ToDisplayString( format, context ) + "." + this.MethodKind switch
+            {
+                MethodKind.EventAdd => "add",
+                MethodKind.EventRemove => "remove",
+                MethodKind.PropertyGet => "get",
+                MethodKind.PropertySet => "set",
+                MethodKind.EventRaise => "raise",
+                _ => this.MethodKind.ToString()
+            };
     }
 }
