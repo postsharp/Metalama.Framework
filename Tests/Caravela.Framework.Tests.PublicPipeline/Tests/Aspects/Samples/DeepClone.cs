@@ -36,7 +36,6 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
             // Define a local variable of the same type as the target type.
             var clone = meta.Type.DefaultValue();
 
-            // TODO: access to meta.Method.Invokers.Base does not work.
             if (meta.Method.Invokers.Base == null)
             {
                 // Invoke base.MemberwiseClone().
