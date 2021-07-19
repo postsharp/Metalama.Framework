@@ -24,9 +24,14 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public IDeclaration? DefaultScope { get; private set; }
 
-        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, IDeclaration? defaultScope = null )
+        internal UserDiagnosticSink( CompileTimeProject compileTimeProject, IDeclaration? defaultScope = null )
         {
-            this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
+            this._diagnosticManifest = compileTimeProject.ClosureDiagnosticManifest;
+            this.DefaultScope = defaultScope;
+        }
+        
+        internal UserDiagnosticSink( IDeclaration? defaultScope = null )
+        {
             this.DefaultScope = defaultScope;
         }
 

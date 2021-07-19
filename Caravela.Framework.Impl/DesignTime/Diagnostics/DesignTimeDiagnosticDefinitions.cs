@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
         /// <summary>
         /// Gets the set of <see cref="DiagnosticDescriptor"/> that are defined by Caravela itself.
         /// </summary>
-        public static ImmutableDictionary<string, DiagnosticDescriptor> StandardDiagnosticDescriptors { get; } = DiagnosticDefinitionHelper
+        public static ImmutableDictionary<string, DiagnosticDescriptor> StandardDiagnosticDescriptors { get; } = new DiagnosticDefinitionDiscoveryService()
             .GetDiagnosticDefinitions(
                 typeof(TemplatingDiagnosticDescriptors),
                 typeof(DesignTimeDiagnosticDescriptors),

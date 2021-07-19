@@ -456,6 +456,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 CompileTimeCompilationBuilder.GetCompileTimeAssemblyName( manifest.AssemblyName, referenceProjects, manifest.SourceHash );
 
             project = CompileTimeProject.Create(
+                this._serviceProvider,
                 this._domain,
                 runTimeAssemblyIdentity,
                 new AssemblyIdentity( compileTimeAssemblyName ),
