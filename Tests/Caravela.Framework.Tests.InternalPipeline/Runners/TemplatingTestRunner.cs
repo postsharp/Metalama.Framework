@@ -22,6 +22,8 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
@@ -179,6 +181,11 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 return testResult;
             }
 
+            if ( !testInput.Options.AllowCompileTimeDynamicCode.GetValueOrDefault() )
+            {
+                VerifyNoDynamicCode( buildTimeAssemblyStream );
+            }
+
             buildTimeAssemblyStream.Seek( 0, SeekOrigin.Begin );
             buildTimeDebugStream.Seek( 0, SeekOrigin.Begin );
             var assemblyLoadContext = new AssemblyLoadContext( null, true );
@@ -223,6 +230,42 @@ namespace Caravela.Framework.Tests.Integration.Runners
             }
 
             return testResult;
+        }
+
+        private static void VerifyNoDynamicCode( MemoryStream stream )
+        {
+            stream.Seek( 0, SeekOrigin.Begin );
+            using PEReader peReader = new PEReader( stream, PEStreamOptions.LeaveOpen );
+            MetadataReader metadataReader = peReader.GetMetadataReader();
+
+            foreach ( var typeRefHandle in metadataReader.TypeReferences )
+            {
+                var typeRef = metadataReader.GetTypeReference( typeRefHandle );
+                var ns = metadataReader.GetString( typeRef.Namespace );
+                var typeName = metadataReader.GetString( typeRef.Name );
+
+                if ( ns.Contains( "Microsoft.CSharp.RuntimeBinder" ) && typeName == "CSharpArgumentInfo" )
+                {
+                    var directory = Path.Combine( Path.GetTempPath(), "Caravela", "InvalidAssemblies" );
+
+                    if ( !Directory.Exists( directory ) )
+                    {
+                        Directory.CreateDirectory( directory );
+                    }
+                    
+                    var diagnosticFile = Path.Combine( directory, Guid.NewGuid().ToString() + ".dll" );
+
+                    using ( var diagnosticStream = File.Create( diagnosticFile ) )
+                    {
+                        stream.Seek( 0, SeekOrigin.Begin );
+                        stream.CopyTo( diagnosticStream );
+                    }
+
+                    throw new AssertionFailedException( $"The binary contains dynamic code. See '{diagnosticFile}'." );
+                }
+            }
+
+            stream.Seek( 0, SeekOrigin.Begin );
         }
 
         private (TemplateExpansionContext Context, MethodDeclarationSyntax TargetMethod) CreateTemplateExpansionContext(

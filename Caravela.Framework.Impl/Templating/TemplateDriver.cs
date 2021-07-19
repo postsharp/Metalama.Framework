@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Templating
                                 (this._sourceTemplateSymbol,
                                  templateExpansionContext.MetaApi.Declaration,
                                  userException.GetType().Name,
-                                 userException.ToString()) ) );
+                                 userException.ToString().Replace( Environment.NewLine, "\n" )) ) );
 
                         block = null;
 

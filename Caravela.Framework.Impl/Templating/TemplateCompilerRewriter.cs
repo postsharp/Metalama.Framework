@@ -589,10 +589,7 @@ namespace Caravela.Framework.Impl.Templating
                         SeparatedList(
                             new[]
                             {
-                                Argument(
-                                    CastFromDynamic(
-                                        this.MetaSyntaxFactory.Type( typeof(IDynamicExpression) ),
-                                        (ExpressionSyntax) this.Visit( node.Expression )! ) ),
+                                Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( node.Expression )! ) ),
                                 Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( node.Name.Identifier.ValueText ) ) )
                             } ) ) );
             }
@@ -638,7 +635,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 var invocationExpression = InvocationExpression(
                         this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicDiscardAssignment) ) )
-                    .AddArgumentListArguments( Argument( assignment.Right ) );
+                    .AddArgumentListArguments( Argument( this.CastToDynamicExpression( assignment.Right ) ) );
 
                 return this.WithCallToAddSimplifierAnnotation( invocationExpression );
             }
@@ -1279,7 +1276,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 invocationExpression = InvocationExpression(
                         this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicReturnStatement) ) )
-                    .AddArgumentListArguments( Argument( expression ) );
+                    .AddArgumentListArguments( Argument( this.CastToDynamicExpression( expression ) ) );
 
                 // TODO: pass expressionText and Location
             }
@@ -1294,6 +1291,11 @@ namespace Caravela.Framework.Impl.Templating
 
             return this.WithCallToAddSimplifierAnnotation( invocationExpression );
         }
+
+        private CastExpressionSyntax CastToDynamicExpression( ExpressionSyntax expression )
+            => CastExpression(
+                this.MetaSyntaxFactory.Type( typeof(IDynamicExpression) ),
+                expression );
 
         public override SyntaxNode VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
         {
@@ -1312,7 +1314,7 @@ namespace Caravela.Framework.Impl.Templating
                             .AddArgumentListArguments(
                                 Argument( (ExpressionSyntax) this.Visit( declaration.Type )! ),
                                 Argument( this.Transform( declarator.Identifier ) ),
-                                Argument( (ExpressionSyntax) this.Visit( declarator.Initializer.Value )! ) );
+                                Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( declarator.Initializer.Value )! ) ) );
 
                         return this.WithCallToAddSimplifierAnnotation( invocationExpression );
 
