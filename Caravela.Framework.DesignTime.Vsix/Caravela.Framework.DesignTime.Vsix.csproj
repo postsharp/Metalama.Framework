@@ -6,11 +6,11 @@
     <ProjectGuid>{318AC40B-9A06-48C9-941E-CC6850892196}</ProjectGuid>
     <Nullable>enable</Nullable>
     <RuntimeIdentifiers>win</RuntimeIdentifiers>
-    <TargetVsixContainerName>Caravela.$(CaravelaVersion).vsix</TargetVsixContainerName>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <SchemaVersion>2.0</SchemaVersion>
+	  <TargetVsixContainerName>Caravela.$(CaravelaVersion).vsix</TargetVsixContainerName>
+	  <SchemaVersion>2.0</SchemaVersion>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Caravela.Framework.DesignTime.Vsix</RootNamespace>
