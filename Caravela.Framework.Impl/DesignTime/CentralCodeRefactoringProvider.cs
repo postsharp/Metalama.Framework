@@ -28,6 +28,10 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             try
             {
+                var buildOptions = new ProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
+
+                DebuggingHelper.AttachDebugger( buildOptions );
+                
                 if ( !context.Document.SupportsSemanticModel )
                 {
                     return;
@@ -43,7 +47,8 @@ namespace Caravela.Framework.Impl.DesignTime
                 }
 
                 var node = (await syntaxTree.GetRootAsync( cancellationToken )).FindNode( context.Span );
-
+                
+                
                 var semanticModel = await context.Document.GetSemanticModelAsync( cancellationToken );
 
                 if ( semanticModel == null )
@@ -51,7 +56,7 @@ namespace Caravela.Framework.Impl.DesignTime
                     return;
                 }
 
-                var compilation = semanticModel.Compilation;
+                                var compilation = semanticModel.Compilation;
 
                 var symbol = semanticModel.GetDeclaredSymbol( node, cancellationToken );
 
@@ -60,9 +65,6 @@ namespace Caravela.Framework.Impl.DesignTime
                     return;
                 }
 
-                var buildOptions = new ProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
-
-                DebuggingHelper.AttachDebugger( buildOptions );
 
                 // TODO: Make sure we are on a background thread.
 
@@ -82,7 +84,7 @@ namespace Caravela.Framework.Impl.DesignTime
                         expandAspectActions.Add(
                             CodeAction.Create(
                                 aspect.DisplayName,
-                                ct => ExpandAspectToCode( buildOptions, compilation, aspect, symbol, context.Document, ct.IgnoreIfDebugging() ) ) );
+                                ct => ExpandAspectToCode( buildOptions, aspect, symbol, context.Document, ct.IgnoreIfDebugging() ) ) );
                     }
                 }
 
@@ -117,12 +119,18 @@ namespace Caravela.Framework.Impl.DesignTime
 
         private static async Task<Solution> ExpandAspectToCode(
             ProjectOptions projectOptions,
-            Compilation compilation,
             AspectClass aspect,
             ISymbol targetSymbol,
             Document targetDocument,
             CancellationToken cancellationToken )
         {
+            var compilation = await targetDocument.Project.GetCompilationAsync( cancellationToken );
+
+            if ( compilation == null )
+            {
+                return targetDocument.Project.Solution;
+            }
+
             if ( DesignTimeAspectPipelineCache.Instance.TryApplyAspectToCode(
                 projectOptions,
                 aspect,
@@ -137,9 +145,9 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 foreach ( var modifiedSyntaxTree in outputCompilation.ModifiedSyntaxTrees )
                 {
-                    var document = project.GetDocument( modifiedSyntaxTree.Value.OldTree )!;
+                    var document = project.GetDocument( modifiedSyntaxTree.Value.OldTree );
 
-                    if ( !document.SupportsSyntaxTree )
+                    if ( document == null || !document.SupportsSyntaxTree )
                     {
                         continue;
                     }
