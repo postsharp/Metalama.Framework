@@ -23,7 +23,6 @@ namespace Caravela.Framework.Impl
     internal class AspectDriver : IAspectDriver
     {
         private readonly UserCodeInvoker _userCodeInvoker;
-        private readonly IServiceProvider _serviceProvider;
         private readonly Compilation _compilation;
         private readonly List<(AttributeData Attribute, ISymbol Member)> _declarativeAdviceAttributes;
 
@@ -32,7 +31,6 @@ namespace Caravela.Framework.Impl
         public AspectDriver( IServiceProvider serviceProvider, INamedTypeSymbol aspectType, Compilation compilation )
         {
             this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
-            this._serviceProvider = serviceProvider;
             this._compilation = compilation;
             this.AspectType = aspectType;
 
@@ -95,7 +93,7 @@ namespace Caravela.Framework.Impl
                 return CreateResultForError( diagnostic );
             }
 
-            var diagnosticSink = new UserDiagnosticSink(  aspectInstance.AspectClass.Project, targetDeclaration );
+            var diagnosticSink = new UserDiagnosticSink( aspectInstance.AspectClass.Project, targetDeclaration );
 
             using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
             {

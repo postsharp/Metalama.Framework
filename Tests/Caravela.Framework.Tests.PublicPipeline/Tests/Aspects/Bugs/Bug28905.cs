@@ -5,7 +5,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905
 {
     internal class ImportAttribute : OverrideFieldOrPropertyAspect
     {
-        public override dynamic OverrideProperty 
+        public override dynamic? OverrideProperty 
         { 
             get
             {
@@ -44,7 +44,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905
     
     class ServiceLocator
     {
-        public static readonly IServiceProvider ServiceProvider = null;
+        public static readonly IServiceProvider ServiceProvider = null!;
 
     }
 }

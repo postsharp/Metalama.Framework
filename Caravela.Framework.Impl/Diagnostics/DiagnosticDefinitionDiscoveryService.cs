@@ -5,7 +5,6 @@ using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 

@@ -284,7 +284,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var targetCaravelaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! )!;
             var targetMethod = targetCaravelaType.Methods.Single( m => string.Equals( m.Name, "Method", StringComparison.Ordinal ) );
 
-            var diagnostics = new UserDiagnosticSink( null, targetMethod );
+            var diagnostics = new UserDiagnosticSink( targetMethod );
 
             var roslynTargetType = roslynCompilation.Assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
 

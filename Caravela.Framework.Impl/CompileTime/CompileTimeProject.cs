@@ -61,7 +61,6 @@ namespace Caravela.Framework.Impl.CompileTime
         public IReadOnlyList<CompileTimeProject> References { get; }
 
         public IReadOnlyList<CompileTimeProject> ClosureProjects { get; }
-            
 
         /// <summary>
         /// Gets the list of transformed code files in the current project. 
@@ -127,9 +126,9 @@ namespace Caravela.Framework.Impl.CompileTime
             this.RunTimeIdentity = runTimeIdentity;
             this.CompileTimeIdentity = compileTimeIdentity;
             this.References = references;
-            this.ClosureProjects = this.SelectManyRecursive( p => p.References, includeThis: true, throwOnDuplicate: false ).ToImmutableList();
-            this.DiagnosticManifest = this.GetDiagnosticManifest(serviceProvider);
-            this.ClosureDiagnosticManifest = new( this.ClosureProjects.Select( p => p.DiagnosticManifest ).ToList() );
+            this.ClosureProjects = this.SelectManyRecursive( p => p.References, true, false ).ToImmutableList();
+            this.DiagnosticManifest = this.GetDiagnosticManifest( serviceProvider );
+            this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.Select( p => p.DiagnosticManifest ).ToList() );
         }
 
         /// <summary>
@@ -145,7 +144,8 @@ namespace Caravela.Framework.Impl.CompileTime
             string? compiledAssemblyPath,
             string sourceDirectory,
             Func<string, TextMapFile?> getLocationMap )
-            => new( serviceProvider, domain, runTimeIdentity, compileTimeIdentity, references, manifest, compiledAssemblyPath, getLocationMap, sourceDirectory );
+            => new( serviceProvider, domain, runTimeIdentity, compileTimeIdentity, references, manifest, compiledAssemblyPath, getLocationMap,
+                    sourceDirectory );
 
         /// <summary>
         /// Creates a <see cref="CompileTimeProject"/> that does not include any source code.
@@ -248,7 +248,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public DiagnosticManifest ClosureDiagnosticManifest { get; }
 
-        private DiagnosticManifest GetDiagnosticManifest(IServiceProvider serviceProvider)
+        private DiagnosticManifest GetDiagnosticManifest( IServiceProvider serviceProvider )
         {
             var aspectTypes = this.AspectTypes.Select( this.GetType ).WhereNotNull().ToArray();
             var service = new DiagnosticDefinitionDiscoveryService( serviceProvider );
