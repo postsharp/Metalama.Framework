@@ -6,10 +6,8 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
-using System.IO;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
@@ -49,21 +47,15 @@ namespace Caravela.Framework.Impl.Pipeline
             }
             catch ( Exception e )
             {
-                var tempPath = DefaultDirectoryOptions.Instance.CrashReportDirectory;
+                var mustRethrow = true;
 
-                RetryHelper.Retry(
-                    () =>
-                    {
-                        if ( !Directory.Exists( tempPath ) )
-                        {
-                            Directory.CreateDirectory( tempPath );
-                        }
-                    } );
+                ServiceProviderFactory.AsyncLocalProvider.GetOptionalService<ICompileTimeExceptionHandler>()
+                    ?.ReportException( e, context.ReportDiagnostic, out mustRethrow );
 
-                var reportFile = Path.Combine( tempPath, $"exception-{Guid.NewGuid()}.txt" );
-                File.WriteAllText( reportFile, e.ToString() );
-
-                context.ReportDiagnostic( GeneralDiagnosticDescriptors.UnhandledException.CreateDiagnostic( null, (e.Message, reportFile) ) );
+                if ( mustRethrow )
+                {
+                    throw;
+                }
 
                 return context.Compilation;
             }

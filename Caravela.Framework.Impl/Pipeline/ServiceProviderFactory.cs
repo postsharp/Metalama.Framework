@@ -71,6 +71,7 @@ namespace Caravela.Framework.Impl.Pipeline
             serviceProvider.AddService( new SyntaxSerializationService() );
             serviceProvider.AddService( new SystemTypeResolver( serviceProvider ) );
             serviceProvider.AddService( new DefaultCompileTimeDomainFactory() );
+            serviceProvider.AddService( new CompileTimeExceptionHandler() );
             
             if ( freeze )
             {
@@ -86,7 +87,7 @@ namespace Caravela.Framework.Impl.Pipeline
         public static ServiceProvider GlobalProvider
             => LazyInitializer.EnsureInitialized( ref _globalInstance, () => CreateBaseServiceProvider( DefaultDirectoryOptions.Instance, true ) )!;
 
-        private static ServiceProvider AsyncLocalProvider => _asyncLocalInstance.Value ??= GlobalProvider;
+        internal static ServiceProvider AsyncLocalProvider => _asyncLocalInstance.Value ??= GlobalProvider;
 
         /// <summary>
         /// Gets a new instance of the <see cref="ServiceProvider"/>. If an implementation of <see cref="IDirectoryOptions"/> is provided,
