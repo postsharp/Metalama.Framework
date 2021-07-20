@@ -49,8 +49,7 @@ namespace Caravela.Framework.Impl.Linking
         }
 
         public bool IsDiscarded( ISymbol symbol, ResolvedAspectReferenceSemantic semantic )
-        {
-            return symbol switch
+            => symbol switch
             {
                 IMethodSymbol methodSymbol => this.IsDiscarded( methodSymbol, semantic ),
                 IPropertySymbol propertySymbol => this.IsDiscarded( propertySymbol, semantic ),
@@ -58,11 +57,9 @@ namespace Caravela.Framework.Impl.Linking
                 IFieldSymbol => false,
                 _ => throw new AssertionFailedException()
             };
-        }
 
         private bool IsInlineable( ISymbol symbol, ResolvedAspectReferenceSemantic semantic )
-        {
-            return symbol switch
+            => symbol switch
             {
                 IMethodSymbol methodSymbol => this.IsInlineable( methodSymbol, semantic ),
                 IPropertySymbol propertySymbol => this.IsInlineable( propertySymbol, semantic ),
@@ -70,14 +67,10 @@ namespace Caravela.Framework.Impl.Linking
                 IFieldSymbol => false,
                 _ => throw new AssertionFailedException()
             };
-        }
 
         private bool IsInlineableReference( ResolvedAspectReference aspectReference )
-        {
-            return
-                aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable )
-                && this.GetInliner( aspectReference, out _ );
-        }
+            => aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable )
+               && this.GetInliner( aspectReference, out _ );
 
         private bool GetInliner( ResolvedAspectReference aspectReference, [NotNullWhen( true )] out Inliner? matchingInliner )
         {
@@ -422,10 +415,7 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public bool IsRewriteTarget( ISymbol symbol )
-        {
-            return this._analysisRegistry.IsOverride( symbol ) || this._analysisRegistry.IsOverrideTarget( symbol );
-        }
+        public bool IsRewriteTarget( ISymbol symbol ) => this._analysisRegistry.IsOverride( symbol ) || this._analysisRegistry.IsOverrideTarget( symbol );
 
         /// <summary>
         /// Gets rewritten member and any additional induced members (e.g. backing field of auto property).
@@ -499,7 +489,9 @@ namespace Caravela.Framework.Impl.Linking
                 case MemberAccessExpressionSyntax memberAccessExpression:
                     // The reference expression is member access.
 
-                    if ( SymbolEqualityComparer.Default.Equals( aspectReference.ContainingSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType ) )
+                    if ( SymbolEqualityComparer.Default.Equals(
+                        aspectReference.ContainingSymbol.ContainingType,
+                        aspectReference.ResolvedSymbol.ContainingType ) )
                     {
                         // This is the same type, we can just change the identifier in the expression.
                         // TODO: Is the target always accessible?
@@ -533,13 +525,14 @@ namespace Caravela.Framework.Impl.Linking
                                             SyntaxKind.SimpleMemberAccessExpression,
                                             BaseExpression(),
                                             IdentifierName( targetMemberName ) );
+
                                     default:
                                         var aspectInstance = this.ResolveAspectInstance( aspectReference );
 
                                         this.DiagnosticSink.Report(
                                             AspectLinkerDiagnosticDescriptors.CannotUseBaseInvokerWithInstanceExpression.CreateDiagnostic(
-                                            aspectInstance.TargetDeclaration.GetDiagnosticLocation(),
-                                            (aspectInstance.AspectClass.DisplayName, aspectInstance.TargetDeclaration) ) );
+                                                aspectInstance.TargetDeclaration.GetDiagnosticLocation(),
+                                                (aspectInstance.AspectClass.DisplayName, aspectInstance.TargetDeclaration) ) );
 
                                         return aspectReference.Expression;
                                 }
@@ -560,6 +553,7 @@ namespace Caravela.Framework.Impl.Linking
         private AspectInstance ResolveAspectInstance( ResolvedAspectReference aspectReference )
         {
             var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( aspectReference.ContainingSymbol );
+
             return introducedMember.AssertNotNull().Introduction.Advice.Aspect;
         }
 

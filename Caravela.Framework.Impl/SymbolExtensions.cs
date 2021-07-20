@@ -109,7 +109,7 @@ namespace Caravela.Framework.Impl
                 return false;
             }
 
-            if ( SymbolEqualityComparer.Default.Equals(left, right) )
+            if ( SymbolEqualityComparer.Default.Equals( left, right ) )
             {
                 return true;
             }
@@ -146,9 +146,6 @@ namespace Caravela.Framework.Impl
             }
         }
 
-        public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol )
-        {
-            return symbol.GetPrimarySyntaxReference()?.GetSyntax();
-        }
+        public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol ) => symbol.GetPrimarySyntaxReference()?.GetSyntax();
     }
 }

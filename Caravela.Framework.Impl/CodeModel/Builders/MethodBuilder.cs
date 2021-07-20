@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
+using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
@@ -26,7 +27,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public GenericParameterBuilderList GenericParameters { get; } = new();
 
         [Memo]
-        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), this.OverriddenMethod != null );
+        public IInvokerFactory<IMethodInvoker> Invokers
+            => new InvokerFactory<IMethodInvoker>(
+                ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ),
+                this.OverriddenMethod != null );
 
         public IMethod? OverriddenMethod { get; set; }
 
@@ -100,9 +104,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     RefKind.None );
         }
 
-        // TODO: #(28532) Implement properly.
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.Name;
-
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
@@ -145,5 +146,28 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public void SetExplicitInterfaceImplementation( IMethod interfaceMethod ) => this.ExplicitInterfaceImplementations = new[] { interfaceMethod };
 
         public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
+
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        {
+            StringBuilder stringBuilder = new();
+            stringBuilder.Append( this.DeclaringType.ToDisplayString( format, context ) );
+            stringBuilder.Append( "." );
+            stringBuilder.Append( this.Name );
+            stringBuilder.Append( "(" );
+
+            foreach ( var parameter in this.Parameters )
+            {
+                if ( parameter.Index > 0 )
+                {
+                    stringBuilder.Append( ", " );
+                }
+
+                stringBuilder.Append( parameter.ParameterType.ToDisplayString( format, context ) );
+            }
+
+            stringBuilder.Append( ")" );
+
+            return stringBuilder.ToString();
+        }
     }
 }

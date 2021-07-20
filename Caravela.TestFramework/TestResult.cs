@@ -122,6 +122,12 @@ namespace Caravela.TestFramework
             {
                 i++;
 
+                if ( i >= this.SyntaxTrees.Count )
+                {
+                    // This is the "Intrinsics" syntax tree.
+                    continue;
+                }
+
                 var syntaxNode = await syntaxTree.GetRootAsync();
 
                 // Format the output code.

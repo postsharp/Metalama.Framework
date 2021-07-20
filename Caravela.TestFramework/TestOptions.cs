@@ -97,6 +97,11 @@ namespace Caravela.TestFramework
         public bool? ClearIgnoredDiagnostics { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the test is allowed to have compile-time code that has dynamic calls.
+        /// </summary>
+        internal bool? AllowCompileTimeDynamicCode { get; set; }
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
@@ -125,6 +130,8 @@ namespace Caravela.TestFramework
             this.IncludedFiles.AddRange( baseOptions.IncludedFiles );
 
             this.References.AddRange( baseOptions.References );
+
+            this.AllowCompileTimeDynamicCode ??= baseOptions.AllowCompileTimeDynamicCode;
 
             if ( !this.ClearIgnoredDiagnostics.GetValueOrDefault() )
             {
@@ -215,6 +222,11 @@ namespace Caravela.TestFramework
 
                     case "ClearIgnoredDiagnostics":
                         this.ClearIgnoredDiagnostics = true;
+
+                        break;
+
+                    case "AllowCompileTimeDynamicCode":
+                        this.AllowCompileTimeDynamicCode = true;
 
                         break;
 

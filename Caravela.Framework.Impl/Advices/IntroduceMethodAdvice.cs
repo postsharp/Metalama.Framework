@@ -153,7 +153,7 @@ namespace Caravela.Framework.Impl.Advices
                                         (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
                         }
-                        else if ( !compilation.InvariantComparer.Equals(this.Builder.ReturnType, existingDeclaration.ReturnType))
+                        else if ( !compilation.InvariantComparer.Equals( this.Builder.ReturnType, existingDeclaration.ReturnType ) )
                         {
                             return
                                 AdviceResult.Create(

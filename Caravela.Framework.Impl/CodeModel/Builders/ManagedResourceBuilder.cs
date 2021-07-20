@@ -12,9 +12,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         Advice ITransformation.Advice => throw new NotImplementedException();
 
-        public ResourceDescription ToResourceDescription()
-        {
-            throw new NotImplementedException();
-        }
+        public ResourceDescription ToResourceDescription() => throw new NotImplementedException();
     }
 }

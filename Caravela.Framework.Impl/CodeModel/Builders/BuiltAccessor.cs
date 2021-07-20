@@ -81,7 +81,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
 
         [Memo]
-        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), false );
+        public IInvokerFactory<IMethodInvoker> Invokers
+            => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ), false );
 
         public IMethod? OverriddenMethod => throw new NotImplementedException();
 
@@ -96,21 +97,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
 
         [return: RunTimeOnly]
-        public MethodInfo ToMethodInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
         [return: RunTimeOnly]
-        public System.Reflection.MethodBase ToMethodBase()
-        {
-            throw new NotImplementedException();
-        }
+        public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
         [return: RunTimeOnly]
-        public MemberInfo ToMemberInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public MemberInfo ToMemberInfo() => throw new NotImplementedException();
     }
 }

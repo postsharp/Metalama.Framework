@@ -1341,6 +1341,7 @@ namespace Caravela.Framework.Impl.Templating
             else if ( leftScope.IsRunTime() )
             {
                 context = ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, $"right part of the run-time '{node.Left} ??'" );
+                leftScope = TemplatingScope.RunTimeOnly;
             }
             else
             {

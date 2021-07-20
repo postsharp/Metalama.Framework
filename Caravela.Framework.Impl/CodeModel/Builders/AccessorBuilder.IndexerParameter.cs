@@ -30,6 +30,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             public override bool IsParams => ((PropertyBuilder) this.Accessor._containingDeclaration).Parameters[this.Index].IsParams;
 
             public override string Name => throw new NotSupportedException( "Cannot get the name of a return parameter." );
+
+            public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
         }
     }
 }

@@ -1,3 +1,5 @@
+// @AllowCompileTimeDynamicCode
+
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
 

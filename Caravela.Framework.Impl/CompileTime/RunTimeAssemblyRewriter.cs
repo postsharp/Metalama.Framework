@@ -16,6 +16,23 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal class RunTimeAssemblyRewriter : CompileTimeBaseRewriter
     {
+        private const string _intrinsics = @"
+using System;
+
+namespace Caravela.Compiler
+{
+    internal static class Intrinsics
+    {
+        public static RuntimeMethodHandle GetRuntimeMethodHandle(string documentationId) => throw new InvalidOperationException(""Code calling this method has to be compiled by the Caravela compiler."");
+        public static RuntimeFieldHandle GetRuntimeFieldHandle(string documentationId) => throw new InvalidOperationException(""Code calling this method has to be compiled by the Caravela compiler."");
+        public static RuntimeTypeHandle GetRuntimeTypeHandle(string documentationId) => throw new InvalidOperationException(""Code calling this method has to be compiled by the Caravela compiler."");
+    }
+}
+";
+
+        private static readonly Lazy<SyntaxTree> _intrinsicsSyntaxTree =
+            new Lazy<SyntaxTree>( () => CSharpSyntaxTree.ParseText( _intrinsics, CSharpParseOptions.Default ) );
+
         private readonly INamedTypeSymbol? _aspectDriverSymbol;
 
         private RunTimeAssemblyRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
@@ -28,7 +45,14 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             var rewriter = new RunTimeAssemblyRewriter( runTimeCompilation, serviceProvider );
 
-            return rewriter.VisitTrees( runTimeCompilation );
+            var transformedCompilation = rewriter.VisitTrees( runTimeCompilation );
+
+            if ( transformedCompilation.GetTypeByMetadataName( "Caravela.Compiler.Intrinsics" ) == null )
+            {
+                transformedCompilation = transformedCompilation.AddSyntaxTrees( _intrinsicsSyntaxTree.Value );
+            }
+
+            return transformedCompilation;
         }
 
         public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )

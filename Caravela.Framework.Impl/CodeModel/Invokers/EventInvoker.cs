@@ -16,9 +16,14 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
     {
         public IEvent Member { get; }
 
-        public EventInvoker( IEvent member, InvokerOrder order ) : base( member, order )
+        public EventInvoker( IEvent member, InvokerOrder order, InvokerOperator invokerOperator ) : base( member, order )
         {
             this.Member = member;
+
+            if ( invokerOperator == InvokerOperator.Conditional )
+            {
+                throw new NotSupportedException( "Conditional access is not supported for events." );
+            }
         }
 
         protected virtual void AssertNoArgument() { }
