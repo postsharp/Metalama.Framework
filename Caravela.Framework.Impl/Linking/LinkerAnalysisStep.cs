@@ -58,7 +58,7 @@ namespace Caravela.Framework.Impl.Linking
 
                         break;
 
-                    case IFieldSymbol field:
+                    case IFieldSymbol:
                         // NOP.
                         break;
 
