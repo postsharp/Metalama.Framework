@@ -5,7 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -167,7 +167,7 @@ namespace Caravela.Framework.Impl.Linking
                             node = node.WithBaseList( BaseList( node.BaseList.Types.AddRange( additionalBaseList ) ) );
                         }
 
-                        node = node.WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
+                        node = node.AddGeneratedCodeAnnotation();
                     }
 
                     return node;
@@ -184,7 +184,7 @@ namespace Caravela.Framework.Impl.Linking
 
                         introducedNode = introducedNode.NormalizeWhitespace()
                             .WithLeadingTrivia( LineFeed, LineFeed )
-                            .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
+                            .AddGeneratedCodeAnnotation();
 
                         if ( introducedMember.Declaration != null )
                         {

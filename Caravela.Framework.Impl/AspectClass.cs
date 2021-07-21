@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl
         /// <inheritdoc />
         public bool IsAbstract { get; }
 
-        public bool CanExpandToSource { get; }
+        public bool IsLiveTemplate { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectClass"/> class.
@@ -93,7 +93,6 @@ namespace Caravela.Framework.Impl
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
             this.AspectType = aspectType;
             this._prototypeAspectInstance = prototype;
-            this.CanExpandToSource = !this.IsAbstract && this.AspectType.GetConstructor( Type.EmptyTypes ) != null;
         }
 
         private void Initialize()
@@ -225,6 +224,26 @@ namespace Caravela.Framework.Impl
             public AspectClassBuilder( AspectClass parent )
             {
                 this._parent = parent;
+            }
+
+            public bool IsLiveTemplate
+            {
+                get => this._parent.IsLiveTemplate;
+                set
+                {
+                    if ( value != this._parent.IsLiveTemplate )
+                    {
+                        if ( value )
+                        {
+                            if ( this._parent.AspectType.GetConstructor( Type.EmptyTypes ) == null )
+                            {
+                                throw new InvalidOperationException( "The aspect type must have a default constructor to be able to be a live template." );
+                            }
+                        }
+
+                        this._parent.IsLiveTemplate = value;
+                    }
+                }
             }
 
             public string DisplayName { get => this._parent.DisplayName; set => this._parent.DisplayName = value; }

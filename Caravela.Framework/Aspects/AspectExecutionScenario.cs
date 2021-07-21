@@ -20,8 +20,8 @@ namespace Caravela.Framework.Aspects
         DesignTime,
 
         /// <summary>
-        /// On demand at design time, when applying an aspect to source code.
+        /// Live template.
         /// </summary>
-        ApplyToSourceCode
+        LiveTemplate
     }
 }

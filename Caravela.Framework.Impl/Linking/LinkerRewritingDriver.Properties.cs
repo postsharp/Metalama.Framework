@@ -2,8 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Linking.Inlining;
-using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -189,50 +189,45 @@ namespace Caravela.Framework.Impl.Linking
         }
 
         private static FieldDeclarationSyntax GetPropertyBackingField( PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol )
-        {
-            return
-                FieldDeclaration(
-                        List<AttributeListSyntax>(),
-                        symbol.IsStatic
-                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                        VariableDeclaration(
-                            propertyDeclaration.Type,
-                            SingletonSeparatedList( VariableDeclarator( Identifier( GetAutoPropertyBackingFieldName( symbol ) ) ) ) ) )
-                    .NormalizeWhitespace()
-                    .WithLeadingTrivia( LineFeed )
-                    .WithTrailingTrivia( LineFeed, LineFeed )
-                    .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
-        }
+            => FieldDeclaration(
+                    List<AttributeListSyntax>(),
+                    symbol.IsStatic
+                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                    VariableDeclaration(
+                        propertyDeclaration.Type,
+                        SingletonSeparatedList( VariableDeclarator( Identifier( GetAutoPropertyBackingFieldName( symbol ) ) ) ) ) )
+                .NormalizeWhitespace()
+                .WithLeadingTrivia( LineFeed, LineFeed )
+                .WithTrailingTrivia( LineFeed )
+                .AddGeneratedCodeAnnotation();
 
         private static BlockSyntax GetImplicitGetterBody( IMethodSymbol symbol )
-        {
-            return Block(
-                ReturnStatement(
-                    Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
-                    MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        symbol.IsStatic
-                            ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
-                            : ThisExpression(),
-                        IdentifierName( GetAutoPropertyBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
-                    Token( SyntaxKind.SemicolonToken ) ) );
-        }
-
-        private static BlockSyntax GetImplicitSetterBody( IMethodSymbol symbol )
-        {
-            return Block(
-                ExpressionStatement(
-                    AssignmentExpression(
-                        SyntaxKind.SimpleAssignmentExpression,
+            => Block(
+                    ReturnStatement(
+                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
                                 ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
                                 : ThisExpression(),
                             IdentifierName( GetAutoPropertyBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
-                        IdentifierName( "value" ) ) ) );
-        }
+                        Token( SyntaxKind.SemicolonToken ) ) )
+                .AddGeneratedCodeAnnotation();
+
+        private static BlockSyntax GetImplicitSetterBody( IMethodSymbol symbol )
+            => Block(
+                    ExpressionStatement(
+                        AssignmentExpression(
+                            SyntaxKind.SimpleAssignmentExpression,
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                symbol.IsStatic
+                                    ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
+                                    : ThisExpression(),
+                                IdentifierName( GetAutoPropertyBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
+                            IdentifierName( "value" ) ) ) )
+                .AddGeneratedCodeAnnotation();
 
         private static string GetAutoPropertyBackingFieldName( IPropertySymbol property )
         {
@@ -275,11 +270,9 @@ namespace Caravela.Framework.Impl.Linking
         }
 
         private static bool IsAutoPropertyDeclaration( PropertyDeclarationSyntax propertyDeclaration )
-        {
-            return propertyDeclaration.ExpressionBody == null
-                   && propertyDeclaration.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true
-                   && propertyDeclaration.Modifiers.All( x => x.Kind() != SyntaxKind.AbstractKeyword );
-        }
+            => propertyDeclaration.ExpressionBody == null
+               && propertyDeclaration.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true
+               && propertyDeclaration.Modifiers.All( x => x.Kind() != SyntaxKind.AbstractKeyword );
 
         private static MemberDeclarationSyntax GetOriginalImplProperty( PropertyDeclarationSyntax property, IPropertySymbol symbol )
         {
@@ -302,10 +295,10 @@ namespace Caravela.Framework.Impl.Linking
                                     }.Where( a => a != null )
                                     .AssertNoneNull() ) )
                         .NormalizeWhitespace()
-                    : property.AccessorList.AddSourceCodeAnnotation();
+                    : property.AccessorList;
 
             var initializer =
-                property.Initializer?.AddSourceCodeAnnotation();
+                property.Initializer;
 
             return
                 PropertyDeclaration(
@@ -323,7 +316,8 @@ namespace Caravela.Framework.Impl.Linking
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithInitializer( initializer )
                     .WithTrailingTrivia( ElasticLineFeed )
-                    .WithAccessorList( accessorList );
+                    .WithAccessorList( accessorList )
+                    .AddGeneratedCodeAnnotation();
         }
     }
 }
