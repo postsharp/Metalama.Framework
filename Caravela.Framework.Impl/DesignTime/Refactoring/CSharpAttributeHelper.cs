@@ -61,6 +61,11 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
 
             foreach ( var ns in attribute.Imports )
             {
+                if ( ns == null )
+                {
+                    continue;
+                }
+                
                 if ( await newRoot.SyntaxTree.GetRootAsync( cancellationToken ) is CompilationUnitSyntax newUnit )
                 {
                     if ( newUnit.Usings.All( u => u.Name.ToString() != ns ) )

@@ -65,7 +65,7 @@ function CreateVersionFile() {
         $assemblyVersion = "`$(MainVersion).$Numbered"
     } elseif ( $Public ) {
         # Public build
-        $packageVersion = "`$(MainVersion)$(PackageVersionSuffix)"
+        $packageVersion = "`$(MainVersion)`$(PackageVersionSuffix)"
         $assemblyVersion = "`$(MainVersion)"
     } else {
         Throw "One of the following flags must be used: -local, -numbered or -public"

@@ -85,10 +85,18 @@ namespace Caravela.Framework.Impl.CodeModel
                     var oldTree = replacement.OldTree.AssertNotNull();
                     compilation = compilation.ReplaceSyntaxTree( oldTree, replacement.NewTree );
 
-                    var initialTree = baseCompilation.SyntaxTrees.TryGetValue( replacement.FilePath, out var initialTreeReplacement )
-                        ? initialTreeReplacement
-                        : replacement.OldTree;
-
+                    // Find the tree in InitialCompilation.
+                    SyntaxTree initialTree;
+                    
+                    if ( baseCompilation.ModifiedSyntaxTrees.TryGetValue( replacement.FilePath, out var initialTreeReplacement ) && initialTreeReplacement.OldTree != null )
+                    {
+                        initialTree = initialTreeReplacement.OldTree;
+                    }
+                    else if ( !baseCompilation.SyntaxTrees.TryGetValue( replacement.FilePath, out initialTree! ) )
+                    {
+                        initialTree = replacement.OldTree.AssertNotNull();
+                    }
+                    
                     modifiedTreeBuilder[replacement.FilePath] = new ModifiedSyntaxTree( replacement.NewTree, initialTree );
                 }
             }

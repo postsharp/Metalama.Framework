@@ -23,15 +23,15 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
     /// <summary>
     /// An implementation of the <see cref="AspectPipeline"/> that applies an aspect to source code in the interactive process.
     /// </summary>
-    internal class ApplyToSourceCodeAspectPipeline : AspectPipeline
+    internal class LiveTemplateAspectPipeline : AspectPipeline
     {
         private readonly InteractiveAspectSource _source;
 
-        private ApplyToSourceCodeAspectPipeline(
+        private LiveTemplateAspectPipeline(
             IProjectOptions projectOptions,
             CompileTimeDomain domain,
             AspectClass aspectClass,
-            ISymbol targetSymbol ) : base( projectOptions, AspectExecutionScenario.ApplyToSourceCode, false, domain )
+            ISymbol targetSymbol ) : base( projectOptions, AspectExecutionScenario.LiveTemplate, false, domain )
         {
             this._source = new InteractiveAspectSource( aspectClass, targetSymbol );
         }
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             [NotNullWhen( true )] out PartialCompilation? outputCompilation,
             out ImmutableArray<Diagnostic> diagnostics )
         {
-            ApplyToSourceCodeAspectPipeline pipeline = new( projectOptions, domain, aspectClass, targetSymbol );
+            LiveTemplateAspectPipeline pipeline = new( projectOptions, domain, aspectClass, targetSymbol );
 
             return pipeline.TryExecute( configuration, inputCompilation, cancellationToken, out outputCompilation, out diagnostics );
         }

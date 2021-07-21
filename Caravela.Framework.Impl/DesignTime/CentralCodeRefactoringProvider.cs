@@ -28,6 +28,10 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             try
             {
+                var buildOptions = new ProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
+
+                DebuggingHelper.AttachDebugger( buildOptions );
+
                 if ( !context.Document.SupportsSemanticModel )
                 {
                     return;
@@ -51,8 +55,6 @@ namespace Caravela.Framework.Impl.DesignTime
                     return;
                 }
 
-                var compilation = semanticModel.Compilation;
-
                 var symbol = semanticModel.GetDeclaredSymbol( node, cancellationToken );
 
                 if ( symbol == null )
@@ -60,40 +62,34 @@ namespace Caravela.Framework.Impl.DesignTime
                     return;
                 }
 
-                var buildOptions = new ProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
-
-                DebuggingHelper.AttachDebugger( buildOptions );
-
-                // TODO: Make sure we are on a background thread.
-
                 // Execute the pipeline.
 
                 var eligibleAspects = DesignTimeAspectPipelineCache.Instance.GetEligibleAspects( symbol, buildOptions, cancellationToken );
 
-                var addAspectAttributeActions = ImmutableArray.CreateBuilder<CodeAction>();
-                var expandAspectActions = ImmutableArray.CreateBuilder<CodeAction>();
+                var aspectActions = ImmutableArray.CreateBuilder<CodeAction>();
+                var liveTemplatesActions = ImmutableArray.CreateBuilder<CodeAction>();
 
                 foreach ( var aspect in eligibleAspects )
                 {
-                    addAspectAttributeActions.Add( CodeAction.Create( aspect.DisplayName, ct => AddAspectAttribute( aspect, symbol, context.Document, ct ) ) );
+                    aspectActions.Add( CodeAction.Create( aspect.DisplayName, ct => AddAspectAttributeAsync( aspect, symbol, context.Document, ct ) ) );
 
-                    if ( aspect.CanExpandToSource )
+                    if ( aspect.IsLiveTemplate )
                     {
-                        expandAspectActions.Add(
+                        liveTemplatesActions.Add(
                             CodeAction.Create(
                                 aspect.DisplayName,
-                                ct => ExpandAspectToCode( buildOptions, compilation, aspect, symbol, context.Document, ct.IgnoreIfDebugging() ) ) );
+                                ct => ApplyLiveTemplateAsync( buildOptions, aspect, symbol, context.Document, ct.IgnoreIfDebugging() ) ) );
                     }
                 }
 
-                if ( addAspectAttributeActions.Count > 0 )
+                if ( aspectActions.Count > 0 )
                 {
-                    context.RegisterRefactoring( CodeAction.Create( "Add aspect as attribute", addAspectAttributeActions.ToImmutable(), true ) );
+                    context.RegisterRefactoring( CodeAction.Create( "Add aspect", aspectActions.ToImmutable(), true ) );
                 }
 
-                if ( expandAspectActions.Count > 0 )
+                if ( liveTemplatesActions.Count > 0 )
                 {
-                    context.RegisterRefactoring( CodeAction.Create( "Expand aspect", expandAspectActions.ToImmutable(), false ) );
+                    context.RegisterRefactoring( CodeAction.Create( "Apply live template", liveTemplatesActions.ToImmutable(), false ) );
                 }
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
@@ -102,7 +98,7 @@ namespace Caravela.Framework.Impl.DesignTime
             }
         }
 
-        private static Task<Solution> AddAspectAttribute(
+        private static Task<Solution> AddAspectAttributeAsync(
             AspectClass aspect,
             ISymbol targetSymbol,
             Document targetDocument,
@@ -115,14 +111,20 @@ namespace Caravela.Framework.Impl.DesignTime
             return CSharpAttributeHelper.AddAttributeAsync( targetDocument, targetSymbol, attributeDescription, cancellationToken ).AsTask();
         }
 
-        private static async Task<Solution> ExpandAspectToCode(
+        private static async Task<Solution> ApplyLiveTemplateAsync(
             ProjectOptions projectOptions,
-            Compilation compilation,
             AspectClass aspect,
             ISymbol targetSymbol,
             Document targetDocument,
             CancellationToken cancellationToken )
         {
+            var compilation = await targetDocument.Project.GetCompilationAsync( cancellationToken );
+
+            if ( compilation == null )
+            {
+                return targetDocument.Project.Solution;
+            }
+
             if ( DesignTimeAspectPipelineCache.Instance.TryApplyAspectToCode(
                 projectOptions,
                 aspect,
@@ -137,9 +139,9 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 foreach ( var modifiedSyntaxTree in outputCompilation.ModifiedSyntaxTrees )
                 {
-                    var document = project.GetDocument( modifiedSyntaxTree.Value.OldTree )!;
+                    var document = project.GetDocument( modifiedSyntaxTree.Value.OldTree );
 
-                    if ( !document.SupportsSyntaxTree )
+                    if ( document == null || !document.SupportsSyntaxTree )
                     {
                         continue;
                     }

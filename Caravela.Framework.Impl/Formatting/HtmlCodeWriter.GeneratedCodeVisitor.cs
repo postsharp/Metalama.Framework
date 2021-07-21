@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -26,11 +25,11 @@ namespace Caravela.Framework.Impl.Formatting
                     return;
                 }
 
-                if ( node.HasAnnotation( AspectPipelineAnnotations.GeneratedCode ) )
+                if ( node.HasAnnotation( FormattingAnnotations.GeneratedCode ) )
                 {
                     this._textSpans.Add( node.Span, TextSpanClassification.GeneratedCode );
                 }
-                else if ( node.HasAnnotation( AspectPipelineAnnotations.SourceCode ) )
+                else if ( node.HasAnnotation( FormattingAnnotations.SourceCode ) )
                 {
                     this._textSpans.Add( node.Span, TextSpanClassification.SourceCode );
                 }

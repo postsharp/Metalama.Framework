@@ -807,10 +807,21 @@ namespace Caravela.Framework.Impl.Templating
 
             // TODO: templates may support build-time parameters, which must to the compiled template method.
 
-            var body =
-                node.Body != null
-                    ? (BlockSyntax) this.BuildRunTimeBlock( node.Body, false )
-                    : (BlockSyntax) this.BuildRunTimeBlock( node.ExpressionBody.AssertNotNull().Expression, false );
+            BlockSyntax body;
+
+            if ( node.Body != null )
+            {
+                body = (BlockSyntax) this.BuildRunTimeBlock( node.Body, false );
+            }
+            else
+            {
+                var isVoid = node.ReturnType is PredefinedTypeSyntax predefinedType && predefinedType.Keyword.Kind() == SyntaxKind.VoidKeyword;
+
+                body = (BlockSyntax) this.BuildRunTimeBlock(
+                    node.ExpressionBody.AssertNotNull().Expression,
+                    false,
+                    isVoid );
+            }
 
             var result = this.CreateTemplateMethod( node, body );
 
@@ -831,10 +842,21 @@ namespace Caravela.Framework.Impl.Templating
 
             // TODO: templates may support build-time parameters, which must to the compiled template method.
 
-            var body =
-                node.Body != null
-                    ? (BlockSyntax) this.BuildRunTimeBlock( node.Body, false )
-                    : (BlockSyntax) this.BuildRunTimeBlock( node.ExpressionBody.AssertNotNull().Expression, false );
+            BlockSyntax body;
+
+            if ( node.Body != null )
+            {
+                body = (BlockSyntax) this.BuildRunTimeBlock( node.Body, false );
+            }
+            else
+            {
+                var isVoid = node.Keyword.Kind() != SyntaxKind.GetKeyword;
+
+                body = (BlockSyntax) this.BuildRunTimeBlock(
+                    node.ExpressionBody.AssertNotNull().Expression,
+                    false,
+                    isVoid );
+            }
 
             var result = this.CreateTemplateMethod( node, body );
 
@@ -847,7 +869,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             this.Indent( 3 );
 
-            var body = (BlockSyntax) this.BuildRunTimeBlock( node.ExpressionBody.AssertNotNull().Expression, false );
+            var body = (BlockSyntax) this.BuildRunTimeBlock( node.ExpressionBody.AssertNotNull().Expression, false, false );
 
             var result = this.CreateTemplateMethod( node, body );
 
@@ -897,7 +919,7 @@ namespace Caravela.Framework.Impl.Templating
         /// expression (in this case, a delegate invocation is returned), or <c>false</c> if it can be a statement
         /// (in this case, a return statement is returned).</param>
         /// <returns></returns>
-        private SyntaxNode BuildRunTimeBlock( ExpressionSyntax node, bool generateExpression )
+        private SyntaxNode BuildRunTimeBlock( ExpressionSyntax node, bool generateExpression, bool isVoid )
         {
             StatementSyntax statement;
 
@@ -907,7 +929,7 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                statement = ReturnStatement( node );
+                statement = isVoid ? ExpressionStatement( node ) : ReturnStatement( node );
             }
 
             return this.BuildRunTimeBlock( () => this.ToMetaStatements( statement ), generateExpression );

@@ -275,7 +275,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 return false;
             }
 
-            return ApplyToSourceCodeAspectPipeline.TryExecute(
+            return LiveTemplateAspectPipeline.TryExecute(
                 projectOptions,
                 this._domain,
                 configuration,

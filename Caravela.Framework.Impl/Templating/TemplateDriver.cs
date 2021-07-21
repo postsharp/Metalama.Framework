@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -87,7 +87,7 @@ namespace Caravela.Framework.Impl.Templating
                 block = block.NormalizeWhitespace();
 
                 // We add generated-code annotations to the statements and not to the block itself so that the brackets don't get colored.
-                block = block.AddSourceCodeAnnotation();
+                block = block.AddGeneratedCodeAnnotation();
 
                 return errorCountAfter == errorCountBefore;
             }
