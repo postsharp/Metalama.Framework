@@ -1,15 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Linking.Inlining;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 // TODO: A lot methods here are called multiple times. Optimize.
@@ -138,6 +139,12 @@ namespace Caravela.Framework.Impl.Linking
                             rewrittenBody,
                             CreateGotoStatement() )
                         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+            }
+            
+            // Add the SourceCode annotation, if it is source code.
+            if ( !(symbol.GetPrimarySyntaxReference() is { } primarySyntax && primarySyntax.GetSyntax().HasAnnotation( FormattingAnnotations.GeneratedCode )) )
+            {
+                rewrittenBody = rewrittenBody.AddSourceCodeAnnotation();
             }
 
             return rewrittenBody;

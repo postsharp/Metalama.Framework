@@ -151,8 +151,8 @@ namespace Caravela.Framework.Impl.Linking
                     .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
-                    .WithBody( method.Body.AddSourceCodeAnnotation() )
-                    .WithExpressionBody( method.ExpressionBody.AddSourceCodeAnnotation() );
+                    .WithBody( method.Body )
+                    .WithExpressionBody( method.ExpressionBody );
         }
     }
 }

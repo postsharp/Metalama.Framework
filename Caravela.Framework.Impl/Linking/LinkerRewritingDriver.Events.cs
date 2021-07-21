@@ -2,8 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Linking.Inlining;
-using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -274,7 +274,7 @@ namespace Caravela.Framework.Impl.Linking
                     .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
-                    .WithAccessorList( @event.AccessorList.AddSourceCodeAnnotation() )
+                    .WithAccessorList( @event.AccessorList )
                     .AddGeneratedCodeAnnotation();
         }
 
@@ -301,7 +301,7 @@ namespace Caravela.Framework.Impl.Linking
                     .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
-                    .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
+                    .AddGeneratedCodeAnnotation();
         }
     }
 }
