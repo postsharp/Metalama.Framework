@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Bugs.Bug18911
 {
  public class EmptyOverrideFieldOrPropertyAttribute : OverrideFieldOrPropertyAspect
     {
-        public override dynamic OverrideProperty
+        public override dynamic? OverrideProperty
         {
             get => meta.Proceed();
             set => meta.Proceed();
@@ -19,6 +19,6 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Bugs.Bug18911
    class EmptyOverrideFieldOrPropertyExample
     {
         [EmptyOverrideFieldOrProperty]
-        public string Property { get; set; }
+        public string? Property { get; set; }
     }
 }
