@@ -184,7 +184,7 @@ namespace Caravela.Framework.Impl.Linking
                         .WithLeadingTrivia( propertyDeclaration.GetLeadingTrivia() )
                         .WithTrailingTrivia( propertyDeclaration.GetTrailingTrivia() )
                         .WithExpressionBody( null )
-                        .WithInitializer(null)
+                        .WithInitializer( null )
                         .WithSemicolonToken( Token( SyntaxKind.None ) );
             }
         }
@@ -199,10 +199,9 @@ namespace Caravela.Framework.Impl.Linking
                             : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
                         VariableDeclaration(
                             propertyDeclaration.Type,
-                            SingletonSeparatedList( 
-                                VariableDeclarator( 
-                                    Identifier( 
-                                        GetAutoPropertyBackingFieldName( symbol ) ),
+                            SingletonSeparatedList(
+                                VariableDeclarator(
+                                    Identifier( GetAutoPropertyBackingFieldName( symbol ) ),
                                     null,
                                     propertyDeclaration.Initializer ) ) ) )
                     .NormalizeWhitespace()

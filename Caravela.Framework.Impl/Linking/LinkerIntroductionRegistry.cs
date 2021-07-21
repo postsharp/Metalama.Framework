@@ -209,6 +209,10 @@ namespace Caravela.Framework.Impl.Linking
             {
                 symbolSyntax = eventFieldSyntax.Declaration.Variables.First();
             }
+            else if ( intermediateSyntax is FieldDeclarationSyntax fieldSyntax )
+            {
+                symbolSyntax = fieldSyntax.Declaration.Variables.First();
+            }
             else
             {
                 symbolSyntax = intermediateSyntax;

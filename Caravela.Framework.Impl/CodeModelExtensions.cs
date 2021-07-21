@@ -88,7 +88,7 @@ namespace Caravela.Framework.Impl
             return declaration.GetSymbol()?.GetPrimaryDeclaration();
         }
 
-        public static InsertPosition ToInsertPosition(this IMember declaration )
+        public static InsertPosition ToInsertPosition( this IMember declaration )
         {
             switch ( declaration )
             {
@@ -102,15 +102,18 @@ namespace Caravela.Framework.Impl
                     var symbol = declaration.GetSymbol().AssertNotNull();
 
                     var memberDeclaration = symbol.GetPrimaryDeclaration().GetMemberDeclarationSyntax();
+
                     if ( memberDeclaration != null )
                     {
                         return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
                     }
                     else
                     {
-                        return new InsertPosition( InsertPositionRelation.Within, (MemberDeclarationSyntax) declaration.DeclaringType.GetPrimaryDeclaration().AssertNotNull() );
+                        return new InsertPosition(
+                            InsertPositionRelation.Within,
+                            (MemberDeclarationSyntax) declaration.DeclaringType.GetPrimaryDeclaration().AssertNotNull() );
                     }
-            }            
+            }
         }
     }
 }

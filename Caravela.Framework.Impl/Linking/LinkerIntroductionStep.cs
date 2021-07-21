@@ -2,13 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -100,7 +98,7 @@ namespace Caravela.Framework.Impl.Linking
                     case Field replacedField:
                         var syntaxReference = replacedField.Symbol.GetPrimarySyntaxReference();
 
-                        if (syntaxReference == null)
+                        if ( syntaxReference == null )
                         {
                             throw new AssertionFailedException();
                         }
@@ -108,10 +106,14 @@ namespace Caravela.Framework.Impl.Linking
                         var removedSyntax = syntaxReference.GetSyntax();
 
                         syntaxTransformationCollection.AddRemovedSyntax( removedSyntax );
+
                         break;
+
                     case ISyntaxTreeTransformation replacedTransformation:
                         replacedTransformations.Add( replacedTransformation );
+
                         break;
+
                     default:
                         throw new AssertionFailedException();
                 }

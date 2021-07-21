@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             }
 
             public override string Name => "value";
-            
+
             public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
                 => this.Accessor.ToDisplayString( format, context ) + "@value";
         }

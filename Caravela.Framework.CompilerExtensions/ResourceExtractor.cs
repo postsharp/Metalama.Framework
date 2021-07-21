@@ -74,7 +74,7 @@ namespace Caravela.Framework.CompilerExtensions
                 {
                     Directory.CreateDirectory( directory );
                 }
-                
+
                 var path = Path.Combine( directory, Guid.NewGuid().ToString() + ".txt" );
 
                 File.WriteAllText( path, e.ToString() );
@@ -92,7 +92,7 @@ namespace Caravela.Framework.CompilerExtensions
             {
                 StringBuilder log = new();
                 log.AppendLine( $"Extracting resources from assembly '{currentAssembly.GetName()}', Path='{currentAssembly.Location}'." );
-                
+
                 // We cannot use MutexHelper because of dependencies on an embedded assembly.
                 using var extractMutex = new Mutex( false, "Global\\Caravela_Extract_" + AssemblyMetadataReader.BuildId );
                 extractMutex.WaitOne();
@@ -108,7 +108,7 @@ namespace Caravela.Framework.CompilerExtensions
                             if ( resourceName.EndsWith( ".dll", StringComparison.OrdinalIgnoreCase ) )
                             {
                                 log.AppendLine( $"Extracting resource " + resourceName );
-                                    
+
                                 // Extract the file to disk.
                                 using var stream = currentAssembly.GetManifestResourceStream( resourceName )!;
                                 var file = Path.Combine( _snapshotDirectory, resourceName );

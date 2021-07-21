@@ -31,7 +31,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             public override string Name => throw new NotSupportedException( "Cannot get the name of a return parameter." );
 
-            public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
+            public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+                => throw new NotImplementedException();
         }
     }
 }

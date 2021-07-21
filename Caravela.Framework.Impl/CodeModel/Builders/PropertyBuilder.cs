@@ -163,10 +163,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     GenerateAccessorList(),
                     null,
                     this.InitializerSyntax != null
-                        ? EqualsValueClause(this.InitializerSyntax)
+                        ? EqualsValueClause( this.InitializerSyntax )
                         : null,
                     this.InitializerSyntax != null
-                        ? Token(SyntaxKind.SemicolonToken)
+                        ? Token( SyntaxKind.SemicolonToken )
                         : default );
 
             return new[] { new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };

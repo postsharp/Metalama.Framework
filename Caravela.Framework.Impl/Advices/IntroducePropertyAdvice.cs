@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
@@ -61,6 +62,12 @@ namespace Caravela.Framework.Impl.Advices
 
             this.MemberBuilder.Type = (this.TemplateMember?.Type ?? this._getTemplateMethod?.ReturnType).AssertNotNull();
             this.MemberBuilder.Accessibility = (this.TemplateMember?.Accessibility ?? this._getTemplateMethod?.Accessibility).AssertNotNull();
+
+            if ( this.TemplateMember != null )
+            {
+                var declaration = (PropertyDeclarationSyntax) this.TemplateMember.GetPrimaryDeclaration().AssertNotNull();
+                this.MemberBuilder.InitializerSyntax = declaration.Initializer?.Value;
+            }
         }
 
         public override AdviceResult ToResult( ICompilation compilation )
@@ -72,7 +79,12 @@ namespace Caravela.Framework.Impl.Advices
             if ( existingDeclaration == null )
             {
                 // There is no existing declaration, we will introduce and override the introduced.
-                var overriddenMethod = new OverriddenProperty( this, this.MemberBuilder, this.TemplateMember, this._getTemplateMethod, this._setTemplateMethod );
+                var overriddenMethod = new OverriddenProperty(
+                    this,
+                    this.MemberBuilder,
+                    this.TemplateMember,
+                    this._getTemplateMethod,
+                    this._setTemplateMethod );
 
                 return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
             }
@@ -105,7 +117,12 @@ namespace Caravela.Framework.Impl.Advices
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverriddenProperty( this, existingDeclaration, this.TemplateMember, this._getTemplateMethod, this._setTemplateMethod );
+                            var overriddenMethod = new OverriddenProperty(
+                                this,
+                                existingDeclaration,
+                                this.TemplateMember,
+                                this._getTemplateMethod,
+                                this._setTemplateMethod );
 
                             return AdviceResult.Create( overriddenMethod );
                         }
@@ -113,7 +130,13 @@ namespace Caravela.Framework.Impl.Advices
                         {
                             this.MemberBuilder.IsNew = true;
                             this.MemberBuilder.OverriddenProperty = existingDeclaration;
-                            var overriddenMethod = new OverriddenProperty( this, this.MemberBuilder, this.TemplateMember, this._getTemplateMethod, this._setTemplateMethod );
+
+                            var overriddenMethod = new OverriddenProperty(
+                                this,
+                                this.MemberBuilder,
+                                this.TemplateMember,
+                                this._getTemplateMethod,
+                                this._setTemplateMethod );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                         }
@@ -121,7 +144,12 @@ namespace Caravela.Framework.Impl.Advices
                     case OverrideStrategy.Override:
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverriddenProperty( this, existingDeclaration, this.TemplateMember, this._getTemplateMethod, this._setTemplateMethod );
+                            var overriddenMethod = new OverriddenProperty(
+                                this,
+                                existingDeclaration,
+                                this.TemplateMember,
+                                this._getTemplateMethod,
+                                this._setTemplateMethod );
 
                             return AdviceResult.Create( overriddenMethod );
                         }
@@ -134,11 +162,26 @@ namespace Caravela.Framework.Impl.Advices
                                         (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
                         }
+                        else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingDeclaration.Type ) )
+                        {
+                            return
+                                AdviceResult.Create(
+                                    AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateDiagnostic(
+                                        this.TargetDeclaration.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration,
+                                         existingDeclaration.DeclaringType, existingDeclaration.Type) ) );
+                        }
                         else
                         {
                             this.MemberBuilder.IsOverride = true;
                             this.MemberBuilder.OverriddenProperty = existingDeclaration;
-                            var overriddenMethod = new OverriddenProperty( this, this.MemberBuilder, this.TemplateMember, this._getTemplateMethod, this._setTemplateMethod );
+
+                            var overriddenMethod = new OverriddenProperty(
+                                this,
+                                this.MemberBuilder,
+                                this.TemplateMember,
+                                this._getTemplateMethod,
+                                this._setTemplateMethod );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                         }

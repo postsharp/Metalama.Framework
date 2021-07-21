@@ -43,9 +43,6 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
             // TODO: Other members.
         }
 
-       
-        
-        
         [Template]
         public dynamic? Template()
         {

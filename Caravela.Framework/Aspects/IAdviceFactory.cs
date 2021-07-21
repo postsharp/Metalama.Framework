@@ -86,9 +86,23 @@ namespace Caravela.Framework.Aspects
             string? setTemplate = null,
             Dictionary<string, object?>? tags = null );
 
-        [Obsolete( "Not implemented." )]
+        /// <summary>
+        /// Introduces a field to the target type.
+        /// </summary>
+        /// <param name="targetType">The type into which the property must be introduced.</param>
+        /// <param name="name">Name of the introduced field.</param> 
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        /// method. The default scope depends on the scope of the template method. If the method is static, the introduced method is static. However, if the
+        /// template method is non-static, then the introduced method copies of the scope of the target declaration of the aspect.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
+        /// The default strategy is to fail with a compile-time error.</param>
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <see cref="meta"/> API.</param>
+        /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
+        /// <seealso href="@introducing-members"/>
         IFieldBuilder IntroduceField(
             INamedType targetType,
+            string name,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Dictionary<string, object?>? tags = null );
@@ -103,8 +117,8 @@ namespace Caravela.Framework.Aspects
         /// this method.
         /// </param>
         /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
-        /// method. The default scope depends on the scope of the template method. If the method is static, the introduced method is static. However, if the
-        /// template method is non-static, then the introduced method copies of the scope of the target declaration of the aspect.</param>
+        /// property. The default scope depends on the scope of the template method. If the property is static, the introduced property is static. However, if the
+        /// template property is non-static, then the introduced property copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         /// The default strategy is to fail with a compile-time error.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the

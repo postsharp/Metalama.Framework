@@ -16,15 +16,15 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         public IProperty? OfExactSignature( IProperty signatureTemplate, bool matchIsStatic = true, bool declaredOnly = true )
         {
             // TODO: This should use at least some code from the base class (specifically for indexers).
-            if (signatureTemplate.Parameters.Count > 0)
+            if ( signatureTemplate.Parameters.Count > 0 )
             {
                 throw new NotImplementedException();
             }
 
             // TODO: This is temporary.
-            foreach (var candidate in this.OfName( signatureTemplate.Name ))
+            foreach ( var candidate in this.OfName( signatureTemplate.Name ) )
             {
-                if (matchIsStatic && candidate.IsStatic != signatureTemplate.IsStatic)
+                if ( matchIsStatic && candidate.IsStatic != signatureTemplate.IsStatic )
                 {
                     continue;
                 }

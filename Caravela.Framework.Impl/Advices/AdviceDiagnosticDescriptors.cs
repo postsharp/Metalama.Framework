@@ -37,7 +37,8 @@ namespace Caravela.Framework.Impl.Advices
                 "and is static, non-virtual or sealed.",
                 _category, Error );
 
-        public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType, IType ReturnType)>
+        public static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType, IType
+                ReturnType)>
             CannotIntroduceDifferentExistingReturnType = new(
                 "CR0503",
                 "Cannot introduce member into a type because it has a different return type in the base class.",

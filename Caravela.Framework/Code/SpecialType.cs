@@ -19,6 +19,11 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// <c>void</c>.
         /// </summary>
-        Void
+        Void,
+
+        /// <summary>
+        /// <c>object</c>.
+        /// </summary>
+        Object
     }
 }

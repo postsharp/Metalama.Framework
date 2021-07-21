@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
             this.DefaultScope = defaultScope;
         }
-        
+
         // This overload is used for tests only.
         internal UserDiagnosticSink( IDeclaration? defaultScope = null )
         {

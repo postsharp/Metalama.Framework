@@ -128,6 +128,22 @@ namespace Caravela.Framework.Impl.Advices
 
                                 break;
 
+                            case IField templateField:
+                                var introduceFieldAdvice = new IntroduceFieldAdvice(
+                                    aspect,
+                                    targetType,
+                                    null,
+                                    templateField,
+                                    scope,
+                                    conflictBehavior,
+                                    layerName,
+                                    null );
+
+                                advice = introduceFieldAdvice;
+                                builder = introduceFieldAdvice.Builder;
+
+                                break;
+
                             default:
                                 throw new AssertionFailedException( $"Don't know how to introduce a {templateDeclaration.DeclarationKind}." );
                         }

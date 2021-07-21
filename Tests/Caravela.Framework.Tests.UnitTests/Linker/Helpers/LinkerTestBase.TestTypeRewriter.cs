@@ -361,7 +361,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 switch ( node )
                 {
                     case MethodDeclarationSyntax { Body: not null } method:
-                        var rewrittenMethodBody =methodBodyRewriter.VisitBlock( method.Body );
+                        var rewrittenMethodBody = methodBodyRewriter.VisitBlock( method.Body );
 
                         overrideSyntax =
                             method
@@ -489,7 +489,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 return method
                     .WithAttributeLists( List<AttributeListSyntax>() )
                     .WithIdentifier( Identifier( method.Identifier.ValueText + "__SymbolHelper" ) )
-                    .WithExpressionBody(null)
+                    .WithExpressionBody( null )
                     .WithBody(
                         method.ReturnType.ToString() == "void"
                             ? Block()
@@ -516,13 +516,13 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                                         {
                                             _ when a.Kind() == SyntaxKind.GetAccessorDeclaration =>
                                                 a
-                                                .WithExpressionBody( null )
-                                                .WithBody(
-                                                    Block(
-                                                        ReturnStatement(
-                                                            LiteralExpression(
-                                                                SyntaxKind.DefaultLiteralExpression,
-                                                                Token( SyntaxKind.DefaultKeyword ) ) ) ) ),
+                                                    .WithExpressionBody( null )
+                                                    .WithBody(
+                                                        Block(
+                                                            ReturnStatement(
+                                                                LiteralExpression(
+                                                                    SyntaxKind.DefaultLiteralExpression,
+                                                                    Token( SyntaxKind.DefaultKeyword ) ) ) ) ),
                                             _ when a.Kind() == SyntaxKind.SetAccessorDeclaration =>
                                                 a.WithBody( Block() ),
                                             _ => throw new NotSupportedException()

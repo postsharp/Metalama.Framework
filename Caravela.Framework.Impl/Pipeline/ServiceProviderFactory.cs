@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Pipeline
             serviceProvider.AddService( new SyntaxSerializationService() );
             serviceProvider.AddService( new SystemTypeResolver( serviceProvider ) );
             serviceProvider.AddService( new DefaultCompileTimeDomainFactory() );
-            
+
             if ( freeze )
             {
                 serviceProvider.Freeze();

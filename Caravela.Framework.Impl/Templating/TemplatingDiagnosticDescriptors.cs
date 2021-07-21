@@ -181,14 +181,15 @@ namespace Caravela.Framework.Impl.Templating
                     + "in a template is a compile-time keyword. Use 'meta.This' instead.",
                     _category,
                     Error );
-        
+
         internal static readonly DiagnosticDefinition<string>
             CannotEmitCompileTimeAssembly
                 = new(
                     "CR0222",
                     "Error compiling the compile-time assembly.",
                     "The compile-time project could not be compiled. In most cases, this is due to a problem in your code and can be diagnosed " +
-                    "using the other reported errors. If, however, you believe this is due to a bug in Caravela, please report the issue and include diagnostic " +
+                    "using the other reported errors. If, however, you believe this is due to a bug in Caravela, please report the issue and include diagnostic "
+                    +
                     "information available in '{0}'.",
                     _category,
                     Error );

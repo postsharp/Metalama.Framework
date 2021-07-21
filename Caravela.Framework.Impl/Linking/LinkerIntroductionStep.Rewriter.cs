@@ -201,7 +201,7 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             // Recursively add members dependent on this introduction
                             AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.After, builder ) );
-                        } 
+                        }
                     }
                 }
             }
@@ -213,14 +213,14 @@ namespace Caravela.Framework.Impl.Linking
                     return null;
                 }
 
-                return base.VisitVariableDeclarator( node );                
+                return base.VisitVariableDeclarator( node );
             }
 
             public override SyntaxNode? VisitFieldDeclaration( FieldDeclarationSyntax node )
             {
-                var visitedNode = (FieldDeclarationSyntax?)base.VisitFieldDeclaration( node );
+                var visitedNode = (FieldDeclarationSyntax?) base.VisitFieldDeclaration( node );
 
-                if ( visitedNode != null && !visitedNode.Declaration.Variables.Any())
+                if ( visitedNode != null && !visitedNode.Declaration.Variables.Any() )
                 {
                     return null;
                 }

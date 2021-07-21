@@ -131,7 +131,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 return false;
             }
         }
-        
+
         private protected override HighLevelPipelineStage CreateStage(
             IReadOnlyList<OrderedAspectLayer> parts,
             CompileTimeProject compileTimeProject,

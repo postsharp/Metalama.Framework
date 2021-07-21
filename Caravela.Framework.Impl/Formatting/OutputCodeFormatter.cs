@@ -136,7 +136,6 @@ namespace Caravela.Framework.Impl.Formatting
         // Code formatting is used by TryCaravela only now. Somehow TryCaravela also builds through the command line for some
         // initialization, which triggers an error because we don't ship all necessary assemblies.
 
-        public static bool CanFormat
-            => AppDomain.CurrentDomain.GetAssemblies().Any( a => a.GetName().Name == "Microsoft.CodeAnalysis.Workspaces" );
+        public static bool CanFormat => AppDomain.CurrentDomain.GetAssemblies().Any( a => a.GetName().Name == "Microsoft.CodeAnalysis.Workspaces" );
     }
 }

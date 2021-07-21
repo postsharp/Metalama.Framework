@@ -8,13 +8,13 @@ namespace Caravela.Framework.Impl
 {
     public static class SyntaxExtensions
     {
-        public static MemberDeclarationSyntax? GetMemberDeclarationSyntax(this SyntaxNode? node)
+        public static MemberDeclarationSyntax? GetMemberDeclarationSyntax( this SyntaxNode? node )
         {
             var current = node;
 
-            while (current != null)
+            while ( current != null )
             {
-                if (current is MemberDeclarationSyntax memberDeclaration)
+                if ( current is MemberDeclarationSyntax memberDeclaration )
                 {
                     return memberDeclaration;
                 }

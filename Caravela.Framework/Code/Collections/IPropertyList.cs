@@ -62,9 +62,9 @@ namespace Caravela.Framework.Code.Collections
         /// <param name="matchIsStatic">Value indicating whether the staticity of the property should be matched.</param>
         /// <returns>Enumeration of properties and indexers matching specified constraints. If <paramref name="declaredOnly" /> is set to <c>false</c>, only the top-most visible property of the same signature is included.</returns>
         /// <returns>A <see cref="IProperty"/> that matches the given signature. If <paramref name="declaredOnly" /> is set to <c>false</c>, the top-most visible property or indexer is shown.</returns>
-        IProperty? OfExactSignature( 
-            IProperty signatureTemplate, 
-            bool matchIsStatic = true, 
+        IProperty? OfExactSignature(
+            IProperty signatureTemplate,
+            bool matchIsStatic = true,
             bool declaredOnly = true );
     }
 }

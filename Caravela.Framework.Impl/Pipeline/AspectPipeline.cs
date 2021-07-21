@@ -45,20 +45,20 @@ namespace Caravela.Framework.Impl.Pipeline
             IProjectOptions projectOptions,
             AspectExecutionScenario executionScenario,
             bool isTest,
-            CompileTimeDomain? domain, 
+            CompileTimeDomain? domain,
             IDirectoryOptions? directoryOptions = null,
             IAssemblyLocator? assemblyLocator = null )
         {
             this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( directoryOptions, assemblyLocator );
 
             var existingProjectOptions = this.ServiceProvider.GetOptionalService<IProjectOptions>();
-            
+
             if ( existingProjectOptions != null )
             {
                 // TryCaravela uses this scenario to define options.
                 projectOptions = existingProjectOptions.Apply( projectOptions );
             }
-            
+
             this.ServiceProvider.AddService( projectOptions );
             this.ProjectOptions = projectOptions;
 

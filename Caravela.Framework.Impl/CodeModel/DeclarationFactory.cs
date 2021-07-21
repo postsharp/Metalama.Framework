@@ -151,6 +151,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => specialType switch
             {
                 SpecialType.Void => this._voidType ??= this.GetTypeByReflectionType( typeof(void) ),
+                SpecialType.Object => this._voidType ??= this.GetTypeByReflectionType( typeof(object) ),
                 _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
             };
 

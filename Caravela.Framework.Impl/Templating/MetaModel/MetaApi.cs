@@ -91,7 +91,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             {
                 return;
             }
-            
+
             if ( Debugger.IsAttached )
             {
                 Debugger.Break();

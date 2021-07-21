@@ -17,7 +17,8 @@ namespace Caravela.Framework.Impl.Linking
             CannotUseBaseInvokerWithInstanceExpression = new(
                 "CR0600",
                 "Cannot use Base invoker with the instance expression.",
-                "The aspect '{0}' on '{1}' uses Base invoker with an instance different than 'this'. Use 'meta.This' as the first argument or use Final invoker.",
+                "The aspect '{0}' on '{1}' uses Base invoker with an instance different than 'this'. Use 'meta.This' as the first argument or use Final invoker."
+               ,
                 _category, Error );
     }
 }

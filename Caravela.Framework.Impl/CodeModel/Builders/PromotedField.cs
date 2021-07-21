@@ -15,7 +15,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public MemberRef<IMemberOrNamedType> ReplacedMember => this._field.ToMemberRef<IMemberOrNamedType>();
 
-        public PromotedField( Advice advice, IField field ) : base( advice, field.DeclaringType, field.Name, true, field.Writeability == Writeability.All, true, false )
+        public PromotedField( Advice advice, IField field ) : base(
+            advice,
+            field.DeclaringType,
+            field.Name,
+            true,
+            field.Writeability == Writeability.All,
+            true,
+            false )
         {
             this._field = field;
             this.Type = field.Type;
@@ -23,9 +30,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             this.IsStatic = this._field.IsStatic;
 
             // Copy the initializer.
-            VariableDeclaratorSyntax fieldDeclaration = (VariableDeclaratorSyntax) this._field.GetPrimaryDeclaration().AssertNotNull();
+            var fieldDeclaration = (VariableDeclaratorSyntax) this._field.GetPrimaryDeclaration().AssertNotNull();
 
-            if (fieldDeclaration.Initializer != null)
+            if ( fieldDeclaration.Initializer != null )
             {
                 this.InitializerSyntax = fieldDeclaration.Initializer.Value;
             }
