@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
@@ -24,13 +25,13 @@ namespace Caravela.Framework.Impl.Linking
         {
             private readonly CompilationModel _compilation;
             private readonly ImmutableMultiValueDictionary<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
-            private readonly IntroductionCollection _introducedMemberCollection;
+            private readonly SyntaxTransformationCollection _introducedMemberCollection;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
             public Rewriter(
-                IntroductionCollection introducedMemberCollection,
+                SyntaxTransformationCollection introducedMemberCollection,
                 ImmutableMultiValueDictionary<IDeclaration, ScopedSuppression> diagnosticSuppressions,
                 CompilationModel compilation )
             {
@@ -195,8 +196,48 @@ namespace Caravela.Framework.Impl.Linking
                         }
 
                         members.Add( introducedNode );
+
+                        if ( introducedMember.Introduction is IDeclarationBuilder builder )
+                        {
+                            // Recursively add members dependent on this introduction
+                            AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.After, builder ) );
+                        } 
                     }
                 }
+            }
+
+            public override SyntaxNode? VisitVariableDeclarator( VariableDeclaratorSyntax node )
+            {
+                if ( this._introducedMemberCollection.IsRemovedSyntax( node ) )
+                {
+                    return null;
+                }
+
+                return base.VisitVariableDeclarator( node );                
+            }
+
+            public override SyntaxNode? VisitFieldDeclaration( FieldDeclarationSyntax node )
+            {
+                var visitedNode = (FieldDeclarationSyntax?)base.VisitFieldDeclaration( node );
+
+                if ( visitedNode != null && !visitedNode.Declaration.Variables.Any())
+                {
+                    return null;
+                }
+
+                return visitedNode;
+            }
+
+            public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+            {
+                var visitedNode = (EventFieldDeclarationSyntax?) base.VisitEventFieldDeclaration( node );
+
+                if ( visitedNode != null && !visitedNode.Declaration.Variables.Any() )
+                {
+                    return null;
+                }
+
+                return visitedNode;
             }
 
             public override SyntaxNode? VisitPragmaWarningDirectiveTrivia( PragmaWarningDirectiveTriviaSyntax node )

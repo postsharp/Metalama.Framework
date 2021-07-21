@@ -1,0 +1,3 @@
+// CompileTimeAspectPipeline.TryExecute failed. 
+// Error CR0500 on `TargetClass`: `The aspect 'Introduction' cannot introduce member 'PropertyBuilder' into type 'TargetClass' because it is already defined in type 'TargetClass'.`
+// Error CR0500 on `TargetClass`: `The aspect 'Introduction' cannot introduce member 'PropertyBuilder' into type 'TargetClass' because it is already defined in type 'TargetClass'.`

@@ -5,19 +5,34 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Transformations;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class PromotedField : PropertyBuilder, IReplaceMember
     {
-        public IField ReplacedField { get; }
+        private readonly IField _field;
 
-        MemberRef<IMemberOrNamedType> IReplaceMember.ReplacedMember => this.ReplacedField.ToMemberLink<IMemberOrNamedType>();
+        public MemberRef<IMemberOrNamedType> ReplacedMember => this._field.ToMemberRef<IMemberOrNamedType>();
 
-        public PromotedField( Advice parentAdvice, IField field )
-            : base( parentAdvice, field.DeclaringType, field.Name, true, true, true, false )
+        public PromotedField( Advice advice, IField field ) : base( advice, field.DeclaringType, field.Name, true, field.Writeability == Writeability.All, true, false )
         {
-            this.ReplacedField = field;
+            this._field = field;
+            this.Type = field.Type;
+            this.Accessibility = this._field.Accessibility;
+            this.IsStatic = this._field.IsStatic;
+
+            // Copy the initializer.
+            VariableDeclaratorSyntax fieldDeclaration = (VariableDeclaratorSyntax) this._field.GetPrimaryDeclaration().AssertNotNull();
+
+            if (fieldDeclaration.Initializer != null)
+            {
+                this.InitializerSyntax = fieldDeclaration.Initializer.Value;
+            }
+
+            // TODO: Attributes etc.
         }
+
+        public override InsertPosition InsertPosition => this._field.ToInsertPosition();
     }
 }

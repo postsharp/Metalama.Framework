@@ -19,23 +19,23 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Collection of introduced members for given transformations. Id is added to the nodes to allow tracking.
         /// </summary>
-        private class IntroductionCollection
+        private class SyntaxTransformationCollection
         {
-            private readonly CompilationModel _compilationModel;
             private readonly List<LinkerIntroducedMember> _introducedMembers;
             private readonly Dictionary<InsertPosition, List<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
             private readonly Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>> _introducedInterfacesByTargetTypeDecl;
+            private readonly HashSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
 
             private int _nextId;
 
             public IReadOnlyList<LinkerIntroducedMember> IntroducedMembers => this._introducedMembers;
 
-            public IntroductionCollection( CompilationModel compilationModel )
+            public SyntaxTransformationCollection()
             {
-                this._compilationModel = compilationModel;
                 this._introducedMembers = new List<LinkerIntroducedMember>();
                 this._introducedMembersByInsertPosition = new Dictionary<InsertPosition, List<LinkerIntroducedMember>>();
                 this._introducedInterfacesByTargetTypeDecl = new Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>>();
+                this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
             }
 
             public void Add( IMemberIntroduction memberIntroduction, IEnumerable<IntroducedMember> introducedMembers )
@@ -77,10 +77,21 @@ namespace Caravela.Framework.Impl.Linking
                 interfaceList.AddRange( introducedInterfaces );
             }
 
-            public void Add( IReplaceMember replaceMember )
+            internal void AddRemovedSyntax( SyntaxNode removedSyntax )
             {
-                var resolvedMember = replaceMember.ReplacedMember.Resolve( this._compilationModel );
-                _ = resolvedMember;
+                switch (removedSyntax)
+                {
+                    case VariableDeclaratorSyntax variableDeclarator:
+                        this._removedVariableDeclaratorSyntax.Add( variableDeclarator );
+                        break;
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+            public bool IsRemovedSyntax( VariableDeclaratorSyntax memberDeclaration )
+            {
+                return this._removedVariableDeclaratorSyntax.Contains( memberDeclaration );
             }
 
             public IEnumerable<LinkerIntroducedMember> GetIntroducedMembersOnPosition( InsertPosition position )

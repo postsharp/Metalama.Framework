@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Collections;
@@ -69,25 +70,20 @@ namespace Caravela.Framework.Impl.CodeModel
         public IPropertyList Properties
             => new PropertyList(
                 this,
-                this.TypeSymbol.GetMembers()
-                    .Select(
-                        m => m switch
-                        {
-                            IPropertySymbol p => new MemberRef<IProperty>( p ),
-                            _ => default
-                        } ) );
+                this.TransformMembers<IProperty, IPropertyBuilder, IPropertySymbol>(
+                    this.TypeSymbol
+                        .GetMembers()
+                        .OfType<IPropertySymbol>() ) );
 
         [Memo]
         public IFieldList Fields
             => new FieldList(
                 this,
-                this.TypeSymbol.GetMembers()
-                    .Select(
-                        m => m switch
-                        {
-                            IFieldSymbol { CanBeReferencedByName: true } p => new MemberRef<IField>( p ),
-                            _ => default
-                        } ) );
+                this.TransformMembers<IField, IFieldBuilder, IFieldSymbol>(
+                    this.TypeSymbol
+                        .GetMembers()
+                        .OfType<IFieldSymbol>()
+                        .Where( s => s is { CanBeReferencedByName: true } ) ) );
 
         [Memo]
         public IFieldOrPropertyList FieldsAndProperties => new FieldAndPropertiesList( this.Fields, this.Properties );
@@ -96,32 +92,28 @@ namespace Caravela.Framework.Impl.CodeModel
         public IEventList Events
             => new EventList(
                 this,
-                this.TypeSymbol
-                    .GetMembers()
-                    .OfType<IEventSymbol>()
-                    .Select( e => new MemberRef<IEvent>( e ) ) );
+                this.TransformMembers<IEvent, IEventBuilder, IEventSymbol>(
+                    this.TypeSymbol
+                        .GetMembers()
+                        .OfType<IEventSymbol>() ) );
 
         [Memo]
         public IMethodList Methods
             => new MethodList(
                 this,
-                this.TypeSymbol
-                    .GetMembers()
-                    .OfType<IMethodSymbol>()
-                    .Where(
-                        m =>
-                            m.MethodKind != MethodKind.Constructor
-                            && m.MethodKind != MethodKind.StaticConstructor
-                            && m.MethodKind != MethodKind.PropertyGet
-                            && m.MethodKind != MethodKind.PropertySet
-                            && m.MethodKind != MethodKind.EventAdd
-                            && m.MethodKind != MethodKind.EventRemove
-                            && m.MethodKind != MethodKind.EventRaise )
-                    .Select( m => new MemberRef<IMethod>( m ) )
-                    .Concat(
-                        this.Compilation.GetObservableTransformationsOnElement( this )
-                            .OfType<MethodBuilder>()
-                            .Select( m => new MemberRef<IMethod>( m ) ) ) );
+                this.TransformMembers<IMethod, IMethodBuilder, IMethodSymbol>(
+                    this.TypeSymbol
+                        .GetMembers()
+                        .OfType<IMethodSymbol>()
+                        .Where(
+                            m =>
+                                m.MethodKind != MethodKind.Constructor
+                                && m.MethodKind != MethodKind.StaticConstructor
+                                && m.MethodKind != MethodKind.PropertyGet
+                                && m.MethodKind != MethodKind.PropertySet
+                                && m.MethodKind != MethodKind.EventAdd
+                                && m.MethodKind != MethodKind.EventRemove
+                                && m.MethodKind != MethodKind.EventRaise ) ) );
 
         [Memo]
         public IConstructorList Constructors
@@ -311,6 +303,92 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 return false;
             }
+        }
+
+        private IEnumerable<MemberRef<TMember>> TransformMembers<TMember, TBuilder, TSymbol>(IEnumerable<TSymbol> symbolMembers)
+            where TMember : class, IMember
+            where TBuilder : IMemberBuilder, TMember
+            where TSymbol : class, ISymbol
+        {
+            var transformations = this.Compilation.GetObservableTransformationsOnElement( this );
+
+            if (transformations.Length == 0)
+            {
+                // No transformations.
+                return symbolMembers.Select( x => new MemberRef<TMember>( x ) );
+            }
+
+            if (!transformations.OfType<TBuilder>().Any(t=> t is IReplaceMember))
+            {
+                // No replaced members.
+                return
+                    symbolMembers
+                    .Select( x => new MemberRef<TMember>( x ) )
+                    .Concat( transformations.OfType<TBuilder>().Select( x => x.ToMemberRef<TMember>() ) );
+            }
+
+            var allSymbols = new HashSet<TSymbol>( symbolMembers, SymbolEqualityComparer.Default );
+            var replacedSymbols = new HashSet<TSymbol>( SymbolEqualityComparer.Default );
+            var replacedBuilders = new HashSet<TBuilder>();
+            var builders = new List<TBuilder>();
+
+            // Go through transformations, noting replaced symbols and builders.
+            foreach (var builder in transformations )
+            {
+                if (builder is IReplaceMember replace)
+                {
+                    if ( replace.ReplacedMember.Target != null && allSymbols.Contains( (TSymbol) replace.ReplacedMember.Target ))
+                    {
+                        // If the MemberRef points to a symbol just remove from symbol list.
+                        // This prevents needless allocation.
+                        replacedSymbols.Add( (TSymbol) replace.ReplacedMember.Target );
+                    }
+                    else
+                    {
+                        // Otherwise resolve the MemberRef.
+                        var resolved = replace.ReplacedMember.Resolve( this.Compilation );
+                        var resolvedSymbol = (TSymbol?)resolved.GetSymbol();
+
+                        if ( resolvedSymbol != null)
+                        {
+                            replacedSymbols.Add( resolvedSymbol );
+                        }
+                        else if (resolved is TBuilder replacedBuilder)
+                        {
+                            replacedBuilders.Add( replacedBuilder );
+                        }
+                        else
+                        {
+                            throw new AssertionFailedException();
+                        }
+                    }
+                }
+
+                if ( builder is TBuilder typedBuilder )
+                {
+                    builders.Add( typedBuilder );
+                }
+            }
+
+            var members = new List<MemberRef<TMember>>();
+
+            foreach (var symbol in symbolMembers )
+            {
+                if (!replacedSymbols.Contains(symbol))
+                {
+                    members.Add( new MemberRef<TMember>( symbol ) );
+                }
+            }
+
+            foreach (var builder in builders )
+            {
+                if (!replacedBuilders.Contains(builder))
+                {
+                    members.Add( builder.ToMemberRef<TMember>() );
+                }
+            }
+
+            return members;
         }
     }
 }

@@ -29,6 +29,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IInvokerFactory<IEventInvoker> Invokers => this.Underlying.Invokers;
 
+        public IEvent? OverriddenEvent => this.Underlying.OverriddenEvent;
+
         IMethod IEvent.Adder => this.Adder;
 
         IMethod IEvent.Remover => this.Remover;

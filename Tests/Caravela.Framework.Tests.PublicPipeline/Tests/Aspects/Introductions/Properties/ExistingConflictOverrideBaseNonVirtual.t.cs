@@ -1,0 +1,3 @@
+// CompileTimeAspectPipeline.TryExecute failed. 
+// Error CR0501 on `TargetClass`: `The aspect 'Introduction' cannot introduce member 'PropertyBuilder' into type 'TargetClass' because it is already defined in type 'BaseClass' and is static, non-virtual or sealed.`
+// Error CR0501 on `TargetClass`: `The aspect 'Introduction' cannot introduce member 'PropertyBuilder' into type 'TargetClass' because it is already defined in type 'BaseClass' and is static, non-virtual or sealed.`

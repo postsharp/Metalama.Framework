@@ -44,6 +44,23 @@ namespace Caravela.Framework.Impl.CodeModel
                 ? new PseudoAccessor( this, AccessorSemantic.Raise )
                 : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );
 
+        public IEvent? OverriddenEvent
+        {
+            get
+            {
+                var overriddenEvent = this._symbol.OverriddenEvent;
+
+                if ( overriddenEvent != null )
+                {
+                    return this.Compilation.Factory.GetEvent( overriddenEvent );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
         [Memo]
         public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
             => this._symbol.ExplicitInterfaceImplementations.Select( e => this.Compilation.Factory.GetEvent( e ) ).ToList();

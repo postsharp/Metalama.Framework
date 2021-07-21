@@ -285,10 +285,10 @@ namespace Caravela.Framework.Impl.Linking
                 switch ( declaration )
                 {
                     case MethodDeclarationSyntax methodDecl:
-                        return (SyntaxNode?) methodDecl.Body ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) methodDecl.Body ?? methodDecl.ExpressionBody ?? throw new AssertionFailedException();
 
                     case AccessorDeclarationSyntax accessorDecl:
-                        return (SyntaxNode?) accessorDecl.Body ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) accessorDecl.Body ?? accessorDecl.ExpressionBody ?? throw new AssertionFailedException();
 
                     default:
                         throw new AssertionFailedException();
