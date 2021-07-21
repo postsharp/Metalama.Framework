@@ -316,7 +316,8 @@ namespace Caravela.Framework.Impl.Linking
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithInitializer( initializer )
                     .WithTrailingTrivia( ElasticLineFeed )
-                    .WithAccessorList( accessorList );
+                    .WithAccessorList( accessorList )
+                    .AddGeneratedCodeAnnotation();
         }
     }
 }

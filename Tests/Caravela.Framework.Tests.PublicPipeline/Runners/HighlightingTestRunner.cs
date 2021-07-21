@@ -105,7 +105,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                         Path.GetDirectoryName( sourceAbsolutePath )!,
                         Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.InputHtml );
 
-                    CompareHtmlFiles( syntaxTree.HtmlInputRunTimePath!, expectedInputHtmlPath );
+                    this.CompareHtmlFiles( syntaxTree.HtmlInputRunTimePath!, expectedInputHtmlPath );
                 }
             }
 
@@ -116,13 +116,16 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     Path.GetDirectoryName( testInput.FullPath )!,
                     Path.GetFileNameWithoutExtension( testInput.FullPath ) + FileExtensions.OutputHtml );
 
-                CompareHtmlFiles( testResult.OutputHtmlPath!, expectedOutputHtmlPath );
+                this.CompareHtmlFiles( testResult.OutputHtmlPath!, expectedOutputHtmlPath );
             }
         }
 
-        private static void CompareHtmlFiles( string actualHtmlPath, string expectedHtmlPath )
+        private void CompareHtmlFiles( string actualHtmlPath, string expectedHtmlPath )
         {
             Assert.True( File.Exists( expectedHtmlPath ) );
+
+            this.Logger?.WriteLine( "Actual HTML: " + actualHtmlPath );
+            this.Logger?.WriteLine( "Expected HTML: " + actualHtmlPath );
 
             var expectedHighlightedSource = NormalizeEndOfLines( File.ReadAllText( expectedHtmlPath ) );
 
