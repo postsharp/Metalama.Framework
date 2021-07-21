@@ -29,7 +29,8 @@ namespace Caravela.Framework.Impl.CodeModel
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 
         [Memo]
-        public IInvokerFactory<IPropertyInvoker> Invokers => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ) );
+        public IInvokerFactory<IPropertyInvoker> Invokers
+            => new InvokerFactory<IPropertyInvoker>( ( order, invokerOperator ) => new PropertyInvoker( this, order, invokerOperator ) );
 
         public override ISymbol Symbol => this._symbol;
 

@@ -53,7 +53,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsOpenGeneric => false;
 
         [Memo]
-        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), false );
+        public IInvokerFactory<IMethodInvoker> Invokers
+            => new InvokerFactory<IMethodInvoker>(
+                ( order, invokerOperator )
+                    => new MethodInvoker( this, order, invokerOperator ),
+                false );
 
         public IMethod? OverriddenMethod => throw new NotImplementedException();
 
@@ -136,46 +140,39 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         bool IMemberOrNamedType.IsSealed => this.IsSealed;
 
-        public IGenericParameterBuilder AddGenericParameter( string name )
-        {
-            throw new NotSupportedException( "Cannot add generic parameters to accessors." );
-        }
+        public IGenericParameterBuilder AddGenericParameter( string name ) => throw new NotSupportedException( "Cannot add generic parameters to accessors." );
 
         public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
-        {
-            throw new NotSupportedException( "Cannot directly add parameters to accessors." );
-        }
+            => throw new NotSupportedException( "Cannot directly add parameters to accessors." );
 
         public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
-        {
-            throw new NotSupportedException( "Cannot directly add parameters to accessors." );
-        }
+            => throw new NotSupportedException( "Cannot directly add parameters to accessors." );
 
         public IMethod WithGenericArguments( params IType[] genericArguments )
-        {
-            throw new NotSupportedException( "Cannot add generic parameters to accessors." );
-        }
+            => throw new NotSupportedException( "Cannot add generic parameters to accessors." );
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
 
         public bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
         [return: RunTimeOnly]
-        public MethodInfo ToMethodInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
         [return: RunTimeOnly]
-        public System.Reflection.MethodBase ToMethodBase()
-        {
-            throw new NotImplementedException();
-        }
+        public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
         [return: RunTimeOnly]
-        public MemberInfo ToMemberInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public MemberInfo ToMemberInfo() => throw new NotImplementedException();
+
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+            => this._containingDeclaration.ToDisplayString( format, context ) + "." + this.MethodKind switch
+            {
+                MethodKind.EventAdd => "add",
+                MethodKind.EventRemove => "remove",
+                MethodKind.PropertyGet => "get",
+                MethodKind.PropertySet => "set",
+                MethodKind.EventRaise => "raise",
+                _ => this.MethodKind.ToString()
+            };
     }
 }

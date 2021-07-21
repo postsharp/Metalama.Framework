@@ -22,5 +22,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsAsync { get; set; }
 
         public bool IsOverride { get; set; }
+        
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+            => this.DeclaringType.ToDisplayString( format, context ) + "." + this.Name;
     }
 }

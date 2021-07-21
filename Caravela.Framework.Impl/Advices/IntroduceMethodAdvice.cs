@@ -153,6 +153,15 @@ namespace Caravela.Framework.Impl.Advices
                                         (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
                         }
+                        else if ( !compilation.InvariantComparer.Equals( this.Builder.ReturnType, existingDeclaration.ReturnType ) )
+                        {
+                            return
+                                AdviceResult.Create(
+                                    AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateDiagnostic(
+                                        this.TargetDeclaration.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration,
+                                         existingDeclaration.DeclaringType, existingDeclaration.ReturnType) ) );
+                        }
                         else
                         {
                             this.MemberBuilder.IsOverride = true;

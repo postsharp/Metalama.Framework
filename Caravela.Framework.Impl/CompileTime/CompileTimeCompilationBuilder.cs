@@ -498,6 +498,7 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( CompileTimeProjectManifest.TryDeserialize( File.OpenRead( outputPaths.Manifest ), out var manifest ) )
             {
                 project = CompileTimeProject.Create(
+                    this._serviceProvider,
                     this._domain,
                     runTimeCompilation.Assembly.Identity,
                     new AssemblyIdentity( compileTimeAssemblyName ),
@@ -601,6 +602,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         else
                         {
                             project = CompileTimeProject.CreateEmpty(
+                                this._serviceProvider,
                                 this._domain,
                                 runTimeCompilation.Assembly.Identity,
                                 new AssemblyIdentity( compileTimeAssemblyName ),
@@ -636,6 +638,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );
 
                         project = CompileTimeProject.Create(
+                            this._serviceProvider,
                             this._domain,
                             runTimeCompilation.Assembly.Identity,
                             compileTimeCompilation.Assembly.Identity,

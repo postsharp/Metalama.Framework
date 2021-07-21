@@ -51,7 +51,8 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     try
                     {
-                        output = this._userCodeInvoker.Invoke( () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() ) );
+                        output = this._userCodeInvoker.Invoke(
+                            () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() ) );
                     }
                     catch ( TargetInvocationException ex ) when ( ex.InnerException != null )
                     {
@@ -71,7 +72,7 @@ namespace Caravela.Framework.Impl.Templating
                                 (this._sourceTemplateSymbol,
                                  templateExpansionContext.MetaApi.Declaration,
                                  userException.GetType().Name,
-                                 userException.ToString()) ) );
+                                 userException.Message.TrimEnd( "." )) ) );
 
                         block = null;
 

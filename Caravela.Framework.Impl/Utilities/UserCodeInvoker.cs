@@ -9,9 +9,9 @@ namespace Caravela.Framework.Impl.Utilities
     {
         private readonly IUserCodeInvokerHook? _hook;
 
-        public UserCodeInvoker( IServiceProvider serviceProvider )
+        public UserCodeInvoker( IServiceProvider? serviceProvider )
         {
-            this._hook = serviceProvider.GetOptionalService<IUserCodeInvokerHook>();
+            this._hook = serviceProvider?.GetOptionalService<IUserCodeInvokerHook>();
         }
 
         public T Invoke<T>( Func<T> func )

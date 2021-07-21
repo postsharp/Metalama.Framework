@@ -22,6 +22,8 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
@@ -161,7 +163,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             var buildTimeAssemblyStream = new MemoryStream();
             var buildTimeDebugStream = new MemoryStream();
-            
+
             // SyntaxTreeStructureVerifier.Verify( compileTimeCompilation );
 
             var emitResult = compileTimeCompilation.Emit(
@@ -177,6 +179,11 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 testResult.SetFailed( "The final template compilation failed." );
 
                 return testResult;
+            }
+
+            if ( !testInput.Options.AllowCompileTimeDynamicCode.GetValueOrDefault() )
+            {
+                VerifyNoDynamicCode( buildTimeAssemblyStream );
             }
 
             buildTimeAssemblyStream.Seek( 0, SeekOrigin.Begin );
@@ -225,6 +232,43 @@ namespace Caravela.Framework.Tests.Integration.Runners
             return testResult;
         }
 
+        private static void VerifyNoDynamicCode( MemoryStream stream )
+        {
+            stream.Seek( 0, SeekOrigin.Begin );
+            using var peReader = new PEReader( stream, PEStreamOptions.LeaveOpen );
+            var metadataReader = peReader.GetMetadataReader();
+
+            foreach ( var typeRefHandle in metadataReader.TypeReferences )
+            {
+                var typeRef = metadataReader.GetTypeReference( typeRefHandle );
+                var ns = metadataReader.GetString( typeRef.Namespace );
+                var typeName = metadataReader.GetString( typeRef.Name );
+
+                if ( ns.Contains( "Microsoft.CSharp.RuntimeBinder", StringComparison.Ordinal ) &&
+                     string.Equals( typeName, "CSharpArgumentInfo", StringComparison.Ordinal ) )
+                {
+                    var directory = Path.Combine( Path.GetTempPath(), "Caravela", "InvalidAssemblies" );
+
+                    if ( !Directory.Exists( directory ) )
+                    {
+                        Directory.CreateDirectory( directory );
+                    }
+
+                    var diagnosticFile = Path.Combine( directory, Guid.NewGuid().ToString() + ".dll" );
+
+                    using ( var diagnosticStream = File.Create( diagnosticFile ) )
+                    {
+                        stream.Seek( 0, SeekOrigin.Begin );
+                        stream.CopyTo( diagnosticStream );
+                    }
+
+                    throw new AssertionFailedException( $"The binary contains dynamic code. See '{diagnosticFile}'." );
+                }
+            }
+
+            stream.Seek( 0, SeekOrigin.Begin );
+        }
+
         private (TemplateExpansionContext Context, MethodDeclarationSyntax TargetMethod) CreateTemplateExpansionContext(
             IServiceProvider serviceProvider,
             Assembly assembly,
@@ -240,7 +284,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var targetCaravelaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! )!;
             var targetMethod = targetCaravelaType.Methods.Single( m => string.Equals( m.Name, "Method", StringComparison.Ordinal ) );
 
-            var diagnostics = new UserDiagnosticSink( null, targetMethod );
+            var diagnostics = new UserDiagnosticSink( targetMethod );
 
             var roslynTargetType = roslynCompilation.Assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
 

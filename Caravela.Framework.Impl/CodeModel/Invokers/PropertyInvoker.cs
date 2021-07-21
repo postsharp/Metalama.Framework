@@ -15,10 +15,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
     {
         protected IProperty Property => (IProperty) this.Member;
 
-        protected override void AssertNoArgument()
-        {
-            this.Member.CheckArguments( this.Property.Parameters, null );
-        }
+        protected override void AssertNoArgument() => this.Member.CheckArguments( this.Property.Parameters, null );
 
         private ExpressionSyntax CreateIndexerAccess( RuntimeExpression? instance, RuntimeExpression[]? args )
         {
@@ -36,14 +33,12 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
         }
 
         public object GetIndexerValue( object? instance, params object?[] args )
-        {
-            return new DynamicExpression(
+            => new DynamicExpression(
                 this.CreateIndexerAccess(
                     RuntimeExpression.FromValue( instance ),
                     RuntimeExpression.FromValue( args ) ),
                 this.Member.Type,
                 false );
-        }
 
         public object SetIndexerValue( object? instance, object value, params object?[] args )
         {
@@ -54,6 +49,6 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             return new DynamicExpression( expression, this.Member.Type, false );
         }
 
-        public PropertyInvoker( IProperty member, InvokerOrder order ) : base( member, order ) { }
+        public PropertyInvoker( IProperty member, InvokerOrder order, InvokerOperator invokerOperator ) : base( member, order, invokerOperator ) { }
     }
 }

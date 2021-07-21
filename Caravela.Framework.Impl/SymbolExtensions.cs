@@ -102,6 +102,35 @@ namespace Caravela.Framework.Impl
             }
         }
 
+        public static bool Is( this ITypeSymbol left, ITypeSymbol right )
+        {
+            if ( left is IErrorTypeSymbol )
+            {
+                return false;
+            }
+
+            if ( SymbolEqualityComparer.Default.Equals( left, right ) )
+            {
+                return true;
+            }
+            else if ( left.BaseType != null && left.BaseType.Is( right ) )
+            {
+                return true;
+            }
+            else
+            {
+                foreach ( var i in left.Interfaces )
+                {
+                    if ( i.Is( right ) )
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
         // TODO: Partial methods etc.
 
         public static SyntaxReference? GetPrimarySyntaxReference( this ISymbol symbol )
@@ -117,9 +146,6 @@ namespace Caravela.Framework.Impl
             }
         }
 
-        public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol )
-        {
-            return symbol.GetPrimarySyntaxReference()?.GetSyntax();
-        }
+        public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol ) => symbol.GetPrimarySyntaxReference()?.GetSyntax();
     }
 }

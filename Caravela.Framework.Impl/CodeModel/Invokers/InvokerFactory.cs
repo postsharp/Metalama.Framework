@@ -9,17 +9,21 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
     internal class InvokerFactory<T> : IInvokerFactory<T>
         where T : class, IInvoker
     {
-        private readonly Func<InvokerOrder, T> _createInvoker;
+        private readonly Func<InvokerOrder, InvokerOperator, T> _createInvoker;
         private readonly bool _hasBaseInvoker;
 
-        public InvokerFactory( Func<InvokerOrder, T> createInvoker, bool hasBaseInvoker = true )
+        public InvokerFactory( Func<InvokerOrder, InvokerOperator, T> createInvoker, bool hasBaseInvoker = true )
         {
             this._createInvoker = createInvoker;
             this._hasBaseInvoker = hasBaseInvoker;
         }
 
-        public T? Base => this._hasBaseInvoker ? this._createInvoker( InvokerOrder.Base ) : null;
+        public T? Base => this._hasBaseInvoker ? this._createInvoker( InvokerOrder.Base, InvokerOperator.Default ) : null;
 
-        public T Final => this._createInvoker( InvokerOrder.Default );
+        public T? BaseConditional => this._hasBaseInvoker ? this._createInvoker( InvokerOrder.Base, InvokerOperator.Conditional ) : null;
+
+        public T Final => this._createInvoker( InvokerOrder.Default, InvokerOperator.Default );
+
+        public T FinalConditional => this._createInvoker( InvokerOrder.Default, InvokerOperator.Conditional );
     }
 }

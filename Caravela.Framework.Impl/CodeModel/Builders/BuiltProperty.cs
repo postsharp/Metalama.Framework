@@ -55,7 +55,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 
         [Memo]
-        public IInvokerFactory<IPropertyInvoker> Invokers => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ), false );
+        public IInvokerFactory<IPropertyInvoker> Invokers
+            => new InvokerFactory<IPropertyInvoker>( ( order, invokerOperator ) => new PropertyInvoker( this, order, invokerOperator ), false );
 
         public IProperty? OverriddenProperty => this.PropertyBuilder.OverriddenProperty;
 

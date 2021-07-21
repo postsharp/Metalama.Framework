@@ -49,6 +49,9 @@ namespace Caravela.Framework.Code
         /// <returns></returns>
         IPointerType MakePointerType( IType pointedType );
 
+        T MakeNullable<T>( T type )
+            where T : IType;
+
         IType GetSpecialType( SpecialType specialType );
 
         /// <summary>

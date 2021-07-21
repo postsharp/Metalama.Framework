@@ -175,7 +175,7 @@ namespace Caravela.Framework.Impl.Linking
                 syntaxTreeMapping,
                 syntaxTransformationCollection.IntroducedMembers );
 
-            return new LinkerIntroductionStepOutput( diagnostics.ToImmutable(), intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
+            return new LinkerIntroductionStepOutput( diagnostics, intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
         }
     }
 }

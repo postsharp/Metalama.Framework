@@ -8,6 +8,7 @@ using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
@@ -23,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     /// <see cref="IDeclarationRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
     /// 
     /// </summary>
-    internal abstract class DeclarationBuilder : IDeclarationBuilder, IDeclarationInternal
+    internal abstract class DeclarationBuilder : IDeclarationBuilder, IDeclarationInternal, ITransformation
     {
         internal Advice ParentAdvice { get; }
 
@@ -43,13 +44,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsFrozen { get; private set; }
 
+        Advice ITransformation.Advice => this.ParentAdvice;
+
         public DeclarationBuilder( Advice parentAdvice )
         {
             this.ParentAdvice = parentAdvice;
         }
 
-        // TODO: How to implement this?
-        public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.GetType().Name;
+        public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
         public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments )
         {
@@ -74,10 +76,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public void RemoveAttributes( INamedType type ) => throw new NotImplementedException();
 
-        public virtual void Freeze()
-        {
-            this.IsFrozen = true;
-        }
+        public virtual void Freeze() => this.IsFrozen = true;
 
         public IDiagnosticLocation? DiagnosticLocation => this.ContainingDeclaration?.DiagnosticLocation;
 
@@ -87,5 +86,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences
             => ((IDeclarationInternal?) this.ContainingDeclaration)?.DeclaringSyntaxReferences ?? ImmutableArray<SyntaxReference>.Empty;
+
+        public override string ToString() => this.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
     }
 }

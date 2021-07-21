@@ -350,7 +350,7 @@ namespace Caravela.Framework.Impl.CompileTime
             using var stream = new FileStream( path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite );
             using var peReader = new PEReader( stream );
 
-            MetadataReader metadataReader = peReader.GetMetadataReader();
+            var metadataReader = peReader.GetMetadataReader();
 
             foreach ( var resourceHandle in metadataReader.ManifestResources )
             {
@@ -456,6 +456,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 CompileTimeCompilationBuilder.GetCompileTimeAssemblyName( manifest.AssemblyName, referenceProjects, manifest.SourceHash );
 
             project = CompileTimeProject.Create(
+                this._serviceProvider,
                 this._domain,
                 runTimeAssemblyIdentity,
                 new AssemblyIdentity( compileTimeAssemblyName ),

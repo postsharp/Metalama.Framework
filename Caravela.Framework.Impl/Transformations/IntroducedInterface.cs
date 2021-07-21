@@ -20,6 +20,8 @@ namespace Caravela.Framework.Impl.Transformations
 
         public ImplementInterfaceAdvice Advice { get; }
 
+        Advice ITransformation.Advice => this.Advice;
+
         public INamedType TargetType { get; }
 
         public SyntaxTree TargetSyntaxTree => this.TargetType.GetSymbol().GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
