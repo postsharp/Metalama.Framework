@@ -136,8 +136,7 @@ namespace Caravela.Framework.Impl.Advices
                                     templateField,
                                     scope,
                                     conflictBehavior,
-                                    layerName,
-                                    null );
+                                    layerName );
 
                                 advice = introduceFieldAdvice;
                                 builder = introduceFieldAdvice.Builder;

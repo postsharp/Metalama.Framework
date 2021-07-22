@@ -143,8 +143,7 @@ namespace Caravela.Framework.Impl.Advices
             INamedType targetType,
             string name,
             IntroductionScope scope = IntroductionScope.Default,
-            OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null )
+            OverrideStrategy whenExists = OverrideStrategy.Default )
         {
             var diagnosticList = new DiagnosticList();
 
@@ -155,8 +154,7 @@ namespace Caravela.Framework.Impl.Advices
                 null,
                 scope,
                 whenExists,
-                _layerName,
-                tags );
+                _layerName );
 
             advice.Initialize( this._declarativeAdvices, diagnosticList );
             ThrowOnErrors( diagnosticList );

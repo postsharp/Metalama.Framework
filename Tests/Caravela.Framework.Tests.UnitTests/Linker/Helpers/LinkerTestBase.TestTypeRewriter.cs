@@ -361,7 +361,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 switch ( node )
                 {
                     case MethodDeclarationSyntax { Body: not null } method:
-                        var rewrittenMethodBody = methodBodyRewriter.VisitBlock( method.Body );
+                        var rewrittenMethodBody = methodBodyRewriter.VisitBlock( method.Body.AssertNotNull() );
 
                         overrideSyntax =
                             method

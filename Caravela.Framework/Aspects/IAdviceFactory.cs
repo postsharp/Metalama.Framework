@@ -59,7 +59,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="targetDeclaration">The field or property to override.</param>
         /// <param name="template">The name of a property of the aspect class, with a getter, a setter, or both, whose implementation will be used as a template.
         /// This property must be annotated with <see cref="TemplateAttribute"/>.</param>
-        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template property and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
         /// <seealso href="@overriding-members"/>
         void OverrideFieldOrProperty(
@@ -92,20 +92,16 @@ namespace Caravela.Framework.Aspects
         /// <param name="targetType">The type into which the property must be introduced.</param>
         /// <param name="name">Name of the introduced field.</param> 
         /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
-        /// method. The default scope depends on the scope of the template method. If the method is static, the introduced method is static. However, if the
-        /// template method is non-static, then the introduced method copies of the scope of the target declaration of the aspect.</param>
+        /// field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         /// The default strategy is to fail with a compile-time error.</param>
-        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
-        /// <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
         IFieldBuilder IntroduceField(
             INamedType targetType,
             string name,
             IntroductionScope scope = IntroductionScope.Default,
-            OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null );
+            OverrideStrategy whenExists = OverrideStrategy.Default );
 
         /// <summary>
         /// Introduces a property to the target type, or overrides the implementation of an existing one, by specifying a property template.
@@ -117,11 +113,11 @@ namespace Caravela.Framework.Aspects
         /// this method.
         /// </param>
         /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
-        /// property. The default scope depends on the scope of the template method. If the property is static, the introduced property is static. However, if the
+        /// property. The default scope depends on the scope of the template property. If the property is static, the introduced property is static. However, if the
         /// template property is non-static, then the introduced property copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         /// The default strategy is to fail with a compile-time error.</param>
-        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template property and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
@@ -195,7 +191,7 @@ namespace Caravela.Framework.Aspects
         /// template event is non-static, then the introduced event copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when an event of the same name is already declared in the target type.
         /// The default strategy is to fail with a compile-time error.</param>
-        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template event and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IEventBuilder"/> that allows to change the name and the type of the event.</returns>
         /// <seealso href="@introducing-members"/>
@@ -245,7 +241,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="interfaceType">The type of the implemented interface.</param>
         /// <param name="whenExists">Determines the implementation strategy when the interface is already implemented by the target type.
         /// The default strategy is to fail with a compile-time error.</param>
-        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <param name="tags">An arbitrary dictionary of tags passed to templates and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
         /// <seealso href="@implementing-interfaces"/>
         void ImplementInterface(
@@ -261,7 +257,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="interfaceType">The type of the implemented interface.</param>
         /// <param name="whenExists">Determines the implementation strategy when the interface is already implemented by the target type.
         /// The default strategy is to fail with a compile-time error.</param>
-        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <param name="tags">An arbitrary dictionary of tags passed to templates and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
         /// <seealso href="@implementing-interfaces"/>
         void ImplementInterface(

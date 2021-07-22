@@ -29,9 +29,8 @@ namespace Caravela.Framework.Impl.Advices
             IField? fieldTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
-            string? layerName,
-            Dictionary<string, object?>? tags )
-            : base( aspect, targetDeclaration, fieldTemplate, scope, overrideStrategy, layerName, tags )
+            string? layerName )
+            : base( aspect, targetDeclaration, fieldTemplate, scope, overrideStrategy, layerName, null )
         {
             this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, (explicitName ?? fieldTemplate?.Name).AssertNotNull() );
         }
