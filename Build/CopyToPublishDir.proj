@@ -20,6 +20,7 @@
         <!-- To avoid unintended publishing of artefacts, all items must be explicitly specified without wildcard -->
 
         <ShippedFile Include="$(PackagesDir)\Caravela.Framework.$(Version).nupkg" />
+        <ShippedFile Include="$(PackagesDir)\Caravela.Framework.TestFramework.$(Version).nupkg" />
         <ShippedFile Include="$(PackagesDir)\Caravela.Framework.Redist.$(Version).nupkg" />
         <ShippedFile Include="$(PackagesDir)\Caravela.Framework.Sdk.$(Version).nupkg" />
 
