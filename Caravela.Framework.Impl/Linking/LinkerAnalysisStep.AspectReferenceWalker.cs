@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.Linking
                         ConditionalAccessExpressionSyntax conditionalAccess => conditionalAccess.WhenNotNull,
                         _ => node
                     };
-                    
+
                     var referencedSymbol = this._semanticModel.GetSymbolInfo( nodeWithSymbol ).Symbol.AssertNotNull();
 
                     var resolvedReference = this._referenceResolver.Resolve(

@@ -236,7 +236,7 @@ namespace Caravela.TestFramework
             }
 
             // We exclude CR0222 from the results because it contains randomly-generated info and tests need to be deterministic.
-            
+
             comments.AddRange(
                 this.Diagnostics
                     .Where(

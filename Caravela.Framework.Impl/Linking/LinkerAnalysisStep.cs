@@ -58,6 +58,10 @@ namespace Caravela.Framework.Impl.Linking
 
                         break;
 
+                    case IFieldSymbol:
+                        // NOP.
+                        break;
+
                     default:
                         throw new NotSupportedException();
 
@@ -104,7 +108,12 @@ namespace Caravela.Framework.Impl.Linking
                 methodBodyAnalysisResults,
                 aspectReferences.ToDictionary( x => x.Key, x => (IReadOnlyList<ResolvedAspectReference>) x.Value ) );
 
-            return new LinkerAnalysisStepOutput( input.DiagnosticSink, input.IntermediateCompilation, input.IntroductionRegistry, analysisRegistry, referenceResolver );
+            return new LinkerAnalysisStepOutput(
+                input.DiagnosticSink,
+                input.IntermediateCompilation,
+                input.IntroductionRegistry,
+                analysisRegistry,
+                referenceResolver );
 
             void AnalyzeOverriddenBody( IMethodSymbol symbol )
             {

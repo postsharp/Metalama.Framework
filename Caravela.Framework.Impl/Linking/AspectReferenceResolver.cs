@@ -150,7 +150,7 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         if ( StructuralSymbolComparer.Signature.Equals( symbol, member ) )
                         {
-                            hiddenSymbol = (IMethodSymbol) member;
+                            hiddenSymbol = member;
 
                             return true;
                         }

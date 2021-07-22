@@ -2,7 +2,7 @@ class Yack
     {
 
 
-private IGreetingService? __service1;
+private IGreetingService? _service1;
         [Import]
         IGreetingService? _service {get    {
         var value = this.___service__OriginalImpl;
@@ -24,11 +24,11 @@ private IGreetingService? ___service__OriginalImpl
 {
     get
     {
-        return this.__service1;
+        return this._service1;
     }
 
     set
     {
-        this.__service1 = value;
+        this._service1 = value;
     }
 }    }

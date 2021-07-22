@@ -44,6 +44,11 @@ namespace Caravela.Framework.Code
         IInvokerFactory<IEventInvoker> Invokers { get; }
 
         /// <summary>
+        /// Gets the base event that is overridden by the current event.
+        /// </summary>
+        IEvent? OverriddenEvent { get; }
+
+        /// <summary>
         /// Gets a list of interface events this event explicitly implements.
         /// </summary>
         IReadOnlyList<IEvent> ExplicitInterfaceImplementations { get; }

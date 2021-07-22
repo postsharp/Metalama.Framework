@@ -30,6 +30,14 @@ namespace Caravela.Framework.Code
         [return: RunTimeOnly]
         PropertyInfo ToPropertyInfo();
 
+        /// <summary>
+        /// Gets an object that allows to invoke the current property.
+        /// </summary>
         new IInvokerFactory<IPropertyInvoker> Invokers { get; }
+
+        /// <summary>
+        /// Gets the base property that is overridden by the current property.
+        /// </summary>
+        IProperty? OverriddenProperty { get; }
     }
 }

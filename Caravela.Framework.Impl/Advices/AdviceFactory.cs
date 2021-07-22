@@ -141,11 +141,28 @@ namespace Caravela.Framework.Impl.Advices
 
         public IFieldBuilder IntroduceField(
             INamedType targetType,
+            string name,
             IntroductionScope scope = IntroductionScope.Default,
-            OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null )
+            OverrideStrategy whenExists = OverrideStrategy.Default )
         {
-            throw new NotImplementedException();
+            var diagnosticList = new DiagnosticList();
+
+            var advice = new IntroduceFieldAdvice(
+                this._aspect,
+                targetType,
+                name,
+                null,
+                scope,
+                whenExists,
+                _layerName );
+
+            advice.Initialize( this._declarativeAdvices, diagnosticList );
+            ThrowOnErrors( diagnosticList );
+            this._advices.Add( advice );
+
+            this._diagnosticAdder.Report( diagnosticList );
+
+            return advice.Builder;
         }
 
         public IPropertyBuilder IntroduceProperty(

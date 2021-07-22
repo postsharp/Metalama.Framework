@@ -8,15 +8,13 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class OverrideEventAdvice : Advice
+    internal class OverrideEventAdvice : OverrideMemberAdvice<IEvent>
     {
         public IEvent? TemplateEvent { get; }
 
         public IMethod? AddTemplateMethod { get; }
 
         public IMethod? RemoveTemplateMethod { get; }
-
-        public new IEvent TargetDeclaration => (IEvent) base.TargetDeclaration;
 
         public OverrideEventAdvice(
             AspectInstance aspect,

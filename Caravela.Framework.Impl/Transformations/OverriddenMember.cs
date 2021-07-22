@@ -37,38 +37,6 @@ namespace Caravela.Framework.Impl.Transformations
 
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
 
-        public InsertPosition InsertPosition
-        {
-            get
-            {
-                // TODO: Select a good syntax reference if there are multiple (partial class, partial method).
-                var memberSymbol = (this.OverriddenDeclaration as Member)?.Symbol;
-
-                if ( memberSymbol != null )
-                {
-                    var declaration = memberSymbol.GetPrimaryDeclaration();
-
-                    switch ( declaration )
-                    {
-                        case MemberDeclarationSyntax memberDeclaration:
-                            return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
-
-                        case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax eventFieldDeclaration } }:
-                            return new InsertPosition( InsertPositionRelation.After, eventFieldDeclaration );
-
-                        case VariableDeclaratorSyntax { Parent: { Parent: FieldDeclarationSyntax fieldDeclaration } }:
-                            return new InsertPosition( InsertPositionRelation.After, fieldDeclaration );
-                    }
-                }
-
-                var typeSymbol = ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol;
-
-                return new InsertPosition(
-                    InsertPositionRelation.Within,
-                    (MemberDeclarationSyntax) typeSymbol.GetPrimaryDeclaration().AssertNotNull() );
-            }
-        }
-
         protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind )
         {
             ExpressionSyntax expression;
@@ -111,5 +79,7 @@ namespace Caravela.Framework.Impl.Transformations
                     referenceTargetKind,
                     flags: AspectReferenceFlags.Inlineable );
         }
+
+        public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();
     }
 }

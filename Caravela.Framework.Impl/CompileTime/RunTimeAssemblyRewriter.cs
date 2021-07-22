@@ -31,7 +31,7 @@ namespace Caravela.Compiler
 ";
 
         private static readonly Lazy<SyntaxTree> _intrinsicsSyntaxTree =
-            new Lazy<SyntaxTree>( () => CSharpSyntaxTree.ParseText( _intrinsics, CSharpParseOptions.Default ) );
+            new( () => CSharpSyntaxTree.ParseText( _intrinsics, CSharpParseOptions.Default ) );
 
         private readonly INamedTypeSymbol? _aspectDriverSymbol;
 

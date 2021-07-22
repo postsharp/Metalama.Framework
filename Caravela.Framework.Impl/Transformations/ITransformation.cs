@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.Transformations
     /// <summary>
     /// Represents any transformation.
     /// </summary>
-    internal interface ITransformation 
+    internal interface ITransformation
     {
         Advice Advice { get; }
     }

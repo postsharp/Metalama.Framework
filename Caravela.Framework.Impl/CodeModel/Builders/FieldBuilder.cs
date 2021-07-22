@@ -12,18 +12,20 @@ using Caravela.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class FieldBuilder : MemberBuilder, IFieldBuilder
     {
-        public override DeclarationKind DeclarationKind => throw new NotImplementedException();
+        public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
-        public IType Type { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public IType Type { get; set; }
 
-        public IMethod? Getter => throw new NotImplementedException();
+        [Memo]
+        public IMethod? Getter => new PseudoAccessor( this, AccessorSemantic.Get );
 
-        public IMethod? Setter => throw new NotImplementedException();
+        public IMethod? Setter => new PseudoAccessor( this, AccessorSemantic.Set );
 
         public override bool IsExplicitInterfaceImplementation => false;
 
@@ -31,21 +33,47 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
             => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ), false );
 
-        IType IFieldOrProperty.Type => throw new NotImplementedException();
+        IType IFieldOrProperty.Type => this.Type;
 
-        public Writeability Writeability => throw new NotImplementedException();
+        public Writeability Writeability { get; set; }
 
-        public bool IsAutoPropertyOrField => throw new NotImplementedException();
+        Writeability IFieldOrProperty.Writeability => this.Writeability;
+
+        public bool IsAutoPropertyOrField => true;
 
         public override InsertPosition InsertPosition
             => new(
                 InsertPositionRelation.Within,
                 (MemberDeclarationSyntax) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration().AssertNotNull() );
 
-        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name )
-            : base( parentAdvice, targetType, name ) { }
+        public ExpressionSyntax? InitializerSyntax { get; set; }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context ) => throw new NotImplementedException();
+        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name )
+            : base( parentAdvice, targetType, name )
+        {
+            this.Type = this.Compilation.Factory.GetSpecialType( SpecialType.Object );
+        }
+
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        {
+            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
+
+            var field =
+                FieldDeclaration(
+                    List<AttributeListSyntax>(), // TODO: Attributes.
+                    this.GetSyntaxModifierList(),
+                    VariableDeclaration(
+                        syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
+                        SingletonSeparatedList(
+                            VariableDeclarator(
+                                Identifier( this.Name ),
+                                null,
+                                this.InitializerSyntax != null
+                                    ? EqualsValueClause( this.InitializerSyntax )
+                                    : null ) ) ) );
+
+            return new[] { new IntroducedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+        }
 
         [return: RunTimeOnly]
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();

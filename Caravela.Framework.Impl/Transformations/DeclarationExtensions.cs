@@ -36,6 +36,9 @@ namespace Caravela.Framework.Impl.Transformations
 
                 case IParameter parameter:
                     return GetParameterSyntaxModifierList( parameter );
+
+                case IField field:
+                    return GetMemberSyntaxModifierList( field );
             }
 
             throw new AssertionFailedException();

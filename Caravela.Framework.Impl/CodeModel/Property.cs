@@ -57,6 +57,23 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 
+        public IProperty? OverriddenProperty
+        {
+            get
+            {
+                var overriddenProperty = this._symbol.OverriddenProperty;
+
+                if ( overriddenProperty != null )
+                {
+                    return this.Compilation.Factory.GetProperty( overriddenProperty );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
         [Memo]
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations
             => this._symbol.ExplicitInterfaceImplementations.Select( p => this.Compilation.Factory.GetProperty( p ) ).ToList();

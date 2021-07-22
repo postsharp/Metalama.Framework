@@ -107,7 +107,7 @@ namespace Caravela.Framework.Impl.CodeModel
             where T : class, IDeclaration
             => ((IDeclarationInternal) declaration).ToRef().Cast<T>();
 
-        public static MemberRef<T> ToMemberLink<T>( this T member )
+        public static MemberRef<T> ToMemberRef<T>( this T member )
             where T : class, IMemberOrNamedType
             => new( ((IDeclarationInternal) member).ToRef() );
 

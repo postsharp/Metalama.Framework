@@ -50,6 +50,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IInvokerFactory<IEventInvoker> Invokers
             => new InvokerFactory<IEventInvoker>( ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ), false );
 
+        public IEvent? OverriddenEvent { get; set; }
+
         public override InsertPosition InsertPosition
             => new(
                 InsertPositionRelation.Within,

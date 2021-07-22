@@ -75,8 +75,7 @@ namespace Caravela.Framework.Impl.Linking
             var diagnostics = new UserDiagnosticSink( input.CompileTimeProject );
             var nameProvider = new LinkerIntroductionNameProvider();
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
-            var introductionCollection = new IntroductionCollection( input.CompilationModel );
-            var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
+            var syntaxTransformationCollection = new SyntaxTransformationCollection();
             var syntaxFactory = ReflectionMapper.GetInstance( input.CompilationModel.RoslynCompilation );
 
             // TODO: Merge observable and non-observable transformations so that the order is preserved.
@@ -88,32 +87,60 @@ namespace Caravela.Framework.Impl.Linking
                     .Concat( input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
                     .ToList();
 
-            // Visit all member introductions, respect aspect part ordering.
-            foreach ( var memberIntroduction in allTransformations.OfType<IMemberIntroduction>() )
+            var replacedTransformations = new HashSet<ISyntaxTreeTransformation>();
+
+            foreach ( var transformation in allTransformations.OfType<IReplaceMember>() )
             {
-                var introductionContext = new MemberIntroductionContext(
-                    diagnostics,
-                    nameProvider,
-                    lexicalScopeFactory,
-                    syntaxFactory,
-                    this._serviceProvider );
+                var replacedMember = transformation.ReplacedMember.Resolve( input.CompilationModel );
 
-                var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
+                switch ( replacedMember )
+                {
+                    case Field replacedField:
+                        var syntaxReference = replacedField.Symbol.GetPrimarySyntaxReference();
 
-                introductionCollection.Add( memberIntroduction, introducedMembers );
+                        if ( syntaxReference == null )
+                        {
+                            throw new AssertionFailedException();
+                        }
+
+                        var removedSyntax = syntaxReference.GetSyntax();
+
+                        syntaxTransformationCollection.AddRemovedSyntax( removedSyntax );
+
+                        break;
+
+                    case ISyntaxTreeTransformation replacedTransformation:
+                        replacedTransformations.Add( replacedTransformation );
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
 
-            // Visit all interface introductions.
-            foreach ( var interfaceIntroduction in allTransformations.OfType<IIntroducedInterface>() )
+            // Visit all transformations, respect aspect part ordering.
+            foreach ( var transformation in allTransformations )
             {
-                var introducedInterfaces = interfaceIntroduction.GetIntroducedInterfaceImplementations();
+                if ( transformation is IMemberIntroduction memberIntroduction )
+                {
+                    var introductionContext = new MemberIntroductionContext(
+                        diagnostics,
+                        nameProvider,
+                        lexicalScopeFactory,
+                        syntaxFactory,
+                        this._serviceProvider );
 
-                introductionCollection.Add( interfaceIntroduction, introducedInterfaces );
-            }
+                    var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
-            foreach ( var memberReplacement in allTransformations.OfType<IReplaceMember>() )
-            {
-                introductionCollection.Add( memberReplacement );
+                    syntaxTransformationCollection.Add( memberIntroduction, introducedMembers );
+                }
+
+                if ( transformation is IIntroducedInterface interfaceIntroduction )
+                {
+                    var introducedInterfaces = interfaceIntroduction.GetIntroducedInterfaceImplementations();
+                    syntaxTransformationCollection.Add( interfaceIntroduction, introducedInterfaces );
+                }
             }
 
             // Group diagnostic suppressions by target.
@@ -123,7 +150,9 @@ namespace Caravela.Framework.Impl.Linking
 
             // Process syntax trees one by one.
             var intermediateCompilation = input.InitialCompilation;
-            Rewriter addIntroducedElementsRewriter = new( introductionCollection, suppressionsByTarget, input.CompilationModel );
+            Rewriter addIntroducedElementsRewriter = new( syntaxTransformationCollection, suppressionsByTarget, input.CompilationModel );
+
+            var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
 
             foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees.Values )
             {
@@ -146,7 +175,7 @@ namespace Caravela.Framework.Impl.Linking
                 input.CompilationModel,
                 intermediateCompilation.Compilation,
                 syntaxTreeMapping,
-                introductionCollection.IntroducedMembers );
+                syntaxTransformationCollection.IntroducedMembers );
 
             return new LinkerIntroductionStepOutput( diagnostics, intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
         }

@@ -64,6 +64,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IInvokerFactory<IPropertyInvoker> Invokers
             => new InvokerFactory<IPropertyInvoker>( ( order, invokerOperator ) => new PropertyInvoker( this, order, invokerOperator ), false );
 
+        public IProperty? OverriddenProperty { get; set; }
+
         public override InsertPosition InsertPosition
             => new(
                 InsertPositionRelation.Within,
@@ -76,6 +78,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
         public bool IsIndexer => string.Equals( this.Name, "Items", StringComparison.Ordinal );
+
+        public ExpressionSyntax? InitializerSyntax { get; set; }
 
         public PropertyBuilder(
             Advice parentAdvice,
@@ -158,7 +162,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     Identifier( this.Name ),
                     GenerateAccessorList(),
                     null,
-                    null );
+                    this.InitializerSyntax != null
+                        ? EqualsValueClause( this.InitializerSyntax )
+                        : null,
+                    this.InitializerSyntax != null
+                        ? Token( SyntaxKind.SemicolonToken )
+                        : default );
 
             return new[] { new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
 

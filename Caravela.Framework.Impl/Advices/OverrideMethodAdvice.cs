@@ -8,11 +8,9 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class OverrideMethodAdvice : Advice
+    internal class OverrideMethodAdvice : OverrideMemberAdvice<IMethod>
     {
         public IMethod TemplateMethod { get; }
-
-        public new IMethod TargetDeclaration => (IMethod) base.TargetDeclaration;
 
         public OverrideMethodAdvice(
             AspectInstance aspect,

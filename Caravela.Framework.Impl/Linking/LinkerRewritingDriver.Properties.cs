@@ -184,6 +184,7 @@ namespace Caravela.Framework.Impl.Linking
                         .WithLeadingTrivia( propertyDeclaration.GetLeadingTrivia() )
                         .WithTrailingTrivia( propertyDeclaration.GetTrailingTrivia() )
                         .WithExpressionBody( null )
+                        .WithInitializer( null )
                         .WithSemicolonToken( Token( SyntaxKind.None ) );
             }
         }
@@ -196,7 +197,11 @@ namespace Caravela.Framework.Impl.Linking
                         : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
                     VariableDeclaration(
                         propertyDeclaration.Type,
-                        SingletonSeparatedList( VariableDeclarator( Identifier( GetAutoPropertyBackingFieldName( symbol ) ) ) ) ) )
+                        SingletonSeparatedList(
+                            VariableDeclarator(
+                                Identifier( GetAutoPropertyBackingFieldName( symbol ) ),
+                                null,
+                                propertyDeclaration.Initializer ) ) ) )
                 .NormalizeWhitespace()
                 .WithLeadingTrivia( LineFeed, LineFeed )
                 .WithTrailingTrivia( LineFeed )
@@ -243,10 +248,16 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             // TODO: Write tests of the collision resolution algorithm.
+            if ( camelCasePropertyName.StartsWith( "_", StringComparison.Ordinal ) )
+            {
+                return camelCasePropertyName;
+            }
+            else
+            {
+                var fieldName = FindUniqueName( "_" + camelCasePropertyName );
 
-            var fieldName = FindUniqueName( "_" + camelCasePropertyName );
-
-            return fieldName;
+                return fieldName;
+            }
 
             string FindUniqueName( string hint )
             {

@@ -58,6 +58,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IInvokerFactory<IPropertyInvoker> Invokers
             => new InvokerFactory<IPropertyInvoker>( ( order, invokerOperator ) => new PropertyInvoker( this, order, invokerOperator ), false );
 
+        public IProperty? OverriddenProperty => this.PropertyBuilder.OverriddenProperty;
+
         // TODO: When an interface is introduced, explicit implementation should appear here.
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => Array.Empty<IProperty>();
 

@@ -9,15 +9,13 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class OverrideFieldOrPropertyAdvice : Advice
+    internal class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrProperty>
     {
         public IProperty? TemplateProperty { get; }
 
         public IMethod? GetTemplateMethod { get; }
 
         public IMethod? SetTemplateMethod { get; }
-
-        public new IFieldOrProperty TargetDeclaration => (IFieldOrProperty) base.TargetDeclaration;
 
         public OverrideFieldOrPropertyAdvice(
             AspectInstance aspect,
