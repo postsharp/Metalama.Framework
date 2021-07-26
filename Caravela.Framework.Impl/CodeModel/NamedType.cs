@@ -349,7 +349,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
                         if ( resolved is TMember )
                         {
-                            var resolvedSymbol = (TSymbol?)resolved.GetSymbol();
+                            var resolvedSymbol = (TSymbol?) resolved.GetSymbol();
 
                             if ( resolvedSymbol != null )
                             {

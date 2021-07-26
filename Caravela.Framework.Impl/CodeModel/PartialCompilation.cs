@@ -87,8 +87,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
                     // Find the tree in InitialCompilation.
                     SyntaxTree initialTree;
-                    
-                    if ( baseCompilation.ModifiedSyntaxTrees.TryGetValue( replacement.FilePath, out var initialTreeReplacement ) && initialTreeReplacement.OldTree != null )
+
+                    if ( baseCompilation.ModifiedSyntaxTrees.TryGetValue( replacement.FilePath, out var initialTreeReplacement )
+                         && initialTreeReplacement.OldTree != null )
                     {
                         initialTree = initialTreeReplacement.OldTree;
                     }
@@ -96,7 +97,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     {
                         initialTree = replacement.OldTree.AssertNotNull();
                     }
-                    
+
                     modifiedTreeBuilder[replacement.FilePath] = new ModifiedSyntaxTree( replacement.NewTree, initialTree );
                 }
             }

@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             // If the symbol containing the reference is different from the referenced symbol, we are referencing explicit interface implementation.
             if ( (!SymbolEqualityComparer.Default.Equals( containingSymbol.ContainingType, referencedSymbol.ContainingType )
-                     && referencedSymbol.ContainingType.TypeKind == TypeKind.Interface )
+                  && referencedSymbol.ContainingType.TypeKind == TypeKind.Interface)
                  || referencedSymbol.IsInterfaceMemberReference() )
             {
                 // Replace the referenced symbol with the overridden interface implementation.
@@ -260,8 +260,9 @@ namespace Caravela.Framework.Impl.Linking
             switch (referencedSymbol, resolvedSymbol)
             {
                 case (IMethodSymbol { MethodKind: MethodKind.Ordinary }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
-                case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol { MethodKind: MethodKind.Ordinary } ):
-                case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation } ):
+                case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
+                case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol
+                    { MethodKind: MethodKind.ExplicitInterfaceImplementation }):
                 case (IPropertySymbol, IPropertySymbol):
                 case (IEventSymbol, IEventSymbol):
                 case (IFieldSymbol, IFieldSymbol):

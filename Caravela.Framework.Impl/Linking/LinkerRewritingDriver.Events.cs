@@ -87,10 +87,10 @@ namespace Caravela.Framework.Impl.Linking
         {
             if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
             {
-                var members = 
+                var members =
                     eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField )
-                    ? new List<MemberDeclarationSyntax> { GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration() }
-                    : new List<MemberDeclarationSyntax> { GetLinkedDeclaration() };
+                        ? new List<MemberDeclarationSyntax> { GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration() }
+                        : new List<MemberDeclarationSyntax> { GetLinkedDeclaration() };
 
                 if ( !this.IsInlineable( (IEventSymbol) this._analysisRegistry.GetLastOverride( symbol ), ResolvedAspectReferenceSemantic.Default ) )
                 {
@@ -118,11 +118,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     // Event field indicates explicit interface implementation with event field template.
 
-                    return new MemberDeclarationSyntax[] 
-                    { 
-                        GetEventBackingField( eventDeclaration, symbol ),
-                        GetLinkedDeclaration().NormalizeWhitespace()
-                    };
+                    return new MemberDeclarationSyntax[] { GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration().NormalizeWhitespace() };
                 }
 
                 if ( this.IsDiscarded( symbol, ResolvedAspectReferenceSemantic.Default ) )

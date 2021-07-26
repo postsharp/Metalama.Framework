@@ -93,7 +93,7 @@ namespace Caravela.Framework.Impl.Linking
                 var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = (IPropertySymbol) this._analysisRegistry.GetLastOverride( symbol );
 
-                if ( IsAutoPropertyDeclaration( propertyDeclaration ) 
+                if ( IsAutoPropertyDeclaration( propertyDeclaration )
                      && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
                 {
                     // Backing field for auto property.

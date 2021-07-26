@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         private class IndexerParameter : ParameterBase
         {
-            public IndexerParameter( AccessorBuilder accessor, int index, string name, IType parameterType, RefKind refKind ) : base( accessor, index ) 
+            public IndexerParameter( AccessorBuilder accessor, int index, string name, IType parameterType, RefKind refKind ) : base( accessor, index )
             {
                 this.DefaultValue = TypedConstant.Null;
                 this.Name = name;

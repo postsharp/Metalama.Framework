@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public string Name
         {
             get => this._name ?? throw new NotSupportedException( "Cannot get the name of a return parameter." );
-            set 
+            set
                 => this._name = this._name != null
                     ? value ?? throw new NotSupportedException( "Cannot set the parameter name to null." )
                     : throw new NotSupportedException( "Cannot set the name of a return parameter." );

@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => left switch
             {
                 // Internal and protected are not comparable.
-                Accessibility.Internal => 
+                Accessibility.Internal =>
                     right != Accessibility.Protected && left < right,
                 Accessibility.Protected =>
                     right != Accessibility.Internal && left < right,

@@ -1,10 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
@@ -12,6 +8,10 @@ using Caravela.Framework.Impl.Linking.Inlining;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 // TODO: A lot methods here are called multiple times. Optimize.
@@ -141,7 +141,7 @@ namespace Caravela.Framework.Impl.Linking
                             CreateGotoStatement() )
                         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
-            
+
             // Add the SourceCode annotation, if it is source code.
             if ( !(symbol.GetPrimarySyntaxReference() is { } primarySyntax && primarySyntax.GetSyntax().HasAnnotation( FormattingAnnotations.GeneratedCode )) )
             {
@@ -285,7 +285,7 @@ namespace Caravela.Framework.Impl.Linking
                         throw new AssertionFailedException();
                 }
             }
-            
+
             if ( this._analysisRegistry.IsOverride( symbol ) )
             {
                 isImplicitlyLinked = false;
@@ -306,6 +306,7 @@ namespace Caravela.Framework.Impl.Linking
             if ( symbol.AssociatedSymbol != null && IsExplicitInterfaceEventField( symbol.AssociatedSymbol ) )
             {
                 isImplicitlyLinked = true;
+
                 return GetImplicitAccessorBody( symbol );
             }
 
@@ -482,7 +483,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 return symbol;
             }
-            
+
             if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
             {
                 return (IMethodSymbol) this._analysisRegistry.GetLastOverride( symbol ).AssertNotNull();
@@ -651,16 +652,16 @@ namespace Caravela.Framework.Impl.Linking
                 case IPropertySymbol propertySymbol:
                     name =
                         propertySymbol.ExplicitInterfaceImplementations.Any()
-                        ? propertySymbol.ExplicitInterfaceImplementations[0].Name
-                        : propertySymbol.Name;
+                            ? propertySymbol.ExplicitInterfaceImplementations[0].Name
+                            : propertySymbol.Name;
 
                     break;
 
                 case IEventSymbol eventSymbol:
                     name =
                         eventSymbol.ExplicitInterfaceImplementations.Any()
-                        ? eventSymbol.ExplicitInterfaceImplementations[0].Name
-                        : eventSymbol.Name;
+                            ? eventSymbol.ExplicitInterfaceImplementations[0].Name
+                            : eventSymbol.Name;
 
                     break;
 

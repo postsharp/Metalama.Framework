@@ -60,13 +60,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     => new MethodInvoker( this, order, invokerOperator ),
                 false );
 
-        public IMethod? OverriddenMethod 
+        public IMethod? OverriddenMethod
             => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
-                (PropertyBuilder propertyBuilder, MethodKind.PropertyGet ) => propertyBuilder.OverriddenProperty?.Getter.AssertNotNull(),
-                (PropertyBuilder propertyBuilder, MethodKind.PropertySet ) => propertyBuilder.OverriddenProperty?.Setter.AssertNotNull(),
-                (EventBuilder eventBuilder, MethodKind.EventAdd ) => eventBuilder.OverriddenEvent?.Adder.AssertNotNull(),
-                (EventBuilder eventBuilder, MethodKind.EventRemove ) => eventBuilder.OverriddenEvent?.Remover.AssertNotNull(),
+                (PropertyBuilder propertyBuilder, MethodKind.PropertyGet) => propertyBuilder.OverriddenProperty?.Getter.AssertNotNull(),
+                (PropertyBuilder propertyBuilder, MethodKind.PropertySet) => propertyBuilder.OverriddenProperty?.Setter.AssertNotNull(),
+                (EventBuilder eventBuilder, MethodKind.EventAdd) => eventBuilder.OverriddenEvent?.Adder.AssertNotNull(),
+                (EventBuilder eventBuilder, MethodKind.EventRemove) => eventBuilder.OverriddenEvent?.Remover.AssertNotNull(),
                 _ => throw new AssertionFailedException()
             };
 
@@ -94,15 +94,16 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             get => this._accessibility ?? this._containingDeclaration.Accessibility;
 
             set
-            { 
+            {
                 if ( this.ContainingDeclaration is not PropertyBuilder propertyBuilder )
                 {
                     throw new InvalidOperationException( $"Cannot change event accessor accessibility." );
                 }
 
-                if (!value.IsMoreRestrictiveOrEqualThan( propertyBuilder.Accessibility ) )
+                if ( !value.IsMoreRestrictiveOrEqualThan( propertyBuilder.Accessibility ) )
                 {
-                    throw new InvalidOperationException( $"Cannot change accessor accessibility to {value}, which is not more restrictive than parent accessibility {propertyBuilder.Accessibility}." );
+                    throw new InvalidOperationException(
+                        $"Cannot change accessor accessibility to {value}, which is not more restrictive than parent accessibility {propertyBuilder.Accessibility}." );
                 }
 
                 var otherAccessor = this.MethodKind switch
@@ -112,14 +113,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     _ => throw new AssertionFailedException()
                 };
 
-                if ( otherAccessor == null)
+                if ( otherAccessor == null )
                 {
                     throw new InvalidOperationException( $"Cannot change accessor accessibility, if the property has a single accesor ." );
                 }
 
                 if ( otherAccessor.Accessibility.IsMoreRestrictiveThan( propertyBuilder.Accessibility ) )
                 {
-                    throw new InvalidOperationException( 
+                    throw new InvalidOperationException(
                         $"Cannot change accessor accessibility to {value}, because the other accessor is already restricted to {otherAccessor.Accessibility}." );
                 }
 
@@ -141,11 +142,23 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             set => throw new NotSupportedException();
         }
 
-        public bool IsStatic { get => this._containingDeclaration.IsStatic; set => throw new NotSupportedException( "Cannot directly change staticity of an accessor." ); }
+        public bool IsStatic
+        {
+            get => this._containingDeclaration.IsStatic;
+            set => throw new NotSupportedException( "Cannot directly change staticity of an accessor." );
+        }
 
-        public bool IsVirtual { get => this._containingDeclaration.IsVirtual; set => throw new NotSupportedException( "Cannot directly change virtuality of an accessor." ); }
+        public bool IsVirtual
+        {
+            get => this._containingDeclaration.IsVirtual;
+            set => throw new NotSupportedException( "Cannot directly change virtuality of an accessor." );
+        }
 
-        public bool IsSealed { get => this._containingDeclaration.IsSealed; set => throw new NotSupportedException( "Cannot directly change sealedness of an accessor." ); }
+        public bool IsSealed
+        {
+            get => this._containingDeclaration.IsSealed;
+            set => throw new NotSupportedException( "Cannot directly change sealedness of an accessor." );
+        }
 
         public bool IsAbstract => this._containingDeclaration.IsAbstract;
 
@@ -191,10 +204,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
             => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
-                (PropertyBuilder propertyBuilder, MethodKind.PropertyGet ) => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.Getter ).AssertNoneNull().ToArray(),
-                (PropertyBuilder propertyBuilder, MethodKind.PropertySet ) => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.Setter ).AssertNoneNull().ToArray(),
-                (EventBuilder eventBuilder, MethodKind.EventAdd ) => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.Adder ).AssertNoneNull().ToArray(),
-                (EventBuilder eventBuilder, MethodKind.EventRemove ) => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.Remover ).AssertNoneNull().ToArray(),
+                (PropertyBuilder propertyBuilder, MethodKind.PropertyGet) 
+                    => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.Getter ).AssertNoneNull().ToArray(),
+                (PropertyBuilder propertyBuilder, MethodKind.PropertySet) 
+                    => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.Setter ).AssertNoneNull().ToArray(),
+                (EventBuilder eventBuilder, MethodKind.EventAdd) 
+                    => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.Adder ).AssertNoneNull().ToArray(),
+                (EventBuilder eventBuilder, MethodKind.EventRemove) 
+                    => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.Remover ).AssertNoneNull().ToArray(),
                 _ => throw new AssertionFailedException()
             };
 
