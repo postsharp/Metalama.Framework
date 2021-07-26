@@ -165,7 +165,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 case IPointerTypeSymbol pointer:
                     return this.GetTemplatingScope( pointer.PointedAtType, recursion + 1 );
 
-                case INamedTypeSymbol { IsGenericType: true, IsUnboundGenericType: false } namedType when namedType.OriginalDefinition != namedType:
+                case INamedTypeSymbol
+                        { IsGenericType: true, IsUnboundGenericType: false } namedType
+                    when !SymbolEqualityComparer.Default.Equals( namedType, namedType.OriginalDefinition ):
                     {
                         List<TemplatingScope> scopes = new( namedType.TypeArguments.Length + 1 );
                         var declarationScope = this.GetTemplatingScope( namedType.OriginalDefinition, recursion + 1 );

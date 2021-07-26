@@ -26,6 +26,9 @@
         <MicrosoftBclHashCodeVersion>1.1.1</MicrosoftBclHashCodeVersion>
         <SystemReflectionMetadataLoadContextVersion>4.7.2</SystemReflectionMetadataLoadContextVersion>
         <K4osHashxxHashVersion>1.0.6</K4osHashxxHashVersion>
+        <MicrosoftNETTestSdkVersion>16.10.0</MicrosoftNETTestSdkVersion>
+        <xUnitVersion>2.4.1</xUnitVersion>
+        <xUnitAbstractionsVersion>2.0.3</xUnitAbstractionsVersion>
 
         <!-- this cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
         <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>

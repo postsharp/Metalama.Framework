@@ -50,11 +50,6 @@
 		</PackageReference>
 		<EmbeddedResource Include="$(PkgNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" Link="Resources\Newtonsoft.Json.dll" />
 
-		<PackageReference Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" PrivateAssets="all">
-		    <GeneratePathProperty>true</GeneratePathProperty>
-		</PackageReference>
-		<EmbeddedResource Include="$(PkgSystem_Reflection_MetadataLoadContext)\lib\netstandard2.0\System.Reflection.MetadataLoadContext.dll" Link="Resources\System.Reflection.MetadataLoadContext.dll" />
-
 		<EmbeddedResource Include="$(OutputPath)\Caravela.Framework.Impl.dll" Link="Resources\Caravela.Framework.Impl.dll" />
 		<EmbeddedResource Include="$(OutputPath)\Caravela.Framework.DesignTime.Contracts.dll" Link="Resources\Caravela.Framework.DesignTime.Contracts.dll" />
 		<EmbeddedResource Include="$(OutputPath)\Caravela.Framework.Sdk.dll" Link="Resources\Caravela.Framework.Sdk.dll" />
