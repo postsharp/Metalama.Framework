@@ -87,7 +87,10 @@ namespace Caravela.Framework.Impl.Linking
         {
             if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
             {
-                var members = new List<MemberDeclarationSyntax> { GetLinkedDeclaration() };
+                var members = 
+                    eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField )
+                    ? new List<MemberDeclarationSyntax> { GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration() }
+                    : new List<MemberDeclarationSyntax> { GetLinkedDeclaration() };
 
                 if ( !this.IsInlineable( (IEventSymbol) this._analysisRegistry.GetLastOverride( symbol ), ResolvedAspectReferenceSemantic.Default ) )
                 {
@@ -97,13 +100,31 @@ namespace Caravela.Framework.Impl.Linking
                 if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original )
                      && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
                 {
-                    members.Add( GetOriginalImplEvent( eventDeclaration, symbol ) );
+                    if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField ) )
+                    {
+                        members.Add( GetOriginalImplEventField( eventDeclaration.Type, symbol ) );
+                    }
+                    else
+                    {
+                        members.Add( GetOriginalImplEvent( eventDeclaration, symbol ) );
+                    }
                 }
 
                 return members;
             }
             else
             {
+                if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField ) )
+                {
+                    // Event field indicates explicit interface implementation with event field template.
+
+                    return new MemberDeclarationSyntax[] 
+                    { 
+                        GetEventBackingField( eventDeclaration, symbol ),
+                        GetLinkedDeclaration().NormalizeWhitespace()
+                    };
+                }
+
                 if ( this.IsDiscarded( symbol, ResolvedAspectReferenceSemantic.Default ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
@@ -112,7 +133,7 @@ namespace Caravela.Framework.Impl.Linking
                 return new[] { GetLinkedDeclaration() };
             }
 
-            MemberDeclarationSyntax GetLinkedDeclaration()
+            EventDeclarationSyntax GetLinkedDeclaration()
             {
                 var addDeclaration = (AccessorDeclarationSyntax) symbol.AddMethod.AssertNotNull().GetPrimaryDeclaration().AssertNotNull();
 
@@ -147,7 +168,14 @@ namespace Caravela.Framework.Impl.Linking
         {
             if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
             {
-                var members = new List<MemberDeclarationSyntax> { GetEventBackingField( eventFieldDeclaration, symbol ), GetLinkedDeclaration() };
+                var members = new List<MemberDeclarationSyntax>();
+
+                if ( this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
+                {
+                    members.Add( GetEventBackingField( eventFieldDeclaration, symbol ) );
+                }
+
+                members.Add( GetLinkedDeclaration() );
 
                 if ( !this.IsInlineable( (IEventSymbol) this._analysisRegistry.GetLastOverride( symbol ), ResolvedAspectReferenceSemantic.Default ) )
                 {
@@ -157,7 +185,7 @@ namespace Caravela.Framework.Impl.Linking
                 if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original )
                      && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
                 {
-                    members.Add( GetOriginalImplEvent( eventFieldDeclaration, symbol ) );
+                    members.Add( GetOriginalImplEventField( eventFieldDeclaration.Declaration.Type, symbol ) );
                 }
 
                 return members;
@@ -218,7 +246,7 @@ namespace Caravela.Framework.Impl.Linking
                             symbol.IsStatic
                                 ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
                                 : ThisExpression(),
-                            IdentifierName( GetEventFieldBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
+                            IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ) ) );
         }
 
@@ -233,16 +261,17 @@ namespace Caravela.Framework.Impl.Linking
                             symbol.IsStatic
                                 ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
                                 : ThisExpression(),
-                            IdentifierName( GetEventFieldBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
+                            IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ) ) );
         }
 
-        public static string GetEventFieldBackingFieldName( IEventSymbol @event )
-        {
-            return $"__{@event.Name}__BackingField";
-        }
+        private static FieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
+            => GetEventBackingField( eventDeclaration.Type, symbol );
 
         private static FieldDeclarationSyntax GetEventBackingField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
+            => GetEventBackingField( eventFieldDeclaration.Declaration.Type, symbol );
+
+        private static FieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, IEventSymbol symbol )
         {
             return
                 FieldDeclaration(
@@ -251,8 +280,8 @@ namespace Caravela.Framework.Impl.Linking
                             ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
                             : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
                         VariableDeclaration(
-                            eventFieldDeclaration.Declaration.Type,
-                            SingletonSeparatedList( VariableDeclarator( Identifier( GetEventFieldBackingFieldName( symbol ) ) ) ) ) )
+                            eventType,
+                            SingletonSeparatedList( VariableDeclarator( Identifier( GetBackingFieldName( symbol ) ) ) ) ) )
                     .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
@@ -269,7 +298,7 @@ namespace Caravela.Framework.Impl.Linking
                             : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
                         @event.Type,
                         null,
-                        Identifier( GetOriginalImplMemberName( symbol.Name ) ),
+                        Identifier( GetOriginalImplMemberName( symbol ) ),
                         null )
                     .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
@@ -278,7 +307,7 @@ namespace Caravela.Framework.Impl.Linking
                     .AddGeneratedCodeAnnotation();
         }
 
-        private static MemberDeclarationSyntax GetOriginalImplEvent( EventFieldDeclarationSyntax eventField, IEventSymbol symbol )
+        private static MemberDeclarationSyntax GetOriginalImplEventField( TypeSyntax eventType, IEventSymbol symbol )
         {
             return
                 EventDeclaration(
@@ -286,9 +315,9 @@ namespace Caravela.Framework.Impl.Linking
                         symbol.IsStatic
                             ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
                             : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                        eventField.Declaration.Type,
+                        eventType,
                         null,
-                        Identifier( GetOriginalImplMemberName( symbol.Name ) ),
+                        Identifier( GetOriginalImplMemberName( symbol ) ),
                         AccessorList(
                             List(
                                 new[]

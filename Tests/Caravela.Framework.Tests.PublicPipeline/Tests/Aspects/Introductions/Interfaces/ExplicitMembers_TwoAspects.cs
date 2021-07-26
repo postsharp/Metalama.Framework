@@ -5,7 +5,7 @@ using System;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers
+namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_TwoAspects
 {
     /*
      * Simple case with explicit interface members for a single interface.
@@ -77,8 +77,46 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         public int AutoProperty { get; set; }
     }
 
+    public class OverrideAttribute : Attribute, IAspect<INamedType>
+    {
+        public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        {
+            foreach(var method in aspectBuilder.TargetDeclaration.Methods)
+            {
+                if (method.IsExplicitInterfaceImplementation)
+                {
+                    aspectBuilder.AdviceFactory.OverrideMethod(method, nameof(Template));
+                }
+            }
+
+            foreach (var property in aspectBuilder.TargetDeclaration.Properties)
+            {
+                if (property.IsExplicitInterfaceImplementation)
+                {
+                    aspectBuilder.AdviceFactory.OverrideFieldOrPropertyAccessors(property, nameof(Template), nameof(Template));
+                }
+            }
+
+            foreach (var method in aspectBuilder.TargetDeclaration.Events)
+            {
+                if (method.IsExplicitInterfaceImplementation)
+                {
+                    aspectBuilder.AdviceFactory.OverrideEventAccessors(method, nameof(Template), nameof(Template), null);
+                }
+            }
+        }
+
+        [Template]
+        public dynamic? Template()
+        {
+            Console.WriteLine("This is overridden method.");
+            return meta.Proceed();
+        }
+    }
+
     // <target>
     [Introduction]
+    [Override]
     public class TargetClass
     {
     }

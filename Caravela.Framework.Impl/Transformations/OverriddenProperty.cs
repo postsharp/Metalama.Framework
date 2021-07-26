@@ -176,7 +176,12 @@ namespace Caravela.Framework.Impl.Transformations
                         MethodKind.PropertySet => this.CreateSetExpression(),
                         _ => throw new AssertionFailedException()
                     },
-                    this.OverriddenDeclaration.Type,
+                    accessor.MethodKind switch
+                    {
+                        MethodKind.PropertyGet => this.OverriddenDeclaration.Type,
+                        MethodKind.PropertySet => this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
+                        _ => throw new AssertionFailedException()
+                    },
                     false );
 
                 var metaApi = MetaApi.ForFieldOrProperty(

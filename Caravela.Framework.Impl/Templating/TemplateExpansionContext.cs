@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.Templating
                                                     TriviaList() ) ),
                                             CastExpression(
                                                 PredefinedType( Token( SyntaxKind.ObjectKeyword ) ),
-                                                returnExpression ) ) ),
+                                                ParenthesizedExpression( returnExpression ) ) ) ),
                                     ReturnStatement() )
                                 .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }

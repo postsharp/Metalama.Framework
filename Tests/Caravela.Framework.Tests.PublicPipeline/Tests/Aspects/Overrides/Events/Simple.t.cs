@@ -17,16 +17,16 @@ remove    {
     }
 }
     
-private EventHandler? __EventField__BackingField;
+private EventHandler? _eventField;
     
     
         public event EventHandler? EventField{add    {
         global::System.Console.WriteLine("This is the add template.");
-this.__EventField__BackingField+=value;    }
+this._eventField += value;    }
     
 remove    {
         global::System.Console.WriteLine("This is the remove template.");
-this.__EventField__BackingField-=value;    }
+this._eventField -= value;    }
 }
     
 }

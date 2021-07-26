@@ -74,17 +74,17 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IGenericParameterList GenericParameters => GenericParameterList.Empty;
 
-        public IReadOnlyList<IType> GenericArguments => throw new NotImplementedException();
+        public IReadOnlyList<IType> GenericArguments => this.AccessorBuilder.GenericArguments;
 
         public bool IsOpenGeneric => true;
 
-        public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
+        public IMethod WithGenericArguments( params IType[] genericArguments ) => this.AccessorBuilder.WithGenericArguments( genericArguments );
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers
             => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ), false );
 
-        public IMethod? OverriddenMethod => throw new NotImplementedException();
+        public IMethod? OverriddenMethod => this.AccessorBuilder.OverriddenMethod;
 
         public INamedType DeclaringType => this._builtMember.DeclaringType;
 
@@ -92,17 +92,17 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IMethod IDeclarationRef<IMethod>.Resolve( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
 
-        ISymbol IDeclarationRef<IMethod>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+        ISymbol IDeclarationRef<IMethod>.GetSymbol( Compilation compilation ) => this.GetSymbol();
 
-        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
-
-        [return: RunTimeOnly]
-        public MethodInfo ToMethodInfo() => throw new NotImplementedException();
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.AccessorBuilder.ExplicitInterfaceImplementations;
 
         [return: RunTimeOnly]
-        public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
+        public MethodInfo ToMethodInfo() => this.AccessorBuilder.ToMethodInfo();
 
         [return: RunTimeOnly]
-        public MemberInfo ToMemberInfo() => throw new NotImplementedException();
+        public System.Reflection.MethodBase ToMethodBase() => this.AccessorBuilder.ToMethodBase();
+
+        [return: RunTimeOnly]
+        public MemberInfo ToMemberInfo() => this.AccessorBuilder.ToMemberInfo();
     }
 }

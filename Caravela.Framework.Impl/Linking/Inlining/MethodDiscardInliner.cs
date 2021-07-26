@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
-            // The syntax has to be in form: <local> = <annotated_method_expression( <arguments> );
+            // The syntax has to be in form: _ = <annotated_method_expression( <arguments> );
             if ( aspectReference.ResolvedSymbol is not IMethodSymbol )
             {
                 return false;
@@ -41,8 +41,9 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             }
 
             // Assignment should have a discard identifier on the left (TODO: ref returns).
-            if ( assignmentExpression.Left is not IdentifierNameSyntax identifierName ||
-                 !string.Equals( identifierName.Identifier.ValueText, "_", StringComparison.Ordinal ) )
+            if ( assignmentExpression.Kind() != SyntaxKind.SimpleAssignmentExpression
+                 || assignmentExpression.Left is not IdentifierNameSyntax identifierName
+                 || !string.Equals( identifierName.Identifier.ValueText, "_", StringComparison.Ordinal ) )
             {
                 return false;
             }

@@ -1,11 +1,13 @@
-﻿using System;
+﻿// @Skipped #28907 Linker: conditional access expression
+
+using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherInstance_BaseInvoker_Error
+namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherInstance_FinalConditionalInvoker
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class TestAttribute : Attribute, IAspect<INamedType>
@@ -21,20 +23,16 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
         public dynamic? OverrideMethod()
         {
             var x = meta.This;
-            return meta.Method.Invokers.Base!.Invoke(x);
+            return meta.Method.Invokers.FinalConditional.Invoke(x);
         }
     }
 
-    internal class BaseClass
-    {
-        public virtual void Foo()
-        {
-        }
-    }       
-
     // <target>
     [TestAttribute]
-    internal class TargetClass : BaseClass
+    internal class TargetClass
     {
+        public void Foo()
+        {
+        }
     }
 }

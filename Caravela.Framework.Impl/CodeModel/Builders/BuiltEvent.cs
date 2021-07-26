@@ -46,10 +46,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IEvent? OverriddenEvent => this.EventBuilder.OverriddenEvent;
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
-        public IReadOnlyList<IEvent> ExplicitInterfaceImplementations => Array.Empty<IEvent>();
+        public IReadOnlyList<IEvent> ExplicitInterfaceImplementations => this.EventBuilder.ExplicitInterfaceImplementations;
 
         [return: RunTimeOnly]
-        public EventInfo ToEventInfo() => throw new NotImplementedException();
+        public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 
         IEvent IDeclarationRef<IEvent>.Resolve( CompilationModel compilation ) => (IEvent) this.GetForCompilation( compilation );
 

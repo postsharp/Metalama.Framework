@@ -61,13 +61,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IProperty? OverriddenProperty => this.PropertyBuilder.OverriddenProperty;
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
-        public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => Array.Empty<IProperty>();
+        public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => this.PropertyBuilder.ExplicitInterfaceImplementations;
 
         [return: RunTimeOnly]
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.PropertyBuilder.ToFieldOrPropertyInfo();
 
         [return: RunTimeOnly]
-        public PropertyInfo ToPropertyInfo() => throw new NotImplementedException();
+        public PropertyInfo ToPropertyInfo() => this.PropertyBuilder.ToPropertyInfo();
 
         IProperty IDeclarationRef<IProperty>.Resolve( CompilationModel compilation ) => (IProperty) this.GetForCompilation( compilation );
 
