@@ -983,7 +983,8 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
 
-            var transformedNode = node.WithIdentifier( node.Identifier.AddColoringAnnotation( color ) ).AddScopeAnnotation( scope );
+            var coloredIdentifier = node.Identifier.AddColoringAnnotation( color );
+            var transformedNode = node.WithIdentifier( coloredIdentifier ).AddScopeAnnotation( scope );
 
             return transformedNode;
         }
@@ -1662,7 +1663,7 @@ namespace Caravela.Framework.Impl.Templating
                 ? TemplatingScope.CompileTimeOnly
                 : this.GetSwitchCaseScope( transformedPattern, transformedWhen );
 
-            return node.Update( node.Keyword, node.Pattern, node.WhenClause, node.ColonToken ).AddScopeAnnotation( combinedScope );
+            return node.Update( node.Keyword, transformedPattern, transformedWhen, node.ColonToken ).AddScopeAnnotation( combinedScope );
         }
 
         #endregion

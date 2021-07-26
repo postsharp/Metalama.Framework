@@ -200,18 +200,6 @@ namespace Caravela.Framework.Impl.Formatting
             base.VisitToken( token );
         }
 
-        public override void VisitVariableDeclarator( VariableDeclaratorSyntax node )
-        {
-            base.VisitVariableDeclarator( node );
-
-            var colorFromAnnotation = node.Identifier.GetColorFromAnnotation();
-
-            if ( colorFromAnnotation != TextSpanClassification.Default )
-            {
-                this.Mark( node.Identifier, colorFromAnnotation );
-            }
-        }
-
         public override void DefaultVisit( SyntaxNode node )
         {
             if ( this._isInTemplate )
