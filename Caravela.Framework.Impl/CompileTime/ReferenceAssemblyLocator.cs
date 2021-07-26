@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public ReferenceAssemblyLocator( IServiceProvider serviceProvider )
         {
-            this._cacheDirectory = serviceProvider.GetService<IDirectoryOptions>().AssemblyLocatorCacheDirectory;
+            this._cacheDirectory = serviceProvider.GetService<IPathOptions>().AssemblyLocatorCacheDirectory;
 
             this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
 

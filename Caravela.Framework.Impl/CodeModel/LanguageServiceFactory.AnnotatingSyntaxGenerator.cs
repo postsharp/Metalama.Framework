@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Simplification;
@@ -96,7 +97,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public TypeSyntax ArrayTypeExpression( ExpressionSyntax type )
             {
-                return (TypeSyntax) this._syntaxGenerator.ArrayTypeExpression( type ).WithAdditionalAnnotations( Simplifier.Annotation );
+                var arrayType = (ArrayTypeSyntax) this._syntaxGenerator.ArrayTypeExpression( type ).WithAdditionalAnnotations( Simplifier.Annotation );
+
+                // Roslyn does not specify the rank properly so it needs to be fixed up.
+
+                return arrayType.WithRankSpecifiers(
+                    SingletonList( ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) );
             }
         }
     }

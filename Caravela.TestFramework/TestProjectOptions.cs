@@ -9,9 +9,9 @@ using System.IO;
 namespace Caravela.TestFramework
 {
     /// <summary>
-    /// An implementation of <see cref="IProjectOptions"/> that can be used in tests.
+    /// An implementation of <see cref="IProjectOptions"/> and <see cref="IPathOptions"/> that can be used in tests.
     /// </summary>
-    public class TestProjectOptions : DefaultDirectoryOptions, IProjectOptions, IDisposable
+    public class TestProjectOptions : DefaultPathOptions, IProjectOptions, IDisposable
     {
         public TestProjectOptions()
         {
@@ -41,7 +41,7 @@ namespace Caravela.TestFramework
 
         public bool FormatOutput => false;
 
-        public bool FormatCompileTimeCode => false;
+        public bool FormatCompileTimeCode { get; set; }
 
         public bool IsUserCodeTrusted => true;
 

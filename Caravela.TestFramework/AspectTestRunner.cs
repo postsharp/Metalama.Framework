@@ -19,6 +19,7 @@ namespace Caravela.TestFramework
     /// </summary>
     public class AspectTestRunner : BaseTestRunner
     {
+        private int _runCount;
         public AspectTestRunner(
             IServiceProvider serviceProvider,
             string? projectDirectory,
@@ -32,11 +33,21 @@ namespace Caravela.TestFramework
         /// <returns>The result of the test execution.</returns>
         public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
+            if ( this._runCount > 0 )
+            {
+                // We are reusing the TestProjectOptions from the service provider, so we cannot run a test twice with the same service provider.
+                throw new InvalidOperationException( "The Run method can be called only once." );
+            }
+            else
+            {
+                this._runCount++;
+            }
+            
             var testResult = await base.RunTestAsync( testInput );
 
-            using var testProjectOptions = new TestProjectOptions();
+            
             using var domain = new UnloadableCompileTimeDomain();
-
+            var testProjectOptions = (TestProjectOptions) this.ServiceProvider.GetService( typeof(TestProjectOptions) );
             var pipeline = new CompileTimeAspectPipeline( testProjectOptions, true, domain, testProjectOptions );
             var spy = new Spy( testResult );
             pipeline.ServiceProvider.AddService( spy );

@@ -82,6 +82,8 @@ namespace Caravela.TestFramework
         /// </summary>
         internal bool HasOutputCode { get; set; }
 
+        public Compilation? CompileTimeCompilation { get; private set; }
+
         internal void AddInputDocument( Document document, string? path ) => this._syntaxTrees.Add( new TestSyntaxTree( path, document, this ) );
 
         private static string CleanMessage( string text )
@@ -105,6 +107,37 @@ namespace Caravela.TestFramework
             }
 
             return string.Join( Environment.NewLine, lines );
+        }
+
+        internal async Task SetCompileTimeCompilationAsync( Compilation compilation )
+        {
+            if ( this.InputCompilation == null ||
+                 this.TestInput == null ||
+                 this.InputProject == null )
+            {
+                throw new InvalidOperationException( "The object has not bee properly initialized." );
+            }
+
+            this.CompileTimeCompilation = compilation;
+
+            var i = -1;
+
+            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            {
+                i++;
+
+                if ( i >= this.SyntaxTrees.Count )
+                {
+                    // This is the "Intrinsics" syntax tree.
+                    continue;
+                }
+
+                var syntaxNode = await syntaxTree.GetRootAsync();
+
+                // Format the output code.
+                this.SyntaxTrees[i].SetCompileTimeCode( syntaxNode, syntaxTree.FilePath );
+            }
+            
         }
 
         internal async Task SetOutputCompilationAsync( Compilation runTimeCompilation )

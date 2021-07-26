@@ -33,12 +33,12 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Replaces the async-local <see cref="ServiceProvider"/> by a newly created provider, with a new instances
         /// of all services. This method must be called when the consumer needs to pass a different implementation
-        /// of <see cref="IDirectoryOptions"/> than the default one cannot call <see cref="GetServiceProvider"/>
+        /// of <see cref="IPathOptions"/> than the default one cannot call <see cref="GetServiceProvider"/>
         /// because it does not control the calling point. A typical consumer of this method is TryCaravela.
         /// </summary>
-        public static void InitializeAsyncLocalProvider( IDirectoryOptions? directoryOptions = null )
+        public static void InitializeAsyncLocalProvider( IPathOptions? directoryOptions = null )
         {
-            _asyncLocalInstance.Value = CreateBaseServiceProvider( directoryOptions ?? DefaultDirectoryOptions.Instance, true );
+            _asyncLocalInstance.Value = CreateBaseServiceProvider( directoryOptions ?? DefaultPathOptions.Instance, true );
         }
 
         public static bool HasAsyncLocalProvider => _asyncLocalInstance.Value != null;
@@ -62,10 +62,10 @@ namespace Caravela.Framework.Impl.Pipeline
             _asyncLocalInstance.Value = newServices;
         }
 
-        private static ServiceProvider CreateBaseServiceProvider( IDirectoryOptions directoryOptions, bool freeze )
+        private static ServiceProvider CreateBaseServiceProvider( IPathOptions pathOptions, bool freeze )
         {
             ServiceProvider serviceProvider = new();
-            serviceProvider.AddService( directoryOptions );
+            serviceProvider.AddService( pathOptions );
             serviceProvider.AddService( new ReferenceAssemblyLocator( serviceProvider ) );
             serviceProvider.AddService( new SymbolClassificationService( serviceProvider ) );
             serviceProvider.AddService( new SyntaxSerializationService() );
@@ -85,17 +85,17 @@ namespace Caravela.Framework.Impl.Pipeline
         /// Gets the default <see cref="ServiceProvider"/> instance.
         /// </summary>
         public static ServiceProvider GlobalProvider
-            => LazyInitializer.EnsureInitialized( ref _globalInstance, () => CreateBaseServiceProvider( DefaultDirectoryOptions.Instance, true ) )!;
+            => LazyInitializer.EnsureInitialized( ref _globalInstance, () => CreateBaseServiceProvider( DefaultPathOptions.Instance, true ) )!;
 
         internal static ServiceProvider AsyncLocalProvider => _asyncLocalInstance.Value ??= GlobalProvider;
 
         /// <summary>
-        /// Gets a new instance of the <see cref="ServiceProvider"/>. If an implementation of <see cref="IDirectoryOptions"/> is provided,
+        /// Gets a new instance of the <see cref="ServiceProvider"/>. If an implementation of <see cref="IPathOptions"/> is provided,
         /// the new <see cref="ServiceProvider"/> gets a new implementation of all shared service (i.e. <see cref="AddGlobalService{T}"/> and
         /// <see cref="AddAsyncLocalService"/> are ignored). This scenario is used in tests. Otherwise, a shallow clone of the async-local or the global
         /// provider is provided.
         /// </summary>
-        public static ServiceProvider GetServiceProvider( IDirectoryOptions? directoryOptions = null, IAssemblyLocator? assemblyLocator = null )
+        public static ServiceProvider GetServiceProvider( IPathOptions? directoryOptions = null, IAssemblyLocator? assemblyLocator = null )
         {
             ServiceProvider serviceProvider;
 

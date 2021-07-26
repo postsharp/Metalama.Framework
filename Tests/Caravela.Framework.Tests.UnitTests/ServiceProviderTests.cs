@@ -22,12 +22,12 @@ namespace Caravela.Framework.Tests.UnitTests
             ServiceProviderFactory.InitializeAsyncLocalProvider( myOptions );
             Assert.True( ServiceProviderFactory.HasAsyncLocalProvider );
 
-            Assert.Same( myOptions, ServiceProviderFactory.GetServiceProvider().GetService<IDirectoryOptions>() );
+            Assert.Same( myOptions, ServiceProviderFactory.GetServiceProvider().GetService<IPathOptions>() );
 
             await Task.Yield();
 
             Assert.True( ServiceProviderFactory.HasAsyncLocalProvider );
-            Assert.Same( myOptions, ServiceProviderFactory.GetServiceProvider().GetService<IDirectoryOptions>() );
+            Assert.Same( myOptions, ServiceProviderFactory.GetServiceProvider().GetService<IPathOptions>() );
 
             ServiceProviderFactory.ResetAsyncLocalProvider();
 

@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly IServiceProvider _serviceProvider;
         private readonly CompileTimeDomain _domain;
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
-        private readonly IDirectoryOptions _directoryOptions;
+        private readonly IPathOptions _pathOptions;
         private readonly IProjectOptions? _projectOptions;
         private readonly ICompileTimeCompilationBuilderSpy? _spy;
         private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public CompileTimeCompilationBuilder( IServiceProvider serviceProvider, CompileTimeDomain domain )
         {
-            this._directoryOptions = serviceProvider.GetService<IDirectoryOptions>();
+            this._pathOptions = serviceProvider.GetService<IPathOptions>();
             this._serviceProvider = serviceProvider;
             this._domain = domain;
             this._spy = serviceProvider.GetOptionalService<ICompileTimeCompilationBuilderSpy>();
@@ -167,14 +167,14 @@ namespace Caravela.Framework.Impl.CompileTime
 
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees.Select( t => t.TransformedTree ) );
 
-            this._spy?.ReportCompileTimeCompilation( compileTimeCompilation );
-
             compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitTrees( compileTimeCompilation );
 
             if ( this._projectOptions is { FormatCompileTimeCode: true } && OutputCodeFormatter.CanFormat )
             {
                 compileTimeCompilation = OutputCodeFormatter.FormatAll( compileTimeCompilation );
             }
+
+            this._spy?.ReportCompileTimeCompilation( compileTimeCompilation );
 
             return true;
         }
@@ -681,7 +681,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private OutputPaths GetOutputPaths( string compileTimeAssemblyName )
         {
             // We cannot include the full assembly name in the path because we're hitting the max path length.
-            var directory = Path.Combine( this._directoryOptions.CompileTimeProjectCacheDirectory, HashUtilities.HashString( compileTimeAssemblyName ) );
+            var directory = Path.Combine( this._pathOptions.CompileTimeProjectCacheDirectory, HashUtilities.HashString( compileTimeAssemblyName ) );
             var pe = Path.Combine( directory, compileTimeAssemblyName + ".dll" );
             var pdb = Path.ChangeExtension( pe, ".pdb" );
             var manifest = Path.ChangeExtension( pe, ".manifest" );

@@ -3,6 +3,7 @@
 
 using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.Impl.Formatting;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
@@ -21,7 +22,6 @@ namespace Caravela.AspectWorkbench.ViewModels
     [NotifyPropertyChanged]
     public class MainViewModel
     {
-        private readonly IServiceProvider _serviceProvider;
         private TemplateTest? _currentTest;
 
         public string Title => this.CurrentPath == null ? "Aspect Workbench" : $"Aspect Workbench - {this.CurrentPath}";
@@ -44,11 +44,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         private string? CurrentPath { get; set; }
 
-        public MainViewModel( IServiceProvider serviceProvider )
-        {
-            this._serviceProvider = serviceProvider;
-        }
-
+        
         public async Task RunTestAsync()
         {
             if ( this.TestText == null )
@@ -73,7 +69,10 @@ namespace Caravela.AspectWorkbench.ViewModels
                     testInput.Options.TestRunnerFactoryType = typeof(TemplatingTestRunnerFactory).AssemblyQualifiedName;
                 }
 
-                var testRunner = TestRunnerFactory.CreateTestRunner( testInput, this._serviceProvider, null );
+                using var testProjectOptions = new TestProjectOptions() { FormatCompileTimeCode = true };
+                using var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions );
+
+                var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, null );
 
                 var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject( testInput.Options ) );
 
@@ -85,6 +84,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 var testSyntaxTree = testResult.SyntaxTrees.First();
 
                 var annotatedTemplateSyntax = testSyntaxTree.AnnotatedSyntaxRoot;
+
 
                 if ( annotatedTemplateSyntax != null )
                 {
@@ -103,8 +103,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 if ( transformedTemplateSyntax != null )
                 {
-                    // this.CompiledTemplatePath = testResult.TransformedTemplatePath;
-
+                    SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation );
                     // Render the transformed tree.
                     var project3 = testRunner.CreateProject( testInput.Options );
                     var document3 = project3.AddDocument( "name.cs", transformedTemplateSyntax );
