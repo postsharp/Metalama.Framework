@@ -147,5 +147,14 @@ namespace Caravela.Framework.Impl
         }
 
         public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol ) => symbol.GetPrimarySyntaxReference()?.GetSyntax();
+
+        public static bool IsInterfaceMemberImplementation( this ISymbol symbol )
+            => symbol switch
+            {
+                IMethodSymbol methodsymbol => methodsymbol.ExplicitInterfaceImplementations.Any(),
+                IPropertySymbol propertySymbol => propertySymbol.ExplicitInterfaceImplementations.Any(),
+                IEventSymbol eventSymbol => eventSymbol.ExplicitInterfaceImplementations.Any(),
+                _ => false
+            };
     }
 }

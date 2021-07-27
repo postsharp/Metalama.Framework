@@ -29,7 +29,15 @@ namespace Caravela.Framework.Impl.Linking
             ExpressionSyntax expression,
             AspectReferenceSpecification referenceSpecification )
         {
-            // TODO: Other things than methods.
+            // If the symbol containing the reference is different from the referenced symbol, we are referencing explicit interface implementation.
+            if ( (!SymbolEqualityComparer.Default.Equals( containingSymbol.ContainingType, referencedSymbol.ContainingType )
+                  && referencedSymbol.ContainingType.TypeKind == TypeKind.Interface)
+                 || referencedSymbol.IsInterfaceMemberImplementation() )
+            {
+                // Replace the referenced symbol with the overridden interface implementation.
+                referencedSymbol = containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
+            }
+
             var overrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
 
             if ( overrides.Count > 0 )
@@ -90,7 +98,7 @@ namespace Caravela.Framework.Impl.Linking
                             return new ResolvedAspectReference(
                                 containingSymbol,
                                 referencedSymbol,
-                                TransitionSymbol( referencedSymbol, originalSymbol ),
+                                GetMethodSymbolForResolvedSymbol( referencedSymbol, originalSymbol ),
                                 SymbolEqualityComparer.Default.Equals( referencedSymbol, originalSymbol )
                                     ? ResolvedAspectReferenceSemantic.Original
                                     : ResolvedAspectReferenceSemantic.Default,
@@ -116,7 +124,7 @@ namespace Caravela.Framework.Impl.Linking
                             return new ResolvedAspectReference(
                                 containingSymbol,
                                 referencedSymbol,
-                                TransitionSymbol( referencedSymbol, originalSymbol ),
+                                GetMethodSymbolForResolvedSymbol( referencedSymbol, originalSymbol ),
                                 SymbolEqualityComparer.Default.Equals( referencedSymbol, originalSymbol )
                                     ? ResolvedAspectReferenceSemantic.Original
                                     : ResolvedAspectReferenceSemantic.Default,
@@ -244,14 +252,15 @@ namespace Caravela.Framework.Impl.Linking
         {
             var symbol = this._introductionRegistry.GetSymbolForIntroducedMember( resolvedIntroduction );
 
-            return TransitionSymbol( referencedSymbol, symbol );
+            return GetMethodSymbolForResolvedSymbol( referencedSymbol, symbol );
         }
 
-        private static ISymbol TransitionSymbol( ISymbol referencedSymbol, ISymbol resolvedSymbol )
+        private static ISymbol GetMethodSymbolForResolvedSymbol( ISymbol referencedSymbol, ISymbol resolvedSymbol )
         {
             switch (referencedSymbol, resolvedSymbol)
             {
                 case (IMethodSymbol { MethodKind: MethodKind.Ordinary }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
+                case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
                 case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol
                     { MethodKind: MethodKind.ExplicitInterfaceImplementation }):
                 case (IPropertySymbol, IPropertySymbol):

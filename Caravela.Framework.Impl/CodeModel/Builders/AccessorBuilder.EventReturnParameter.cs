@@ -14,17 +14,21 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             public override IType ParameterType
             {
-                get => ((EventBuilder) this.Accessor._containingDeclaration).EventType;
-                set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );
+                get => this.Compilation.Factory.GetSpecialType( SpecialType.Void );
+                set => throw new NotSupportedException( "Cannot change event accessor's return parameter type." );
             }
 
             public override RefKind RefKind
             {
                 get => RefKind.None;
-                set => throw new NotSupportedException( "Cannot directly change accessor's parameter reference kind." );
+                set => throw new NotSupportedException( "Cannot change event accessor's return parameter reference kind." );
             }
 
-            public override string Name => throw new NotSupportedException( "Cannot get the name of a return parameter." );
+            public override string Name
+            {
+                get => throw new NotSupportedException( "Cannot get the name of a return parameter." );
+                set => throw new NotSupportedException( "Cannot set the name of a return parameter." );
+            }
 
             public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
                 => this.Accessor.ToDisplayString( format, context ) + "@<return>";

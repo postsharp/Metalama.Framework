@@ -30,7 +30,8 @@ namespace Caravela.Framework.Impl.Formatting
             switch ( node )
             {
                 case BlockSyntax block:
-                    var annotatedBlock = (T) (object) block.WithStatements( SyntaxFactory.List( block.Statements.Select( s => s.AddAnnotationInsideBlock( annotation, true ) ) ) );
+                    var annotatedBlock = (T) (object) block.WithStatements(
+                        SyntaxFactory.List( block.Statements.Select( s => s.AddAnnotationInsideBlock( annotation, true ) ) ) );
 
                     if ( addToBrackets )
                     {

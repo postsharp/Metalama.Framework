@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -73,12 +74,12 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Gets introduced members representing overrides of a symbol.
         /// </summary>
-        /// <param name="symbol">Symbol.</param>
+        /// <param name="referencedSymbol">Symbol.</param>
         /// <returns>List of introduced members.</returns>
-        public IReadOnlyList<LinkerIntroducedMember> GetOverridesForSymbol( ISymbol symbol )
+        public IReadOnlyList<LinkerIntroducedMember> GetOverridesForSymbol( ISymbol referencedSymbol )
         {
             // TODO: Optimize.
-            var declaringSyntax = symbol.GetPrimaryDeclaration();
+            var declaringSyntax = referencedSymbol.GetPrimaryDeclaration();
 
             if ( declaringSyntax == null )
             {
@@ -93,7 +94,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 // Original code declaration - we should be able to get ICodeElement by symbol name.
 
-                if ( !this._overrideTargetsByOriginalSymbolName.TryGetValue( symbol, out var originalElement ) )
+                if ( !this._overrideTargetsByOriginalSymbolName.TryGetValue( referencedSymbol, out var originalElement ) )
                 {
                     return Array.Empty<LinkerIntroducedMember>();
                 }
@@ -170,6 +171,15 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns>An introduced member, or <c>null</c> if the declaration represented by this symbol was not introduced.</returns>
         public LinkerIntroducedMember? GetIntroducedMemberForSymbol( ISymbol symbol )
         {
+            switch ( symbol )
+            {
+                case IMethodSymbol { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } propertyAccessorSymbol:
+                    return this.GetIntroducedMemberForSymbol( propertyAccessorSymbol.AssociatedSymbol.AssertNotNull() );
+
+                case IMethodSymbol { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove } eventAccessorSymbol:
+                    return this.GetIntroducedMemberForSymbol( eventAccessorSymbol.AssociatedSymbol.AssertNotNull() );
+            }
+
             var declaringSyntax = symbol.GetPrimaryDeclaration();
 
             if ( declaringSyntax == null )

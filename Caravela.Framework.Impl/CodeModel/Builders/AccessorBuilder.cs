@@ -10,6 +10,7 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
@@ -41,7 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IType ReturnType
         {
             get => this.ReturnParameter.ParameterType;
-            set => throw new NotSupportedException();
+            set => throw new NotSupportedException( "Cannot directly change the return type of an accessor." );
         }
 
         [Memo]
@@ -59,7 +60,15 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     => new MethodInvoker( this, order, invokerOperator ),
                 false );
 
-        public IMethod? OverriddenMethod => throw new NotImplementedException();
+        public IMethod? OverriddenMethod
+            => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
+            {
+                (PropertyBuilder propertyBuilder, MethodKind.PropertyGet) => propertyBuilder.OverriddenProperty?.Getter.AssertNotNull(),
+                (PropertyBuilder propertyBuilder, MethodKind.PropertySet) => propertyBuilder.OverriddenProperty?.Setter.AssertNotNull(),
+                (EventBuilder eventBuilder, MethodKind.EventAdd) => eventBuilder.OverriddenEvent?.Adder.AssertNotNull(),
+                (EventBuilder eventBuilder, MethodKind.EventRemove) => eventBuilder.OverriddenEvent?.Remover.AssertNotNull(),
+                _ => throw new AssertionFailedException()
+            };
 
         // TODO: Local functions from templates will never be visible (which is probably only thing possible).
         public IMethodList LocalFunctions => MethodList.Empty;
@@ -70,7 +79,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             => (this._containingDeclaration, this.MethodKind) switch
             {
                 // TODO: Indexer parameters (need to have special IParameterList implementation that would mirror adding parameters to the indexer property).
-                // TODO: Events.
                 (IProperty property, MethodKind.PropertyGet) when property.Parameters.Count == 0 => new ParameterBuilderList(),
                 (IProperty property, MethodKind.PropertySet) when property.Parameters.Count == 0 =>
                     new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
@@ -85,9 +93,39 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             get => this._accessibility ?? this._containingDeclaration.Accessibility;
 
-            // TODO: Changing accessibility of all accessors at the same time should be prohibited or should change the visibility of the method group.
-            // TODO: Throw if the set accessibility does not restrict the property/event accessibility.
-            set => this._accessibility = value;
+            set
+            {
+                if ( this.ContainingDeclaration is not PropertyBuilder propertyBuilder )
+                {
+                    throw new InvalidOperationException( $"Cannot change event accessor accessibility." );
+                }
+
+                if ( !value.CompareAccessibility( propertyBuilder.Accessibility ).IsSubsetOrEqual )
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot change accessor accessibility to {value}, which is not more restrictive than parent accessibility {propertyBuilder.Accessibility}." );
+                }
+
+                var otherAccessor = this.MethodKind switch
+                {
+                    MethodKind.PropertyGet => propertyBuilder.Setter,
+                    MethodKind.PropertySet => propertyBuilder.Getter,
+                    _ => throw new AssertionFailedException()
+                };
+
+                if ( otherAccessor == null )
+                {
+                    throw new InvalidOperationException( $"Cannot change accessor accessibility, if the property has a single accesor ." );
+                }
+
+                if ( otherAccessor.Accessibility.CompareAccessibility( propertyBuilder.Accessibility ).IsSubset )
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot change accessor accessibility to {value}, because the other accessor is already restricted to {otherAccessor.Accessibility}." );
+                }
+
+                this._accessibility = value;
+            }
         }
 
         public string Name
@@ -104,11 +142,23 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             set => throw new NotSupportedException();
         }
 
-        public bool IsStatic { get => this._containingDeclaration.IsStatic; set => throw new NotSupportedException(); }
+        public bool IsStatic
+        {
+            get => this._containingDeclaration.IsStatic;
+            set => throw new NotSupportedException( "Cannot directly change staticity of an accessor." );
+        }
 
-        public bool IsVirtual { get => this._containingDeclaration.IsVirtual; set => throw new NotSupportedException(); }
+        public bool IsVirtual
+        {
+            get => this._containingDeclaration.IsVirtual;
+            set => throw new NotSupportedException( "Cannot directly change virtuality of an accessor." );
+        }
 
-        public bool IsSealed { get => this._containingDeclaration.IsSealed; set => throw new NotSupportedException(); }
+        public bool IsSealed
+        {
+            get => this._containingDeclaration.IsSealed;
+            set => throw new NotSupportedException( "Cannot directly change sealedness of an accessor." );
+        }
 
         public bool IsAbstract => this._containingDeclaration.IsAbstract;
 
@@ -151,7 +201,19 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethod WithGenericArguments( params IType[] genericArguments )
             => throw new NotSupportedException( "Cannot add generic parameters to accessors." );
 
-        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
+            => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
+            {
+                (PropertyBuilder propertyBuilder, MethodKind.PropertyGet) 
+                    => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.Getter ).AssertNoneNull().ToArray(),
+                (PropertyBuilder propertyBuilder, MethodKind.PropertySet) 
+                    => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.Setter ).AssertNoneNull().ToArray(),
+                (EventBuilder eventBuilder, MethodKind.EventAdd) 
+                    => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.Adder ).AssertNoneNull().ToArray(),
+                (EventBuilder eventBuilder, MethodKind.EventRemove) 
+                    => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.Remover ).AssertNoneNull().ToArray(),
+                _ => throw new AssertionFailedException()
+            };
 
         public bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 

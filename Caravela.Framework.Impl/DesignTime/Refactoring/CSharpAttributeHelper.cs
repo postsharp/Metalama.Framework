@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
                 {
                     continue;
                 }
-                
+
                 if ( await newRoot.SyntaxTree.GetRootAsync( cancellationToken ) is CompilationUnitSyntax newUnit )
                 {
                     if ( newUnit.Usings.All( u => u.Name.ToString() != ns ) )

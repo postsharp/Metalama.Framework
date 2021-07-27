@@ -5,6 +5,8 @@ using Caravela.Framework;
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 
+#pragma warning disable CS0169
+
 // This checks that throw expressions in expression bodies work properly.
 
 
@@ -53,11 +55,10 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Bugs.Bug28880
         {
             return a;
         }
-        
-        // TODO BUg 28882
-       // [PropertyAspect]
-       // int field;
-        
+
+        [PropertyAspect]
+        int field;
+
         [PropertyAspect]
         int Property { get; set; }
         
