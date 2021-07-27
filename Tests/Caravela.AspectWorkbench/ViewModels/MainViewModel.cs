@@ -44,7 +44,6 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         private string? CurrentPath { get; set; }
 
-        
         public async Task RunTestAsync()
         {
             if ( this.TestText == null )
@@ -85,7 +84,6 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 var annotatedTemplateSyntax = testSyntaxTree.AnnotatedSyntaxRoot;
 
-
                 if ( annotatedTemplateSyntax != null )
                 {
                     // Display the annotated syntax tree.
@@ -103,7 +101,8 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 if ( transformedTemplateSyntax != null )
                 {
-                    SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation );
+                    SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation! );
+
                     // Render the transformed tree.
                     var project3 = testRunner.CreateProject( testInput.Options );
                     var document3 = project3.AddDocument( "name.cs", transformedTemplateSyntax );

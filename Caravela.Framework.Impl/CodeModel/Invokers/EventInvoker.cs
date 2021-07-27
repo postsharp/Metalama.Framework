@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                     .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
         }
 
-        public object AddDelegate( object? instance, object? value )
+        public object Add( object? instance, object? value )
         {
             var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ), AspectReferenceTargetKind.EventAddAccessor );
 
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             return new DynamicExpression( expression, this.Member.EventType, false );
         }
 
-        public object RemoveDelegate( object? instance, object? value )
+        public object Remove( object? instance, object? value )
         {
             var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ), AspectReferenceTargetKind.EventRemoveAccessor );
 

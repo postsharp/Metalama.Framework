@@ -87,6 +87,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
 
+        public IMemberWithAccessors? DeclaringMember
+            => this.MethodSymbol.AssociatedSymbol != null
+                ? this.Compilation.Factory.GetDeclaration( this.MethodSymbol.AssociatedSymbol ) as IMemberWithAccessors
+                : null;
+
         public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
     }
 }

@@ -54,11 +54,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IMethod? IFieldOrProperty.Getter => this.Getter;
 
+        IMethod? IFieldOrProperty.Setter => this.Setter;
+        
         public IMethodBuilder? Setter { get; }
 
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
-
-        IMethod? IFieldOrProperty.Setter => this.Setter;
 
         [Memo]
         public IInvokerFactory<IPropertyInvoker> Invokers
@@ -239,6 +239,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
             }
         }
+
+        public IMethod? GetAccessor( MethodKind methodKind )
+            => methodKind switch
+            {
+                MethodKind.PropertyGet => this.Getter,
+                MethodKind.PropertySet => this.Setter,
+                _ => null
+            };
 
         [return: RunTimeOnly]
         public PropertyInfo ToPropertyInfo() => throw new NotImplementedException();

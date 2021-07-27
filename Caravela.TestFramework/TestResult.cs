@@ -137,7 +137,6 @@ namespace Caravela.TestFramework
                 // Format the output code.
                 this.SyntaxTrees[i].SetCompileTimeCode( syntaxNode, syntaxTree.FilePath );
             }
-            
         }
 
         internal async Task SetOutputCompilationAsync( Compilation runTimeCompilation )

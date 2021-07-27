@@ -3,8 +3,6 @@
 
 using Caravela.AspectWorkbench.CodeEditor;
 using Caravela.AspectWorkbench.ViewModels;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.TestFramework;
 using Microsoft.Win32;
 using PostSharp;
 using RoslynPad.Editor;
@@ -155,6 +153,5 @@ namespace Caravela.AspectWorkbench.Views
                 _ = Process.Start( new ProcessStartInfo( this._viewModel.CompiledTemplatePath ) { UseShellExecute = true } );
             }
         }
-
     }
 }

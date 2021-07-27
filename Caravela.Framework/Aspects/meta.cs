@@ -72,7 +72,7 @@ namespace Caravela.Framework.Aspects
         /// <returns>A value that is structurally equivalent to the compile-time <paramref name="value"/>.</returns>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
-        [return:NotNullIfNotNull("value")]
+        [return: NotNullIfNotNull( "value" )]
         public static T? RunTime<T>( T? value ) => value;
 
         /// <summary>

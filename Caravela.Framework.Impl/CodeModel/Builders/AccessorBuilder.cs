@@ -158,6 +158,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [return: RunTimeOnly]
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
+        IMemberWithAccessors? IMethod.DeclaringMember => (IMemberWithAccessors) this._containingDeclaration;
+
         [return: RunTimeOnly]
         public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
@@ -165,14 +167,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-            => this._containingDeclaration.ToDisplayString( format, context ) + "." + this.MethodKind switch
-            {
-                MethodKind.EventAdd => "add",
-                MethodKind.EventRemove => "remove",
-                MethodKind.PropertyGet => "get",
-                MethodKind.PropertySet => "set",
-                MethodKind.EventRaise => "raise",
-                _ => this.MethodKind.ToString()
-            };
+            => this._containingDeclaration.ToDisplayString( this.MethodKind, format, context );
     }
 }

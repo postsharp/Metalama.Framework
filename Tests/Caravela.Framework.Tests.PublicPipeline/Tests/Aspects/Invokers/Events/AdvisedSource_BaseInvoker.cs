@@ -11,12 +11,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedSou
     {
         public override void OverrideAdd(dynamic value)
         {
-            meta.Event.Invokers.Base!.AddDelegate(meta.This, value);
+            meta.Event.Invokers.Base!.Add(meta.This, value);
         }
 
         public override void OverrideRemove(dynamic value)
         {
-            meta.Event.Invokers.Base!.RemoveDelegate(meta.This, value);
+            meta.Event.Invokers.Base!.Remove(meta.This, value);
         }
     }
 

@@ -36,6 +36,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
+        IMemberWithAccessors? IMethod.DeclaringMember => null;
+
         public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
         {
             var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind );

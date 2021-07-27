@@ -140,7 +140,7 @@ namespace Caravela.Framework.Impl.Linking
                             CreateGotoStatement() )
                         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
-            
+
             // Add the SourceCode annotation, if it is source code.
             if ( !(symbol.GetPrimarySyntaxReference() is { } primarySyntax && primarySyntax.GetSyntax().HasAnnotation( FormattingAnnotations.GeneratedCode )) )
             {

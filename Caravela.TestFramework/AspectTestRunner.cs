@@ -20,6 +20,7 @@ namespace Caravela.TestFramework
     public class AspectTestRunner : BaseTestRunner
     {
         private int _runCount;
+
         public AspectTestRunner(
             IServiceProvider serviceProvider,
             string? projectDirectory,
@@ -42,10 +43,9 @@ namespace Caravela.TestFramework
             {
                 this._runCount++;
             }
-            
+
             var testResult = await base.RunTestAsync( testInput );
 
-            
             using var domain = new UnloadableCompileTimeDomain();
             var testProjectOptions = (TestProjectOptions) this.ServiceProvider.GetService( typeof(TestProjectOptions) );
             var pipeline = new CompileTimeAspectPipeline( testProjectOptions, true, domain, testProjectOptions );

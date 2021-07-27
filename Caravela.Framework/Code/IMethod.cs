@@ -66,5 +66,7 @@ namespace Caravela.Framework.Code
         /// <returns>A <see cref="MethodInfo"/> that can be used only in run-time code.</returns>
         [return: RunTimeOnly]
         MethodInfo ToMethodInfo();
+
+        IMemberWithAccessors? DeclaringMember { get; }
     }
 }

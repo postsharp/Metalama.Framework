@@ -101,7 +101,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this.StandardCompileTimeMetadataReferences =
                 this.SystemAssemblyPaths
                     .Concat( caravelaImplementationPaths )
-                    .Select( c => (MetadataReference) MetadataReferenceCache.GetFromFile( c ) )
+                    .Select( MetadataReferenceCache.GetFromFile )
                     .Prepend( frameworkAssemblyReference )
                     .ToImmutableArray();
         }

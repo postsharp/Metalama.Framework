@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Invokers;
+using Caravela.Framework.Impl.CodeModel.Pseudo;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.RunTime;
 using Microsoft.CodeAnalysis;
@@ -32,10 +33,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
 
         [Memo]
-        public IMethod? Getter => new PseudoAccessor( this, AccessorSemantic.Get );
+        public IMethod? Getter => new PseudoGetter( this );
 
         [Memo]
-        public IMethod? Setter => this.Writeability != Writeability.None ? new PseudoAccessor( this, AccessorSemantic.Set ) : null;
+        public IMethod? Setter => this.Writeability != Writeability.None ? new PseudoSetter( this ) : null;
 
         // TODO: Memo does not work here.
         // [Memo]

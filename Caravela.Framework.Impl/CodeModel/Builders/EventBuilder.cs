@@ -149,5 +149,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
 
         public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
+
+        public IMethod? GetAccessor( MethodKind methodKind )
+            => methodKind switch
+            {
+                MethodKind.EventAdd => this.Adder,
+                MethodKind.EventRaise => this.Raiser,
+                MethodKind.EventRemove => this.Remover,
+                _ => null
+            };
     }
 }

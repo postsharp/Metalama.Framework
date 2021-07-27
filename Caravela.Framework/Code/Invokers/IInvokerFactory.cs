@@ -39,5 +39,10 @@ namespace Caravela.Framework.Code.Invokers
         /// This property uses the null-conditional access operator <c>?.</c>. For unconditional access, use <see cref="Final"/>.
         /// </summary>
         T FinalConditional { get; }
+
+        /// <summary>
+        /// Gets the invoker for a given <see cref="InvokerOrder"/> and <see cref="InvokerOperator"/>.
+        /// </summary>
+        T? GetInvoker( InvokerOrder order, InvokerOperator @operator );
     }
 }

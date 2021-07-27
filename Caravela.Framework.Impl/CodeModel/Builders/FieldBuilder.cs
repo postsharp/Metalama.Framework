@@ -7,6 +7,7 @@ using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Invokers;
+using Caravela.Framework.Impl.CodeModel.Pseudo;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -23,9 +24,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IType Type { get; set; }
 
         [Memo]
-        public IMethod? Getter => new PseudoAccessor( this, AccessorSemantic.Get );
+        public IMethod? Getter => new PseudoGetter( this );
 
-        public IMethod? Setter => new PseudoAccessor( this, AccessorSemantic.Set );
+        public IMethod? Setter => new PseudoSetter( this );
 
         public override bool IsExplicitInterfaceImplementation => false;
 

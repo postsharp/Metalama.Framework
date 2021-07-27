@@ -9,33 +9,36 @@ using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using Accessibility = Caravela.Framework.Code.Accessibility;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Pseudo
 {
-    internal partial class PseudoAccessor : IMethod
+    internal abstract class PseudoAccessor<T> : IMethod, IDeclarationInternal
+        where T : IMember
     {
-        private readonly IMember _containingMember;
-        private readonly AccessorSemantic _semantic;
+        protected T DeclaringMember { get; }
 
-        public PseudoAccessor( IMember containingMember, AccessorSemantic semantic )
+        protected PseudoAccessor( T containingMember, MethodKind semantic )
         {
-            this._containingMember = containingMember;
-            this._semantic = semantic;
+            this.DeclaringMember = containingMember;
+            this.MethodKind = semantic;
         }
 
         [Memo]
-        public IParameter ReturnParameter => new ReturnParam( this );
+        public IParameter ReturnParameter => new PseudoParameter( this, -1, this.ReturnType, null );
 
         [Memo]
         public IType ReturnType
-            => this._semantic != AccessorSemantic.Get
-                ? ((CompilationModel) this._containingMember.Compilation).Factory.GetTypeByReflectionType( typeof(void) )
-                : ((IProperty) this._containingMember).Type;
+            => this.MethodKind != MethodKind.PropertyGet
+                ? this.DeclaringMember.Compilation.TypeFactory.GetTypeByReflectionType( typeof(void) )
+                : ((IProperty) this.DeclaringMember).Type;
 
         [Memo]
         public IGenericParameterList GenericParameters => new GenericParameterList( this, Enumerable.Empty<DeclarationRef<IGenericParameter>>() );
@@ -43,7 +46,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IReadOnlyList<IType> GenericArguments => ImmutableList<IType>.Empty;
 
-        public bool IsOpenGeneric => this._containingMember.DeclaringType.IsOpenGeneric;
+        public bool IsOpenGeneric => this.DeclaringMember.DeclaringType.IsOpenGeneric;
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers
@@ -53,35 +56,17 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IMethodList LocalFunctions => MethodList.Empty;
 
-        public IParameterList Parameters => throw new NotImplementedException();
+        public abstract IParameterList Parameters { get; }
 
-        public MethodKind MethodKind
-            => this._semantic switch
-            {
-                AccessorSemantic.Get => MethodKind.PropertyGet,
-                AccessorSemantic.Set => MethodKind.PropertySet,
-                AccessorSemantic.Add => MethodKind.EventAdd,
-                AccessorSemantic.Remove => MethodKind.EventRemove,
-                AccessorSemantic.Raise => MethodKind.EventRaise,
-                _ => throw new NotSupportedException()
-            };
+        public MethodKind MethodKind { get; }
 
-        public Accessibility Accessibility => this._containingMember.Accessibility;
+        public Accessibility Accessibility => this.DeclaringMember.Accessibility;
 
-        public string Name
-            => this._semantic switch
-            {
-                AccessorSemantic.Get => $"get_{this._containingMember.Name}",
-                AccessorSemantic.Set => $"set_{this._containingMember.Name}",
-                AccessorSemantic.Add => $"add_{this._containingMember.Name}",
-                AccessorSemantic.Remove => $"remove_{this._containingMember.Name}",
-                AccessorSemantic.Raise => $"raise_{this._containingMember.Name}",
-                _ => throw new NotSupportedException()
-            };
+        public abstract string Name { get; }
 
         public bool IsAbstract => false;
 
-        public bool IsStatic => this._containingMember.IsStatic;
+        public bool IsStatic => this.DeclaringMember.IsStatic;
 
         public bool IsVirtual => false;
 
@@ -93,23 +78,23 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
-        public bool IsNew => this._containingMember.IsNew;
+        public bool IsNew => this.DeclaringMember.IsNew;
 
         public bool IsAsync => false;
 
-        public INamedType DeclaringType => this._containingMember.DeclaringType;
+        public INamedType DeclaringType => this.DeclaringMember.DeclaringType;
 
         public DeclarationOrigin Origin => DeclarationOrigin.Source;
 
-        public IDeclaration? ContainingDeclaration => this._containingMember;
+        public IDeclaration? ContainingDeclaration => this.DeclaringMember;
 
         public IAttributeList Attributes => AttributeList.Empty;
 
         public DeclarationKind DeclarationKind => DeclarationKind.Method;
 
-        public IDiagnosticLocation? DiagnosticLocation => this._containingMember.DiagnosticLocation;
+        public IDiagnosticLocation? DiagnosticLocation => this.DeclaringMember.DiagnosticLocation;
 
-        public ICompilation Compilation => this._containingMember.Compilation;
+        public ICompilation Compilation => this.DeclaringMember.Compilation;
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
@@ -124,6 +109,14 @@ namespace Caravela.Framework.Impl.CodeModel
         [return: RunTimeOnly]
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
+        IMemberWithAccessors? IMethod.DeclaringMember => (IMemberWithAccessors) this.DeclaringMember;
+
         public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotSupportedException();
+
+        public ISymbol? Symbol => null;
+
+        public DeclarationRef<IDeclaration> ToRef() => throw new NotImplementedException();
+
+        public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
     }
 }

@@ -67,5 +67,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.Underlying.ExplicitInterfaceImplementations;
 
         public MethodInfo ToMethodInfo() => this.Underlying.ToMethodInfo();
+
+        public IMemberWithAccessors? DeclaringMember => this.Underlying.DeclaringMember;
     }
 }

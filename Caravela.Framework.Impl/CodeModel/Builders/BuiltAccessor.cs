@@ -99,6 +99,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [return: RunTimeOnly]
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
+        IMemberWithAccessors? IMethod.DeclaringMember => (IMemberWithAccessors) this._builtMember;
+
         [return: RunTimeOnly]
         public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 

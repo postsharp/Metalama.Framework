@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.CodeModel
 {
-    public class DynamicMetaMembersTest : TestBase
+    public class InvokerTest : TestBase
     {
         [Fact]
         public void Methods()
@@ -196,10 +196,96 @@ class TargetCode
             AssertEx.DynamicEquals(
                 property.Invokers.FinalConditional.GetValue( SyntaxFactory.IdentifierName( "a" ) ),
                 @"((global::TargetCode)(a))?.P" );
+            
+            AssertEx.DynamicEquals(
+                property.Invokers.Final.SetValue( SyntaxFactory.IdentifierName( "a" ), SyntaxFactory.IdentifierName( "b" ) ),
+                @"((global::TargetCode)(a)).P = b" );
 
             AssertEx.DynamicEquals(
                 property.Invokers.Final.GetValue( property.Invokers.Final.GetValue( thisExpression ) ),
                 @"((global::TargetCode)(this)).P.P" );
+        }
+        
+        [Fact]
+        public void PropertyAccessors()
+        {
+            var code = @"
+class TargetCode
+{
+    TargetCode P { get; set; }
+    int this[int index] => 42;
+}";
+
+            var compilation = CreateCompilationModel( code );
+
+            var type = compilation.DeclaredTypes.Single();
+            var property = type.Properties.OfName( "P" ).Single();
+            RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression() );
+
+            AssertEx.DynamicEquals( property.Invokers.Final.GetValue( thisExpression ), @"((global::TargetCode)(this)).P" );
+
+            AssertEx.DynamicEquals(
+                property.Getter!.Invokers.FinalConditional.Invoke( SyntaxFactory.IdentifierName( "a" ) ),
+                @"((global::TargetCode)(a))?.P" );
+
+            AssertEx.DynamicEquals(
+                property.Getter!.Invokers.Final.Invoke( property.Invokers.Final.GetValue( thisExpression ) ),
+                @"((global::TargetCode)(this)).P.P" );
+        }
+
+        [Fact]
+        public void Events()
+        {
+            var code = @"
+class TargetCode
+{
+    event System.EventHandler MyEvent;
+}";
+
+            var compilation = CreateCompilationModel( code );
+
+            var type = compilation.DeclaredTypes.Single();
+            var @event = type.Events.Single();
+
+            RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression() );
+            RuntimeExpression parameterExpression = new( SyntaxFactory.IdentifierName( "value" ) );
+
+            AssertEx.DynamicEquals( @event.Invokers.Final.Add( thisExpression, parameterExpression ), @"((global::TargetCode)(this)).MyEvent += value" );
+            AssertEx.DynamicEquals( @event.Invokers.Final.Remove( thisExpression, parameterExpression ), @"((global::TargetCode)(this)).MyEvent -= value" );
+
+            AssertEx.DynamicEquals(
+                @event.Invokers.Final.Raise( thisExpression, parameterExpression, parameterExpression ),
+                @"((global::TargetCode)(this)).MyEvent?.Invoke((global::System.Object? )(value), (global::System.EventArgs)(value))" );
+        }
+
+        [Fact]
+        public void EventAccessors()
+        {
+            var code = @"
+class TargetCode
+{
+    event System.EventHandler MyEvent;
+}";
+
+            var compilation = CreateCompilationModel( code );
+
+            var type = compilation.DeclaredTypes.Single();
+            var @event = type.Events.Single();
+
+            RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression() );
+            RuntimeExpression parameterExpression = new( SyntaxFactory.IdentifierName( "value" ) );
+
+            AssertEx.DynamicEquals(
+                @event.Adder.Invokers.Final.Invoke( thisExpression, parameterExpression ),
+                @"((global::TargetCode)(this)).MyEvent += value" );
+
+            AssertEx.DynamicEquals(
+                @event.Remover.Invokers.Final.Invoke( thisExpression, parameterExpression ),
+                @"((global::TargetCode)(this)).MyEvent -= value" );
+
+            AssertEx.DynamicEquals(
+                @event.Raiser?.Invokers.Final.Invoke( thisExpression, parameterExpression, parameterExpression ),
+                @"((global::TargetCode)(this)).MyEvent?.Invoke((global::System.Object? )(value), (global::System.EventArgs)(value))" );
         }
 
         [Fact]

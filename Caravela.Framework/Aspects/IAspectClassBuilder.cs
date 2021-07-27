@@ -19,7 +19,7 @@ namespace Caravela.Framework.Aspects
         /// that is applied in the IDE to the source code. A live template must have a default constructor.
         /// </summary>
         bool IsLiveTemplate { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the name of the aspect as shown to the user at design time.
         /// </summary>

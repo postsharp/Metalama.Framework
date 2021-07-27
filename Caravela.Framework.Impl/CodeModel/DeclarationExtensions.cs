@@ -130,7 +130,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 if ( argumentsLength < requiredArguments )
                 {
-                    throw GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments.CreateException( (declaration, requiredArguments) );
+                    throw GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments.CreateException( (declaration, requiredArguments, argumentsLength) );
                 }
             }
             else
