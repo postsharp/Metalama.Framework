@@ -495,7 +495,7 @@ namespace Caravela.Framework.Impl.CompileTime
             Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' ): found on disk. Deserializing." );
 
             // Deserialize the manifest.
-            if ( CompileTimeProjectManifest.TryDeserialize( File.OpenRead( outputPaths.Manifest ), out var manifest ) )
+            if ( CompileTimeProjectManifest.TryDeserialize( RetryHelper.Retry( () => File.OpenRead( outputPaths.Manifest ) ), out var manifest ) )
             {
                 project = CompileTimeProject.Create(
                     this._serviceProvider,
