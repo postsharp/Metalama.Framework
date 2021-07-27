@@ -14,13 +14,11 @@ namespace Caravela.Framework.Code.Invokers
         /// <summary>
         /// Add a delegate to the event.
         /// </summary>
-        [return: RunTimeOnly]
         dynamic Add( dynamic? instance, dynamic? handler );
 
         /// <summary>
         /// Remove a delegate from the event.
         /// </summary>
-        [return: RunTimeOnly]
         dynamic Remove( dynamic? instance, dynamic? handler );
 
         dynamic? Raise( dynamic? instance, params dynamic?[] args );

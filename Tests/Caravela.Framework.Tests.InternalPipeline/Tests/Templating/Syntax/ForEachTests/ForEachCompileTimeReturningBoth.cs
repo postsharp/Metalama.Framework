@@ -1,20 +1,17 @@
-﻿#pragma warning disable CS0649, CS8618
+#pragma warning disable CS0649, CS8618
 
+using System;
 using System.Collections.Generic;
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.ForEachStatements.ForEachStatements
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEach.CompileTimeReturningBoth
 {
-    class RunTimeClass
-    {
-        public IEnumerable<int> runTimeEnumerable;
-    }
 
     [CompileTimeOnly]
     class CompileTimeClass
     {
-        public IEnumerable<int> compileTimeEnumerable;
+        public IEnumerable<int> compileTimeEnumerable = new[] { 1, 2, 3 };
     }
 
     [CompileTime]
@@ -23,21 +20,25 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.ForEachSt
         [TestTemplate]
         dynamic? Template()
         {
-            var runTimeObject = new RunTimeClass();
             var compileTimeObject = new CompileTimeClass();
 
             foreach (var x in compileTimeObject.compileTimeEnumerable)
             {
-                x.ToString();
+                Console.WriteLine( x.ToString() );
             }
-
-
-            foreach (var x in runTimeObject.runTimeEnumerable)
+            
+            foreach (var x in meta.RunTime( compileTimeObject.compileTimeEnumerable) )
             {
-                x.ToString();
+                Console.WriteLine( x.ToString() );
             }
+
 
             return meta.Proceed();
         }
+    }
+    
+    class TargetCode
+    {
+        void Method() {}
     }
 }

@@ -12,6 +12,8 @@ namespace Caravela.Framework.Impl
 {
     internal static class SymbolExtensions
     {
+        public static bool IsDynamic( this ITypeSymbol? type ) => type is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
+        
         public static bool AnyBaseType( this INamedTypeSymbol type, Predicate<INamedTypeSymbol> predicate )
         {
             for ( var t = type; t != null; t = t.BaseType )

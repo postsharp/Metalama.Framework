@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Collections;
@@ -155,15 +154,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
-        [return: RunTimeOnly]
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
         IMemberWithAccessors? IMethod.DeclaringMember => (IMemberWithAccessors) this._containingDeclaration;
 
-        [return: RunTimeOnly]
         public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
-        [return: RunTimeOnly]
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )

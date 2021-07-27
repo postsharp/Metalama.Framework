@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Invokers;
@@ -76,7 +75,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             return new[] { new IntroducedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
         }
 
-        [return: RunTimeOnly]
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
     }
 }

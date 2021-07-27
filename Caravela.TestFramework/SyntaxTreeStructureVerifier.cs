@@ -16,6 +16,7 @@ namespace Caravela.TestFramework
         /// </summary>
         public static void Verify( Compilation compilation )
         {
+            
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
                 var actualSyntaxFactory = syntaxTree.GetRoot().ToSyntaxFactoryDebug( compilation );
