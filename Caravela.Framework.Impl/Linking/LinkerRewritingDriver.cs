@@ -522,7 +522,7 @@ namespace Caravela.Framework.Impl.Linking
                         aspectReference.ContainingSymbol.ContainingType,
                         aspectReference.ResolvedSymbol.ContainingType ) )
                     {
-                        if ( aspectReference.OriginalSymbol.IsInterfaceMemberReference() )
+                        if ( aspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
                         {
                             return memberAccessExpression
                                 .WithExpression( ThisExpression() )

@@ -100,7 +100,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     throw new InvalidOperationException( $"Cannot change event accessor accessibility." );
                 }
 
-                if ( !value.IsMoreRestrictiveOrEqualThan( propertyBuilder.Accessibility ) )
+                if ( !value.CompareAccessibility( propertyBuilder.Accessibility ).IsSubsetOrEqual )
                 {
                     throw new InvalidOperationException(
                         $"Cannot change accessor accessibility to {value}, which is not more restrictive than parent accessibility {propertyBuilder.Accessibility}." );
@@ -118,7 +118,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     throw new InvalidOperationException( $"Cannot change accessor accessibility, if the property has a single accesor ." );
                 }
 
-                if ( otherAccessor.Accessibility.IsMoreRestrictiveThan( propertyBuilder.Accessibility ) )
+                if ( otherAccessor.Accessibility.CompareAccessibility( propertyBuilder.Accessibility ).IsSubset )
                 {
                     throw new InvalidOperationException(
                         $"Cannot change accessor accessibility to {value}, because the other accessor is already restricted to {otherAccessor.Accessibility}." );

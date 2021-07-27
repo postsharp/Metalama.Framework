@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Linking
             // If the symbol containing the reference is different from the referenced symbol, we are referencing explicit interface implementation.
             if ( (!SymbolEqualityComparer.Default.Equals( containingSymbol.ContainingType, referencedSymbol.ContainingType )
                   && referencedSymbol.ContainingType.TypeKind == TypeKind.Interface)
-                 || referencedSymbol.IsInterfaceMemberReference() )
+                 || referencedSymbol.IsInterfaceMemberImplementation() )
             {
                 // Replace the referenced symbol with the overridden interface implementation.
                 referencedSymbol = containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();

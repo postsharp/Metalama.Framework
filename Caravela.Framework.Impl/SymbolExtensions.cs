@@ -148,7 +148,7 @@ namespace Caravela.Framework.Impl
 
         public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol ) => symbol.GetPrimarySyntaxReference()?.GetSyntax();
 
-        public static bool IsInterfaceMemberReference( this ISymbol symbol )
+        public static bool IsInterfaceMemberImplementation( this ISymbol symbol )
             => symbol switch
             {
                 IMethodSymbol methodsymbol => methodsymbol.ExplicitInterfaceImplementations.Any(),
