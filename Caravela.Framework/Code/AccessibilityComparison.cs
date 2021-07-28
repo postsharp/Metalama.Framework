@@ -3,14 +3,16 @@
 
 namespace Caravela.Framework.Code
 {
-    internal struct SetRelationship
+    internal readonly struct AccessibilityComparison
     {
         private readonly int? _comparison;
 
-        public SetRelationship(int? comparison)
+        public AccessibilityComparison( int? comparison )
         {
             this._comparison = comparison;
         }
+
+        public bool IsOther => this._comparison == null;
 
         public bool IsEqual => this._comparison == 0;
 
