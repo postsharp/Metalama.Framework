@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Collections;
@@ -100,7 +99,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     throw new InvalidOperationException( $"Cannot change event accessor accessibility." );
                 }
 
-                if ( !value.CompareAccessibility( propertyBuilder.Accessibility ).IsSubsetOrEqual )
+                if ( !value.ToAccessibilityFlags().IsSubsetOrEqual( propertyBuilder.Accessibility.ToAccessibilityFlags() ) )
                 {
                     throw new InvalidOperationException(
                         $"Cannot change accessor accessibility to {value}, which is not more restrictive than parent accessibility {propertyBuilder.Accessibility}." );
@@ -115,10 +114,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
                 if ( otherAccessor == null )
                 {
-                    throw new InvalidOperationException( $"Cannot change accessor accessibility, if the property has a single accesor ." );
+                    throw new InvalidOperationException( $"Cannot change accessor accessibility, if the property has a single accessor ." );
                 }
 
-                if ( otherAccessor.Accessibility.CompareAccessibility( propertyBuilder.Accessibility ).IsSubset )
+                if ( otherAccessor.Accessibility.ToAccessibilityFlags().IsSubsetOf( propertyBuilder.Accessibility.ToAccessibilityFlags() ) )
                 {
                     throw new InvalidOperationException(
                         $"Cannot change accessor accessibility to {value}, because the other accessor is already restricted to {otherAccessor.Accessibility}." );
@@ -151,13 +150,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsVirtual
         {
             get => this._containingDeclaration.IsVirtual;
-            set => throw new NotSupportedException( "Cannot directly change virtuality of an accessor." );
+            set => throw new NotSupportedException( "Cannot directly change the IsVirtual property of an accessor." );
         }
 
         public bool IsSealed
         {
             get => this._containingDeclaration.IsSealed;
-            set => throw new NotSupportedException( "Cannot directly change sealedness of an accessor." );
+            set => throw new NotSupportedException( "Cannot directly change the IsSealed property of an accessor." );
         }
 
         public bool IsAbstract => this._containingDeclaration.IsAbstract;
@@ -217,24 +216,15 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
-        [return: RunTimeOnly]
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
-        [return: RunTimeOnly]
+        IMemberWithAccessors? IMethod.DeclaringMember => (IMemberWithAccessors) this._containingDeclaration;
+
         public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
-        [return: RunTimeOnly]
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-            => this._containingDeclaration.ToDisplayString( format, context ) + "." + this.MethodKind switch
-            {
-                MethodKind.EventAdd => "add",
-                MethodKind.EventRemove => "remove",
-                MethodKind.PropertyGet => "get",
-                MethodKind.PropertySet => "set",
-                MethodKind.EventRaise => "raise",
-                _ => this.MethodKind.ToString()
-            };
+            => this._containingDeclaration.ToDisplayString( this.MethodKind, format, context );
     }
 }

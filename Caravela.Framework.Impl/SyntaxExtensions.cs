@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl
                     return memberDeclaration;
                 }
 
-                current = current?.Parent;
+                current = current.Parent;
             }
 
             return null;

@@ -25,5 +25,15 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
         public T Final => this._createInvoker( InvokerOrder.Default, InvokerOperator.Default );
 
         public T FinalConditional => this._createInvoker( InvokerOrder.Default, InvokerOperator.Conditional );
+
+        public T? GetInvoker( InvokerOrder order, InvokerOperator @operator )
+            => (order, @operator) switch
+            {
+                (InvokerOrder.Base, InvokerOperator.Conditional) => this.BaseConditional,
+                (InvokerOrder.Base, InvokerOperator.Default) => this.Base,
+                (InvokerOrder.Default, InvokerOperator.Conditional) => this.FinalConditional,
+                (InvokerOrder.Default, InvokerOperator.Default) => this.Final,
+                _ => throw new ArgumentOutOfRangeException()
+            };
     }
 }

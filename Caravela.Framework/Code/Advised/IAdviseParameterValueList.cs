@@ -15,7 +15,6 @@ namespace Caravela.Framework.Code.Advised
         /// Generates syntax that represents the current parameter list as an <c>object[]</c>.
         /// </summary>
         /// <returns></returns>
-        [return: RunTimeOnly]
         dynamic ToArray();
     }
 }

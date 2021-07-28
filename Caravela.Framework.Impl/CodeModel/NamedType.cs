@@ -6,6 +6,7 @@ using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
@@ -72,7 +73,8 @@ namespace Caravela.Framework.Impl.CodeModel
                 this.TransformMembers<IProperty, IPropertyBuilder, IPropertySymbol>(
                     this.TypeSymbol
                         .GetMembers()
-                        .OfType<IPropertySymbol>() ) );
+                        .OfType<IPropertySymbol>()
+                        .ToReadOnlyList() ) );
 
         [Memo]
         public IFieldList Fields
@@ -82,7 +84,8 @@ namespace Caravela.Framework.Impl.CodeModel
                     this.TypeSymbol
                         .GetMembers()
                         .OfType<IFieldSymbol>()
-                        .Where( s => s is { CanBeReferencedByName: true } ) ) );
+                        .Where( s => s is { CanBeReferencedByName: true } )
+                        .ToReadOnlyList() ) );
 
         [Memo]
         public IFieldOrPropertyList FieldsAndProperties => new FieldAndPropertiesList( this.Fields, this.Properties );
@@ -94,7 +97,8 @@ namespace Caravela.Framework.Impl.CodeModel
                 this.TransformMembers<IEvent, IEventBuilder, IEventSymbol>(
                     this.TypeSymbol
                         .GetMembers()
-                        .OfType<IEventSymbol>() ) );
+                        .OfType<IEventSymbol>()
+                        .ToReadOnlyList() ) );
 
         [Memo]
         public IMethodList Methods
@@ -112,7 +116,8 @@ namespace Caravela.Framework.Impl.CodeModel
                                 && m.MethodKind != MethodKind.PropertySet
                                 && m.MethodKind != MethodKind.EventAdd
                                 && m.MethodKind != MethodKind.EventRemove
-                                && m.MethodKind != MethodKind.EventRaise ) ) );
+                                && m.MethodKind != MethodKind.EventRaise )
+                        .ToReadOnlyList() ) );
 
         [Memo]
         public IConstructorList Constructors
@@ -304,7 +309,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        private IEnumerable<MemberRef<TMember>> TransformMembers<TMember, TBuilder, TSymbol>( IEnumerable<TSymbol> symbolMembers )
+        private IEnumerable<MemberRef<TMember>> TransformMembers<TMember, TBuilder, TSymbol>( IReadOnlyList<TSymbol> symbolMembers )
             where TMember : class, IMember
             where TBuilder : IMemberBuilder, TMember
             where TSymbol : class, ISymbol
@@ -336,11 +341,11 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 if ( builder is IReplaceMember replace )
                 {
-                    if ( replace.ReplacedMember.Target is TSymbol && allSymbols.Contains( replace.ReplacedMember.Target ) )
+                    if ( replace.ReplacedMember.Target is TSymbol symbol && allSymbols.Contains( replace.ReplacedMember.Target ) )
                     {
                         // If the MemberRef points to a symbol just remove from symbol list.
                         // This prevents needless allocation.
-                        replacedSymbols.Add( (TSymbol) replace.ReplacedMember.Target );
+                        replacedSymbols.Add( symbol );
                     }
                     else
                     {

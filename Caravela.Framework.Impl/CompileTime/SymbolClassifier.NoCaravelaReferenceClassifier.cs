@@ -20,10 +20,17 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
             }
 
+            public TemplatingScope? GetTemplatingScope( AttributeData attribute ) => throw new NotSupportedException();
+
             public TemplateMemberKind GetTemplateMemberKind( ISymbol symbol ) => TemplateMemberKind.None;
 
             public TemplatingScope GetTemplatingScope( ISymbol symbol )
             {
+                if ( symbol is ITypeParameterSymbol )
+                {
+                    throw new ArgumentOutOfRangeException( nameof(symbol), "Type parameters are not supported." );
+                }
+
                 if ( SymbolClassifier.TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
                 {
                     return scopeFromWellKnown;

@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Pipeline
             AspectExecutionScenario executionScenario,
             bool isTest,
             CompileTimeDomain? domain,
-            IDirectoryOptions? directoryOptions = null,
+            IPathOptions? directoryOptions = null,
             IAssemblyLocator? assemblyLocator = null )
         {
             this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( directoryOptions, assemblyLocator );

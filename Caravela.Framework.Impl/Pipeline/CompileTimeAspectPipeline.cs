@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Pipeline
             IProjectOptions projectOptions,
             bool isTest,
             CompileTimeDomain? domain = null,
-            IDirectoryOptions? directoryOptions = null,
+            IPathOptions? directoryOptions = null,
             IAssemblyLocator? assemblyLocator = null ) : base(
             projectOptions,
             AspectExecutionScenario.CompileTime,

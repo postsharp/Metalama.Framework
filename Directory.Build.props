@@ -47,7 +47,7 @@
     </PropertyGroup>
     <ItemGroup Condition="'$(DisableCodeQuality)'!='True'">
         <!-- Beta version fixes issue with record parameter names -->
-        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.333"
+        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354"
                           Condition="'$(EnforceCodeStyleInBuild)'=='True'" PrivateAssets="All" />
         <Content Include="$(MSBuildThisFileDirectory)\stylecop.json" Condition="'$(EnforceCodeStyleInBuild)'=='True'"
                  Pack="false" />

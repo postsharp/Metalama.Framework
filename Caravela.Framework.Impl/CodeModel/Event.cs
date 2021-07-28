@@ -4,11 +4,13 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Invokers;
+using Caravela.Framework.Impl.CodeModel.Pseudo;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -42,7 +44,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IMethod? Raiser
             => this._symbol.RaiseMethod == null
-                ? new PseudoAccessor( this, AccessorSemantic.Raise )
+                ? new PseudoRaiser( this )
                 : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );
 
         public IEvent? OverriddenEvent
@@ -71,6 +73,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 
         public override bool IsExplicitInterfaceImplementation => !this._symbol.ExplicitInterfaceImplementations.IsEmpty;
+
+        public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
         public override bool IsAsync => false;
 

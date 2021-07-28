@@ -3,9 +3,19 @@
 
 namespace Caravela.Framework.Code.Invokers
 {
+    /// <summary>
+    /// Enumeration of orders for invokers.
+    /// </summary>
     public enum InvokerOrder
     {
+        /// <summary>
+        /// Final (equivalent to <c>this</c> in C#).
+        /// </summary>
         Default,
+        
+        /// <summary>
+        /// Base (equivalent to <c>base</c> in C#).
+        /// </summary>
         Base
     }
 }

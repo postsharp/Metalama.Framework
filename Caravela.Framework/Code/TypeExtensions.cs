@@ -54,7 +54,6 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Generates the <c>default(T)</c> syntax for the type.
         /// </summary>
-        [return: RunTimeOnly]
         public static dynamic? DefaultValue( this IType type ) => type.Compilation.TypeFactory.DefaultValue( type );
     }
 }

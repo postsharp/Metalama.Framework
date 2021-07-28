@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeType( code );
 
             this.AssertEqual(
-                @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target.Sub""))",
+                @"typeof(global::Target.Sub)",
                 serialized );
 
             TestExpression<Type>( code, serialized, info => Assert.Equal( "Sub", info.Name ) );

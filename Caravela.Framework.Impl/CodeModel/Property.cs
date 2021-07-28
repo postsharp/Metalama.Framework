@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -101,5 +102,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public override bool IsAsync => false;
 
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
+
+        public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
     }
 }

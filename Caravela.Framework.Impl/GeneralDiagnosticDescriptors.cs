@@ -40,8 +40,9 @@ namespace Caravela.Framework.Impl
         public static readonly DiagnosticDefinition<(IDeclaration Member, int RequiredArgumentsCount, int ActualArgumentsCount)> MemberRequiresNArguments =
             new( "CR0012", _category, "Member '{0}' requires {1} arguments but received {2}.", Error, "Member requires number of arguments." );
 
-        public static readonly DiagnosticDefinition<(IDeclaration Member, int ArgumentsCount)> MemberRequiresAtLeastNArguments =
-            new( "CR0013", _category, "Member '{0}' requires at least {1} arguments.", Error, "Member requires more arguments." );
+        public static readonly DiagnosticDefinition<(IDeclaration Member, int RequiredArgumentsCount, int ActualArgumentsCount)>
+            MemberRequiresAtLeastNArguments =
+                new( "CR0013", _category, "Member '{0}' requires at least {1} arguments but received {2}.", Error, "Member requires more arguments." );
 
         public static readonly DiagnosticDefinition<IMemberOrNamedType> MustProvideInstanceForInstanceMember =
             new( "CR0015", _category, "Member {0} is not static, but has been used with a null instance.", Error,
