@@ -1,10 +1,10 @@
 string Method(MyClass1 a)
 {
-    var rt = global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle("T:Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1"));
+    var rt = typeof(global::Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1);
     global::System.Console.WriteLine("rt=" + rt);
     global::System.Console.WriteLine("ct=Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1");
     global::System.Console.WriteLine("Oops");
-    global::System.Console.WriteLine(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle("T:Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1")));
-    global::System.Console.WriteLine(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle("T:Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1")).FullName);
+    global::System.Console.WriteLine(typeof(global::Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1));
+    global::System.Console.WriteLine(typeof(global::Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1).FullName);
     return (string)this.Method(a);
 }

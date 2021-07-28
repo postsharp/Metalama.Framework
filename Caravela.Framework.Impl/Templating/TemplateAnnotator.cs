@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 throw new ArgumentOutOfRangeException( nameof(scope) );
             }
-            
+
             if ( this._localScopes.TryGetValue( symbol, out _ ) )
             {
                 throw new AssertionFailedException( $"The symbol {symbol} was already assigned to the scope {scope}." );
@@ -348,14 +348,13 @@ namespace Caravela.Framework.Impl.Templating
                     case TemplatingScope.Dynamic:
                     case TemplatingScope.RunTimeOnly:
                         return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
-                    
+
                     case TemplatingScope.Both:
                         return TemplatingScope.CompileTimeOnlyReturningBoth;
-                    
+
                     default:
                         return TemplatingScope.CompileTimeOnly;
                 }
-                
             }
             else
             {
@@ -831,6 +830,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             // We don't add an annotation to the argument because it needs to be inherited from the parent.
             var transformedExpression = this.Visit( node.Expression )!;
+
             return node.WithExpression( transformedExpression );
         }
 
@@ -1063,7 +1063,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( transformedInitializer != null )
                 {
                     localScope = this.GetNodeScope( transformedInitializer.Value )
-                        .GetExpressionValueScope(true)
+                        .GetExpressionValueScope( true )
                         .ReplaceIndeterminate( TemplatingScope.RunTimeOnly )
                         .GetExpressionValueScope();
                 }
@@ -1645,14 +1645,12 @@ namespace Caravela.Framework.Impl.Templating
 
                     if ( this.RequireScope( transformedLabels, switchScope, scopeReason ) )
                     {
-                        transformedLabels = transformedLabels.Select( l => l.ReplaceScopeAnnotation( switchScope ) ).ToArray();    
+                        transformedLabels = transformedLabels.Select( l => l.ReplaceScopeAnnotation( switchScope ) ).ToArray();
                     }
                     else
                     {
                         // We would have an error if we replace the annotation.
                     }
-
-                    
                 }
 
                 using ( this.WithScopeContext( ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, switchScope, scopeReason ) ) )
@@ -1899,7 +1897,7 @@ namespace Caravela.Framework.Impl.Templating
             for ( var i = 0; i < node.Catches.Count; i++ )
             {
                 var @catch = node.Catches[i];
-                
+
                 using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalScope( this._currentScopeContext, "catch" ) ) )
                 {
                     var annotatedCatch = this.Visit( @catch )!;
@@ -1970,5 +1968,5 @@ namespace Caravela.Framework.Impl.Templating
                 return node.AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
             }
         }
-   }
+    }
 }

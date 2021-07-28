@@ -8,7 +8,7 @@ class Animals
             var value = global::Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\SOFTWARE\\Company\\Product\\Animals", "Turtles", null);
             if (value != null)
             {
-                return (int)global::System.Convert.ChangeType(value, global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle("T:System.Int32")));
+                return (int)global::System.Convert.ChangeType(value, typeof(global::System.Int32));
             }
             else
             {

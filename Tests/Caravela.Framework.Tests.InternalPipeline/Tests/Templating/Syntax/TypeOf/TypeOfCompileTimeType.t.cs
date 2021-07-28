@@ -1,6 +1,6 @@
 string Method(string a)
 {
-    var rt = global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle("T:System.String"));
+    var rt = typeof(global::System.String);
     global::System.Console.WriteLine("rt=" + rt);
     global::System.Console.WriteLine("ct=System.String");
     return (string)this.Method(a);

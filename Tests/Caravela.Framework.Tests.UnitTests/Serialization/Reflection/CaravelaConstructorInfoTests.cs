@@ -41,7 +41,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeConstructor( code );
 
             this.AssertEqual(
-                @"((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.#ctor(`0)""), global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).TypeHandle))",
+                @"((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.#ctor(`0)""), typeof(global::Target<>).TypeHandle))",
                 serialized );
 
             TestExpression<ConstructorInfo>(

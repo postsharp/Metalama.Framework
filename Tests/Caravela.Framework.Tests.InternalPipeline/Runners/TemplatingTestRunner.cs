@@ -16,7 +16,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
-using PostSharp.Aspects.Advices;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -267,10 +266,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
                         stream.Seek( 0, SeekOrigin.Begin );
                         stream.CopyTo( diagnosticStream );
                     }
-                    
-                    
-                    this.Logger.WriteLine( "Compiled compile-time assembly: " + diagnosticFile );
 
+                    this.Logger?.WriteLine( "Compiled compile-time assembly: " + diagnosticFile );
 
                     return false;
                 }

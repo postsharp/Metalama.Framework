@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// 'MembersOnly' means that the rule applies to the members of the type, but not to the type itself.
         /// </summary>
         private static readonly Dictionary<string, (TemplatingScope Scope, bool MembersOnly)> _wellKnownRunTimeTypes =
-            new (System.Type Type, TemplatingScope Scope, bool MembersOnly)[]
+            new (Type Type, TemplatingScope Scope, bool MembersOnly)[]
             {
                 (typeof(Console), TemplatingScope.RunTimeOnly, false),
                 (typeof(Process), TemplatingScope.RunTimeOnly, false),
@@ -145,7 +145,7 @@ namespace Caravela.Framework.Impl.CompileTime
         public TemplatingScope GetTemplatingScope( ISymbol symbol )
         {
             var scope = this.GetTemplatingScope( symbol, 0 );
-            
+
             if ( scope == TemplatingScope.CompileTimeOnly )
             {
                 // If the member returns a run-time only type, it is CompileTimeDynamic.
@@ -153,19 +153,19 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     IFieldSymbol field => field.Type,
                     IPropertySymbol property => property.Type,
-                    IMethodSymbol method when ! method.GetReturnTypeAttributes()
+                    IMethodSymbol method when !method.GetReturnTypeAttributes()
                         .Any( a => this.GetTemplatingScope( a ).GetValueOrDefault() == TemplatingScope.CompileTimeOnly ) => method
                         .ReturnType,
                     _ => null
                 };
 
-                if ( returnType != null && returnType.SpecialType != SpecialType.System_Void)
+                if ( returnType != null && returnType.SpecialType != SpecialType.System_Void )
                 {
                     switch ( this.GetTemplatingScope( returnType ) )
                     {
                         case TemplatingScope.RunTimeOnly:
                             return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
-                        
+
                         case TemplatingScope.Both:
                             return TemplatingScope.CompileTimeOnlyReturningBoth;
                     }
@@ -191,7 +191,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 case IDynamicTypeSymbol:
                     return TemplatingScope.RunTimeOnly;
-                
+
                 case ITypeParameterSymbol:
                     return TemplatingScope.Both;
 
@@ -204,8 +204,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 case IPointerTypeSymbol pointer:
                     return this.GetTemplatingScope( pointer.PointedAtType, recursion + 1 );
 
-                case INamedTypeSymbol { IsGenericType: true } namedType 
-                    when !namedType.TypeArguments.Any(a=>a is ITypeParameterSymbol) && 
+                case INamedTypeSymbol { IsGenericType: true } namedType
+                    when !namedType.IsGenericTypeDefinition() &&
                          !SymbolEqualityComparer.Default.Equals( namedType, namedType.OriginalDefinition ):
                     {
                         List<TemplatingScope> scopes = new( namedType.TypeArguments.Length + 1 );

@@ -34,7 +34,10 @@ namespace Caravela.Framework.Impl.Templating
         private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( _scopeAnnotationKind, _runTimeAnnotationData );
         private static readonly SyntaxAnnotation _buildTimeTargetAnnotation = new( _targetScopeAnnotationKind, _buildTimeAnnotationData );
         private static readonly SyntaxAnnotation _runTimeTargetAnnotation = new( _targetScopeAnnotationKind, _runTimeAnnotationData );
-        private static readonly SyntaxAnnotation _compileTimeReturningRunTimeOnlyAnnotation = new( _scopeAnnotationKind, _compileTimeReturningRunTimeOnlyAnnotationData );
+
+        private static readonly SyntaxAnnotation _compileTimeReturningRunTimeOnlyAnnotation =
+            new( _scopeAnnotationKind, _compileTimeReturningRunTimeOnlyAnnotationData );
+
         private static readonly SyntaxAnnotation _compileTimeReturningBothAnnotation = new( _scopeAnnotationKind, _compileTimeReturningBothAnnotationData );
         private static readonly SyntaxAnnotation _runTimeDynamicAnnotation = new( _scopeAnnotationKind, _runTimeDynamicAnnotationData );
         private static readonly SyntaxAnnotation _bothAnnotation = new( _scopeAnnotationKind, _bothAnnotationData );
@@ -75,7 +78,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 case _compileTimeReturningRunTimeOnlyAnnotationData:
                     return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
-                
+
                 case _compileTimeReturningBothAnnotationData:
                     return TemplatingScope.CompileTimeOnlyReturningBoth;
 
@@ -89,7 +92,7 @@ namespace Caravela.Framework.Impl.Templating
                     throw new AssertionFailedException();
             }
         }
-        
+
         public static TemplatingScope GetTargetScopeFromAnnotation( this SyntaxNode node )
         {
             var annotation = node.GetAnnotations( _targetScopeAnnotationKind ).SingleOrDefault();
@@ -167,7 +170,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( !existingScope.IsUndetermined() && existingScope.GetExpressionExecutionScope() != scope )
             {
-                throw new InvalidOperationException($"Cannot change the scope of node '{node}' to {scope} because it is already set to {existingScope}.");
+                throw new InvalidOperationException( $"Cannot change the scope of node '{node}' to {scope} because it is already set to {existingScope}." );
             }
 
             return node.WithoutAnnotations( _scopeAnnotationKind ).AddScopeAnnotation( scope );
@@ -222,7 +225,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 case TemplatingScope.CompileTimeOnlyReturningBoth:
                     return node.WithAdditionalAnnotations( _compileTimeReturningBothAnnotation );
-                
+
                 case TemplatingScope.Dynamic:
                     return node.WithAdditionalAnnotations( _runTimeDynamicAnnotation );
 
@@ -233,7 +236,7 @@ namespace Caravela.Framework.Impl.Templating
                     throw new AssertionFailedException();
             }
         }
-        
+
         [return: NotNullIfNotNull( "node" )]
         public static T? AddTargetScopeAnnotation<T>( this T? node, TemplatingScope scope )
             where T : SyntaxNode

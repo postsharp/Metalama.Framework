@@ -5,18 +5,14 @@ using System;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-
-    
     internal static class TemplatingScopeExtensions
     {
         public static bool MustBeTransformed( this TemplatingScope scope )
             => scope.GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.RunTimeOnly ) is
                 TemplatingScope.RunTimeOnly;
 
-
         public static bool IsDynamic( this TemplatingScope scope ) => scope is TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.Dynamic;
 
-        
         public static bool IsRunTime( this TemplatingScope scope )
             => scope is TemplatingScope.Dynamic or TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.RunTimeOnly;
 

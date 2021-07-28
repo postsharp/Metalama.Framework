@@ -36,7 +36,6 @@ namespace Caravela.Framework.Impl.Templating
             => symbol != null && this._symbolClassifier.GetTemplatingScope( symbol ).GetExpressionExecutionScope()
                 == TemplatingScope.CompileTimeOnly;
 
-
         public bool IsDynamicParameter( ArgumentSyntax argument ) => this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type.IsDynamic() ?? false;
 
         public bool IsRunTimeMethod( ISymbol symbol )
@@ -62,7 +61,7 @@ namespace Caravela.Framework.Impl.Templating
 
             var nodeSymbol = this._syntaxTreeAnnotationMap.GetSymbol( originalNode );
 
-            return (nodeSymbol is IMethodSymbol method && method.ReturnType.IsDynamic() ) ||
+            return (nodeSymbol is IMethodSymbol method && method.ReturnType.IsDynamic()) ||
                    (nodeSymbol is IPropertySymbol property && property.Type.IsDynamic());
         }
 

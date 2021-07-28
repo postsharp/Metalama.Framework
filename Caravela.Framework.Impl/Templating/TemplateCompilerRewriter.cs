@@ -19,7 +19,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using SyntaxNodeExtensions = Microsoft.CodeAnalysis.SyntaxNodeExtensions;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -144,21 +143,19 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         protected override TransformationKind GetTransformationKind( SyntaxNode node )
         {
-            
             var targetScope = node.GetTargetScopeFromAnnotation();
 
             switch ( targetScope )
             {
                 case TemplatingScope.RunTimeOnly:
                     return TransformationKind.Transform;
-                
+
                 case TemplatingScope.CompileTimeOnly:
                     return TransformationKind.None;
             }
 
-            
             var scope = node.GetScopeFromAnnotation().GetValueOrDefault();
-            
+
             // Take a decision from the node if we can.
             if ( scope != TemplatingScope.Both && scope != TemplatingScope.Unknown )
             {
@@ -174,10 +171,9 @@ namespace Caravela.Framework.Impl.Templating
                 // This situation seems to happen only when Transform is called from a newly created syntax node,
                 // which has not been added to the syntax tree yet. Transform then calls Visit and, which then calls GetTransformationKind
                 // so we need to return Transform here. This is not nice and would need to be refactored.
-                
+
                 return TransformationKind.Transform;
             }
-            
 
             if ( parent is IfStatementSyntax ||
                  parent is ForEachStatementSyntax ||
@@ -197,7 +193,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return null;
             }
-            
+
             this._cancellationToken.ThrowIfCancellationRequested();
 
             // Captures the root symbol.
@@ -222,7 +218,6 @@ namespace Caravela.Framework.Impl.Templating
                 // The node itself does not need to be transformed because it is compile time, but it needs to be converted
                 // into a run-time value.
                 return this.CreateRunTimeExpression( (ExpressionSyntax) node );
-
             }
             else
             {
@@ -1421,7 +1416,7 @@ namespace Caravela.Framework.Impl.Templating
                             // We have an access to a field or method with a "using static", or a non-qualified static member access.
                             return this.MetaSyntaxFactory.MemberAccessExpression(
                                 this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
-                                (ExpressionSyntax) this.Transform( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( symbol.ContainingType ) )!,
+                                this.Transform( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( symbol.ContainingType ) )!,
                                 this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
                     }
                 }
