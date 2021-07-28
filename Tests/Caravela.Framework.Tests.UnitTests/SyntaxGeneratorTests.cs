@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests
 
         private void AssertType( string type, string expectedTypeOf )
         {
-            string code = $"using System.Collections.Generic; class T {{ {type} field; }} ";
+            var code = $"using System.Collections.Generic; class T {{ {type} field; }} ";
             var compilation = CreateCompilationModel( code );
             var fieldType = compilation.DeclaredTypes.Single().Fields.Single().Type.GetSymbol();
 

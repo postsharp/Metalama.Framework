@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.Bug2876
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var parameterNamesTypes=  meta.RunTime( meta.Parameters.Select(p => p.ParameterType.ToType()).ToArray() );
             return meta.Proceed();
