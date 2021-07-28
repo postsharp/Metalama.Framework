@@ -46,7 +46,7 @@ class T
     {
     }
 
-    private Handler __Foo__BackingField;
+    private Handler _foo;
     event Handler Foo
     {
         add
@@ -65,12 +65,12 @@ class T
     {
         add
         {
-            this.__Foo__BackingField += value;
+            this._foo += value;
         }
 
         remove
         {
-            this.__Foo__BackingField -= value;
+            this._foo -= value;
         }
     }
 }

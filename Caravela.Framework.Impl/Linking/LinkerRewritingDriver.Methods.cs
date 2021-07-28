@@ -143,7 +143,7 @@ namespace Caravela.Framework.Impl.Linking
                             : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
                         method.ReturnType,
                         null,
-                        Identifier( GetOriginalImplMemberName( method.Identifier.ValueText ) ),
+                        Identifier( GetOriginalImplMemberName( symbol ) ),
                         method.TypeParameterList,
                         method.ParameterList,
                         method.ConstraintClauses,

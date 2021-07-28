@@ -341,7 +341,7 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 if ( builder is IReplaceMember replace )
                 {
-                    if ( replace.ReplacedMember.Target != null && allSymbols.Contains( (TSymbol) replace.ReplacedMember.Target ) )
+                    if ( replace.ReplacedMember.Target is TSymbol && allSymbols.Contains( replace.ReplacedMember.Target ) )
                     {
                         // If the MemberRef points to a symbol just remove from symbol list.
                         // This prevents needless allocation.
@@ -351,19 +351,23 @@ namespace Caravela.Framework.Impl.CodeModel
                     {
                         // Otherwise resolve the MemberRef.
                         var resolved = replace.ReplacedMember.Resolve( this.Compilation );
-                        var resolvedSymbol = (TSymbol?) resolved.GetSymbol();
 
-                        if ( resolvedSymbol != null )
+                        if ( resolved is TMember )
                         {
-                            replacedSymbols.Add( resolvedSymbol );
-                        }
-                        else if ( resolved is TBuilder replacedBuilder )
-                        {
-                            replacedBuilders.Add( replacedBuilder );
-                        }
-                        else
-                        {
-                            throw new AssertionFailedException();
+                            var resolvedSymbol = (TSymbol?) resolved.GetSymbol();
+
+                            if ( resolvedSymbol != null )
+                            {
+                                replacedSymbols.Add( resolvedSymbol );
+                            }
+                            else if ( resolved is TBuilder replacedBuilder )
+                            {
+                                replacedBuilders.Add( replacedBuilder );
+                            }
+                            else
+                            {
+                                throw new AssertionFailedException();
+                            }
                         }
                     }
                 }

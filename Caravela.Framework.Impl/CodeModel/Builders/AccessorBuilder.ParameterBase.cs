@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             public abstract RefKind RefKind { get; set; }
 
-            public abstract string Name { get; }
+            public abstract string Name { get; set; }
 
             public int Index { get; }
 

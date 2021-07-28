@@ -75,11 +75,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
-            if ( this._isEventField && this.ExplicitInterfaceImplementations.Count > 0 )
-            {
-                throw new AssertionFailedException();
-            }
-
             MemberDeclarationSyntax @event =
                 this._isEventField && this.ExplicitInterfaceImplementations.Count == 0
                     ? EventFieldDeclaration(

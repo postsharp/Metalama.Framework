@@ -443,7 +443,7 @@ namespace Caravela.Framework.Impl.Advices
                 interfaceProperty.Name,
                 interfaceProperty.Getter != null || (!isExplicit && targetProperty.Getter != null),
                 interfaceProperty.Setter != null || (!isExplicit && targetProperty.Setter != null),
-                !isExplicit && isAutoProperty,
+                isAutoProperty,
                 interfaceProperty.Writeability == Writeability.InitOnly );
 
             propertyBuilder.Type = interfaceProperty.Type;
@@ -499,7 +499,7 @@ namespace Caravela.Framework.Impl.Advices
                 this,
                 this.TargetDeclaration,
                 interfaceEvent.Name,
-                !isExplicit && isEventField ); // We cannot build event fields with explicit interface impl.
+                isEventField );
 
             eventBuilder.EventType = interfaceEvent.EventType;
 
