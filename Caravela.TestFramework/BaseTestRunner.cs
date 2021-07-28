@@ -77,7 +77,8 @@ namespace Caravela.TestFramework
             {
                 var parsedSyntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
                 var prunedSyntaxRoot = new InactiveCodeRemover().Visit( parsedSyntaxTree.GetRoot() );
-                var document = project.AddDocument( fileName, prunedSyntaxRoot, filePath: fileName );
+                var transformedSyntaxRoot = this.TransformSyntaxRoot( testInput, prunedSyntaxRoot );
+                var document = project.AddDocument( fileName, transformedSyntaxRoot, filePath: fileName );
                 project = document.Project;
 
                 return document;
@@ -131,6 +132,11 @@ namespace Caravela.TestFramework
             }
 
             return testResult;
+        }
+
+        protected virtual SyntaxNode TransformSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot )
+        {
+            return syntaxRoot;
         }
 
         private static void ValidateCustomAttributes( Compilation compilation )
@@ -252,7 +258,7 @@ namespace Caravela.TestFramework
         /// Creates a new project that is used to compile the test source.
         /// </summary>
         /// <returns>A new project instance.</returns>
-        public Project CreateProject( TestOptions options )
+        public virtual Project CreateProject( TestOptions options )
         {
             var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null, this._additionalAssemblies );
 

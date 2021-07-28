@@ -107,12 +107,20 @@ namespace Caravela.TestFramework.XunitFramework
 
                 // If the directory is included, index the files.
                 var runnerFileName = "_Runner.cs";
+                var helpersFileName = "_Helpers.cs";
 
                 foreach ( var testPath in Directory.EnumerateFiles( directory, "*.cs" ) )
                 {
                     var fileName = Path.GetFileName( testPath );
                     var firstDotPosition = fileName.IndexOf( '.', StringComparison.Ordinal );
                     var extension = fileName.Substring( firstDotPosition );
+
+                    if ( string.Equals( fileName, helpersFileName, StringComparison.Ordinal ) )
+                    {
+                        // Skipping _Helpers.cs.
+
+                        continue;
+                    }
 
                     if ( !string.Equals( extension, ".cs", StringComparison.Ordinal ) )
                     {

@@ -56,6 +56,22 @@ namespace Caravela.TestFramework
             }
         }
 
+        private protected TestInput(
+            string testName,
+            string sourceCode,
+            string? projectDirectory,
+            string? relativePath,
+            string? fullPath,
+            TestOptions options )
+        {
+            this.TestName = testName;
+            this.SourceCode = sourceCode;
+            this.ProjectDirectory = projectDirectory;
+            this.RelativePath = relativePath;
+            this.FullPath = fullPath;
+            this.Options = options;
+        }
+
         private static string? FindProjectDirectory( string? directory )
         {
             if ( directory == null )

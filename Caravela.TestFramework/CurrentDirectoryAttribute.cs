@@ -22,7 +22,7 @@ namespace Caravela.TestFramework
         /// <summary>
         /// Gets the root directory of test files for the current test methods.
         /// </summary>
-        public string Directory { get; }
+        public string Directory { get; }        
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CurrentDirectoryAttribute"/> class.
