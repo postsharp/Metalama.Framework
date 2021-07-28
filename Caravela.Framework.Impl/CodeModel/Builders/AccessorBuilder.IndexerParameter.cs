@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         // ReSharper disable once UnusedType.Local
         // TODO: Use this type and remove the warning waiver.
 
-        private class IndexerParameter : ParameterBase
+        private sealed class IndexerParameter : ParameterBase
         {
             public IndexerParameter( AccessorBuilder accessor, int index, string name, IType parameterType, RefKind refKind ) : base( accessor, index )
             {

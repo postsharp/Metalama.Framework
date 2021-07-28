@@ -114,7 +114,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
                 if ( otherAccessor == null )
                 {
-                    throw new InvalidOperationException( $"Cannot change accessor accessibility, if the property has a single accesor ." );
+                    throw new InvalidOperationException( $"Cannot change accessor accessibility, if the property has a single accessor ." );
                 }
 
                 if ( otherAccessor.Accessibility.CompareAccessibility( propertyBuilder.Accessibility ).IsSubset )
@@ -150,13 +150,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsVirtual
         {
             get => this._containingDeclaration.IsVirtual;
-            set => throw new NotSupportedException( "Cannot directly change virtuality of an accessor." );
+            set => throw new NotSupportedException( "Cannot directly change the IsVirtual property of an accessor." );
         }
 
         public bool IsSealed
         {
             get => this._containingDeclaration.IsSealed;
-            set => throw new NotSupportedException( "Cannot directly change sealedness of an accessor." );
+            set => throw new NotSupportedException( "Cannot directly change the IsSealed property of an accessor." );
         }
 
         public bool IsAbstract => this._containingDeclaration.IsAbstract;

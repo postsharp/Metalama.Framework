@@ -341,11 +341,11 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 if ( builder is IReplaceMember replace )
                 {
-                    if ( replace.ReplacedMember.Target is TSymbol && allSymbols.Contains( replace.ReplacedMember.Target ) )
+                    if ( replace.ReplacedMember.Target is TSymbol symbol && allSymbols.Contains( replace.ReplacedMember.Target ) )
                     {
                         // If the MemberRef points to a symbol just remove from symbol list.
                         // This prevents needless allocation.
-                        replacedSymbols.Add( (TSymbol) replace.ReplacedMember.Target );
+                        replacedSymbols.Add( symbol );
                     }
                     else
                     {

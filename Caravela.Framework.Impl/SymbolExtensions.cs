@@ -155,7 +155,7 @@ namespace Caravela.Framework.Impl
         public static bool IsInterfaceMemberImplementation( this ISymbol symbol )
             => symbol switch
             {
-                IMethodSymbol methodsymbol => methodsymbol.ExplicitInterfaceImplementations.Any(),
+                IMethodSymbol methodSymbol => methodSymbol.ExplicitInterfaceImplementations.Any(),
                 IPropertySymbol propertySymbol => propertySymbol.ExplicitInterfaceImplementations.Any(),
                 IEventSymbol eventSymbol => eventSymbol.ExplicitInterfaceImplementations.Any(),
                 _ => false
