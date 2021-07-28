@@ -53,6 +53,7 @@
       ObfuscateRootPath=$(MSBuildThisFileDirectory)
     </PostSharpProperties>
     <PostSharpSearchPath>$(OutputPath)\netstandard2.0</PostSharpSearchPath>
+    <PostSharpDisabledMessages>PS0131</PostSharpDisabledMessages>
   </PropertyGroup>
 
   <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">
