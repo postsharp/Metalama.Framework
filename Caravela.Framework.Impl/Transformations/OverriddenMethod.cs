@@ -4,14 +4,19 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Caravela.Framework.Impl.Utilities;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Simplification;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.Transformations
 {
@@ -36,10 +41,7 @@ namespace Caravela.Framework.Impl.Transformations
         {
             using ( context.DiagnosticSink.WithDefaultScope( this.OverriddenDeclaration ) )
             {
-                var proceedExpression = new DynamicExpression(
-                    this.CreateInvocationExpression(),
-                    this.OverriddenDeclaration.ReturnType,
-                    false );
+                var proceedExpression = this.CreateProceedExpression();
 
                 var metaApi = MetaApi.ForMethod(
                     this.OverriddenDeclaration,
@@ -67,6 +69,9 @@ namespace Caravela.Framework.Impl.Transformations
                     return Enumerable.Empty<IntroducedMember>();
                 }
 
+                var returnType = AsyncHelper.GetIntermediateMethodReturnType( this.OverriddenDeclaration );
+                    
+
                 var overrides = new[]
                 {
                     new IntroducedMember(
@@ -74,16 +79,16 @@ namespace Caravela.Framework.Impl.Transformations
                         MethodDeclaration(
                             List<AttributeListSyntax>(),
                             this.OverriddenDeclaration.GetSyntaxModifierList(),
-                            this.OverriddenDeclaration.GetSyntaxReturnType(),
+                            returnType,
                             null,
                             Identifier(
                                 context.IntroductionNameProvider.GetOverrideName(
                                     this.OverriddenDeclaration.DeclaringType,
                                     this.Advice.AspectLayerId,
                                     this.OverriddenDeclaration ) ),
-                            this.OverriddenDeclaration.GetSyntaxTypeParameterList(),
-                            this.OverriddenDeclaration.GetSyntaxParameterList(),
-                            this.OverriddenDeclaration.GetSyntaxConstraintClauses(),
+                            SyntaxHelpers.CreateSyntaxForTypeParameterList( this.OverriddenDeclaration ),
+                            SyntaxHelpers.CreateSyntaxForParameterList( this.OverriddenDeclaration ),
+                            SyntaxHelpers.CreateSyntaxForConstraintClauses( this.OverriddenDeclaration ),
                             newMethodBody,
                             null ),
                         this.Advice.AspectLayerId,
@@ -92,6 +97,28 @@ namespace Caravela.Framework.Impl.Transformations
                 };
 
                 return overrides;
+            }
+        }
+
+        private DynamicExpression CreateProceedExpression()
+        {
+            var invocationExpression = this.CreateInvocationExpression();
+            
+            if ( this.OverriddenDeclaration.IsAsync )
+            {
+                var taskResultType = AsyncHelper.GetTaskResultType( this.OverriddenDeclaration.ReturnType );
+
+                return new DynamicExpression(
+                    ParenthesizedExpression( AwaitExpression( invocationExpression ) ).WithAdditionalAnnotations( Simplifier.Annotation ),
+                    taskResultType,
+                    false );
+            }
+            else
+            {
+                return new DynamicExpression(
+                    invocationExpression,
+                    this.OverriddenDeclaration.ReturnType,
+                    false );
             }
         }
 
@@ -104,17 +131,18 @@ namespace Caravela.Framework.Impl.Transformations
                         SeparatedList(
                             this.OverriddenDeclaration.Parameters.Select(
                                 p =>
-                                    Argument(
-                                        null,
-                                        p.RefKind switch
-                                        {
-                                            RefKind.None => default,
-                                            RefKind.In => default,
-                                            RefKind.Out => Token( SyntaxKind.OutKeyword ),
-                                            RefKind.Ref => Token( SyntaxKind.RefKeyword ),
-                                            _ => throw new AssertionFailedException()
-                                        },
-                                        IdentifierName( p.Name ) ) ) ) ) );
+                                {
+                                    var refKind = p.RefKind switch
+                                    {
+                                        RefKind.None => default,
+                                        RefKind.In => default,
+                                        RefKind.Out => Token( SyntaxKind.OutKeyword ),
+                                        RefKind.Ref => Token( SyntaxKind.RefKeyword ),
+                                        _ => throw new AssertionFailedException()
+                                    };
+
+                                    return Argument( null, refKind, IdentifierName( p.Name ) );
+                                } ) ) ) );
         }
     }
 }

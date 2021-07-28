@@ -4,6 +4,8 @@
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -129,6 +131,30 @@ namespace Caravela.Framework.Impl
 
                 return false;
             }
+        }
+        
+        public static bool IsAccessor( this IMethodSymbol method )
+        {
+            return method.MethodKind switch
+            {
+                MethodKind.PropertyGet => true,
+                MethodKind.PropertySet => true,
+                MethodKind.EventAdd => true,
+                MethodKind.EventRemove => true,
+                MethodKind.EventRaise => true,
+                _ => false
+            };
+        }
+
+        public static bool HasModifier( this ISymbol symbol, SyntaxKind kind )
+        {
+            if ( symbol.DeclaringSyntaxReferences.IsEmpty )
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            return symbol.DeclaringSyntaxReferences.Any(
+                r => r.GetSyntax() is MemberDeclarationSyntax member && member.Modifiers.Any( m => m.Kind() == kind ) );
         }
 
         // TODO: Partial methods etc.

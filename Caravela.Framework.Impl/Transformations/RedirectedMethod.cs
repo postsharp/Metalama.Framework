@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -43,16 +44,16 @@ namespace Caravela.Framework.Impl.Transformations
                     MethodDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        this.OverriddenDeclaration.GetSyntaxReturnType(),
+                        SyntaxHelpers.CreateSyntaxForEventType( this.OverriddenDeclaration ),
                         null,
                         Identifier(
                             context.IntroductionNameProvider.GetOverrideName(
                                 this.OverriddenDeclaration.DeclaringType,
                                 this.Advice.AspectLayerId,
                                 this.OverriddenDeclaration ) ),
-                        this.OverriddenDeclaration.GetSyntaxTypeParameterList(),
-                        this.OverriddenDeclaration.GetSyntaxParameterList(),
-                        this.OverriddenDeclaration.GetSyntaxConstraintClauses(),
+                        SyntaxHelpers.CreateSyntaxForTypeParameterList( this.OverriddenDeclaration ),
+                        SyntaxHelpers.CreateSyntaxForParameterList( this.OverriddenDeclaration ),
+                        SyntaxHelpers.CreateSyntaxForConstraintClauses( this.OverriddenDeclaration ),
                         body,
                         null ),
                     this.Advice.AspectLayerId,

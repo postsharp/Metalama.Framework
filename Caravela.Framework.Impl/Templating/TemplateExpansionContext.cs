@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -57,7 +58,14 @@ namespace Caravela.Framework.Impl.Templating
                 return ReturnStatement();
             }
 
-            if ( this.MetaApi.Method.ReturnType.Is( SpecialType.Void ) )
+            var returnType = this.MetaApi.Method.ReturnType;
+
+            if ( this.MetaApi.Method.IsAsync )
+            {
+                returnType = AsyncHelper.GetTaskResultType( returnType );
+            }
+
+            if ( returnType.Is( SpecialType.Void ) )
             {
                 switch ( returnExpression )
                 {
@@ -113,7 +121,7 @@ namespace Caravela.Framework.Impl.Templating
             return
                 ReturnStatement(
                     Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                    CastExpression( ParseTypeName( this.MetaApi.Method.ReturnType.ToDisplayString() ), returnExpression ),
+                    CastExpression( ParseTypeName( returnType.ToDisplayString() ), returnExpression ),
                     Token( SyntaxKind.SemicolonToken ) );
         }
 

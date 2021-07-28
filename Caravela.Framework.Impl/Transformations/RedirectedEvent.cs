@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -35,7 +36,7 @@ namespace Caravela.Framework.Impl.Transformations
                     EventDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        this.OverriddenDeclaration.GetSyntaxReturnType(),
+                        SyntaxHelpers.CreateSyntaxForEventType( this.OverriddenDeclaration ),
                         null,
                         Identifier(
                             context.IntroductionNameProvider.GetOverrideName(

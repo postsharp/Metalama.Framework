@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -114,15 +115,15 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 MethodDeclaration(
                     List<AttributeListSyntax>(),
                     this.GetSyntaxModifierList(),
-                    this.GetSyntaxReturnType(),
+                    SyntaxHelpers.CreateSyntaxForEventType( this ),
                     this.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier(
                             (NameSyntax) syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                         : null,
                     Identifier( this.Name ),
-                    this.GetSyntaxTypeParameterList(),
-                    this.GetSyntaxParameterList(),
-                    this.GetSyntaxConstraintClauses(),
+                    SyntaxHelpers.CreateSyntaxForTypeParameterList( this ),
+                    SyntaxHelpers.CreateSyntaxForParameterList( this ),
+                    SyntaxHelpers.CreateSyntaxForConstraintClauses( this ),
                     Block(
                         List(
                             !this.ReturnParameter.ParameterType.Is( typeof(void) )

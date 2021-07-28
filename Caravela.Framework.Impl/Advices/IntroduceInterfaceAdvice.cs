@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;

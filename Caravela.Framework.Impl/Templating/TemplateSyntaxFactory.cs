@@ -161,6 +161,8 @@ namespace Caravela.Framework.Impl.Templating
                 throw new AssertionFailedException();
             }
 
+            var runtimeExpression = value.CreateExpression( expressionText, location );
+
             if ( value.ExpressionType.Is( SpecialType.Void ) )
             {
                 // If the method is void, we invoke the method as a statement (so we don't loose the side effect) and we define a local that
@@ -183,18 +185,27 @@ namespace Caravela.Framework.Impl.Templating
                         break;
                 }
 
-                return SyntaxFactory.Block(
-                        SyntaxFactory.ExpressionStatement( value.CreateExpression( expressionText, location ) ),
-                        SyntaxFactory.LocalDeclarationStatement(
-                                SyntaxFactory.VariableDeclaration(
-                                    variableType,
-                                    SyntaxFactory.SingletonSeparatedList(
-                                        SyntaxFactory.VariableDeclarator(
-                                            identifier,
-                                            null,
-                                            SyntaxFactory.EqualsValueClause( variableValue ) ) ) ) )
-                            .WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
-                    .WithFlattenBlockAnnotation();
+                var expressionStatement = (ExpressionStatementSyntax?) runtimeExpression;
+
+                var localDeclarationStatement = SyntaxFactory.LocalDeclarationStatement(
+                        SyntaxFactory.VariableDeclaration(
+                            variableType,
+                            SyntaxFactory.SingletonSeparatedList(
+                                SyntaxFactory.VariableDeclarator(
+                                    identifier,
+                                    null,
+                                    SyntaxFactory.EqualsValueClause( variableValue ) ) ) ) )
+                    .WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
+
+                if ( expressionStatement != null )
+                {
+                    return SyntaxFactory.Block( expressionStatement, localDeclarationStatement )
+                        .WithFlattenBlockAnnotation();
+                }
+                else
+                {
+                    return localDeclarationStatement;
+                }
             }
             else
             {
@@ -205,7 +216,7 @@ namespace Caravela.Framework.Impl.Templating
                             SyntaxFactory.VariableDeclarator(
                                 identifier,
                                 null,
-                                SyntaxFactory.EqualsValueClause( value.CreateExpression( expressionText, location ) ) ) ) ) );
+                                SyntaxFactory.EqualsValueClause( runtimeExpression ) ) ) ) );
             }
         }
 

@@ -1,13 +1,17 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Linking.Inlining;
+using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
@@ -101,7 +105,7 @@ namespace Caravela.Framework.Impl.Linking
                 if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original )
                      && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
                 {
-                    members.Add( GetOriginalImplMethod( methodDeclaration, symbol ) );
+                    members.Add( this.GetOriginalImplMethod( methodDeclaration, symbol ) );
                 }
 
                 return members;
@@ -133,15 +137,19 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private static MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
+        private MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
         {
+            var returnType = AsyncHelper.GetIntermediateMethodReturnType( this.IntermediateCompilation, symbol, method.ReturnType );
+
+            var modifiers = symbol
+                .GetSyntaxModifierList( ModifierCategories.Async | ModifierCategories.Static | ModifierCategories.Unsafe )
+                .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
+
             return
                 MethodDeclaration(
                         List<AttributeListSyntax>(),
-                        symbol.IsStatic
-                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                        method.ReturnType,
+                        modifiers,
+                        returnType,
                         null,
                         Identifier( GetOriginalImplMemberName( method.Identifier.ValueText ) ),
                         method.TypeParameterList,

@@ -36,6 +36,14 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         [return: NotNullIfNotNull( "runtimeExpression" )]
         public static implicit operator ExpressionSyntax?( RuntimeExpression? runtimeExpression ) => runtimeExpression?.Syntax;
 
+        public static implicit operator ExpressionStatementSyntax?( RuntimeExpression? runtimeExpression )
+            => runtimeExpression?.Syntax switch
+            {
+                null => null,
+                ParenthesizedExpressionSyntax parenthesized => SyntaxFactory.ExpressionStatement( parenthesized.Expression ),
+                _ => SyntaxFactory.ExpressionStatement( runtimeExpression.Syntax )
+            };
+
         private ITypeSymbol? GetExpressionType( ITypeFactory typeFactory )
         {
             if ( this._expressionType == null )

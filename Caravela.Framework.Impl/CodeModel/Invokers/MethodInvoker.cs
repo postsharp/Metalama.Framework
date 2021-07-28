@@ -47,6 +47,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             switch ( this._method.MethodKind )
             {
                 case MethodKind.Default:
+                case MethodKind.LocalFunction:
                     return this.InvokeDefaultMethod( instance, args );
 
                 case MethodKind.EventAdd:
