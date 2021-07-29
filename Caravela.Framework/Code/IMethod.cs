@@ -68,12 +68,10 @@ namespace Caravela.Framework.Code
         MethodInfo ToMethodInfo();
 
         IMemberWithAccessors? DeclaringMember { get; }
-        
+
         /// <summary>
         /// Gets a value indicating whether the method is <c>readonly</c>.
         /// </summary>
         bool IsReadOnly { get; }
-
-
     }
 }

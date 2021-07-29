@@ -6,15 +6,17 @@ using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
+using Caravela.Framework.Sdk;
 using System.Collections.Generic;
 using System.Reflection;
 using MethodBase = System.Reflection.MethodBase;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdvisedMethod : AdviceMember<IMethod>, IAdvisedMethod
+    internal class AdvisedMethod : AdvisedMember<IMethodInternal>, IAdvisedMethod
     {
-        public AdvisedMethod( IMethod underlying ) : base( underlying ) { }
+        public AdvisedMethod( IMethod underlying ) : base( (IMethodInternal) underlying ) { }
 
         public IMethodList LocalFunctions => this.Underlying.LocalFunctions;
 

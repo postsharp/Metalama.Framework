@@ -7,7 +7,7 @@ using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.InternalInterfaces
 {
     internal interface IDeclarationInternal : ISdkDeclaration
     {

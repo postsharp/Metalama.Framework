@@ -154,7 +154,7 @@ namespace Caravela.TestFramework
                 }
 
                 var optionName = option.Groups["name"].Value;
-                var optionArg = (option.Groups["arg"]?.Value ?? "").Trim();
+                var optionArg = option.Groups["arg"].Value;
 
                 switch ( optionName )
                 {

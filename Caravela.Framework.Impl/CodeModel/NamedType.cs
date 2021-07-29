@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.ReflectionMocks;
@@ -21,12 +22,15 @@ using System.Linq;
 using System.Reflection;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
+using SpecialType = Caravela.Framework.Code.SpecialType;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
     internal sealed class NamedType : MemberOrNamedType, ITypeInternal, ISdkNamedType
     {
+        private SpecialType? _specialType;
+
         internal INamedTypeSymbol TypeSymbol { get; }
 
         ITypeSymbol? ISdkType.TypeSymbol => this.TypeSymbol;
@@ -49,6 +53,29 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
             };
 
+        public SpecialType SpecialType => this._specialType ??= this.GetSpecialTypeCore();
+
+        private SpecialType GetSpecialTypeCore()
+        {
+            var specialType = this.TypeSymbol.SpecialType.ToOurSpecialType();
+
+            if ( specialType != SpecialType.None )
+            {
+                return specialType;
+            }
+            else
+            {
+                return this.TypeSymbol.Name switch
+                {
+                    "IAsyncEnumerable" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
+                        => SpecialType.IAsyncEnumerable,
+                    "IAsyncEnumerator" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
+                        => SpecialType.IAsyncEnumerator,
+                    _ => SpecialType.None
+                };
+            }
+        }
+
         public Type ToType() => CompileTimeType.Create( this );
 
         public override MemberInfo ToMemberInfo() => this.ToType();
@@ -60,8 +87,11 @@ namespace Caravela.Framework.Impl.CodeModel
                (this.TypeSymbol.TypeKind == RoslynTypeKind.Class && !this.TypeSymbol.IsAbstract &&
                 this.TypeSymbol.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
-        public bool IsOpenGeneric
-            => this.GenericArguments.Any( ga => ga is IGenericParameter ) || (this.ContainingDeclaration as INamedType)?.IsOpenGeneric == true;
+        public bool IsOpenGeneric => this.TypeSymbol.TypeArguments.Any( ga => ga is ITypeParameterSymbol );
+
+        public bool IsGeneric => this.TypeSymbol.IsGenericType;
+
+        public INamedType OriginalDeclaration => this.IsGeneric ? this.Compilation.Factory.GetNamedType( this.TypeSymbol.OriginalDefinition ) : this;
 
         [Memo]
         public INamedTypeList NestedTypes => new NamedTypeList( this, this.TypeSymbol.GetTypeMembers().Select( t => new MemberRef<INamedType>( t ) ) );

@@ -6,14 +6,15 @@ using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using System.Collections.Generic;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdvisedProperty : AdvisedFieldOrProperty<IProperty>, IAdvisedProperty
+    internal class AdvisedProperty : AdvisedFieldOrProperty<IPropertyInternal>, IAdvisedProperty
     {
-        public AdvisedProperty( IProperty underlying ) : base( underlying ) { }
+        public AdvisedProperty( IProperty underlying ) : base( (IPropertyInternal) underlying ) { }
 
         public RefKind RefKind => this.Underlying.RefKind;
 

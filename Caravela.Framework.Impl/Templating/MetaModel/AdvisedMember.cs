@@ -2,14 +2,16 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdviceMember<T> : AdviceDeclaration<T>, IMember
-        where T : IMember
+    internal abstract class AdvisedMember<T> : AdvisedDeclaration<T>, IMember
+        where T : IMember, IDeclarationInternal
     {
-        public AdviceMember( T underlying ) : base( underlying ) { }
+        protected AdvisedMember( T underlying ) : base( underlying ) { }
 
         public Accessibility Accessibility => this.Underlying.Accessibility;
 

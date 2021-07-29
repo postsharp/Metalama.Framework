@@ -47,7 +47,13 @@ namespace Caravela.TestFramework
             var testResult = await base.RunTestAsync( testInput );
 
             using var domain = new UnloadableCompileTimeDomain();
-            var testProjectOptions = (TestProjectOptions) this.ServiceProvider.GetService( typeof(TestProjectOptions) );
+            var testProjectOptions = (TestProjectOptions?) this.ServiceProvider.GetService( typeof(TestProjectOptions) );
+
+            if ( testProjectOptions == null )
+            {
+                throw new InvalidOperationException( "The service provider does not contain a TestProjectOptions." );
+            }
+
             var pipeline = new CompileTimeAspectPipeline( testProjectOptions, true, domain, testProjectOptions );
             var spy = new Spy( testResult );
             pipeline.ServiceProvider.AddService( spy );

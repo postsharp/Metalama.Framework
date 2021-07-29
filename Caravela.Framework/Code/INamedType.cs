@@ -73,6 +73,10 @@ namespace Caravela.Framework.Code
         /// </summary>
         bool IsOpenGeneric { get; }
 
+        bool IsGeneric { get; }
+
+        INamedType OriginalDeclaration { get; }
+
         /// <summary>
         /// Gets the nested types of the current type.
         /// </summary>

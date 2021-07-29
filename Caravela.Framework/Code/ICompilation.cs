@@ -38,4 +38,14 @@ namespace Caravela.Framework.Code
         IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
             where T : IAspect;
     }
+
+    internal interface ICompilationInternal : ICompilation
+    {
+        ICompilationHelpers Helpers { get; }
+    }
+
+    internal interface ICompilationHelpers
+    {
+        IteratorInfo GetIteratorInfo( IMethod method );
+    }
 }

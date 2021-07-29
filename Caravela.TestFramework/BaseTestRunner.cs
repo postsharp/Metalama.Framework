@@ -208,7 +208,7 @@ namespace Caravela.TestFramework
                 Path.GetDirectoryName( testInput.RelativePath ) ?? "",
                 Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.TransformedCode );
 
-            Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );
+            Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath )! );
 
             var storedTransformedSourceText =
                 File.Exists( actualTransformedPath ) ? NormalizeTestOutput( File.ReadAllText( actualTransformedPath ), formatCode ) : null;

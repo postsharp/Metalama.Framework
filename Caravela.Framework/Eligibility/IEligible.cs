@@ -23,7 +23,7 @@ namespace Caravela.Framework.Eligibility
         /// <param name="builder">An object that allows the aspect to configure characteristics like
         /// description, dependencies, or layers.</param>
         void BuildEligibility( IEligibilityBuilder<T> builder )
-#if NETCOREAPP3_1
+#if NET5_0
         { }
 #else
             ;

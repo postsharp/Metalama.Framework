@@ -19,4 +19,8 @@
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Code" />
+  </ItemGroup>
+
 </Project>

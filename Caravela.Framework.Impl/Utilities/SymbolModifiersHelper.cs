@@ -5,8 +5,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Accessibility = Microsoft.CodeAnalysis.Accessibility;
-using RefKind = Microsoft.CodeAnalysis.RefKind;
 
 namespace Caravela.Framework.Impl.Utilities
 {
@@ -119,7 +117,6 @@ namespace Caravela.Framework.Impl.Utilities
                 tokens.Add( Token( SyntaxKind.AsyncKeyword ) );
             }
 
-
             return TokenList( tokens );
         }
 
@@ -210,6 +207,5 @@ namespace Caravela.Framework.Impl.Utilities
 
             return TokenList( tokens );
         }
-
     }
 }

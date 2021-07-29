@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -185,7 +186,7 @@ namespace Caravela.Framework.Impl.Transformations
                     accessor,
                     new MetaApiProperties(
                         context.DiagnosticSink,
-                        accessorTemplate.GetSymbol(),
+                        accessorTemplate.GetSymbol().AssertNotNull( Justifications.TemplateMembersHaveSymbol ),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
                         proceedExpression,

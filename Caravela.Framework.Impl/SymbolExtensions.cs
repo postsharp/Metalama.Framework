@@ -9,11 +9,39 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
+using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl
 {
     internal static class SymbolExtensions
     {
+        public static SpecialType ToOurSpecialType( this RoslynSpecialType type )
+            => type switch
+            {
+                RoslynSpecialType.System_Object => SpecialType.Object,
+                RoslynSpecialType.System_Void => SpecialType.Void,
+                RoslynSpecialType.System_Collections_IEnumerable => SpecialType.IEnumerable,
+                RoslynSpecialType.System_Collections_IEnumerator => SpecialType.IEnumerator,
+                RoslynSpecialType.System_Collections_Generic_IEnumerable_T => SpecialType.IEnumerable_T,
+                RoslynSpecialType.System_Collections_Generic_IEnumerator_T => SpecialType.IEnumerator_T,
+                _ => SpecialType.None
+            };
+
+        public static RoslynSpecialType ToRoslynSpecialType( this SpecialType type )
+            => type switch
+            {
+                SpecialType.Object => RoslynSpecialType.System_Object,
+                SpecialType.Void => RoslynSpecialType.System_Void,
+                SpecialType.IEnumerable => RoslynSpecialType.System_Collections_IEnumerable,
+                SpecialType.IEnumerator => RoslynSpecialType.System_Collections_IEnumerator,
+                SpecialType.IEnumerable_T => RoslynSpecialType.System_Collections_Generic_IEnumerable_T,
+                SpecialType.IEnumerator_T => RoslynSpecialType.System_Collections_Generic_IEnumerator_T,
+
+                // Note that we have special types that Roslyn does not have.
+                _ => RoslynSpecialType.None
+            };
+
         public static bool AnyBaseType( this INamedTypeSymbol type, Predicate<INamedTypeSymbol> predicate )
         {
             for ( var t = type; t != null; t = t.BaseType )
@@ -132,7 +160,7 @@ namespace Caravela.Framework.Impl
                 return false;
             }
         }
-        
+
         public static bool IsAccessor( this IMethodSymbol method )
         {
             return method.MethodKind switch

@@ -4,13 +4,17 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
+using Caravela.Framework.Impl.CodeModel.References;
+using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdviceDeclaration<T> : IDeclaration
-        where T : IDeclaration
+    internal abstract class AdvisedDeclaration<T> : IDeclarationInternal
+        where T : IDeclarationInternal
     {
-        public AdviceDeclaration( T underlying )
+        protected AdvisedDeclaration( T underlying )
         {
             this.Underlying = underlying;
         }
@@ -31,5 +35,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IAttributeList Attributes => this.Underlying.Attributes;
 
         public DeclarationKind DeclarationKind => this.Underlying.DeclarationKind;
+
+        public ISymbol? Symbol => this.Underlying.Symbol;
+
+        public DeclarationRef<IDeclaration> ToRef() => this.Underlying.ToRef();
+
+        public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Underlying.DeclaringSyntaxReferences;
     }
 }

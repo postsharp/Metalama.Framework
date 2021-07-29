@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Sdk;
 using Caravela.TestFramework;
 using System.Collections.Immutable;
 using System.Linq;

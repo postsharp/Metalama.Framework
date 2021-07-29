@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
+using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
@@ -15,7 +16,7 @@ using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltEvent : BuiltMember, IEvent, IMemberRef<IEvent>
+    internal class BuiltEvent : BuiltMember, IEventInternal, IMemberRef<IEvent>
     {
         public BuiltEvent( EventBuilder builder, CompilationModel compilation ) : base( compilation )
         {

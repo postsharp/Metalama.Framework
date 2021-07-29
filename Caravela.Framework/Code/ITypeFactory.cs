@@ -52,7 +52,7 @@ namespace Caravela.Framework.Code
         T MakeNullable<T>( T type )
             where T : IType;
 
-        IType GetSpecialType( SpecialType specialType );
+        INamedType GetSpecialType( SpecialType specialType );
 
         /// <summary>
         /// Gets a run-time value that corresponds to the default value of a specified type.

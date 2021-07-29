@@ -21,7 +21,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="builder">An object that allows the aspect to configure characteristics like
         /// description, dependencies, or layers.</param>
         void BuildAspectClass( IAspectClassBuilder builder )
-#if NETCOREAPP3_1
+#if NET5_0
         { }
 #else
             ;
@@ -44,7 +44,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <param name="builder">An object that allows the aspect to add advices, child aspects and validators.</param>
         void BuildAspect( IAspectBuilder<T> builder )
-#if NETCOREAPP3_1
+#if NET5_0
         { }
 #else
             ;

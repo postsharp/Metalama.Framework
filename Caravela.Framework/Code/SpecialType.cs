@@ -3,6 +3,8 @@
 
 using Caravela.Framework.Aspects;
 
+// ReSharper disable InconsistentNaming
+
 namespace Caravela.Framework.Code
 {
     /// <summary>
@@ -24,6 +26,23 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// <c>object</c>.
         /// </summary>
-        Object
+        Object,
+
+        IEnumerable,
+
+        IEnumerator,
+
+        IEnumerable_T,
+
+        IEnumerator_T,
+
+        List,
+
+        IAsyncEnumerable,
+
+        IAsyncEnumerator,
+
+        // Must be last.
+        Count
     }
 }

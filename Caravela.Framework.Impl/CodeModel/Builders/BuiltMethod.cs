@@ -6,6 +6,7 @@ using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
@@ -17,7 +18,7 @@ using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltMethod : BuiltMember, IMethod, IMemberRef<IMethod>
+    internal class BuiltMethod : BuiltMember, IMethodInternal, IMemberRef<IMethod>
     {
         public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation )
         {

@@ -44,7 +44,7 @@ namespace Caravela.AspectWorkbench.Views
             this.sourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "" );
         }
 
-        private void ViewModel_PropertyChanged( object sender, PropertyChangedEventArgs e )
+        private void ViewModel_PropertyChanged( object? sender, PropertyChangedEventArgs e )
         {
             // TODO RichTextBox doesn't support data binding out of the box. RoslynPad doesn't support binding to text either.
             switch ( e.PropertyName )

@@ -7,9 +7,11 @@ using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -21,7 +23,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder
+    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodInternal
     {
         public ParameterBuilderList Parameters { get; } = new();
 
@@ -115,7 +117,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 MethodDeclaration(
                     List<AttributeListSyntax>(),
                     this.GetSyntaxModifierList(),
-                    SyntaxHelpers.CreateSyntaxForEventType( this ),
+                    SyntaxHelpers.CreateSyntaxForReturnType( this ),
                     this.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier(
                             (NameSyntax) syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )

@@ -7,6 +7,7 @@ using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.RunTime;
@@ -20,7 +21,7 @@ using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltProperty : BuiltMember, IProperty, IMemberRef<IProperty>
+    internal class BuiltProperty : BuiltMember, IPropertyInternal, IMemberRef<IProperty>
     {
         public BuiltProperty( PropertyBuilder builder, CompilationModel compilation ) : base( compilation )
         {

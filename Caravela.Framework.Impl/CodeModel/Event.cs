@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
+using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.Pseudo;
 using Caravela.Framework.Impl.ReflectionMocks;
@@ -14,7 +15,7 @@ using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Event : Member, IEvent
+    internal class Event : Member, IEventInternal
     {
         private readonly IEventSymbol _symbol;
 

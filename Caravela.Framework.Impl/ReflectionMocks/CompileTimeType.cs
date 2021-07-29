@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;

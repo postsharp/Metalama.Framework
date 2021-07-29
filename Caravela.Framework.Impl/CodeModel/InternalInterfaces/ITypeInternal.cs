@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Sdk;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.InternalInterfaces
 {
     internal interface ITypeInternal : ISdkType { }
 }

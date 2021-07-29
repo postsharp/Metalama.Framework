@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
@@ -65,6 +64,11 @@ namespace Caravela.Framework.Impl.Linking
                     if ( this._analysisRegistry.IsLastOverride( symbol ) )
                     {
                         return true;
+                    }
+
+                    if ( symbol.GetIteratorInfoImpl().IsIterator )
+                    {
+                        return false;
                     }
 
                     var aspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );

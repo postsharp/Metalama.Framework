@@ -20,6 +20,8 @@ namespace Caravela.Framework.Code
         /// </summary>
         TypeKind TypeKind { get; }
 
+        SpecialType SpecialType { get; }
+
         /// <summary>
         /// Gets a reflection <see cref="Type"/> that represents the current type at run time.
         /// </summary>

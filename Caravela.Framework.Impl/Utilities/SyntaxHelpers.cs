@@ -1,5 +1,9 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,7 +14,7 @@ namespace Caravela.Framework.Impl.Utilities
 {
     internal static class SyntaxHelpers
     {
-        public static TypeSyntax CreateSyntaxForEventType( IMethod method )
+        public static TypeSyntax CreateSyntaxForReturnType( IMethod method )
         {
             return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( method.ReturnType.GetSymbol() );
         }
@@ -42,8 +46,8 @@ namespace Caravela.Framework.Impl.Utilities
                     method.Parameters.Select(
                         p => SyntaxFactory.Parameter(
                             SyntaxFactory.List<AttributeListSyntax>(),
-                            DeclarationModifiersHelper.GetSyntaxModifierList( p ),
-                            LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( CodeModelExtensions.GetSymbol( (IType) p.ParameterType ) ),
+                            p.GetSyntaxModifierList(),
+                            LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( p.ParameterType.GetSymbol() ),
                             SyntaxFactory.Identifier( p.Name! ),
                             null ) ) ) );
         }

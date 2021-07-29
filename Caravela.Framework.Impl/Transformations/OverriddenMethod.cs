@@ -2,19 +2,22 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.RunTime;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using RefKind = Caravela.Framework.Code.RefKind;
 
@@ -47,7 +50,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration,
                     new MetaApiProperties(
                         context.DiagnosticSink,
-                        this.TemplateMethod.GetSymbol(),
+                        this.TemplateMethod.GetSymbol().AssertNotNull( Justifications.TemplateMembersHaveSymbol ),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
                         proceedExpression,
@@ -70,7 +73,6 @@ namespace Caravela.Framework.Impl.Transformations
                 }
 
                 var returnType = AsyncHelper.GetIntermediateMethodReturnType( this.OverriddenDeclaration );
-                    
 
                 var overrides = new[]
                 {
@@ -103,9 +105,57 @@ namespace Caravela.Framework.Impl.Transformations
         private DynamicExpression CreateProceedExpression()
         {
             var invocationExpression = this.CreateInvocationExpression();
-            
-            if ( this.OverriddenDeclaration.IsAsync )
+
+            if ( this.OverriddenDeclaration.GetIteratorInfoImpl() is { IsIterator: true } iteratorInfo )
             {
+                ExpressionSyntax expression;
+
+                if ( !iteratorInfo.IsAsync )
+                {
+                    expression =
+                        InvocationExpression(
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    this.OverriddenDeclaration.GetSyntaxFactory().GetTypeSyntax( typeof(RunTimeAspectHelper) ),
+                                    IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
+                            .WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( invocationExpression ) ) ) )
+                            .WithAdditionalAnnotations( Simplifier.Annotation );
+                }
+                else
+                {
+                    var arguments = ArgumentList( SingletonSeparatedList( Argument( invocationExpression ) ) );
+
+                    var cancellationTokenParameter = this.OverriddenDeclaration.Parameters
+                        .OfParameterType<CancellationToken>()
+                        .LastOrDefault( p => p.Attributes.Any( a => a.Type.Name == "EnumeratorCancellationAttribute" ) );
+
+                    if ( cancellationTokenParameter != null )
+                    {
+                        arguments = arguments.AddArguments( Argument( IdentifierName( cancellationTokenParameter.Name ) ) );
+                    }
+
+                    var bufferExpression =
+                        InvocationExpression(
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    this.OverriddenDeclaration.GetSyntaxFactory().GetTypeSyntax( typeof(RunTimeAspectHelper) ),
+                                    IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
+                            .WithArgumentList( arguments )
+                            .WithAdditionalAnnotations( Simplifier.Annotation );
+
+                    expression =
+                        ParenthesizedExpression( AwaitExpression( bufferExpression ) ).WithAdditionalAnnotations( Simplifier.Annotation );
+                }
+
+                // We have an iterator method. The meta.Proceed() translates into a `new List( METHOD() )`.
+                return new DynamicExpression(
+                    expression,
+                    this.OverriddenDeclaration.ReturnType,
+                    false );
+            }
+            else if ( this.OverriddenDeclaration.IsAsync )
+            {
+                // We have an async method. The meta.Proceed() translates into an '(await METHOD())' expression.
                 var taskResultType = AsyncHelper.GetTaskResultType( this.OverriddenDeclaration.ReturnType );
 
                 return new DynamicExpression(

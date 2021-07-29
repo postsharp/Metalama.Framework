@@ -7,6 +7,7 @@ using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
@@ -19,7 +20,7 @@ using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltAccessor : BuiltDeclaration, IMethod, IMemberRef<IMethod>
+    internal class BuiltAccessor : BuiltDeclaration, IMethodInternal, IMemberRef<IMethod>
     {
         private readonly BuiltMember _builtMember;
 

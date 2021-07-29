@@ -130,7 +130,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             // Write the transformed code to disk.
             var transformedTemplatePath = Path.Combine( GeneratedDirectoryPath, Path.ChangeExtension( testInput.TestName, ".cs" ) );
             var transformedTemplateText = await transformedTemplateSyntax!.SyntaxTree.GetTextAsync();
-            Directory.CreateDirectory( Path.GetDirectoryName( transformedTemplatePath ) );
+            Directory.CreateDirectory( Path.GetDirectoryName( transformedTemplatePath )! );
 
             await using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
             {
@@ -370,7 +370,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 this._children = children;
             }
 
-            public object GetService( Type serviceType ) => this._children.Select( c => c.GetService( serviceType ) ).First( s => s != null );
+            public object? GetService( Type serviceType ) => this._children.Select( c => c.GetService( serviceType ) ).FirstOrDefault( s => s != null );
         }
     }
 }

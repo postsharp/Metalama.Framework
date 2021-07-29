@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
+using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
@@ -19,47 +20,10 @@ namespace Caravela.Framework.Impl
     {
         public static CompilationModel GetCompilationModel( this IDeclaration declaration ) => (CompilationModel) declaration.Compilation;
 
-        // TODO: should this be in the SDK?
-        public static INamedTypeSymbol GetSymbol( this INamedType namedType )
-        {
-            if ( namedType is NamedType sourceNamedType )
-            {
-                return sourceNamedType.TypeSymbol;
-            }
+        public static ISyntaxFactory GetSyntaxFactory( this IDeclaration declaration ) => declaration.GetCompilationModel().ReflectionMapper;
 
-            throw new ArgumentOutOfRangeException( nameof(namedType), "This is not a source symbol." );
-        }
-
-        public static ITypeSymbol GetSymbol( this IType type )
-        {
-            if ( type is ITypeInternal sourceNamedType )
-            {
-                return sourceNamedType.TypeSymbol.AssertNotNull();
-            }
-
-            throw new ArgumentOutOfRangeException( nameof(type), "This is not a source symbol." );
-        }
-
-        public static IMethodSymbol GetSymbol( this IMethodBase method )
-        {
-            if ( method is MethodBase sourceMethod )
-            {
-                return (IMethodSymbol) sourceMethod.Symbol;
-            }
-
-            throw new ArgumentOutOfRangeException( nameof(method), "This is not a source symbol." );
-        }
-
-        public static IPropertySymbol GetSymbol( this IProperty property )
-        {
-            if ( property is Property sourceProperty )
-            {
-                return (IPropertySymbol) sourceProperty.Symbol;
-            }
-
-            throw new ArgumentOutOfRangeException( nameof(property), "This is not a source symbol." );
-        }
-
+    
+    
         public static AttributeData GetAttributeData( this IAttribute attribute )
         {
             if ( attribute is Attribute attributeModel )
@@ -71,8 +35,7 @@ namespace Caravela.Framework.Impl
         }
 
         public static bool IsAccessor( this IMethod method )
-        {
-            return method.MethodKind switch
+            => method.MethodKind switch
             {
                 MethodKind.PropertyGet => true,
                 MethodKind.PropertySet => true,
@@ -81,7 +44,6 @@ namespace Caravela.Framework.Impl
                 MethodKind.EventRaise => true,
                 _ => false
             };
-        }
 
         public static SyntaxNode? GetPrimaryDeclaration( this IDeclaration declaration )
         {

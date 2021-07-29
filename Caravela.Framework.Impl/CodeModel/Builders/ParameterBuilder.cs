@@ -3,13 +3,15 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class ParameterBuilder : DeclarationBuilder, IParameterBuilder
+    internal sealed class ParameterBuilder : DeclarationBuilder, IParameterBuilder, IParameterInternal
     {
         private readonly string? _name;
         private TypedConstant _defaultValue;

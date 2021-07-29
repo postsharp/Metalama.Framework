@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Linq;

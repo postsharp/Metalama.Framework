@@ -7,6 +7,7 @@ using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder
+    internal partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder, IMethodInternal
     {
         private readonly MemberBuilder _containingDeclaration;
 

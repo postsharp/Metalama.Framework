@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
+using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.Pseudo;
 using Caravela.Framework.Impl.ReflectionMocks;
@@ -12,7 +13,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class Field : Member, IField
+    internal sealed class Field : Member, IFieldInternal
     {
         private readonly IFieldSymbol _symbol;
 
