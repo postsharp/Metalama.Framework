@@ -27,18 +27,21 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Async.NormalTe
         [Aspect]
         async Task<int> MethodReturningTaskOfInt(int a)
         {
+            await Task.Yield();
             return a;
         }
         
         [Aspect]
         async Task MethodReturningTaskd(int a)
         {
+            await Task.Yield();
             Console.WriteLine("Oops");
         }
         
         [Aspect]
         async ValueTask<int> MethodReturningValueTaskOfInt(int a)
         {
+            await Task.Yield();
             return a;
         }
     }

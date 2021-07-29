@@ -39,6 +39,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Async.TwoNorma
        [Aspect1, Aspect2]
         async void MethodReturningValueTaskOfInt(int a)
         {
+            await Task.Yield();
             Console.WriteLine( "Oops" );
         }
     }

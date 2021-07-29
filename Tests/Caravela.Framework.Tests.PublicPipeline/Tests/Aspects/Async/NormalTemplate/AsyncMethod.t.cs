@@ -27,6 +27,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Async.NormalTe
 
 private async Task<int> __MethodReturningTaskOfInt__OriginalImpl(int a)
         {
+            await Task.Yield();
             return a;
         }
         
@@ -42,6 +43,7 @@ private async Task<int> __MethodReturningTaskOfInt__OriginalImpl(int a)
 
 private async Task __MethodReturningTaskd__OriginalImpl(int a)
         {
+            await Task.Yield();
             Console.WriteLine("Oops");
         }
         
@@ -56,6 +58,7 @@ private async Task __MethodReturningTaskd__OriginalImpl(int a)
 
 private async ValueTask<int> __MethodReturningValueTaskOfInt__OriginalImpl(int a)
         {
+            await Task.Yield();
             return a;
         }
     }

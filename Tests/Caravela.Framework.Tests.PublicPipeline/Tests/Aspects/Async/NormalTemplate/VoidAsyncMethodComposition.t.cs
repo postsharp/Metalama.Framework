@@ -34,6 +34,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Async.TwoNorma
 
 private async global::System.Threading.Tasks.ValueTask __MethodReturningValueTaskOfInt__OriginalImpl(int a)
         {
+            await Task.Yield();
             Console.WriteLine( "Oops" );
         }
 
