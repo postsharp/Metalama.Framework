@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Invokers;
@@ -138,11 +137,19 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             }
         }
 
-        [return: RunTimeOnly]
         public EventInfo ToEventInfo() => throw new NotImplementedException();
 
         public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
 
         public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
+
+        public IMethod? GetAccessor( MethodKind methodKind )
+            => methodKind switch
+            {
+                MethodKind.EventAdd => this.Adder,
+                MethodKind.EventRaise => this.Raiser,
+                MethodKind.EventRemove => this.Remover,
+                _ => null
+            };
     }
 }

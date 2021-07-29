@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Invokers;
+using Caravela.Framework.Impl.CodeModel.Pseudo;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -23,9 +23,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IType Type { get; set; }
 
         [Memo]
-        public IMethod? Getter => new PseudoAccessor( this, AccessorSemantic.Get );
+        public IMethod? Getter => new PseudoGetter( this );
 
-        public IMethod? Setter => new PseudoAccessor( this, AccessorSemantic.Set );
+        public IMethod? Setter => new PseudoSetter( this );
 
         public override bool IsExplicitInterfaceImplementation => false;
 
@@ -75,7 +75,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             return new[] { new IntroducedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
         }
 
-        [return: RunTimeOnly]
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
     }
 }

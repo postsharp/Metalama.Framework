@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Invokers;
@@ -11,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -48,11 +48,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         // TODO: When an interface is introduced, explicit implementation should appear here.
         public IReadOnlyList<IEvent> ExplicitInterfaceImplementations => this.EventBuilder.ExplicitInterfaceImplementations;
 
-        [return: RunTimeOnly]
         public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 
         IEvent IDeclarationRef<IEvent>.Resolve( CompilationModel compilation ) => (IEvent) this.GetForCompilation( compilation );
 
         ISymbol IDeclarationRef<IEvent>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+
+        public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
     }
 }

@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
+using Caravela.Framework.Impl.CodeModel;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -28,5 +29,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public new IInvokerFactory<IPropertyInvoker> Invokers => this.Underlying.Invokers;
 
         public IProperty? OverriddenProperty => this.Underlying.OverriddenProperty;
+
+        public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
     }
 }

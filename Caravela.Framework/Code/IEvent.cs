@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code.Invokers;
 using System.Collections.Generic;
 using System.Reflection;
@@ -11,7 +10,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represent an event.
     /// </summary>
-    public interface IEvent : IMember
+    public interface IEvent : IMemberWithAccessors
     {
         /// <summary>
         /// Gets the type of the event, i.e. the type of the delegate.
@@ -57,7 +56,6 @@ namespace Caravela.Framework.Code
         /// Gets an <see cref="EventInfo"/> that represents the current event at run time.
         /// </summary>
         /// <returns>An <see cref="EventInfo"/> that can be used only in run-time code.</returns>
-        [return: RunTimeOnly]
         EventInfo ToEventInfo();
     }
 }

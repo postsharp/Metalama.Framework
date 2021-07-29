@@ -1,19 +1,33 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
+using System;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Code
 {
     internal static class AccessibilityExtensions
     {
-        public static SetRelationship CompareAccessibility( this Accessibility left, Accessibility right )
-            => (left, right) switch
+        public static bool IsSupersetOf( this AccessibilityFlags left, AccessibilityFlags right ) => (right & left) == right && left != right;
+
+        public static bool IsSubsetOf( this AccessibilityFlags left, AccessibilityFlags right ) => (right & left) == left && left != right;
+
+        public static bool IsSupersetOrEqual( this AccessibilityFlags left, AccessibilityFlags right ) => (right & left) == right;
+
+        public static bool IsSubsetOrEqual( this AccessibilityFlags left, AccessibilityFlags right ) => (right & left) == left;
+
+        public static AccessibilityFlags ToAccessibilityFlags( this Accessibility accessibility )
+            => accessibility switch
             {
-                // Internal and protected are not comparable.
-                (Accessibility.Internal, Accessibility.Protected ) => new SetRelationship( null ),
-                (Accessibility.Protected, Accessibility.Internal ) => new SetRelationship( null ),
-                _ => new SetRelationship( left - right ),
+                Accessibility.Private => AccessibilityFlags.SameType,
+                Accessibility.Internal => AccessibilityFlags.SameType | AccessibilityFlags.DerivedTypeOfFriendAssembly
+                                                                      | AccessibilityFlags.AnyTypeOfFriendAssembly,
+                Accessibility.Protected => AccessibilityFlags.SameType | AccessibilityFlags.DerivedTypeOfAnyAssembly
+                                                                       | AccessibilityFlags.DerivedTypeOfAnyAssembly,
+                Accessibility.PrivateProtected => AccessibilityFlags.SameType | AccessibilityFlags.DerivedTypeOfFriendAssembly,
+                Accessibility.ProtectedInternal => AccessibilityFlags.SameType | AccessibilityFlags.AnyTypeOfFriendAssembly
+                                                                               | AccessibilityFlags.DerivedTypeOfAnyAssembly,
+                Accessibility.Public => AccessibilityFlags.Public,
+                _ => throw new ArgumentOutOfRangeException( nameof(accessibility) )
             };
     }
 }

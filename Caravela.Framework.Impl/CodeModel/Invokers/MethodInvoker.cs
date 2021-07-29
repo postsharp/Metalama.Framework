@@ -6,6 +6,7 @@ using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Invokers
@@ -21,13 +22,57 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             this._invokerOperator = invokerOperator;
         }
 
-        public object Invoke( object? instance, params object?[] args )
+        public object? Invoke( object? instance, params object?[] args )
         {
             if ( this._method.IsOpenGeneric )
             {
                 throw GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember.CreateException( this._method );
             }
 
+            var parametersCount = this._method.Parameters.Count;
+
+            if ( parametersCount > 0 && this._method.Parameters[parametersCount - 1].IsParams )
+            {
+                // The method has a 'params' param.
+                if ( args.Length < parametersCount - 1 )
+                {
+                    throw GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments.CreateException( (this._method, parametersCount - 1, args.Length) );
+                }
+            }
+            else if ( args.Length != parametersCount )
+            {
+                throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (this._method, parametersCount, args.Length) );
+            }
+
+            switch ( this._method.MethodKind )
+            {
+                case MethodKind.Default:
+                case MethodKind.LocalFunction:
+                    return this.InvokeDefaultMethod( instance, args );
+
+                case MethodKind.EventAdd:
+                    return ((IEvent) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.Add( instance, args[0] );
+
+                case MethodKind.EventRaise:
+                    return ((IEvent) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.Raise( instance, args );
+
+                case MethodKind.EventRemove:
+                    return ((IEvent) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.Remove( instance, args[0] );
+
+                case MethodKind.PropertyGet:
+                    return ((IProperty) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.GetValue( instance );
+
+                case MethodKind.PropertySet:
+                    return ((IProperty) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.SetValue( instance, args[0] );
+
+                default:
+                    throw new NotImplementedException(
+                        $"Cannot generate syntax to invoke the method '{this._method}' because method kind {this._method.MethodKind} is not implemented." );
+            }
+        }
+
+        private object InvokeDefaultMethod( object? instance, object?[] args )
+        {
             var name = this._method.GenericArguments.Any()
                 ? LanguageServiceFactory.CSharpSyntaxGenerator.GenericName(
                     this._method.Name,

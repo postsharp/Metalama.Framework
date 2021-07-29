@@ -18,8 +18,10 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var code = "class Target { public int Field; }";
             var serialized = this.SerializeField( code );
 
+            // TODO: This should emit a call to Intrinsics.
+
             this.AssertEqual(
-                @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             TestExpression<FieldInfo>(
@@ -38,8 +40,10 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var code = "class Target<TKey> { public TKey[] Field; }";
             var serialized = this.SerializeField( code );
 
+            // TODO: This should emit a call to Intrinsics.
+
             this.AssertEqual(
-                @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             TestExpression<FieldInfo>(

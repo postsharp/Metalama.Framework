@@ -21,6 +21,28 @@ namespace Caravela.Framework.Impl.CodeModel
                 this._syntaxGenerator = syntaxGenerator;
             }
 
+            public TypeOfExpressionSyntax TypeOfExpression( ITypeSymbol type )
+            {
+                TypeSyntax typeSyntax = this.TypeExpression( type.WithNullableAnnotation( NullableAnnotation.NotAnnotated ) );
+
+                if ( type is INamedTypeSymbol { IsGenericType: true } genericType )
+                {
+                    if ( genericType.IsGenericTypeDefinition() )
+                    {
+                        typeSyntax = (TypeSyntax) UnboundTypeRewriter.Instance.Visit( typeSyntax );
+                    }
+                    else
+                    {
+                        NullableAnnotationRewriter rewriter = new( type );
+                        typeSyntax = (TypeSyntax) rewriter.Visit( typeSyntax );
+
+                        // We have to remove the nullable annotations but only for reference types.
+                    }
+                }
+
+                return (TypeOfExpressionSyntax) this._syntaxGenerator.TypeOfExpression( typeSyntax );
+            }
+
             public TypeSyntax TypeExpression( ITypeSymbol symbol )
                 => (TypeSyntax) this._syntaxGenerator.TypeExpression( symbol )
                     .WithAdditionalAnnotations( Simplifier.Annotation );
@@ -96,7 +118,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public TypeSyntax ArrayTypeExpression( ExpressionSyntax type )
             {
-                return (TypeSyntax) this._syntaxGenerator.ArrayTypeExpression( type ).WithAdditionalAnnotations( Simplifier.Annotation );
+                var arrayType = (ArrayTypeSyntax) this._syntaxGenerator.ArrayTypeExpression( type ).WithAdditionalAnnotations( Simplifier.Annotation );
+
+                // Roslyn does not specify the rank properly so it needs to be fixed up.
+
+                return arrayType.WithRankSpecifiers(
+                    SingletonList( ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) );
             }
         }
     }

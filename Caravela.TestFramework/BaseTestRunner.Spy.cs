@@ -21,7 +21,7 @@ namespace Caravela.TestFramework
             }
 
             public void ReportCompileTimeCompilation( Compilation compilation )
-                => Task.Run( () => this._testResult.SetOutputCompilationAsync( compilation ) ).Wait();
+                => Task.Run( () => this._testResult.SetCompileTimeCompilationAsync( compilation ) ).Wait();
 
             public void ReportAnnotatedSyntaxNode( SyntaxNode sourceSyntaxRoot, SyntaxNode annotatedSyntaxRoot )
             {

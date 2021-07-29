@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public void ReportException( Exception exception, Action<Diagnostic> reportDiagnostic, out bool mustRethrow )
         {
-            var tempPath = DefaultDirectoryOptions.Instance.CrashReportDirectory;
+            var tempPath = DefaultPathOptions.Instance.CrashReportDirectory;
 
             RetryHelper.Retry(
                 () =>

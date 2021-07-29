@@ -105,7 +105,7 @@ class C
             var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes.OfName( "C" ).Single();
             this.AssertScope( type, TemplatingScope.CompileTimeOnly );
-            this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.CompileTimeOnly );
+            this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.CompileTimeOnlyReturningBoth );
             this.AssertScope( type.Methods.OfName( "M" ).Single(), TemplatingScope.CompileTimeOnly );
         }
 

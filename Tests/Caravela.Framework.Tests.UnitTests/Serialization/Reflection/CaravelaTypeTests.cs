@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target {  }";
             var serialized = this.SerializeType( code );
-            this.AssertEqual( @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target""))", serialized );
+            this.AssertEqual( @"typeof(global::Target)", serialized );
 
             TestExpression<Type>( code, serialized, info => Assert.Equal( "Target", info.Name ) );
         }
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target<TKey,TValue> {  }";
             var serialized = this.SerializeType( code );
-            this.AssertEqual( @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`2""))", serialized );
+            this.AssertEqual( @"typeof(global::Target<,>)", serialized );
 
             TestExpression<Type>(
                 code,
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeTypeOfProperty( code );
 
             this.AssertEqual(
-                @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32"")).MakeArrayType()",
+                @"typeof(global::System.Int32[])",
                 serialized );
 
             TestExpression<Type>(
@@ -66,7 +66,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeTypeOfProperty( code );
 
             this.AssertEqual(
-                @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32"")).MakeArrayType(2)",
+                @"typeof(global::System.Int32[,])",
                 serialized );
 
             TestExpression<Type>(

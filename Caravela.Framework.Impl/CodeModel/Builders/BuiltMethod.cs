@@ -47,6 +47,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
+        IMemberWithAccessors? IMethod.DeclaringMember => null;
+
         System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
 
         [Memo]

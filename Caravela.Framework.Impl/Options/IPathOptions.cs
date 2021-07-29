@@ -3,7 +3,7 @@
 
 namespace Caravela.Framework.Impl.Options
 {
-    public interface IDirectoryOptions : IService
+    public interface IPathOptions : IService
     {
         string CompileTimeProjectCacheDirectory { get; }
 

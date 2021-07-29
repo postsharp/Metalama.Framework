@@ -3,6 +3,7 @@
 
 using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.Impl.Formatting;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
@@ -21,7 +22,6 @@ namespace Caravela.AspectWorkbench.ViewModels
     [NotifyPropertyChanged]
     public class MainViewModel
     {
-        private readonly IServiceProvider _serviceProvider;
         private TemplateTest? _currentTest;
 
         public string Title => this.CurrentPath == null ? "Aspect Workbench" : $"Aspect Workbench - {this.CurrentPath}";
@@ -43,11 +43,6 @@ namespace Caravela.AspectWorkbench.ViewModels
         public bool IsNewTest => string.IsNullOrEmpty( this.CurrentPath );
 
         private string? CurrentPath { get; set; }
-
-        public MainViewModel( IServiceProvider serviceProvider )
-        {
-            this._serviceProvider = serviceProvider;
-        }
 
         public async Task RunTestAsync()
         {
@@ -73,7 +68,10 @@ namespace Caravela.AspectWorkbench.ViewModels
                     testInput.Options.TestRunnerFactoryType = typeof(TemplatingTestRunnerFactory).AssemblyQualifiedName;
                 }
 
-                var testRunner = TestRunnerFactory.CreateTestRunner( testInput, this._serviceProvider, null );
+                using var testProjectOptions = new TestProjectOptions() { FormatCompileTimeCode = true };
+                using var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions );
+
+                var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, null );
 
                 var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject( testInput.Options ) );
 
@@ -103,7 +101,10 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 if ( transformedTemplateSyntax != null )
                 {
-                    // this.CompiledTemplatePath = testResult.TransformedTemplatePath;
+                    if ( testResult.CompileTimeCompilation != null )
+                    {
+                        SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation );
+                    }
 
                     // Render the transformed tree.
                     var project3 = testRunner.CreateProject( testInput.Options );

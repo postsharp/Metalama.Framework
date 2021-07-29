@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using System.Collections.Generic;
@@ -64,7 +63,8 @@ namespace Caravela.Framework.Code
         /// Gets a <see cref="MethodInfo"/> that represents the current method at run time.
         /// </summary>
         /// <returns>A <see cref="MethodInfo"/> that can be used only in run-time code.</returns>
-        [return: RunTimeOnly]
         MethodInfo ToMethodInfo();
+
+        IMemberWithAccessors? DeclaringMember { get; }
     }
 }

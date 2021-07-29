@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             this.AssertFieldType(
                 "class Outer { class Inner { System.Collections.Generic.List<string> Target; } }",
                 typeof(List<string>),
-                @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Collections.Generic.List`1"")).MakeGenericType(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")))" );
+                @"typeof(global::System.Collections.Generic.List<global::System.String>)" );
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             this.AssertFieldType(
                 "class Outer { class Inner { System.Collections.Generic.Dictionary<string[],int?> Target; } }",
                 typeof(Dictionary<string[], int?>),
-                @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Collections.Generic.Dictionary`2"")).MakeGenericType(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")).MakeArrayType(), global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Nullable`1"")).MakeGenericType(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))))" );
+                @"typeof(global::System.Collections.Generic.Dictionary<global::System.String[],global::System.Int32?>)" );
         }
 
         private void AssertFieldType( string code, Type expectedType, string expected )
@@ -43,7 +43,8 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 .ToString();
 
             TestExpression<Type>( code, serialized, info => Assert.Equal( expectedType, info ) );
-            Assert.Equal( expected, serialized );
+
+            this.AssertEqual( expected, serialized );
         }
     }
 }

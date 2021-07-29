@@ -18,9 +18,9 @@ namespace Caravela.Framework.Impl.Pipeline
                 throw new InvalidOperationException();
             }
 
-            Type[] interfaces = service.GetType().GetInterfaces();
+            var interfaces = service.GetType().GetInterfaces();
 
-            foreach ( Type interfaceType in interfaces )
+            foreach ( var interfaceType in interfaces )
             {
                 if ( typeof(IService).IsAssignableFrom( interfaceType ) )
                 {
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 }
             }
 
-            for ( Type cursorType = service.GetType();
+            for ( var cursorType = service.GetType();
                   cursorType != null && typeof(IService).IsAssignableFrom( cursorType );
                   cursorType = cursorType.BaseType )
             {

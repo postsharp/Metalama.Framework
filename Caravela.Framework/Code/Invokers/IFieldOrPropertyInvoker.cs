@@ -14,13 +14,11 @@ namespace Caravela.Framework.Code.Invokers
         /// <summary>
         /// Get the value for a different instance.
         /// </summary>
-        [return: RunTimeOnly]
         dynamic GetValue( dynamic? instance );
 
         /// <summary>
         /// Set the value for a different instance.
         /// </summary>
-        [return: RunTimeOnly]
-        dynamic SetValue( dynamic? instance, dynamic value );
+        dynamic SetValue( dynamic? instance, dynamic? value );
     }
 }
