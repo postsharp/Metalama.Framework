@@ -14,11 +14,15 @@ namespace Caravela.Framework.Impl.CodeModel
             => accessibility switch
             {
                 Accessibility.Private => AccessibilityFlags.SameType,
-                Accessibility.Internal => AccessibilityFlags.SameType | AccessibilityFlags.DerivedTypeOfFriendAssembly | AccessibilityFlags.AnyTypeOfFriendAssembly,
-                Accessibility.Protected => AccessibilityFlags.SameType | AccessibilityFlags.DerivedTypeOfAnyAssembly | AccessibilityFlags.DerivedTypeOfAnyAssembly,
+                Accessibility.Internal => AccessibilityFlags.SameType | AccessibilityFlags.DerivedTypeOfFriendAssembly
+                                                                      | AccessibilityFlags.AnyTypeOfFriendAssembly,
+                Accessibility.Protected => AccessibilityFlags.SameType | AccessibilityFlags.DerivedTypeOfAnyAssembly
+                                                                       | AccessibilityFlags.DerivedTypeOfAnyAssembly,
                 Accessibility.ProtectedAndInternal => AccessibilityFlags.SameType | AccessibilityFlags.DerivedTypeOfFriendAssembly,
-                Accessibility.ProtectedOrInternal => AccessibilityFlags.SameType | AccessibilityFlags.AnyTypeOfFriendAssembly | AccessibilityFlags.DerivedTypeOfAnyAssembly,
-                Accessibility.Public => AccessibilityFlags.SameType | AccessibilityFlags.AnyType | AccessibilityFlags.AnyTypeOfFriendAssembly | AccessibilityFlags.DerivedTypeOfAnyAssembly | AccessibilityFlags.DerivedTypeOfFriendAssembly,
+                Accessibility.ProtectedOrInternal => AccessibilityFlags.SameType | AccessibilityFlags.AnyTypeOfFriendAssembly
+                                                                                 | AccessibilityFlags.DerivedTypeOfAnyAssembly,
+                Accessibility.Public => AccessibilityFlags.SameType | AccessibilityFlags.AnyType | AccessibilityFlags.AnyTypeOfFriendAssembly
+                                        | AccessibilityFlags.DerivedTypeOfAnyAssembly | AccessibilityFlags.DerivedTypeOfFriendAssembly,
                 _ => throw new ArgumentOutOfRangeException( nameof(accessibility) )
             };
 

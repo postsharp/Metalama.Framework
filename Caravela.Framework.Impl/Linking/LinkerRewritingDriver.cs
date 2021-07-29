@@ -231,6 +231,7 @@ namespace Caravela.Framework.Impl.Linking
             StatementSyntax CreateAssignmentStatement( ExpressionSyntax expression )
             {
                 IdentifierNameSyntax identifier;
+
                 if ( inliningContext.ReturnVariableName != null )
                 {
                     identifier = IdentifierName( inliningContext.ReturnVariableName );
@@ -249,10 +250,10 @@ namespace Caravela.Framework.Impl.Linking
 
                 return
                     ExpressionStatement(
-                            AssignmentExpression(
-                                SyntaxKind.SimpleAssignmentExpression,
-                                identifier,
-                                expression ) );
+                        AssignmentExpression(
+                            SyntaxKind.SimpleAssignmentExpression,
+                            identifier,
+                            expression ) );
             }
 
             GotoStatementSyntax CreateGotoStatement()

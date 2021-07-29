@@ -80,7 +80,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
 
             public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )
             {
-                if ( !node.StaticKeyword.IsMissing && StringComparer.Ordinal.Equals( node.Name.ToFullString(), typeof( Api ).FullName ) )
+                if ( !node.StaticKeyword.IsMissing && StringComparer.Ordinal.Equals( node.Name.ToFullString(), typeof(Api).FullName ) )
                 {
                     return null;
                 }

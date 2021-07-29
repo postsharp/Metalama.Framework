@@ -337,7 +337,9 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                         "PseudoOverride should have 2 or 3 arguments - overridden declaration name, aspect name and optionally layer name." );
                 }
 
-                var overriddenDeclarationName = ((InvocationExpressionSyntax)attribute.ArgumentList.Arguments[0].Expression).ArgumentList.Arguments[0].ToString();
+                var overriddenDeclarationName =
+                    ((InvocationExpressionSyntax) attribute.ArgumentList.Arguments[0].Expression).ArgumentList.Arguments[0].ToString();
+
                 var aspectName = attribute.ArgumentList.Arguments[1].ToString().Trim( '\"' );
 
                 string? layerName = null;

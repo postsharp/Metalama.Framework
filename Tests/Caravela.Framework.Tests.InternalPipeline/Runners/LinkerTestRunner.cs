@@ -30,8 +30,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 serviceProvider,
                 projectDirectory,
                 metadataReferences,
-                logger )
-        { }
+                logger ) { }
 
         /// <summary>
         /// Runs the template test with name and source provided in the <paramref name="testInput"/>.
@@ -41,7 +40,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
         public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
             var builder = new LinkerTestInputBuilder();
-            var testResult = await base.RunTestAsync( TestInputWithBuilder.Create( testInput, builder ) );
+            testInput.SetExtension( builder );
+            var testResult = await base.RunTestAsync( testInput );
 
             if ( !testResult.Success )
             {
@@ -54,9 +54,10 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var result = linker.ToResult();
 
             var linkedCompilation = result.Compilation;
+
             var cleanCompilation =
                 LinkerTestInputBuilder.GetCleanCompilation( linkedCompilation )
-                .Compilation.AssertNotNull();
+                    .Compilation.AssertNotNull();
 
             testResult.OutputCompilation = cleanCompilation;
             testResult.HasOutputCode = true;
@@ -78,30 +79,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
         protected override SyntaxNode TransformSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot )
         {
-            var builder = ((TestInputWithBuilder) testInput).Builder;
+            var builder = testInput.GetExtension<LinkerTestInputBuilder>().AssertNotNull();
 
             return builder.ProcessSyntaxRoot( syntaxRoot );
-        }
-
-        private class TestInputWithBuilder : TestInput
-        {
-            public LinkerTestInputBuilder Builder { get; }
-
-            private TestInputWithBuilder(
-                string testName,
-                string sourceCode,
-                string? projectDirectory,
-                string? relativePath,
-                string? fullPath,
-                TestOptions options,
-                LinkerTestInputBuilder builder)
-                : base( testName, sourceCode, projectDirectory, relativePath, fullPath, options )
-            {
-                this.Builder = builder;
-            }
-
-            public static TestInputWithBuilder Create( TestInput testInput, LinkerTestInputBuilder builder )
-                => new TestInputWithBuilder( testInput.TestName, testInput.SourceCode, testInput.ProjectDirectory, testInput.RelativePath, testInput.FullPath, testInput.Options, builder );
         }
     }
 }

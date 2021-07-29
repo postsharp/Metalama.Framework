@@ -71,7 +71,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
         {
             var initialCompilationModel = CompilationModel.CreateInitialInstance( inputCompilation );
 
-            FinalizeTransformationFakes( this._rewriter, (CSharpCompilation)inputCompilation.Compilation, initialCompilationModel );
+            FinalizeTransformationFakes( this._rewriter, (CSharpCompilation) inputCompilation.Compilation, initialCompilationModel );
 
             var inputCompilationModel = initialCompilationModel.WithTransformations( this._rewriter.ObservableTransformations );
 

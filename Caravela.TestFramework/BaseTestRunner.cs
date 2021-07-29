@@ -258,7 +258,7 @@ namespace Caravela.TestFramework
         /// Creates a new project that is used to compile the test source.
         /// </summary>
         /// <returns>A new project instance.</returns>
-        public virtual Project CreateProject( TestOptions options )
+        public Project CreateProject( TestOptions options )
         {
             var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null, this._additionalAssemblies );
 

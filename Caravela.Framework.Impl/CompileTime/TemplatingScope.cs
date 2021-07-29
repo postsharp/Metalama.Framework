@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// A <see cref="CompileTimeOnly"/> member whose evaluated value is <see cref="RunTimeOnly"/>. 
         /// </summary>
         CompileTimeOnlyReturningRuntimeOnly,
-        
+
         /// <summary>
         /// A <see cref="CompileTimeOnly"/> member whose evaluated value is <see cref="Both"/>. 
         /// </summary>
@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// A member of a dynamic receiver.
         /// </summary>
         Dynamic,
-        
+
         /// <summary>
         /// An expression that contains conflicting children.
         /// </summary>

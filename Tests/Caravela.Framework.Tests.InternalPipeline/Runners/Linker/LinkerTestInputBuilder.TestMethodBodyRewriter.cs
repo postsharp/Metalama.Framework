@@ -37,15 +37,18 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
 
             public override SyntaxNode? VisitElementAccessExpression( ElementAccessExpressionSyntax node )
             {
-                if (this.TransformInvocationOrElementAccess(node.Expression, node.ArgumentList.Arguments, out var transformedNode))
+                if ( this.TransformInvocationOrElementAccess( node.Expression, node.ArgumentList.Arguments, out var transformedNode ) )
                 {
                     return transformedNode;
                 }
 
                 return base.VisitElementAccessExpression( node );
             }
-                        
-            public bool TransformInvocationOrElementAccess(ExpressionSyntax expression, SeparatedSyntaxList<ArgumentSyntax> arguments, [NotNullWhen( true )] out SyntaxNode? transformedNode)
+
+            public bool TransformInvocationOrElementAccess(
+                ExpressionSyntax expression,
+                SeparatedSyntaxList<ArgumentSyntax> arguments,
+                [NotNullWhen( true )] out SyntaxNode? transformedNode )
             {
                 if ( expression is IdentifierNameSyntax identifier && identifier.Identifier.ValueText == "link" )
                 {
@@ -130,18 +133,23 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                         }
                     }
 
-                    transformedNode = this.Visit( annotatedExpression ).WithAspectReferenceAnnotation( new AspectLayerId( this._aspectName, this._layerName ), order, target, flags );
+                    transformedNode = this.Visit( annotatedExpression )
+                        .WithAspectReferenceAnnotation( new AspectLayerId( this._aspectName, this._layerName ), order, target, flags );
+
                     return true;
                 }
 
                 transformedNode = null;
+
                 return false;
             }
 
             public override SyntaxNode? VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
             {
-                if (node.Kind() == SyntaxKind.SimpleMemberAccessExpression && node.Expression is IdentifierNameSyntax identifier
-                    && StringComparer.Ordinal.Equals( identifier.Identifier.ValueText, nameof( Api._static ) ) )
+                if ( node.Kind() == SyntaxKind.SimpleMemberAccessExpression && node.Expression is IdentifierNameSyntax identifier
+                                                                            && StringComparer.Ordinal.Equals(
+                                                                                identifier.Identifier.ValueText,
+                                                                                nameof(Api._static) ) )
                 {
                     return node.Name;
                 }
