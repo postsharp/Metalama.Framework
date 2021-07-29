@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IAdvisedMethod Adder => new AdvisedMethod( (IMethodInternal) this.Underlying.Adder );
 
         [Memo]
-        public IAdvisedMethod Remover => new AdvisedMethod( (IMethodInternal)this.Underlying.Remover );
+        public IAdvisedMethod Remover => new AdvisedMethod( (IMethodInternal) this.Underlying.Remover );
 
         [Memo]
         public IAdvisedMethod? Raiser => this.Underlying.Raiser != null ? new AdvisedMethod( (IMethodInternal) this.Underlying.Raiser ) : null;

@@ -113,7 +113,7 @@ namespace Caravela.TestFramework
 
         private static async Task ExecuteTestProgramAsync( TestInput testInput, TestResult testResult, MemoryStream peStream, MemoryStream? pdbStream = null )
         {
-            if ( !testInput.Options.ExecuteProgram.GetValueOrDefault(true) )
+            if ( !testInput.Options.ExecuteProgram.GetValueOrDefault( true ) )
             {
                 return;
             }
@@ -273,7 +273,7 @@ namespace Caravela.TestFramework
                 this.Logger?.WriteLine( testResult.ProgramOutput );
                 this.Logger?.WriteLine( "=====================" );
 
-                string expectedOutput = File.ReadAllText( expectedProgramOutputPath );
+                var expectedOutput = File.ReadAllText( expectedProgramOutputPath );
 
                 Assert.Equal( expectedOutput, testResult.ProgramOutput );
             }

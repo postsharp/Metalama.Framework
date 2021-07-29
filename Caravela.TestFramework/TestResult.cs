@@ -26,7 +26,7 @@ namespace Caravela.TestFramework
 
         private readonly List<TestSyntaxTree> _syntaxTrees = new();
         private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
-        
+
         public DiagnosticList Diagnostics { get; } = new();
 
         public IReadOnlyList<TestSyntaxTree> SyntaxTrees => this._syntaxTrees;

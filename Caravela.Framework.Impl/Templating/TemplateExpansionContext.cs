@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return CreateReturnStatementVoid( returnExpression );
             }
-            else if ( method.GetIteratorInfoImpl() is { IsIterator: true, IsAsync: true} iteratorInfo )
+            else if ( method.GetIteratorInfoImpl() is { IsIterator: true, IsAsync: true } iteratorInfo )
             {
                 switch ( iteratorInfo.IteratorKind )
                 {
@@ -84,7 +84,7 @@ namespace Caravela.Framework.Impl.Templating
 
                     case IteratorKind.IAsyncEnumerator:
                         return this.CreateReturnStatementAsyncEnumerator( returnExpression );
-                    
+
                     default:
                         throw new AssertionFailedException();
                 }
@@ -200,7 +200,7 @@ namespace Caravela.Framework.Impl.Templating
                             SingletonSeparatedList(
                                 VariableDeclarator( Identifier( enumerator ) )
                                     .WithInitializer( EqualsValueClause( returnExpression ) ) ) ) );
-            
+
             var tryStatement =
                 TryStatement()
                     .WithBlock(

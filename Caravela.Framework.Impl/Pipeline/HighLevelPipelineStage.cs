@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.Pipeline
             [NotNullWhen( true )] out PipelineStageResult? result )
         {
             var compilation = CompilationModel.CreateInitialInstance( input.PartialCompilation );
-            
+
             this.ServiceProvider.GetOptionalService<ICompilationModelObserver>()?.OnInitialCompilationModelCreated( compilation );
 
             var pipelineStepsState = new PipelineStepsState(

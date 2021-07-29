@@ -100,7 +100,7 @@ namespace Caravela.TestFramework
         /// Gets or sets a value indicating whether the test is allowed to have compile-time code that has dynamic calls.
         /// </summary>
         internal bool? AllowCompileTimeDynamicCode { get; set; }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the `Program.Main` method should be executed if it exists. The default value is <c>true</c>.
         /// </summary>

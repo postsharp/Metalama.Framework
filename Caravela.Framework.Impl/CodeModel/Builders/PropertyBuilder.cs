@@ -58,7 +58,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         IMethod? IFieldOrProperty.Getter => this.Getter;
 
         IMethod? IFieldOrProperty.Setter => this.Setter;
-        
+
         public IMethodBuilder? Setter { get; }
 
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;

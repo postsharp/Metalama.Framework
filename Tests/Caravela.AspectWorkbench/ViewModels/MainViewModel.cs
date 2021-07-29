@@ -43,16 +43,16 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public bool IsNewTest => string.IsNullOrEmpty( this.CurrentPath );
 
-        private string CurrentPath { get; set; }
-        
+        private string? CurrentPath { get; set; }
+
         public bool ShowCompiledTemplate { get; set; }
-        
+
         public string? ActualProgramOutput { get; set; }
-        
+
         public string? ExpectedProgramOutput { get; set; }
 
         public Visibility CompiledTemplateVisibility => this.ShowCompiledTemplate ? Visibility.Visible : Visibility.Collapsed;
-        
+
         public Visibility ProgramOutputVisibility => this.ShowCompiledTemplate ? Visibility.Collapsed : Visibility.Visible;
 
         public async Task RunTestAsync()
@@ -60,6 +60,10 @@ namespace Caravela.AspectWorkbench.ViewModels
             if ( this.SourceCode == null )
             {
                 throw new InvalidOperationException( $"Property {nameof(this.SourceCode)} not set." );
+            }
+            else if ( this.CurrentPath == null )
+            {
+                throw new InvalidOperationException( "The test must be saved before you can run it." );
             }
 
             try
@@ -171,8 +175,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 if ( this.ActualProgramOutput == this.ExpectedProgramOutput )
                 {
-                    errorsDocument.Blocks.Add(
-                        new Paragraph( new Run( "The program output is equal to expectations." ) { Foreground = Brushes.Green } ) );
+                    errorsDocument.Blocks.Add( new Paragraph( new Run( "The program output is equal to expectations." ) { Foreground = Brushes.Green } ) );
                 }
                 else
                 {

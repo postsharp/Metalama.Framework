@@ -12,8 +12,7 @@ namespace Caravela.Framework.RunTime
     {
         IAsyncEnumerator<T> IAsyncEnumerable<T>.GetAsyncEnumerator( CancellationToken cancellationToken ) => this.GetAsyncEnumerator( cancellationToken );
 
-        public AsyncEnumerator GetAsyncEnumerator( CancellationToken cancellationToken = default )
-            => new AsyncEnumerator( this.GetEnumerator(), cancellationToken );
+        public AsyncEnumerator GetAsyncEnumerator( CancellationToken cancellationToken = default ) => new( this.GetEnumerator(), cancellationToken );
 
         public struct AsyncEnumerator : IAsyncEnumerator<T>
         {

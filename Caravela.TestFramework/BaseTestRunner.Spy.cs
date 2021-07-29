@@ -2,9 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Observers;
-using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;

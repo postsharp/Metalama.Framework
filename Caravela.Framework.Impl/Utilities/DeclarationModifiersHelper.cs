@@ -100,8 +100,9 @@ namespace Caravela.Framework.Impl.Utilities
                     tokens.Add( Token( SyntaxKind.SealedKeyword ) );
                 }
             }
-            
-            if ( (categories & ModifierCategories.ReadOnly) != 0 && member is IMethod { IsReadOnly: true } or IField { Writeability: Writeability.ConstructorOnly } )
+
+            if ( (categories & ModifierCategories.ReadOnly) != 0 && member is IMethod { IsReadOnly: true } or IField
+                { Writeability: Writeability.ConstructorOnly } )
             {
                 tokens.Add( Token( SyntaxKind.ReadOnlyKeyword ) );
             }

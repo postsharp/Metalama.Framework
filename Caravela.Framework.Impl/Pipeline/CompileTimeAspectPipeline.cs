@@ -7,7 +7,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
-using Caravela.Framework.Impl.Observers;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
@@ -73,8 +72,6 @@ namespace Caravela.Framework.Impl.Pipeline
                 }
 
                 var partialCompilation = PartialCompilation.CreateComplete( compilation );
-                
-                
 
                 // Initialize the pipeline and generate the compile-time project.
                 if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )

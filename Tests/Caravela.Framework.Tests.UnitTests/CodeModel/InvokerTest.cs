@@ -196,7 +196,7 @@ class TargetCode
             AssertEx.DynamicEquals(
                 property.Invokers.FinalConditional.GetValue( SyntaxFactory.IdentifierName( "a" ) ),
                 @"((global::TargetCode)(a))?.P" );
-            
+
             AssertEx.DynamicEquals(
                 property.Invokers.Final.SetValue( SyntaxFactory.IdentifierName( "a" ), SyntaxFactory.IdentifierName( "b" ) ),
                 @"((global::TargetCode)(a)).P = b" );
@@ -205,7 +205,7 @@ class TargetCode
                 property.Invokers.Final.GetValue( property.Invokers.Final.GetValue( thisExpression ) ),
                 @"((global::TargetCode)(this)).P.P" );
         }
-        
+
         [Fact]
         public void PropertyAccessors()
         {

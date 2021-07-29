@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="{Binding Title}" Height="1100" Width="1620">
     <Window.DataContext>
-        <viewModels:MainViewModel/>
+        <viewModels:MainViewModel />
     </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
@@ -24,7 +24,7 @@
                 <Button Content="Open" Click="OpenButton_Click" />
                 <Button Content="Save" Click="SaveButton_Click" />
                 <Button Content="SaveAs" Click="SaveAsButton_Click" />
-              
+
             </ToolBar>
             <ToolBar Band="0" BandIndex="1">
                 <Button Content="Run" Click="RunButton_Click" />
@@ -109,7 +109,7 @@
                              VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto"
                              VerticalScrollBarVisibility="Auto" FontFamily="Consolas" />
             </DockPanel>
-            
+
             <Grid Grid.Column="6" Visibility="{Binding Path=ProgramOutputVisibility}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="500" />
@@ -132,11 +132,11 @@
 
                 <DockPanel Grid.Row="3">
                     <TextBlock DockPanel.Dock="Top">Actual Program Output</TextBlock>
-                    <TextBlock  Name="programOutputRichBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                 FontFamily="Consolas" Text="{Binding ActualProgramOutput}" />
+                    <TextBlock Name="programOutputRichBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                               FontFamily="Consolas" Text="{Binding ActualProgramOutput}" />
                 </DockPanel>
             </Grid>
-            
+
         </Grid>
 
         <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Center" />

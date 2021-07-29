@@ -3,12 +3,10 @@
 
 using Caravela.AspectWorkbench.CodeEditor;
 using Caravela.AspectWorkbench.ViewModels;
-using ICSharpCode.AvalonEdit.Document;
-using ICSharpCode.AvalonEdit.Highlighting;
 using Microsoft.Win32;
 using PostSharp;
 using RoslynPad.Editor;
-using System.Collections.Generic;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -19,7 +17,6 @@ using TextRange = System.Windows.Documents.TextRange;
 
 namespace Caravela.AspectWorkbench.Views
 {
-   
     public partial class MainWindow
     {
         private const string _testsProjectPath = @"c:\src\Caravela\Tests\Caravela.Templating.UnitTests\";
@@ -77,8 +74,6 @@ namespace Caravela.AspectWorkbench.Views
                     this.errorsTextBlock.Document = this._viewModel.ErrorsDocument ?? new FlowDocument();
 
                     break;
-                
-                
             }
         }
 
@@ -98,8 +93,8 @@ namespace Caravela.AspectWorkbench.Views
             {
                 return;
             }
-            
-            this._viewModel.NewTest(dlg.FileName);
+
+            this._viewModel.NewTest( dlg.FileName );
         }
 
         private async void OpenButton_Click( object sender, RoutedEventArgs e )
@@ -142,7 +137,15 @@ namespace Caravela.AspectWorkbench.Views
         private async void RunButton_Click( object sender, RoutedEventArgs e )
         {
             this.UpdateViewModel();
-            await this._viewModel.RunTestAsync();
+
+            try
+            {
+                await this._viewModel.RunTestAsync();
+            }
+            catch ( Exception exception )
+            {
+                MessageBox.Show( this, exception.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK );
+            }
         }
 
         private void MakeExpectedTransformedCodeButton_Click( object sender, RoutedEventArgs e )

@@ -5,7 +5,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
-using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
@@ -22,8 +21,6 @@ namespace Caravela.Framework.Impl
 
         public static ISyntaxFactory GetSyntaxFactory( this IDeclaration declaration ) => declaration.GetCompilationModel().ReflectionMapper;
 
-    
-    
         public static AttributeData GetAttributeData( this IAttribute attribute )
         {
             if ( attribute is Attribute attributeModel )
