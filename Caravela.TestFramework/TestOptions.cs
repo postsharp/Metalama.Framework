@@ -100,6 +100,11 @@ namespace Caravela.TestFramework
         /// Gets or sets a value indicating whether the test is allowed to have compile-time code that has dynamic calls.
         /// </summary>
         internal bool? AllowCompileTimeDynamicCode { get; set; }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether the `Program.Main` method should be executed if it exists. The default value is <c>true</c>.
+        /// </summary>
+        public bool? ExecuteProgram { get; set; }
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -132,6 +137,8 @@ namespace Caravela.TestFramework
             this.References.AddRange( baseOptions.References );
 
             this.AllowCompileTimeDynamicCode ??= baseOptions.AllowCompileTimeDynamicCode;
+
+            this.ExecuteProgram ??= baseOptions.ExecuteProgram;
 
             if ( !this.ClearIgnoredDiagnostics.GetValueOrDefault() )
             {

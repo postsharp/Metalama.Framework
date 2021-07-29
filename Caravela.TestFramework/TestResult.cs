@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -17,22 +18,16 @@ namespace Caravela.TestFramework
     /// <summary>
     /// Represents the result of a test run.
     /// </summary>
-    public class TestResult : IDiagnosticAdder
+    public class TestResult
     {
         private bool _frozen;
 
         public TestInput? TestInput { get; set; }
 
-        private readonly List<Diagnostic> _diagnostics = new();
         private readonly List<TestSyntaxTree> _syntaxTrees = new();
         private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
-
-        void IDiagnosticAdder.Report( Diagnostic diagnostic ) => this._diagnostics.Add( diagnostic );
-
-        /// <summary>
-        /// Gets the list of diagnostics emitted during test run.
-        /// </summary>
-        public IReadOnlyList<Diagnostic> Diagnostics => this._diagnostics;
+        
+        public DiagnosticList Diagnostics { get; } = new();
 
         public IReadOnlyList<TestSyntaxTree> SyntaxTrees => this._syntaxTrees;
 
@@ -83,6 +78,10 @@ namespace Caravela.TestFramework
         internal bool HasOutputCode { get; set; }
 
         public Compilation? CompileTimeCompilation { get; private set; }
+
+        public ICompilation? InitialCompilationModel { get; internal set; }
+
+        public string? ProgramOutput { get; internal set; }
 
         internal void AddInputDocument( Document document, string? path ) => this._syntaxTrees.Add( new TestSyntaxTree( path, document, this ) );
 

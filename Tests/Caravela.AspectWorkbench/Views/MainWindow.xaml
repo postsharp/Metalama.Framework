@@ -4,8 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:editor="clr-namespace:RoslynPad.Editor;assembly=RoslynPad.Editor.Windows"
+        xmlns:viewModels="clr-namespace:Caravela.AspectWorkbench.ViewModels"
         mc:Ignorable="d"
         Title="{Binding Title}" Height="1100" Width="1620">
+    <Window.DataContext>
+        <viewModels:MainViewModel/>
+    </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -20,9 +24,13 @@
                 <Button Content="Open" Click="OpenButton_Click" />
                 <Button Content="Save" Click="SaveButton_Click" />
                 <Button Content="SaveAs" Click="SaveAsButton_Click" />
+              
             </ToolBar>
             <ToolBar Band="0" BandIndex="1">
                 <Button Content="Run" Click="RunButton_Click" />
+            </ToolBar>
+            <ToolBar Band="0" BandIndex="1">
+                <CheckBox IsChecked="{Binding ShowCompiledTemplate}" VerticalAlignment="Center">Show Compiled Template</CheckBox>
             </ToolBar>
         </ToolBarTray>
 
@@ -59,8 +67,8 @@
                 </Grid.RowDefinitions>
 
                 <DockPanel Grid.Row="0">
-                    <TextBlock DockPanel.Dock="Top">Expected Output</TextBlock>
-                    <TextBox Name="expectedOutputTextBox" Text="{Binding ExpectedOutputText, Mode=TwoWay}"
+                    <TextBlock DockPanel.Dock="Top">Expected Transformed Code</TextBlock>
+                    <TextBox Name="expectedOutputTextBox" Text="{Binding ExpectedTransformedCode, Mode=TwoWay}"
                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontFamily="Consolas"
                              AcceptsReturn="True" HorizontalScrollBarVisibility="Auto"
                              VerticalScrollBarVisibility="Auto" />
@@ -68,10 +76,10 @@
 
                 <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
 
-                <Button Grid.Row="2" Click="MakeExpectedButton_Click">⬆ Make expected ⬆</Button>
+                <Button Grid.Row="2" Click="MakeExpectedTransformedCodeButton_Click">⬆ Make expected ⬆</Button>
 
                 <DockPanel Grid.Row="3">
-                    <TextBlock DockPanel.Dock="Top">Transformed Code</TextBlock>
+                    <TextBlock DockPanel.Dock="Top">Actual Transformed Code</TextBlock>
                     <RichTextBox IsReadOnly="True" Name="transformedCodeRichBox" HorizontalAlignment="Stretch"
                                  VerticalAlignment="Stretch"
                                  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
@@ -91,7 +99,7 @@
 
             <GridSplitter Grid.Column="5" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
 
-            <DockPanel Grid.Column="6">
+            <DockPanel Grid.Column="6" Visibility="{Binding Path=CompiledTemplateVisibility}">
                 <TextBlock DockPanel.Dock="Top">
                     <Hyperlink Name="compiledTemplateHyperlink" Click="CompiledTemplateHyperlink_OnClick">
                         Compiled Template
@@ -101,6 +109,34 @@
                              VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto"
                              VerticalScrollBarVisibility="Auto" FontFamily="Consolas" />
             </DockPanel>
+            
+            <Grid Grid.Column="6" Visibility="{Binding Path=ProgramOutputVisibility}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="500" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <DockPanel Grid.Row="0">
+                    <TextBlock DockPanel.Dock="Top">Expected Program Output</TextBlock>
+                    <TextBox Name="expectedProgramOutputBox" Text="{Binding ExpectedProgramOutput, Mode=TwoWay}"
+                             HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontFamily="Consolas"
+                             AcceptsReturn="True" HorizontalScrollBarVisibility="Auto"
+                             VerticalScrollBarVisibility="Auto" />
+                </DockPanel>
+
+                <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+
+                <Button Grid.Row="2" Click="MakeExpectedProgramOutputButton_Click">⬆ Make expected ⬆</Button>
+
+                <DockPanel Grid.Row="3">
+                    <TextBlock DockPanel.Dock="Top">Actual Program Output</TextBlock>
+                    <TextBlock  Name="programOutputRichBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                 FontFamily="Consolas" Text="{Binding ActualProgramOutput}" />
+                </DockPanel>
+            </Grid>
+            
         </Grid>
 
         <GridSplitter Grid.Row="2" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Center" />

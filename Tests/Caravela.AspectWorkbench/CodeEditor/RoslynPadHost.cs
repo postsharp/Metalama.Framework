@@ -17,11 +17,11 @@ using System.Runtime.CompilerServices;
 
 namespace Caravela.AspectWorkbench.CodeEditor
 {
-    public class CustomRoslynHost : RoslynHost
+    public class RoslynPadHost : RoslynHost
     {
-        public static CustomRoslynHost Create()
+        public static RoslynPadHost Create()
         {
-            var host = new CustomRoslynHost(
+            var host = new RoslynPadHost(
                 ImmutableArray.Create( "IDE0051" /* Private member is unused. */ ),
                 new[] { Assembly.Load( "RoslynPad.Roslyn.Windows" ), Assembly.Load( "RoslynPad.Editor.Windows" ) },
                 RoslynHostReferences.Empty
@@ -43,7 +43,7 @@ namespace Caravela.AspectWorkbench.CodeEditor
             return host;
         }
 
-        public CustomRoslynHost(
+        public RoslynPadHost(
             ImmutableArray<string>? disabledDiagnostics = default,
             IEnumerable<Assembly>? additionalAssemblies = null,
             RoslynHostReferences? references = null ) : base( additionalAssemblies, references, disabledDiagnostics ) { }

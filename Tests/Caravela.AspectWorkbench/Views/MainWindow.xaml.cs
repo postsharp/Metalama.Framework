@@ -3,9 +3,12 @@
 
 using Caravela.AspectWorkbench.CodeEditor;
 using Caravela.AspectWorkbench.ViewModels;
+using ICSharpCode.AvalonEdit.Document;
+using ICSharpCode.AvalonEdit.Highlighting;
 using Microsoft.Win32;
 using PostSharp;
 using RoslynPad.Editor;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -16,6 +19,7 @@ using TextRange = System.Windows.Documents.TextRange;
 
 namespace Caravela.AspectWorkbench.Views
 {
+   
     public partial class MainWindow
     {
         private const string _testsProjectPath = @"c:\src\Caravela\Tests\Caravela.Templating.UnitTests\";
@@ -27,7 +31,7 @@ namespace Caravela.AspectWorkbench.Views
         public MainWindow()
         {
             this.InitializeComponent();
-            this.InitializeRoslynEditors();
+            this.InitializeRoslynEditor();
 
             var newViewModel = new MainViewModel();
             this._viewModel = newViewModel;
@@ -35,9 +39,9 @@ namespace Caravela.AspectWorkbench.Views
             Post.Cast<MainViewModel, INotifyPropertyChanged>( newViewModel ).PropertyChanged += this.ViewModel_PropertyChanged;
         }
 
-        private void InitializeRoslynEditors()
+        private void InitializeRoslynEditor()
         {
-            var roslynHost = CustomRoslynHost.Create();
+            var roslynHost = RoslynPadHost.Create();
             var highlightColors = new ClassificationHighlightColors();
             var workingDirectory = Directory.GetCurrentDirectory();
 
@@ -49,13 +53,13 @@ namespace Caravela.AspectWorkbench.Views
             // TODO RichTextBox doesn't support data binding out of the box. RoslynPad doesn't support binding to text either.
             switch ( e.PropertyName )
             {
-                case nameof(MainViewModel.TestText):
-                    this.sourceTextBox.Text = this._viewModel.TestText;
+                case nameof(MainViewModel.SourceCode):
+                    this.sourceTextBox.Text = this._viewModel.SourceCode;
 
                     break;
 
-                case nameof(MainViewModel.ColoredTemplateDocument):
-                    this.highlightedSourceRichBox.Document = this._viewModel.ColoredTemplateDocument ?? new FlowDocument();
+                case nameof(MainViewModel.ColoredSourceCodeDocument):
+                    this.highlightedSourceRichBox.Document = this._viewModel.ColoredSourceCodeDocument ?? new FlowDocument();
 
                     break;
 
@@ -64,8 +68,8 @@ namespace Caravela.AspectWorkbench.Views
 
                     break;
 
-                case nameof(MainViewModel.TransformedTargetDocument):
-                    this.transformedCodeRichBox.Document = this._viewModel.TransformedTargetDocument ?? new FlowDocument();
+                case nameof(MainViewModel.TransformedCodeDocument):
+                    this.transformedCodeRichBox.Document = this._viewModel.TransformedCodeDocument ?? new FlowDocument();
 
                     break;
 
@@ -73,25 +77,34 @@ namespace Caravela.AspectWorkbench.Views
                     this.errorsTextBlock.Document = this._viewModel.ErrorsDocument ?? new FlowDocument();
 
                     break;
+                
+                
             }
         }
 
         private void UpdateViewModel()
         {
-            this._viewModel.TestText = this.sourceTextBox.Text;
+            this._viewModel.SourceCode = this.sourceTextBox.Text;
 
             // Alternatively set the UpdateSourceTrigger property of the TextBox binding to PropertyChanged.
             this.expectedOutputTextBox.GetBindingExpression( TextBox.TextProperty )!.UpdateSource();
         }
 
-        private void NewButton_Click( object sender, RoutedEventArgs e ) => this._viewModel.NewTest();
+        private void NewButton_Click( object sender, RoutedEventArgs e )
+        {
+            var dlg = new SaveFileDialog { DefaultExt = _fileDialogueExt, Filter = _fileDialogueFilter, InitialDirectory = _testsProjectPath };
+
+            if ( dlg.ShowDialog() == false )
+            {
+                return;
+            }
+            
+            this._viewModel.NewTest(dlg.FileName);
+        }
 
         private async void OpenButton_Click( object sender, RoutedEventArgs e )
         {
-            var dlg = new OpenFileDialog();
-            dlg.DefaultExt = _fileDialogueExt;
-            dlg.Filter = _fileDialogueFilter;
-            dlg.InitialDirectory = _testsProjectPath;
+            var dlg = new OpenFileDialog { DefaultExt = _fileDialogueExt, Filter = _fileDialogueFilter, InitialDirectory = _testsProjectPath };
 
             if ( dlg.ShowDialog() == true )
             {
@@ -132,18 +145,18 @@ namespace Caravela.AspectWorkbench.Views
             await this._viewModel.RunTestAsync();
         }
 
-        private void MakeExpectedButton_Click( object sender, RoutedEventArgs e )
+        private void MakeExpectedTransformedCodeButton_Click( object sender, RoutedEventArgs e )
         {
-            if ( this._viewModel.TransformedTargetDocument == null )
+            if ( this._viewModel.TransformedCodeDocument == null )
             {
-                this._viewModel.ExpectedOutputText = "";
+                this._viewModel.ExpectedTransformedCode = "";
 
                 return;
             }
 
-            this._viewModel.ExpectedOutputText = new TextRange(
-                this._viewModel.TransformedTargetDocument.ContentStart,
-                this._viewModel.TransformedTargetDocument.ContentEnd ).Text;
+            this._viewModel.ExpectedTransformedCode = new TextRange(
+                this._viewModel.TransformedCodeDocument.ContentStart,
+                this._viewModel.TransformedCodeDocument.ContentEnd ).Text;
         }
 
         private void CompiledTemplateHyperlink_OnClick( object sender, RoutedEventArgs e )
@@ -152,6 +165,11 @@ namespace Caravela.AspectWorkbench.Views
             {
                 _ = Process.Start( new ProcessStartInfo( this._viewModel.CompiledTemplatePath ) { UseShellExecute = true } );
             }
+        }
+
+        private void MakeExpectedProgramOutputButton_Click( object sender, RoutedEventArgs e )
+        {
+            this._viewModel.ExpectedProgramOutput = this._viewModel.ActualProgramOutput;
         }
     }
 }

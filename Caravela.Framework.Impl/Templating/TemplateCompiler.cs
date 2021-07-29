@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Observers;
 using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,7 +20,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private readonly IServiceProvider _serviceProvider;
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap = new();
-        private readonly ITemplateCompilerSpy? _spy;
+        private readonly ITemplateCompilerObserver? _observer;
         private readonly SerializableTypes _serializableTypes;
 
         public TemplateCompiler( IServiceProvider serviceProvider, Compilation runTimeCompilation )
@@ -28,7 +29,7 @@ namespace Caravela.Framework.Impl.Templating
             var syntaxSerializationService = serviceProvider.GetService<SyntaxSerializationService>();
             this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( runTimeCompilation ) );
 
-            this._spy = serviceProvider.GetOptionalService<ITemplateCompilerSpy>();
+            this._observer = serviceProvider.GetOptionalService<ITemplateCompilerObserver>();
         }
 
         public ILocationAnnotationMapBuilder LocationAnnotationMap => this._syntaxTreeAnnotationMap;
@@ -73,7 +74,7 @@ namespace Caravela.Framework.Impl.Templating
 
             annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot )!;
 
-            this._spy?.ReportAnnotatedSyntaxNode( sourceSyntaxRoot, annotatedSyntaxRoot );
+            this._observer?.OnAnnotatedSyntaxNode( sourceSyntaxRoot, annotatedSyntaxRoot );
 
             // Stop if we have any error.
             if ( !annotatorRewriter.Success )

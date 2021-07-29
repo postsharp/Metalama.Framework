@@ -110,7 +110,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     (CSharpCompilationOptions) testResult.InputProject!.CompilationOptions! )
                 .AddReferences( MetadataReference.CreateFromFile( typeof(TestTemplateAttribute).Assembly.Location ) );
 
-            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult, this.ServiceProvider );
+            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult.Diagnostics, this.ServiceProvider );
 
             var templateCompilerSuccess = templateCompiler.TryCompile(
                 compileTimeCompilation,
@@ -175,7 +175,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             if ( !emitResult.Success )
             {
-                testResult.Report( emitResult.Diagnostics );
+                testResult.Diagnostics.Report( emitResult.Diagnostics );
                 testResult.SetFailed( "The final template compilation failed." );
 
                 return testResult;
@@ -207,9 +207,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InputCompilation );
                 var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( this.ServiceProvider, assembly, compilationModel, templateMethod );
 
-                var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult, out var output );
+                var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult.Diagnostics, out var output );
 
-                testResult.Report( expansionContext.DiagnosticSink.ToImmutable().ReportedDiagnostics );
+                testResult.Diagnostics.Report( expansionContext.DiagnosticSink.ToImmutable().ReportedDiagnostics );
 
                 if ( !expandSuccessful )
                 {
