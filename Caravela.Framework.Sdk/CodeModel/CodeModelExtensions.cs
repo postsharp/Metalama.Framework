@@ -24,10 +24,16 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public static INamedTypeSymbol GetSymbol( this INamedType namedType )
             => namedType.GetSymbol<INamedTypeSymbol>() ?? throw new InvalidOperationException(
-                "Assertion failed: uUntil type introductions are supported, all types are assumed to have a Roslyn symbol." );
+                "Assertion failed: until type introductions are supported, all types are assumed to have a Roslyn symbol." );
 
         public static IMethodSymbol? GetSymbol( this IMethodBase method ) => method.GetSymbol<IMethodSymbol>();
 
         public static IPropertySymbol? GetSymbol( this IProperty property ) => property.GetSymbol<IPropertySymbol>();
+
+        public static IEventSymbol? GetSymbol( this IEvent @event ) => @event.GetSymbol<IEventSymbol>();
+
+        public static IFieldSymbol? GetSymbol( this IField field ) => field.GetSymbol<IFieldSymbol>();
+
+        public static IParameterSymbol? GetSymbol( this IParameter parameter ) => parameter.GetSymbol<IParameterSymbol>();
     }
 }

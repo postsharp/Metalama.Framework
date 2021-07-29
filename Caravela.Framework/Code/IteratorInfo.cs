@@ -52,6 +52,5 @@ namespace Caravela.Framework.Code
             this._getItemType = getItemType;
             this.IteratorKind = iteratorKind;
         }
-
     }
 }

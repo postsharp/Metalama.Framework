@@ -1,21 +1,22 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.AspectOrdering;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Sdk;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Utilities;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Serialization;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Sdk;
+using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Utilities;
+using Microsoft.CodeAnalysis;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl
@@ -139,7 +140,7 @@ namespace Caravela.Framework.Impl
 
         public TemplateDriver GetTemplateDriver( IMethod sourceTemplate )
         {
-            var templateSymbol = CodeModel.CodeModelExtensions.GetSymbol( sourceTemplate ).AssertNotNull();
+            var templateSymbol = sourceTemplate.GetSymbol().AssertNotNull();
             var id = templateSymbol.GetDocumentationCommentId()!;
 
             if ( this._templateDrivers.TryGetValue( id, out var templateDriver ) )
@@ -155,7 +156,7 @@ namespace Caravela.Framework.Impl
                 throw new AssertionFailedException( $"Could not find the compile template for {sourceTemplate}." );
             }
 
-            templateDriver = new TemplateDriver( this._serviceProvider, this, CodeModel.CodeModelExtensions.GetSymbol( sourceTemplate ).AssertNotNull(), compiledTemplateMethodInfo );
+            templateDriver = new TemplateDriver( this._serviceProvider, this, sourceTemplate.GetSymbol().AssertNotNull(), compiledTemplateMethodInfo );
             this._templateDrivers.Add( id, templateDriver );
 
             return templateDriver;
@@ -255,7 +256,7 @@ namespace Caravela.Framework.Impl
             public IAspectDependencyBuilder Dependencies => this;
 
             public void RequiresAspect<TAspect>()
-                where TAspect : Attribute, IAspect, new()
+                where TAspect : System.Attribute, IAspect, new()
                 => throw new NotImplementedException();
         }
     }

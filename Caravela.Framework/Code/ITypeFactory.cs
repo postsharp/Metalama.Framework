@@ -53,7 +53,7 @@ namespace Caravela.Framework.Code
             where T : IType;
 
         /// <summary>
-        /// Gets a <see cref="INamedType"/> representing a given <see cref="SpecialType"/>/
+        /// Gets a <see cref="INamedType"/> representing a given <see cref="SpecialType"/>.
         /// </summary>
         INamedType GetSpecialType( SpecialType specialType );
 
