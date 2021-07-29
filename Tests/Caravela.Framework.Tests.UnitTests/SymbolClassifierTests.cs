@@ -5,7 +5,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Impl.CodeModel;
 using System.Linq;
 using Xunit;
 

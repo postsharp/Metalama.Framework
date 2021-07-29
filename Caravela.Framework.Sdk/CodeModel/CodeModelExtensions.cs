@@ -5,7 +5,7 @@ using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Caravela.Framework.Impl.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel
 {
     /// <summary>
     /// Exposes the <see cref="ISymbol"/> from <see cref="IDeclaration"/>.

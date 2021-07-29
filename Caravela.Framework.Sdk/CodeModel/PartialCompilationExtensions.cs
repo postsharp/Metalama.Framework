@@ -7,7 +7,7 @@ using System;
 using System.Linq;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel
 {
     /// <summary>
     /// Extension methods for the <see cref="IPartialCompilation"/> interface.

@@ -6,7 +6,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Impl.CodeModel;
 using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Utilities;
@@ -140,7 +139,7 @@ namespace Caravela.Framework.Impl
 
         public TemplateDriver GetTemplateDriver( IMethod sourceTemplate )
         {
-            var templateSymbol = sourceTemplate.GetSymbol().AssertNotNull();
+            var templateSymbol = CodeModel.CodeModelExtensions.GetSymbol( sourceTemplate ).AssertNotNull();
             var id = templateSymbol.GetDocumentationCommentId()!;
 
             if ( this._templateDrivers.TryGetValue( id, out var templateDriver ) )
@@ -156,7 +155,7 @@ namespace Caravela.Framework.Impl
                 throw new AssertionFailedException( $"Could not find the compile template for {sourceTemplate}." );
             }
 
-            templateDriver = new TemplateDriver( this._serviceProvider, this, sourceTemplate.GetSymbol().AssertNotNull(), compiledTemplateMethodInfo );
+            templateDriver = new TemplateDriver( this._serviceProvider, this, CodeModel.CodeModelExtensions.GetSymbol( sourceTemplate ).AssertNotNull(), compiledTemplateMethodInfo );
             this._templateDrivers.Add( id, templateDriver );
 
             return templateDriver;

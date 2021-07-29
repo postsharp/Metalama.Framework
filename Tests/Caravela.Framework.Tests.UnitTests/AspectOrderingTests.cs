@@ -3,10 +3,10 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Impl.CodeModel;
 using Caravela.TestFramework;
 using System.Collections.Immutable;
 using System.Linq;

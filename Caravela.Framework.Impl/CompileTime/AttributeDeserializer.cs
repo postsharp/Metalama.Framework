@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Impl.CodeModel;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -13,6 +12,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using RoslynExtensions = Caravela.Framework.Impl.CodeModel.RoslynExtensions;
 using TypedConstant = Microsoft.CodeAnalysis.TypedConstant;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
@@ -197,7 +197,7 @@ namespace Caravela.Framework.Impl.CompileTime
             out object? translatedValue )
             => this.TryTranslateAttributeArgument(
                 attribute,
-                typedConstant.GetValueSafe(),
+                RoslynExtensions.GetValueSafe( typedConstant ),
                 typedConstant.Type,
                 targetType,
                 diagnosticAdder,
