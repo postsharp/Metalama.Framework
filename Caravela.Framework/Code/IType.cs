@@ -20,6 +20,10 @@ namespace Caravela.Framework.Code
         /// </summary>
         TypeKind TypeKind { get; }
 
+        /// <summary>
+        /// Gets the <see cref="Code.SpecialType"/> enumeration value for the current type. Provides a fast to determine whether
+        /// the current type is of a well-known type. 
+        /// </summary>
         SpecialType SpecialType { get; }
 
         /// <summary>

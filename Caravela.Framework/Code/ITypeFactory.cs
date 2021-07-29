@@ -52,6 +52,9 @@ namespace Caravela.Framework.Code
         T MakeNullable<T>( T type )
             where T : IType;
 
+        /// <summary>
+        /// Gets a <see cref="INamedType"/> representing a given <see cref="SpecialType"/>/
+        /// </summary>
         INamedType GetSpecialType( SpecialType specialType );
 
         /// <summary>
@@ -61,6 +64,12 @@ namespace Caravela.Framework.Code
         /// <returns></returns>
         dynamic? DefaultValue( IType type );
 
+        /// <summary>
+        /// Get a run-time value cast to a given type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         dynamic? Cast( IType type, object? value );
     }
 }

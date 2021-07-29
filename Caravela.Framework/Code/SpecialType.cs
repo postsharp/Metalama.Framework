@@ -28,21 +28,46 @@ namespace Caravela.Framework.Code
         /// </summary>
         Object,
 
+        /// <summary>
+        /// <c>System.Collections.IEnumerable</c>.
+        /// </summary>
         IEnumerable,
 
+        /// <summary>
+        /// <c>System.Collections.IEnumerator</c>.
+        /// </summary>
         IEnumerator,
 
+        /// <summary>
+        /// <c>System.Collections.Generic.IEnumerable</c>.
+        /// </summary>
         IEnumerable_T,
 
+        /// <summary>
+        /// <c>System.Collections.Generic.IEnumerator</c>.
+        /// </summary>
         IEnumerator_T,
 
+        /// <summary>
+        /// <c>System.Collections.Generic.List</c>.
+        /// </summary>
         List,
 
+        /// <summary>
+        /// <c>System.Collections.Generic.IAsyncEnumerable</c>.
+        /// </summary>
         IAsyncEnumerable,
 
+        /// <summary>
+        /// <c>System.Collections.Generic.IAsyncEnumerator</c>.
+        /// </summary>
         IAsyncEnumerator,
 
         // Must be last.
+        
+        /// <summary>
+        /// Number of items in this enumeration.
+        /// </summary>
         Count
     }
 }
