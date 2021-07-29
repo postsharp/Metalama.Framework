@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
-using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using System;
 using System.Reflection;
 

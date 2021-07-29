@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Sdk;
+using Caravela.Framework.Impl.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;

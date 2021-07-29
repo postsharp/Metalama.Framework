@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
-using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
+using Caravela.Framework.Impl.CodeModel;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {

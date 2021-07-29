@@ -4,7 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Code.Invokers;
-using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.RunTime;
 using System;
 

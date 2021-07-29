@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Sdk;
+using Caravela.Framework.Impl.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.DesignTime.Pipeline

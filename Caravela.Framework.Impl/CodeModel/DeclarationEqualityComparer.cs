@@ -2,9 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Sdk;
+using Caravela.Framework.Impl.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using System;
 

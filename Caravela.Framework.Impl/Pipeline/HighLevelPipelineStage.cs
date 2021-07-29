@@ -6,7 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Observers;
-using Caravela.Framework.Sdk;
+using Caravela.Framework.Impl.Sdk;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;

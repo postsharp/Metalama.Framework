@@ -5,6 +5,7 @@
     <PackageDescription>
       PostSharp project "Caravela" SDK. A tool for custom source code modifying extensions using the Roslyn API. More powerful than source generators.
     </PackageDescription>
+    <RootNamespace>Caravela.Framework.Impl</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Code" />
+    <Folder Include="Impl" />
   </ItemGroup>
 
 </Project>

@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
 using System;
 using System.Collections;
 using System.Collections.Generic;

@@ -5,7 +5,7 @@ using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Caravela.Framework.Sdk
+namespace Caravela.Framework.Impl.Impl.CodeModel
 {
     /// <summary>
     /// Extends the user-level <see cref="IDeclaration"/> interface with a <see cref="Symbol"/> property exposing the Roslyn <see cref="ISymbol"/>. 

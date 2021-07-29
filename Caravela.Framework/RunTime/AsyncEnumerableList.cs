@@ -8,12 +8,25 @@ using System.Threading.Tasks;
 
 namespace Caravela.Framework.RunTime
 {
+    /// <summary>
+    /// A <see cref="List{T}"/> that implements <see cref="IAsyncEnumerable{T}"/>. This class is used when a non-iterator template is applied
+    /// to an async iterator method.
+    /// </summary>
+    /// <typeparam name="T">Type of items.</typeparam>
     public sealed class AsyncEnumerableList<T> : List<T>, IAsyncEnumerable<T>
     {
         IAsyncEnumerator<T> IAsyncEnumerable<T>.GetAsyncEnumerator( CancellationToken cancellationToken ) => this.GetAsyncEnumerator( cancellationToken );
 
+        /// <summary>
+        /// Gets an enumerator for the current list.
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public AsyncEnumerator GetAsyncEnumerator( CancellationToken cancellationToken = default ) => new( this.GetEnumerator(), cancellationToken );
 
+        /// <summary>
+        /// Implementation of <see cref="IAsyncEnumerator{T}"/>.
+        /// </summary>
         public struct AsyncEnumerator : IAsyncEnumerator<T>
         {
             private readonly CancellationToken _cancellationToken;

@@ -15,10 +15,28 @@ using System.Threading.Tasks;
 
 namespace Caravela.Framework.RunTime
 {
+    /// <summary>
+    /// Defines helper methods used by code transformed by aspects.
+    /// </summary>
     public static class RunTimeAspectHelper
     {
+        /// <summary>
+        /// Evaluates an <see cref="IEnumerable{T}"/> and stores the result into a <see cref="List{T}"/>. If the enumerable is already
+        /// a list, returns the input list. The intended side effect of this method is to completely evaluate the input enumerable.
+        /// </summary>
+        /// <param name="enumerable">An enumerable.</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>A <see cref="List{T}"/> made from the items of <paramref name="enumerable"/>, or the <paramref name="enumerable"/> object itself
+        /// it is already a <see cref="List{T}"/>.</returns>
         public static List<T> Buffer<T>( this IEnumerable<T> enumerable ) => enumerable as List<T> ?? new List<T>( enumerable );
 
+        /// <summary>
+        /// Evaluates an <see cref="IEnumerable"/> and stores the result into a <c>List&lt;object&gt;</c>. If the enumerable is already
+        /// a list, returns the input list.  The intended side effect of this method is to completely evaluate the input enumerable.
+        /// </summary>
+        /// <param name="enumerable">An enumerable.</param>
+        /// <returns>A <c>List&lt;object&gt;</c> made from the items of <paramref name="enumerable"/>, or the <paramref name="enumerable"/> object itself
+        /// it is already a <c>List&lt;object&gt;</c>.</returns>
         public static List<object> Buffer( this IEnumerable enumerable )
         {
             if ( enumerable is List<object> list )
@@ -38,6 +56,15 @@ namespace Caravela.Framework.RunTime
             }
         }
 
+        /// <summary>
+        /// Evaluates an <see cref="IEnumerator{T}"/>, stores the result into a <see cref="List{T}"/> and returns an enumerator for this list.
+        /// If the enumerator is already a list enumerator, returns the input  enumerator.
+        ///  The intended side effect of this method is to completely evaluate the input enumerator.
+        /// </summary>
+        /// <param name="enumerator">An enumerator.</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>An enumerator on a <see cref="List{T}"/> made from the items of <paramref name="enumerator"/>, or the <paramref name="enumerator"/> object itself
+        /// it is already a <see cref="List{T}"/> enumerator.</returns>
         public static List<T>.Enumerator Buffer<T>( this IEnumerator<T> enumerator )
         {
             if ( enumerator is List<T>.Enumerator listEnumerator )
@@ -64,6 +91,14 @@ namespace Caravela.Framework.RunTime
             }
         }
 
+        /// <summary>
+        /// Evaluates an <see cref="IEnumerator"/>, stores the result into a <c>List&lt;object&gt;</c> and returns an enumerator for this list.
+        /// If the enumerator is already a list enumerator, returns the input  enumerator.
+        ///  The intended side effect of this method is to completely evaluate the input enumerator.
+        /// </summary>
+        /// <param name="enumerator">An enumerator.</param>
+        /// <returns>An enumerator on a <c>List&lt;object&gt;</c> made from the items of <paramref name="enumerator"/>, or the <paramref name="enumerator"/> object itself
+        /// it is already a <c>List&lt;object&gt;</c> enumerator.</returns>
         public static List<object>.Enumerator Buffer( this IEnumerator enumerator )
         {
             if ( enumerator is List<object>.Enumerator listEnumerator )
@@ -91,10 +126,18 @@ namespace Caravela.Framework.RunTime
         }
 
 #if NET5_0
+        /// <summary>
+        /// Evaluates an <see cref="IAsyncEnumerable{T}"/> and stores the result into an <see cref="AsyncEnumerableList{T}"/>. If the enumerable is already
+        /// an <see cref="AsyncEnumerableList{T}"/>, returns the input list.
+        ///  The intended side effect of this method is to completely evaluate the input enumerable.
+        /// </summary>
+        /// <param name="enumerable">An enumerable.</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>A <see cref="AsyncEnumerableList{T}"/> made from the items of <paramref name="enumerable"/>, or the <paramref name="enumerable"/> object itself
+        /// it is already an <see cref="AsyncEnumerableList{T}"/>.</returns>
         public static async ValueTask<AsyncEnumerableList<T>> BufferAsync<T>(
             this IAsyncEnumerable<T> enumerable,
-            CancellationToken cancellationToken =
-                default )
+            CancellationToken cancellationToken = default )
         {
             if ( enumerable is AsyncEnumerableList<T> asyncEnumerableList )
             {
@@ -113,6 +156,15 @@ namespace Caravela.Framework.RunTime
             }
         }
 
+        /// <summary>
+        /// Evaluates an <see cref="IAsyncEnumerator{T}"/>, stores the result into an <see cref="AsyncEnumerableList{T}"/> and returns an enumerator for this object.
+        /// If the enumerable is already an enumerator of a <see cref="AsyncEnumerableList{T}"/>, returns the input enumerator.
+        ///  The intended side effect of this method is to completely evaluate the input enumerator.
+        /// </summary>
+        /// <param name="enumerator">An enumerator.</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>An enumerator on a <see cref="AsyncEnumerableList{T}"/> made from the items of <paramref name="enumerator"/>, or the <paramref name="enumerator"/> object itself
+        /// it is already an <see cref="AsyncEnumerableList{T}"/> enumerator.</returns>
         public static async ValueTask<AsyncEnumerableList<T>.AsyncEnumerator> BufferAsync<T>(
             this IAsyncEnumerator<T> enumerator,
             CancellationToken cancellationToken

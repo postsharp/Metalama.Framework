@@ -3,11 +3,11 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Sdk;
+using Caravela.Framework.Impl.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.CodeModel.InternalInterfaces
+namespace Caravela.Framework.Impl.CodeModel
 {
     internal interface IDeclarationInternal : ISdkDeclaration
     {

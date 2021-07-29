@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Aspects;
 
-namespace Caravela.Framework.Sdk
+namespace Caravela.Framework.Impl.Sdk
 {
     /// <summary>
     /// Aspect weavers are responsible for applying low-level aspects to the Roslyn transformation. They

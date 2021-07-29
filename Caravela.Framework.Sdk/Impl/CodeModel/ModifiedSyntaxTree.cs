@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Caravela.Framework.Sdk
+namespace Caravela.Framework.Impl.Impl.CodeModel
 {
     /// <summary>
     /// Maps an old <see cref="SyntaxTree"/> to a new <see cref="SyntaxTree"/> in an <see cref="IPartialCompilation"/>.

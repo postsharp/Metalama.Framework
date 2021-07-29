@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Sdk
+namespace Caravela.Framework.Impl.Sdk
 {
     /// <summary>
     /// Custom attribute that, when applied to a type implementing <see cref="IAspectWeaver"/>, exports this type

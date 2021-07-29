@@ -3,8 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
-using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
-using Caravela.Framework.Sdk;
+using Caravela.Framework.Impl.Impl.CodeModel;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Reflection;

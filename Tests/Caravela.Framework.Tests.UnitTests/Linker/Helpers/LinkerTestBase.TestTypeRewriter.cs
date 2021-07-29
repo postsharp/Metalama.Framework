@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.CodeModel.InternalInterfaces;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using FakeItEasy;

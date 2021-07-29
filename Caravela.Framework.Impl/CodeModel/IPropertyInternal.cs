@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 
-namespace Caravela.Framework.Impl.CodeModel.InternalInterfaces
+namespace Caravela.Framework.Impl.CodeModel
 {
-    internal interface IEventInternal : IEvent, IDeclarationInternal { }
+    internal interface IPropertyInternal : IProperty, IDeclarationInternal { }
 }
