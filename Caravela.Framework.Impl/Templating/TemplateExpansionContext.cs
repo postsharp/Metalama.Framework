@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Templating
                 returnType = asyncInfo.ResultType;
             }
 
-            if ( returnType.Is( SpecialType.Void ) )
+            if ( TypeExtensions.Equals( returnType, SpecialType.Void ) )
             {
                 return CreateReturnStatementVoid( returnExpression );
             }
@@ -289,9 +289,9 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
             }
-            else if ( returnExpression.ExpressionType.Is( SpecialType.Void ) )
+            else if ( TypeExtensions.Equals( returnExpression.ExpressionType, SpecialType.Void ) )
             {
-                if ( this.MetaApi.Method.ReturnType.Is( SpecialType.Void ) )
+                if ( TypeExtensions.Equals( this.MetaApi.Method.ReturnType, SpecialType.Void ) )
                 {
                     return
                         Block(

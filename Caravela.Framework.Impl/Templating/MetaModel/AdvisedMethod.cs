@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             {
                 return this.Invokers.Base.Invoke( this.IsStatic ? null : this.This, args );
             }
-            else if ( this.ReturnType.Is( SpecialType.Void ) )
+            else if ( TypeExtensions.Equals( this.ReturnType, SpecialType.Void ) )
             {
                 return null;
             }

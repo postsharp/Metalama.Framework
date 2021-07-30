@@ -7,13 +7,25 @@ using System.Linq;
 
 namespace Caravela.Framework.Code.Collections
 {
+    /// <summary>
+    /// Extension methods for the <see cref="IParameterList"/> class.
+    /// </summary>
     public static class ParameterListExtensions
     {
+        /// <summary>
+        /// Selects the parameters of a given type.
+        /// </summary>
         public static IEnumerable<IParameter> OfParameterType<T>( this IParameterList parameters ) => parameters.OfParameterType( typeof(T) );
 
+        /// <summary>
+        /// Selects the parameters of a given type.
+        /// </summary>
         public static IEnumerable<IParameter> OfParameterType( this IParameterList parameters, Type type )
             => parameters.Where( p => p.ParameterType.Is( type ) );
 
+        /// <summary>
+        /// Selects the parameters of a given type.
+        /// </summary>
         public static IEnumerable<IParameter> OfParameterType( this IParameterList parameters, IType type )
             => parameters.Where( p => p.ParameterType.Is( type ) );
     }

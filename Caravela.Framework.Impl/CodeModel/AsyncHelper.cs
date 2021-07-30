@@ -105,7 +105,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 : returnTypeSyntax ?? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( method.ReturnType );
 
         public static TypeSyntax GetIntermediateMethodReturnType( IMethod method )
-            => method.IsAsync && method.ReturnType.Is( SpecialType.Void )
+            => method.IsAsync && TypeExtensions.Equals( method.ReturnType, SpecialType.Void )
                 ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(
                     ReflectionMapper.GetInstance( method.GetCompilationModel().RoslynCompilation ).GetTypeSymbol( typeof(ValueTask) ) )
                 : SyntaxHelpers.CreateSyntaxForReturnType( method );

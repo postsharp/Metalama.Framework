@@ -5,6 +5,10 @@ using System;
 
 namespace Caravela.Framework.Aspects
 {
-    [AttributeUsage( AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event )]
-    internal class AbstractAttribute : Attribute { }
+    /// <summary>
+    /// Custom attribute to be used besides <see cref="TemplateAttribute"/>, which means that the target method has no implementation and should be ignored.
+    /// </summary>
+    [AttributeUsage( AttributeTargets.Method )]
+    [CompileTimeOnly]
+    internal sealed class AbstractAttribute : Attribute { }
 }

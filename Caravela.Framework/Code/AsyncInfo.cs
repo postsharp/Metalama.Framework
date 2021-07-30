@@ -3,14 +3,29 @@
 
 namespace Caravela.Framework.Code
 {
+    /// <summary>
+    /// Information about an async method, returned by the <see cref="MethodExtensions.GetAsyncInfo"/> extension method of <see cref="IMethod"/>.
+    /// </summary>
     public readonly struct AsyncInfo
     {
+        /// <summary>
+        /// Gets a value indicating whether the method has an async implementation, i.e. has the <c>async</c> modifier.
+        /// </summary>
         public bool IsAsync { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the return type of the method is awaitable, i.e. whether it can be used with the <c>await</c> keyword.
+        /// </summary>
         public bool IsAwaitable { get; }
 
-        public bool IsAwaitableOrVoid => this.IsAwaitable || this.ResultType.Is( SpecialType.Void );
+        /// <summary>
+        /// Gets a value indicating whether the return type of the method is either awaitable (see <see cref="IsAwaitable"/>) either <c>void</c>.
+        /// </summary>
+        public bool IsAwaitableOrVoid => this.IsAwaitable || TypeExtensions.Equals( this.ResultType, SpecialType.Void );
 
+        /// <summary>
+        /// Gets the type of the result of the async method, i.e. the type of the <c>await</c> expression.
+        /// </summary>
         public IType ResultType { get; }
 
         internal AsyncInfo( bool isAsync, bool isAwaitable, IType resultType )

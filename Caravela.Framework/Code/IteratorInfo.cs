@@ -6,7 +6,7 @@ using System;
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Information about iterator method, returned by the <see cref="MethodExtensions.GetIteratorInfo"/> extension method of <see cref="IMethod"/>.
+    /// Information about an iterator method, returned by the <see cref="MethodExtensions.GetIteratorInfo"/> extension method of <see cref="IMethod"/>.
     /// </summary>
     public readonly struct IteratorInfo
     {
