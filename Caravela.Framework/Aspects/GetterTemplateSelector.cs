@@ -5,13 +5,17 @@ namespace Caravela.Framework.Aspects
 {
     public readonly struct GetterTemplateSelector
     {
-        public string DefaultTemplate { get; }
+        public string? DefaultTemplate { get; }
 
         public string? EnumerableTemplate { get; }
 
         public string? EnumeratorTemplate { get; }
 
-        public GetterTemplateSelector( string defaultTemplate, string? enumerableTemplate = null, string? enumeratorTemplate = null )
+        public bool HasOnlyDefaultTemplate => this.EnumeratorTemplate == null && this.EnumeratorTemplate == null;
+
+        public bool IsNull => this.DefaultTemplate == null && this.EnumeratorTemplate == null && this.EnumerableTemplate == null;
+
+        public GetterTemplateSelector( string? defaultTemplate, string? enumerableTemplate = null, string? enumeratorTemplate = null )
         {
             this.DefaultTemplate = defaultTemplate;
             this.EnumerableTemplate = enumerableTemplate;

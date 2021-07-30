@@ -21,35 +21,32 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
 
-        public IEvent? TemplateEvent { get; }
+        public Template<IEvent> EventTemplate { get; }
 
-        public IMethod? AddTemplateMethod { get; }
+        public Template<IMethod> AddTemplate { get; }
 
-        public IMethod? RemoveTemplateMethod { get; }
+        public Template<IMethod> RemoveTemplate { get; }
 
         public OverriddenEvent(
             Advice advice,
             IEvent overriddenDeclaration,
-            IEvent? templateEvent,
-            IMethod? addTemplateMethod,
-            IMethod? removeTemplateMethod )
+            Template<IEvent> eventTemplate,
+            Template<IMethod> addTemplate,
+            Template<IMethod> removeTemplate )
             : base( advice, overriddenDeclaration )
         {
-            Invariant.Assert( advice != null );
-            Invariant.Assert( overriddenDeclaration != null );
-
             // We need event template xor both accessor templates.
-            Invariant.Assert( templateEvent != null || (addTemplateMethod != null && removeTemplateMethod != null) );
-            Invariant.Assert( !(templateEvent != null && (addTemplateMethod != null || removeTemplateMethod != null)) );
+            Invariant.Assert( eventTemplate.IsNotNull || (addTemplate.IsNotNull && removeTemplate.IsNotNull) );
+            Invariant.Assert( !(eventTemplate.IsNotNull && (addTemplate.IsNotNull || removeTemplate.IsNotNull)) );
 
-            this.TemplateEvent = templateEvent;
-            this.AddTemplateMethod = addTemplateMethod;
-            this.RemoveTemplateMethod = removeTemplateMethod;
+            this.EventTemplate = eventTemplate;
+            this.AddTemplate = addTemplate;
+            this.RemoveTemplate = removeTemplate;
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            if ( this.TemplateEvent?.IsEventField() == true )
+            if ( this.EventTemplate.Declaration?.IsEventField() == true )
             {
                 throw new AssertionFailedException();
             }
@@ -61,8 +58,8 @@ namespace Caravela.Framework.Impl.Transformations
                     this.Advice.AspectLayerId,
                     this.OverriddenDeclaration );
 
-                var addTemplateMethod = this.TemplateEvent != null ? this.TemplateEvent.Adder : this.AddTemplateMethod;
-                var removeTemplateMethod = this.TemplateEvent != null ? this.TemplateEvent.Remover : this.RemoveTemplateMethod;
+                var addTemplateMethod = this.EventTemplate.Declaration != null ? this.EventTemplate.Declaration.Adder : this.AddTemplate.Declaration;
+                var removeTemplateMethod = this.EventTemplate.Declaration != null ? this.EventTemplate.Declaration.Remover : this.RemoveTemplate.Declaration;
 
                 var templateExpansionError = false;
                 BlockSyntax? addAccessorBody = null;

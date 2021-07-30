@@ -12,7 +12,8 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal abstract class IntroduceMemberAdvice<TBuilder> : Advice
+    internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice
+        where TMember : IMemberOrNamedType
         where TBuilder : MemberOrNamedTypeBuilder
     {
         public IntroductionScope Scope { get; }
@@ -23,18 +24,20 @@ namespace Caravela.Framework.Impl.Advices
 
         protected TBuilder MemberBuilder { get; init; }
 
-        protected IMemberOrNamedType? TemplateMember { get; }
+        protected Template<TMember> Template { get; }
+
+        protected TMember? TemplateMember => this.Template.Declaration;
 
         public IntroduceMemberAdvice(
             AspectInstance aspect,
             INamedType targetDeclaration,
-            IMemberOrNamedType? templateMember,
+            Template<TMember> template,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
             Dictionary<string, object?>? tags ) : base( aspect, targetDeclaration, layerName, tags )
         {
-            this.TemplateMember = templateMember;
+            this.Template = template;
             this.Scope = scope;
             this.OverrideStrategy = overrideStrategy;
 

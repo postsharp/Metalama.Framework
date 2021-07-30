@@ -21,30 +21,27 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
 
-        public IProperty? TemplateProperty { get; }
+        public Template<IProperty> PropertyTemplate { get; }
 
-        public IMethod? GetTemplateMethod { get; }
+        public Template<IMethod> GetTemplate { get; }
 
-        public IMethod? SetTemplateMethod { get; }
+        public Template<IMethod> SetTemplate { get; }
 
         public OverriddenProperty(
             Advice advice,
             IProperty overriddenDeclaration,
-            IProperty? templateProperty,
-            IMethod? getTemplateMethod,
-            IMethod? setTemplateMethod )
+            Template<IProperty> propertyTemplate,
+            Template<IMethod> getTemplate,
+            Template<IMethod> setTemplate )
             : base( advice, overriddenDeclaration )
         {
-            Invariant.Assert( advice != null );
-            Invariant.Assert( overriddenDeclaration != null );
-
             // We need either property template or (one or more) accessor templates, but never both.
-            Invariant.Assert( templateProperty != null || getTemplateMethod != null || setTemplateMethod != null );
-            Invariant.Assert( !(templateProperty != null && (getTemplateMethod != null || setTemplateMethod != null)) );
+            Invariant.Assert( propertyTemplate.IsNotNull || getTemplate.IsNotNull || setTemplate.IsNotNull );
+            Invariant.Assert( !(propertyTemplate.IsNotNull && (getTemplate.IsNotNull || setTemplate.IsNotNull)) );
 
-            this.TemplateProperty = templateProperty;
-            this.GetTemplateMethod = getTemplateMethod;
-            this.SetTemplateMethod = setTemplateMethod;
+            this.PropertyTemplate = propertyTemplate;
+            this.GetTemplate = getTemplate;
+            this.SetTemplate = setTemplate;
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
@@ -57,14 +54,14 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration );
 
                 var getTemplateMethod =
-                    this.TemplateProperty != null && !this.TemplateProperty.IsAutoPropertyOrField
-                        ? this.TemplateProperty.Getter
-                        : this.GetTemplateMethod;
+                    this.PropertyTemplate.Declaration is { IsAutoPropertyOrField: false }
+                        ? this.PropertyTemplate.Declaration.Getter
+                        : this.GetTemplate.Declaration;
 
                 var setTemplateMethod =
-                    this.TemplateProperty != null && !this.TemplateProperty.IsAutoPropertyOrField
-                        ? this.TemplateProperty.Setter
-                        : this.SetTemplateMethod;
+                    this.PropertyTemplate.Declaration is { IsAutoPropertyOrField: false }
+                        ? this.PropertyTemplate.Declaration.Setter
+                        : this.SetTemplate.Declaration;
 
                 var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly
                     ? SyntaxKind.InitAccessorDeclaration

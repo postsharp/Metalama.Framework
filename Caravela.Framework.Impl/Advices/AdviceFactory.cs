@@ -19,8 +19,8 @@ namespace Caravela.Framework.Impl.Advices
         private const string? _layerName = null;
 
         private readonly CompilationModel _compilation;
-        private readonly INamedType _aspectType;
         private readonly AspectInstance _aspect;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IDiagnosticAdder _diagnosticAdder;
         private readonly IReadOnlyList<Advice> _declarativeAdvices;
         private readonly List<Advice> _advices = new();
@@ -33,91 +33,122 @@ namespace Caravela.Framework.Impl.Advices
             CompilationModel compilation,
             IDiagnosticAdder diagnosticAdder,
             IReadOnlyList<Advice> declarativeAdvices,
-            INamedType aspectType,
-            AspectInstance aspect )
+            AspectInstance aspect,
+            IServiceProvider serviceProvider )
         {
-            this._aspectType = aspectType;
             this._aspect = aspect;
+            this._serviceProvider = serviceProvider;
             this._compilation = compilation;
             this._diagnosticAdder = diagnosticAdder;
             this._declarativeAdvices = declarativeAdvices;
             this._implementInterfaceAdvices = new Dictionary<INamedType, ImplementInterfaceAdvice>( compilation.InvariantComparer );
         }
 
-        private string? ValidateTemplateName( string? templateName, bool required = false )
+        private TemplateRef ValidateTemplateName( string? templateName, TemplateKind templateKind, bool required = false )
         {
             if ( templateName == null )
             {
                 if ( required )
                 {
-                    throw new ArgumentOutOfRangeException( nameof(templateName), "A required template name was not provided." );
+                    throw new ArgumentOutOfRangeException(
+                        nameof(templateName),
+                        $"A required template name was not provided for the template kind {templateKind}." );
                 }
                 else
                 {
-                    return null;
+                    return default;
                 }
             }
-            else if ( this._aspect.AspectClass.ImplementedTemplates.ContainsKey( templateName ) )
+            else if ( this._aspect.AspectClass.ImplementedTemplates.TryGetValue( templateName, out var implementationClass ) )
             {
-                return templateName;
+                return new TemplateRef( templateName, implementationClass, templateKind );
             }
             else if ( this._aspect.AspectClass.AbstractTemplates.ContainsKey( templateName ) )
             {
                 if ( !required )
                 {
-                    return null;
+                    return default;
                 }
             }
 
             throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (this._aspect.AspectClass.DisplayName, templateName!) );
         }
 
-        private MethodTemplateSelector ValidateTemplateNames( in MethodTemplateSelector templates )
-            => new(
-                this.ValidateTemplateName( templates.DefaultTemplate, true )!,
-                this.ValidateTemplateName( templates.AsyncTemplate ),
-                this.ValidateTemplateName( templates.EnumerableTemplate ),
-                this.ValidateTemplateName( templates.EnumeratorTemplate ),
-                this.ValidateTemplateName( templates.AsyncEnumerableTemplate ),
-                this.ValidateTemplateName( templates.AsyncEnumeratorTemplate ),
-                templates.UseAsyncTemplateForAnyAwaitable,
-                templates.UseAsyncTemplateForAnyEnumerable );
-
-        private static ( string TemplateName, TemplateKind TemplateKind) SelectTemplate( IMethod targetMethod, in MethodTemplateSelector templates )
+        private TemplateRef SelectTemplate( IMethod targetMethod, in MethodTemplateSelector templates )
         {
-            (string TemplateName, TemplateKind TemplateKind) selectedTemplate = (templates.DefaultTemplate, TemplateKind.Default);
+            var defaultTemplate = this.ValidateTemplateName( templates.DefaultTemplate, TemplateKind.Default, true )!;
+            var asyncTemplate = this.ValidateTemplateName( templates.AsyncTemplate, TemplateKind.Async );
+            var enumerableTemplate = this.ValidateTemplateName( templates.EnumerableTemplate, TemplateKind.IEnumerable );
+            var enumeratorTemplate = this.ValidateTemplateName( templates.EnumeratorTemplate, TemplateKind.IEnumerator );
+            var asyncEnumerableTemplate = this.ValidateTemplateName( templates.AsyncEnumerableTemplate, TemplateKind.IAsyncEnumerable );
+            var asyncEnumeratorTemplate = this.ValidateTemplateName( templates.AsyncEnumeratorTemplate, TemplateKind.IAsyncEnumerator );
+
+            var selectedTemplate = defaultTemplate;
 
             if ( !templates.HasOnlyDefaultTemplate )
             {
                 var asyncInfo = targetMethod.GetAsyncInfoImpl();
                 var iteratorInfo = targetMethod.GetIteratorInfoImpl();
 
-                if ( templates.AsyncTemplate != null &&
+                if ( !asyncTemplate.IsNull &&
                      (asyncInfo.IsAsync || (templates.UseAsyncTemplateForAnyAwaitable && asyncInfo.IsAwaitable)) )
                 {
-                    selectedTemplate = (templates.AsyncTemplate, TemplateKind.Async);
+                    selectedTemplate = asyncTemplate;
 
                     // We don't return because the result can still be overwritten by async iterators.
                 }
 
-                if ( templates.EnumerableTemplate != null && iteratorInfo.IsIterator )
+                if ( !enumerableTemplate.IsNull && iteratorInfo.IsIterator )
                 {
-                    selectedTemplate = (templates.EnumerableTemplate, TemplateKind.IEnumerable);
+                    selectedTemplate = enumerableTemplate;
                 }
 
-                if ( templates.EnumeratorTemplate != null && iteratorInfo.IteratorKind is IteratorKind.IEnumerator or IteratorKind.UntypedIEnumerator )
+                if ( !enumeratorTemplate.IsNull && iteratorInfo.IteratorKind is IteratorKind.IEnumerator or IteratorKind.UntypedIEnumerator )
                 {
-                    return (templates.EnumeratorTemplate, TemplateKind.IEnumerator);
+                    return enumeratorTemplate;
                 }
 
-                if ( templates.AsyncEnumerableTemplate != null && iteratorInfo.IsIterator && iteratorInfo.IsAsync )
+                if ( !asyncEnumerableTemplate.IsNull && iteratorInfo.IsIterator && iteratorInfo.IsAsync )
                 {
-                    selectedTemplate = (templates.AsyncEnumerableTemplate, TemplateKind.IAsyncEnumerable);
+                    return asyncEnumerableTemplate;
                 }
 
-                if ( templates.AsyncEnumeratorTemplate != null && iteratorInfo.IteratorKind == IteratorKind.IAsyncEnumerator )
+                if ( !asyncEnumeratorTemplate.IsNull && iteratorInfo.IteratorKind == IteratorKind.IAsyncEnumerator )
                 {
-                    return (templates.AsyncEnumeratorTemplate, TemplateKind.IAsyncEnumerator);
+                    return asyncEnumeratorTemplate;
+                }
+            }
+
+            return selectedTemplate;
+        }
+
+        private TemplateRef SelectTemplate( IFieldOrProperty targetFieldOrProperty, in GetterTemplateSelector templates, bool required )
+        {
+            var getter = targetFieldOrProperty.Getter;
+
+            if ( getter == null )
+            {
+                return default;
+            }
+
+            var defaultTemplate = this.ValidateTemplateName( templates.DefaultTemplate, TemplateKind.Default, required )!;
+            var enumerableTemplate = this.ValidateTemplateName( templates.EnumerableTemplate, TemplateKind.IEnumerable );
+            var enumeratorTemplate = this.ValidateTemplateName( templates.EnumeratorTemplate, TemplateKind.IEnumerator );
+
+            var selectedTemplate = defaultTemplate;
+
+            if ( !templates.HasOnlyDefaultTemplate )
+            {
+                var iteratorInfo = getter.GetIteratorInfoImpl();
+
+                if ( !enumerableTemplate.IsNull && iteratorInfo.IsIterator )
+                {
+                    selectedTemplate = enumerableTemplate;
+                }
+
+                if ( !enumeratorTemplate.IsNull && iteratorInfo.IteratorKind is IteratorKind.IEnumerator or IteratorKind.UntypedIEnumerator )
+                {
+                    return enumeratorTemplate;
                 }
             }
 
@@ -128,8 +159,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             var diagnosticList = new DiagnosticList();
 
-            var selectedTemplate = SelectTemplate( targetMethod, this.ValidateTemplateNames( templates ) );
-            var templateMethod = this._aspectType.GetTemplateMethod( this._compilation, selectedTemplate.TemplateName, nameof(this.OverrideMethod) );
+            var templateMethod = this.SelectTemplate( targetMethod, templates ).GetTemplate<IMethod>( this._compilation, this._serviceProvider )!;
 
             var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, _layerName, tags );
             advice.Initialize( this._declarativeAdvices, diagnosticList );
@@ -147,12 +177,14 @@ namespace Caravela.Framework.Impl.Advices
             Dictionary<string, object?>? tags = null )
         {
             var diagnosticList = new DiagnosticList();
-            var templateMethod = this._aspectType.GetTemplateMethod( this._compilation, defaultTemplate, nameof(this.IntroduceMethod) );
+
+            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Introduction, true )
+                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
             var advice = new IntroduceMethodAdvice(
                 this._aspect,
                 targetType,
-                templateMethod,
+                template,
                 scope,
                 whenExists,
                 _layerName,
@@ -174,14 +206,16 @@ namespace Caravela.Framework.Impl.Advices
         {
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
-            var templateProperty = this._aspectType.GetTemplateProperty( this._compilation, defaultTemplate, nameof(this.OverrideFieldOrProperty) );
+
+            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Introduction, true )
+                .GetTemplate<IProperty>( this._compilation, this._serviceProvider )!;
 
             var advice = new OverrideFieldOrPropertyAdvice(
                 this._aspect,
                 targetDeclaration,
-                templateProperty,
-                null,
-                null,
+                template,
+                default,
+                default,
                 _layerName,
                 tags );
 
@@ -194,26 +228,31 @@ namespace Caravela.Framework.Impl.Advices
 
         public void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
-            in GetterTemplateSelector? getTemplate,
+            in GetterTemplateSelector getTemplate,
             string? setTemplate,
             Dictionary<string, object?>? tags = null )
         {
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
 
-            var getTemplateMethod = this._aspectType.GetTemplateMethod(
-                this._compilation,
-                getTemplate?.DefaultTemplate,
-                nameof(this.OverrideFieldOrPropertyAccessors) );
+            var getTemplateRef = this.SelectTemplate( targetDeclaration, getTemplate, setTemplate == null )
+                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
-            var setTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, setTemplate, nameof(this.OverrideFieldOrPropertyAccessors) );
+            var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplate.IsNull )
+                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
+
+            if ( getTemplateRef.IsNull && setTemplateRef.IsNull )
+            {
+                // There is no applicable template because the property has no getter or no setter matching the selection.
+                return;
+            }
 
             var advice = new OverrideFieldOrPropertyAdvice(
                 this._aspect,
                 targetDeclaration,
-                null,
-                getTemplateMethod,
-                setTemplateMethod,
+                default,
+                getTemplateRef,
+                setTemplateRef,
                 _layerName,
                 tags );
 
@@ -236,7 +275,7 @@ namespace Caravela.Framework.Impl.Advices
                 this._aspect,
                 targetType,
                 name,
-                null,
+                default,
                 scope,
                 whenExists,
                 _layerName );
@@ -259,15 +298,16 @@ namespace Caravela.Framework.Impl.Advices
         {
             var diagnosticList = new DiagnosticList();
 
-            var templateProperty = this._aspectType.GetTemplateProperty( this._compilation, defaultTemplate, nameof(this.IntroduceProperty) );
+            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Introduction, true )
+                .GetTemplate<IProperty>( this._compilation, this._serviceProvider );
 
             var advice = new IntroducePropertyAdvice(
                 this._aspect,
                 targetType,
                 null,
-                templateProperty,
-                null,
-                null,
+                template,
+                default,
+                default,
                 scope,
                 whenExists,
                 _layerName,
@@ -285,23 +325,27 @@ namespace Caravela.Framework.Impl.Advices
         public IPropertyBuilder IntroduceProperty(
             INamedType targetType,
             string name,
-            string? defaultGetTemplate,
+            string? getTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Dictionary<string, object?>? tags = null )
         {
             var diagnosticList = new DiagnosticList();
-            var getTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, defaultGetTemplate, nameof(this.OverrideFieldOrPropertyAccessors) );
-            var setTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, setTemplate, nameof(this.OverrideFieldOrPropertyAccessors) );
+
+            var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Introduction, true )
+                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
+
+            var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Introduction, true )
+                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
             var advice = new IntroducePropertyAdvice(
                 this._aspect,
                 targetType,
                 name,
-                null,
-                getTemplateMethod,
-                setTemplateMethod,
+                default,
+                getTemplateRef,
+                setTemplateRef,
                 scope,
                 whenExists,
                 _layerName,
@@ -329,15 +373,24 @@ namespace Caravela.Framework.Impl.Advices
             }
 
             var diagnosticList = new DiagnosticList();
-            var addTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, addTemplate, nameof(this.OverrideEventAccessors) );
-            var removeTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, removeTemplate, nameof(this.OverrideEventAccessors) );
+
+            var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateKind.Default, true )
+                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
+
+            var removeTemplateRef = this.ValidateTemplateName( removeTemplate, TemplateKind.Default, true )
+                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
+
+            if ( invokeTemplate != null )
+            {
+                throw new NotImplementedException( "Support for overriding event raisers is not yet implemented." );
+            }
 
             var advice = new OverrideEventAdvice(
                 this._aspect,
                 targetDeclaration,
-                null,
-                addTemplateMethod,
-                removeTemplateMethod,
+                default,
+                addTemplateRef,
+                removeTemplateRef,
                 _layerName,
                 tags );
 
@@ -356,15 +409,17 @@ namespace Caravela.Framework.Impl.Advices
             Dictionary<string, object?>? tags = null )
         {
             var diagnosticList = new DiagnosticList();
-            var templateEvent = this._aspectType.GetTemplateEvent( this._compilation, eventTemplate, nameof(this.IntroduceProperty) );
+
+            var template = this.ValidateTemplateName( eventTemplate, TemplateKind.Introduction, true )
+                .GetTemplate<IEvent>( this._compilation, this._serviceProvider );
 
             var advice = new IntroduceEventAdvice(
                 this._aspect,
                 targetType,
                 null,
-                templateEvent,
-                null,
-                null,
+                template,
+                default,
+                default,
                 scope,
                 whenExists,
                 _layerName,
@@ -390,16 +445,20 @@ namespace Caravela.Framework.Impl.Advices
             Dictionary<string, object?>? tags = null )
         {
             var diagnosticList = new DiagnosticList();
-            var addTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, addTemplate, nameof(this.OverrideEventAccessors) );
-            var removeTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, removeTemplate, nameof(this.OverrideEventAccessors) );
+
+            var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateKind.Introduction, true )
+                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
+
+            var removeTemplateRef = this.ValidateTemplateName( removeTemplate, TemplateKind.Introduction, true )
+                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
             var advice = new IntroduceEventAdvice(
                 this._aspect,
                 targetType,
                 name,
-                null,
-                addTemplateMethod,
-                removeTemplateMethod,
+                default,
+                addTemplateRef,
+                removeTemplateRef,
                 scope,
                 whenExists,
                 _layerName,

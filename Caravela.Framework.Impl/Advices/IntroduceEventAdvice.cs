@@ -13,13 +13,12 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class IntroduceEventAdvice : IntroduceMemberAdvice<EventBuilder>
+    internal class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, EventBuilder>
     {
-        private readonly IMethod? _addTemplateMethod;
-        private readonly IMethod? _removeTemplateMethod;
+        private readonly Template<IMethod> _addTemplate;
+        private readonly Template<IMethod> _removeTemplate;
 
         // ReSharper disable once MemberCanBePrivate.Global
-        public new IEvent? TemplateMember => (IEvent?) base.TemplateMember;
 
         public IEventBuilder Builder => this.MemberBuilder;
 
@@ -27,23 +26,23 @@ namespace Caravela.Framework.Impl.Advices
             AspectInstance aspect,
             INamedType targetDeclaration,
             string? explicitName,
-            IEvent? eventTemplate,
-            IMethod? addTemplateMethod,
-            IMethod? removeTemplateMethod,
+            Template<IEvent> eventTemplate,
+            Template<IMethod> addTemplate,
+            Template<IMethod> removeTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
             Dictionary<string, object?>? tags )
             : base( aspect, targetDeclaration, eventTemplate, scope, overrideStrategy, layerName, tags )
         {
-            this._addTemplateMethod = addTemplateMethod;
-            this._removeTemplateMethod = removeTemplateMethod;
+            this._addTemplate = addTemplate;
+            this._removeTemplate = removeTemplate;
 
             this.MemberBuilder = new EventBuilder(
                 this,
                 this.TargetDeclaration,
-                eventTemplate?.Name ?? explicitName.AssertNotNull(),
-                eventTemplate != null && eventTemplate.IsEventField() );
+                eventTemplate.Declaration?.Name ?? explicitName.AssertNotNull(),
+                eventTemplate.Declaration != null && eventTemplate.Declaration.IsEventField() );
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
@@ -53,10 +52,10 @@ namespace Caravela.Framework.Impl.Advices
             // TODO: Checks.
 
             this.MemberBuilder.EventType =
-                (this.TemplateMember?.EventType ?? (INamedType?) this._addTemplateMethod?.Parameters.FirstOrDefault().AssertNotNull().ParameterType)
+                (this.TemplateMember?.EventType ?? (INamedType?) this._addTemplate.Declaration?.Parameters.FirstOrDefault().AssertNotNull().ParameterType)
                 .AssertNotNull();
 
-            this.MemberBuilder.Accessibility = (this.TemplateMember?.Accessibility ?? this._addTemplateMethod?.Accessibility).AssertNotNull();
+            this.MemberBuilder.Accessibility = (this.TemplateMember?.Accessibility ?? this._addTemplate.Declaration?.Accessibility).AssertNotNull();
         }
 
         public override AdviceResult ToResult( ICompilation compilation )
@@ -74,9 +73,9 @@ namespace Caravela.Framework.Impl.Advices
                     new OverriddenEvent(
                         this,
                         this.MemberBuilder,
-                        this.TemplateMember,
-                        this._addTemplateMethod,
-                        this._removeTemplateMethod ) );
+                        this.Template,
+                        this._addTemplate,
+                        this._removeTemplate ) );
             }
         }
     }

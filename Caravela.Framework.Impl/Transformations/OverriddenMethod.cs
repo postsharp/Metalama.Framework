@@ -29,14 +29,14 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 
-        public IMethod TemplateMethod { get; }
+        public Template<IMethod> Template { get; }
 
-        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, IMethod templateMethod )
+        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, Template<IMethod> template )
             : base( advice, overriddenDeclaration )
         {
-            Invariant.Assert( templateMethod != null );
-
-            this.TemplateMethod = templateMethod;
+            Invariant.Assert( template.IsNotNull );
+            
+            this.Template = template;
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration,
                     new MetaApiProperties(
                         context.DiagnosticSink,
-                        this.TemplateMethod.GetSymbol().AssertNotNull( Justifications.TemplateMembersHaveSymbol ),
+                        this.Template.Declaration!.GetSymbol().AssertNotNull( Justifications.TemplateMembersHaveSymbol ),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
                         proceedExpression,
@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.Transformations
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
                     (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
 
-                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( this.TemplateMethod );
+                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( this.Template.Declaration! );
 
                 if ( !templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out var newMethodBody ) )
                 {

@@ -314,7 +314,7 @@ namespace Caravela.Framework.Impl.Advices
                                     ? new OverriddenMethod(
                                         this,
                                         (IMethod) memberBuilder,
-                                        (IMethod) memberSpec.AspectInterfaceMember )
+                                        new Template<IMethod>( (IMethod) memberSpec.AspectInterfaceMember, TemplateKind.Introduction ) )
                                     : new RedirectedMethod(
                                         this,
                                         (IMethod) memberBuilder,
@@ -340,9 +340,9 @@ namespace Caravela.Framework.Impl.Advices
                                         ? new OverriddenProperty(
                                             this,
                                             (IProperty) memberBuilder,
-                                            (IProperty) memberSpec.AspectInterfaceMember,
-                                            null,
-                                            null )
+                                            new Template<IProperty>( (IProperty) memberSpec.AspectInterfaceMember, TemplateKind.Introduction ),
+                                            default,
+                                            default )
                                         : new RedirectedProperty(
                                             this,
                                             (IProperty) memberBuilder,
@@ -365,9 +365,9 @@ namespace Caravela.Framework.Impl.Advices
                                         ? new OverriddenEvent(
                                             this,
                                             (IEvent) memberBuilder,
-                                            (IEvent) memberSpec.AspectInterfaceMember,
-                                            null,
-                                            null )
+                                            new Template<IEvent>( (IEvent) memberSpec.AspectInterfaceMember, TemplateKind.Introduction ),
+                                            default,
+                                            default )
                                         : new RedirectedEvent(
                                             this,
                                             (IEvent) memberBuilder,

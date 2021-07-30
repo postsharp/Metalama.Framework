@@ -17,7 +17,6 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Serialization;
-using Attribute = System.Attribute;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl
@@ -25,7 +24,7 @@ namespace Caravela.Framework.Impl
     /// <summary>
     /// Represents the metadata of an aspect class. This class is compilation-independent. 
     /// </summary>
-    internal class AspectClass : IAspectClass
+    internal partial class AspectClass : IAspectClass
     {
         private readonly Dictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
 
@@ -158,7 +157,7 @@ namespace Caravela.Framework.Impl
         {
             if ( this._prototypeAspectInstance != null )
             {
-                var builder = new AspectClassBuilder( this );
+                var builder = new Builder( this );
                 this._userCodeInvoker.Invoke( () => this._prototypeAspectInstance.BuildAspectClass( builder ) );
 
                 this._layers = builder.Layers.As<string?>().Prepend( null ).Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
@@ -291,49 +290,5 @@ namespace Caravela.Framework.Impl
             };
 
         public override string ToString() => this.FullName;
-
-        private class AspectClassBuilder : IAspectClassBuilder, IAspectDependencyBuilder
-        {
-            private readonly AspectClass _parent;
-
-            public AspectClassBuilder( AspectClass parent )
-            {
-                this._parent = parent;
-            }
-
-            public bool IsLiveTemplate
-            {
-                get => this._parent.IsLiveTemplate;
-                set
-                {
-                    if ( value != this._parent.IsLiveTemplate )
-                    {
-                        if ( value )
-                        {
-                            if ( this._parent.AspectType.GetConstructor( Type.EmptyTypes ) == null )
-                            {
-                                throw new InvalidOperationException( "The aspect type must have a default constructor to be able to be a live template." );
-                            }
-                        }
-
-                        this._parent.IsLiveTemplate = value;
-                    }
-                }
-            }
-
-            public string DisplayName { get => this._parent.DisplayName; set => this._parent.DisplayName = value; }
-
-            public string? Description { get => this._parent.Description; set => this._parent.Description = value; }
-
-            public ImmutableArray<string> Layers { get; set; } = ImmutableArray<string>.Empty;
-
-            public IAspectDependencyBuilder Dependencies => this;
-
-            public void RequiresAspect<TAspect>()
-                where TAspect : Attribute, IAspect, new()
-                => throw new NotImplementedException();
-
-            public override string ToString() => this.DisplayName;
-        }
     }
 }

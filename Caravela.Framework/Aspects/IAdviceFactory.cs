@@ -82,7 +82,7 @@ namespace Caravela.Framework.Aspects
         /// <seealso href="@overriding-members"/>
         void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
-            in GetterTemplateSelector? getTemplate = null,
+            in GetterTemplateSelector getTemplate = default,
             string? setTemplate = null,
             Dictionary<string, object?>? tags = null );
 

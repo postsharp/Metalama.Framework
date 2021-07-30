@@ -7,11 +7,24 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal enum TemplateKind
     {
+        /// <summary>
+        /// Not a template.
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Default template.
+        /// </summary>
         Default,
         Async,
         IEnumerable,
         IEnumerator,
         IAsyncEnumerable,
-        IAsyncEnumerator
+        IAsyncEnumerator,
+
+        /// <summary>
+        /// Templated used for an introduction. Can be any type, must be detected from the signature and implementation.
+        /// </summary>
+        Introduction
     }
 }
