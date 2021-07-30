@@ -10,8 +10,7 @@ namespace Caravela.Framework.Code
     /// </summary>
     public readonly struct IteratorInfo
     {
-        private readonly object? _method;
-        private readonly Func<object, IType>? _getItemType;
+        private readonly IMethod? _method;
 
         /// <summary>
         /// Gets a value indicating whether the method is an iterator (i.e., has a <c>yield return</c> or <c>yield break</c> statement).
@@ -30,7 +29,14 @@ namespace Caravela.Framework.Code
                     throw new InvalidOperationException( $"Cannot get the {nameof(this.ItemType)} property because the method is not available." );
                 }
 
-                return this._getItemType!( this._method );
+                if ( this._method.ReturnType is INamedType { IsGeneric: true } namedType )
+                {
+                    return namedType.GenericArguments[0];
+                }
+                else
+                {
+                    return this._method.Compilation.TypeFactory.GetSpecialType( SpecialType.Object );
+                }
             }
         }
 
@@ -46,10 +52,9 @@ namespace Caravela.Framework.Code
         /// </summary>
         public bool IsAsync => this.IteratorKind is IteratorKind.IAsyncEnumerable or IteratorKind.IAsyncEnumerator;
 
-        internal IteratorInfo( IteratorKind iteratorKind, object? method, Func<object, IType> getItemType )
+        internal IteratorInfo( IteratorKind iteratorKind, IMethod? method )
         {
             this._method = method;
-            this._getItemType = getItemType;
             this.IteratorKind = iteratorKind;
         }
     }

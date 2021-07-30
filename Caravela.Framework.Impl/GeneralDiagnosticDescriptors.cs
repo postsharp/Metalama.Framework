@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl
                 _category,
                 Error );
 
-        public static readonly DiagnosticDefinition<(INamedType AspectType, string MethodName)> AspectMustHaveExactlyOneTemplateMember = new(
+        public static readonly DiagnosticDefinition<(string AspectType, string MethodName)> AspectMustHaveExactlyOneTemplateMember = new(
             "CR0025",
             "The aspect type must have exactly one member of a given name otherwise it cannot be used as a dynamic advice.",
             "The type '{0}' must have exactly one member named '{1}'.",
@@ -115,6 +115,11 @@ namespace Caravela.Framework.Impl
             VirtualTemplateCannotReferenceRunTimeOnlyTypes = new(
                 "CR0031", _category, "The template '{0}' cannot be virtual because it references the following runtime-only types: {1}.", Error,
                 "A template cannot be virtual when it references run-time-only types." );
+
+        public static readonly DiagnosticDefinition<(ISymbol TemplateMethod, string BaseClassName)>
+            TemplateWithSameNameAlreadyDefined = new(
+                "CR0032", _category, "The class '{1}' already defines a template named '{0}'. Template names must be unique.", Error,
+                "The class already defines a template of the same name." );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>

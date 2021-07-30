@@ -21,6 +21,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Async.NormalTe
         }
     }
 
+    // <target>
     class TargetCode
     {
        [Aspect]

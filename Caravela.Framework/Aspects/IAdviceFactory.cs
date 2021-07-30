@@ -22,12 +22,12 @@ namespace Caravela.Framework.Aspects
         /// Overrides the implementation of a method.
         /// </summary>
         /// <param name="method">The method to override.</param>
-        /// <param name="template">Name of a method in the aspect class whose implementation will be used as a template.
-        /// This property must be annotated with <see cref="TemplateAttribute"/>.</param>
+        /// <param name="templates">Name of a method in the aspect class whose implementation will be used as a template.
+        ///     This property must be annotated with <see cref="TemplateAttribute"/>.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property
-        /// of the <see cref="meta"/> API.</param>
+        ///     of the <see cref="meta"/> API.</param>
         /// <seealso href="@overriding-members"/>
-        void OverrideMethod( IMethod method, string template, Dictionary<string, object?>? tags = null );
+        void OverrideMethod( IMethod method, in MethodTemplateSelector templates, Dictionary<string, object?>? tags = null );
 
         /// <summary>
         /// Introduces a new method or overrides the implementation of the existing one.
@@ -82,7 +82,7 @@ namespace Caravela.Framework.Aspects
         /// <seealso href="@overriding-members"/>
         void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
-            string? getTemplate = null,
+            in GetterTemplateSelector? getTemplate = null,
             string? setTemplate = null,
             Dictionary<string, object?>? tags = null );
 

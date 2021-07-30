@@ -6,5 +6,7 @@ namespace Caravela.Framework.Code
     internal interface ICompilationHelpers
     {
         IteratorInfo GetIteratorInfo( IMethod method );
+
+        AsyncInfo GetAsyncInfo( IMethod method );
     }
 }

@@ -207,7 +207,12 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         /// <param name="reflectionName"></param>
         /// <returns></returns>
-        public Type? GetType( string reflectionName ) => this.IsEmpty ? null : this.Assembly!.GetType( reflectionName, false );
+        public Type? GetTypeOrNull( string reflectionName ) => this.IsEmpty ? null : this.Assembly!.GetType( reflectionName, false );
+
+        public Type GetType( string reflectionName )
+            => this.GetTypeOrNull( reflectionName ) ?? throw new ArgumentOutOfRangeException(
+                nameof(reflectionName),
+                $"Cannot find a type named '{reflectionName}' in the compile-time project '{this.CompileTimeIdentity}'." );
 
         public CompileTimeFile? FindCodeFileFromTransformedPath( string transformedCodePath )
             => this.CodeFiles.Where( t => transformedCodePath.EndsWith( t.TransformedPath, StringComparison.OrdinalIgnoreCase ) )
@@ -250,7 +255,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private DiagnosticManifest GetDiagnosticManifest( IServiceProvider serviceProvider )
         {
-            var aspectTypes = this.AspectTypes.Select( this.GetType ).WhereNotNull().ToArray();
+            var aspectTypes = this.AspectTypes.Select( this.GetTypeOrNull ).WhereNotNull().ToArray();
             var service = new DiagnosticDefinitionDiscoveryService( serviceProvider );
             var diagnostics = service.GetDiagnosticDefinitions( aspectTypes ).ToImmutableArray();
             var suppressions = service.GetSuppressionDefinitions( aspectTypes ).ToImmutableArray();

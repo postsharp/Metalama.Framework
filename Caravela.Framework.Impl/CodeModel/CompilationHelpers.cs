@@ -8,5 +8,7 @@ namespace Caravela.Framework.Impl.CodeModel
     internal class CompilationHelpers : ICompilationHelpers
     {
         public IteratorInfo GetIteratorInfo( IMethod method ) => method.GetIteratorInfoImpl();
+
+        public AsyncInfo GetAsyncInfo( IMethod method ) => method.GetAsyncInfoImpl();
     }
 }

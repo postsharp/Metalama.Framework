@@ -34,7 +34,8 @@ namespace Caravela.Framework.Impl.Advices
 
             if ( members.Count != 1 )
             {
-                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (aspectType, methodName) );
+                // TODO: We should normally not get here because AdviceFactory.ValidateTemplate should throw this exception.
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (aspectType.Name, methodName) );
             }
 
             var method = members.OfType<IMethodSymbol>().Single();
@@ -71,7 +72,8 @@ namespace Caravela.Framework.Impl.Advices
 
             if ( members.Count != 1 )
             {
-                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (aspectType, propertyName) );
+                // TODO: We should normally not get here because AdviceFactory.ValidateTemplate should throw this exception.
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (aspectType.Name, propertyName) );
             }
 
             var property = members.OfType<IPropertySymbol>().Single();
@@ -108,7 +110,8 @@ namespace Caravela.Framework.Impl.Advices
 
             if ( members.Count != 1 )
             {
-                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (aspectType, eventName) );
+                // TODO: We should normally not get here because AdviceFactory.ValidateTemplate should throw this exception.
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (aspectType.Name, eventName) );
             }
 
             var @event = members.OfType<IEventSymbol>().Single();

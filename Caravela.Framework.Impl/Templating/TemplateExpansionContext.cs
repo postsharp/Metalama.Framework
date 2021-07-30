@@ -8,7 +8,6 @@ using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -63,11 +62,13 @@ namespace Caravela.Framework.Impl.Templating
 
             var returnType = method.ReturnType;
 
-            if ( method.IsAsync )
+            var asyncInfo = method.GetAsyncInfoImpl();
+
+            if ( asyncInfo.IsAsync && asyncInfo.IsAwaitable )
             {
-                // If we are in an async method, the consider the return type as seen by the method body,
+                // If we are in an awaitable async method, the consider the return type as seen by the method body,
                 // not the one as seen from outside.
-                returnType = AsyncHelper.GetTaskResultType( returnType );
+                returnType = asyncInfo.ResultType;
             }
 
             if ( returnType.Is( SpecialType.Void ) )

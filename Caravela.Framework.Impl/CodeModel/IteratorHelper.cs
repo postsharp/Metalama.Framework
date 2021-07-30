@@ -49,10 +49,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 r => r.GetSyntax() is MethodDeclarationSyntax { Body: { } body } &&
                      FindYieldVisitor.Instance.VisitBlock( body ) ) )
             {
-                return new IteratorInfo(
-                    iteratorKind,
-                    method,
-                    ResolveItemType );
+                return new IteratorInfo( iteratorKind, method );
             }
             else
             {
@@ -72,20 +69,6 @@ namespace Caravela.Framework.Impl.CodeModel
             }
 
             return symbol.GetIteratorInfoImpl();
-        }
-
-        private static IType ResolveItemType( object arg )
-        {
-            var method = (IMethod) arg;
-
-            if ( method.ReturnType is INamedType { IsGeneric: true } namedType )
-            {
-                return namedType.GenericArguments[0];
-            }
-            else
-            {
-                return method.Compilation.TypeFactory.GetSpecialType( Code.SpecialType.Object );
-            }
         }
     }
 }

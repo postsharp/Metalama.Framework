@@ -22,20 +22,21 @@ namespace Caravela.Framework.Impl.CompileTime
         /// 'MembersOnly' means that the rule applies to the members of the type, but not to the type itself.
         /// </summary>
         private static readonly Dictionary<string, (TemplatingScope Scope, bool MembersOnly)> _wellKnownRunTimeTypes =
-            new (Type Type, TemplatingScope Scope, bool MembersOnly)[]
+            new (Type ReflectionType, TemplatingScope Scope, bool MembersOnly)[]
             {
-                (typeof(Console), TemplatingScope.RunTimeOnly, false),
-                (typeof(Process), TemplatingScope.RunTimeOnly, false),
-                (typeof(Thread), TemplatingScope.RunTimeOnly, false),
-                (typeof(AppDomain), TemplatingScope.RunTimeOnly, false),
-                (typeof(MemberInfo), TemplatingScope.RunTimeOnly, true),
-                (typeof(ParameterInfo), TemplatingScope.RunTimeOnly, true)
-            }.ToDictionary( t => t.Type.FullName, t => (t.Scope, t.MembersOnly) );
+                (typeof(Console), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(Process), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(Thread), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(AppDomain), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(MemberInfo), Scope: TemplatingScope.RunTimeOnly, true),
+                (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true)
+            }.ToDictionary( t => t.ReflectionType.FullName, t => (t.Scope, t.MembersOnly) );
 
         private readonly Compilation _compilation;
         private readonly INamedTypeSymbol _compileTimeAttribute;
         private readonly INamedTypeSymbol _compileTimeOnlyAttribute;
         private readonly INamedTypeSymbol _templateAttribute;
+        private readonly INamedTypeSymbol _ignoreUnlessOverriddenAttribute;
         private readonly INamedTypeSymbol _interfaceMemberAttribute;
         private readonly Dictionary<ISymbol, TemplatingScope?> _cacheFromAttributes = new( SymbolEqualityComparer.Default );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
@@ -47,19 +48,36 @@ namespace Caravela.Framework.Impl.CompileTime
             this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeOnlyAttribute).FullName ).AssertNotNull();
             this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
             this._interfaceMemberAttribute = this._compilation.GetTypeByMetadataName( typeof(InterfaceMemberAttribute).FullName ).AssertNotNull();
+            this._ignoreUnlessOverriddenAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
             this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
         }
 
-        public TemplateMemberKind GetTemplateMemberKind( ISymbol symbol )
+        public TemplateMemberKind GetTemplateMemberKind( ISymbol symbol ) => this.GetTemplateMemberKind( symbol, false );
+
+        private TemplateMemberKind GetTemplateMemberKind( ISymbol symbol, bool isInherited )
         {
             // Look for a [Template] attribute on the symbol.
             var templateAttribute = symbol
                 .GetAttributes()
-                .FirstOrDefault( this.IsTemplateAttribute );
+                .FirstOrDefault( a => this.IsAttributeOfType( a, this._templateAttribute ) );
 
             if ( templateAttribute != null )
             {
-                return GetTemplateMemberKind( templateAttribute );
+                var templateKind = GetTemplateMemberKind( templateAttribute );
+
+                if ( templateKind != TemplateMemberKind.None )
+                {
+                    // Ignore any abstract member.
+                    if ( !isInherited && (symbol.IsAbstract
+                                          || symbol.GetAttributes().Any( a => this.IsAttributeOfType( a, this._ignoreUnlessOverriddenAttribute ) )) )
+                    {
+                        return TemplateMemberKind.Abstract;
+                    }
+                    else
+                    {
+                        return templateKind;
+                    }
+                }
             }
 
             // Look for a [InterfaceMember] attribute on the symbol.
@@ -72,18 +90,18 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 case IMethodSymbol { OverriddenMethod: { } overriddenMethod }:
                     // Look at the overriden method.
-                    return this.GetTemplateMemberKind( overriddenMethod! );
+                    return this.GetTemplateMemberKind( overriddenMethod!, true );
 
                 case IPropertySymbol { OverriddenProperty: { } overriddenProperty }:
                     // Look at the overridden property.
-                    return this.GetTemplateMemberKind( overriddenProperty! );
+                    return this.GetTemplateMemberKind( overriddenProperty!, true );
 
                 default:
                     return TemplateMemberKind.None;
             }
         }
 
-        private bool IsTemplateAttribute( AttributeData a ) => this._compilation.HasImplicitConversion( a.AttributeClass, this._templateAttribute );
+        private bool IsAttributeOfType( AttributeData a, ITypeSymbol type ) => this._compilation.HasImplicitConversion( a.AttributeClass, type );
 
         private static TemplateMemberKind GetTemplateMemberKind( AttributeData templateAttribute )
         {

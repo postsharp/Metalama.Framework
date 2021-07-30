@@ -152,10 +152,10 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration.ReturnType,
                     false );
             }
-            else if ( this.OverriddenDeclaration.IsAsync )
+            else if ( this.OverriddenDeclaration.GetAsyncInfoImpl() is { IsAsync: true, IsAwaitableOrVoid: true } asyncInfo )
             {
                 // We have an async method. The meta.Proceed() translates into an '(await METHOD())' expression.
-                var taskResultType = AsyncHelper.GetTaskResultType( this.OverriddenDeclaration.ReturnType );
+                var taskResultType = asyncInfo.ResultType;
 
                 return new DynamicExpression(
                     ParenthesizedExpression( AwaitExpression( invocationExpression ) ).WithAdditionalAnnotations( Simplifier.Annotation ),

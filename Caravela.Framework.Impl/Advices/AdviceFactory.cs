@@ -29,8 +29,6 @@ namespace Caravela.Framework.Impl.Advices
 
         internal IReadOnlyList<Advice> Advices => this._advices;
 
-        public Dictionary<string, object?> Tags { get; } = new( StringComparer.Ordinal );
-
         public AdviceFactory(
             CompilationModel compilation,
             IDiagnosticAdder diagnosticAdder,
@@ -46,10 +44,92 @@ namespace Caravela.Framework.Impl.Advices
             this._implementInterfaceAdvices = new Dictionary<INamedType, ImplementInterfaceAdvice>( compilation.InvariantComparer );
         }
 
-        public void OverrideMethod( IMethod targetMethod, string defaultTemplate, Dictionary<string, object?>? tags = null )
+        private string? ValidateTemplateName( string? templateName, bool required = false )
+        {
+            if ( templateName == null )
+            {
+                if ( required )
+                {
+                    throw new ArgumentOutOfRangeException( nameof(templateName), "A required template name was not provided." );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else if ( this._aspect.AspectClass.ImplementedTemplates.ContainsKey( templateName ) )
+            {
+                return templateName;
+            }
+            else if ( this._aspect.AspectClass.AbstractTemplates.ContainsKey( templateName ) )
+            {
+                if ( !required )
+                {
+                    return null;
+                }
+            }
+
+            throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (this._aspect.AspectClass.DisplayName, templateName!) );
+        }
+
+        private MethodTemplateSelector ValidateTemplateNames( in MethodTemplateSelector templates )
+            => new(
+                this.ValidateTemplateName( templates.DefaultTemplate, true )!,
+                this.ValidateTemplateName( templates.AsyncTemplate ),
+                this.ValidateTemplateName( templates.EnumerableTemplate ),
+                this.ValidateTemplateName( templates.EnumeratorTemplate ),
+                this.ValidateTemplateName( templates.AsyncEnumerableTemplate ),
+                this.ValidateTemplateName( templates.AsyncEnumeratorTemplate ),
+                templates.UseAsyncTemplateForAnyAwaitable,
+                templates.UseAsyncTemplateForAnyEnumerable );
+
+        private static ( string TemplateName, TemplateKind TemplateKind) SelectTemplate( IMethod targetMethod, in MethodTemplateSelector templates )
+        {
+            (string TemplateName, TemplateKind TemplateKind) selectedTemplate = (templates.DefaultTemplate, TemplateKind.Default);
+
+            if ( !templates.HasOnlyDefaultTemplate )
+            {
+                var asyncInfo = targetMethod.GetAsyncInfoImpl();
+                var iteratorInfo = targetMethod.GetIteratorInfoImpl();
+
+                if ( templates.AsyncTemplate != null &&
+                     (asyncInfo.IsAsync || (templates.UseAsyncTemplateForAnyAwaitable && asyncInfo.IsAwaitable)) )
+                {
+                    selectedTemplate = (templates.AsyncTemplate, TemplateKind.Async);
+
+                    // We don't return because the result can still be overwritten by async iterators.
+                }
+
+                if ( templates.EnumerableTemplate != null && iteratorInfo.IsIterator )
+                {
+                    selectedTemplate = (templates.EnumerableTemplate, TemplateKind.IEnumerable);
+                }
+
+                if ( templates.EnumeratorTemplate != null && iteratorInfo.IteratorKind is IteratorKind.IEnumerator or IteratorKind.UntypedIEnumerator )
+                {
+                    return (templates.EnumeratorTemplate, TemplateKind.IEnumerator);
+                }
+
+                if ( templates.AsyncEnumerableTemplate != null && iteratorInfo.IsIterator && iteratorInfo.IsAsync )
+                {
+                    selectedTemplate = (templates.AsyncEnumerableTemplate, TemplateKind.IAsyncEnumerable);
+                }
+
+                if ( templates.AsyncEnumeratorTemplate != null && iteratorInfo.IteratorKind == IteratorKind.IAsyncEnumerator )
+                {
+                    return (templates.AsyncEnumeratorTemplate, TemplateKind.IAsyncEnumerator);
+                }
+            }
+
+            return selectedTemplate;
+        }
+
+        public void OverrideMethod( IMethod targetMethod, in MethodTemplateSelector templates, Dictionary<string, object?>? tags = null )
         {
             var diagnosticList = new DiagnosticList();
-            var templateMethod = this._aspectType.GetTemplateMethod( this._compilation, defaultTemplate, nameof(this.OverrideMethod) );
+
+            var selectedTemplate = SelectTemplate( targetMethod, this.ValidateTemplateNames( templates ) );
+            var templateMethod = this._aspectType.GetTemplateMethod( this._compilation, selectedTemplate.TemplateName, nameof(this.OverrideMethod) );
 
             var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, _layerName, tags );
             advice.Initialize( this._declarativeAdvices, diagnosticList );
@@ -114,13 +194,18 @@ namespace Caravela.Framework.Impl.Advices
 
         public void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
-            string? getTemplate,
+            in GetterTemplateSelector? getTemplate,
             string? setTemplate,
             Dictionary<string, object?>? tags = null )
         {
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
-            var getTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, getTemplate, nameof(this.OverrideFieldOrPropertyAccessors) );
+
+            var getTemplateMethod = this._aspectType.GetTemplateMethod(
+                this._compilation,
+                getTemplate?.DefaultTemplate,
+                nameof(this.OverrideFieldOrPropertyAccessors) );
+
             var setTemplateMethod = this._aspectType.GetTemplateMethod( this._compilation, setTemplate, nameof(this.OverrideFieldOrPropertyAccessors) );
 
             var advice = new OverrideFieldOrPropertyAdvice(

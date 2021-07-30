@@ -1,12 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Runtime.Serialization;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
@@ -17,6 +11,13 @@ using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Runtime.Serialization;
+using Attribute = System.Attribute;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl
@@ -27,6 +28,10 @@ namespace Caravela.Framework.Impl
     internal class AspectClass : IAspectClass
     {
         private readonly Dictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
+
+        public ImmutableDictionary<string, AspectClass> ImplementedTemplates { get; }
+
+        public ImmutableDictionary<string, AspectClass> AbstractTemplates { get; }
 
         private readonly IServiceProvider _serviceProvider;
         private readonly UserCodeInvoker _userCodeInvoker;
@@ -50,7 +55,7 @@ namespace Caravela.Framework.Impl
         /// </summary>
         public AspectClass? BaseClass { get; }
 
-        public CompileTimeProject Project { get; }
+        public CompileTimeProject? Project { get; }
 
         /// <summary>
         /// Gets the aspect driver of the current class, responsible for executing the aspect.
@@ -79,9 +84,11 @@ namespace Caravela.Framework.Impl
             INamedTypeSymbol aspectTypeSymbol,
             AspectClass? baseClass,
             IAspectDriver? aspectDriver,
-            CompileTimeProject project,
+            CompileTimeProject? project,
             Type aspectType,
-            IAspect? prototype )
+            IAspect? prototype,
+            IDiagnosticAdder diagnosticAdder,
+            Compilation compilation )
         {
             this.FullName = aspectTypeSymbol.GetReflectionNameSafe();
             this.DisplayName = aspectTypeSymbol.Name.TrimEnd( "Attribute" );
@@ -94,6 +101,57 @@ namespace Caravela.Framework.Impl
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
             this.AspectType = aspectType;
             this._prototypeAspectInstance = prototype;
+            (this.ImplementedTemplates, this.AbstractTemplates) = this.DetectTemplates( compilation, aspectTypeSymbol, diagnosticAdder );
+        }
+
+        private ( ImmutableDictionary<string, AspectClass> Implemented, ImmutableDictionary<string, AspectClass> Abstract )
+            DetectTemplates( Compilation compilation, INamedTypeSymbol type, IDiagnosticAdder diagnosticAdder )
+        {
+            if ( compilation == null! )
+            {
+                // This is a test scenario where templates must not be detected.
+                return (ImmutableDictionary<string, AspectClass>.Empty, ImmutableDictionary<string, AspectClass>.Empty);
+            }
+
+            var symbolClassifier = this._serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
+
+            var implementedTemplatesBuilder = this.BaseClass?.ImplementedTemplates.ToBuilder()
+                                              ?? ImmutableDictionary.CreateBuilder<string, AspectClass>( StringComparer.Ordinal );
+
+            var abstractTemplatesBuilder = this.BaseClass?.AbstractTemplates.ToBuilder()
+                                           ?? ImmutableDictionary.CreateBuilder<string, AspectClass>( StringComparer.Ordinal );
+
+            foreach ( var member in type.GetMembers() )
+            {
+                var templateMemberKind = symbolClassifier.GetTemplateMemberKind( member );
+
+                if ( templateMemberKind != TemplateMemberKind.None )
+                {
+                    if ( implementedTemplatesBuilder.TryGetValue( member.Name, out var existingClass ) && !member.IsOverride )
+                    {
+                        // The template is already defined and we are not overwriting a template of the base class.
+                        diagnosticAdder.Report(
+                            GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefined.CreateDiagnostic(
+                                member.GetDiagnosticLocation(),
+                                (member, existingClass.FullName) ) );
+
+                        continue;
+                    }
+
+                    // Add or replace the template.
+                    if ( templateMemberKind == TemplateMemberKind.Abstract )
+                    {
+                        abstractTemplatesBuilder[member.Name] = this;
+                    }
+                    else
+                    {
+                        abstractTemplatesBuilder.Remove( member.Name );
+                        implementedTemplatesBuilder[member.Name] = this;
+                    }
+                }
+            }
+
+            return (implementedTemplatesBuilder.ToImmutable(), abstractTemplatesBuilder.ToImmutable());
         }
 
         private void Initialize()
@@ -104,6 +162,11 @@ namespace Caravela.Framework.Impl
                 this._userCodeInvoker.Invoke( () => this._prototypeAspectInstance.BuildAspectClass( builder ) );
 
                 this._layers = builder.Layers.As<string?>().Prepend( null ).Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
+            }
+            else
+            {
+                // Abstract aspect classes don't have any layer.
+                this._layers = Array.Empty<AspectLayer>();
             }
 
             // TODO: get all eligibility rules from the prototype instance and combine them into a single rule.
@@ -122,17 +185,28 @@ namespace Caravela.Framework.Impl
         /// </summary>
         public static bool TryCreate(
             IServiceProvider serviceProvider,
-            INamedTypeSymbol aspectNamedType,
-            AspectClass? baseAspectType,
+            INamedTypeSymbol aspectTypeSymbol,
+            Type aspectReflectionType,
+            AspectClass? baseAspectClass,
             IAspectDriver? aspectDriver,
-            CompileTimeProject compileTimeProject,
+            CompileTimeProject? compileTimeProject,
             IDiagnosticAdder diagnosticAdder,
+            Compilation compilation,
             [NotNullWhen( true )] out AspectClass? aspectClass )
         {
-            var aspectType = compileTimeProject.GetType( aspectNamedType.GetReflectionNameSafe() ).AssertNotNull();
-            var prototype = aspectNamedType.IsAbstract ? null : (IAspect) FormatterServices.GetUninitializedObject( aspectType ).AssertNotNull();
+            var prototype = aspectTypeSymbol.IsAbstract ? null : (IAspect) FormatterServices.GetUninitializedObject( aspectReflectionType ).AssertNotNull();
 
-            aspectClass = new AspectClass( serviceProvider, aspectNamedType, baseAspectType, aspectDriver, compileTimeProject, aspectType, prototype );
+            aspectClass = new AspectClass(
+                serviceProvider,
+                aspectTypeSymbol,
+                baseAspectClass,
+                aspectDriver,
+                compileTimeProject,
+                aspectReflectionType,
+                prototype,
+                diagnosticAdder,
+                compilation );
+
             aspectClass.Initialize();
 
             return true;
@@ -256,8 +330,10 @@ namespace Caravela.Framework.Impl
             public IAspectDependencyBuilder Dependencies => this;
 
             public void RequiresAspect<TAspect>()
-                where TAspect : System.Attribute, IAspect, new()
+                where TAspect : Attribute, IAspect, new()
                 => throw new NotImplementedException();
+
+            public override string ToString() => this.DisplayName;
         }
     }
 }

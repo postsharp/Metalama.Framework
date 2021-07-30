@@ -15,5 +15,7 @@ namespace Caravela.Framework.Code
         /// <param name="method"></param>
         /// <returns></returns>
         public static IteratorInfo GetIteratorInfo( this IMethod method ) => ((ICompilationInternal) method.Compilation).Helpers.GetIteratorInfo( method );
+
+        public static AsyncInfo GetAsyncInfo( this IMethod method ) => ((ICompilationInternal) method.Compilation).Helpers.GetAsyncInfo( method );
     }
 }
