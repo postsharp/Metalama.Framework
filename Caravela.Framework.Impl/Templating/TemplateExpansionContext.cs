@@ -75,15 +75,15 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return CreateReturnStatementVoid( returnExpression );
             }
-            else if ( method.GetIteratorInfoImpl() is { IsIterator: true, IsAsync: true } iteratorInfo )
+            else if ( method.GetIteratorInfoImpl() is { IsIterator: true, IsAsyncIterator: true } iteratorInfo )
             {
-                switch ( iteratorInfo.IteratorKind )
+                switch ( iteratorInfo.EnumerableKind )
                 {
-                    case IteratorKind.IAsyncEnumerable:
+                    case EnumerableKind.IAsyncEnumerable:
 
                         return this.CreateReturnStatementAsyncEnumerable( returnExpression );
 
-                    case IteratorKind.IAsyncEnumerator:
+                    case EnumerableKind.IAsyncEnumerator:
                         return this.CreateReturnStatementAsyncEnumerator( returnExpression );
 
                     default:

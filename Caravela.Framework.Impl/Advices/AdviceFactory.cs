@@ -74,24 +74,24 @@ namespace Caravela.Framework.Impl.Advices
             throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (this._aspect.AspectClass.DisplayName, templateName!) );
         }
 
-        private TemplateRef SelectTemplate( IMethod targetMethod, in MethodTemplateSelector templates )
+        private TemplateRef SelectTemplate( IMethod targetMethod, in MethodTemplateSelector templateSelector )
         {
-            var defaultTemplate = this.ValidateTemplateName( templates.DefaultTemplate, TemplateKind.Default, true )!;
-            var asyncTemplate = this.ValidateTemplateName( templates.AsyncTemplate, TemplateKind.Async );
-            var enumerableTemplate = this.ValidateTemplateName( templates.EnumerableTemplate, TemplateKind.IEnumerable );
-            var enumeratorTemplate = this.ValidateTemplateName( templates.EnumeratorTemplate, TemplateKind.IEnumerator );
-            var asyncEnumerableTemplate = this.ValidateTemplateName( templates.AsyncEnumerableTemplate, TemplateKind.IAsyncEnumerable );
-            var asyncEnumeratorTemplate = this.ValidateTemplateName( templates.AsyncEnumeratorTemplate, TemplateKind.IAsyncEnumerator );
+            var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, true )!;
+            var asyncTemplate = this.ValidateTemplateName( templateSelector.AsyncTemplate, TemplateKind.Async );
+            var enumerableTemplate = this.ValidateTemplateName( templateSelector.IteratorTemplate, TemplateKind.IEnumerable );
+            var enumeratorTemplate = this.ValidateTemplateName( templateSelector.IteratorEnumeratorTemplate, TemplateKind.IEnumerator );
+            var asyncEnumerableTemplate = this.ValidateTemplateName( templateSelector.AsyncIteratorTemplate, TemplateKind.IAsyncEnumerable );
+            var asyncEnumeratorTemplate = this.ValidateTemplateName( templateSelector.AsyncIteratorEnumeratorTemplate, TemplateKind.IAsyncEnumerator );
 
             var selectedTemplate = defaultTemplate;
 
-            if ( !templates.HasOnlyDefaultTemplate )
+            if ( !templateSelector.HasOnlyDefaultTemplate )
             {
                 var asyncInfo = targetMethod.GetAsyncInfoImpl();
                 var iteratorInfo = targetMethod.GetIteratorInfoImpl();
 
                 if ( !asyncTemplate.IsNull &&
-                     (asyncInfo.IsAsync || (templates.UseAsyncTemplateForAnyAwaitable && asyncInfo.IsAwaitable)) )
+                     (asyncInfo.IsAsync || (templateSelector.UseAsyncTemplateForAnyAwaitable && asyncInfo.IsAwaitable)) )
                 {
                     selectedTemplate = asyncTemplate;
 
@@ -103,17 +103,17 @@ namespace Caravela.Framework.Impl.Advices
                     selectedTemplate = enumerableTemplate;
                 }
 
-                if ( !enumeratorTemplate.IsNull && iteratorInfo.IteratorKind is IteratorKind.IEnumerator or IteratorKind.UntypedIEnumerator )
+                if ( !enumeratorTemplate.IsNull && iteratorInfo.EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator )
                 {
                     return enumeratorTemplate;
                 }
 
-                if ( !asyncEnumerableTemplate.IsNull && iteratorInfo.IsIterator && iteratorInfo.IsAsync )
+                if ( !asyncEnumerableTemplate.IsNull && iteratorInfo.IsIterator && iteratorInfo.IsAsyncIterator )
                 {
                     return asyncEnumerableTemplate;
                 }
 
-                if ( !asyncEnumeratorTemplate.IsNull && iteratorInfo.IteratorKind == IteratorKind.IAsyncEnumerator )
+                if ( !asyncEnumeratorTemplate.IsNull && iteratorInfo.EnumerableKind == EnumerableKind.IAsyncEnumerator )
                 {
                     return asyncEnumeratorTemplate;
                 }
@@ -122,7 +122,7 @@ namespace Caravela.Framework.Impl.Advices
             return selectedTemplate;
         }
 
-        private TemplateRef SelectTemplate( IFieldOrProperty targetFieldOrProperty, in GetterTemplateSelector templates, bool required )
+        private TemplateRef SelectTemplate( IFieldOrProperty targetFieldOrProperty, in GetterTemplateSelector templateSelector, bool required )
         {
             var getter = targetFieldOrProperty.Getter;
 
@@ -131,13 +131,13 @@ namespace Caravela.Framework.Impl.Advices
                 return default;
             }
 
-            var defaultTemplate = this.ValidateTemplateName( templates.DefaultTemplate, TemplateKind.Default, required )!;
-            var enumerableTemplate = this.ValidateTemplateName( templates.EnumerableTemplate, TemplateKind.IEnumerable );
-            var enumeratorTemplate = this.ValidateTemplateName( templates.EnumeratorTemplate, TemplateKind.IEnumerator );
+            var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, required )!;
+            var enumerableTemplate = this.ValidateTemplateName( templateSelector.IteratorTemplate, TemplateKind.IEnumerable );
+            var enumeratorTemplate = this.ValidateTemplateName( templateSelector.IteratorEnumeratorTemplate, TemplateKind.IEnumerator );
 
             var selectedTemplate = defaultTemplate;
 
-            if ( !templates.HasOnlyDefaultTemplate )
+            if ( !templateSelector.HasOnlyDefaultTemplate )
             {
                 var iteratorInfo = getter.GetIteratorInfoImpl();
 
@@ -146,7 +146,7 @@ namespace Caravela.Framework.Impl.Advices
                     selectedTemplate = enumerableTemplate;
                 }
 
-                if ( !enumeratorTemplate.IsNull && iteratorInfo.IteratorKind is IteratorKind.IEnumerator or IteratorKind.UntypedIEnumerator )
+                if ( !enumeratorTemplate.IsNull && iteratorInfo.EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator )
                 {
                     return enumeratorTemplate;
                 }
@@ -155,11 +155,11 @@ namespace Caravela.Framework.Impl.Advices
             return selectedTemplate;
         }
 
-        public void OverrideMethod( IMethod targetMethod, in MethodTemplateSelector templates, Dictionary<string, object?>? tags = null )
+        public void OverrideMethod( IMethod targetMethod, in MethodTemplateSelector templateSelector, Dictionary<string, object?>? tags = null )
         {
             var diagnosticList = new DiagnosticList();
 
-            var templateMethod = this.SelectTemplate( targetMethod, templates ).GetTemplate<IMethod>( this._compilation, this._serviceProvider )!;
+            var templateMethod = this.SelectTemplate( targetMethod, templateSelector ).GetTemplate<IMethod>( this._compilation, this._serviceProvider )!;
 
             var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, _layerName, tags );
             advice.Initialize( this._declarativeAdvices, diagnosticList );
@@ -228,17 +228,17 @@ namespace Caravela.Framework.Impl.Advices
 
         public void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
-            in GetterTemplateSelector getTemplate,
+            in GetterTemplateSelector getTemplateSelector,
             string? setTemplate,
             Dictionary<string, object?>? tags = null )
         {
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
 
-            var getTemplateRef = this.SelectTemplate( targetDeclaration, getTemplate, setTemplate == null )
+            var getTemplateRef = this.SelectTemplate( targetDeclaration, getTemplateSelector, setTemplate == null )
                 .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
-            var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplate.IsNull )
+            var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
                 .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
             if ( getTemplateRef.IsNull && setTemplateRef.IsNull )

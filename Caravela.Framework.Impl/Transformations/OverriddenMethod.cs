@@ -109,7 +109,7 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 ExpressionSyntax expression;
 
-                if ( !iteratorInfo.IsAsync )
+                if ( !iteratorInfo.IsAsyncIterator )
                 {
                     expression =
                         InvocationExpression(

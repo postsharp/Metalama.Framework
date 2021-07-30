@@ -18,21 +18,21 @@ namespace Caravela.Framework.Impl.CodeModel
             var iteratorKind =
                 typeDefinition.SpecialType switch
                 {
-                    SpecialType.System_Collections_IEnumerable => IteratorKind.UntypedIEnumerable,
-                    SpecialType.System_Collections_IEnumerator => IteratorKind.UntypedIEnumerator,
-                    SpecialType.System_Collections_Generic_IEnumerable_T => IteratorKind.IEnumerable,
-                    SpecialType.System_Collections_Generic_IEnumerator_T => IteratorKind.IEnumerator,
+                    SpecialType.System_Collections_IEnumerable => EnumerableKind.UntypedIEnumerable,
+                    SpecialType.System_Collections_IEnumerator => EnumerableKind.UntypedIEnumerator,
+                    SpecialType.System_Collections_Generic_IEnumerable_T => EnumerableKind.IEnumerable,
+                    SpecialType.System_Collections_Generic_IEnumerator_T => EnumerableKind.IEnumerator,
                     _ => typeDefinition.Name switch
                     {
                         "IAsyncEnumerable" when methodSymbol.IsAsync && typeDefinition.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
-                            => IteratorKind.IAsyncEnumerable,
+                            => EnumerableKind.IAsyncEnumerable,
                         "IAsyncEnumerator" when methodSymbol.IsAsync && typeDefinition.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
-                            => IteratorKind.IAsyncEnumerator,
-                        _ => IteratorKind.None
+                            => EnumerableKind.IAsyncEnumerator,
+                        _ => EnumerableKind.None
                     }
                 };
 
-            if ( iteratorKind == IteratorKind.None )
+            if ( iteratorKind == EnumerableKind.None )
             {
                 return default;
             }
@@ -45,16 +45,11 @@ namespace Caravela.Framework.Impl.CodeModel
                 return default;
             }
 
-            if ( methodSymbol.DeclaringSyntaxReferences.Any(
+            var isIterator = methodSymbol.DeclaringSyntaxReferences.Any(
                 r => r.GetSyntax() is MethodDeclarationSyntax { Body: { } body } &&
-                     FindYieldVisitor.Instance.VisitBlock( body ) ) )
-            {
-                return new IteratorInfo( iteratorKind, method );
-            }
-            else
-            {
-                return default;
-            }
+                     FindYieldVisitor.Instance.VisitBlock( body ) );
+
+            return new IteratorInfo( isIterator, iteratorKind, method );
         }
 
         // We use the Impl suffix to resolve an ambiguity with the public API.

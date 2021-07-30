@@ -8,7 +8,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Kinds of iterators.
     /// </summary>
-    public enum IteratorKind
+    public enum EnumerableKind
     {
         /// <summary>
         /// None. The method is not a <c>yield</c> iterator.

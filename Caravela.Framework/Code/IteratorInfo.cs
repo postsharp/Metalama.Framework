@@ -14,8 +14,9 @@ namespace Caravela.Framework.Code
 
         /// <summary>
         /// Gets a value indicating whether the method is an iterator (i.e., has a <c>yield return</c> or <c>yield break</c> statement).
+        /// This property evaluates to <c>false</c> for methods that return an enumerable type but do not use <c>yield</c>.
         /// </summary>
-        public bool IsIterator => this.IteratorKind != IteratorKind.None;
+        public bool IsIterator { get; }
 
         /// <summary>
         /// Gets the type of items being enumerated (the <c>int</c> in <c>IEnumerable&lt;int&gt;</c>).
@@ -41,21 +42,23 @@ namespace Caravela.Framework.Code
         }
 
         /// <summary>
-        /// Gets the kind of iterator (<see cref="Code.IteratorKind.IEnumerable"/>, <see cref="Code.IteratorKind.IEnumerator"/>,
-        /// <see cref="Code.IteratorKind.IAsyncEnumerable"/>, ...).
+        /// Gets the kind of enumerable (<see cref="Code.EnumerableKind.IEnumerable"/>, <see cref="Code.EnumerableKind.IEnumerator"/>,
+        /// <see cref="Code.EnumerableKind.IAsyncEnumerable"/>, ...), regardless of whether the method is a yield-base iterator (see <see cref="IsIterator"/>).
         /// </summary>
-        public IteratorKind IteratorKind { get; }
+        public EnumerableKind EnumerableKind { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the iterator is an async iterator, i.e. its <see cref="IteratorKind"/> is
-        /// <see cref="Code.IteratorKind.IAsyncEnumerable"/> or <see cref="Code.IteratorKind.IAsyncEnumerator"/>.
+        /// Gets a value indicating whether the iterator is an async iterator, i.e. its <see cref="EnumerableKind"/> is
+        /// <see cref="Code.EnumerableKind.IAsyncEnumerable"/> or <see cref="Code.EnumerableKind.IAsyncEnumerator"/>.
+        /// This property evaluates to <c>false</c> if the method is not an iterator.
         /// </summary>
-        public bool IsAsync => this.IteratorKind is IteratorKind.IAsyncEnumerable or IteratorKind.IAsyncEnumerator;
+        public bool IsAsyncIterator => this.IsIterator && this.EnumerableKind is EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator;
 
-        internal IteratorInfo( IteratorKind iteratorKind, IMethod? method )
+        internal IteratorInfo( bool isIterator, EnumerableKind enumerableKind, IMethod? method )
         {
             this._method = method;
-            this.IteratorKind = iteratorKind;
+            this.EnumerableKind = enumerableKind;
+            this.IsIterator = isIterator;
         }
     }
 }

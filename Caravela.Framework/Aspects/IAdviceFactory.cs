@@ -22,12 +22,14 @@ namespace Caravela.Framework.Aspects
         /// Overrides the implementation of a method.
         /// </summary>
         /// <param name="method">The method to override.</param>
-        /// <param name="templates">Name of a method in the aspect class whose implementation will be used as a template.
-        ///     This property must be annotated with <see cref="TemplateAttribute"/>.</param>
+        /// <param name="templateSelector">Name of a method in the aspect class whose implementation will be used as a template.
+        ///     This property must be annotated with <see cref="TemplateAttribute"/>. To select a different templates according to the kind of target method
+        /// (such as async or iterator methods), use the constructor of the <see cref="MethodTemplateSelector"/> type. To specify a single
+        /// template for all methods, pass a string.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property
         ///     of the <see cref="meta"/> API.</param>
         /// <seealso href="@overriding-members"/>
-        void OverrideMethod( IMethod method, in MethodTemplateSelector templates, Dictionary<string, object?>? tags = null );
+        void OverrideMethod( IMethod method, in MethodTemplateSelector templateSelector, Dictionary<string, object?>? tags = null );
 
         /// <summary>
         /// Introduces a new method or overrides the implementation of the existing one.
@@ -71,9 +73,12 @@ namespace Caravela.Framework.Aspects
         /// Overrides a field or property by specifying a method template for the getter, the setter, or both.
         /// </summary>
         /// <param name="targetDeclaration">The field or property to override.</param>
-        /// <param name="getTemplate">The name of the method of the aspect class whose implementation will be used as a template for the getter, or <c>null</c>
+        /// <param name="getTemplateSelector">The name of the method of the aspect class whose implementation will be used as a template for the getter, or <c>null</c>
         /// if the getter should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
-        /// be <c>T Get()</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.</param>
+        /// be <c>T Get()</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.
+        /// To select a different templates for iterator getters, use the constructor of the <see cref="GetterTemplateSelector"/> type. To specify a single
+        /// template for all properties, pass a string.
+        /// </param>
         /// <param name="setTemplate">The name of the method of the aspect class whose implementation will be used as a template for the getter, or <c>null</c>
         /// if the getter should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
         /// be <c>void Set(T value</c>  where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.</param>
@@ -82,7 +87,7 @@ namespace Caravela.Framework.Aspects
         /// <seealso href="@overriding-members"/>
         void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
-            in GetterTemplateSelector getTemplate = default,
+            in GetterTemplateSelector getTemplateSelector = default,
             string? setTemplate = null,
             Dictionary<string, object?>? tags = null );
 
