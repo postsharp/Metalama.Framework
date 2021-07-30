@@ -78,10 +78,10 @@ namespace Caravela.Framework.Impl.Advices
         {
             var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, true )!;
             var asyncTemplate = this.ValidateTemplateName( templateSelector.AsyncTemplate, TemplateKind.Async );
-            var enumerableTemplate = this.ValidateTemplateName( templateSelector.IteratorTemplate, TemplateKind.IEnumerable );
-            var enumeratorTemplate = this.ValidateTemplateName( templateSelector.IteratorEnumeratorTemplate, TemplateKind.IEnumerator );
-            var asyncEnumerableTemplate = this.ValidateTemplateName( templateSelector.AsyncIteratorTemplate, TemplateKind.IAsyncEnumerable );
-            var asyncEnumeratorTemplate = this.ValidateTemplateName( templateSelector.AsyncIteratorEnumeratorTemplate, TemplateKind.IAsyncEnumerator );
+            var enumerableTemplate = this.ValidateTemplateName( templateSelector.IteratorTemplate, TemplateKind.Iterator );
+            var enumeratorTemplate = this.ValidateTemplateName( templateSelector.IteratorEnumeratorTemplate, TemplateKind.IteratorEnumerator );
+            var asyncEnumerableTemplate = this.ValidateTemplateName( templateSelector.AsyncIteratorTemplate, TemplateKind.AsyncIterator );
+            var asyncEnumeratorTemplate = this.ValidateTemplateName( templateSelector.AsyncIteratorEnumeratorTemplate, TemplateKind.AsyncIteratorEnumerator );
 
             var selectedTemplate = defaultTemplate;
 
@@ -132,8 +132,8 @@ namespace Caravela.Framework.Impl.Advices
             }
 
             var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, required )!;
-            var enumerableTemplate = this.ValidateTemplateName( templateSelector.IteratorTemplate, TemplateKind.IEnumerable );
-            var enumeratorTemplate = this.ValidateTemplateName( templateSelector.IteratorEnumeratorTemplate, TemplateKind.IEnumerator );
+            var enumerableTemplate = this.ValidateTemplateName( templateSelector.IteratorTemplate, TemplateKind.Iterator );
+            var enumeratorTemplate = this.ValidateTemplateName( templateSelector.IteratorEnumeratorTemplate, TemplateKind.IteratorEnumerator );
 
             var selectedTemplate = defaultTemplate;
 
