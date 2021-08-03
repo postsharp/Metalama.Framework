@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Diagnostics;
@@ -131,6 +132,13 @@ namespace Caravela.Framework.Impl
                 "CR0034", _category,
                 "The template '{0}.{1}' was expected to be annotated with the [{2}] attribute, but it is annotated with the [{3}] attribute.", Error,
                 "The member does not have a template custom attribute." );
+
+        public static readonly DiagnosticDefinition<(string Layer1, string Layer2)> UnorderedLayers = new(
+            "CR0035", _category,
+            "The aspect layers '{0}' and '{1}' are not strongly ordered. Add an [assembly: " + nameof(AspectOrderAttribute) + "(...)] attribute to specify the order relationship " +
+            "between these two layers, otherwise the compilation will be non-deterministic.", Warning,
+            "Two layers are not strongly ordered."
+        );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>

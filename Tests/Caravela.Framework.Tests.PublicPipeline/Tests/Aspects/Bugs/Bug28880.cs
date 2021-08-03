@@ -4,9 +4,11 @@ using Caravela.Framework.Code;
 using Caravela.Framework;
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
+using  Caravela.Framework.Tests.Integration.Aspects.Bugs.Bug28880;
 
 // This checks that throw expressions in expression bodies work properly.
 
+[assembly: AspectOrder(typeof(MethodAspect), typeof(PropertyAspect), typeof(PropertyAspect2), typeof(EventAspect))]
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Bugs.Bug28880
 {

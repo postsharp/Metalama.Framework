@@ -2,6 +2,9 @@
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 using System;
+using Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Uninlineable;
+
+[assembly: AspectOrder(typeof(FirstOverrideAttribute), typeof(SecondOverrideAttribute))]
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Uninlineable
 {
