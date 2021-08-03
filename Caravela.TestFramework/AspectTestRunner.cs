@@ -66,7 +66,7 @@ namespace Caravela.TestFramework
             var observer = new Observer( testResult );
             pipeline.ServiceProvider.AddService( observer );
 
-            if ( pipeline.TryExecute( testResult.Diagnostics, testResult.InputCompilation!, CancellationToken.None, out var resultCompilation, out _ ) )
+            if ( pipeline.TryExecute( testResult.PipelineDiagnostics, testResult.InputCompilation!, CancellationToken.None, out var resultCompilation, out _ ) )
             {
                 testResult.OutputCompilation = resultCompilation;
                 testResult.HasOutputCode = true;
@@ -84,7 +84,7 @@ namespace Caravela.TestFramework
                     var peStream = new MemoryStream();
                     var emitResult = resultCompilation.Emit( peStream );
 
-                    testResult.Diagnostics.Report( emitResult.Diagnostics.Where( MustBeReported ) );
+                    testResult.OutputCompilationDiagnostics.Report( emitResult.Diagnostics.Where( MustBeReported ) );
 
                     if ( !emitResult.Success )
                     {
@@ -95,7 +95,7 @@ namespace Caravela.TestFramework
                 }
                 else
                 {
-                    testResult.Diagnostics.Report( resultCompilation.GetDiagnostics().Where( MustBeReported ) );
+                    testResult.OutputCompilationDiagnostics.Report( resultCompilation.GetDiagnostics().Where( MustBeReported ) );
                 }
             }
             else

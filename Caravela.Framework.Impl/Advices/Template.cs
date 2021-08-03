@@ -10,18 +10,23 @@ namespace Caravela.Framework.Impl.Advices
     {
         public T? Declaration { get; }
 
-        public TemplateKind Kind { get; }
+        public TemplateSelectionKind SelectedKind { get; }
 
-        public bool IsNull => this.Kind == TemplateKind.None;
+        public TemplateSelectionKind InterpretedKind { get; }
 
-        public bool IsNotNull => this.Kind != TemplateKind.None;
+        public bool IsNull => this.SelectedKind == TemplateSelectionKind.None;
 
-        public Template( T implementation, TemplateKind kind ) : this()
+        public bool IsNotNull => this.SelectedKind != TemplateSelectionKind.None;
+
+        public Template( T implementation, TemplateSelectionKind selectedKind ) : this( implementation, selectedKind, selectedKind ) { }
+
+        public Template( T implementation, TemplateSelectionKind selectedKind, TemplateSelectionKind interpretedKind )
         {
             this.Declaration = implementation;
-            this.Kind = kind;
+            this.SelectedKind = selectedKind;
+            this.InterpretedKind = interpretedKind != TemplateSelectionKind.None ? interpretedKind : selectedKind;
         }
 
-        public override string ToString() => this.IsNull ? "null" : $"{this.Declaration!.Name}:{this.Kind}";
+        public override string ToString() => this.IsNull ? "null" : $"{this.Declaration!.Name}:{this.SelectedKind}";
     }
 }

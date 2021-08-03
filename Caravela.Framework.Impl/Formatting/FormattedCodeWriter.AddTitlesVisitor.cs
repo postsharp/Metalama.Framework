@@ -9,7 +9,7 @@ using System;
 
 namespace Caravela.Framework.Impl.Formatting
 {
-    public sealed partial class HtmlCodeWriter
+    public partial class FormattedCodeWriter
     {
         private class AddTitlesVisitor : CSharpSyntaxWalker
         {

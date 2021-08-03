@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Observers;
 using Microsoft.CodeAnalysis;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace Caravela.TestFramework
 {
     public partial class BaseTestRunner
     {
-        protected class Observer : ICompileTimeCompilationBuilderObserver, ITemplateCompilerObserver, ICompilationModelObserver
+        protected class Observer : ICompileTimeCompilationBuilderObserver, ITemplateCompilerObserver, ICompilationModelObserver, ILinkerObserver
         {
             private readonly TestResult _testResult;
 
@@ -37,6 +38,8 @@ namespace Caravela.TestFramework
             }
 
             public void OnInitialCompilationModelCreated( ICompilation compilation ) => this._testResult.InitialCompilationModel = compilation;
+
+            public void OnIntermediateCompilationCreated( PartialCompilation compilation ) => this._testResult.IntermediateLinkerCompilation = compilation;
         }
     }
 }

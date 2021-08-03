@@ -2,14 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -17,24 +15,24 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         public static AsyncInfo GetAsyncInfoImpl( this IMethod method )
         {
-            var isAwaitable = TryGetAwaitableResultType( method.ReturnType, out var resultType );
+            var isAwaitable = TryGetAsyncInfo( method.ReturnType, out var resultType, out var hasMethodBuilder );
 
-            return new AsyncInfo( method.IsAsync, isAwaitable, resultType ?? method.ReturnType );
+            return new AsyncInfo( method.IsAsync, isAwaitable, resultType ?? method.ReturnType, hasMethodBuilder );
         }
 
         // Caches the result type of an awaitable for a type, or null if the type is not awaitable.
-        private static readonly ConditionalWeakTable<INamedTypeSymbol, ITypeSymbol?> _cache = new();
+        private static readonly ConditionalWeakTable<INamedTypeSymbol, AsyncInfoSymbol?> _cache = new();
 
         /// <summary>
         /// Gets the type of the result of an awaitable.
         /// </summary>
         /// <param name="awaitableType"></param>
         /// <returns></returns>
-        public static bool TryGetAwaitableResultType( IType awaitableType, out IType? awaitableResultType )
+        private static bool TryGetAsyncInfo( IType awaitableType, out IType? awaitableResultType, out bool hasMethodBuilder )
         {
             var returnType = awaitableType.GetSymbol();
 
-            if ( !TryGetAwaitableResultTypeSymbol( returnType, out var resultTypeSymbol ) )
+            if ( !TryGetAsyncInfo( returnType, out var resultTypeSymbol, out hasMethodBuilder ) )
             {
                 awaitableResultType = null;
 
@@ -48,34 +46,48 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        private static bool TryGetAwaitableResultTypeSymbol( ITypeSymbol returnType, [NotNullWhen( true )] out ITypeSymbol? returnTypeSymbol )
+        private static bool TryGetAsyncInfo( ITypeSymbol returnType, [NotNullWhen( true )] out ITypeSymbol? resultType, out bool hasMethodBuilder )
         {
             if ( returnType is not INamedTypeSymbol namedType )
             {
-                returnTypeSymbol = null;
+                resultType = null;
+                hasMethodBuilder = false;
 
                 return false;
             }
 
             // We're caching because we're always requesting the same few types.
             // ReSharper disable once InconsistentlySynchronizedField
-            if ( !_cache.TryGetValue( namedType, out returnTypeSymbol ) )
+            if ( !_cache.TryGetValue( namedType, out var cached ) )
             {
                 lock ( _cache )
                 {
-                    if ( !_cache.TryGetValue( namedType, out returnTypeSymbol ) )
+                    if ( !_cache.TryGetValue( namedType, out cached ) )
                     {
-                        returnTypeSymbol = GetAwaitableResultTypeCore( namedType );
+                        cached = GetAwaitableResultTypeCore( namedType );
 
-                        _cache.Add( namedType, returnTypeSymbol );
+                        _cache.Add( namedType, cached );
                     }
                 }
             }
 
-            return returnTypeSymbol != null;
+            if ( cached != null )
+            {
+                resultType = cached.ResultType;
+                hasMethodBuilder = cached.HasMethodBuilder;
+
+                return true;
+            }
+            else
+            {
+                resultType = null;
+                hasMethodBuilder = false;
+
+                return false;
+            }
         }
 
-        private static ITypeSymbol? GetAwaitableResultTypeCore( INamedTypeSymbol returnType )
+        private static AsyncInfoSymbol? GetAwaitableResultTypeCore( INamedTypeSymbol returnType )
         {
             var getAwaiterMethod = returnType.GetMembers( "GetAwaiter" ).OfType<IMethodSymbol>().FirstOrDefault( p => p.Parameters.Length == 0 );
 
@@ -83,6 +95,8 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 return null;
             }
+
+            var hasBuilder = returnType.OriginalDefinition.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(AsyncMethodBuilderAttribute) );
 
             var awaiterType = getAwaiterMethod.ReturnType;
             var getResultMethod = awaiterType.GetMembers( "GetResult" ).OfType<IMethodSymbol>().FirstOrDefault( p => p.Parameters.Length == 0 );
@@ -92,7 +106,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 return null;
             }
 
-            return getResultMethod.ReturnType;
+            return new AsyncInfoSymbol( getResultMethod.ReturnType, hasBuilder );
         }
 
         /// <summary>
@@ -104,10 +118,6 @@ namespace Caravela.Framework.Impl.CodeModel
                 ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( ReflectionMapper.GetInstance( compilation ).GetTypeSymbol( typeof(ValueTask) ) )
                 : returnTypeSyntax ?? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( method.ReturnType );
 
-        public static TypeSyntax GetIntermediateMethodReturnType( IMethod method )
-            => method.IsAsync && TypeExtensions.Equals( method.ReturnType, SpecialType.Void )
-                ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(
-                    ReflectionMapper.GetInstance( method.GetCompilationModel().RoslynCompilation ).GetTypeSymbol( typeof(ValueTask) ) )
-                : SyntaxHelpers.CreateSyntaxForReturnType( method );
+        private record AsyncInfoSymbol ( ITypeSymbol ResultType, bool HasMethodBuilder );
     }
 }

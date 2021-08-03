@@ -117,6 +117,9 @@ namespace Caravela.Framework.Impl.Templating
                     case nameof(meta.This):
                         return MetaMemberKind.This;
 
+                    case nameof(meta.Proceed):
+                        return MetaMemberKind.Proceed;
+
                     default:
                         return MetaMemberKind.Default;
                 }

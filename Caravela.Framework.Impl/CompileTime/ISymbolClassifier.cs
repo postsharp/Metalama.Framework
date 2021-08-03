@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal interface ISymbolClassifier
     {
-        TemplateMemberKind GetTemplateMemberKind( ISymbol symbol );
+        TemplateAttributeKind GetTemplateMemberKind( ISymbol symbol );
 
         /// <summary>
         /// Gets the scope of a symbol in the context of a template.

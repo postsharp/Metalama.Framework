@@ -19,24 +19,32 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Determines whether the property will be discarded in the final compilation (unreferenced or inlined declarations).
         /// </summary>
-        /// <param name="symbol">Override property symbol or overridden property symbol.</param>
+        /// <param name="referencedProperty">Override property symbol or overridden property symbol.</param>
         /// <returns></returns>
-        private bool IsDiscarded( IPropertySymbol symbol, ResolvedAspectReferenceSemantic semantic )
+        private bool IsDiscarded( IPropertySymbol referencedProperty, ResolvedAspectReferenceSemantic semantic )
         {
-            if ( this._analysisRegistry.IsOverride( symbol ) )
+            if ( this._analysisRegistry.IsOverride( referencedProperty ) )
             {
-                var overrideTarget = this._analysisRegistry.GetOverrideTarget( symbol );
+                var overrideTarget = this._analysisRegistry.GetOverrideTarget( referencedProperty );
                 var lastOverride = this._analysisRegistry.GetLastOverride( overrideTarget.AssertNotNull() );
-                var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertyGetAccessor );
-                var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertySetAccessor );
 
-                if ( SymbolEqualityComparer.Default.Equals( symbol, lastOverride ) )
+                var getAspectReferences = this._analysisRegistry.GetAspectReferences(
+                    referencedProperty,
+                    semantic,
+                    AspectReferenceTargetKind.PropertyGetAccessor );
+
+                var setAspectReferences = this._analysisRegistry.GetAspectReferences(
+                    referencedProperty,
+                    semantic,
+                    AspectReferenceTargetKind.PropertySetAccessor );
+
+                if ( SymbolEqualityComparer.Default.Equals( referencedProperty, lastOverride ) )
                 {
-                    return this.IsInlineable( symbol, semantic );
+                    return this.IsInlineable( referencedProperty, semantic );
                 }
                 else
                 {
-                    return this.IsInlineable( symbol, semantic ) || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0);
+                    return this.IsInlineable( referencedProperty, semantic ) || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0);
                 }
             }
             else
@@ -118,7 +126,7 @@ namespace Caravela.Framework.Impl.Linking
             }
             else if ( this._analysisRegistry.IsOverride( symbol ) )
             {
-                if ( this.IsDiscarded( symbol, ResolvedAspectReferenceSemantic.Default ) )
+                if ( this.IsDiscarded( (ISymbol) symbol, ResolvedAspectReferenceSemantic.Default ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }

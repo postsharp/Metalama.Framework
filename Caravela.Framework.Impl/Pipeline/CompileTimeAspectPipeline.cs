@@ -99,7 +99,8 @@ namespace Caravela.Framework.Impl.Pipeline
                 if ( this.ProjectOptions.FormatOutput && OutputCodeFormatter.CanFormat )
                 {
                     // ReSharper disable once AccessToModifiedClosure
-                    resultCompilation = Task.Run( () => OutputCodeFormatter.FormatAsync( resultCompilation, cancellationToken ), cancellationToken ).Result;
+                    resultCompilation = Task.Run( () => OutputCodeFormatter.FormatToSyntaxAsync( resultCompilation, cancellationToken ), cancellationToken )
+                        .Result;
                 }
 
                 // Add managed resources.

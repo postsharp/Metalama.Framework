@@ -4,10 +4,11 @@
 using Caravela.Framework.DesignTime.Contracts;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Formatting
 {
-    public sealed partial class HtmlCodeWriter
+    public partial class FormattedCodeWriter
     {
         private class GeneratedCodeVisitor : CSharpSyntaxWalker
         {
@@ -35,6 +36,18 @@ namespace Caravela.Framework.Impl.Formatting
                 }
 
                 base.Visit( node );
+
+                foreach ( var diagnosticAnnotation in node.GetAnnotations( DiagnosticAnnotationName ) )
+                {
+                    var span = node.Span;
+
+                    if ( node is MethodDeclarationSyntax method )
+                    {
+                        span = method.Identifier.Span;
+                    }
+
+                    this._textSpans.SetTag( span, DiagnosticTagName, diagnosticAnnotation.Data! );
+                }
             }
         }
     }

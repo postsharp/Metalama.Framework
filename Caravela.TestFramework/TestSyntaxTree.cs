@@ -109,12 +109,10 @@ namespace Caravela.TestFramework
 
             if ( this.Parent.TestInput!.Options.FormatOutput.GetValueOrDefault() )
             {
-                var formattedNode = await OutputCodeFormatter.FormatAsync( document );
+                var formatted = await OutputCodeFormatter.FormatToDocumentAsync( document );
 
-                this.OutputRunTimeDocument = this.Parent.OutputProject!.RemoveDocument( this.InputDocument.Id )
-                    .AddDocument( documentName, formattedNode );
-
-                this.OutputRunTimeSyntaxRoot = formattedNode;
+                this.OutputRunTimeDocument = formatted.Document;
+                this.OutputRunTimeSyntaxRoot = formatted.Syntax;
             }
             else
             {
@@ -122,7 +120,7 @@ namespace Caravela.TestFramework
                 this.OutputRunTimeSyntaxRoot = compilationUnit;
             }
 
-            this.OutputRunTimeSourceText = this.OutputRunTimeDocument.GetSyntaxTreeAsync().Result!.GetText();
+            this.OutputRunTimeSourceText = await (await this.OutputRunTimeDocument.GetSyntaxTreeAsync())!.GetTextAsync();
         }
 
         internal TestSyntaxTree( string? inputPath, Document document, TestResult parent )

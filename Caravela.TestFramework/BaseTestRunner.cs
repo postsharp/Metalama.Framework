@@ -123,7 +123,7 @@ namespace Caravela.TestFramework
 
                 if ( errors.Any() )
                 {
-                    testResult.Diagnostics.Report( errors );
+                    testResult.InputCompilationDiagnostics.Report( errors );
                     testResult.SetFailed( "The initial compilation failed." );
 
                     return testResult;
@@ -302,7 +302,7 @@ namespace Caravela.TestFramework
                 var output = testResult.GetConsolidatedTestOutput();
                 var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", output );
 
-                var formattedOutput = await OutputCodeFormatter.FormatAsync( outputDocument );
+                var formattedOutput = await OutputCodeFormatter.FormatToSyntaxAsync( outputDocument );
                 var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.OutputHtml );
                 var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput );
 

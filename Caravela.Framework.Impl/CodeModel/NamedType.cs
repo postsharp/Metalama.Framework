@@ -18,6 +18,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 using SpecialType = Caravela.Framework.Code.SpecialType;
@@ -69,6 +70,8 @@ namespace Caravela.Framework.Impl.CodeModel
                         => SpecialType.IAsyncEnumerable,
                     "IAsyncEnumerator" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
                         => SpecialType.IAsyncEnumerator,
+                    nameof(ValueTask) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
+                        => this.TypeSymbol.IsGenericType ? SpecialType.ValueTask_T : SpecialType.ValueTask,
                     _ => SpecialType.None
                 };
             }

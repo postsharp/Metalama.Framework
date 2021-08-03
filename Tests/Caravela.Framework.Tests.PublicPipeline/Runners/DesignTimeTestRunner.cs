@@ -35,7 +35,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var pipeline = new DesignTimeAspectPipeline( buildOptions, domain, true );
             var pipelineResult = pipeline.Execute( PartialCompilation.CreateComplete( testResult.InputCompilation! ), CancellationToken.None );
 
-            testResult.Diagnostics.Report( pipelineResult.Diagnostics.ReportedDiagnostics );
+            testResult.PipelineDiagnostics.Report( pipelineResult.Diagnostics.ReportedDiagnostics );
 
             if ( pipelineResult.Success )
             {

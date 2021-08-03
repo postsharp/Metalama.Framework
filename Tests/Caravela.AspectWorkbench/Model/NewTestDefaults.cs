@@ -9,23 +9,19 @@ namespace Caravela.AspectWorkbench.Model
             @"using System;
 using System.Collections.Generic;
 using Caravela.Framework;
-using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 
 // TODO: Change the namespace
 namespace Caravela.Framework.Tests.Integration.Templating.ChangeMe
 {
-    class Aspect
+    class Aspect : Attribute
     {
-        [TestTemplate]
-        dynamic Template()
-        {
-            return meta.Proceed();
-        }
     }
 
     class TargetCode
     {
+        [Aspect]
         int Method(int a)
         {
             return a;

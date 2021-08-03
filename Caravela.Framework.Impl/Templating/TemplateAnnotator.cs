@@ -165,8 +165,8 @@ namespace Caravela.Framework.Impl.Templating
             {
                 switch ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) )
                 {
-                    case TemplateMemberKind.Introduction:
-                    case TemplateMemberKind.InterfaceMember:
+                    case TemplateAttributeKind.Introduction:
+                    case TemplateAttributeKind.InterfaceMember:
                         return TemplatingScope.RunTimeOnly;
 
                     default:
@@ -493,7 +493,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( scope == TemplatingScope.CompileTimeOnly )
                 {
                     // Template code cannot be referenced in a template until this is implemented.
-                    if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) == TemplateMemberKind.Template )
+                    if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) == TemplateAttributeKind.Template )
                     {
                         this.ReportDiagnostic(
                             TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate,
@@ -1152,7 +1152,7 @@ namespace Caravela.Framework.Impl.Templating
                 symbol = associatedSymbol;
             }
 
-            if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) != TemplateMemberKind.None )
+            if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) != TemplateAttributeKind.None )
             {
                 var previousTemplateMember = this._currentTemplateMember;
                 this._currentTemplateMember = symbol;
@@ -1468,9 +1468,16 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitAwaitExpression( AwaitExpressionSyntax node )
         {
-            this.ReportUnsupportedLanguageFeature( node.AwaitKeyword, "await" );
+            // Await is always run-time.
 
-            return base.VisitAwaitExpression( node );
+            ExpressionSyntax transformedExpression;
+
+            using ( this.WithScopeContext( ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, "'await' expression" ) ) )
+            {
+                transformedExpression = this.Visit( node.Expression );
+            }
+
+            return node.WithExpression( transformedExpression ).AddScopeAnnotation( TemplatingScope.RunTimeOnly );
         }
 
         public override SyntaxNode? VisitYieldStatement( YieldStatementSyntax node )

@@ -38,21 +38,21 @@ namespace Caravela.Framework.Impl.Linking
             return false;
         }
 
-        private bool IsInlineable( IEventSymbol symbol, ResolvedAspectReferenceSemantic semantic )
+        private bool IsInlineable( IEventSymbol inlinedEvent, ResolvedAspectReferenceSemantic semantic )
         {
-            if ( GetDeclarationFlags( symbol ).HasFlag( LinkerDeclarationFlags.NotInlineable ) )
+            if ( GetDeclarationFlags( inlinedEvent ).HasFlag( LinkerDeclarationFlags.NotInlineable ) )
             {
                 return false;
             }
 
-            if ( this._analysisRegistry.IsLastOverride( symbol ) )
+            if ( this._analysisRegistry.IsLastOverride( inlinedEvent ) )
             {
                 return true;
             }
 
-            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
-            var addAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventAddAccessor );
-            var removeAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventRemoveAccessor );
+            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( inlinedEvent, semantic );
+            var addAspectReferences = this._analysisRegistry.GetAspectReferences( inlinedEvent, semantic, AspectReferenceTargetKind.EventAddAccessor );
+            var removeAspectReferences = this._analysisRegistry.GetAspectReferences( inlinedEvent, semantic, AspectReferenceTargetKind.EventRemoveAccessor );
 
             if ( selfAspectReferences.Count > 0 )
             {
@@ -89,7 +89,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var members = new List<MemberDeclarationSyntax> { GetLinkedDeclaration() };
 
-                if ( !this.IsInlineable( (IEventSymbol) this._analysisRegistry.GetLastOverride( symbol ), ResolvedAspectReferenceSemantic.Default ) )
+                if ( !this.IsInlineable( (ISymbol) (IEventSymbol) this._analysisRegistry.GetLastOverride( symbol ), ResolvedAspectReferenceSemantic.Default ) )
                 {
                     members.Add( GetTrampolineEvent( eventDeclaration, symbol ) );
                 }
@@ -104,7 +104,7 @@ namespace Caravela.Framework.Impl.Linking
             }
             else
             {
-                if ( this.IsDiscarded( symbol, ResolvedAspectReferenceSemantic.Default ) )
+                if ( this.IsDiscarded( (ISymbol) symbol, ResolvedAspectReferenceSemantic.Default ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
@@ -164,7 +164,7 @@ namespace Caravela.Framework.Impl.Linking
             }
             else
             {
-                if ( this.IsDiscarded( symbol, ResolvedAspectReferenceSemantic.Default ) )
+                if ( this.IsDiscarded( (ISymbol) symbol, ResolvedAspectReferenceSemantic.Default ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }

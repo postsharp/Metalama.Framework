@@ -1503,5 +1503,21 @@ namespace Caravela.Framework.Impl.Templating
                 ArgumentList(
                     SeparatedList( new[] { Argument( transformedCondition ), Argument( transformedWhenTrue ), Argument( transformedWhenFalse ) } ) ) );
         }
+
+        protected override ExpressionSyntax TransformYieldStatement( YieldStatementSyntax node )
+        {
+            if ( node.Kind() == SyntaxKind.YieldReturnStatement && node.Expression is InvocationExpressionSyntax invocation &&
+                 this._templateMemberClassifier.GetMetaMemberKind( invocation.Expression ) == MetaMemberKind.Proceed )
+            {
+                // We have a 'yield return meta.Proceed()' statement.
+
+                return InvocationExpression(
+                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ConditionalExpression) ) );
+            }
+            else
+            {
+                return base.TransformYieldStatement( node );
+            }
+        }
     }
 }

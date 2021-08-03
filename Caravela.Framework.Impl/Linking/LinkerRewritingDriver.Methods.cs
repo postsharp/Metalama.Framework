@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
@@ -19,28 +20,28 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Determines whether the method will be discarded in the final compilation (unreferenced or inlined declarations).
         /// </summary>
-        /// <param name="symbol">Override method symbol or overridden method symbol.</param>
+        /// <param name="referencedMethod">Override method symbol or overridden method symbol.</param>
         /// <returns></returns>
-        private bool IsDiscarded( IMethodSymbol symbol, ResolvedAspectReferenceSemantic semantic )
+        private bool IsDiscarded( IMethodSymbol referencedMethod, ResolvedAspectReferenceSemantic semantic )
         {
-            if ( symbol.MethodKind != MethodKind.Ordinary )
+            if ( referencedMethod.MethodKind != MethodKind.Ordinary )
             {
                 throw new AssertionFailedException();
             }
 
-            if ( this._analysisRegistry.IsOverride( symbol ) )
+            if ( this._analysisRegistry.IsOverride( referencedMethod ) )
             {
-                var aspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
-                var overrideTarget = this._analysisRegistry.GetOverrideTarget( symbol );
+                var aspectReferences = this._analysisRegistry.GetAspectReferences( referencedMethod, semantic );
+                var overrideTarget = this._analysisRegistry.GetOverrideTarget( referencedMethod );
                 var lastOverride = this._analysisRegistry.GetLastOverride( overrideTarget.AssertNotNull() );
 
-                if ( SymbolEqualityComparer.Default.Equals( symbol, lastOverride ) )
+                if ( SymbolEqualityComparer.Default.Equals( referencedMethod, lastOverride ) )
                 {
-                    return this.IsInlineable( symbol, semantic );
+                    return this.IsInlineable( referencedMethod, semantic );
                 }
                 else
                 {
-                    return this.IsInlineable( symbol, semantic ) || aspectReferences.Count == 0;
+                    return this.IsInlineable( referencedMethod, semantic ) || aspectReferences.Count == 0;
                 }
             }
             else
@@ -49,28 +50,29 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private bool IsInlineable( IMethodSymbol symbol, ResolvedAspectReferenceSemantic semantic )
+        private bool IsInlineable( IMethodSymbol inlinedMethod, ResolvedAspectReferenceSemantic semantic )
         {
-            switch ( symbol.MethodKind )
+            switch ( inlinedMethod.MethodKind )
             {
                 case MethodKind.Ordinary:
                 case MethodKind.ExplicitInterfaceImplementation:
-                    if ( GetDeclarationFlags( symbol ).HasFlag( LinkerDeclarationFlags.NotInlineable ) )
+                    if ( GetDeclarationFlags( inlinedMethod ).HasFlag( LinkerDeclarationFlags.NotInlineable ) )
                     {
                         return false;
                     }
 
-                    if ( this._analysisRegistry.IsLastOverride( symbol ) )
+                    if ( inlinedMethod.GetIteratorInfoImpl().IsIterator )
                     {
+                        return false;
+                    }
+
+                    if ( this._analysisRegistry.IsLastOverride( inlinedMethod ) )
+                    {
+                        // TODO: Seems weird to return true here, what if a condition later returns false?
                         return true;
                     }
 
-                    if ( symbol.GetIteratorInfoImpl().IsIterator )
-                    {
-                        return false;
-                    }
-
-                    var aspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
+                    var aspectReferences = this._analysisRegistry.GetAspectReferences( inlinedMethod, semantic );
 
                     if ( aspectReferences.Count != 1 )
                     {
@@ -89,7 +91,7 @@ namespace Caravela.Framework.Impl.Linking
             return this._analysisRegistry.GetAspectReferences( symbol, semantic ).Count > 0;
         }
 
-        public IReadOnlyList<MemberDeclarationSyntax> RewriteMethod( MethodDeclarationSyntax methodDeclaration, IMethodSymbol symbol )
+        private IReadOnlyList<MemberDeclarationSyntax> RewriteMethod( MethodDeclarationSyntax methodDeclaration, IMethodSymbol symbol )
         {
             if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
             {
@@ -98,7 +100,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( this.IsInlineable( lastOverride, ResolvedAspectReferenceSemantic.Default ) )
                 {
-                    members.Add( GetLinkedDeclaration() );
+                    members.Add( GetLinkedDeclaration( lastOverride.IsAsync ) );
                 }
                 else
                 {
@@ -115,26 +117,39 @@ namespace Caravela.Framework.Impl.Linking
             }
             else if ( this._analysisRegistry.IsOverride( symbol ) )
             {
-                if ( this.IsDiscarded( symbol, ResolvedAspectReferenceSemantic.Default ) )
+                if ( this.IsDiscarded( (ISymbol) symbol, ResolvedAspectReferenceSemantic.Default ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
 
-                return new[] { GetLinkedDeclaration() };
+                return new[] { GetLinkedDeclaration( symbol.IsAsync ) };
             }
             else
             {
                 throw new AssertionFailedException();
             }
 
-            MethodDeclarationSyntax GetLinkedDeclaration()
+            MethodDeclarationSyntax GetLinkedDeclaration( bool isAsync )
             {
+                var linkedBody = this.GetLinkedBody(
+                    this.GetBodySource( symbol ),
+                    InliningContext.Create( this, symbol ) );
+
+                var modifiers = methodDeclaration.Modifiers;
+
+                if ( isAsync && !symbol.IsAsync )
+                {
+                    modifiers = modifiers.Add( Token( TriviaList( ElasticSpace ), SyntaxKind.AsyncKeyword, TriviaList( ElasticSpace ) ) );
+                }
+                else if ( !isAsync && symbol.IsAsync )
+                {
+                    modifiers = TokenList( modifiers.Where( m => m.Kind() != SyntaxKind.AsyncKeyword ) );
+                }
+
                 return methodDeclaration
                     .WithExpressionBody( null )
-                    .WithBody(
-                        this.GetLinkedBody(
-                            this.GetBodySource( symbol ),
-                            InliningContext.Create( this, symbol ) ) )
+                    .WithModifiers( modifiers )
+                    .WithBody( linkedBody )
                     .WithLeadingTrivia( methodDeclaration.GetLeadingTrivia() )
                     .WithTrailingTrivia( methodDeclaration.GetTrailingTrivia() );
             }
@@ -145,7 +160,7 @@ namespace Caravela.Framework.Impl.Linking
             var returnType = AsyncHelper.GetIntermediateMethodReturnType( this.IntermediateCompilation, symbol, method.ReturnType );
 
             var modifiers = symbol
-                .GetSyntaxModifierList( ModifierCategories.Async | ModifierCategories.Static | ModifierCategories.Unsafe )
+                .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
                 .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
 
             return

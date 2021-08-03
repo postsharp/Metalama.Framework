@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 
 namespace Caravela.Framework.Impl.Observers
 {
@@ -16,5 +17,10 @@ namespace Caravela.Framework.Impl.Observers
         /// </summary>
         /// <param name="compilation"></param>
         void OnInitialCompilationModelCreated( ICompilation compilation );
+    }
+
+    public interface ILinkerObserver : IService
+    {
+        void OnIntermediateCompilationCreated( PartialCompilation compilation );
     }
 }

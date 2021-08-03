@@ -10,10 +10,10 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using TextRange = System.Windows.Documents.TextRange;
 
 namespace Caravela.AspectWorkbench.Views
 {
@@ -33,6 +33,7 @@ namespace Caravela.AspectWorkbench.Views
             var newViewModel = new MainViewModel();
             this._viewModel = newViewModel;
             this.DataContext = newViewModel;
+            this.detailPaneComboBox.ItemsSource = Enum.GetValues( typeof(DetailPaneContent) ).Cast<DetailPaneContent>();
             Post.Cast<MainViewModel, INotifyPropertyChanged>( newViewModel ).PropertyChanged += this.ViewModel_PropertyChanged;
         }
 
@@ -72,6 +73,11 @@ namespace Caravela.AspectWorkbench.Views
 
                 case nameof(MainViewModel.ErrorsDocument):
                     this.errorsTextBlock.Document = this._viewModel.ErrorsDocument ?? new FlowDocument();
+
+                    break;
+
+                case nameof(MainViewModel.IntermediateLinkerCodeCodeDocument):
+                    this.intermediateLinkerCodeTextBox.Document = this._viewModel.IntermediateLinkerCodeCodeDocument ?? new FlowDocument();
 
                     break;
             }

@@ -3,18 +3,15 @@
 
 using Caravela.Framework.DesignTime.Contracts;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace Caravela.Framework.Impl.Formatting
 {
-    public sealed partial class HtmlCodeWriter
+    public sealed class HtmlCodeWriter : FormattedCodeWriter
     {
-        private const string _csClassTagName = "csharp";
         private readonly HtmlCodeWriterOptions _options;
 
         public HtmlCodeWriter( HtmlCodeWriterOptions options )
@@ -24,61 +21,16 @@ namespace Caravela.Framework.Impl.Formatting
 
         public void Write( Document document, SyntaxNode? annotatedSyntaxRoot, TextWriter textWriter )
         {
-            var sourceText = document.GetTextAsync().Result;
-            var syntaxTree = document.GetSyntaxTreeAsync().Result!;
-
-            // Process the annotations by the template compiler.
-            ClassifiedTextSpanCollection classifiedTextSpans;
-
-            if ( annotatedSyntaxRoot != null )
-            {
-                var classifier = new TextSpanClassifier( sourceText, detectRegion: true );
-                classifier.Visit( annotatedSyntaxRoot );
-                classifiedTextSpans = (ClassifiedTextSpanCollection) classifier.ClassifiedTextSpans;
-            }
-            else
-            {
-                classifiedTextSpans = new ClassifiedTextSpanCollection();
-            }
+            var (sourceText, classifiedTextSpans) = GetClassifiedTextSpans( document, annotatedSyntaxRoot, addTitles: this._options.AddTitles );
 
             if ( this._options.Prolog != null )
             {
                 textWriter.Write( this._options.Prolog );
             }
 
-            // Process the annotations by the aspect linker (on the output document).
-            GeneratedCodeVisitor generatedCodeVisitor = new( classifiedTextSpans );
-            generatedCodeVisitor.Visit( syntaxTree.GetRoot() );
-
             textWriter.Write( "<pre><code class=\"nohighlight\">" );
 
             var i = 0;
-
-            // Add C# classifications
-            var semanticModel = document.Project.GetCompilationAsync().Result!.GetSemanticModel( syntaxTree );
-
-            foreach ( var csharpSpan in Classifier.GetClassifiedSpans(
-                    semanticModel,
-                    syntaxTree.GetRoot().Span,
-                    document.Project!.Solution.Workspace )
-                .OrderBy( c => c.TextSpan.Start )
-                .ThenBy( c => c.ClassificationType ) )
-            {
-                var existingSpan = classifiedTextSpans.GetClassifiedSpans( csharpSpan.TextSpan ).SingleOrDefault();
-
-                var combinedClassification = existingSpan.Tags != null! && existingSpan.Tags.TryGetValue( _csClassTagName, out var existingClassification )
-                    ? existingClassification + ";" + csharpSpan.ClassificationType
-                    : csharpSpan.ClassificationType;
-
-                classifiedTextSpans.SetTag( csharpSpan.TextSpan, _csClassTagName, combinedClassification );
-            }
-
-            // Add XML doc based on the input compilation.
-            if ( this._options.AddTitles )
-            {
-                var visitor = new AddTitlesVisitor( classifiedTextSpans, semanticModel );
-                visitor.Visit( syntaxTree.GetRoot() );
-            }
 
             foreach ( var classifiedSpan in classifiedTextSpans )
             {
@@ -108,7 +60,7 @@ namespace Caravela.Framework.Impl.Formatting
                             classes.Add( $"cr-{classifiedSpan.Classification}" );
                         }
 
-                        if ( classifiedSpan.Tags.TryGetValue( _csClassTagName, out var csClassification ) )
+                        if ( classifiedSpan.Tags.TryGetValue( CSharpClassTagName, out var csClassification ) )
                         {
                             foreach ( var classification in csClassification.Split( ';' ) )
                             {

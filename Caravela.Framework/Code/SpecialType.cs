@@ -63,8 +63,12 @@ namespace Caravela.Framework.Code
         /// </summary>
         IAsyncEnumerator,
 
+        ValueTask,
+
+        ValueTask_T,
+
         // Must be last.
-        
+
         /// <summary>
         /// Number of items in this enumeration.
         /// </summary>

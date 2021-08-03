@@ -7,12 +7,10 @@ using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Formatting;
 using PostSharp.Patterns.Model;
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
@@ -20,6 +18,13 @@ using System.Windows.Media;
 
 namespace Caravela.AspectWorkbench.ViewModels
 {
+    public enum DetailPaneContent
+    {
+        ProgramOutput,
+        CompiledTemplate,
+        IntermediateLinkerCode
+    }
+
     [NotifyPropertyChanged]
     public class MainViewModel
     {
@@ -39,21 +44,27 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public FlowDocument? TransformedCodeDocument { get; set; }
 
+        public FlowDocument? IntermediateLinkerCodeCodeDocument { get; set; }
+
         public FlowDocument? ErrorsDocument { get; set; }
 
         public bool IsNewTest => string.IsNullOrEmpty( this.CurrentPath );
 
         private string? CurrentPath { get; set; }
 
-        public bool ShowCompiledTemplate { get; set; }
+        public DetailPaneContent DetailPaneContent { get; set; }
 
         public string? ActualProgramOutput { get; set; }
 
         public string? ExpectedProgramOutput { get; set; }
 
-        public Visibility CompiledTemplateVisibility => this.ShowCompiledTemplate ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility CompiledTemplateVisibility
+            => this.DetailPaneContent == DetailPaneContent.CompiledTemplate ? Visibility.Visible : Visibility.Collapsed;
 
-        public Visibility ProgramOutputVisibility => this.ShowCompiledTemplate ? Visibility.Collapsed : Visibility.Visible;
+        public Visibility ProgramOutputVisibility => this.DetailPaneContent == DetailPaneContent.ProgramOutput ? Visibility.Visible : Visibility.Collapsed;
+
+        public Visibility IntermediateLinkerCodeVisibility
+            => this.DetailPaneContent == DetailPaneContent.IntermediateLinkerCode ? Visibility.Visible : Visibility.Collapsed;
 
         public async Task RunTestAsync()
         {
@@ -88,8 +99,6 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, null );
 
-                var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject( testInput.Options ) );
-
                 var compilationStopwatch = Stopwatch.StartNew();
 
                 var testResult = await testRunner.RunTestAsync( testInput );
@@ -102,12 +111,10 @@ namespace Caravela.AspectWorkbench.ViewModels
                 if ( annotatedTemplateSyntax != null )
                 {
                     // Display the annotated syntax tree.
-                    var sourceText = await testResult.SyntaxTrees.First().InputDocument.GetTextAsync();
-                    var classifier = new TextSpanClassifier( sourceText, testRunner is TemplatingTestRunner );
-                    classifier.Visit( annotatedTemplateSyntax );
-                    var metaSpans = classifier.ClassifiedTextSpans;
-
-                    this.ColoredSourceCodeDocument = await syntaxColorizer.WriteSyntaxColoring( sourceText, metaSpans );
+                    this.ColoredSourceCodeDocument = SyntaxColorizer.WriteSyntaxColoring(
+                        testResult.SyntaxTrees.First().InputDocument!,
+                        testResult.Diagnostics,
+                        annotatedTemplateSyntax );
                 }
 
                 var errorsDocument = new FlowDocument();
@@ -121,20 +128,27 @@ namespace Caravela.AspectWorkbench.ViewModels
                     // Render the transformed tree.
                     var project3 = testRunner.CreateProject( testInput.Options );
                     var document3 = project3.AddDocument( "name.cs", transformedTemplateSyntax );
-                    var optionSet = (await document3.GetOptionsAsync()).WithChangedOption( FormattingOptions.IndentationSize, 4 );
 
-                    var formattedTransformedSyntaxRoot = Formatter.Format( transformedTemplateSyntax, project3.Solution.Workspace, optionSet );
-                    var text4 = formattedTransformedSyntaxRoot.GetText( Encoding.UTF8 );
-                    var spanMarker = new TextSpanClassifier( text4 );
-                    spanMarker.Visit( formattedTransformedSyntaxRoot );
-                    this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
+                    var formattedDocument3 = await OutputCodeFormatter.FormatToDocumentAsync( document3 );
+
+                    this.CompiledTemplateDocument = SyntaxColorizer.WriteSyntaxColoring( formattedDocument3.Document, testResult.Diagnostics );
                 }
 
                 var consolidatedOutputSyntax = testResult.GetConsolidatedTestOutput();
                 var consolidatedOutputText = await consolidatedOutputSyntax.SyntaxTree.GetTextAsync();
+                var consolidatedOutputDocument = testResult.OutputProject!.AddDocument( "ConsolidatedOutput", consolidatedOutputSyntax );
 
                 // Display the transformed code.
-                this.TransformedCodeDocument = await syntaxColorizer.WriteSyntaxColoring( consolidatedOutputText, null );
+                this.TransformedCodeDocument = SyntaxColorizer.WriteSyntaxColoring( consolidatedOutputDocument );
+
+                // Display the intermediate linker code.
+                if ( testResult.IntermediateLinkerCompilation != null )
+                {
+                    var intermediateSyntaxTree = testResult.IntermediateLinkerCompilation.Compilation.SyntaxTrees.First();
+                    var linkerProject = testRunner.CreateProject( testInput.Options );
+                    var linkerDocument = linkerProject.AddDocument( "name.cs", intermediateSyntaxTree.GetRoot() );
+                    this.IntermediateLinkerCodeCodeDocument = SyntaxColorizer.WriteSyntaxColoring( linkerDocument );
+                }
 
                 // Compare the output and shows the result.
                 if ( BaseTestRunner.NormalizeTestOutput( this.ExpectedTransformedCode, false ) ==

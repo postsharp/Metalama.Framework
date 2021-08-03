@@ -19,6 +19,11 @@ namespace Caravela.Framework.Code
         public bool IsAwaitable { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the return type of the method has an <c>AsyncMethodBuilderAttribute</c> custom attribute.
+        /// </summary>
+        public bool HasMethodBuilder { get; }
+
+        /// <summary>
         /// Gets a value indicating whether the return type of the method is either awaitable (see <see cref="IsAwaitable"/>) either <c>void</c>.
         /// </summary>
         public bool IsAwaitableOrVoid => this.IsAwaitable || TypeExtensions.Equals( this.ResultType, SpecialType.Void );
@@ -28,11 +33,12 @@ namespace Caravela.Framework.Code
         /// </summary>
         public IType ResultType { get; }
 
-        internal AsyncInfo( bool isAsync, bool isAwaitable, IType resultType )
+        internal AsyncInfo( bool isAsync, bool isAwaitable, IType resultType, bool hasMethodBuilder )
         {
             this.IsAsync = isAsync;
             this.IsAwaitable = isAwaitable;
             this.ResultType = resultType;
+            this.HasMethodBuilder = hasMethodBuilder;
         }
     }
 }

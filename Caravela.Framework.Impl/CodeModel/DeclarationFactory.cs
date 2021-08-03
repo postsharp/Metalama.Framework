@@ -13,6 +13,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -164,6 +165,8 @@ namespace Caravela.Framework.Impl.CodeModel
                     specialType switch
                     {
                         SpecialType.List => (INamedType) this.GetTypeByReflectionType( typeof(List<>) ),
+                        SpecialType.ValueTask => (INamedType) this.GetTypeByReflectionType( typeof(ValueTask) ),
+                        SpecialType.ValueTask_T => (INamedType) this.GetTypeByReflectionType( typeof(ValueTask<>) ),
                         SpecialType.IAsyncEnumerable => this.GetTypeByReflectionName( "System.Collections.Generic.IAsyncEnumerable`1" ),
                         SpecialType.IAsyncEnumerator => this.GetTypeByReflectionName( "System.Collections.Generic.IAsyncEnumerator`1" ),
                         _ => throw new ArgumentOutOfRangeException( nameof(specialType) )

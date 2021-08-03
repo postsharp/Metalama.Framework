@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Formatting;
@@ -14,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.Templating
@@ -298,6 +300,10 @@ namespace Caravela.Framework.Impl.Templating
                     return SyntaxFactory.ConditionalExpression( condition, whenTrue, whenFalse );
             }
         }
+
+        public static StatementSyntax YieldProceed() => ExpansionContext.CreateYieldProceedStatement();
+
+        public static ValueTask<dynamic?> ProceedAsync() => meta.Proceed();
 
         private class InitializeCookie : IDisposable
         {

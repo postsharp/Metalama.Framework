@@ -9,10 +9,10 @@ namespace Caravela.Framework.Impl.Advices
 {
     /// <summary>
     /// Enumeration of the kind of templates that were specified by the user using <see cref="MethodTemplateSelector"/> or
-    /// <see cref="GetterTemplateSelector"/>. A <see cref="TemplateKind"/> represents the intention of the user, not
+    /// <see cref="GetterTemplateSelector"/>. A <see cref="TemplateSelectionKind"/> represents the intention of the user, not
     /// a characteristic of the declaration used as a template.
     /// </summary>
-    internal enum TemplateKind
+    internal enum TemplateSelectionKind
     {
         /// <summary>
         /// Not a template.
@@ -23,31 +23,31 @@ namespace Caravela.Framework.Impl.Advices
         /// Default template.
         /// </summary>
         Default,
-        
+
         /// <summary>
         /// <see cref="MethodTemplateSelector.AsyncTemplate"/>.
         /// </summary>
         Async,
-        
+
         /// <summary>
         /// <see cref="MethodTemplateSelector.IteratorTemplate"/> or <see cref="GetterTemplateSelector.IteratorTemplate"/>.
         /// </summary>
-        Iterator,
-        
+        IEnumerable,
+
         /// <summary>
         /// <see cref="MethodTemplateSelector.IteratorEnumeratorTemplate"/> or <see cref="GetterTemplateSelector.IteratorEnumeratorTemplate"/>.
         /// </summary>
-        IteratorEnumerator,
-        
+        IEnumerator,
+
         /// <summary>
         /// <see cref="MethodTemplateSelector.AsyncIteratorTemplate"/>.
         /// </summary>
-        AsyncIterator,
-        
+        IAsyncEnumerable,
+
         /// <summary>
         /// <see cref="MethodTemplateSelector.AsyncIteratorEnumeratorTemplate"/>.
         /// </summary>
-        AsyncIteratorEnumerator,
+        IAsyncEnumerator,
 
         /// <summary>
         /// Templated used for an introduction. Can be any type, must be detected from the signature and implementation.

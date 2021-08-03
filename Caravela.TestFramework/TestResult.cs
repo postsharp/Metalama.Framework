@@ -2,13 +2,16 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using PostSharp.Patterns;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -27,7 +30,14 @@ namespace Caravela.TestFramework
         private readonly List<TestSyntaxTree> _syntaxTrees = new();
         private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
 
-        public DiagnosticList Diagnostics { get; } = new();
+        public DiagnosticList InputCompilationDiagnostics { get; } = new();
+
+        public DiagnosticList OutputCompilationDiagnostics { get; } = new();
+
+        public DiagnosticList PipelineDiagnostics { get; } = new();
+
+        public IEnumerable<Diagnostic> Diagnostics
+            => this.OutputCompilationDiagnostics.Concat( this.PipelineDiagnostics ).Concat( this.InputCompilationDiagnostics );
 
         public IReadOnlyList<TestSyntaxTree> SyntaxTrees => this._syntaxTrees;
 
@@ -80,6 +90,8 @@ namespace Caravela.TestFramework
         public Compilation? CompileTimeCompilation { get; private set; }
 
         public ICompilation? InitialCompilationModel { get; internal set; }
+
+        internal PartialCompilation? IntermediateLinkerCompilation { get; set; }
 
         public string? ProgramOutput { get; internal set; }
 
@@ -214,10 +226,27 @@ namespace Caravela.TestFramework
             var consolidatedCompilationUnit = SyntaxFactory.CompilationUnit();
 
             // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
-            var outputSyntaxRoot = this.SyntaxTrees.FirstOrDefault()?.OutputRunTimeSyntaxRoot;
+            var outputSyntaxTree = this.SyntaxTrees.FirstOrDefault();
+            var outputSyntaxRoot = outputSyntaxTree?.OutputRunTimeSyntaxRoot;
 
             if ( this.HasOutputCode && outputSyntaxRoot != null )
             {
+                // Add diagnostics as annotations.
+                foreach ( var diagnostic in this.OutputCompilationDiagnostics )
+                {
+                    if ( Path.GetFileName( diagnostic.Location.SourceTree!.FilePath ) == Path.GetFileName( outputSyntaxTree!.InputPath ) )
+                    {
+                        var node = outputSyntaxRoot.FindNode( diagnostic.Location.SourceSpan );
+
+                        outputSyntaxRoot = outputSyntaxRoot.ReplaceNode(
+                            node,
+                            node.WithAdditionalAnnotations(
+                                new SyntaxAnnotation(
+                                    FormattedCodeWriter.DiagnosticAnnotationName,
+                                    diagnostic.Severity + ": " + diagnostic.GetMessage() ) ) );
+                    }
+                }
+
                 // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
                 // passed to this method.
 

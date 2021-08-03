@@ -30,7 +30,7 @@
                 <Button Content="Run" Click="RunButton_Click" />
             </ToolBar>
             <ToolBar Band="0" BandIndex="1">
-                <CheckBox IsChecked="{Binding ShowCompiledTemplate}" VerticalAlignment="Center">Show Compiled Template</CheckBox>
+                <ComboBox Name="detailPaneComboBox" SelectedValue="{Binding DetailPaneContent}" />
             </ToolBar>
         </ToolBarTray>
 
@@ -109,6 +109,19 @@
                              VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto"
                              VerticalScrollBarVisibility="Auto" FontFamily="Consolas" />
             </DockPanel>
+
+            <DockPanel Grid.Column="6" Visibility="{Binding Path=IntermediateLinkerCodeVisibility}">
+                <TextBlock DockPanel.Dock="Top">
+                    <TextBlock>
+                        Intermediate Linker Code
+                    </TextBlock>
+                    >
+                </TextBlock>
+                <RichTextBox Name="intermediateLinkerCodeTextBox" IsReadOnly="True" HorizontalAlignment="Stretch"
+                             VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto"
+                             VerticalScrollBarVisibility="Auto" FontFamily="Consolas" />
+            </DockPanel>
+
 
             <Grid Grid.Column="6" Visibility="{Binding Path=ProgramOutputVisibility}">
                 <Grid.RowDefinitions>

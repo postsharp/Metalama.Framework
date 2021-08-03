@@ -6,9 +6,9 @@ using Caravela.Framework.Aspects;
 namespace Caravela.Framework.Impl.CompileTime
 {
     /// <summary>
-    /// Kinds of template members.
+    /// Kinds of template members as specified by their attribute.
     /// </summary>
-    internal enum TemplateMemberKind
+    internal enum TemplateAttributeKind
     {
         /// <summary>
         /// Not a template.
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.CompileTime
         Template,
 
         /// <summary>
-        /// Introduction advice.
+        /// Declarative introduction advice.
         /// </summary>
         Introduction,
 

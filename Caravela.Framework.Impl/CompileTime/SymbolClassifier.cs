@@ -52,9 +52,9 @@ namespace Caravela.Framework.Impl.CompileTime
             this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
         }
 
-        public TemplateMemberKind GetTemplateMemberKind( ISymbol symbol ) => this.GetTemplateMemberKind( symbol, false );
+        public TemplateAttributeKind GetTemplateMemberKind( ISymbol symbol ) => this.GetTemplateMemberKind( symbol, false );
 
-        private TemplateMemberKind GetTemplateMemberKind( ISymbol symbol, bool isInherited )
+        private TemplateAttributeKind GetTemplateMemberKind( ISymbol symbol, bool isInherited )
         {
             // Look for a [Template] attribute on the symbol.
             var templateAttribute = symbol
@@ -65,13 +65,13 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var templateKind = GetTemplateMemberKind( templateAttribute );
 
-                if ( templateKind != TemplateMemberKind.None )
+                if ( templateKind != TemplateAttributeKind.None )
                 {
                     // Ignore any abstract member.
                     if ( !isInherited && (symbol.IsAbstract
                                           || symbol.GetAttributes().Any( a => this.IsAttributeOfType( a, this._ignoreUnlessOverriddenAttribute ) )) )
                     {
-                        return TemplateMemberKind.Abstract;
+                        return TemplateAttributeKind.Abstract;
                     }
                     else
                     {
@@ -83,7 +83,7 @@ namespace Caravela.Framework.Impl.CompileTime
             // Look for a [InterfaceMember] attribute on the symbol.
             if ( symbol.GetAttributes().Any( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._interfaceMemberAttribute ) ) )
             {
-                return TemplateMemberKind.InterfaceMember;
+                return TemplateAttributeKind.InterfaceMember;
             }
 
             switch ( symbol )
@@ -97,24 +97,24 @@ namespace Caravela.Framework.Impl.CompileTime
                     return this.GetTemplateMemberKind( overriddenProperty!, true );
 
                 default:
-                    return TemplateMemberKind.None;
+                    return TemplateAttributeKind.None;
             }
         }
 
         private bool IsAttributeOfType( AttributeData a, ITypeSymbol type ) => this._compilation.HasImplicitConversion( a.AttributeClass, type );
 
-        private static TemplateMemberKind GetTemplateMemberKind( AttributeData templateAttribute )
+        private static TemplateAttributeKind GetTemplateMemberKind( AttributeData templateAttribute )
         {
             switch ( templateAttribute.AttributeClass?.Name )
             {
                 case nameof(IntroduceAttribute):
-                    return TemplateMemberKind.Introduction;
+                    return TemplateAttributeKind.Introduction;
 
                 case nameof(InterfaceMemberAttribute):
-                    return TemplateMemberKind.InterfaceMember;
+                    return TemplateAttributeKind.InterfaceMember;
 
                 default:
-                    return TemplateMemberKind.Template;
+                    return TemplateAttributeKind.Template;
             }
         }
 
@@ -171,6 +171,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
             switch ( symbol )
             {
+                case ITypeSymbol type when string.Equals( type.Name, "dynamic", StringComparison.Ordinal ):
+                    return TemplatingScope.Dynamic;
+
                 case ITypeParameterSymbol:
                     return TemplatingScope.Both;
 
@@ -199,6 +202,9 @@ namespace Caravela.Framework.Impl.CompileTime
                         {
                             switch ( scope )
                             {
+                                case TemplatingScope.Dynamic:
+                                    return TemplatingScope.Dynamic;
+
                                 case TemplatingScope.RunTimeOnly:
                                     runtimeCount++;
 
@@ -309,9 +315,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
             switch ( symbol )
             {
-                case ITypeSymbol type when string.Equals( type.Name, "dynamic", StringComparison.Ordinal ):
-                    return AddToCache( TemplatingScope.RunTimeOnly );
-
                 case ITypeSymbol type:
                     {
                         if ( symbol is INamedTypeSymbol namedType )

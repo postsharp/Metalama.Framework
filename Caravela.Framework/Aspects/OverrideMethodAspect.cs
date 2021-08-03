@@ -28,13 +28,11 @@ namespace Caravela.Framework.Aspects
                 nameof(this.OverrideAsyncEnumerableMethod),
                 nameof(this.OverrideAsyncEnumeratorMethod) );
 #else
-
             var templates = new MethodTemplateSelector(
                 nameof(this.OverrideMethod),
                 nameof(this.OverrideAsyncMethod),
                 nameof(this.OverrideEnumerableMethod),
                 nameof(this.OverrideEnumeratorMethod) );
-
 #endif
 
             builder.AdviceFactory.OverrideMethod( builder.TargetDeclaration, templates );

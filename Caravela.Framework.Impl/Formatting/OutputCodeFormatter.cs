@@ -23,7 +23,17 @@ namespace Caravela.Framework.Impl.Formatting
         /// </summary>
         public static readonly SyntaxAnnotation PossibleRedundantAnnotation = new( "Caravela_PossibleRedundant" );
 
-        public static async ValueTask<CompilationUnitSyntax> FormatAsync(
+        public static async ValueTask<(Document Document, CompilationUnitSyntax Syntax)> FormatToDocumentAsync(
+            Document document,
+            bool reformatAll = true,
+            CancellationToken cancellationToken = default )
+        {
+            var syntax = await FormatToSyntaxAsync( document, reformatAll, cancellationToken );
+
+            return (document.Project.RemoveDocument( document.Id ).AddDocument( document.Name, syntax, document.Folders, document.FilePath ), syntax);
+        }
+
+        public static async ValueTask<CompilationUnitSyntax> FormatToSyntaxAsync(
             Document document,
             bool reformatAll = true,
             CancellationToken cancellationToken = default )
@@ -48,7 +58,7 @@ namespace Caravela.Framework.Impl.Formatting
             return outputSyntaxRoot;
         }
 
-        public static async Task<PartialCompilation> FormatAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
+        public static async Task<PartialCompilation> FormatToSyntaxAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
         {
             var (project, syntaxTreeMap) = await CreateProjectFromCompilation( compilation.Compilation, cancellationToken );
 
@@ -66,7 +76,7 @@ namespace Caravela.Framework.Impl.Formatting
                     continue;
                 }
 
-                var formattedSyntaxRoot = await FormatAsync( document, false, cancellationToken );
+                var formattedSyntaxRoot = await FormatToSyntaxAsync( document, false, cancellationToken );
 
                 syntaxTreeReplacements.Add( new ModifiedSyntaxTree( syntaxTree.WithRootAndOptions( formattedSyntaxRoot, syntaxTree.Options ), syntaxTree ) );
             }
@@ -93,7 +103,7 @@ namespace Caravela.Framework.Impl.Formatting
                     continue;
                 }
 
-                var formattedSyntaxRoot = await FormatAsync( document, true, cancellationToken );
+                var formattedSyntaxRoot = await FormatToSyntaxAsync( document, true, cancellationToken );
 
                 formattedCompilation = formattedCompilation.ReplaceSyntaxTree(
                     syntaxTree,

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
@@ -12,6 +13,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
+using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SpecialType = Caravela.Framework.Code.SpecialType;
 
@@ -21,6 +23,9 @@ namespace Caravela.Framework.Impl.Templating
 
     internal class TemplateExpansionContext
     {
+        private readonly bool _isAsyncTemplate;
+        private readonly Func<TemplateExpansionContext, StatementSyntax>? _expandYieldProceed;
+
         public TemplateLexicalScope LexicalScope { get; }
 
         public MetaApi MetaApi { get; }
@@ -31,8 +36,12 @@ namespace Caravela.Framework.Impl.Templating
             ICompilation compilation,
             TemplateLexicalScope lexicalScope,
             SyntaxSerializationService syntaxSerializationService,
-            ICompilationElementFactory syntaxFactory )
+            ICompilationElementFactory syntaxFactory,
+            bool isAsyncTemplate = false,
+            Func<TemplateExpansionContext, StatementSyntax>? expandYieldProceed = null )
         {
+            this._isAsyncTemplate = isAsyncTemplate;
+            this._expandYieldProceed = expandYieldProceed;
             this.TemplateInstance = templateInstance;
             this.MetaApi = metaApi;
             this.Compilation = compilation;
@@ -62,13 +71,16 @@ namespace Caravela.Framework.Impl.Templating
 
             var returnType = method.ReturnType;
 
-            var asyncInfo = method.GetAsyncInfoImpl();
-
-            if ( asyncInfo.IsAsync && asyncInfo.IsAwaitable )
+            if ( this._isAsyncTemplate )
             {
                 // If we are in an awaitable async method, the consider the return type as seen by the method body,
                 // not the one as seen from outside.
-                returnType = asyncInfo.ResultType;
+                var asyncInfo = method.GetAsyncInfoImpl();
+
+                if ( asyncInfo.IsAwaitable )
+                {
+                    returnType = asyncInfo.ResultType;
+                }
             }
 
             if ( TypeExtensions.Equals( returnType, SpecialType.Void ) )
@@ -308,6 +320,20 @@ namespace Caravela.Framework.Impl.Templating
             else
             {
                 return this.CreateReturnStatement( returnExpression.CreateExpression( expressionText, location ) );
+            }
+        }
+
+        public StatementSyntax CreateYieldProceedStatement()
+        {
+            if ( this._expandYieldProceed != null )
+            {
+                return this._expandYieldProceed( this );
+            }
+            else
+            {
+                return YieldStatement(
+                    SyntaxKind.YieldReturnStatement,
+                    ((IDynamicExpression) meta.Proceed()!).CreateExpression() );
             }
         }
     }

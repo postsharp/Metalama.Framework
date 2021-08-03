@@ -28,9 +28,7 @@ namespace Caravela.Framework.Impl
     {
         private readonly Dictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
 
-        public ImmutableDictionary<string, AspectClass> ImplementedTemplates { get; }
-
-        public ImmutableDictionary<string, AspectClass> AbstractTemplates { get; }
+        public ImmutableDictionary<string, AspectClassMember> Members { get; }
 
         private readonly IServiceProvider _serviceProvider;
         private readonly UserCodeInvoker _userCodeInvoker;
@@ -100,57 +98,54 @@ namespace Caravela.Framework.Impl
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
             this.AspectType = aspectType;
             this._prototypeAspectInstance = prototype;
-            (this.ImplementedTemplates, this.AbstractTemplates) = this.DetectTemplates( compilation, aspectTypeSymbol, diagnosticAdder );
+            this.Members = this.GetMembers( compilation, aspectTypeSymbol, diagnosticAdder );
         }
 
-        private ( ImmutableDictionary<string, AspectClass> Implemented, ImmutableDictionary<string, AspectClass> Abstract )
-            DetectTemplates( Compilation compilation, INamedTypeSymbol type, IDiagnosticAdder diagnosticAdder )
+        private ImmutableDictionary<string, AspectClassMember> GetMembers( Compilation compilation, INamedTypeSymbol type, IDiagnosticAdder diagnosticAdder )
         {
             if ( compilation == null! )
             {
                 // This is a test scenario where templates must not be detected.
-                return (ImmutableDictionary<string, AspectClass>.Empty, ImmutableDictionary<string, AspectClass>.Empty);
+                return null!;
             }
 
             var symbolClassifier = this._serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
 
-            var implementedTemplatesBuilder = this.BaseClass?.ImplementedTemplates.ToBuilder()
-                                              ?? ImmutableDictionary.CreateBuilder<string, AspectClass>( StringComparer.Ordinal );
+            var members = this.BaseClass?.Members.ToBuilder()
+                          ?? ImmutableDictionary.CreateBuilder<string, AspectClassMember>( StringComparer.Ordinal );
 
-            var abstractTemplatesBuilder = this.BaseClass?.AbstractTemplates.ToBuilder()
-                                           ?? ImmutableDictionary.CreateBuilder<string, AspectClass>( StringComparer.Ordinal );
-
-            foreach ( var member in type.GetMembers() )
+            foreach ( var memberSymbol in type.GetMembers() )
             {
-                var templateMemberKind = symbolClassifier.GetTemplateMemberKind( member );
+                var templateMemberKind = symbolClassifier.GetTemplateMemberKind( memberSymbol );
+                var aspectClassMember = new AspectClassMember( memberSymbol.Name, this, templateMemberKind, memberSymbol is IMethodSymbol { IsAsync: true } );
 
-                if ( templateMemberKind != TemplateMemberKind.None )
+                if ( templateMemberKind != TemplateAttributeKind.None )
                 {
-                    if ( implementedTemplatesBuilder.TryGetValue( member.Name, out var existingClass ) && !member.IsOverride )
+                    if ( members.TryGetValue( memberSymbol.Name, out var existingMember ) && !memberSymbol.IsOverride &&
+                         existingMember.Kind != TemplateAttributeKind.None )
                     {
                         // The template is already defined and we are not overwriting a template of the base class.
                         diagnosticAdder.Report(
                             GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefined.CreateDiagnostic(
-                                member.GetDiagnosticLocation(),
-                                (member, existingClass.FullName) ) );
+                                memberSymbol.GetDiagnosticLocation(),
+                                (memberSymbol, existingMember.AspectClass.FullName) ) );
 
                         continue;
                     }
 
                     // Add or replace the template.
-                    if ( templateMemberKind == TemplateMemberKind.Abstract )
+                    members[memberSymbol.Name] = aspectClassMember;
+                }
+                else
+                {
+                    if ( !members.ContainsKey( memberSymbol.Name ) )
                     {
-                        abstractTemplatesBuilder[member.Name] = this;
-                    }
-                    else
-                    {
-                        abstractTemplatesBuilder.Remove( member.Name );
-                        implementedTemplatesBuilder[member.Name] = this;
+                        members.Add( memberSymbol.Name, aspectClassMember );
                     }
                 }
             }
 
-            return (implementedTemplatesBuilder.ToImmutable(), abstractTemplatesBuilder.ToImmutable());
+            return members.ToImmutable();
         }
 
         private void Initialize()

@@ -59,8 +59,8 @@ namespace Caravela.Framework.Impl.Linking
                 _ => throw new AssertionFailedException()
             };
 
-        private bool IsInlineable( ISymbol symbol, ResolvedAspectReferenceSemantic semantic )
-            => symbol switch
+        private bool IsInlineable( ISymbol inlinedSymbol, ResolvedAspectReferenceSemantic semantic )
+            => inlinedSymbol switch
             {
                 IMethodSymbol methodSymbol => this.IsInlineable( methodSymbol, semantic ),
                 IPropertySymbol propertySymbol => this.IsInlineable( propertySymbol, semantic ),
@@ -71,7 +71,10 @@ namespace Caravela.Framework.Impl.Linking
 
         private bool IsInlineableReference( ResolvedAspectReference aspectReference )
             => aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable )
+               && IsAsync( aspectReference.ContainingSymbol ) == IsAsync( aspectReference.ResolvedSymbol )
                && this.GetInliner( aspectReference, out _ );
+
+        private static bool IsAsync( ISymbol symbol ) => symbol is IMethodSymbol { IsAsync: true };
 
         private bool GetInliner( ResolvedAspectReference aspectReference, [NotNullWhen( true )] out Inliner? matchingInliner )
         {
