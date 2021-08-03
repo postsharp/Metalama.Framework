@@ -22,17 +22,25 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns></returns>
         private bool IsDiscarded( IEventSymbol symbol, ResolvedAspectReferenceSemantic semantic )
         {
-            var addAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventAddAccessor );
-            var removeAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventRemoveAccessor );
-
-            if ( addAspectReferences.Count == 0 && removeAspectReferences.Count == 0 )
+            if ( symbol.GetPrimaryDeclaration().AssertNotNull().GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotDiscardable ) )
             {
-                return true;
+                return false;
             }
 
-            if ( this.IsInlineable( symbol, semantic ) )
+            if ( this._analysisRegistry.IsOverride( symbol ) )
             {
-                return true;
+                var addAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventAddAccessor );
+                var removeAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventRemoveAccessor );
+
+                if ( addAspectReferences.Count == 0 && removeAspectReferences.Count == 0 )
+                {
+                    return true;
+                }
+
+                if ( this.IsInlineable( symbol, semantic ) )
+                {
+                    return true;
+                }
             }
 
             return false;
@@ -47,6 +55,7 @@ namespace Caravela.Framework.Impl.Linking
 
             if ( this._analysisRegistry.IsLastOverride( symbol ) )
             {
+                // Last overrides should be inlined if not marked as not-inlineable.
                 return true;
             }
 

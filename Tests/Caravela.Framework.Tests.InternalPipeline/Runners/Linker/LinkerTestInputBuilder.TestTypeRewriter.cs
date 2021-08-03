@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
@@ -28,8 +29,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
 
             private readonly TestRewriter _owner;
             private TypeDeclarationSyntax? _currentType;
-            private MemberDeclarationSyntax? _currentInsertPosition;
-            private InsertPositionRelation _currentInsertPositionRelation;
+            private InsertPosition? _currentInsertPosition;
 
             public IReadOnlyList<IObservableTransformation> ObservableTransformations => this._observableTransformations;
 
@@ -68,8 +68,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                 node = AssignNodeId( node );
 
                 this._currentType = node;
-                this._currentInsertPosition = node;
-                this._currentInsertPositionRelation = InsertPositionRelation.Within;
+                this._currentInsertPosition = new InsertPosition( InsertPositionRelation.Within, node);
 
                 return node;
             }
@@ -83,8 +82,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                     if ( !isPseudoMember )
                     {
                         newNode = AssignNodeId( newNode.AssertNotNull() );
-                        this._currentInsertPosition = (MemberDeclarationSyntax) newNode.AssertNotNull();
-                        this._currentInsertPositionRelation = InsertPositionRelation.After;
+                        this._currentInsertPosition = new InsertPosition( InsertPositionRelation.After, (MemberDeclarationSyntax) newNode.AssertNotNull() );
                     }
 
                     return newNode;
@@ -92,8 +90,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
 
                 // Non-pseudo nodes become the next insert positions.
                 node = AssignNodeId( node );
-                this._currentInsertPosition = node;
-                this._currentInsertPositionRelation = InsertPositionRelation.After;
+                this._currentInsertPosition = new InsertPosition( InsertPositionRelation.After, node );
 
                 return node;
             }
@@ -107,8 +104,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                     if ( !isPseudoMember )
                     {
                         newNode = AssignNodeId( newNode.AssertNotNull() );
-                        this._currentInsertPosition = (MemberDeclarationSyntax) newNode.AssertNotNull();
-                        this._currentInsertPositionRelation = InsertPositionRelation.After;
+                        this._currentInsertPosition = new InsertPosition( InsertPositionRelation.After, (MemberDeclarationSyntax) newNode.AssertNotNull() );
                     }
 
                     return newNode;
@@ -116,8 +112,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
 
                 // Non-pseudo nodes become the next insert positions.
                 node = AssignNodeId( node );
-                this._currentInsertPosition = node;
-                this._currentInsertPositionRelation = InsertPositionRelation.After;
+                this._currentInsertPosition = new InsertPosition( InsertPositionRelation.After, node );
 
                 return node;
             }
@@ -131,8 +126,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                     if ( !isPseudoMember )
                     {
                         newNode = AssignNodeId( newNode.AssertNotNull() );
-                        this._currentInsertPosition = (MemberDeclarationSyntax) newNode.AssertNotNull();
-                        this._currentInsertPositionRelation = InsertPositionRelation.After;
+                        this._currentInsertPosition = new InsertPosition( InsertPositionRelation.After, (MemberDeclarationSyntax) newNode.AssertNotNull() );
                     }
 
                     return newNode;
@@ -140,8 +134,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
 
                 // Non-pseudo nodes become the next insert positions.
                 node = AssignNodeId( node );
-                this._currentInsertPosition = node;
-                this._currentInsertPositionRelation = InsertPositionRelation.After;
+                this._currentInsertPosition = new InsertPosition( InsertPositionRelation.After, node );
 
                 return node;
             }
@@ -155,8 +148,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                     if ( !isPseudoMember )
                     {
                         newNode = AssignNodeId( newNode.AssertNotNull() );
-                        this._currentInsertPosition = (MemberDeclarationSyntax) newNode.AssertNotNull();
-                        this._currentInsertPositionRelation = InsertPositionRelation.After;
+                        this._currentInsertPosition = new InsertPosition( InsertPositionRelation.After, (MemberDeclarationSyntax) newNode.AssertNotNull() );
                     }
 
                     return newNode;
@@ -164,8 +156,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
 
                 // Non-pseudo nodes become the next insert positions.
                 node = AssignNodeId( node );
-                this._currentInsertPosition = node;
-                this._currentInsertPositionRelation = InsertPositionRelation.After;
+                this._currentInsertPosition = new InsertPosition( InsertPositionRelation.After, node );
 
                 return node;
             }
@@ -182,6 +173,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                 AttributeSyntax? pseudoOverrideAttribute = null;
 
                 var notInlineable = false;
+                var notDiscardable = false;
 
                 foreach ( var attributeList in node.AttributeLists )
                 {
@@ -193,6 +185,10 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                         if ( name == "PseudoNotInlineable" )
                         {
                             notInlineable = true;
+                        }
+                        else if ( name == "PseudoNotDiscardable" )
+                        {
+                            notDiscardable = true;
                         }
                     }
 
@@ -210,7 +206,8 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                             pseudoOverrideAttribute = attribute;
                         }
                         else if ( name.StartsWith( "Pseudo", StringComparison.Ordinal ) &&
-                                  !string.Equals( name, "PseudoNotInlineable", StringComparison.Ordinal ) )
+                                  !string.Equals( name, "PseudoNotInlineable", StringComparison.Ordinal ) &&
+                                  !string.Equals( name, "PseudoNotDiscardable", StringComparison.Ordinal ) )
                         {
                             throw new NotSupportedException( $"Unsupported pseudo attribute {name}" );
                         }
@@ -222,13 +219,13 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                     // Introduction will create a temporary declaration, that will help us to provide values for IMethod member.
                     isPseudoMember = true;
 
-                    return this.ProcessPseudoIntroduction( node, newAttributeLists, pseudoIntroductionAttribute, notInlineable );
+                    return this.ProcessPseudoIntroduction( node, newAttributeLists, pseudoIntroductionAttribute, notInlineable, notDiscardable );
                 }
                 else if ( pseudoOverrideAttribute != null )
                 {
                     isPseudoMember = true;
 
-                    return this.ProcessPseudoOverride( node, newAttributeLists, pseudoOverrideAttribute, notInlineable );
+                    return this.ProcessPseudoOverride( node, newAttributeLists, pseudoOverrideAttribute, notInlineable, notDiscardable );
                 }
                 else
                 {
@@ -236,9 +233,21 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
 
                     var transformedNode = node.WithAttributeLists( List( newAttributeLists ) );
 
-                    if ( notInlineable )
+                    if ( notInlineable || notDiscardable )
                     {
-                        transformedNode = transformedNode.WithLinkerDeclarationFlags( LinkerDeclarationFlags.NotInlineable );
+                        var flags = LinkerDeclarationFlags.None;
+                        
+                        if (notInlineable)
+                        {
+                            flags |= LinkerDeclarationFlags.NotInlineable;
+                        }
+
+                        if ( notDiscardable )
+                        {
+                            flags |= LinkerDeclarationFlags.NotDiscardable;
+                        }
+
+                        transformedNode = transformedNode.WithLinkerDeclarationFlags( flags );
                     }
 
                     return transformedNode;
@@ -249,7 +258,8 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                 MemberDeclarationSyntax node,
                 List<AttributeListSyntax> newAttributeLists,
                 AttributeSyntax attribute,
-                bool notInlineable )
+                bool notInlineable,
+                bool notDiscardable )
             {
                 if ( attribute.ArgumentList == null || attribute.ArgumentList.Arguments.Count < 1 || attribute.ArgumentList.Arguments.Count > 3 )
                 {
@@ -271,9 +281,21 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
 
                 var introductionSyntax = node.WithAttributeLists( List( newAttributeLists ) );
 
-                if ( notInlineable )
+                if ( notInlineable || notDiscardable )
                 {
-                    introductionSyntax = introductionSyntax.WithLinkerDeclarationFlags( LinkerDeclarationFlags.NotInlineable );
+                    var flags = LinkerDeclarationFlags.None;
+
+                    if ( notInlineable )
+                    {
+                        flags |= LinkerDeclarationFlags.NotInlineable;
+                    }
+
+                    if ( notDiscardable )
+                    {
+                        flags |= LinkerDeclarationFlags.NotDiscardable;
+                    }
+
+                    introductionSyntax = introductionSyntax.WithLinkerDeclarationFlags( flags );
                 }
 
                 // Create transformation fake.
@@ -281,9 +303,10 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                     o => o
                         .Implements<IObservableTransformation>()
                         .Implements<IMemberIntroduction>()
-                        .Implements<IMethod>()
+                        .Implements<IDeclarationBuilder>()
                         .Implements<IDeclarationInternal>()
-                        .Implements<ITestTransformation>() );
+                        .Implements<ITestTransformation>()
+                        .Implements<IMethod>() );
 
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Introduced" );
@@ -304,9 +327,11 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                 A.CallTo( () => ((ITestTransformation) transformation).ContainingNodeId ).Returns( GetNodeId( this._currentType.AssertNotNull() ) );
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
-                    .Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
+                    .Returns( this._currentInsertPosition!.Value.SyntaxNode != null ? GetNodeId( this._currentInsertPosition.Value.SyntaxNode ) : null );
+                A.CallTo( () => ((ITestTransformation) transformation).InsertPositionBuilder )
+                    .Returns( this._currentInsertPosition!.Value.Builder );
 
-                A.CallTo( () => ((ITestTransformation) transformation).InsertPositionRelation ).Returns( this._currentInsertPositionRelation );
+                A.CallTo( () => ((ITestTransformation) transformation).InsertPositionRelation ).Returns( this._currentInsertPosition.Value.Relation );
 
                 var introducedElementName = node switch
                 {
@@ -318,7 +343,10 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                 };
 
                 A.CallTo( () => ((ITestTransformation) transformation).IntroducedElementName ).Returns( introducedElementName );
-                A.CallTo( () => ((ITestTransformation) transformation).SymbolHelperNodeId ).Returns( GetNodeId( symbolHelperDeclaration ) );
+
+                var symbolHelperId = GetNodeId( symbolHelperDeclaration );
+                this._currentInsertPosition = new InsertPosition(InsertPositionRelation.After, (IDeclarationBuilder)transformation);
+                A.CallTo( () => ((ITestTransformation) transformation).SymbolHelperNodeId ).Returns( symbolHelperId );
 
                 this._observableTransformations.Add( (IObservableTransformation) transformation );
 
@@ -329,7 +357,8 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                 MemberDeclarationSyntax node,
                 List<AttributeListSyntax> newAttributeLists,
                 AttributeSyntax attribute,
-                bool notInlineable )
+                bool notInlineable,
+                bool notDiscardable )
             {
                 if ( attribute.ArgumentList == null || attribute.ArgumentList.Arguments.Count < 2 || attribute.ArgumentList.Arguments.Count > 3 )
                 {
@@ -418,9 +447,21 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                         throw new NotSupportedException();
                 }
 
-                if ( notInlineable )
+                if ( notInlineable || notDiscardable )
                 {
-                    overrideSyntax = overrideSyntax.WithLinkerDeclarationFlags( LinkerDeclarationFlags.NotInlineable );
+                    var flags = LinkerDeclarationFlags.None;
+
+                    if ( notInlineable )
+                    {
+                        flags |= LinkerDeclarationFlags.NotInlineable;
+                    }
+
+                    if ( notDiscardable )
+                    {
+                        flags |= LinkerDeclarationFlags.NotDiscardable;
+                    }
+
+                    overrideSyntax = overrideSyntax.WithLinkerDeclarationFlags( flags );
                 }
 
                 var symbolHelperDeclaration = GetSymbolHelperDeclaration( node );
@@ -450,9 +491,11 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                 A.CallTo( () => ((ITestTransformation) transformation).ContainingNodeId ).Returns( GetNodeId( this._currentType.AssertNotNull() ) );
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
-                    .Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
+                    .Returns( this._currentInsertPosition!.Value.SyntaxNode != null ? GetNodeId( this._currentInsertPosition.Value.SyntaxNode ) : null );
+                A.CallTo( () => ((ITestTransformation) transformation).InsertPositionBuilder )
+                    .Returns( this._currentInsertPosition!.Value.Builder );
 
-                A.CallTo( () => ((ITestTransformation) transformation).InsertPositionRelation ).Returns( this._currentInsertPositionRelation );
+                A.CallTo( () => ((ITestTransformation) transformation).InsertPositionRelation ).Returns( this._currentInsertPosition.Value.Relation );
 
                 A.CallTo( () => ((ITestTransformation) transformation).OverriddenDeclarationName ).Returns( overriddenDeclarationName );
                 A.CallTo( () => ((ITestTransformation) transformation).SymbolHelperNodeId ).Returns( GetNodeId( symbolHelperDeclaration ) );

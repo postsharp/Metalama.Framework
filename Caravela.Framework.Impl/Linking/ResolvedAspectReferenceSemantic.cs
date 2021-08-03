@@ -6,13 +6,18 @@ namespace Caravela.Framework.Impl.Linking
     internal enum ResolvedAspectReferenceSemantic
     {
         /// <summary>
-        /// Default symbol semantic, i.e. what this symbol would be in the final compilation.
+        /// Default symbol semantic, i.e. version in the intermediate compilation.
         /// </summary>
         Default,
 
         /// <summary>
-        /// Original version of the symbol. Relevant only for override targets.
+        /// Base symbol semantic. Relevant only for introduced override targets with no overridden declaration.
         /// </summary>
-        Original
+        Base,
+
+        /// <summary>
+        /// Final version of the symbol. Relevant only for override targets.
+        /// </summary>
+        Final,
     }
 }

@@ -158,6 +158,12 @@ namespace Caravela.Framework.Impl.Linking
                 // Collect syntax node replacements from inliners and redirect the rest to correct targets.
                 foreach ( var aspectReference in containedAspectReferences )
                 {
+                    if ( aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable ) && SymbolEqualityComparer.Default.Equals( aspectReference.ContainingSymbol, aspectReference.ResolvedSymbol) )
+                    {
+                        // Inlineable self-reference would cause 
+                        throw new AssertionFailedException();
+                    }
+
                     if ( this.IsInlineable( aspectReference.ResolvedSymbol, aspectReference.Semantic ) )
                     {
                         if ( !this.GetInliner( aspectReference, out var inliner ) )
@@ -524,12 +530,21 @@ namespace Caravela.Framework.Impl.Linking
                 throw new AssertionFailedException();
             }
 
+            var targetSymbol = aspectReference.ResolvedSymbol;
+            var targetSemantic = aspectReference.Semantic;
+            if ( this._analysisRegistry.IsLastOverride( targetSymbol ) )
+            {
+                // If something is resolved to the last override, we will point to the target declaration instead.
+                targetSymbol = aspectReference.OriginalSymbol;
+                targetSemantic = ResolvedAspectReferenceSemantic.Default;
+            }
+
             // Determine the target name. Specifically, handle case when the resolved symbol points to the original implementation.
             var targetMemberName =
-                aspectReference.Semantic switch
+                targetSemantic switch
                 {
-                    ResolvedAspectReferenceSemantic.Original => GetOriginalImplMemberName( aspectReference.ResolvedSymbol ),
-                    _ => aspectReference.ResolvedSymbol.Name
+                    ResolvedAspectReferenceSemantic.Original => GetOriginalImplMemberName( targetSymbol ),
+                    _ => targetSymbol.Name
                 };
 
             // Presume that all (annotated) aspect references are member access expressions.
@@ -540,7 +555,7 @@ namespace Caravela.Framework.Impl.Linking
 
                     if ( SymbolEqualityComparer.Default.Equals(
                         aspectReference.ContainingSymbol.ContainingType,
-                        aspectReference.ResolvedSymbol.ContainingType ) )
+                        targetSymbol.ContainingType ) )
                     {
                         if ( aspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
                         {
@@ -557,28 +572,28 @@ namespace Caravela.Framework.Impl.Linking
                     }
                     else
                     {
-                        if ( aspectReference.ResolvedSymbol.ContainingType.TypeKind == TypeKind.Interface )
+                        if ( targetSymbol.ContainingType.TypeKind == TypeKind.Interface )
                         {
                             return memberAccessExpression
                                 .WithExpression( ThisExpression() )
                                 .WithName( IdentifierName( targetMemberName ) );
                         }
 
-                        if ( aspectReference.ResolvedSymbol.IsStatic )
+                        if ( targetSymbol.IsStatic )
                         {
                             // Static member access where the target is a different type.
                             return MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
-                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( aspectReference.ResolvedSymbol.ContainingType ),
+                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
                                 IdentifierName( targetMemberName ) );
                         }
                         else
                         {
-                            if ( aspectReference.ResolvedSymbol.ContainingType.Is( aspectReference.ContainingSymbol.ContainingType ) )
+                            if ( targetSymbol.ContainingType.Is( aspectReference.ContainingSymbol.ContainingType ) )
                             {
                                 throw new AssertionFailedException( "Resolved symbol is declared in a derived class." );
                             }
-                            else if ( aspectReference.ContainingSymbol.ContainingType.Is( aspectReference.ResolvedSymbol.ContainingType ) )
+                            else if ( aspectReference.ContainingSymbol.ContainingType.Is( targetSymbol.ContainingType ) )
                             {
                                 // Resolved symbol is declared in a base class.
                                 switch ( memberAccessExpression.Expression )

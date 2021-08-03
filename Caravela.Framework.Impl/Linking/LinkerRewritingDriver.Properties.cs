@@ -23,6 +23,11 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns></returns>
         private bool IsDiscarded( IPropertySymbol symbol, ResolvedAspectReferenceSemantic semantic )
         {
+            if ( symbol.GetPrimaryDeclaration().AssertNotNull().GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotDiscardable ) )
+            {
+                return false;
+            }
+
             if ( this._analysisRegistry.IsOverride( symbol ) )
             {
                 var overrideTarget = this._analysisRegistry.GetOverrideTarget( symbol );
@@ -39,10 +44,8 @@ namespace Caravela.Framework.Impl.Linking
                     return this.IsInlineable( symbol, semantic ) || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0);
                 }
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         private bool IsInlineable( IPropertySymbol symbol, ResolvedAspectReferenceSemantic semantic )
@@ -54,6 +57,7 @@ namespace Caravela.Framework.Impl.Linking
 
             if ( this._analysisRegistry.IsLastOverride( symbol ) )
             {
+                // Last overrides should be inlined if not marked as not-inlineable.
                 return true;
             }
 

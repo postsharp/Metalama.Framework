@@ -26,6 +26,13 @@ namespace Caravela.Framework.Impl.Linking
                 throw new AssertionFailedException();
             }
 
+            var declarationFlags = GetDeclarationFlags( symbol );
+
+            if ( declarationFlags.HasFlag( LinkerDeclarationFlags.NotDiscardable ) )
+            {
+                return false;
+            }
+
             if ( this._analysisRegistry.IsOverride( symbol ) )
             {
                 var aspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
@@ -41,10 +48,8 @@ namespace Caravela.Framework.Impl.Linking
                     return this.IsInlineable( symbol, semantic ) || aspectReferences.Count == 0;
                 }
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         private bool IsInlineable( IMethodSymbol symbol, ResolvedAspectReferenceSemantic semantic )
@@ -53,13 +58,16 @@ namespace Caravela.Framework.Impl.Linking
             {
                 case MethodKind.Ordinary:
                 case MethodKind.ExplicitInterfaceImplementation:
-                    if ( GetDeclarationFlags( symbol ).HasFlag( LinkerDeclarationFlags.NotInlineable ) )
+                    var declarationFlags = GetDeclarationFlags( symbol );
+
+                    if ( declarationFlags.HasFlag( LinkerDeclarationFlags.NotInlineable ) )
                     {
                         return false;
                     }
 
                     if ( this._analysisRegistry.IsLastOverride( symbol ) )
                     {
+                        // Last overrides should be inlined if not marked as not-inlineable.
                         return true;
                     }
 

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Transformations;
@@ -64,7 +65,7 @@ namespace Caravela.Framework.Impl.Linking
                     }
                 }
 
-                if ( introducedMember.Introduction is MemberBuilder builder )
+                if ( introducedMember.Introduction is IDeclarationBuilder builder )
                 {
                     this._builderLookup[builder] = introducedMember;
                 }
@@ -140,7 +141,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 return originalDeclaration.GetSymbol();
             }
-            else if ( overrideTarget is MemberBuilder builder )
+            else if ( overrideTarget is IDeclarationBuilder builder )
             {
                 return GetFromBuilder( builder );
             }
@@ -153,7 +154,7 @@ namespace Caravela.Framework.Impl.Linking
                 throw new AssertionFailedException();
             }
 
-            ISymbol? GetFromBuilder( DeclarationBuilder builder )
+            ISymbol? GetFromBuilder( IDeclarationBuilder builder )
             {
                 var introducedBuilder = this._builderLookup[builder];
                 var intermediateSyntaxTree = this._introducedTreeMap[((ISyntaxTreeTransformation) builder).TargetSyntaxTree];

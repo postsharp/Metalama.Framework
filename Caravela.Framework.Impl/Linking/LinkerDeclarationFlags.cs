@@ -15,6 +15,14 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         EventField = 1,
 
-        NotInlineable = 1 << 15
+        /// <summary>
+        /// Used to denote a declaration body of which should not be inlined by the linker.
+        /// </summary>
+        NotInlineable = 1 << 15,
+
+        /// <summary>
+        /// User to denote a declaration which should not be discarded. 
+        /// </summary>
+        NotDiscardable = 1 << 16
     }
 }

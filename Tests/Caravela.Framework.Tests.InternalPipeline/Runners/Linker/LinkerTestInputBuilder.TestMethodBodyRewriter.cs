@@ -27,7 +27,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
             {
-                if ( this.TransformInvocationOrElementAccess( node.Expression, node.ArgumentList.Arguments, out var transformedNode ) )
+                if ( this.TransformInvocationOrElementAccess( node, node.Expression, node.ArgumentList.Arguments, out var transformedNode ) )
                 {
                     return transformedNode;
                 }
@@ -37,18 +37,15 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
 
             public override SyntaxNode? VisitElementAccessExpression( ElementAccessExpressionSyntax node )
             {
-                if ( this.TransformInvocationOrElementAccess( node.Expression, node.ArgumentList.Arguments, out var transformedNode ) )
+                if (this.TransformInvocationOrElementAccess( node, node.Expression, node.ArgumentList.Arguments, out var transformedNode))
                 {
                     return transformedNode;
                 }
 
                 return base.VisitElementAccessExpression( node );
             }
-
-            public bool TransformInvocationOrElementAccess(
-                ExpressionSyntax expression,
-                SeparatedSyntaxList<ArgumentSyntax> arguments,
-                [NotNullWhen( true )] out SyntaxNode? transformedNode )
+                        
+            public bool TransformInvocationOrElementAccess(SyntaxNode originalNode, ExpressionSyntax expression, SeparatedSyntaxList<ArgumentSyntax> arguments, [NotNullWhen( true )] out SyntaxNode? transformedNode)
             {
                 if ( expression is IdentifierNameSyntax identifier && identifier.Identifier.ValueText == "link" )
                 {
@@ -76,8 +73,8 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
 
                                 break;
 
-                            case "next":
-                                order = AspectReferenceOrder.Next;
+                            case "after":
+                                order = AspectReferenceOrder.Self;
 
                                 break;
 
@@ -133,9 +130,11 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                         }
                     }
 
-                    transformedNode = this.Visit( annotatedExpression )
-                        .WithAspectReferenceAnnotation( new AspectLayerId( this._aspectName, this._layerName ), order, target, flags );
-
+                    transformedNode = 
+                        this.Visit( annotatedExpression )
+                        .WithAspectReferenceAnnotation( new AspectLayerId( this._aspectName, this._layerName ), order, target, flags )
+                        .WithLeadingTrivia( originalNode.GetLeadingTrivia() )
+                        .WithTrailingTrivia( originalNode.GetTrailingTrivia() );
                     return true;
                 }
 

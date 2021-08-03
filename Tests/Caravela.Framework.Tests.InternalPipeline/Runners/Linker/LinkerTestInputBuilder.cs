@@ -143,6 +143,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
             {
                 var containingNodeId = ((ITestTransformation) transformation).ContainingNodeId;
                 var insertPositionNodeId = ((ITestTransformation) transformation).InsertPositionNodeId;
+                var insertPositionBuilder = ((ITestTransformation) transformation).InsertPositionBuilder;
                 var insertPositionRelation = ((ITestTransformation) transformation).InsertPositionRelation;
                 var symbolHelperNodeId = ((ITestTransformation) transformation).SymbolHelperNodeId;
 
@@ -151,21 +152,51 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                     var overriddenDeclarationName = ((ITestTransformation) transformation).OverriddenDeclarationName;
 
                     var containingNode = nodeIdToSyntaxNode[containingNodeId];
-                    var insertPositionNode = nodeIdToSyntaxNode[insertPositionNodeId];
+                    var insertPositionNode =
+                        insertPositionNodeId != null
+                        ? nodeIdToSyntaxNode[insertPositionNodeId]
+                        : null;
                     var symbolHelperNode = nodeIdToSyntaxNode[symbolHelperNodeId];
 
                     var containingSymbol = (ITypeSymbol) syntaxNodeToSymbol[containingNode];
                     var symbolHelperSymbol = syntaxNodeToSymbol[symbolHelperNode];
 
-                    var overridenMemberSymbol = containingSymbol.GetMembers()
+                    var overriddenMemberSymbol = containingSymbol.GetMembers()
                         .Where( x => StringComparer.Ordinal.Equals( x.Name, overriddenDeclarationName ) )
                         .Where( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) )
-                        .Single();
+                        .SingleOrDefault();
 
-                    var overridenMember = symbolToCodeElement[overridenMemberSymbol];
+                    IDeclaration? overridenMember;
+                    if ( overriddenMemberSymbol != null )
+                    {
+                        overridenMember = symbolToCodeElement[overriddenMemberSymbol];
+                    }
+                    else
+                    {
+                        // Find introduction's symbol helper.
+                        var overriddenMemberSymbolHelper = containingSymbol.GetMembers()
+                            .Where( x => StringComparer.Ordinal.Equals( x.Name, overriddenDeclarationName + "__SymbolHelper" ) )
+                            .Where( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) )
+                            .SingleOrDefault();
 
-                    A.CallTo( () => ((IMemberIntroduction) overriddenDeclaration).InsertPosition )
-                        .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
+                        // Find the transformation for this symbol helper.
+                        var overriddenMemberSymbolHelperNodeId = GetNodeId( overriddenMemberSymbolHelper.GetPrimaryDeclaration().AssertNotNull() );
+
+                        overridenMember = (IDeclaration)rewriter.ObservableTransformations
+                            .Where( t => ((ITestTransformation) t).SymbolHelperNodeId == overriddenMemberSymbolHelperNodeId )
+                            .Single();
+                    }
+
+                    if ( insertPositionNode != null )
+                    {
+                        A.CallTo( () => ((IMemberIntroduction) overriddenDeclaration).InsertPosition )
+                            .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
+                    }
+                    else
+                    {
+                        A.CallTo( () => ((IMemberIntroduction) overriddenDeclaration).InsertPosition )
+                            .Returns( new InsertPosition( insertPositionRelation, insertPositionBuilder.AssertNotNull() ) );
+                    }
 
                     A.CallTo( () => overriddenDeclaration.OverriddenDeclaration ).Returns( overridenMember );
                     A.CallTo( () => ((IMemberIntroduction) overriddenDeclaration).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
@@ -175,15 +206,26 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                     var introducedElementName = ((ITestTransformation) transformation).IntroducedElementName;
 
                     var symbolHelperNode = nodeIdToSyntaxNode[symbolHelperNodeId];
-                    var insertPositionNode = nodeIdToSyntaxNode[insertPositionNodeId];
+                    var insertPositionNode =
+                        insertPositionNodeId != null 
+                        ? nodeIdToSyntaxNode[insertPositionNodeId]
+                        : null;
 
                     var containingDeclaration = nodeIdToCodeElement[containingNodeId];
                     var symbolHelperElement = (IMethod) nodeIdToCodeElement[symbolHelperNodeId];
 
                     A.CallTo( () => observableTransformation.ContainingDeclaration ).Returns( containingDeclaration );
 
-                    A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPosition )
-                        .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
+                    if ( insertPositionNode != null )
+                    {
+                        A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPosition )
+                            .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
+                    }
+                    else
+                    {
+                        A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPosition )
+                            .Returns( new InsertPosition( insertPositionRelation, insertPositionBuilder.AssertNotNull() ) );
+                    }
 
                     A.CallTo( () => ((IMemberIntroduction) observableTransformation).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
 
