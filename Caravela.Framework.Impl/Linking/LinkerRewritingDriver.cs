@@ -190,11 +190,7 @@ namespace Caravela.Framework.Impl.Linking
                             {
                                 replacements[returnStatement] =
                                     Block(
-                                            ExpressionStatement(
-                                                AssignmentExpression(
-                                                    SyntaxKind.SimpleAssignmentExpression,
-                                                    IdentifierName( inliningContext.ReturnVariableName ?? "_" ),
-                                                    returnStatement.Expression ) ),
+                                            CreateAssignmentStatement( returnStatement.Expression ),
                                             CreateGotoStatement() )
                                         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                             }
@@ -220,11 +216,7 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             replacements[returnNode] =
                                 Block(
-                                        ExpressionStatement(
-                                            AssignmentExpression(
-                                                SyntaxKind.SimpleAssignmentExpression,
-                                                IdentifierName( inliningContext.ReturnVariableName ?? "_" ),
-                                                returnExpression ) ),
+                                        CreateAssignmentStatement( returnExpression ),
                                         CreateGotoStatement() )
                                     .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
@@ -234,6 +226,34 @@ namespace Caravela.Framework.Impl.Linking
                         throw new AssertionFailedException();
                     }
                 }
+            }
+
+            StatementSyntax CreateAssignmentStatement( ExpressionSyntax expression )
+            {
+                IdentifierNameSyntax identifier;
+
+                if ( inliningContext.ReturnVariableName != null )
+                {
+                    identifier = IdentifierName( inliningContext.ReturnVariableName );
+                }
+                else
+                {
+                    identifier =
+                        IdentifierName(
+                            Identifier(
+                                TriviaList(),
+                                SyntaxKind.UnderscoreToken,
+                                "_",
+                                "_",
+                                TriviaList() ) );
+                }
+
+                return
+                    ExpressionStatement(
+                        AssignmentExpression(
+                            SyntaxKind.SimpleAssignmentExpression,
+                            identifier,
+                            expression ) );
             }
 
             GotoStatementSyntax CreateGotoStatement()
