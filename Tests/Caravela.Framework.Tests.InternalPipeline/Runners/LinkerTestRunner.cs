@@ -77,7 +77,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             return testResult;
         }
 
-        protected override SyntaxNode TransformSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot )
+        protected override SyntaxNode PreprocessSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot )
         {
             var builder = testInput.GetExtension<LinkerTestInputBuilder>().AssertNotNull();
 

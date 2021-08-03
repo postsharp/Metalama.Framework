@@ -77,7 +77,7 @@ namespace Caravela.TestFramework
             {
                 var parsedSyntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
                 var prunedSyntaxRoot = new InactiveCodeRemover().Visit( parsedSyntaxTree.GetRoot() );
-                var transformedSyntaxRoot = this.TransformSyntaxRoot( testInput, prunedSyntaxRoot );
+                var transformedSyntaxRoot = this.PreprocessSyntaxRoot( testInput, prunedSyntaxRoot );
                 var document = project.AddDocument( fileName, transformedSyntaxRoot, filePath: fileName );
                 project = document.Project;
 
@@ -134,7 +134,13 @@ namespace Caravela.TestFramework
             return testResult;
         }
 
-        protected virtual SyntaxNode TransformSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot )
+        /// <summary>
+        /// Processes syntax root of the test file before it is added to the test project.
+        /// </summary>
+        /// <param name="testInput"></param>
+        /// <param name="syntaxRoot"></param>
+        /// <returns></returns>
+        protected virtual SyntaxNode PreprocessSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot )
         {
             return syntaxRoot;
         }
