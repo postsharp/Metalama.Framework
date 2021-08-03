@@ -169,7 +169,7 @@ namespace Caravela.Framework.Impl.Linking
                         modifiers,
                         returnType,
                         null,
-                        Identifier( GetOriginalImplMemberName( method.Identifier.ValueText ) ),
+                        Identifier( GetOriginalImplMemberName( symbol ) ),
                         method.TypeParameterList,
                         method.ParameterList,
                         method.ConstraintClauses,

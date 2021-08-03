@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.RunTimeSwitchEx
             
             var y = o switch 
             {
-                IEnumerable<object> enumerable when enumerable.Count() > meta.Parameters.Count => -1,
+                IEnumerable<object> enumerable when enumerable.Count() > meta.Target.Parameters.Count => -1,
                 IEnumerable<object> enumerable2 => enumerable2.Count()
             };
             

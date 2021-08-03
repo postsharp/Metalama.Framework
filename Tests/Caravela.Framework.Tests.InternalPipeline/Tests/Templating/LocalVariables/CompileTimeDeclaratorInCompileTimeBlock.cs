@@ -10,19 +10,19 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.Compile
         [TestTemplate]
         dynamic? Template()
         {
-            if (meta.Parameters.Count > 0)
+            if (meta.Target.Parameters.Count > 0)
             {
                 var x = meta.CompileTime(0);
                 Console.WriteLine(x);
             }
 
-            if (meta.Parameters.Count > 1)
+            if (meta.Target.Parameters.Count > 1)
             {
                 var x = meta.CompileTime(1);
                 Console.WriteLine(x);
             }
 
-            foreach (var p in meta.Parameters)
+            foreach (var p in meta.Target.Parameters)
             {
                 var y = meta.CompileTime(0);
                 Console.WriteLine(y);

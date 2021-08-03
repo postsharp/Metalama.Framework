@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.ImportServi
         {
             get
             {
-                return meta.This._serviceProvider.GetService(meta.FieldOrProperty.Type.ToType());
+                return meta.This._serviceProvider.GetService(meta.Target.FieldOrProperty.Type.ToType());
             }
 
             set

@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.DoNo
             do
             {
                 i++;
-            } while (i < meta.Parameters.Count);
+            } while (i < meta.Target.Parameters.Count);
 
             Console.WriteLine("Test result = " + i);
 

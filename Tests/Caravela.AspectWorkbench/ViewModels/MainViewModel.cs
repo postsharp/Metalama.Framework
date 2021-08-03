@@ -119,7 +119,10 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 if ( transformedTemplateSyntax != null )
                 {
-                    SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation! );
+                    if ( testResult.CompileTimeCompilation != null )
+                    {
+                        SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation );
+                    }
 
                     // Render the transformed tree.
                     var project3 = testRunner.CreateProject( testInput.Options );

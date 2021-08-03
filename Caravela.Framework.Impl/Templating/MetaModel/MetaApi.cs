@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     /// <summary>
     /// The implementation of <see cref="IMetaApi"/>.
     /// </summary>
-    internal class MetaApi : IMetaApi
+    internal class MetaApi : IMetaApi, IMetaTarget
     {
         private readonly IAdvisedFieldOrProperty? _fieldOrProperty;
         private readonly IAdvisedMethod? _method;
@@ -66,6 +66,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     (this._common.TemplateSymbol, expressionName, this.Declaration, this.Declaration.DeclarationKind) )
             };
         }
+
+        public IMetaTarget Target => this;
 
         public object This => this.GetThisOrBase( "meta.This", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
 

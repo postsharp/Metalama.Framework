@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 // TODO: A lot methods here are called multiple times. Optimize.
@@ -192,11 +193,7 @@ namespace Caravela.Framework.Impl.Linking
                             {
                                 replacements[returnStatement] =
                                     Block(
-                                            ExpressionStatement(
-                                                AssignmentExpression(
-                                                    SyntaxKind.SimpleAssignmentExpression,
-                                                    IdentifierName( inliningContext.ReturnVariableName ?? "_" ),
-                                                    returnStatement.Expression ) ),
+                                            CreateAssignmentStatement( returnStatement.Expression ),
                                             CreateGotoStatement() )
                                         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                             }
@@ -222,11 +219,7 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             replacements[returnNode] =
                                 Block(
-                                        ExpressionStatement(
-                                            AssignmentExpression(
-                                                SyntaxKind.SimpleAssignmentExpression,
-                                                IdentifierName( inliningContext.ReturnVariableName ?? "_" ),
-                                                returnExpression ) ),
+                                        CreateAssignmentStatement( returnExpression ),
                                         CreateGotoStatement() )
                                     .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
@@ -236,6 +229,34 @@ namespace Caravela.Framework.Impl.Linking
                         throw new AssertionFailedException();
                     }
                 }
+            }
+
+            StatementSyntax CreateAssignmentStatement( ExpressionSyntax expression )
+            {
+                IdentifierNameSyntax identifier;
+
+                if ( inliningContext.ReturnVariableName != null )
+                {
+                    identifier = IdentifierName( inliningContext.ReturnVariableName );
+                }
+                else
+                {
+                    identifier =
+                        IdentifierName(
+                            Identifier(
+                                TriviaList(),
+                                SyntaxKind.UnderscoreToken,
+                                "_",
+                                "_",
+                                TriviaList() ) );
+                }
+
+                return
+                    ExpressionStatement(
+                        AssignmentExpression(
+                            SyntaxKind.SimpleAssignmentExpression,
+                            identifier,
+                            expression ) );
             }
 
             GotoStatementSyntax CreateGotoStatement()
@@ -254,8 +275,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             var declaration = symbol.GetPrimaryDeclaration();
 
-            if ( this._analysisRegistry.IsOverrideTarget( symbol )
-                 || (symbol.AssociatedSymbol != null && this._analysisRegistry.IsOverrideTarget( symbol.AssociatedSymbol )) )
+            if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
             {
                 // Override targets are implicitly linked, i.e. no replacement of aspect references is necessary.
                 isImplicitlyLinked = true;
@@ -268,7 +288,7 @@ namespace Caravela.Framework.Impl.Linking
                     case AccessorDeclarationSyntax accessorDecl:
                         var body = (SyntaxNode?) accessorDecl.Body ?? accessorDecl.ExpressionBody;
 
-                        if ( body != null )
+                        if ( body != null && !(symbol.AssociatedSymbol != null && IsExplicitInterfaceEventField( symbol.AssociatedSymbol )) )
                         {
                             return body;
                         }
@@ -288,8 +308,8 @@ namespace Caravela.Framework.Impl.Linking
                         throw new AssertionFailedException();
                 }
             }
-            else if ( this._analysisRegistry.IsOverride( symbol )
-                      || (symbol.AssociatedSymbol != null && this._analysisRegistry.IsOverride( symbol.AssociatedSymbol )) )
+
+            if ( this._analysisRegistry.IsOverride( symbol ) )
             {
                 isImplicitlyLinked = false;
 
@@ -305,10 +325,15 @@ namespace Caravela.Framework.Impl.Linking
                         throw new AssertionFailedException();
                 }
             }
-            else
+
+            if ( symbol.AssociatedSymbol != null && IsExplicitInterfaceEventField( symbol.AssociatedSymbol ) )
             {
-                throw new AssertionFailedException();
+                isImplicitlyLinked = true;
+
+                return GetImplicitAccessorBody( symbol );
             }
+
+            throw new AssertionFailedException();
         }
 
         private static BlockSyntax GetImplicitAccessorBody( IMethodSymbol symbol )
@@ -425,7 +450,20 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public bool IsRewriteTarget( ISymbol symbol ) => this._analysisRegistry.IsOverride( symbol ) || this._analysisRegistry.IsOverrideTarget( symbol );
+        public bool IsRewriteTarget( ISymbol symbol )
+        {
+            if ( this._analysisRegistry.IsOverride( symbol ) || this._analysisRegistry.IsOverrideTarget( symbol ) )
+            {
+                return true;
+            }
+
+            if ( IsExplicitInterfaceEventField( symbol ) )
+            {
+                return true;
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Gets rewritten member and any additional induced members (e.g. backing field of auto property).
@@ -468,14 +506,18 @@ namespace Caravela.Framework.Impl.Linking
             {
                 return symbol;
             }
-            else if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
+
+            if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
             {
                 return (IMethodSymbol) this._analysisRegistry.GetLastOverride( symbol ).AssertNotNull();
             }
-            else
+
+            if ( symbol.AssociatedSymbol != null && IsExplicitInterfaceEventField( symbol.AssociatedSymbol ) )
             {
-                throw new AssertionFailedException();
+                return symbol;
             }
+
+            throw new AssertionFailedException();
         }
 
         private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference )
@@ -489,7 +531,7 @@ namespace Caravela.Framework.Impl.Linking
             var targetMemberName =
                 aspectReference.Semantic switch
                 {
-                    ResolvedAspectReferenceSemantic.Original => GetOriginalImplMemberName( aspectReference.ResolvedSymbol.Name ),
+                    ResolvedAspectReferenceSemantic.Original => GetOriginalImplMemberName( aspectReference.ResolvedSymbol ),
                     _ => aspectReference.ResolvedSymbol.Name
                 };
 
@@ -503,12 +545,28 @@ namespace Caravela.Framework.Impl.Linking
                         aspectReference.ContainingSymbol.ContainingType,
                         aspectReference.ResolvedSymbol.ContainingType ) )
                     {
-                        // This is the same type, we can just change the identifier in the expression.
-                        // TODO: Is the target always accessible?
-                        return memberAccessExpression.WithName( IdentifierName( targetMemberName ) );
+                        if ( aspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
+                        {
+                            return memberAccessExpression
+                                .WithExpression( ThisExpression() )
+                                .WithName( IdentifierName( targetMemberName ) );
+                        }
+                        else
+                        {
+                            // This is the same type, we can just change the identifier in the expression.
+                            // TODO: Is the target always accessible?
+                            return memberAccessExpression.WithName( IdentifierName( targetMemberName ) );
+                        }
                     }
                     else
                     {
+                        if ( aspectReference.ResolvedSymbol.ContainingType.TypeKind == TypeKind.Interface )
+                        {
+                            return memberAccessExpression
+                                .WithExpression( ThisExpression() )
+                                .WithName( IdentifierName( targetMemberName ) );
+                        }
+
                         if ( aspectReference.ResolvedSymbol.IsStatic )
                         {
                             // Static member access where the target is a different type.
@@ -567,7 +625,116 @@ namespace Caravela.Framework.Impl.Linking
             return introducedMember.AssertNotNull().Introduction.Advice.Aspect;
         }
 
-        internal static string GetOriginalImplMemberName( string memberName ) => $"__{memberName}__OriginalImpl";
+        internal static string GetOriginalImplMemberName( ISymbol symbol )
+        {
+            switch ( symbol )
+            {
+                case IMethodSymbol methodSymbol:
+                    if ( methodSymbol.ExplicitInterfaceImplementations.Any() )
+                    {
+                        return CreateName( methodSymbol.ExplicitInterfaceImplementations[0].Name );
+                    }
+                    else
+                    {
+                        return CreateName( methodSymbol.Name );
+                    }
+
+                case IPropertySymbol propertySymbol:
+                    if ( propertySymbol.ExplicitInterfaceImplementations.Any() )
+                    {
+                        return CreateName( propertySymbol.ExplicitInterfaceImplementations[0].Name );
+                    }
+                    else
+                    {
+                        return CreateName( propertySymbol.Name );
+                    }
+
+                case IEventSymbol eventSymbol:
+                    if ( eventSymbol.ExplicitInterfaceImplementations.Any() )
+                    {
+                        return CreateName( eventSymbol.ExplicitInterfaceImplementations[0].Name );
+                    }
+                    else
+                    {
+                        return CreateName( eventSymbol.Name );
+                    }
+
+                default:
+                    throw new AssertionFailedException();
+            }
+
+            static string CreateName( string name ) => $"__{name}__OriginalImpl";
+        }
+
+        private static string GetBackingFieldName( ISymbol symbol )
+        {
+            string name;
+
+            switch ( symbol )
+            {
+                case IPropertySymbol propertySymbol:
+                    name =
+                        propertySymbol.ExplicitInterfaceImplementations.Any()
+                            ? propertySymbol.ExplicitInterfaceImplementations[0].Name
+                            : propertySymbol.Name;
+
+                    break;
+
+                case IEventSymbol eventSymbol:
+                    name =
+                        eventSymbol.ExplicitInterfaceImplementations.Any()
+                            ? eventSymbol.ExplicitInterfaceImplementations[0].Name
+                            : eventSymbol.Name;
+
+                    break;
+
+                default:
+                    throw new AssertionFailedException();
+            }
+
+            var firstPropertyLetter = name.Substring( 0, 1 );
+            var camelCasePropertyName = firstPropertyLetter.ToLowerInvariant() + (name.Length > 1 ? name.Substring( 1 ) : "");
+
+            if ( symbol.ContainingType.GetMembers( camelCasePropertyName ).Any() && firstPropertyLetter == firstPropertyLetter.ToLowerInvariant() )
+            {
+                // If there there is another property whose name differs only by the case of the first character, then the lower case variant will be suffixed.
+                // This is unlikely given naming standards.
+
+                camelCasePropertyName = FindUniqueName( camelCasePropertyName );
+            }
+
+            // TODO: Write tests of the collision resolution algorithm.
+            if ( camelCasePropertyName.StartsWith( "_", StringComparison.Ordinal ) )
+            {
+                return camelCasePropertyName;
+            }
+            else
+            {
+                var fieldName = FindUniqueName( "_" + camelCasePropertyName );
+
+                return fieldName;
+            }
+
+            string FindUniqueName( string hint )
+            {
+                if ( !symbol.ContainingType.GetMembers( hint ).Any() )
+                {
+                    return hint;
+                }
+                else
+                {
+                    for ( var i = 1; /* Nothing */; i++ )
+                    {
+                        var candidate = hint + i;
+
+                        if ( !symbol.ContainingType.GetMembers( candidate ).Any() )
+                        {
+                            return candidate;
+                        }
+                    }
+                }
+            }
+        }
 
         private static LinkerDeclarationFlags GetDeclarationFlags( ISymbol symbol )
         {
@@ -588,6 +755,21 @@ namespace Caravela.Framework.Impl.Linking
                 default:
                     throw new AssertionFailedException();
             }
+        }
+
+        private static bool IsExplicitInterfaceEventField( ISymbol symbol )
+        {
+            if ( symbol is IEventSymbol eventSymbol )
+            {
+                var declaration = eventSymbol.GetPrimaryDeclaration();
+
+                if ( declaration != null && declaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField ) )
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

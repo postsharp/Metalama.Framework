@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.Fo
         dynamic? Template()
         {
             int i = meta.CompileTime(0);
-            foreach (var p in meta.Parameters)
+            foreach (var p in meta.Target.Parameters)
             {
                 if (p.Name.Length > 1) break;
                 i++;

@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -34,13 +33,17 @@ namespace Caravela.Framework.Aspects
             => new( "The 'meta' API can be used only in the execution context of a template." );
 
         /// <summary>
+        /// Gets access to the declaration being overridden or introduced.
+        /// </summary>
+        public static IMetaTarget Target => CurrentContext.Target;
+
+        /// <summary>
         /// Injects the logic that has been intercepted. For instance, in an <see cref="OverrideMethodAspect"/>,
         /// calling <see cref="Proceed"/> invokes the method being overridden. Note that the way how the
         /// logic is invoked (as a method call or inlining) is considered an implementation detail.
         /// </summary>
         /// <returns></returns>
         [TemplateKeyword]
-        [return: RunTimeOnly]
         public static dynamic? Proceed() => CurrentContext.Proceed() ?? throw NewInvalidOperationException();
 
         /// <summary>
@@ -60,6 +63,7 @@ namespace Caravela.Framework.Aspects
         /// <returns>Exactly <paramref name="expression"/>, but coerced as a compile-time expression.</returns>
         /// <seealso href="@templates"/>
         [return: NotNullIfNotNull( "expression" )]
+        [return: CompileTimeOnly]
         [TemplateKeyword]
         public static T? CompileTime<T>( T? expression ) => expression;
 
@@ -76,60 +80,6 @@ namespace Caravela.Framework.Aspects
         public static T? RunTime<T>( T? value ) => value;
 
         /// <summary>
-        /// Gets the method metadata, or the accessor if this is a template for a field, property or event.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static IAdvisedMethod Method => CurrentContext.Method;
-
-        /// <summary>
-        /// Gets the target property, or throws an exception if the advice does not target a property.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static IAdvisedProperty Property => CurrentContext.Property;
-
-        /// <summary>
-        /// Gets the target field or property, or throws an exception if the advice does not target a field or a property.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static IAdvisedFieldOrProperty FieldOrProperty => CurrentContext.FieldOrProperty;
-
-        /// <summary>
-        /// Gets the target member (method, constructor, field, property or event, but not a nested type), or
-        /// throws an exception if the advice does not target member.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static IMember Member => CurrentContext.Member;
-
-        /// <summary>
-        /// Gets the target event, or throws an exception if the advice does not target an event.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static IAdvisedEvent Event => CurrentContext.Event;
-
-        /// <summary>
-        /// Gets the list of parameters of the current <see cref="Method"/> or <see cref="Property"/>, or throws an
-        /// exception if the advice of the target is neither a method.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static IAdvisedParameterList Parameters => CurrentContext.Parameters;
-
-        // Gets the project configuration.
-        // IProject Project { get; }
-
-        /// <summary>
-        /// Gets the target type of the advice. If the advice is applied to a member, this property returns the declaring
-        /// type of the member.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static INamedType Type => CurrentContext.Type;
-
-        /// <summary>
-        /// Gets the code model of the whole compilation.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static ICompilation Compilation => CurrentContext.Compilation;
-
-        /// <summary>
         /// Gets a <c>dynamic</c> object that represents an instance of the target type. It can be used as a value (e.g. as a method argument)
         /// or can be used to get access to <i>instance</i> members of the instance (e.g. <c>meta.This.MyMethod()</c>).
         /// The <see cref="This"/> property exposes the state of the target type as it is <i>after</i> the application
@@ -140,7 +90,6 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="Base"/>
         /// <seealso cref="ThisStatic"/>
         /// <seealso href="@templates"/>
-        [RunTimeOnly]
         [TemplateKeyword]
         public static dynamic This => CurrentContext.This;
 
@@ -153,7 +102,6 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="This"/>
         /// <seealso cref="BaseStatic"/>
         /// <seealso href="@templates"/>
-        [RunTimeOnly]
         [TemplateKeyword]
         public static dynamic Base => CurrentContext.Base;
 
@@ -166,7 +114,6 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="This"/>
         /// <seealso cref="BaseStatic"/>
         /// <seealso href="@templates"/>
-        [RunTimeOnly]
         [TemplateKeyword]
         public static dynamic ThisStatic => CurrentContext.ThisStatic;
 
@@ -179,7 +126,6 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="Base"/>
         /// <seealso cref="ThisStatic"/>
         /// <seealso href="@templates"/>
-        [RunTimeOnly]
         [TemplateKeyword]
         public static dynamic BaseStatic => CurrentContext.BaseStatic;
 
@@ -218,7 +164,6 @@ namespace Caravela.Framework.Aspects
         /// <param name="value">Must be explicitly cast to <c>object</c> otherwise the C# compiler will emit an error.</param>
         /// <returns></returns>
         /// <seealso href="@templates"/>
-        [return: RunTimeOnly]
         [TemplateKeyword]
         public static dynamic? Cast( IType type, dynamic? value ) => type.Compilation.TypeFactory.Cast( type, value );
 

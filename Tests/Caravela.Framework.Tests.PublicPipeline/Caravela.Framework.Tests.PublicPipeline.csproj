@@ -16,7 +16,6 @@
     <NoWarn>1591,1572,1573,CS8892</NoWarn>
   </PropertyGroup>
 
-
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageReference Include="xunit" Version="$(xUnitVersion)" />
@@ -46,7 +45,6 @@
     <None Include="Tests\Aspects\AsyncIterators\NormalTemplate.t.cs" />
     <None Include="Tests\Aspects\Iterators\IteratorMethod.t.cs" />
   </ItemGroup>
-
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
   

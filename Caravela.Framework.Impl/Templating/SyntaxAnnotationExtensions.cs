@@ -16,6 +16,7 @@ namespace Caravela.Framework.Impl.Templating
     internal static class SyntaxAnnotationExtensions
     {
         private const string _scopeAnnotationKind = "Caravela_Scope";
+        private const string _targetScopeAnnotationKind = "Caravela_TargetScope";
         private const string _proceedAnnotationKind = "Caravela_Proceed";
         private const string _noIndentAnnotationKind = "Caravela_NoIndent";
         private const string _colorAnnotationKind = "Caravela_Color";
@@ -23,14 +24,21 @@ namespace Caravela.Framework.Impl.Templating
         private const string _scopeMismatchKind = "Caravela_ScopeMismatch";
         private const string _buildTimeAnnotationData = "buildTime";
         private const string _runTimeAnnotationData = "runTime";
-        private const string _dynamicAnnotationData = "compileTimeDynamic";
+        private const string _compileTimeReturningRunTimeOnlyAnnotationData = "compileTimeReturningRunTimeOnly";
+        private const string _compileTimeReturningBothAnnotationData = "compileTimeReturningBoth";
         private const string _runTimeDynamicAnnotationData = "runTimeDynamic";
         private const string _unknownAnnotationData = "unknown";
         private const string _bothAnnotationData = "both";
 
         private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( _scopeAnnotationKind, _buildTimeAnnotationData );
         private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( _scopeAnnotationKind, _runTimeAnnotationData );
-        private static readonly SyntaxAnnotation _compileTimeDynamicAnnotation = new( _scopeAnnotationKind, _dynamicAnnotationData );
+        private static readonly SyntaxAnnotation _buildTimeTargetAnnotation = new( _targetScopeAnnotationKind, _buildTimeAnnotationData );
+        private static readonly SyntaxAnnotation _runTimeTargetAnnotation = new( _targetScopeAnnotationKind, _runTimeAnnotationData );
+
+        private static readonly SyntaxAnnotation _compileTimeReturningRunTimeOnlyAnnotation =
+            new( _scopeAnnotationKind, _compileTimeReturningRunTimeOnlyAnnotationData );
+
+        private static readonly SyntaxAnnotation _compileTimeReturningBothAnnotation = new( _scopeAnnotationKind, _compileTimeReturningBothAnnotationData );
         private static readonly SyntaxAnnotation _runTimeDynamicAnnotation = new( _scopeAnnotationKind, _runTimeDynamicAnnotationData );
         private static readonly SyntaxAnnotation _bothAnnotation = new( _scopeAnnotationKind, _bothAnnotationData );
         private static readonly SyntaxAnnotation _unknownAnnotation = new( _scopeAnnotationKind, _unknownAnnotationData );
@@ -68,14 +76,40 @@ namespace Caravela.Framework.Impl.Templating
                 case _unknownAnnotationData:
                     return TemplatingScope.Unknown;
 
-                case _dynamicAnnotationData:
-                    return TemplatingScope.CompileTimeDynamic;
+                case _compileTimeReturningRunTimeOnlyAnnotationData:
+                    return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+
+                case _compileTimeReturningBothAnnotationData:
+                    return TemplatingScope.CompileTimeOnlyReturningBoth;
 
                 case _runTimeDynamicAnnotationData:
                     return TemplatingScope.Dynamic;
 
                 case _bothAnnotationData:
                     return TemplatingScope.Both;
+
+                default:
+                    throw new AssertionFailedException();
+            }
+        }
+
+        public static TemplatingScope GetTargetScopeFromAnnotation( this SyntaxNode node )
+        {
+            var annotation = node.GetAnnotations( _targetScopeAnnotationKind ).SingleOrDefault();
+
+            // No annotation means it is default scope usable for both (runTime or compileTime)
+            if ( annotation == null )
+            {
+                return TemplatingScope.Both;
+            }
+
+            switch ( annotation.Data )
+            {
+                case _buildTimeAnnotationData:
+                    return TemplatingScope.CompileTimeOnly;
+
+                case _runTimeAnnotationData:
+                    return TemplatingScope.RunTimeOnly;
 
                 default:
                     throw new AssertionFailedException();
@@ -132,13 +166,20 @@ namespace Caravela.Framework.Impl.Templating
                 return null;
             }
 
+            var existingScope = node.GetScopeFromAnnotation().GetValueOrDefault();
+
+            if ( !existingScope.IsUndetermined() && existingScope.GetExpressionExecutionScope() != scope )
+            {
+                throw new InvalidOperationException( $"Cannot change the scope of node '{node}' to {scope} because it is already set to {existingScope}." );
+            }
+
             return node.WithoutAnnotations( _scopeAnnotationKind ).AddScopeAnnotation( scope );
         }
 
         [return: NotNullIfNotNull( "node" )]
-        public static StatementSyntax AddRunTimeOnlyAnnotationIfIndeterminate( this StatementSyntax statement )
+        public static StatementSyntax AddRunTimeOnlyAnnotationIfUndetermined( this StatementSyntax statement )
         {
-            if ( statement.GetScopeFromAnnotation().GetValueOrDefault() == TemplatingScope.Both )
+            if ( statement.GetScopeFromAnnotation().GetValueOrDefault().IsUndetermined() )
             {
                 return statement.ReplaceScopeAnnotation( TemplatingScope.RunTimeOnly );
             }
@@ -179,14 +220,39 @@ namespace Caravela.Framework.Impl.Templating
                 case TemplatingScope.Unknown:
                     return node.WithAdditionalAnnotations( _unknownAnnotation );
 
-                case TemplatingScope.CompileTimeDynamic:
-                    return node.WithAdditionalAnnotations( _compileTimeDynamicAnnotation );
+                case TemplatingScope.CompileTimeOnlyReturningRuntimeOnly:
+                    return node.WithAdditionalAnnotations( _compileTimeReturningRunTimeOnlyAnnotation );
+
+                case TemplatingScope.CompileTimeOnlyReturningBoth:
+                    return node.WithAdditionalAnnotations( _compileTimeReturningBothAnnotation );
 
                 case TemplatingScope.Dynamic:
                     return node.WithAdditionalAnnotations( _runTimeDynamicAnnotation );
 
                 case TemplatingScope.Both:
                     return node.WithAdditionalAnnotations( _bothAnnotation );
+
+                default:
+                    throw new AssertionFailedException();
+            }
+        }
+
+        [return: NotNullIfNotNull( "node" )]
+        public static T? AddTargetScopeAnnotation<T>( this T? node, TemplatingScope scope )
+            where T : SyntaxNode
+        {
+            if ( node == null )
+            {
+                return null;
+            }
+
+            switch ( scope )
+            {
+                case TemplatingScope.CompileTimeOnly:
+                    return node.WithAdditionalAnnotations( _buildTimeTargetAnnotation );
+
+                case TemplatingScope.RunTimeOnly:
+                    return node.WithAdditionalAnnotations( _runTimeTargetAnnotation );
 
                 default:
                     throw new AssertionFailedException();

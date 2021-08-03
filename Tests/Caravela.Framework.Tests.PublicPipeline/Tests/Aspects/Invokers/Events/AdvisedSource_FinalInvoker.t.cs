@@ -5,23 +5,20 @@ internal class TargetClass
         [Test]
         public event EventHandler Event
 {add    {
-this.Event+= value;
+        this.Event+= value;
     }
     
 remove    {
-this.Event-= value;
+        this.Event-= value;
     }
 }
     
-private EventHandler? __EventField__BackingField;
-    
-    
         public event EventHandler? EventField{add    {
-this.EventField+= value;
+        this.EventField+= value;
     }
     
 remove    {
-this.EventField-= value;
+        this.EventField-= value;
     }
 }
     }

@@ -11,12 +11,13 @@ namespace Caravela.Framework.Code
     [CompileTimeOnly]
     public enum Accessibility
     {
-        // TODO: This uses IL values, shouldn't it correspond to C#?
-        Private,
-        ProtectedInternal,
-        Protected,
-        PrivateProtected,
-        Internal,
-        Public
+        // IMPORTANT: Don't change. Comparisons depend on the order.        
+        // Reserve 0 is we ever need something like undefined values (see Roslyn).
+        Private = 1,
+        PrivateProtected = 2,
+        Protected = 3,
+        Internal = 4,
+        ProtectedInternal = 5,
+        Public = 6
     }
 }

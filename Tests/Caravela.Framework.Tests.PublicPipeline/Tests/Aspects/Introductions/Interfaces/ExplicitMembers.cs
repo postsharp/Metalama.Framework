@@ -1,6 +1,4 @@
-﻿// @Skipped Linker does not yet support overrides of explicit interface members.
-
-using Caravela.Framework.Aspects;
+﻿using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 using System;
@@ -19,7 +17,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
         event EventHandler Event;
 
-        event EventHandler EventField;
+        event EventHandler? EventField;
 
         int Property { get; set; }
 
@@ -30,7 +28,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
         {
-            aspectBuilder.AdviceFactory.ImplementInterface(aspectBuilder.TargetDeclaration, typeof(IInterface));
+            aspectBuilder.AdviceFactory.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
         }
 
         [InterfaceMember(IsExplicit = true)]
@@ -46,11 +44,13 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             add
             {
                 Console.WriteLine("This is introduced interface member.");
+                meta.Proceed();
             }
 
             remove
             {
                 Console.WriteLine("This is introduced interface member.");
+                meta.Proceed();
             }
         }
 
@@ -63,12 +63,13 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             get
             {
                 Console.WriteLine("This is introduced interface member.");
-                return 42;
+                return meta.Proceed();
             }
 
             set
             {
                 Console.WriteLine("This is introduced interface member.");
+                meta.Proceed();
             }
         }
 

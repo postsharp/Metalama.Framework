@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.CompileTi
         dynamic? Template()
         {
             int i = 0;
-            while (i < meta.Parameters.Count)
+            while (i < meta.Target.Parameters.Count)
             {
                 i++;
                 int j = meta.CompileTime(0);

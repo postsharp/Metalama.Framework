@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Yield
         {
             yield return 1;
 
-            if (meta.Parameters.Count == 0)
+            if (meta.Target.Parameters.Count == 0)
             {
                 yield break;
             }

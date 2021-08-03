@@ -118,7 +118,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
-        private TemplatingScope? GetAttributeScope( AttributeData attribute )
+        public TemplatingScope? GetTemplatingScope( AttributeData attribute )
         {
             if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeOnlyAttribute ) )
             {
@@ -149,7 +149,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var scopeFromAttributes = assembly.GetAttributes()
                 .Concat( assembly.Modules.First().GetAttributes() )
-                .Select( this.GetAttributeScope )
+                .Select( this.GetTemplatingScope )
                 .FirstOrDefault( s => s != null );
 
             if ( scopeFromAttributes != null )
@@ -160,10 +160,46 @@ namespace Caravela.Framework.Impl.CompileTime
             return null;
         }
 
-        public TemplatingScope GetTemplatingScope( ISymbol symbol ) => this.GetTemplatingScope( symbol, 0 );
+        public TemplatingScope GetTemplatingScope( ISymbol symbol )
+        {
+            var scope = this.GetTemplatingScope( symbol, 0 );
+
+            if ( scope == TemplatingScope.CompileTimeOnly )
+            {
+                // If the member returns a run-time only type, it is CompileTimeDynamic.
+                var returnType = symbol switch
+                {
+                    IFieldSymbol field => field.Type,
+                    IPropertySymbol property => property.Type,
+                    IMethodSymbol method when !method.GetReturnTypeAttributes()
+                        .Any( a => this.GetTemplatingScope( a ).GetValueOrDefault() == TemplatingScope.CompileTimeOnly ) => method
+                        .ReturnType,
+                    _ => null
+                };
+
+                if ( returnType != null && returnType.SpecialType != SpecialType.System_Void )
+                {
+                    switch ( this.GetTemplatingScope( returnType ) )
+                    {
+                        case TemplatingScope.RunTimeOnly:
+                            return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+
+                        case TemplatingScope.Both:
+                            return TemplatingScope.CompileTimeOnlyReturningBoth;
+                    }
+                }
+            }
+
+            return scope;
+        }
 
         private TemplatingScope GetTemplatingScope( ISymbol symbol, int recursion )
         {
+            if ( symbol is ITypeParameterSymbol )
+            {
+                throw new ArgumentOutOfRangeException( nameof(symbol), "Type parameters are not supported." );
+            }
+
             if ( recursion > 32 )
             {
                 throw new AssertionFailedException();
@@ -171,7 +207,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             switch ( symbol )
             {
-                case ITypeSymbol type when string.Equals( type.Name, "dynamic", StringComparison.Ordinal ):
+                case IDynamicTypeSymbol:
                     return TemplatingScope.Dynamic;
 
                 case ITypeParameterSymbol:
@@ -186,9 +222,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 case IPointerTypeSymbol pointer:
                     return this.GetTemplatingScope( pointer.PointedAtType, recursion + 1 );
 
-                case INamedTypeSymbol
-                        { IsGenericType: true, IsUnboundGenericType: false } namedType
-                    when !SymbolEqualityComparer.Default.Equals( namedType, namedType.OriginalDefinition ):
+                case INamedTypeSymbol { IsGenericType: true } namedType
+                    when !namedType.IsGenericTypeDefinition() &&
+                         !SymbolEqualityComparer.Default.Equals( namedType, namedType.OriginalDefinition ):
                     {
                         List<TemplatingScope> scopes = new( namedType.TypeArguments.Length + 1 );
                         var declarationScope = this.GetTemplatingScope( namedType.OriginalDefinition, recursion + 1 );
@@ -283,7 +319,7 @@ namespace Caravela.Framework.Impl.CompileTime
             // From attributes.
             var scopeFromAttributes = symbol
                 .GetAttributes()
-                .Select( this.GetAttributeScope )
+                .Select( this.GetTemplatingScope )
                 .FirstOrDefault( s => s != null );
 
             if ( scopeFromAttributes != null )

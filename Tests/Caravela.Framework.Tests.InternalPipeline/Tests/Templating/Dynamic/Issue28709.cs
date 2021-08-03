@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.Issue28709
         [TestTemplate]
         dynamic? Template()
         {
-             foreach (var p in meta.Parameters)
+             foreach (var p in meta.Target.Parameters)
             {
                 Console.WriteLine( "IsOut=" + p.IsOut());
             }

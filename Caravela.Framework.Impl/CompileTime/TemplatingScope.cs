@@ -38,16 +38,23 @@ namespace Caravela.Framework.Impl.CompileTime
         Unknown,
 
         /// <summary>
-        /// A <see cref="CompileTimeOnly"/> member whose evaluated value is <see cref="RunTimeOnly"/>. The return
-        /// value does not need to be of the <c>dynamic</c> itself. However, the member must be decorated with both
-        /// <see cref="CompileTimeAttribute"/> (possibly inherited) and <see cref="RunTimeOnlyAttribute"/>.
+        /// A <see cref="CompileTimeOnly"/> member whose evaluated value is <see cref="RunTimeOnly"/>. 
         /// </summary>
-        CompileTimeDynamic,
+        CompileTimeOnlyReturningRuntimeOnly,
+
+        /// <summary>
+        /// A <see cref="CompileTimeOnly"/> member whose evaluated value is <see cref="Both"/>. 
+        /// </summary>
+        CompileTimeOnlyReturningBoth,
 
         /// <summary>
         /// A member of a dynamic receiver.
         /// </summary>
         Dynamic,
+
+        /// <summary>
+        /// An expression that contains conflicting children.
+        /// </summary>
         Conflict
     }
 }

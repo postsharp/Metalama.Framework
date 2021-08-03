@@ -25,5 +25,10 @@ namespace Caravela.Framework.Code.Builders
         /// Gets or sets the parameter ref kind.
         /// </summary>
         new RefKind RefKind { get; set; }
+
+        /// <summary>
+        /// Gets or sets of the parameter name.
+        /// </summary>
+        new string Name { get; set; }
     }
 }

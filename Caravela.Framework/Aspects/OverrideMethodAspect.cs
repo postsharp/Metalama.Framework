@@ -35,7 +35,7 @@ namespace Caravela.Framework.Aspects
                 nameof(this.OverrideEnumeratorMethod) );
 #endif
 
-            builder.AdviceFactory.OverrideMethod( builder.TargetDeclaration, templates );
+            builder.AdviceFactory.OverrideMethod( builder.Target, templates );
         }
 
         public virtual void BuildEligibility( IEligibilityBuilder<IMethod> builder ) => builder.ExceptForInheritance().MustBeNonAbstract();

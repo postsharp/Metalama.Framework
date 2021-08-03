@@ -10,7 +10,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Advice
     {
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.AdviceFactory.OverrideMethod(builder.TargetDeclaration.Methods.OfName("TargetMethod").Single(), nameof(Template));
+            builder.AdviceFactory.OverrideMethod(builder.Target.Methods.OfName("TargetMethod").Single(), nameof(Template));
         }
         
         

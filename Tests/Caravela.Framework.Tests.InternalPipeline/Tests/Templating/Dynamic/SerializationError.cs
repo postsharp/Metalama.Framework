@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.SerializationE
         [TestTemplate]
         dynamic? Template()
         {
-            Console.WriteLine(meta.RunTime(meta.Method));
+            Console.WriteLine(meta.RunTime(meta.Target.Method));
             return default;
         }
     }

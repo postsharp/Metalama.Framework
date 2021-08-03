@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         void IAspect<IProperty>.BuildAspect(IAspectBuilder<IProperty> builder)
         {
-            builder.AdviceFactory.OverrideFieldOrPropertyAccessors(builder.TargetDeclaration, nameof(GetTemplate), nameof(SetTemplate));
+            builder.AdviceFactory.OverrideFieldOrPropertyAccessors(builder.Target, nameof(GetTemplate), nameof(SetTemplate));
         }
         
         [Template]
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         void IAspect<IProperty>.BuildAspect(IAspectBuilder<IProperty> builder)
         {
-            builder.AdviceFactory.OverrideFieldOrPropertyAccessors(builder.TargetDeclaration, nameof(GetTemplate), nameof(SetTemplate));
+            builder.AdviceFactory.OverrideFieldOrPropertyAccessors(builder.Target, nameof(GetTemplate), nameof(SetTemplate));
         }
 
         [Template]

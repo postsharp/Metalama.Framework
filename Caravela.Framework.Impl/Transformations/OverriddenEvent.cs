@@ -148,7 +148,7 @@ namespace Caravela.Framework.Impl.Transformations
                         MethodKind.EventRemove => this.CreateRemoveExpression(),
                         _ => throw new AssertionFailedException()
                     },
-                    this.OverriddenDeclaration.EventType,
+                    this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
                     false );
 
                 var metaApi = MetaApi.ForEvent(

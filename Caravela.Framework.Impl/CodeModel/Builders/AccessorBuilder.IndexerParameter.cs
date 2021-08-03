@@ -11,25 +11,25 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         // ReSharper disable once UnusedType.Local
         // TODO: Use this type and remove the warning waiver.
 
-        private class IndexerParameter : ParameterBase
+        private sealed class IndexerParameter : ParameterBase
         {
-            public IndexerParameter( AccessorBuilder accessor, int index ) : base( accessor, index ) { }
-
-            public override IType ParameterType
+            public IndexerParameter( AccessorBuilder accessor, int index, string name, IType parameterType, RefKind refKind ) : base( accessor, index )
             {
-                get => ((PropertyBuilder) this.Accessor._containingDeclaration).Parameters[this.Index].ParameterType;
-                set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );
+                this.DefaultValue = TypedConstant.Null;
+                this.Name = name;
+                this.ParameterType = parameterType;
+                this.RefKind = refKind;
             }
 
-            public override RefKind RefKind
-            {
-                get => ((PropertyBuilder) this.Accessor._containingDeclaration).Parameters[this.Index].RefKind;
-                set => throw new NotSupportedException( "Cannot directly change accessor's parameter reference kind." );
-            }
+            public override TypedConstant DefaultValue { get; set; }
+
+            public override IType ParameterType { get; set; }
+
+            public override RefKind RefKind { get; set; }
 
             public override bool IsParams => ((PropertyBuilder) this.Accessor._containingDeclaration).Parameters[this.Index].IsParams;
 
-            public override string Name => throw new NotSupportedException( "Cannot get the name of a return parameter." );
+            public override string Name { get; set; }
 
             public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
                 => throw new NotImplementedException();

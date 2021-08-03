@@ -24,6 +24,11 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public TemplatingScope GetTemplatingScope( ISymbol symbol )
             {
+                if ( symbol is ITypeParameterSymbol )
+                {
+                    throw new ArgumentOutOfRangeException( nameof(symbol), "Type parameters are not supported." );
+                }
+
                 if ( SymbolClassifier.TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
                 {
                     return scopeFromWellKnown;

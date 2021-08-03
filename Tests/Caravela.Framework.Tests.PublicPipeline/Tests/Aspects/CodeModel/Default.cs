@@ -7,9 +7,9 @@ namespace Caravela.Framework.IntegrationTests.Aspects.CodeModel.Default
     {
         public override dynamic? OverrideMethod()
         {
-            var classDefault = meta.Method.ReturnType.DefaultValue();
-            var literalDefault = meta.Method.Parameters[1].ParameterType.DefaultValue();
-            var structDefault = meta.Method.Parameters[2].ParameterType.DefaultValue();
+            var classDefault = meta.Target.Method.ReturnType.DefaultValue();
+            var literalDefault = meta.Target.Method.Parameters[1].ParameterType.DefaultValue();
+            var structDefault = meta.Target.Method.Parameters[2].ParameterType.DefaultValue();
             
             return default;
         }

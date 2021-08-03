@@ -5,7 +5,6 @@ using Caravela.Framework.Aspects;
 
 #pragma warning disable CS0169
 
-// TODO: Change the namespace
 namespace Caravela.Framework.Tests.Integration.Templating.InterpolatedString
 {
     class Aspect
@@ -13,20 +12,21 @@ namespace Caravela.Framework.Tests.Integration.Templating.InterpolatedString
         [TestTemplate]
         dynamic? Template()
         {
+        
             // Neutral
             var neutral = $"Zero={0,-5:x}";
             
             // Compile-time with formatting
-            var ct = $"ParameterCount={meta.Parameters.Count,-5:x}";
-            
+            var ct = $"ParameterCount={meta.Target.Parameters.Count,-5:x}";
+          
             // Run-time
-            var rt = $"Value={meta.Parameters[0].Value,-5:x}";
+            var rt = $"Value={meta.Target.Parameters[0].Value,-5:x}";
             
             // Both
-            var both = $"{meta.Type.Fields.Single().Name}={meta.Parameters[0].Value}";
+            var both = $"{meta.Target.Type.Fields.Single().Name}={meta.Target.Parameters[0].Value}";
 
             
-            Console.WriteLine(ct);
+          
             return meta.Proceed();
         }
     }

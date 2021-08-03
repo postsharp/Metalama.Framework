@@ -12,9 +12,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForTests.UseFor
         [TestTemplate]
         dynamic? Template()
         {
-            for (int i = 0; i < meta.Parameters.Count; i++)
+            for (int i = 0; i < meta.Target.Parameters.Count; i++)
             {
-                Console.WriteLine(meta.Parameters[i].Name);
+                Console.WriteLine(meta.Target.Parameters[i].Name);
             }
 
             dynamic? result = meta.Proceed();

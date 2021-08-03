@@ -27,7 +27,7 @@ namespace Caravela.Framework.Aspects
         IReadOnlyList<IAspectInstance> UpstreamAspects { get; }
 
         /// <summary>
-        /// Gets the list of other instances of the same type on <see cref="TargetDeclaration"/>. When several instances
+        /// Gets the list of other instances of the same type on <see cref="Target"/>. When several instances
         /// of the same aspect class are added to the same declaration, only the instance with the highest priority got initialized
         /// using <see cref="IAspect{T}.BuildAspect"/>. The other instances can are exposed in this property and are sorted
         /// by order of decreasing priority.
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets the declaration to which the aspect was added.
         /// </summary>
-        IDeclaration TargetDeclaration { get; }
+        IDeclaration Target { get; }
 
         /// <summary>
         /// Gets an object that exposes methods that allow to create advices.
@@ -63,7 +63,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets the declaration to which the aspect was added.
         /// </summary>
-        new TAspectTarget TargetDeclaration { get; }
+        new TAspectTarget Target { get; }
 
         /// <summary>
         /// Selects members of the current target declaration with the purpose of adding aspects and annotations to them

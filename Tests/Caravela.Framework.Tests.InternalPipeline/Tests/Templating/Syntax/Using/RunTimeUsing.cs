@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Using.RunTimeUs
             using (new MemoryStream())
             {
                 var x = meta.CompileTime(0);
-                var y = meta.Parameters[0].Value + x;
+                var y = meta.Target.Parameters[0].Value + x;
                 return meta.Proceed();
             }
             

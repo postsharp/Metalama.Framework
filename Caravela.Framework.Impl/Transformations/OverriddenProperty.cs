@@ -167,15 +167,23 @@ namespace Caravela.Framework.Impl.Transformations
         {
             using ( context.DiagnosticSink.WithDefaultScope( accessor ) )
             {
-                var proceedExpression = new DynamicExpression(
+                var proceedExpressionSyntax =
                     accessor.MethodKind switch
                     {
                         MethodKind.PropertyGet => this.CreateGetExpression(),
                         MethodKind.PropertySet => this.CreateSetExpression(),
                         _ => throw new AssertionFailedException()
-                    },
-                    this.OverriddenDeclaration.Type,
-                    false );
+                    };
+
+                var proceedExpressionType =
+                    accessor.MethodKind switch
+                    {
+                        MethodKind.PropertyGet => this.OverriddenDeclaration.Type,
+                        MethodKind.PropertySet => this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
+                        _ => throw new AssertionFailedException()
+                    };
+
+                var proceedExpression = new DynamicExpression( proceedExpressionSyntax, proceedExpressionType, false );
 
                 var metaApi = MetaApi.ForFieldOrProperty(
                     this.OverriddenDeclaration,

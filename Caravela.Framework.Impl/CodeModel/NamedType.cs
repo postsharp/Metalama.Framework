@@ -372,29 +372,33 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 if ( builder is IReplaceMember replace )
                 {
-                    if ( replace.ReplacedMember.Target != null && allSymbols.Contains( (TSymbol) replace.ReplacedMember.Target ) )
+                    if ( replace.ReplacedMember.Target is TSymbol symbol && allSymbols.Contains( replace.ReplacedMember.Target ) )
                     {
                         // If the MemberRef points to a symbol just remove from symbol list.
                         // This prevents needless allocation.
-                        replacedSymbols.Add( (TSymbol) replace.ReplacedMember.Target );
+                        replacedSymbols.Add( symbol );
                     }
                     else
                     {
                         // Otherwise resolve the MemberRef.
                         var resolved = replace.ReplacedMember.Resolve( this.Compilation );
-                        var resolvedSymbol = (TSymbol?) resolved.GetSymbol();
 
-                        if ( resolvedSymbol != null )
+                        if ( resolved is TMember )
                         {
-                            replacedSymbols.Add( resolvedSymbol );
-                        }
-                        else if ( resolved is TBuilder replacedBuilder )
-                        {
-                            replacedBuilders.Add( replacedBuilder );
-                        }
-                        else
-                        {
-                            throw new AssertionFailedException();
+                            var resolvedSymbol = (TSymbol?) resolved.GetSymbol();
+
+                            if ( resolvedSymbol != null )
+                            {
+                                replacedSymbols.Add( resolvedSymbol );
+                            }
+                            else if ( resolved is TBuilder replacedBuilder )
+                            {
+                                replacedBuilders.Add( replacedBuilder );
+                            }
+                            else
+                            {
+                                throw new AssertionFailedException();
+                            }
                         }
                     }
                 }

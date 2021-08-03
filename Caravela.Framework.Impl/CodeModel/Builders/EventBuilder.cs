@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Invokers;
@@ -77,11 +76,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
-            if ( this._isEventField && this.ExplicitInterfaceImplementations.Count > 0 )
-            {
-                throw new AssertionFailedException();
-            }
-
             MemberDeclarationSyntax @event =
                 this._isEventField && this.ExplicitInterfaceImplementations.Count == 0
                     ? EventFieldDeclaration(
@@ -144,7 +138,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             }
         }
 
-        [return: RunTimeOnly]
         public EventInfo ToEventInfo() => throw new NotImplementedException();
 
         public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = new[] { interfaceEvent };

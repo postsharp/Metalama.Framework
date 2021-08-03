@@ -19,7 +19,7 @@ private event EventHandler __Event__OriginalImpl
             remove => this._field -= value;
         }
     
-private EventHandler? __EventField__BackingField;
+private EventHandler? _eventField;
     
     
         public event EventHandler? EventField{add    {
@@ -35,12 +35,12 @@ private event EventHandler? __EventField__OriginalImpl
 {
     add
     {
-        this.__EventField__BackingField += value;
+        this._eventField += value;
     }
     
     remove
     {
-        this.__EventField__BackingField -= value;
+        this._eventField -= value;
     }
 }
     

@@ -14,22 +14,22 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicCallAsS
         dynamic? Template()
         {
             // Expression statement
-            meta.Method.Invoke( 1 + 1 ).Foo();
-            meta.Method.Invoke( meta.Parameters[0].Value ).Foo();
-            meta.Method.Invoke( 1 + 1 );
-            meta.Method.Invoke( meta.Parameters[0].Value );
+            meta.Target.Method.Invoke( 1 + 1 ).Foo();
+            meta.Target.Method.Invoke( meta.Target.Parameters[0].Value ).Foo();
+            meta.Target.Method.Invoke( 1 + 1 );
+            meta.Target.Method.Invoke( meta.Target.Parameters[0].Value );
 
             // Discard assignment
-            _ = meta.Method.Invoke( 1 + 1 ).Foo();
-            _ = meta.Method.Invoke( meta.Parameters[0].Value ).Foo();
-            _ = meta.Method.Invoke( 1 + 1  );
-            _ = meta.Method.Invoke( meta.Parameters[0].Value );
+            _ = meta.Target.Method.Invoke( 1 + 1 ).Foo();
+            _ = meta.Target.Method.Invoke( meta.Target.Parameters[0].Value ).Foo();
+            _ = meta.Target.Method.Invoke( 1 + 1  );
+            _ = meta.Target.Method.Invoke( meta.Target.Parameters[0].Value );
 
             // Local variable assignment
-            var x = meta.Method.Invoke( 1 + 1  ).Foo();
-            var y = meta.Method.Invoke( meta.Parameters[0].Value ).Foo();
-            var a = meta.Method.Invoke( 1 + 1  );
-            var b = meta.Method.Invoke( meta.Parameters[0].Value );
+            var x = meta.Target.Method.Invoke( 1 + 1  ).Foo();
+            var y = meta.Target.Method.Invoke( meta.Target.Parameters[0].Value ).Foo();
+            var a = meta.Target.Method.Invoke( 1 + 1  );
+            var b = meta.Target.Method.Invoke( meta.Target.Parameters[0].Value );
             
             return default;
         }

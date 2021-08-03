@@ -9,11 +9,11 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class ReflectionTestBase : SerializerTestsBase
     {
-        private readonly ITestOutputHelper _helper;
+        public ITestOutputHelper Logger { get; }
 
         public ReflectionTestBase( ITestOutputHelper helper )
         {
-            this._helper = helper;
+            this.Logger = helper;
         }
 
         /// <summary>
@@ -30,10 +30,10 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             }
             else
             {
-                this._helper.WriteLine( "Actual result to compare against:" );
-                this._helper.WriteLine( "----" );
-                this._helper.WriteLine( "@\"" + actual.Replace( "\"", "\"\"", StringComparison.Ordinal ) + '\"' );
-                this._helper.WriteLine( "----" );
+                this.Logger.WriteLine( "Actual result to compare against:" );
+                this.Logger.WriteLine( "----" );
+                this.Logger.WriteLine( "@\"" + actual.Replace( "\"", "\"\"", StringComparison.Ordinal ) + '\"' );
+                this.Logger.WriteLine( "----" );
                 Assert.Equal( expected, actual );
             }
         }
