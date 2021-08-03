@@ -17,7 +17,7 @@ namespace Caravela.Framework.Aspects
         /// <inheritdoc />
         public virtual void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.AdviceFactory.OverrideFieldOrProperty( builder.TargetDeclaration, nameof(this.OverrideProperty) );
+            builder.AdviceFactory.OverrideFieldOrProperty( builder.Target, nameof(this.OverrideProperty) );
         }
 
         public virtual void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder )

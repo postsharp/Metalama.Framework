@@ -11,12 +11,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Properties.Advise
         { 
             get
             {
-                return meta.FieldOrProperty.Value;
+                return meta.Target.FieldOrProperty.Value;
             }
 
             set
             {
-                meta.FieldOrProperty.Value = value;
+                meta.Target.FieldOrProperty.Value = value;
             }
         }
     }

@@ -9,18 +9,18 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Samples.SimpleLogging
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine(meta.Method.ToDisplayString() + " started.");
+            Console.WriteLine(meta.Target.Method.ToDisplayString() + " started.");
 
             try
             {
                 dynamic? result = meta.Proceed();
 
-                Console.WriteLine(meta.Method.ToDisplayString() + " succeeded.");
+                Console.WriteLine(meta.Target.Method.ToDisplayString() + " succeeded.");
                 return result;
             }
             catch (Exception e)
             {
-                Console.WriteLine(meta.Method.ToDisplayString() + " failed: " + e.Message);
+                Console.WriteLine(meta.Target.Method.ToDisplayString() + " failed: " + e.Message);
                 throw;
             }
         }

@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Gene
         dynamic Template()
         {
             A<Aspect, int, string> x = new C<object, int, string>();
-            meta.Parameters[0].Value = x;
+            meta.Target.Parameters[0].Value = x;
             dynamic result = meta.Proceed();
             return result;
         }

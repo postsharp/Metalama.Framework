@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lock.RunTimeLoc
         {
             lock (meta.This)
             {
-                var x = meta.Parameters.Count;
+                var x = meta.Target.Parameters.Count;
                 Console.WriteLine(x);
                 return meta.Proceed();
             }

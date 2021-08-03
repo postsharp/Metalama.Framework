@@ -15,11 +15,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905
                 if ( value == null )
                 {
                     // Call the service locator.
-                    value = meta.Cast( meta.FieldOrProperty.Type, ServiceLocator.ServiceProvider.GetService(meta.Property.Type.ToType() ) );
+                    value = meta.Cast( meta.Target.FieldOrProperty.Type, ServiceLocator.ServiceProvider.GetService(meta.Target.Property.Type.ToType() ) );
 
                     // Set the field/property to the new value.
-                    meta.Property.Value = value
-                                          ?? throw new InvalidOperationException($"Cannot get a service of type {meta.Property.Type}.");
+                    meta.Target.Property.Value = value
+                                          ?? throw new InvalidOperationException($"Cannot get a service of type {meta.Target.Property.Type}.");
                 }
 
                 return value;

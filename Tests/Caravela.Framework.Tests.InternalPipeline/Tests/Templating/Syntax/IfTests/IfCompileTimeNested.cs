@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfCompi
         dynamic? Template()
         {
             int t = meta.CompileTime(0);
-            string name = meta.Parameters[0].Name;
+            string name = meta.Target.Parameters[0].Name;
             if (name.Contains("a"))
             {
                 if (name.Contains("b"))

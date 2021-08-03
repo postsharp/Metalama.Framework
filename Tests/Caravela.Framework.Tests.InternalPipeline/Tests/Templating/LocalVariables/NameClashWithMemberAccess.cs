@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.NameCla
         [TestTemplate]
         dynamic? Template()
         {
-            var n = meta.Parameters.Count; // build-time
+            var n = meta.Target.Parameters.Count; // build-time
 
             if (n == 1)
             {

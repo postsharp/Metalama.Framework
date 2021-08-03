@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.LinqWit
             list.Add(2);
             list.Add(5);
 
-            var p = list.Where(a => a > meta.Parameters.Count).Count();
+            var p = list.Where(a => a > meta.Target.Parameters.Count).Count();
             Console.WriteLine(p);
             
             return meta.Proceed();

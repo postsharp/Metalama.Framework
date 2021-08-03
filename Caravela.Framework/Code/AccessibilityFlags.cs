@@ -14,6 +14,6 @@ namespace Caravela.Framework.Code
         DerivedTypeOfAnyAssembly = 4,
         AnyTypeOfFriendAssembly = 8,
         AnyType = 16,
-        Public = SameType | DerivedTypeOfAnyAssembly | DerivedTypeOfFriendAssembly | AnyTypeOfFriendAssembly | AnyType 
+        Public = SameType | DerivedTypeOfAnyAssembly | DerivedTypeOfFriendAssembly | AnyTypeOfFriendAssembly | AnyType
     }
 }

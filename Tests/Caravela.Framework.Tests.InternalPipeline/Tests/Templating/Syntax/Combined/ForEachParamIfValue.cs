@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Combined.ForEac
         [TestTemplate]
         dynamic? Template()
         {
-            foreach (var p in meta.Parameters)
+            foreach (var p in meta.Target.Parameters)
             {
                 if (p.Value == null)
                 {

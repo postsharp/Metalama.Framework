@@ -203,13 +203,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
             => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
-                (PropertyBuilder propertyBuilder, MethodKind.PropertyGet) 
+                (PropertyBuilder propertyBuilder, MethodKind.PropertyGet)
                     => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.Getter ).AssertNoneNull().ToArray(),
-                (PropertyBuilder propertyBuilder, MethodKind.PropertySet) 
+                (PropertyBuilder propertyBuilder, MethodKind.PropertySet)
                     => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.Setter ).AssertNoneNull().ToArray(),
-                (EventBuilder eventBuilder, MethodKind.EventAdd) 
+                (EventBuilder eventBuilder, MethodKind.EventAdd)
                     => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.Adder ).AssertNoneNull().ToArray(),
-                (EventBuilder eventBuilder, MethodKind.EventRemove) 
+                (EventBuilder eventBuilder, MethodKind.EventRemove)
                     => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.Remover ).AssertNoneNull().ToArray(),
                 _ => throw new AssertionFailedException()
             };

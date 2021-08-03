@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
         {
-            aspectBuilder.AdviceFactory.ImplementInterface(aspectBuilder.TargetDeclaration, typeof(IInterface));
+            aspectBuilder.AdviceFactory.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
         }
 
         [InterfaceMember(IsExplicit = true)]
@@ -81,7 +81,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
         {
-            foreach(var method in aspectBuilder.TargetDeclaration.Methods)
+            foreach(var method in aspectBuilder.Target.Methods)
             {
                 if (method.IsExplicitInterfaceImplementation)
                 {
@@ -89,7 +89,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 }
             }
 
-            foreach (var property in aspectBuilder.TargetDeclaration.Properties)
+            foreach (var property in aspectBuilder.Target.Properties)
             {
                 if (property.IsExplicitInterfaceImplementation)
                 {
@@ -97,7 +97,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 }
             }
 
-            foreach (var method in aspectBuilder.TargetDeclaration.Events)
+            foreach (var method in aspectBuilder.Target.Events)
             {
                 if (method.IsExplicitInterfaceImplementation)
                 {

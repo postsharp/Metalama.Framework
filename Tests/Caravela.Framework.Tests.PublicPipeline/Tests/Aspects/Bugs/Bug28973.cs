@@ -37,7 +37,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Bugs.Bug28973
     {
         public override dynamic? OverrideProperty
         {
-            get => ServiceLocator.ServiceProvider.GetService(meta.FieldOrProperty.Type.ToType());
+            get => ServiceLocator.ServiceProvider.GetService(meta.Target.FieldOrProperty.Type.ToType());
 
             set => meta.Proceed();
         }
