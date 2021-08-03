@@ -34,7 +34,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.NonAs
         public Task<dynamic?> OverrideAsyncMethod()
         {
             Console.WriteLine("Non-async intercept");
-            return meta.Proceed();
+            return meta.Proceed()!;
             
         }
     }

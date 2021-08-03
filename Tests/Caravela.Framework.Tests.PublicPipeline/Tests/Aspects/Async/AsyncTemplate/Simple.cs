@@ -9,7 +9,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.Simpl
 {
     class Aspect : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             return meta.Proceed();
         }

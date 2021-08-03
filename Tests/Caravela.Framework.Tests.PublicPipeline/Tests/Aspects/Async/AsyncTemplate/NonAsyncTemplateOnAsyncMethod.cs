@@ -30,7 +30,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.NonAs
         public Task<dynamic?> OverrideAsyncMethod()
         {
             Console.WriteLine("Getting task");
-            var task = meta.Proceed();
+            var task = meta.Proceed()!;
             Console.WriteLine("Got task");
             return task;
             
@@ -44,6 +44,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.NonAs
         [Aspect]
         public async ValueTask<int> AsyncMethod(int a)
         {
+            await Task.Yield();
             return a;
         }
     }

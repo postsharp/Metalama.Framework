@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Linking
 
             return method
                 .WithBody( GetBody() )
-                .WithModifiers( TokenList(method.Modifiers.Where( m => m.Kind() != SyntaxKind.AsyncKeyword )) )
+                .WithModifiers( TokenList( method.Modifiers.Where( m => m.Kind() != SyntaxKind.AsyncKeyword ) ) )
                 .NormalizeWhitespace()
                 .WithLeadingTrivia( method.GetLeadingTrivia() )
                 .WithTrailingTrivia( method.GetTrailingTrivia() );

@@ -72,7 +72,7 @@ namespace Caravela.Framework.Impl.Templating
 
             var returnType = method.ReturnType;
 
-            if ( this._templateMethod.MustInterpretAsAsync())
+            if ( this._templateMethod.MustInterpretAsAsync() )
             {
                 // If we are in an awaitable async method, the consider the return type as seen by the method body,
                 // not the one as seen from outside.
@@ -167,7 +167,6 @@ namespace Caravela.Framework.Impl.Templating
             return Block( forEach, CreateYieldBreakStatement() ).WithFlattenBlockAnnotation();
         }
 
-        
         private StatementSyntax CreateReturnStatementAsyncEnumerator( ExpressionSyntax returnExpression )
         {
             // We are in an async iterator (or async stream), and we cannot have a return statement.
@@ -250,10 +249,9 @@ namespace Caravela.Framework.Impl.Templating
 
             return Block( local, tryStatement, CreateYieldBreakStatement() ).NormalizeWhitespace().WithFlattenBlockAnnotation();
         }
-        
-        private static YieldStatementSyntax CreateYieldBreakStatement() 
-            => YieldStatement( SyntaxKind.YieldBreakStatement ).WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
 
+        private static YieldStatementSyntax CreateYieldBreakStatement()
+            => YieldStatement( SyntaxKind.YieldBreakStatement ).WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
 
         private static StatementSyntax CreateReturnStatementVoid( ExpressionSyntax? returnExpression )
         {

@@ -204,11 +204,10 @@ namespace Caravela.Framework.Impl.Advices
                     }
 
                     break;
-                
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-        
 
             return selectedTemplate.InterpretedAs( interpretedKind );
         }
