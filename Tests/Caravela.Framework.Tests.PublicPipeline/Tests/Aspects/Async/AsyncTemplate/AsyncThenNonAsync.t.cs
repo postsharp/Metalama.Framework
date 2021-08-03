@@ -5,10 +5,12 @@ class TargetCode
         
         [Aspect1]
         [Aspect2]
-        public Task<int> AsyncMethod(int a)
+        public async Task<int> AsyncMethod(int a)
 {
-    global::System.Console.WriteLine("Non-async intercept");
-    return (System.Threading.Tasks.Task<int>)this.__Override__AsyncMethod__By__Aspect1(a);
+    global::System.Console.WriteLine("Async intercept");
+    await global::System.Threading.Tasks.Task.Yield();
+    var result = await this.__Override__AsyncMethod__By__Aspect2(a);
+    return (int)result;
 }
 
 private async Task<int> __AsyncMethod__OriginalImpl(int a)
@@ -18,19 +20,25 @@ private async Task<int> __AsyncMethod__OriginalImpl(int a)
         }
 
 
-public async global::System.Threading.Tasks.Task<global::System.Int32> __Override__AsyncMethod__By__Aspect1(global::System.Int32 a)
+public global::System.Threading.Tasks.Task<global::System.Int32> __Override__AsyncMethod__By__Aspect2(global::System.Int32 a)
 {
-    global::System.Console.WriteLine("Async intercept");
-    await global::System.Threading.Tasks.Task.Yield();
-    var result = await this.__AsyncMethod__OriginalImpl(a);
-    return (int)result;
+    global::System.Console.WriteLine("Non-async intercept");
+    return (System.Threading.Tasks.Task<int>)this.__AsyncMethod__OriginalImpl(a);
 }        
         [Aspect1]
         [Aspect2]
-        public Task<int> NonAsyncMethod(int a)
+        public  async Task<int> NonAsyncMethod(int a)
+{
+    global::System.Console.WriteLine("Async intercept");
+    await global::System.Threading.Tasks.Task.Yield();
+    var result = await this.__Override__NonAsyncMethod__By__Aspect2(a);
+    return (int)result;
+}
+
+
+public global::System.Threading.Tasks.Task<global::System.Int32> __Override__NonAsyncMethod__By__Aspect2(global::System.Int32 a)
 {
     global::System.Console.WriteLine("Non-async intercept");
-    throw new global::System.NotSupportedException("This should not be called.");
-}
-        
+            return Task.FromResult(a);
+}        
     }

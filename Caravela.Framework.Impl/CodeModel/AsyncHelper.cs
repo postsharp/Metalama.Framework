@@ -96,7 +96,13 @@ namespace Caravela.Framework.Impl.CodeModel
                 return null;
             }
 
-            var hasBuilder = returnType.OriginalDefinition.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(AsyncMethodBuilderAttribute) );
+            // The Task type does not have any AsyncMethodBuilder attribute so they need to be marked manually.
+            var isTask = returnType.OriginalDefinition.Name == nameof(Task)
+                         && returnType.OriginalDefinition.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks";
+            
+            // Other types could have an AsyncMethodBuilderAttribute. 
+            var hasBuilder = isTask ||
+                returnType.OriginalDefinition.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(AsyncMethodBuilderAttribute) );
 
             var awaiterType = getAwaiterMethod.ReturnType;
             var getResultMethod = awaiterType.GetMembers( "GetResult" ).OfType<IMethodSymbol>().FirstOrDefault( p => p.Parameters.Length == 0 );

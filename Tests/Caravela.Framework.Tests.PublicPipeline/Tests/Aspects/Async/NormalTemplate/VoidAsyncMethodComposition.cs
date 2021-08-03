@@ -6,8 +6,11 @@ using System.Collections.Generic;
 using Caravela.Framework;
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Tests.Integration.Templating.Aspects.Async.TwoNormalTemplatesOnVoidAsyncMethod;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Async.TwoNormalTemplatesOnVoidAsyncMethod.cs
+[assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) ) ]
+
+namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Async.TwoNormalTemplatesOnVoidAsyncMethod
 {
     class Aspect1 : OverrideMethodAspect
     {
@@ -34,6 +37,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Async.TwoNorma
     }
 
 
+    // <target>
     class TargetCode
     {
        [Aspect1, Aspect2]

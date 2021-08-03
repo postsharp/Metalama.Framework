@@ -133,9 +133,7 @@ namespace Caravela.Framework.Impl.Advices
             // be applied only on methods with async implementations. However, if the template has an async implementation, the
             // target awaitable type must be compatible with an async implementation, i.e. it must have a method builder.
 
-            if ( asyncInfo.IsAsync || (templateSelector.UseAsyncTemplateForAnyAwaitable && asyncInfo.IsAwaitable
-                                                                                        && (!asyncTemplate.TemplateMember.IsAsync
-                                                                                            || asyncInfo.HasMethodBuilder)) )
+            if ( asyncInfo.IsAsync || (templateSelector.UseAsyncTemplateForAnyAwaitable && asyncInfo.IsAwaitable && asyncInfo.HasMethodBuilder) ) 
             {
                 interpretedKind = TemplateSelectionKind.Async;
 

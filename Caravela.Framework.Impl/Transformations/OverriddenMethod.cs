@@ -88,7 +88,10 @@ namespace Caravela.Framework.Impl.Transformations
 
                         modifiers = modifiers.Add( Token( SyntaxKind.AsyncKeyword ) );
 
-                        // The return type needs to be changed from Task<dynamic> to a non-dynamic type.
+                        /*
+                        // The return type needs to be changed from void to ValueTask.
+                        if ( this.OverriddenDeclaration.ReturnType.SpecialType == SpecialType.Void )
+                            
                         var taskType = this.OverriddenDeclaration.ReturnType.SpecialType == SpecialType.Void
                             ? this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.ValueTask )
                             : this.OverriddenDeclaration.GetCompilationModel()
@@ -96,8 +99,8 @@ namespace Caravela.Framework.Impl.Transformations
                                 .WithGenericArguments( this.OverriddenDeclaration.ReturnType );
 
                         returnType = LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( taskType.GetSymbol() );
+                        */
                     }
-                    else { }
                 }
                 else
                 {
