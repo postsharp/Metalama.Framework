@@ -76,7 +76,7 @@ namespace Caravela.Framework.Impl.CodeModel
             switch ( type )
             {
                 case CompileTimeType compileTimeType:
-                    return (ITypeSymbol) compileTimeType.Target.GetSymbol( this.Compilation );
+                    return (ITypeSymbol) compileTimeType.Target.GetSymbol( this.Compilation ).AssertNotNull( Justifications.SerializersNotImplementedForIntroductions );
 
                 default:
                     return this._symbolCache.GetOrAdd( type, this.GetTypeSymbolCore );
@@ -100,7 +100,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             if ( type is CompileTimeType compileTimeType )
             {
-                return (ITypeSymbol) compileTimeType.Target.GetSymbol( this.Compilation );
+                return (ITypeSymbol) compileTimeType.Target.GetSymbol( this.Compilation ).AssertNotNull( Justifications.TypesAlwaysHaveSymbol );
             }
 
             if ( type.IsByRef )
