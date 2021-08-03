@@ -533,40 +533,20 @@ namespace Caravela.Framework.Impl.Templating
             switch ( type?.Name )
             {
                 case "dynamic":
-
-                    ArgumentListSyntax arguments;
-
-                    if ( this._templateMemberClassifier.GetMetaMemberKind( expression ) == MetaMemberKind.This )
-                    {
-                        // This expression can generate a diagnostic, so we need to pass location information.
-                        var expressionText = SyntaxFactoryEx.LiteralExpression( expression.ToString() );
-                        var location = this._templateMetaSyntaxFactory.Location( this._syntaxTreeAnnotationMap.GetLocation( expression ) );
-
-                        arguments = ArgumentList( SeparatedList( new[] { Argument( expressionText ), Argument( location ) } ) );
-                    }
-                    else
-                    {
-                        arguments = ArgumentList();
-                    }
-
-                    return ConditionalAccessExpression(
-                        ParenthesizedExpression( CastFromDynamic( this.MetaSyntaxFactory.Type( typeof(IDynamicExpression) ), expression ) ),
-                        InvocationExpression( MemberBindingExpression( IdentifierName( nameof(IDynamicExpression.CreateExpression) ) ) )
-                            .WithArgumentList( arguments ) );
-
-                // Task<dynamic>: the dynamic expression is in the task result (see the implementation of meta.ProceedAsync).
                 case "Task" when type is INamedTypeSymbol { IsGenericType: true } namedType && namedType.TypeArguments[0] is IDynamicTypeSymbol &&
                                  type.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks":
+                case "IEnumerable" or "IEnumerator" or "IAsyncEnumerable" or "IAsyncEnumerator"
+                    when type is INamedTypeSymbol { IsGenericType: true } namedType2 && namedType2.TypeArguments[0] is IDynamicTypeSymbol &&
+                         type.ContainingNamespace.ToDisplayString() == "System.Collections.Generic":
 
-                    return ConditionalAccessExpression(
-                        ParenthesizedExpression(
-                            CastFromDynamic(
-                                this.MetaSyntaxFactory.Type( typeof(IDynamicExpression) ),
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    expression,
-                                    IdentifierName( nameof(Task<dynamic>.Result) ) ) ) ),
-                        InvocationExpression( MemberBindingExpression( IdentifierName( nameof(IDynamicExpression.CreateExpression) ) ) ) );
+                    var expressionText = SyntaxFactoryEx.LiteralExpression( expression.ToString() );
+                    var location = this._templateMetaSyntaxFactory.Location( this._syntaxTreeAnnotationMap.GetLocation( expression ) );
+
+                    return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.GetDynamicSyntax) ) )
+                        .AddArgumentListArguments(
+                            Argument( CastExpression( NullableType( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ) ), expression ) ),
+                            Argument( expressionText ),
+                            Argument( location ) );
 
                 case "String":
                     return CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind.StringLiteralExpression );

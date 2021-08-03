@@ -305,6 +305,27 @@ namespace Caravela.Framework.Impl.Templating
 
         public static ValueTask<dynamic?> ProceedAsync() => meta.Proceed();
 
+        public static ExpressionSyntax? GetDynamicSyntax( object? expression, string? expressionText, Location? location = null )
+        {
+            switch ( expression )
+            {
+                case null:
+                    return null;
+
+                case IDynamicExpression dynamicExpression:
+                    return dynamicExpression.CreateExpression( expressionText, location );
+
+                case Task<object?> task:
+                    return ((IDynamicExpression?) task.Result)?.CreateExpression( expressionText, location );
+
+                case DynamicEnumerable enumerable:
+                    return ((IDynamicExpression?) enumerable.Expression)?.CreateExpression( expressionText, location );
+
+                default:
+                    throw new ArgumentOutOfRangeException( nameof(expression), $"Don't know how to extract the syntax from '{expression}'." );
+            }
+        }
+
         private class InitializeCookie : IDisposable
         {
             public void Dispose() => _expansionContext.Value = null;

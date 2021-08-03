@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl
 {
     internal static class CodeModelExtensions
     {
-        public static CompilationModel GetCompilationModel( this IDeclaration declaration ) => (CompilationModel) declaration.Compilation;
+        public static CompilationModel GetCompilationModel( this ICompilationElement declaration ) => (CompilationModel) declaration.Compilation;
 
         public static ISyntaxFactory GetSyntaxFactory( this IDeclaration declaration ) => declaration.GetCompilationModel().ReflectionMapper;
 

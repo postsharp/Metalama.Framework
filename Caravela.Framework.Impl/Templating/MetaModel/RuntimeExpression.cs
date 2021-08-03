@@ -9,6 +9,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -17,8 +21,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     /// </summary>
     public sealed class RuntimeExpression
     {
+        private const string _typeIdAnnotationName = "caravela-typeid";
+
         private readonly string? _expressionTypeName;
         private ITypeSymbol? _expressionType;
+   
 
         /// <summary>
         /// Gets a value indicating whether it is legal to use the <c>out</c> or <c>ref</c> argument modifier with this expression.
@@ -60,9 +67,22 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             return this._expressionType;
         }
 
-        private RuntimeExpression( ExpressionSyntax syntax, ITypeSymbol? expressionType, bool isReferenceable )
+        private static ExpressionSyntax AddTypeAnnotation(ExpressionSyntax node, ITypeSymbol? type, Compilation? compilation)
         {
-            this.Syntax = syntax;
+            if ( type != null && compilation != null && !node.GetAnnotations( _typeIdAnnotationName ).Any() )
+            {
+                return node.WithAdditionalAnnotations(
+                    new SyntaxAnnotation( _typeIdAnnotationName,  SymbolIdGenerator.GetInstance( compilation! ).GetId( type ).ToString( CultureInfo.InvariantCulture ) ) );
+            }
+            else
+            {
+                return node;
+            }
+        }
+
+        private RuntimeExpression( ExpressionSyntax syntax, Compilation? compilation, ITypeSymbol? expressionType, bool isReferenceable )
+        {
+            this.Syntax = AddTypeAnnotation( syntax, expressionType, compilation );
             this._expressionType = expressionType;
             this.IsReferenceable = isReferenceable;
         }
@@ -94,10 +114,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         }
 
         public RuntimeExpression( ExpressionSyntax syntax, IType type, bool isReferenceable = false )
-            : this( syntax, type.GetSymbol(), isReferenceable ) { }
+            : this( syntax, type.GetCompilationModel().RoslynCompilation, type.GetSymbol(), isReferenceable ) { }
 
         public RuntimeExpression( ExpressionSyntax syntax )
-            : this( syntax, (ITypeSymbol?) null, false ) { }
+            : this( syntax, null, null, false ) { }
 
         public static ExpressionSyntax GetSyntaxFromValue( object? value )
             => FromValue( value )?.Syntax ?? SyntaxFactory.LiteralExpression( SyntaxKind.NullKeyword );
@@ -161,6 +181,35 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             };
         }
 
+        private static bool TryFindExpressionType( SyntaxNode node, Compilation compilation, out ITypeSymbol? type )
+        {
+           
+            // If we don't know the exact type, check if we have a type annotation on the syntax.
+
+            var typeAnnotation = node.GetAnnotations( _typeIdAnnotationName ).FirstOrDefault();
+
+            if ( typeAnnotation != null! )
+            {
+                var symbolId = typeAnnotation.Data!;
+
+                type = (ITypeSymbol) SymbolIdGenerator.GetInstance( compilation ).GetSymbol( symbolId );
+
+                return true;
+            }
+            else if ( SyntaxTreeAnnotationMap.TryGetExpressionType( node, compilation, out var symbol ) )
+            {
+                type = (ITypeSymbol) symbol;
+
+                return true;
+            }
+            else
+            {
+                type = null;
+
+                return false;
+            }
+        }
+
         /// <summary>
         /// Converts the current <see cref="RuntimeExpression"/> into an <see cref="ExpressionSyntax"/> and emits a cast
         /// if necessary.
@@ -169,18 +218,29 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         /// <returns></returns>
         public ExpressionSyntax ToTypedExpression( IType targetType, bool addsParenthesis = false )
         {
+            var targetTypeSymbol = targetType.GetSymbol();
+            var compilation = targetType.GetCompilationModel().RoslynCompilation;
+
             var expressionType = this.GetExpressionType( targetType.Compilation.TypeFactory );
 
-            var targetTypeSymbol = targetType.GetSymbol();
-
-            if ( SymbolEqualityComparer.Default.Equals( expressionType, targetTypeSymbol ) )
+            if ( expressionType != null || TryFindExpressionType( this.Syntax, compilation, out expressionType ) )
             {
-                return this.Syntax;
-            }
+                // If we know the type of the current expression, check if a cast is necessary.
 
+                if ( compilation.HasImplicitConversion( expressionType, targetType.GetSymbol() ) )
+                {
+                    return this.Syntax;
+                }
+            }
+           
+            // We may need a cast. We are not sure, but we cannot do more. This could be removed later in the simplification step.
             var cast = (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression( targetTypeSymbol, this.Syntax );
 
-            return (addsParenthesis ? SyntaxFactory.ParenthesizedExpression( cast ) : cast).WithAdditionalAnnotations( Simplifier.Annotation );
+            var expression = (addsParenthesis ? SyntaxFactory.ParenthesizedExpression( cast ) : cast).WithAdditionalAnnotations( Simplifier.Annotation );
+
+            return AddTypeAnnotation( expression, this._expressionType, compilation );
         }
+
+        public override string ToString() => this.Syntax.ToString();
     }
 }

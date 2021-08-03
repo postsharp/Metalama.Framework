@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using System;
@@ -10,11 +11,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 // ReSharper disable UnusedParameter.Global
-
+// ReSharper disable once InconsistentNaming
 namespace Caravela.Framework.Aspects
 {
-    // ReSharper disable once InconsistentNaming
-
     /// <summary>
     /// The entry point for the meta model, which can be used in templates to inspect the target code or access other
     /// features of the template language.
@@ -49,14 +48,14 @@ namespace Caravela.Framework.Aspects
         
         public static Task<dynamic?> ProceedAsync() => Task.FromResult( CurrentContext.Proceed( TemplateKind.Async )! );
 
-        public static IEnumerable<dynamic?> ProceedEnumerable() => CurrentContext.Proceed( TemplateKind.IEnumerable )!;
+        public static IEnumerable<dynamic?> ProceedEnumerable() => new DynamicEnumerable( CurrentContext.Proceed( TemplateKind.IEnumerable ) );
 
-        public static IEnumerator<dynamic?> ProceedEnumerator() => CurrentContext.Proceed( TemplateKind.IEnumerable )!;
+        public static IEnumerator<dynamic?> ProceedEnumerator() => new DynamicEnumerable( CurrentContext.Proceed( TemplateKind.IEnumerable ) );
 
 #if NET5_0
-        public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => CurrentContext.Proceed( TemplateKind.IAsyncEnumerable )!;
+        public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => new DynamicEnumerable( CurrentContext.Proceed( TemplateKind.IAsyncEnumerable ) );
 
-        public static IAsyncEnumerator<dynamic?> ProceedAsyncEnumerator() => CurrentContext.Proceed( TemplateKind.IAsyncEnumerator )!;
+        public static IAsyncEnumerator<dynamic?> ProceedAsyncEnumerator() => new DynamicEnumerable( CurrentContext.Proceed( TemplateKind.IAsyncEnumerator ) );
 #endif
 
         /// <summary>

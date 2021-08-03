@@ -19,12 +19,13 @@ namespace Caravela.Framework.Impl.Templating
         public const string TemplateMethodSuffix = "_Template";
 
         private readonly IServiceProvider _serviceProvider;
-        private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap = new();
+        private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly ITemplateCompilerObserver? _observer;
         private readonly SerializableTypes _serializableTypes;
 
         public TemplateCompiler( IServiceProvider serviceProvider, Compilation runTimeCompilation )
         {
+            this._syntaxTreeAnnotationMap = new SyntaxTreeAnnotationMap( runTimeCompilation );
             this._serviceProvider = serviceProvider;
             var syntaxSerializationService = serviceProvider.GetService<SyntaxSerializationService>();
             this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( runTimeCompilation ) );
@@ -130,5 +131,6 @@ namespace Caravela.Framework.Impl.Templating
 
             return transformedSyntaxRoot != null && templateCompilerRewriter.Success;
         }
+
     }
 }
