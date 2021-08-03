@@ -50,7 +50,7 @@ namespace Caravela.Framework.Aspects
 
         public static IEnumerable<dynamic?> ProceedEnumerable() => new DynamicEnumerable( CurrentContext.Proceed( TemplateKind.IEnumerable ) );
 
-        public static IEnumerator<dynamic?> ProceedEnumerator() => new DynamicEnumerable( CurrentContext.Proceed( TemplateKind.IEnumerable ) );
+        public static IEnumerator<dynamic?> ProceedEnumerator() => new DynamicEnumerable( CurrentContext.Proceed( TemplateKind.IEnumerator ) );
 
 #if NET5_0
         public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => new DynamicEnumerable( CurrentContext.Proceed( TemplateKind.IAsyncEnumerable ) );

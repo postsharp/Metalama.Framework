@@ -237,7 +237,7 @@ namespace Caravela.Framework.Impl.Templating
                 var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
                 // Dynamic local variables are considered compile-time because they must be transformed. 
-                return this._templateMemberClassifier.RequiresCompileTimeExecution( symbol ) || symbol is ILocalSymbol
+                return this._templateMemberClassifier.RequiresCompileTimeExecution( symbol ) || ( symbol is ILocalSymbol local && local.Type.IsDynamic( true ) )
                     ? TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
                     : TemplatingScope.Dynamic;
             }
@@ -1504,9 +1504,23 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitYieldStatement( YieldStatementSyntax node )
         {
-            this.ReportUnsupportedLanguageFeature( node.YieldKeyword, "yield" );
+            // Yield is always run-time.
 
-            return base.VisitYieldStatement( node );
+            ExpressionSyntax? transformedExpression;
+
+            if ( node.Expression != null )
+            {
+                using ( this.WithScopeContext( ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, "'yield' expression" ) ) )
+                {
+                    transformedExpression = this.Visit( node.Expression );
+                }
+            }
+            else
+            {
+                transformedExpression = null;
+            }
+
+            return node.WithExpression( transformedExpression ).AddScopeAnnotation( TemplatingScope.RunTimeOnly );
         }
 
         #endregion
