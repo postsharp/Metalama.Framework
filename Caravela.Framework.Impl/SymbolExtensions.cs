@@ -44,7 +44,9 @@ namespace Caravela.Framework.Impl
 
         public static bool IsGenericTypeDefinition( this INamedTypeSymbol namedType ) => namedType.TypeArguments.Any( a => a is ITypeParameterSymbol );
 
-        public static bool IsDynamic( this ITypeSymbol? type ) => type is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
+        public static bool IsDynamic( this ITypeSymbol? type )
+            => type is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } || (type is INamedTypeSymbol { IsGenericType: true } namedType
+               && IsDynamic( namedType.TypeArguments[0] ));
 
         public static bool AnyBaseType( this INamedTypeSymbol type, Predicate<INamedTypeSymbol> predicate )
         {

@@ -27,7 +27,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.Async
         public async Task<dynamic?> OverrideAsyncMethod()
         {
             await Task.Yield();
-            var result = await meta.Proceed();
+            var result = await meta.ProceedAsync();
             Console.WriteLine($"result={result}");
             return result;
             

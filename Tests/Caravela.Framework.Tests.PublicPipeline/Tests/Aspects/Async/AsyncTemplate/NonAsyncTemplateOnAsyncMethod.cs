@@ -30,7 +30,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.NonAs
         public Task<dynamic?> OverrideAsyncMethod()
         {
             Console.WriteLine("Getting task");
-            var task = meta.Proceed()!;
+            var task = meta.ProceedAsync()!;
             Console.WriteLine("Got task");
             return task;
             

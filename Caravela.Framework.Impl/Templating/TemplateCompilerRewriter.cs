@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
@@ -552,6 +553,20 @@ namespace Caravela.Framework.Impl.Templating
                         ParenthesizedExpression( CastFromDynamic( this.MetaSyntaxFactory.Type( typeof(IDynamicExpression) ), expression ) ),
                         InvocationExpression( MemberBindingExpression( IdentifierName( nameof(IDynamicExpression.CreateExpression) ) ) )
                             .WithArgumentList( arguments ) );
+
+                // Task<dynamic>: the dynamic expression is in the task result (see the implementation of meta.ProceedAsync).
+                case "Task" when type is INamedTypeSymbol { IsGenericType: true } namedType && namedType.TypeArguments[0] is IDynamicTypeSymbol &&
+                                 type.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks":
+
+                    return ConditionalAccessExpression(
+                        ParenthesizedExpression(
+                            CastFromDynamic(
+                                this.MetaSyntaxFactory.Type( typeof(IDynamicExpression) ),
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    expression,
+                                    IdentifierName( nameof(Task<dynamic>.Result) ) ) ) ),
+                        InvocationExpression( MemberBindingExpression( IdentifierName( nameof(IDynamicExpression.CreateExpression) ) ) ) );
 
                 case "String":
                     return CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind.StringLiteralExpression );

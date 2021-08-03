@@ -62,7 +62,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.NonAs
         {
             Console.WriteLine("Async intercept");
             await Task.Yield();
-            var result = await meta.Proceed();
+            var result = await meta.ProceedAsync();
             return result;
             
         }

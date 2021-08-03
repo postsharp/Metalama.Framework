@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -21,7 +22,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// List of well-known types, for which the scope is overriden (i.e. this list takes precedence over any other rule).
         /// 'MembersOnly' means that the rule applies to the members of the type, but not to the type itself.
         /// </summary>
-        private static readonly Dictionary<string, (TemplatingScope Scope, bool MembersOnly)> _wellKnownRunTimeTypes =
+        private static readonly Dictionary<string, (string Namespace, TemplatingScope Scope, bool MembersOnly)> _wellKnownRunTimeTypes =
             new (Type ReflectionType, TemplatingScope Scope, bool MembersOnly)[]
             {
                 (typeof(Console), Scope: TemplatingScope.RunTimeOnly, false),
@@ -29,8 +30,12 @@ namespace Caravela.Framework.Impl.CompileTime
                 (typeof(Thread), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(AppDomain), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(MemberInfo), Scope: TemplatingScope.RunTimeOnly, true),
-                (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true)
-            }.ToDictionary( t => t.ReflectionType.FullName, t => (t.Scope, t.MembersOnly) );
+                (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true),
+                (typeof(Task), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(Task<>), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(ValueTask), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(ValueTask<>), Scope: TemplatingScope.RunTimeOnly, false)
+            }.ToDictionary( t => t.ReflectionType.Name, t => ( t.ReflectionType.Namespace, t.Scope, t.MembersOnly) );
 
         private readonly Compilation _compilation;
         private readonly INamedTypeSymbol _compileTimeAttribute;
@@ -420,8 +425,9 @@ namespace Caravela.Framework.Impl.CompileTime
                     return false;
 
                 case INamedTypeSymbol namedType:
-                    if ( namedType.GetReflectionName() is { } name &&
+                    if ( namedType.MetadataName is { } name &&
                          _wellKnownRunTimeTypes.TryGetValue( name, out var config ) &&
+                         config.Namespace == namedType.ContainingNamespace.ToDisplayString() &&
                          (!config.MembersOnly || isMember) )
                     {
                         scope = config.Scope;

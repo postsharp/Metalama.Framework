@@ -47,7 +47,7 @@ namespace Caravela.Framework.Aspects
         [TemplateKeyword]
         public static dynamic? Proceed() => CurrentContext.Proceed( TemplateKind.Default );
         
-        public static Task<dynamic?> ProceedAsync() => CurrentContext.Proceed( TemplateKind.Async )!;
+        public static Task<dynamic?> ProceedAsync() => Task.FromResult( CurrentContext.Proceed( TemplateKind.Async )! );
 
         public static IEnumerable<dynamic?> ProceedEnumerable() => CurrentContext.Proceed( TemplateKind.IEnumerable )!;
 

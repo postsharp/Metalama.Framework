@@ -33,7 +33,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.Async
         {
             Console.WriteLine("Async intercept");
             await Task.Yield();
-            var result = await meta.Proceed();
+            var result = await meta.ProceedAsync();
             return result;
             
         }
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.Async
         public Task<dynamic?> OverrideAsyncMethod()
         {
             Console.WriteLine("Non-async intercept");
-            return meta.Proceed()!;
+            return meta.ProceedAsync();
             
         }
     }
