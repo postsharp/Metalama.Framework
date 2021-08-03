@@ -27,8 +27,9 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            // Property access should be on the left.
-            if ( assignmentExpression.Left != aspectReference.Expression )
+            // Should be simple assignment and property access should be on the left.
+            if ( assignmentExpression.Kind() != SyntaxKind.SimpleAssignmentExpression
+                 || assignmentExpression.Left != aspectReference.Expression )
             {
                 return false;
             }

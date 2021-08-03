@@ -30,8 +30,9 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            // Invocation should be on the right.
-            if ( assignmentExpression.Right != invocationExpression )
+            // Assignment should be simple and Invocation should be on the right.
+            if ( assignmentExpression.Kind() != SyntaxKind.SimpleAssignmentExpression
+                 || assignmentExpression.Right != invocationExpression )
             {
                 return false;
             }

@@ -8,34 +8,47 @@ namespace Caravela.Framework.Impl.CompileTime
     internal static class TemplatingScopeExtensions
     {
         public static bool MustBeTransformed( this TemplatingScope scope )
-            => scope.ReplaceIndeterminate( TemplatingScope.RunTimeOnly ) is
-                TemplatingScope.RunTimeOnly or
-                TemplatingScope.Dynamic;
+            => scope.GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.RunTimeOnly ) is
+                TemplatingScope.RunTimeOnly;
 
-        public static TemplatingScope DynamicToRunTimeOnly( this TemplatingScope scope )
-            => scope == TemplatingScope.CompileTimeDynamic ? TemplatingScope.RunTimeOnly : scope;
-
-        public static TemplatingScope DynamicToCompileTimeOnly( this TemplatingScope scope )
-            => scope == TemplatingScope.CompileTimeDynamic ? TemplatingScope.CompileTimeOnly : scope;
-
-        public static bool IsDynamic( this TemplatingScope scope ) => scope is TemplatingScope.CompileTimeDynamic or TemplatingScope.Dynamic;
-
-        public static bool IsIndeterminate( this TemplatingScope scope ) => scope is TemplatingScope.Both or TemplatingScope.Unknown;
+        public static bool IsDynamic( this TemplatingScope scope ) => scope is TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.Dynamic;
 
         public static bool IsRunTime( this TemplatingScope scope )
-            => scope is TemplatingScope.Dynamic or TemplatingScope.CompileTimeDynamic or TemplatingScope.RunTimeOnly;
+            => scope is TemplatingScope.Dynamic or TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.RunTimeOnly;
 
         public static TemplatingScope ReplaceIndeterminate( this TemplatingScope scope, TemplatingScope defaultScope )
-            => scope.IsIndeterminate() ? defaultScope : scope;
+            => IsUndetermined( scope ) ? defaultScope : scope;
+
+        public static bool IsUndetermined( this TemplatingScope scope ) => scope == TemplatingScope.Both || scope == TemplatingScope.Unknown;
+
+        public static TemplatingScope GetExpressionExecutionScope( this TemplatingScope scope )
+            => scope switch
+            {
+                TemplatingScope.CompileTimeOnlyReturningBoth => TemplatingScope.CompileTimeOnly,
+                TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => TemplatingScope.CompileTimeOnly,
+                TemplatingScope.Dynamic => TemplatingScope.RunTimeOnly,
+                _ => scope
+            };
+
+        public static TemplatingScope GetExpressionValueScope( this TemplatingScope scope, bool preferCompileTime = false )
+            => scope switch
+            {
+                TemplatingScope.CompileTimeOnlyReturningBoth when preferCompileTime => TemplatingScope.CompileTimeOnly,
+                TemplatingScope.CompileTimeOnlyReturningBoth when !preferCompileTime => TemplatingScope.Both,
+                TemplatingScope.Dynamic => TemplatingScope.RunTimeOnly,
+                TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => TemplatingScope.RunTimeOnly,
+                _ => scope
+            };
 
         public static string ToDisplayString( this TemplatingScope scope )
             => scope switch
             {
                 TemplatingScope.RunTimeOnly => "run-time",
                 TemplatingScope.CompileTimeOnly => "compile-time",
+                TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => "compile-time",
+                TemplatingScope.CompileTimeOnlyReturningBoth => "compile-time",
                 TemplatingScope.Both => "both",
                 TemplatingScope.Unknown => "unknown",
-                TemplatingScope.CompileTimeDynamic => "dynamic compile-time",
                 TemplatingScope.Dynamic => "dynamic",
 
                 // We also throw an exception for Dynamic because a caller should convert dynamic to run-time or compile-time according to the context.

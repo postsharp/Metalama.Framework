@@ -32,15 +32,11 @@ namespace Caravela.Framework.Impl.Templating
             this._metaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
         }
 
-        public bool IsCompileTime( ISymbol? symbol )
-            => symbol != null && this._symbolClassifier.GetTemplatingScope( symbol ).DynamicToCompileTimeOnly()
+        public bool RequiresCompileTimeExecution( ISymbol? symbol )
+            => symbol != null && this._symbolClassifier.GetTemplatingScope( symbol ).GetExpressionExecutionScope()
                 == TemplatingScope.CompileTimeOnly;
 
-#pragma warning disable CA1822 // Static anyway.
-        public bool IsDynamicType( ITypeSymbol? type ) => type is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
-#pragma warning restore CA1822
-
-        public bool IsDynamicParameter( ArgumentSyntax argument ) => this.IsDynamicType( this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type );
+        public bool IsDynamicParameter( ArgumentSyntax argument ) => this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type.IsDynamic() ?? false;
 
         public bool IsRunTimeMethod( ISymbol symbol )
             => symbol.Name == nameof(meta.RunTime) &&
@@ -58,30 +54,15 @@ namespace Caravela.Framework.Impl.Templating
         {
             var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( originalNode );
 
-            if ( this.IsDynamicType( expressionType ) )
+            if ( expressionType.IsDynamic() )
             {
                 return true;
             }
 
             var nodeSymbol = this._syntaxTreeAnnotationMap.GetSymbol( originalNode );
 
-            if ( (nodeSymbol is IMethodSymbol method && this.IsDynamicType( method.ReturnType )) ||
-                 (nodeSymbol is IPropertySymbol property && this.IsDynamicType( property.Type )) )
-            {
-                return true;
-            }
-            else
-            {
-                if ( originalNode is InvocationExpressionSyntax invocation
-                     && this._syntaxTreeAnnotationMap.GetSymbol( invocation.Expression ) is IMethodSymbol invokedMethod )
-                {
-                    return invokedMethod.GetReturnTypeAttributes().Any( a => a.AttributeClass?.Name == nameof(RunTimeOnlyAttribute) );
-                }
-                else
-                {
-                    return false;
-                }
-            }
+            return (nodeSymbol is IMethodSymbol method && method.ReturnType.IsDynamic()) ||
+                   (nodeSymbol is IPropertySymbol property && property.Type.IsDynamic());
         }
 
 #pragma warning disable CA1822 // Static anyway.

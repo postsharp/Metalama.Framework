@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Collections;
@@ -62,13 +61,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IProperty? OverriddenProperty => this.PropertyBuilder.OverriddenProperty;
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
-        public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => Array.Empty<IProperty>();
+        public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => this.PropertyBuilder.ExplicitInterfaceImplementations;
 
-        [return: RunTimeOnly]
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.PropertyBuilder.ToFieldOrPropertyInfo();
 
-        [return: RunTimeOnly]
-        public PropertyInfo ToPropertyInfo() => throw new NotImplementedException();
+        public PropertyInfo ToPropertyInfo() => this.PropertyBuilder.ToPropertyInfo();
 
         IProperty IDeclarationRef<IProperty>.Resolve( CompilationModel compilation ) => (IProperty) this.GetForCompilation( compilation );
 

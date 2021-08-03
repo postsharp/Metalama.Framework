@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 .ToString();
 
             this.AssertEqual(
-                @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1.Nested`1"")).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Caravela.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>.Nested<>).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             TestExpression<FieldInfo>(
@@ -47,7 +47,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 .ToString();
 
             this.AssertEqual(
-                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.ReturnSelf~`0""), global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).TypeHandle))",
+                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.ReturnSelf~`0""), typeof(global::Target<>).TypeHandle))",
                 serialized );
 
             TestExpression<MethodInfo>(

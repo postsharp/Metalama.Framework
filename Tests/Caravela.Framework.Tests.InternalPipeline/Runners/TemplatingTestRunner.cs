@@ -183,7 +183,12 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             if ( !testInput.Options.AllowCompileTimeDynamicCode.GetValueOrDefault() )
             {
-                VerifyNoDynamicCode( buildTimeAssemblyStream );
+                if ( !this.VerifyNoDynamicCode( buildTimeAssemblyStream ) )
+                {
+                    testResult.SetFailed( "The compiled assembly contains dynamic code." );
+
+                    return testResult;
+                }
             }
 
             buildTimeAssemblyStream.Seek( 0, SeekOrigin.Begin );
@@ -232,7 +237,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             return testResult;
         }
 
-        private static void VerifyNoDynamicCode( MemoryStream stream )
+        private bool VerifyNoDynamicCode( MemoryStream stream )
         {
             stream.Seek( 0, SeekOrigin.Begin );
             using var peReader = new PEReader( stream, PEStreamOptions.LeaveOpen );
@@ -262,11 +267,15 @@ namespace Caravela.Framework.Tests.Integration.Runners
                         stream.CopyTo( diagnosticStream );
                     }
 
-                    throw new AssertionFailedException( $"The binary contains dynamic code. See '{diagnosticFile}'." );
+                    this.Logger?.WriteLine( "Compiled compile-time assembly: " + diagnosticFile );
+
+                    return false;
                 }
             }
 
             stream.Seek( 0, SeekOrigin.Begin );
+
+            return true;
         }
 
         private (TemplateExpansionContext Context, MethodDeclarationSyntax TargetMethod) CreateTemplateExpansionContext(

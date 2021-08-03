@@ -93,7 +93,8 @@ namespace Caravela.Framework.Impl.Linking
                 var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = (IPropertySymbol) this._analysisRegistry.GetLastOverride( symbol );
 
-                if ( IsAutoPropertyDeclaration( propertyDeclaration ) )
+                if ( IsAutoPropertyDeclaration( propertyDeclaration )
+                     && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
                 {
                     // Backing field for auto property.
                     members.Add( GetPropertyBackingField( propertyDeclaration, symbol ) );
@@ -199,7 +200,7 @@ namespace Caravela.Framework.Impl.Linking
                         propertyDeclaration.Type,
                         SingletonSeparatedList(
                             VariableDeclarator(
-                                Identifier( GetAutoPropertyBackingFieldName( symbol ) ),
+                                Identifier( GetBackingFieldName( symbol ) ),
                                 null,
                                 propertyDeclaration.Initializer ) ) ) )
                 .NormalizeWhitespace()
@@ -216,7 +217,7 @@ namespace Caravela.Framework.Impl.Linking
                             symbol.IsStatic
                                 ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
                                 : ThisExpression(),
-                            IdentifierName( GetAutoPropertyBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
+                            IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         Token( SyntaxKind.SemicolonToken ) ) )
                 .AddGeneratedCodeAnnotation();
 
@@ -230,55 +231,9 @@ namespace Caravela.Framework.Impl.Linking
                                 symbol.IsStatic
                                     ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( symbol.ContainingType )
                                     : ThisExpression(),
-                                IdentifierName( GetAutoPropertyBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
+                                IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                             IdentifierName( "value" ) ) ) )
                 .AddGeneratedCodeAnnotation();
-
-        private static string GetAutoPropertyBackingFieldName( IPropertySymbol property )
-        {
-            var firstPropertyLetter = property.Name.Substring( 0, 1 );
-            var camelCasePropertyName = firstPropertyLetter.ToLowerInvariant() + (property.Name.Length > 1 ? property.Name.Substring( 1 ) : "");
-
-            if ( property.ContainingType.GetMembers( camelCasePropertyName ).Any() && firstPropertyLetter == firstPropertyLetter.ToLowerInvariant() )
-            {
-                // If there there is another property whose name differs only by the case of the first character, then the lower case variant will be suffixed.
-                // This is unlikely given naming standards.
-
-                camelCasePropertyName = FindUniqueName( camelCasePropertyName );
-            }
-
-            // TODO: Write tests of the collision resolution algorithm.
-            if ( camelCasePropertyName.StartsWith( "_", StringComparison.Ordinal ) )
-            {
-                return camelCasePropertyName;
-            }
-            else
-            {
-                var fieldName = FindUniqueName( "_" + camelCasePropertyName );
-
-                return fieldName;
-            }
-
-            string FindUniqueName( string hint )
-            {
-                if ( !property.ContainingType.GetMembers( hint ).Any() )
-                {
-                    return hint;
-                }
-                else
-                {
-                    for ( var i = 1; /* Nothing */; i++ )
-                    {
-                        var candidate = hint + i;
-
-                        if ( !property.ContainingType.GetMembers( candidate ).Any() )
-                        {
-                            return candidate;
-                        }
-                    }
-                }
-            }
-        }
 
         private static bool IsAutoPropertyDeclaration( PropertyDeclarationSyntax propertyDeclaration )
             => propertyDeclaration.ExpressionBody == null
@@ -319,7 +274,7 @@ namespace Caravela.Framework.Impl.Linking
                             : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
                         property.Type,
                         null,
-                        Identifier( GetOriginalImplMemberName( property.Identifier.ValueText ) ),
+                        Identifier( GetOriginalImplMemberName( symbol ) ),
                         null,
                         null,
                         null )

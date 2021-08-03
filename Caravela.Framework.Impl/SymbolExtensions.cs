@@ -14,6 +14,10 @@ namespace Caravela.Framework.Impl
 {
     internal static class SymbolExtensions
     {
+        public static bool IsGenericTypeDefinition( this INamedTypeSymbol namedType ) => namedType.TypeArguments.Any( a => a is ITypeParameterSymbol );
+
+        public static bool IsDynamic( this ITypeSymbol? type ) => type is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
+
         public static bool AnyBaseType( this INamedTypeSymbol type, Predicate<INamedTypeSymbol> predicate )
         {
             for ( var t = type; t != null; t = t.BaseType )
@@ -173,5 +177,14 @@ namespace Caravela.Framework.Impl
         }
 
         public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol ) => symbol.GetPrimarySyntaxReference()?.GetSyntax();
+
+        public static bool IsInterfaceMemberImplementation( this ISymbol symbol )
+            => symbol switch
+            {
+                IMethodSymbol methodSymbol => methodSymbol.ExplicitInterfaceImplementations.Any(),
+                IPropertySymbol propertySymbol => propertySymbol.ExplicitInterfaceImplementations.Any(),
+                IEventSymbol eventSymbol => eventSymbol.ExplicitInterfaceImplementations.Any(),
+                _ => false
+            };
     }
 }

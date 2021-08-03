@@ -40,7 +40,6 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <returns></returns>
         [TemplateKeyword]
-        [return: RunTimeOnly]
         public static dynamic? Proceed() => CurrentContext.Proceed() ?? throw NewInvalidOperationException();
 
         /// <summary>
@@ -60,6 +59,7 @@ namespace Caravela.Framework.Aspects
         /// <returns>Exactly <paramref name="expression"/>, but coerced as a compile-time expression.</returns>
         /// <seealso href="@templates"/>
         [return: NotNullIfNotNull( "expression" )]
+        [return: CompileTimeOnly]
         [TemplateKeyword]
         public static T? CompileTime<T>( T? expression ) => expression;
 
@@ -140,7 +140,6 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="Base"/>
         /// <seealso cref="ThisStatic"/>
         /// <seealso href="@templates"/>
-        [RunTimeOnly]
         [TemplateKeyword]
         public static dynamic This => CurrentContext.This;
 
@@ -153,7 +152,6 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="This"/>
         /// <seealso cref="BaseStatic"/>
         /// <seealso href="@templates"/>
-        [RunTimeOnly]
         [TemplateKeyword]
         public static dynamic Base => CurrentContext.Base;
 
@@ -166,7 +164,6 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="This"/>
         /// <seealso cref="BaseStatic"/>
         /// <seealso href="@templates"/>
-        [RunTimeOnly]
         [TemplateKeyword]
         public static dynamic ThisStatic => CurrentContext.ThisStatic;
 
@@ -179,7 +176,6 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="Base"/>
         /// <seealso cref="ThisStatic"/>
         /// <seealso href="@templates"/>
-        [RunTimeOnly]
         [TemplateKeyword]
         public static dynamic BaseStatic => CurrentContext.BaseStatic;
 
@@ -218,7 +214,6 @@ namespace Caravela.Framework.Aspects
         /// <param name="value">Must be explicitly cast to <c>object</c> otherwise the C# compiler will emit an error.</param>
         /// <returns></returns>
         /// <seealso href="@templates"/>
-        [return: RunTimeOnly]
         [TemplateKeyword]
         public static dynamic? Cast( IType type, dynamic? value ) => type.Compilation.TypeFactory.Cast( type, value );
 

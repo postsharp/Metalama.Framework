@@ -21,8 +21,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
         public dynamic? OverrideMethod()
         {
             var x = meta.This;
-            meta.Method.Invokers.Base!.Invoke(x);
-            return default;
+            return meta.Method.Invokers.Base!.Invoke(x);
         }
     }
 

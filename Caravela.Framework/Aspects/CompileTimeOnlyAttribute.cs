@@ -12,6 +12,6 @@ namespace Caravela.Framework.Aspects
     /// </summary>
     [AttributeUsage(
         AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate | AttributeTargets.Interface
-        | AttributeTargets.Assembly )]
+        | AttributeTargets.Assembly | AttributeTargets.ReturnValue )]
     public class CompileTimeOnlyAttribute : ScopeAttribute { }
 }

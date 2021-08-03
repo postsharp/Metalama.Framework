@@ -24,7 +24,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter reference kind." );
             }
 
-            public override string Name => "value";
+            public override string Name
+            {
+                get => "value";
+                set => throw new NotSupportedException( "Cannot set the name of a value parameter." );
+            }
 
             public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
                 => this.Accessor.ToDisplayString( format, context ) + "@value";

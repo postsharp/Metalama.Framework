@@ -63,7 +63,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeParameter( code );
 
             this.AssertEqual(
-                @"global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.Method``1(System.Tuple{`0,``0})~System.Int32""), global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).TypeHandle).GetParameters()[0]",
+                @"global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.Method``1(System.Tuple{`0,``0})~System.Int32""), typeof(global::Target<>).TypeHandle).GetParameters()[0]",
                 serialized );
 
             TestExpression<ParameterInfo>(
