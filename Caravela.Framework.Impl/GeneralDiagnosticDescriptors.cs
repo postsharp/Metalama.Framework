@@ -128,17 +128,26 @@ namespace Caravela.Framework.Impl
                 "The member does not have a template custom attribute." );
 
         public static readonly DiagnosticDefinition<(string ClassName, string MemberName, string ExpectedAttribute, string ActualAttribute)>
-            TemplateIsOfTheWrongKind = new(
+            TemplateIsOfTheWrongType = new(
                 "CR0034", _category,
-                "The template '{0}.{1}' was expected to be annotated with the [{2}] attribute, but it is annotated with the [{3}] attribute.", Error,
+                "The template '{0}.{1}' was expected to be annotated with the [{2}] attribute, but it is annotated with [{3}].", Error,
                 "The member does not have a template custom attribute." );
 
         public static readonly DiagnosticDefinition<(string Layer1, string Layer2)> UnorderedLayers = new(
             "CR0035", _category,
-            "The aspect layers '{0}' and '{1}' are not strongly ordered. Add an [assembly: " + nameof(AspectOrderAttribute) + "(...)] attribute to specify the order relationship " +
-            "between these two layers, otherwise the compilation will be non-deterministic.", Warning,
+            "The aspect layers '{0}' and '{1}' are not strongly ordered. Add an [assembly: " + nameof(AspectOrderAttribute)
+                                                                                             + "(...)] attribute to specify the order relationship " +
+                                                                                             "between these two layers, otherwise the compilation will be non-deterministic."
+          , Warning,
             "Two layers are not strongly ordered."
         );
+
+        public static readonly DiagnosticDefinition<(string ClassName, string MemberName, string ExpectedAttribute, string ActualAttribute)>
+            TemplateIsOfTheWrongKind = new(
+                "CR0036", _category,
+                "The template '{0}.{1}' was expected to be annotated with the '[Template(TemplateKind.{2})]' attribute, but it is annotated with '[Template(TemplateKind.{3})]'."
+              , Error,
+                "The member does not have a template custom attribute." );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>

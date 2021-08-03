@@ -17,7 +17,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 // ReSharper disable SuspiciousTypeConversion.Global
 
-namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
+namespace Caravela.Framework.Tests.Integration.Runners.Linker
 {
     internal partial class LinkerTestInputBuilder
     {

@@ -30,7 +30,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.NonAs
             throw new NotSupportedException("This should not be called.");
         }
 
-        [Template]
+        [Template(TemplateKind.Async)]
         public Task<dynamic?> OverrideAsyncMethod()
         {
             Console.WriteLine("Non-async intercept");
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.NonAs
             throw new NotSupportedException("This should not be called.");
         }
 
-        [Template]
+        [Template(TemplateKind.Async)]
         public async Task<dynamic?> OverrideAsyncMethod()
         {
             Console.WriteLine("Async intercept");

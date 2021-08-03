@@ -19,7 +19,7 @@ using System.Linq;
 
 // ReSharper disable SuspiciousTypeConversion.Global
 
-namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
+namespace Caravela.Framework.Tests.Integration.Runners.Linker
 {
     // Aspect linker tests' source use [PseudoIntroduction] and [PseudoOverride] attributes, that cause the marked declaration to be removed
     // and transformed into a pseudo-transformation that serves as a linker input. This is mainly to avoid jumping through hoops to reproduce

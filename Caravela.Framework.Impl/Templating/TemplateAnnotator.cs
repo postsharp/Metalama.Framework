@@ -168,10 +168,10 @@ namespace Caravela.Framework.Impl.Templating
             // be called from run-time code.
             if ( this.IsAspectMember( symbol ) )
             {
-                switch ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) )
+                switch ( this._symbolScopeClassifier.GetTemplateInfo( symbol ).AttributeType )
                 {
-                    case TemplateAttributeKind.Introduction:
-                    case TemplateAttributeKind.InterfaceMember:
+                    case TemplateAttributeType.Introduction:
+                    case TemplateAttributeType.InterfaceMember:
                         return TemplatingScope.RunTimeOnly;
 
                     default:
@@ -511,7 +511,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                 {
                     // Template code cannot be referenced in a template until this is implemented.
-                    if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) == TemplateAttributeKind.Template )
+                    if ( this._symbolScopeClassifier.GetTemplateInfo( symbol ).AttributeType == TemplateAttributeType.Template )
                     {
                         this.ReportDiagnostic(
                             TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate,
@@ -1169,7 +1169,7 @@ namespace Caravela.Framework.Impl.Templating
                 symbol = associatedSymbol;
             }
 
-            if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) != TemplateAttributeKind.None )
+            if ( !this._symbolScopeClassifier.GetTemplateInfo( symbol ).IsNone )
             {
                 var previousTemplateMember = this._currentTemplateMember;
                 this._currentTemplateMember = symbol;

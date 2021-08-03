@@ -52,9 +52,9 @@ namespace Caravela.Framework.Impl.CompileTime
             this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
         }
 
-        public TemplateAttributeKind GetTemplateMemberKind( ISymbol symbol ) => this.GetTemplateMemberKind( symbol, false );
+        public TemplateInfo GetTemplateInfo( ISymbol symbol ) => this.GetTemplateInfo( symbol, false );
 
-        private TemplateAttributeKind GetTemplateMemberKind( ISymbol symbol, bool isInherited )
+        private TemplateInfo GetTemplateInfo( ISymbol symbol, bool isInherited )
         {
             // Look for a [Template] attribute on the symbol.
             var templateAttribute = symbol
@@ -63,19 +63,19 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( templateAttribute != null )
             {
-                var templateKind = GetTemplateMemberKind( templateAttribute );
+                var templateInfo = GetTemplateInfo( templateAttribute );
 
-                if ( templateKind != TemplateAttributeKind.None )
+                if ( !templateInfo.IsNone )
                 {
                     // Ignore any abstract member.
                     if ( !isInherited && (symbol.IsAbstract
                                           || symbol.GetAttributes().Any( a => this.IsAttributeOfType( a, this._ignoreUnlessOverriddenAttribute ) )) )
                     {
-                        return TemplateAttributeKind.Abstract;
+                        return templateInfo.AsAbstract();
                     }
                     else
                     {
-                        return templateKind;
+                        return templateInfo;
                     }
                 }
             }
@@ -83,38 +83,45 @@ namespace Caravela.Framework.Impl.CompileTime
             // Look for a [InterfaceMember] attribute on the symbol.
             if ( symbol.GetAttributes().Any( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._interfaceMemberAttribute ) ) )
             {
-                return TemplateAttributeKind.InterfaceMember;
+                return new TemplateInfo( TemplateAttributeType.InterfaceMember, TemplateKind.Introduction );
             }
 
             switch ( symbol )
             {
                 case IMethodSymbol { OverriddenMethod: { } overriddenMethod }:
                     // Look at the overriden method.
-                    return this.GetTemplateMemberKind( overriddenMethod!, true );
+                    return this.GetTemplateInfo( overriddenMethod!, true );
 
                 case IPropertySymbol { OverriddenProperty: { } overriddenProperty }:
                     // Look at the overridden property.
-                    return this.GetTemplateMemberKind( overriddenProperty!, true );
+                    return this.GetTemplateInfo( overriddenProperty!, true );
 
                 default:
-                    return TemplateAttributeKind.None;
+                    return default;
             }
         }
 
         private bool IsAttributeOfType( AttributeData a, ITypeSymbol type ) => this._compilation.HasImplicitConversion( a.AttributeClass, type );
 
-        private static TemplateAttributeKind GetTemplateMemberKind( AttributeData templateAttribute )
+        private static TemplateInfo GetTemplateInfo( AttributeData templateAttribute )
         {
             switch ( templateAttribute.AttributeClass?.Name )
             {
                 case nameof(IntroduceAttribute):
-                    return TemplateAttributeKind.Introduction;
+                    return new TemplateInfo( TemplateAttributeType.Introduction, TemplateKind.Introduction );
 
                 case nameof(InterfaceMemberAttribute):
-                    return TemplateAttributeKind.InterfaceMember;
+                    return new TemplateInfo( TemplateAttributeType.InterfaceMember, TemplateKind.Introduction );
 
                 default:
-                    return TemplateAttributeKind.Template;
+                    if ( templateAttribute.ConstructorArguments.IsEmpty )
+                    {
+                        return new TemplateInfo( TemplateAttributeType.Template, TemplateKind.Default );
+                    }
+                    else
+                    {
+                        return new TemplateInfo( TemplateAttributeType.Template, (TemplateKind) templateAttribute.ConstructorArguments[0].Value! );
+                    }
             }
         }
 

@@ -316,7 +316,7 @@ namespace Caravela.Framework.Impl.Advices
                                     ? new OverriddenMethod(
                                         this,
                                         (IMethod) memberBuilder,
-                                        new Template<IMethod>( implementationMethod, TemplateSelectionKind.Introduction ) )
+                                        new Template<IMethod>( implementationMethod, TemplateKind.Introduction ) )
                                     : new RedirectedMethod(
                                         this,
                                         (IMethod) memberBuilder,
@@ -342,7 +342,7 @@ namespace Caravela.Framework.Impl.Advices
                                         ? new OverriddenProperty(
                                             this,
                                             (IProperty) memberBuilder,
-                                            new Template<IProperty>( (IProperty) memberSpec.AspectInterfaceMember, TemplateSelectionKind.Introduction ),
+                                            new Template<IProperty>( (IProperty) memberSpec.AspectInterfaceMember, TemplateKind.Introduction ),
                                             default,
                                             default )
                                         : new RedirectedProperty(
@@ -367,7 +367,7 @@ namespace Caravela.Framework.Impl.Advices
                                         ? new OverriddenEvent(
                                             this,
                                             (IEvent) memberBuilder,
-                                            new Template<IEvent>( (IEvent) memberSpec.AspectInterfaceMember, TemplateSelectionKind.Introduction ),
+                                            new Template<IEvent>( (IEvent) memberSpec.AspectInterfaceMember, TemplateKind.Introduction ),
                                             default,
                                             default )
                                         : new RedirectedEvent(

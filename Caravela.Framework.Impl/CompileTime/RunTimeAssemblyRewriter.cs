@@ -86,7 +86,7 @@ namespace Caravela.Compiler
             var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 
             return this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
-                   this.SymbolClassifier.GetTemplateMemberKind( symbol ) != TemplateAttributeKind.None;
+                   !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
         }
 
         public override SyntaxNode? VisitIndexerDeclaration( IndexerDeclarationSyntax node )

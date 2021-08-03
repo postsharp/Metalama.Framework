@@ -5,7 +5,7 @@ using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
-using Caravela.Framework.Tests.InternalPipeline.Runners.Linker;
+using Caravela.Framework.Tests.Integration.Runners.Linker;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using System;

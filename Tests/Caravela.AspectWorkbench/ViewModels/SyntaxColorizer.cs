@@ -103,7 +103,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                     // This must be due to a bug upstream. Ignore it.
                     continue;
                 }
-                
+
                 Color foreground = Colors.Black, background;
                 var fontWeight = FontWeights.Normal;
                 var fontStyle = FontStyles.Normal;

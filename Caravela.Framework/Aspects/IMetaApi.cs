@@ -47,7 +47,8 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Invoke the next version of the target declaration.
         /// </summary>
+        /// <param name="kind"></param>
         /// <returns></returns>
-        dynamic? Proceed();
+        dynamic? Proceed( TemplateKind kind );
     }
 }

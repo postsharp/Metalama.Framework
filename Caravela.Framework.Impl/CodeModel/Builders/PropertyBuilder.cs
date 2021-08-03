@@ -94,7 +94,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             // TODO: Sanity checks.
 
             Invariant.Assert( hasGetter || hasSetter );
-            
+
             this.Type = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(object) );
 
             if ( hasGetter )

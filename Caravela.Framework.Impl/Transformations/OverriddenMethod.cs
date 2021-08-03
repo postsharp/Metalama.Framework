@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.Advices;
@@ -52,7 +53,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration,
                     new MetaApiProperties(
                         context.DiagnosticSink,
-                        this.Template.Declaration!.GetSymbol().AssertNotNull( Justifications.TemplateMembersHaveSymbol ),
+                        this.Template.Cast(),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
                         proceedExpression,
@@ -155,8 +156,8 @@ namespace Caravela.Framework.Impl.Transformations
         {
             switch ( this.Template.SelectedKind )
             {
-                case TemplateSelectionKind.IEnumerable:
-                case TemplateSelectionKind.IEnumerator:
+                case TemplateKind.IEnumerable:
+                case TemplateKind.IEnumerator:
                     // Generate: `foreach ( var value in PROCEED() ) {   yield return value; }`
                     return context =>
                     {
@@ -179,8 +180,8 @@ namespace Caravela.Framework.Impl.Transformations
                                         IdentifierName( varName ) ) ) ) );
                     };
 
-                case TemplateSelectionKind.IAsyncEnumerable:
-                case TemplateSelectionKind.IAsyncEnumerator:
+                case TemplateKind.IAsyncEnumerable:
+                case TemplateKind.IAsyncEnumerator:
                     // Generate: `await foreach ( var value in PROCEED() ) {   yield return value; }`
                     return context =>
                     {
@@ -216,7 +217,7 @@ namespace Caravela.Framework.Impl.Transformations
         {
             var invocationExpression = this.CreateInvocationExpression();
 
-            if ( this.Template.SelectedKind == TemplateSelectionKind.Default )
+            if ( this.Template.SelectedKind == TemplateKind.Default )
             {
                 if ( this.OverriddenDeclaration.GetIteratorInfoImpl() is { IsIterator: true } iteratorInfo )
                 {
@@ -261,9 +262,10 @@ namespace Caravela.Framework.Impl.Transformations
                         false );
                 }
             }
-            else if ( this.Template.SelectedKind == TemplateSelectionKind.Async )
+            else if ( this.Template.SelectedKind == TemplateKind.Async )
             {
-                if ( this.OverriddenDeclaration.GetIteratorInfoImpl() is { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } )
+                if ( this.OverriddenDeclaration.GetIteratorInfoImpl() is
+                    { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } )
                 {
                     var expression = GenerateAwaitBufferAsync();
 

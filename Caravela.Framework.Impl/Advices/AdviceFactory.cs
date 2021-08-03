@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.Advices
             this._implementInterfaceAdvices = new Dictionary<INamedType, ImplementInterfaceAdvice>( compilation.InvariantComparer );
         }
 
-        private TemplateRef ValidateTemplateName( string? templateName, TemplateSelectionKind templateSelectionKind, bool required = false )
+        private TemplateRef ValidateTemplateName( string? templateName, TemplateKind templateKind, bool required = false )
         {
             if ( templateName == null )
             {
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Advices
                 {
                     throw new ArgumentOutOfRangeException(
                         nameof(templateName),
-                        $"A required template name was not provided for the template kind {templateSelectionKind}." );
+                        $"A required template name was not provided for the template kind {templateKind}." );
                 }
                 else
                 {
@@ -62,17 +62,17 @@ namespace Caravela.Framework.Impl.Advices
             }
             else if ( this._aspect.AspectClass.Members.TryGetValue( templateName, out var template ) )
             {
-                if ( template.Kind == TemplateAttributeKind.None )
+                if ( template.TemplateInfo.IsNone )
                 {
                     // It is possible that the aspect has a member of the required name, but the user did not use the custom attribute. In this case,
                     // we want a proper error message.
 
                     throw GeneralDiagnosticDescriptors.MemberDoesNotHaveTemplateAttribute.CreateException(
                         (template.AspectClass.FullName, templateName!,
-                         templateSelectionKind == TemplateSelectionKind.Introduction ? nameof(IntroduceAttribute) : nameof(TemplateAttribute)) );
+                         templateKind == TemplateKind.Introduction ? nameof(IntroduceAttribute) : nameof(TemplateAttribute)) );
                 }
 
-                if ( template.Kind is TemplateAttributeKind.Abstract )
+                if ( template.TemplateInfo.IsAbstract )
                 {
                     if ( !required )
                     {
@@ -84,23 +84,31 @@ namespace Caravela.Framework.Impl.Advices
                     }
                 }
 
-                var expectedTemplateKind = templateSelectionKind == TemplateSelectionKind.Introduction
-                    ? TemplateAttributeKind.Introduction
-                    : TemplateAttributeKind.Template;
+                var expectedTemplateType = templateKind == TemplateKind.Introduction
+                    ? TemplateAttributeType.Introduction
+                    : TemplateAttributeType.Template;
 
-                if ( expectedTemplateKind != template.Kind )
+                if ( expectedTemplateType != template.TemplateInfo.AttributeType )
                 {
-                    var expectedAttribute = templateSelectionKind == TemplateSelectionKind.Introduction
+                    var expectedAttribute = templateKind == TemplateKind.Introduction
                         ? nameof(IntroduceAttribute)
                         : nameof(TemplateAttribute);
 
-                    var actualAttribute = template.Kind == TemplateAttributeKind.Introduction ? nameof(IntroduceAttribute) : nameof(TemplateAttribute);
+                    var actualAttribute = template.TemplateInfo.AttributeType == TemplateAttributeType.Introduction
+                        ? nameof(IntroduceAttribute)
+                        : nameof(TemplateAttribute);
 
-                    throw GeneralDiagnosticDescriptors.TemplateIsOfTheWrongKind.CreateException(
+                    throw GeneralDiagnosticDescriptors.TemplateIsOfTheWrongType.CreateException(
                         (template.AspectClass.FullName, templateName!, expectedAttribute, actualAttribute) );
                 }
 
-                return new TemplateRef( template, templateSelectionKind );
+                if ( templateKind != template.TemplateInfo.Kind )
+                {
+                    throw GeneralDiagnosticDescriptors.TemplateIsOfTheWrongKind.CreateException(
+                        (template.AspectClass.FullName, templateName!, templateKind.ToString(), template.TemplateInfo.Kind.ToString()) );
+                }
+
+                return new TemplateRef( template, templateKind );
             }
             else
             {
@@ -111,18 +119,18 @@ namespace Caravela.Framework.Impl.Advices
 
         private TemplateRef SelectTemplate( IMethod targetMethod, in MethodTemplateSelector templateSelector )
         {
-            var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateSelectionKind.Default, true )!;
-            var asyncTemplate = this.ValidateTemplateName( templateSelector.AsyncTemplate, TemplateSelectionKind.Async );
+            var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, true )!;
+            var asyncTemplate = this.ValidateTemplateName( templateSelector.AsyncTemplate, TemplateKind.Async );
 
-            var enumerableTemplate = this.ValidateTemplateName( templateSelector.EnumerableTemplate, TemplateSelectionKind.IEnumerable );
-            var enumeratorTemplate = this.ValidateTemplateName( templateSelector.EnumeratorTemplate, TemplateSelectionKind.IEnumerator );
-            var asyncEnumerableTemplate = this.ValidateTemplateName( templateSelector.AsyncEnumerableTemplate, TemplateSelectionKind.IAsyncEnumerable );
+            var enumerableTemplate = this.ValidateTemplateName( templateSelector.EnumerableTemplate, TemplateKind.IEnumerable );
+            var enumeratorTemplate = this.ValidateTemplateName( templateSelector.EnumeratorTemplate, TemplateKind.IEnumerator );
+            var asyncEnumerableTemplate = this.ValidateTemplateName( templateSelector.AsyncEnumerableTemplate, TemplateKind.IAsyncEnumerable );
 
             var asyncEnumeratorTemplate = this.ValidateTemplateName(
                 templateSelector.AsyncEnumeratorTemplate,
-                TemplateSelectionKind.IAsyncEnumerator );
+                TemplateKind.IAsyncEnumerator );
 
-            var interpretedKind = TemplateSelectionKind.Default;
+            var interpretedKind = TemplateKind.Default;
 
             var selectedTemplate = defaultTemplate;
 
@@ -137,7 +145,7 @@ namespace Caravela.Framework.Impl.Advices
                                                                                             iteratorInfo.EnumerableKind is EnumerableKind.IAsyncEnumerable or
                                                                                                 EnumerableKind.IAsyncEnumerator)) )
             {
-                interpretedKind = TemplateSelectionKind.Async;
+                interpretedKind = TemplateKind.Async;
 
                 if ( !asyncTemplate.IsNull )
                 {
@@ -163,7 +171,7 @@ namespace Caravela.Framework.Impl.Advices
                     }
                     else
                     {
-                        interpretedKind = TemplateSelectionKind.IEnumerable;
+                        interpretedKind = TemplateKind.IEnumerable;
                     }
 
                     break;
@@ -176,7 +184,7 @@ namespace Caravela.Framework.Impl.Advices
                     }
                     else
                     {
-                        interpretedKind = TemplateSelectionKind.IEnumerator;
+                        interpretedKind = TemplateKind.IEnumerator;
                     }
 
                     break;
@@ -188,7 +196,7 @@ namespace Caravela.Framework.Impl.Advices
                     }
                     else
                     {
-                        interpretedKind = TemplateSelectionKind.IAsyncEnumerable;
+                        interpretedKind = TemplateKind.IAsyncEnumerable;
                     }
 
                     break;
@@ -200,7 +208,7 @@ namespace Caravela.Framework.Impl.Advices
                     }
                     else
                     {
-                        interpretedKind = TemplateSelectionKind.IAsyncEnumerator;
+                        interpretedKind = TemplateKind.IAsyncEnumerator;
                     }
 
                     break;
@@ -221,9 +229,9 @@ namespace Caravela.Framework.Impl.Advices
                 return default;
             }
 
-            var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateSelectionKind.Default, required )!;
-            var enumerableTemplate = this.ValidateTemplateName( templateSelector.EnumerableTemplate, TemplateSelectionKind.IEnumerable );
-            var enumeratorTemplate = this.ValidateTemplateName( templateSelector.EnumeratorTemplate, TemplateSelectionKind.IEnumerator );
+            var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, required )!;
+            var enumerableTemplate = this.ValidateTemplateName( templateSelector.EnumerableTemplate, TemplateKind.IEnumerable );
+            var enumeratorTemplate = this.ValidateTemplateName( templateSelector.EnumeratorTemplate, TemplateKind.IEnumerator );
 
             var selectedTemplate = defaultTemplate;
 
@@ -269,7 +277,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             var diagnosticList = new DiagnosticList();
 
-            var template = this.ValidateTemplateName( defaultTemplate, TemplateSelectionKind.Default, true )
+            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
                 .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
             var advice = new IntroduceMethodAdvice(
@@ -298,7 +306,7 @@ namespace Caravela.Framework.Impl.Advices
             // Set template represents both set and init accessors.
             var diagnosticList = new DiagnosticList();
 
-            var template = this.ValidateTemplateName( defaultTemplate, TemplateSelectionKind.Default, true )
+            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
                 .GetTemplate<IProperty>( this._compilation, this._serviceProvider )!;
 
             var advice = new OverrideFieldOrPropertyAdvice(
@@ -329,7 +337,7 @@ namespace Caravela.Framework.Impl.Advices
             var getTemplateRef = this.SelectTemplate( targetDeclaration, getTemplateSelector, setTemplate == null )
                 .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
-            var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateSelectionKind.Default, getTemplateSelector.IsNull )
+            var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
                 .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
             if ( getTemplateRef.IsNull && setTemplateRef.IsNull )
@@ -389,7 +397,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             var diagnosticList = new DiagnosticList();
 
-            var template = this.ValidateTemplateName( defaultTemplate, TemplateSelectionKind.Default, true )
+            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
                 .GetTemplate<IProperty>( this._compilation, this._serviceProvider );
 
             var advice = new IntroducePropertyAdvice(
@@ -424,10 +432,10 @@ namespace Caravela.Framework.Impl.Advices
         {
             var diagnosticList = new DiagnosticList();
 
-            var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateSelectionKind.Default, true )
+            var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default, true )
                 .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
-            var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateSelectionKind.Default, true )
+            var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, true )
                 .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
             var advice = new IntroducePropertyAdvice(
@@ -465,10 +473,10 @@ namespace Caravela.Framework.Impl.Advices
 
             var diagnosticList = new DiagnosticList();
 
-            var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateSelectionKind.Default, true )
+            var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateKind.Default, true )
                 .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
-            var removeTemplateRef = this.ValidateTemplateName( removeTemplate, TemplateSelectionKind.Default, true )
+            var removeTemplateRef = this.ValidateTemplateName( removeTemplate, TemplateKind.Default, true )
                 .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
             if ( invokeTemplate != null )
@@ -501,7 +509,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             var diagnosticList = new DiagnosticList();
 
-            var template = this.ValidateTemplateName( eventTemplate, TemplateSelectionKind.Default, true )
+            var template = this.ValidateTemplateName( eventTemplate, TemplateKind.Default, true )
                 .GetTemplate<IEvent>( this._compilation, this._serviceProvider );
 
             var advice = new IntroduceEventAdvice(
@@ -537,10 +545,10 @@ namespace Caravela.Framework.Impl.Advices
         {
             var diagnosticList = new DiagnosticList();
 
-            var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateSelectionKind.Default, true )
+            var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateKind.Default, true )
                 .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
-            var removeTemplateRef = this.ValidateTemplateName( removeTemplate, TemplateSelectionKind.Default, true )
+            var removeTemplateRef = this.ValidateTemplateName( removeTemplate, TemplateKind.Default, true )
                 .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
             var advice = new IntroduceEventAdvice(

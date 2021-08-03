@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 // ReSharper disable RedundantBlankLines, MissingBlankLines
+
 using System;
 using System.Collections;
 using System.Collections.Generic;

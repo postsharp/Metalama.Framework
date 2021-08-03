@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl
             this._declarativeAdviceAttributes =
                 (from member in aspectType.GetMembers()
                  from attribute in member.GetAttributes()
-                 where attribute.AttributeClass?.Is( typeof(AdviceAttribute) ) ?? false
+                 where attribute.AttributeClass?.Is( typeof(IntroduceAttribute) ) ?? false
                  select (attribute, member)).ToList();
         }
 

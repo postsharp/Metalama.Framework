@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Impl.Transformations;
 
-namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
+namespace Caravela.Framework.Tests.Integration.Runners.Linker
 {
     internal partial class LinkerTestInputBuilder
     {

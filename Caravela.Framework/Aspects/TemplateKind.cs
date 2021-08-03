@@ -2,17 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 // ReSharper disable InconsistentNaming
-
-using Caravela.Framework.Aspects;
-
-namespace Caravela.Framework.Impl.Advices
+namespace Caravela.Framework.Aspects
 {
     /// <summary>
-    /// Enumeration of the kind of templates that were specified by the user using <see cref="MethodTemplateSelector"/> or
-    /// <see cref="GetterTemplateSelector"/>. A <see cref="TemplateSelectionKind"/> represents the intention of the user, not
+    /// Enumeration of the kind of templates that were specified by the user using <see cref="GetterTemplateSelector"/> or
+    /// <see cref="TemplateKind"/>. A <see cref="MethodTemplateSelector"/> represents the intention of the user, not
     /// a characteristic of the declaration used as a template.
     /// </summary>
-    internal enum TemplateSelectionKind
+    public enum TemplateKind
     {
         /// <summary>
         /// Not a template.

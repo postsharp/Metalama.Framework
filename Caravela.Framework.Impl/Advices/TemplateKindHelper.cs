@@ -1,51 +1,52 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.Advices
 {
     internal static class TemplateKindHelper
     {
-        public static bool IsAsyncTask( this TemplateSelectionKind selectionKind )
+        public static bool IsAsyncTask( this TemplateKind selectionKind )
             => selectionKind switch
             {
-                TemplateSelectionKind.Async => true,
+                TemplateKind.Async => true,
                 _ => false
             };
 
-        public static bool IsAsync( this TemplateSelectionKind selectionKind )
+        public static bool IsAsync( this TemplateKind selectionKind )
             => selectionKind switch
             {
-                TemplateSelectionKind.Async => true,
-                TemplateSelectionKind.IAsyncEnumerable => true,
-                TemplateSelectionKind.IAsyncEnumerator => true,
-                _ => false
-            };
-        
-        public static bool IsAsyncIterator( this TemplateSelectionKind selectionKind )
-            => selectionKind switch
-            {
-                TemplateSelectionKind.IAsyncEnumerable => true,
-                TemplateSelectionKind.IAsyncEnumerator => true,
+                TemplateKind.Async => true,
+                TemplateKind.IAsyncEnumerable => true,
+                TemplateKind.IAsyncEnumerator => true,
                 _ => false
             };
 
-        public static bool IsIterator( this TemplateSelectionKind selectionKind )
+        public static bool IsAsyncIterator( this TemplateKind selectionKind )
             => selectionKind switch
             {
-                TemplateSelectionKind.IEnumerable => true,
-                TemplateSelectionKind.IEnumerator => true,
-                TemplateSelectionKind.IAsyncEnumerable => true,
-                TemplateSelectionKind.IAsyncEnumerator => true,
+                TemplateKind.IAsyncEnumerable => true,
+                TemplateKind.IAsyncEnumerator => true,
+                _ => false
+            };
+
+        public static bool IsIterator( this TemplateKind selectionKind )
+            => selectionKind switch
+            {
+                TemplateKind.IEnumerable => true,
+                TemplateKind.IEnumerator => true,
+                TemplateKind.IAsyncEnumerable => true,
+                TemplateKind.IAsyncEnumerator => true,
                 _ => false
             };
 
         public static bool MustInterpretAsAsync( this in Template<IMethod> template )
             => template.Declaration is { IsAsync: true }
-               || (template.SelectedKind == TemplateSelectionKind.Default && template.InterpretedKind.IsAsync());
+               || (template.SelectedKind == TemplateKind.Default && template.InterpretedKind.IsAsync());
 
         public static bool MustInterpretAsAsyncIterator( this in Template<IMethod> template )
-            => template.InterpretedKind.IsAsyncIterator() && (template.Declaration!.IsAsync || template.SelectedKind == TemplateSelectionKind.Default);
+            => template.InterpretedKind.IsAsyncIterator() && (template.Declaration!.IsAsync || template.SelectedKind == TemplateKind.Default);
     }
 }

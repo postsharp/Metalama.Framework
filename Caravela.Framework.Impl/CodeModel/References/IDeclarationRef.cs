@@ -34,6 +34,6 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
         // This is a temporary method to extract the symbol from the reference, when there is any.
         // In the final implementation, this method should not be necessary.
-        ISymbol GetSymbol( Compilation compilation );
+        ISymbol? GetSymbol( Compilation compilation );
     }
 }

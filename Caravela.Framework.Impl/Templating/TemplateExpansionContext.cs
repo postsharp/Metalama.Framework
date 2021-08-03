@@ -292,7 +292,7 @@ namespace Caravela.Framework.Impl.Templating
                                                 TriviaList() ) ),
                                         CastExpression(
                                             PredefinedType( Token( SyntaxKind.ObjectKeyword ) ),
-                                                TemplateSyntaxFactory.AddSimplifierAnnotations( ParenthesizedExpression( returnExpression ) ) ) ) ),
+                                            TemplateSyntaxFactory.AddSimplifierAnnotations( ParenthesizedExpression( returnExpression ) ) ) ) ),
                                 ReturnStatement() )
                             .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }

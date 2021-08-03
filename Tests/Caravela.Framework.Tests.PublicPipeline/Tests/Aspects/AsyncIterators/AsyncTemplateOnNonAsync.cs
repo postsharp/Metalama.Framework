@@ -27,7 +27,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.AsyncIterators
             throw new NotSupportedException("Should not be selected");
         }
 
-        [Template]
+        [Template(TemplateKind.Async)]
         public async Task<dynamic?> OverrideAsyncMethod()
         {
             await Task.Yield();

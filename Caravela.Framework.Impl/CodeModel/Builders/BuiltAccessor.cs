@@ -91,7 +91,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IMethod IDeclarationRef<IMethod>.Resolve( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
 
-        ISymbol IDeclarationRef<IMethod>.GetSymbol( Compilation compilation ) => this.GetSymbol();
+        ISymbol? IDeclarationRef<IMethod>.GetSymbol( Compilation compilation ) => this.GetSymbol();
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.AccessorBuilder.ExplicitInterfaceImplementations;
 

@@ -40,24 +40,24 @@ namespace Caravela.Framework.Aspects
 
         public virtual void BuildEligibility( IEligibilityBuilder<IMethod> builder ) => builder.ExceptForInheritance().MustBeNonAbstract();
 
-        [Template]
+        [Template( TemplateKind.Async )]
         [Abstract]
         public virtual Task<dynamic?> OverrideAsyncMethod() => throw new NotSupportedException();
 
-        [Template]
+        [Template( TemplateKind.IEnumerable )]
         [Abstract]
         public virtual IEnumerable<dynamic?> OverrideEnumerableMethod() => throw new NotSupportedException();
 
-        [Template]
+        [Template( TemplateKind.IEnumerator )]
         [Abstract]
         public virtual IEnumerator<dynamic?> OverrideEnumeratorMethod() => throw new NotSupportedException();
 
 #if NET5_0
-        [Template]
+        [Template( TemplateKind.IAsyncEnumerable )]
         [Abstract]
         public virtual IAsyncEnumerable<dynamic?> OverrideAsyncEnumerableMethod() => throw new NotSupportedException();
 
-        [Template]
+        [Template( TemplateKind.IAsyncEnumerator )]
         [Abstract]
         public virtual IAsyncEnumerable<dynamic?> OverrideAsyncEnumeratorMethod() => throw new NotSupportedException();
 #endif

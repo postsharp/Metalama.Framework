@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
+using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
@@ -204,13 +205,16 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var templateMethod = testResult.InputCompilation!.Assembly.GetTypes()
                     .Single( t => string.Equals( t.Name, "Aspect", StringComparison.Ordinal ) )
                     .GetMembers( "Template" )
+                    .OfType<IMethodSymbol>()
                     .Single();
 
                 Invariant.Assert( compiledTemplateMethod != null );
                 var driver = new TemplateDriver( this.ServiceProvider, null!, templateMethod, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InputCompilation );
-                var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( this.ServiceProvider, assembly, compilationModel, templateMethod );
+                var template = new Template<IMemberOrNamedType>( compilationModel.Factory.GetMethod( templateMethod ) );
+
+                var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( this.ServiceProvider, assembly, compilationModel, template );
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult.PipelineDiagnostics, out var output );
 
@@ -282,7 +286,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             IServiceProvider serviceProvider,
             Assembly assembly,
             CompilationModel compilation,
-            ISymbol templateMethod )
+            Template<IMemberOrNamedType> template )
         {
             var roslynCompilation = compilation.RoslynCompilation;
 
@@ -328,7 +332,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 targetMethod,
                 new MetaApiProperties(
                     diagnostics,
-                    templateMethod,
+                    template,
                     ImmutableDictionary.Create<string, object?>().Add( "TestKey", "TestValue" ),
                     default,
                     proceedExpression,

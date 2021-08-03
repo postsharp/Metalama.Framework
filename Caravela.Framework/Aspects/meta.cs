@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using System.Threading.Tasks;
 
 // ReSharper disable UnusedParameter.Global
 
@@ -44,7 +45,19 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <returns></returns>
         [TemplateKeyword]
-        public static dynamic? Proceed() => CurrentContext.Proceed() ?? throw NewInvalidOperationException();
+        public static dynamic? Proceed() => CurrentContext.Proceed( TemplateKind.Default );
+        
+        public static Task<dynamic?> ProceedAsync() => CurrentContext.Proceed( TemplateKind.Async )!;
+
+        public static IEnumerable<dynamic?> ProceedEnumerable() => CurrentContext.Proceed( TemplateKind.IEnumerable )!;
+
+        public static IEnumerator<dynamic?> ProceedEnumerator() => CurrentContext.Proceed( TemplateKind.IEnumerable )!;
+
+#if NET5_0
+        public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => CurrentContext.Proceed( TemplateKind.IAsyncEnumerable )!;
+
+        public static IAsyncEnumerator<dynamic?> ProceedAsyncEnumerator() => CurrentContext.Proceed( TemplateKind.IAsyncEnumerator )!;
+#endif
 
         /// <summary>
         /// Requests the debugger to break, if any debugger is attached to the current process.

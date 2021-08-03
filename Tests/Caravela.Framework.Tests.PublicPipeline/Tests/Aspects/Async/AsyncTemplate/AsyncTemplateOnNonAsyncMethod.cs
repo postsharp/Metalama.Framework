@@ -23,7 +23,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.Async
             return meta.Proceed();
         }
 
-        [Template]
+        [Template(TemplateKind.Async)]
         public async Task<dynamic?> OverrideAsyncMethod()
         {
             await Task.Yield();

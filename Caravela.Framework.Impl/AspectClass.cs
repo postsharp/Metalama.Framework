@@ -116,13 +116,20 @@ namespace Caravela.Framework.Impl
 
             foreach ( var memberSymbol in type.GetMembers() )
             {
-                var templateMemberKind = symbolClassifier.GetTemplateMemberKind( memberSymbol );
-                var aspectClassMember = new AspectClassMember( memberSymbol.Name, this, templateMemberKind, memberSymbol is IMethodSymbol { IsAsync: true } );
+                if ( memberSymbol is IMethodSymbol { AssociatedSymbol: not null } )
+                {
+                    // Skip accessors.
 
-                if ( templateMemberKind != TemplateAttributeKind.None )
+                    continue;
+                }
+
+                var templateInfo = symbolClassifier.GetTemplateInfo( memberSymbol );
+                var aspectClassMember = new AspectClassMember( memberSymbol.Name, this, templateInfo, memberSymbol is IMethodSymbol { IsAsync: true } );
+
+                if ( !templateInfo.IsNone )
                 {
                     if ( members.TryGetValue( memberSymbol.Name, out var existingMember ) && !memberSymbol.IsOverride &&
-                         existingMember.Kind != TemplateAttributeKind.None )
+                         !existingMember.TemplateInfo.IsNone )
                     {
                         // The template is already defined and we are not overwriting a template of the base class.
                         diagnosticAdder.Report(

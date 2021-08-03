@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Advices
             : base( aspect, targetDeclaration, templateMethod, scope, overrideStrategy, layerName, tags )
         {
             Invariant.Assert( templateMethod.IsNotNull );
-            
+
             this.MemberBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Declaration.AssertNotNull().Name );
         }
 

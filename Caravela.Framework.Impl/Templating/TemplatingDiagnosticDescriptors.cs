@@ -112,7 +112,7 @@ namespace Caravela.Framework.Impl.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol Advice, string Expression, IDeclaration TargetDeclaration, DeclarationKind TargetKind)>
+        internal static readonly DiagnosticDefinition<(IDeclaration Advice, string Expression, IDeclaration TargetDeclaration, DeclarationKind TargetKind)>
             CannotUseThisInStaticContext
                 = new(
                     "CR0114",
@@ -121,7 +121,7 @@ namespace Caravela.Framework.Impl.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol Advice, string Expression, IDeclaration TargetDeclaration, DeclarationKind TargetKind,
+        internal static readonly DiagnosticDefinition<(IDeclaration Advice, string Expression, IDeclaration TargetDeclaration, DeclarationKind TargetKind,
                 string MissingKind)>
             MemberMemberNotAvailable
                 = new(
