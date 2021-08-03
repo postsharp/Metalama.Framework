@@ -12,14 +12,14 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Anon
         {
             var x = new
             {
-                A = meta.Parameters[0].Value,
-                B = meta.Parameters[1].Value,
-                Count = meta.Parameters.Count
+                A = meta.Target.Parameters[0].Value,
+                B = meta.Target.Parameters[1].Value,
+                Count = meta.Target.Parameters.Count
             };
 
             var y = new
             {
-                Count = meta.Parameters.Count
+                Count = meta.Target.Parameters.Count
             };
 
             Console.WriteLine(x);

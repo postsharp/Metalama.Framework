@@ -9,7 +9,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.ReturnStatements.Retur
         [TestTemplate]
         dynamic? Template()
         {
-            object? x = meta.Parameters[0].Value;
+            object? x = meta.Target.Parameters[0].Value;
             return x;
         }
     }

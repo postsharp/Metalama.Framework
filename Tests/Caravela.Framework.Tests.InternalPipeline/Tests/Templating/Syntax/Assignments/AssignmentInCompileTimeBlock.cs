@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.AssignmentInCom
         {
             var x = meta.CompileTime(0);
             
-            foreach ( var p in meta.Parameters )
+            foreach ( var p in meta.Target.Parameters )
             {
                 x++;
             }

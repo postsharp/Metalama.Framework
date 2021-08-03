@@ -12,13 +12,13 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicGreedyA
         dynamic? Template()
         {
             // Dynamic argument of build-time-only method.
-            meta.Method.Invoke( new PropertyChangedEventArgs( meta.Parameters[0].Name) );
+            meta.Target.Method.Invoke( new PropertyChangedEventArgs( meta.Target.Parameters[0].Name) );
             
             // Invocation in dynamic context.
-            meta.This.PropertyChanged.Invoke(new PropertyChangedEventArgs( meta.Parameters[0].Name));
+            meta.This.PropertyChanged.Invoke(new PropertyChangedEventArgs( meta.Target.Parameters[0].Name));
             
             // Conditional access in dynamic context.
-           meta.This.PropertyChanged.Invoke( new PropertyChangedEventArgs(meta.Parameters[0].Name));
+           meta.This.PropertyChanged.Invoke( new PropertyChangedEventArgs(meta.Target.Parameters[0].Name));
             
             return default;
         }

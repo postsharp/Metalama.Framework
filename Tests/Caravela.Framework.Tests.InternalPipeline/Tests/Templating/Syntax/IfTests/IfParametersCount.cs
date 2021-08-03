@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfParam
         {
             bool b = meta.CompileTime(false);
 
-            if (meta.Parameters.Count > 0)
+            if (meta.Target.Parameters.Count > 0)
             {
                 b = true;
             }

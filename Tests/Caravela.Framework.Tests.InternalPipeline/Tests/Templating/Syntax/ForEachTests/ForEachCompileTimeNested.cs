@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.Fo
 
             foreach (int n in array)
             {
-                foreach (var p in meta.Parameters)
+                foreach (var p in meta.Target.Parameters)
                 {
                     if (p.Value <= n)
                     {

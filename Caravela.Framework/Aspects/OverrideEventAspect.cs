@@ -20,7 +20,7 @@ namespace Caravela.Framework.Aspects
         public virtual void BuildAspect( IAspectBuilder<IEvent> builder )
         {
             builder.AdviceFactory.OverrideEventAccessors(
-                builder.TargetDeclaration,
+                builder.Target,
                 nameof(this.OverrideAdd),
                 nameof(this.OverrideRemove),
                 null );

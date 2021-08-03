@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.ParameterAssig
         dynamic? Template()
         {
             var result = meta.Proceed();
-            meta.Parameters[0].Value = 5;
+            meta.Target.Parameters[0].Value = 5;
             return result;
         }
     }

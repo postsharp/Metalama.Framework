@@ -31,14 +31,14 @@ namespace Caravela.Framework.Impl
 
         public IDiagnosticSink Diagnostics => this._diagnosticSink;
 
-        public T TargetDeclaration { get; }
+        public T Target { get; }
 
         [Obsolete( "Not implemented." )]
         public IDeclarationSelection<TMember> WithMembers<TMember>( Func<T, TMember> selector )
             where TMember : class, IDeclaration
             => throw new NotImplementedException();
 
-        IDeclaration IAspectLayerBuilder.TargetDeclaration => this.TargetDeclaration;
+        IDeclaration IAspectLayerBuilder.Target => this.Target;
 
         public IAdviceFactory AdviceFactory => this._adviceFactory;
 
@@ -47,13 +47,13 @@ namespace Caravela.Framework.Impl
         public CancellationToken CancellationToken { get; }
 
         public AspectBuilder(
-            T targetDeclaration,
+            T target,
             UserDiagnosticSink diagnosticSink,
             IEnumerable<Advice> declarativeAdvices,
             AdviceFactory adviceFactory,
             CancellationToken cancellationToken )
         {
-            this.TargetDeclaration = targetDeclaration;
+            this.Target = target;
             this._declarativeAdvices = declarativeAdvices.ToImmutableArray();
             this._diagnosticSink = diagnosticSink;
             this._adviceFactory = adviceFactory;

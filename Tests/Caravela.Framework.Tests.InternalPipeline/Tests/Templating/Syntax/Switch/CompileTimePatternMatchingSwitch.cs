@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.CompileT
         [TestTemplate]
         dynamic? Template()
         {
-            switch (meta.Parameters)
+            switch (meta.Target.Parameters)
             {
                 case null:
                     Console.WriteLine("1");

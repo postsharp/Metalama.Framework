@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfMetho
         {
             int b = meta.CompileTime(0);
 
-            if (meta.Method.Name == "Method")
+            if (meta.Target.Method.Name == "Method")
             {
                 b = 1;
             }

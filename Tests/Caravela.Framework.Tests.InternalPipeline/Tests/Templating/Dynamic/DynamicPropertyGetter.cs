@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicPropert
         {
             // Dynamic property as method argument.
             Console.WriteLine(meta.This);
-            Console.WriteLine(meta.Parameters[0].Value);
+            Console.WriteLine(meta.Target.Parameters[0].Value);
             
             // Dynamic property in assignment;
             object o;

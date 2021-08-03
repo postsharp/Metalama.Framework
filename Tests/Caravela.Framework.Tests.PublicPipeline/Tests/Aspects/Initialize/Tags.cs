@@ -9,7 +9,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.Tags
     {
         public void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            builder.AdviceFactory.OverrideMethod(builder.TargetDeclaration, nameof(OverrideMethod), new () { {"Friend", "Bernard" } });
+            builder.AdviceFactory.OverrideMethod(builder.Target, nameof(OverrideMethod), new () { {"Friend", "Bernard" } });
         }
 
         

@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Operators
         [TestTemplate]
         dynamic Template()
         {
-            int i = meta.Parameters.Count;
+            int i = meta.Target.Parameters.Count;
 
             i = +-i;
             i = unchecked(i + 1);

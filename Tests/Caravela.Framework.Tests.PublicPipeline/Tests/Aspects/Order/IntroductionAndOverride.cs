@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
         
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            foreach (var method in builder.TargetDeclaration.Methods)
+            foreach (var method in builder.Target.Methods)
             {
                 builder.AdviceFactory.OverrideMethod(method, nameof(OverrideTemplate));
             }
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
         
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            foreach (var method in builder.TargetDeclaration.Methods)
+            foreach (var method in builder.Target.Methods)
             {
                 builder.AdviceFactory.OverrideMethod(method, nameof(OverrideTemplate));
             }
@@ -84,7 +84,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
         
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            foreach (var method in builder.TargetDeclaration.Methods)
+            foreach (var method in builder.Target.Methods)
             {
                 builder.AdviceFactory.OverrideMethod(method, nameof(OverrideTemplate));
             }

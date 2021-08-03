@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Templating.Syntax.Array.Run
         [TestTemplate]
         dynamic? Template()
         {
-            var fields = meta.Type.FieldsAndProperties.Where( f => !f.IsStatic ).ToList();
+            var fields = meta.Target.Type.FieldsAndProperties.Where( f => !f.IsStatic ).ToList();
             var values = new object[fields.Count];
 
             foreach (int i in meta.CompileTime( Enumerable.Range( 0, fields.Count ) ))

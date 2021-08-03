@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
     {
         public override dynamic? OverrideMethod()
         {
-            switch (meta.Parameters)
+            switch (meta.Target.Parameters)
             {
                 case null:
                     Console.WriteLine("1");

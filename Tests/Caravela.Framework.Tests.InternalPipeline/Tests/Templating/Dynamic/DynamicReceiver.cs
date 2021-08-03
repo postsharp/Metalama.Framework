@@ -18,8 +18,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicReceive
             meta.This.MyMethod().More().Value = 5;
             
             // Parameter
-            meta.Parameters[0].Value.MyMethod();
-            meta.Parameters[0].Value.MyMethod().More();
+            meta.Target.Parameters[0].Value.MyMethod();
+            meta.Target.Parameters[0].Value.MyMethod().More();
             
             meta.ThisStatic.Hello();
             

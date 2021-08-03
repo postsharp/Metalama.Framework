@@ -37,8 +37,8 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
         [Template]
         dynamic? Template()
         {
-            var m = meta.Method;
-            var p = meta.Method.Parameters[0].Value;
+            var m = meta.Target.Method;
+            var p = meta.Target.Method.Parameters[0].Value;
             
             return meta.Proceed();
         }
