@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.AsyncIterators
     {
         public void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.AdviceFactory.OverrideMethod( builder.TargetDeclaration, 
+            builder.AdviceFactory.OverrideMethod( builder.Target, 
             new( nameof(this.OverrideMethod), nameof(this.OverrideAsyncMethod), useAsyncTemplateForAnyAwaitable: true ) );
         }
     
@@ -31,9 +31,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.AsyncIterators
         public async Task<dynamic?> OverrideAsyncMethod()
         {
             await Task.Yield();
-            Console.WriteLine("Before " + meta.Method.Name);
+            Console.WriteLine("Before " + meta.Target.Method.Name);
             var result = meta.Proceed();
-            Console.WriteLine("After " + meta.Method.Name);
+            Console.WriteLine("After " + meta.Target.Method.Name);
             await Task.Yield();
             return result;
             

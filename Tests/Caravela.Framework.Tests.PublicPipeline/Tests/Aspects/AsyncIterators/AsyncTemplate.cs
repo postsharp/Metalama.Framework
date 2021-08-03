@@ -22,9 +22,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.AsyncIterators
         public override async Task<dynamic?> OverrideAsyncMethod()
         {
             await Task.Yield();
-            Console.WriteLine("Before " + meta.Method.Name);
+            Console.WriteLine("Before " + meta.Target.Method.Name);
             var result = meta.Proceed();
-            Console.WriteLine("After " + meta.Method.Name);
+            Console.WriteLine("After " + meta.Target.Method.Name);
             await Task.Yield();
             return result;
             

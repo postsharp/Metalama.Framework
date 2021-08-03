@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.NonAs
         public void BuildAspect( IAspectBuilder<IMethod> builder )
         {
             builder.AdviceFactory.OverrideMethod( 
-            builder.TargetDeclaration, 
+            builder.Target, 
             new( nameof(this.OverrideMethod), asyncTemplate: nameof(this.OverrideAsyncMethod),
              useAsyncTemplateForAnyAwaitable: true) );
         }

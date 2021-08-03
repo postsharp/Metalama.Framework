@@ -67,7 +67,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             // Attempt to Emit the result.
             var emitResult = cleanCompilation.Emit( Stream.Null );
 
-            testResult.Report( emitResult.Diagnostics );
+            testResult.PipelineDiagnostics.Report( emitResult.Diagnostics );
 
             if ( !emitResult.Success )
             {
