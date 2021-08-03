@@ -1,21 +1,4 @@
-using System;
-using System.Threading.Tasks;
-using System.Collections;
-using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
-
-namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Async.NormalTemplateOnIteratorMethod
-{
-    class Aspect : OverrideMethodAspect
-    {
-        public override dynamic? OverrideMethod() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
-
-        
-    }
-
-    class TargetCode
+class TargetCode
     {
         [Aspect]
         IEnumerable<int> Enumerable(int a)
@@ -82,4 +65,3 @@ private IEnumerator __OldEnumerator__OriginalImpl(int a)
         }
       
     }
-}

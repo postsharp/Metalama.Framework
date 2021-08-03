@@ -42,6 +42,11 @@
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Tests\Aspects\AsyncIterators\NormalTemplate.t.cs" />
+    <None Include="Tests\Aspects\Iterators\IteratorMethod.t.cs" />
+  </ItemGroup>
+
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
   

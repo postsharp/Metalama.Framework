@@ -41,8 +41,6 @@
                 <ColumnDefinition Width="400*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="400*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="400*" />
             </Grid.ColumnDefinitions>
 
             <DockPanel Grid.Column="0">
@@ -88,18 +86,16 @@
             </Grid>
 
             <GridSplitter Grid.Column="3" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
-
-            <DockPanel Grid.Column="4">
-                <TextBlock DockPanel.Dock="Top">Text Source Code with Compile-Time Code Highlighting</TextBlock>
+            
+            <DockPanel Grid.Column="4" Visibility="{Binding Path=HighlightedTemplateVisibility}">
+                <TextBlock DockPanel.Dock="Top">Highlighted Source Code</TextBlock>
                 <RichTextBox Name="highlightedSourceRichBox" IsReadOnly="True" HorizontalAlignment="Stretch"
                              VerticalAlignment="Stretch"
                              HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
                              FontFamily="Consolas" />
             </DockPanel>
 
-            <GridSplitter Grid.Column="5" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
-
-            <DockPanel Grid.Column="6" Visibility="{Binding Path=CompiledTemplateVisibility}">
+            <DockPanel Grid.Column="4" Visibility="{Binding Path=CompiledTemplateVisibility}">
                 <TextBlock DockPanel.Dock="Top">
                     <Hyperlink Name="compiledTemplateHyperlink" Click="CompiledTemplateHyperlink_OnClick">
                         Compiled Template
@@ -110,7 +106,7 @@
                              VerticalScrollBarVisibility="Auto" FontFamily="Consolas" />
             </DockPanel>
 
-            <DockPanel Grid.Column="6" Visibility="{Binding Path=IntermediateLinkerCodeVisibility}">
+            <DockPanel Grid.Column="4" Visibility="{Binding Path=IntermediateLinkerCodeVisibility}">
                 <TextBlock DockPanel.Dock="Top">
                     <TextBlock>
                         Intermediate Linker Code
@@ -123,7 +119,7 @@
             </DockPanel>
 
 
-            <Grid Grid.Column="6" Visibility="{Binding Path=ProgramOutputVisibility}">
+            <Grid Grid.Column="4" Visibility="{Binding Path=ProgramOutputVisibility}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="500" />
                     <RowDefinition Height="Auto" />

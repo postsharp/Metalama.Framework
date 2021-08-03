@@ -30,22 +30,22 @@ namespace Caravela.Framework.Impl.Advices
         Async,
 
         /// <summary>
-        /// <see cref="MethodTemplateSelector.IteratorTemplate"/> or <see cref="GetterTemplateSelector.IteratorTemplate"/>.
+        /// <see cref="MethodTemplateSelector.EnumerableTemplate"/> or <see cref="GetterTemplateSelector.EnumerableTemplate"/>.
         /// </summary>
         IEnumerable,
 
         /// <summary>
-        /// <see cref="MethodTemplateSelector.IteratorEnumeratorTemplate"/> or <see cref="GetterTemplateSelector.IteratorEnumeratorTemplate"/>.
+        /// <see cref="MethodTemplateSelector.EnumeratorTemplate"/> or <see cref="GetterTemplateSelector.EnumeratorTemplate"/>.
         /// </summary>
         IEnumerator,
 
         /// <summary>
-        /// <see cref="MethodTemplateSelector.AsyncIteratorTemplate"/>.
+        /// <see cref="MethodTemplateSelector.AsyncEnumerableTemplate"/>.
         /// </summary>
         IAsyncEnumerable,
 
         /// <summary>
-        /// <see cref="MethodTemplateSelector.AsyncIteratorEnumeratorTemplate"/>.
+        /// <see cref="MethodTemplateSelector.AsyncEnumeratorTemplate"/>.
         /// </summary>
         IAsyncEnumerator,
 

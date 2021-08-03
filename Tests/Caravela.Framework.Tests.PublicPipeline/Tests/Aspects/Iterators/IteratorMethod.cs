@@ -8,7 +8,7 @@ using Caravela.Framework;
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Async.NormalTemplateOnIteratorMethod
+namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Iterators.NormalTemplateOnIteratorMethod
 {
     class Aspect : OverrideMethodAspect
     {
@@ -23,6 +23,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Async.NormalTe
         
     }
 
+    // <target>
     class TargetCode
     {
         [Aspect]

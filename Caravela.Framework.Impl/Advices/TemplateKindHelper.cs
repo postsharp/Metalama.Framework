@@ -19,6 +19,14 @@ namespace Caravela.Framework.Impl.Advices
                 TemplateSelectionKind.IAsyncEnumerator => true,
                 _ => false
             };
+        
+        public static bool IsAsyncIterator( this TemplateSelectionKind selectionKind )
+            => selectionKind switch
+            {
+                TemplateSelectionKind.IAsyncEnumerable => true,
+                TemplateSelectionKind.IAsyncEnumerator => true,
+                _ => false
+            };
 
         public static bool IsIterator( this TemplateSelectionKind selectionKind )
             => selectionKind switch
@@ -31,7 +39,10 @@ namespace Caravela.Framework.Impl.Advices
             };
 
         public static bool MustInterpretAsAsync( this in Template<IMethod> template )
-            => template.Declaration!.IsAsync
+            => template.Declaration is { IsAsync: true }
                || (template.SelectedKind == TemplateSelectionKind.Default && template.InterpretedKind.IsAsync());
+
+        public static bool MustInterpretAsAsyncIterator( this in Template<IMethod> template )
+            => template.InterpretedKind.IsAsyncIterator() && (template.Declaration!.IsAsync || template.SelectedKind == TemplateSelectionKind.Default);
     }
 }

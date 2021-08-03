@@ -24,9 +24,9 @@ namespace Caravela.Framework.Impl.CodeModel
                     SpecialType.System_Collections_Generic_IEnumerator_T => EnumerableKind.IEnumerator,
                     _ => typeDefinition.Name switch
                     {
-                        "IAsyncEnumerable" when methodSymbol.IsAsync && typeDefinition.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
+                        "IAsyncEnumerable" when typeDefinition.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
                             => EnumerableKind.IAsyncEnumerable,
-                        "IAsyncEnumerator" when methodSymbol.IsAsync && typeDefinition.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
+                        "IAsyncEnumerator" when typeDefinition.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
                             => EnumerableKind.IAsyncEnumerator,
                         _ => EnumerableKind.None
                     }

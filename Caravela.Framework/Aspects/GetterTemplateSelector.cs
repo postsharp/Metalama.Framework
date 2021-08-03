@@ -18,22 +18,22 @@ namespace Caravela.Framework.Aspects
         public string? DefaultTemplate { get; }
 
         /// <summary>
-        /// Gets the name of the template that must be applied to iterator getters, including getters returning an enumerator.
+        /// Gets the name of the template that must be applied to iterator getters returning an <see cref="IEnumerable{T}"/> or <see cref="IEnumerable"/>.
         /// </summary>
-        public string? IteratorTemplate { get; }
+        public string? EnumerableTemplate { get; }
 
         /// <summary>
-        /// Gets the name of the template that must be applied to an iterator method returning an <see cref="IEnumerator{T}"/> or <see cref="IEnumerator"/> (but not an async iterator).
+        /// Gets the name of the template that must be applied to iterator getters returning an <see cref="IEnumerator{T}"/> or <see cref="IEnumerator"/>.
         /// </summary>
-        public string? IteratorEnumeratorTemplate { get; }
+        public string? EnumeratorTemplate { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the <see cref="IteratorTemplate"/> or <see cref="IteratorEnumeratorTemplate"/>
-        /// must be applied to all methods returning compatible return type (if set to <c>true</c>), instead of only to methods using the <c>yield</c> statement.
+        /// Gets a value indicating whether the <see cref="EnumerableTemplate"/> or <see cref="EnumeratorTemplate"/>
+        /// must be applied to all methods returning compatible return type, instead of only to methods using the <c>yield</c> statement.
         /// </summary>
-        public bool UseIteratorTemplateForAnyEnumerable { get; }
+        public bool UseEnumerableTemplateForAnyEnumerable { get; }
 
-        internal bool HasOnlyDefaultTemplate => this.IteratorEnumeratorTemplate == null && this.IteratorEnumeratorTemplate == null;
+        internal bool HasOnlyDefaultTemplate => this.EnumeratorTemplate == null && this.EnumeratorTemplate == null;
 
         internal bool IsNull => this.DefaultTemplate == null;
 
@@ -44,33 +44,35 @@ namespace Caravela.Framework.Aspects
         /// the method to which the advice is applied. If several templates are eligible for a method, the template that is the last in the list of parameters is selected.
         /// </summary>
         /// <param name="defaultTemplate">Name of the template that must be applied if no other template is applicable. This parameter is required.</param>
-        /// <param name="iteratorTemplate">Name of the template that must be applied to iterator methods, including methods returning an enumerator, and
-        /// including async iterators.</param>
-        /// <param name="iteratorEnumeratorTemplate">Name of the template that must be applied to an iterator method returning an an <see cref="IEnumerator{T}"/> or <see cref="IEnumerator"/> (but not an async iterator).</param>
-        /// <param name="useIteratorTemplateForAnyEnumerable">Indicates whether the <see cref="IteratorTemplate"/> or <see cref="IteratorEnumeratorTemplate"/>
-        /// must be applied to all methods returning compatible return type (if set to <c>true</c>), instead of only to methods using the <c>yield</c> statement..</param>
+        /// <param name="enumerableTemplate">Name of the template that must be applied to iterator methods returning an <see cref="IEnumerable{T}"/> or <see cref="IEnumerable"/>.
+        /// See <see cref="EnumerableTemplate"/> for details.</param>
+        /// <param name="enumeratorTemplate">Name of the template that must be applied to an iterator method returning an an <see cref="IEnumerator{T}"/> or <see cref="IEnumerator"/>.
+        /// See <see cref="EnumeratorTemplate"/> for details.</param>
+        /// <param name="useEnumerableTemplateForAnyEnumerable">Indicates whether the <see cref="EnumerableTemplate"/> or <see cref="EnumeratorTemplate"/>
+        /// must be applied to all methods returning compatible return type (if set to <c>true</c>), instead of only to methods using the <c>yield</c> statement.
+        /// See <see cref="UseEnumerableTemplateForAnyEnumerable"/> for details.</param>
         /// <remarks>
         /// Note that this type has also an implicit conversion from <see cref="string"/>.
         /// If you only want to specify a default template, you can pass a string, without calling the constructor.
         /// </remarks>
         public GetterTemplateSelector(
             string defaultTemplate,
-            string? iteratorTemplate = null,
-            string? iteratorEnumeratorTemplate = null,
-            bool useIteratorTemplateForAnyEnumerable = false )
+            string? enumerableTemplate = null,
+            string? enumeratorTemplate = null,
+            bool useEnumerableTemplateForAnyEnumerable = false )
         {
             this.DefaultTemplate = defaultTemplate;
-            this.UseIteratorTemplateForAnyEnumerable = useIteratorTemplateForAnyEnumerable;
-            this.IteratorTemplate = iteratorTemplate;
-            this.IteratorEnumeratorTemplate = iteratorEnumeratorTemplate;
+            this.UseEnumerableTemplateForAnyEnumerable = useEnumerableTemplateForAnyEnumerable;
+            this.EnumerableTemplate = enumerableTemplate;
+            this.EnumeratorTemplate = enumeratorTemplate;
         }
 
         private GetterTemplateSelector( string? defaultTemplate )
         {
             this.DefaultTemplate = defaultTemplate;
-            this.UseIteratorTemplateForAnyEnumerable = false;
-            this.IteratorTemplate = null;
-            this.IteratorEnumeratorTemplate = null;
+            this.UseEnumerableTemplateForAnyEnumerable = false;
+            this.EnumerableTemplate = null;
+            this.EnumeratorTemplate = null;
         }
 
         /// <summary>

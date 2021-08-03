@@ -41,5 +41,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public DeclarationRef<IDeclaration> ToRef() => this.Underlying.ToRef();
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Underlying.DeclaringSyntaxReferences;
+
+        public override string ToString() => this.Underlying.ToString();
     }
 }

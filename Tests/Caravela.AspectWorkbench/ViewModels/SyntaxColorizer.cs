@@ -98,6 +98,12 @@ namespace Caravela.AspectWorkbench.ViewModels
 
             foreach ( var span in classified.TextSpans )
             {
+                if ( classified.SourceText.Length < span.Span.End )
+                {
+                    // This must be due to a bug upstream. Ignore it.
+                    continue;
+                }
+                
                 Color foreground = Colors.Black, background;
                 var fontWeight = FontWeights.Normal;
                 var fontStyle = FontStyles.Normal;

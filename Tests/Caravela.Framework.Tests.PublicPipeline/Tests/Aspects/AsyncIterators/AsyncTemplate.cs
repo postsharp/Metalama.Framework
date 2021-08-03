@@ -1,3 +1,5 @@
+// @IgnoredDiagnostic(CS1998)
+
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,13 +10,26 @@ using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 using System.Runtime.CompilerServices;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Iterators.NormalTemplate.AsyncIteratorMethods
+namespace Caravela.Framework.Tests.Integration.Templating.Aspects.AsyncIterators.AsyncTemplate
 {
     class Aspect : OverrideMethodAspect
     {
-        public override dynamic? OverrideMethod() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+        public override dynamic? OverrideMethod()
+        {
+            throw new NotSupportedException("Should not be selected");
+        }
 
-        
+        public override async Task<dynamic?> OverrideAsyncMethod()
+        {
+            await Task.Yield();
+            Console.WriteLine("Before " + meta.Method.Name);
+            var result = meta.Proceed();
+            Console.WriteLine("After " + meta.Method.Name);
+            await Task.Yield();
+            return result;
+            
+        }
+
     }
     
     class Program
@@ -51,76 +66,45 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Iterators.Norm
         }
     }
 
+    // <target>
     class TargetCode
     {
         [Aspect]
         public async IAsyncEnumerable<int> AsyncEnumerable(int a)
-{
-    global::System.Console.WriteLine("Before AsyncEnumerable");
-    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.__AsyncEnumerable__OriginalImpl(a)));
-    global::System.Console.WriteLine("After AsyncEnumerable");
-    await foreach (var r in result)
-    {
-        yield return r;
-    }
-}
-
-private async IAsyncEnumerable<int> __AsyncEnumerable__OriginalImpl(int a)
         {
+            Console.WriteLine("Yield 1");
             yield return 1;
             await Task.Yield();
+            Console.WriteLine("Yield 2");
             yield return 2;
             await Task.Yield();
+            Console.WriteLine("Yield 3");
             yield return 3;
         }
         
          [Aspect]
         public async IAsyncEnumerable<int> AsyncEnumerableCancellable(int a, [EnumeratorCancellation] CancellationToken token)
-{
-    global::System.Console.WriteLine("Before AsyncEnumerableCancellable");
-    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.__AsyncEnumerableCancellable__OriginalImpl(a, token), token));
-    global::System.Console.WriteLine("After AsyncEnumerableCancellable");
-    await foreach (var r in result)
-    {
-        yield return r;
-    }
-}
-
-private async IAsyncEnumerable<int> __AsyncEnumerableCancellable__OriginalImpl(int a, [EnumeratorCancellation] CancellationToken token)
         {
+            Console.WriteLine("Yield 1");
             yield return 1;
             await Task.Yield();
+            Console.WriteLine("Yield 2");
             yield return 2;
             await Task.Yield();
+            Console.WriteLine("Yield 3");
             yield return 3;
         }
         
         
         [Aspect]
         public async IAsyncEnumerator<int> AsyncEnumerator(int a)
-{
-    global::System.Console.WriteLine("Before AsyncEnumerator");
-    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.__AsyncEnumerator__OriginalImpl(a)));
-    global::System.Console.WriteLine("After AsyncEnumerator");
-    var enumerator = result;
-    try
-    {
-        while (await enumerator.MoveNextAsync())
         {
-            yield return enumerator.Current;
-        }
-    }
-    finally
-    {
-        await enumerator.DisposeAsync();
-    }
-}
-
-private async IAsyncEnumerator<int> __AsyncEnumerator__OriginalImpl(int a)
-        {
+            Console.WriteLine("Yield 1");
             yield return 1;
             await Task.Yield();
+            Console.WriteLine("Yield 2");
             yield return 2;
+            Console.WriteLine("Yield 3");
             await Task.Yield();
             yield return 3;
         }
@@ -128,29 +112,13 @@ private async IAsyncEnumerator<int> __AsyncEnumerator__OriginalImpl(int a)
 
          [Aspect]
         public async IAsyncEnumerator<int> AsyncEnumeratorCancellable(int a, CancellationToken token)
-{
-    global::System.Console.WriteLine("Before AsyncEnumeratorCancellable");
-    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.__AsyncEnumeratorCancellable__OriginalImpl(a, token)));
-    global::System.Console.WriteLine("After AsyncEnumeratorCancellable");
-    var enumerator = result;
-    try
-    {
-        while (await enumerator.MoveNextAsync())
         {
-            yield return enumerator.Current;
-        }
-    }
-    finally
-    {
-        await enumerator.DisposeAsync();
-    }
-}
-
-private async IAsyncEnumerator<int> __AsyncEnumeratorCancellable__OriginalImpl(int a, CancellationToken token)
-        {
+            Console.WriteLine("Yield 1");
             yield return 1;
             await Task.Yield();
+            Console.WriteLine("Yield 2");
             yield return 2;
+            Console.WriteLine("Yield 3");
             await Task.Yield();
             yield return 3;
         }

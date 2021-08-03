@@ -90,8 +90,10 @@ namespace Caravela.TestFramework
                     {
                         testResult.SetFailed( "Final Compilation.Emit failed." );
                     }
-
-                    await ExecuteTestProgramAsync( testInput, testResult, peStream );
+                    else
+                    {
+                        await ExecuteTestProgramAsync( testInput, testResult, peStream );
+                    }
                 }
                 else
                 {
@@ -176,6 +178,10 @@ namespace Caravela.TestFramework
                 {
                     _consoleLock.Release();
                 }
+            }
+            catch ( Exception e )
+            {
+                testResult.SetFailed( "Program execution failed", e );
             }
             finally
             {

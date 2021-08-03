@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
@@ -23,7 +24,7 @@ namespace Caravela.Framework.Impl.Templating
 
     internal class TemplateExpansionContext
     {
-        private readonly bool _isAsyncTemplate;
+        private readonly Template<IMethod> _templateMethod;
         private readonly Func<TemplateExpansionContext, StatementSyntax>? _expandYieldProceed;
 
         public TemplateLexicalScope LexicalScope { get; }
@@ -37,10 +38,10 @@ namespace Caravela.Framework.Impl.Templating
             TemplateLexicalScope lexicalScope,
             SyntaxSerializationService syntaxSerializationService,
             ICompilationElementFactory syntaxFactory,
-            bool isAsyncTemplate = false,
+            Template<IMethod> templateMethod = default,
             Func<TemplateExpansionContext, StatementSyntax>? expandYieldProceed = null )
         {
-            this._isAsyncTemplate = isAsyncTemplate;
+            this._templateMethod = templateMethod;
             this._expandYieldProceed = expandYieldProceed;
             this.TemplateInstance = templateInstance;
             this.MetaApi = metaApi;
@@ -71,7 +72,7 @@ namespace Caravela.Framework.Impl.Templating
 
             var returnType = method.ReturnType;
 
-            if ( this._isAsyncTemplate )
+            if ( this._templateMethod.MustInterpretAsAsync())
             {
                 // If we are in an awaitable async method, the consider the return type as seen by the method body,
                 // not the one as seen from outside.
@@ -87,7 +88,8 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return CreateReturnStatementVoid( returnExpression );
             }
-            else if ( method.GetIteratorInfoImpl() is { IsIterator: true, IsAsyncIterator: true } iteratorInfo )
+            else if ( method.GetIteratorInfoImpl() is { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } iteratorInfo &&
+                      this._templateMethod.MustInterpretAsAsyncIterator() )
             {
                 switch ( iteratorInfo.EnumerableKind )
                 {
@@ -162,9 +164,10 @@ namespace Caravela.Framework.Impl.Templating
                 .WithAwaitKeyword( Token( SyntaxKind.AwaitKeyword ) )
                 .NormalizeWhitespace();
 
-            return forEach;
+            return Block( forEach, CreateYieldBreakStatement() ).WithFlattenBlockAnnotation();
         }
 
+        
         private StatementSyntax CreateReturnStatementAsyncEnumerator( ExpressionSyntax returnExpression )
         {
             // We are in an async iterator (or async stream), and we cannot have a return statement.
@@ -245,8 +248,12 @@ namespace Caravela.Framework.Impl.Templating
                                                     IdentifierName( enumerator ),
                                                     IdentifierName( "DisposeAsync" ) ) ) ) ) ) ) ) );
 
-            return Block( local, tryStatement ).NormalizeWhitespace().WithFlattenBlockAnnotation();
+            return Block( local, tryStatement, CreateYieldBreakStatement() ).NormalizeWhitespace().WithFlattenBlockAnnotation();
         }
+        
+        private static YieldStatementSyntax CreateYieldBreakStatement() 
+            => YieldStatement( SyntaxKind.YieldBreakStatement ).WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
+
 
         private static StatementSyntax CreateReturnStatementVoid( ExpressionSyntax? returnExpression )
         {

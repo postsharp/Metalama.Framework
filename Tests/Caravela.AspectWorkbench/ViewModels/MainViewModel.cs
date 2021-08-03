@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 using PostSharp.Patterns.Model;
 using System;
 using System.Diagnostics;
@@ -22,7 +23,8 @@ namespace Caravela.AspectWorkbench.ViewModels
     {
         ProgramOutput,
         CompiledTemplate,
-        IntermediateLinkerCode
+        IntermediateLinkerCode,
+        HighlightedTemplate
     }
 
     [NotifyPropertyChanged]
@@ -65,6 +67,10 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public Visibility IntermediateLinkerCodeVisibility
             => this.DetailPaneContent == DetailPaneContent.IntermediateLinkerCode ? Visibility.Visible : Visibility.Collapsed;
+        
+        public Visibility HighlightedTemplateVisibility
+            => this.DetailPaneContent == DetailPaneContent.HighlightedTemplate ? Visibility.Visible : Visibility.Collapsed;
+
 
         public async Task RunTestAsync()
         {
@@ -134,19 +140,26 @@ namespace Caravela.AspectWorkbench.ViewModels
                     this.CompiledTemplateDocument = SyntaxColorizer.WriteSyntaxColoring( formattedDocument3.Document, testResult.Diagnostics );
                 }
 
-                var consolidatedOutputSyntax = testResult.GetConsolidatedTestOutput();
-                var consolidatedOutputText = await consolidatedOutputSyntax.SyntaxTree.GetTextAsync();
-                var consolidatedOutputDocument = testResult.OutputProject!.AddDocument( "ConsolidatedOutput", consolidatedOutputSyntax );
+                    var consolidatedOutputSyntax = testResult.GetConsolidatedTestOutput();
+                    var consolidatedOutputText = await consolidatedOutputSyntax.SyntaxTree.GetTextAsync();
 
-                // Display the transformed code.
-                this.TransformedCodeDocument = SyntaxColorizer.WriteSyntaxColoring( consolidatedOutputDocument );
+                if ( testResult.OutputProject != null )
+                {
+
+                    var consolidatedOutputDocument = testResult.OutputProject!.AddDocument( "ConsolidatedOutput", consolidatedOutputSyntax );
+
+                    // Display the transformed code.
+                    this.TransformedCodeDocument = SyntaxColorizer.WriteSyntaxColoring( consolidatedOutputDocument );
+
+                }
+                
 
                 // Display the intermediate linker code.
                 if ( testResult.IntermediateLinkerCompilation != null )
                 {
                     var intermediateSyntaxTree = testResult.IntermediateLinkerCompilation.Compilation.SyntaxTrees.First();
                     var linkerProject = testRunner.CreateProject( testInput.Options );
-                    var linkerDocument = linkerProject.AddDocument( "name.cs", intermediateSyntaxTree.GetRoot() );
+                    var linkerDocument = linkerProject.AddDocument( "name.cs", await intermediateSyntaxTree.GetRootAsync() );
                     this.IntermediateLinkerCodeCodeDocument = SyntaxColorizer.WriteSyntaxColoring( linkerDocument );
                 }
 

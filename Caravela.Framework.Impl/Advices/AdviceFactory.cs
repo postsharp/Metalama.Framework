@@ -66,12 +66,12 @@ namespace Caravela.Framework.Impl.Advices
                 {
                     // It is possible that the aspect has a member of the required name, but the user did not use the custom attribute. In this case,
                     // we want a proper error message.
-                    
+
                     throw GeneralDiagnosticDescriptors.MemberDoesNotHaveTemplateAttribute.CreateException(
                         (template.AspectClass.FullName, templateName!,
                          templateSelectionKind == TemplateSelectionKind.Introduction ? nameof(IntroduceAttribute) : nameof(TemplateAttribute)) );
                 }
-                
+
                 if ( template.Kind is TemplateAttributeKind.Abstract )
                 {
                     if ( !required )
@@ -114,12 +114,12 @@ namespace Caravela.Framework.Impl.Advices
             var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateSelectionKind.Default, true )!;
             var asyncTemplate = this.ValidateTemplateName( templateSelector.AsyncTemplate, TemplateSelectionKind.Async );
 
-            var enumerableTemplate = this.ValidateTemplateName( templateSelector.IteratorTemplate, TemplateSelectionKind.IEnumerable );
-            var enumeratorTemplate = this.ValidateTemplateName( templateSelector.IteratorEnumeratorTemplate, TemplateSelectionKind.IEnumerator );
-            var asyncEnumerableTemplate = this.ValidateTemplateName( templateSelector.AsyncIteratorTemplate, TemplateSelectionKind.IAsyncEnumerable );
+            var enumerableTemplate = this.ValidateTemplateName( templateSelector.EnumerableTemplate, TemplateSelectionKind.IEnumerable );
+            var enumeratorTemplate = this.ValidateTemplateName( templateSelector.EnumeratorTemplate, TemplateSelectionKind.IEnumerator );
+            var asyncEnumerableTemplate = this.ValidateTemplateName( templateSelector.AsyncEnumerableTemplate, TemplateSelectionKind.IAsyncEnumerable );
 
             var asyncEnumeratorTemplate = this.ValidateTemplateName(
-                templateSelector.AsyncIteratorEnumeratorTemplate,
+                templateSelector.AsyncEnumeratorTemplate,
                 TemplateSelectionKind.IAsyncEnumerator );
 
             var interpretedKind = TemplateSelectionKind.Default;
@@ -133,7 +133,9 @@ namespace Caravela.Framework.Impl.Advices
             // be applied only on methods with async implementations. However, if the template has an async implementation, the
             // target awaitable type must be compatible with an async implementation, i.e. it must have a method builder.
 
-            if ( asyncInfo.IsAsync || (templateSelector.UseAsyncTemplateForAnyAwaitable && asyncInfo.IsAwaitable && asyncInfo.HasMethodBuilder) ) 
+            if ( asyncInfo.IsAsync || (templateSelector.UseAsyncTemplateForAnyAwaitable && ((asyncInfo.IsAwaitable && asyncInfo.HasMethodBuilder) ||
+                                                                                            iteratorInfo.EnumerableKind is EnumerableKind.IAsyncEnumerable or
+                                                                                                EnumerableKind.IAsyncEnumerator)) )
             {
                 interpretedKind = TemplateSelectionKind.Async;
 
@@ -144,64 +146,69 @@ namespace Caravela.Framework.Impl.Advices
                     // We don't return because the result can still be overwritten by async iterators.
                 }
             }
-            else if ( iteratorInfo.IsIterator )
+
+            var useIteratorTemplate = iteratorInfo.IsIterator
+                                      || (templateSelector.UseEnumerableTemplateForAnyEnumerable && iteratorInfo.EnumerableKind != EnumerableKind.None);
+
+            switch ( iteratorInfo.EnumerableKind )
             {
-                switch ( iteratorInfo.EnumerableKind )
-                {
-                    case EnumerableKind.UntypedIEnumerable:
-                    case EnumerableKind.IEnumerable:
-                        if ( !enumerableTemplate.IsNull )
-                        {
-                            return enumerableTemplate;
-                        }
-                        else
-                        {
-                            interpretedKind = TemplateSelectionKind.IEnumerable;
-                        }
+                case EnumerableKind.None:
+                    break;
 
-                        break;
+                case EnumerableKind.UntypedIEnumerable:
+                case EnumerableKind.IEnumerable:
+                    if ( useIteratorTemplate && !enumerableTemplate.IsNull )
+                    {
+                        return enumerableTemplate;
+                    }
+                    else
+                    {
+                        interpretedKind = TemplateSelectionKind.IEnumerable;
+                    }
 
-                    case EnumerableKind.UntypedIEnumerator:
-                    case EnumerableKind.IEnumerator:
-                        if ( !enumeratorTemplate.IsNull )
-                        {
-                            return enumeratorTemplate;
-                        }
-                        else
-                        {
-                            interpretedKind = TemplateSelectionKind.IEnumerator;
-                        }
+                    break;
 
-                        break;
+                case EnumerableKind.UntypedIEnumerator:
+                case EnumerableKind.IEnumerator:
+                    if ( useIteratorTemplate && !enumeratorTemplate.IsNull )
+                    {
+                        return enumeratorTemplate;
+                    }
+                    else
+                    {
+                        interpretedKind = TemplateSelectionKind.IEnumerator;
+                    }
 
-                    case EnumerableKind.IAsyncEnumerable:
-                        if ( !asyncEnumerableTemplate.IsNull )
-                        {
-                            return asyncEnumerableTemplate;
-                        }
-                        else
-                        {
-                            interpretedKind = TemplateSelectionKind.IAsyncEnumerable;
-                        }
+                    break;
 
-                        break;
+                case EnumerableKind.IAsyncEnumerable:
+                    if ( useIteratorTemplate && !asyncEnumerableTemplate.IsNull )
+                    {
+                        return asyncEnumerableTemplate;
+                    }
+                    else
+                    {
+                        interpretedKind = TemplateSelectionKind.IAsyncEnumerable;
+                    }
 
-                    case EnumerableKind.IAsyncEnumerator:
-                        if ( !asyncEnumeratorTemplate.IsNull )
-                        {
-                            return asyncEnumeratorTemplate;
-                        }
-                        else
-                        {
-                            interpretedKind = TemplateSelectionKind.IAsyncEnumerator;
-                        }
+                    break;
 
-                        break;
+                case EnumerableKind.IAsyncEnumerator:
+                    if ( useIteratorTemplate && !asyncEnumeratorTemplate.IsNull )
+                    {
+                        return asyncEnumeratorTemplate;
+                    }
+                    else
+                    {
+                        interpretedKind = TemplateSelectionKind.IAsyncEnumerator;
+                    }
 
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                    break;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
+        
 
             return selectedTemplate.InterpretedAs( interpretedKind );
         }
@@ -216,8 +223,8 @@ namespace Caravela.Framework.Impl.Advices
             }
 
             var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateSelectionKind.Default, required )!;
-            var enumerableTemplate = this.ValidateTemplateName( templateSelector.IteratorTemplate, TemplateSelectionKind.IEnumerable );
-            var enumeratorTemplate = this.ValidateTemplateName( templateSelector.IteratorEnumeratorTemplate, TemplateSelectionKind.IEnumerator );
+            var enumerableTemplate = this.ValidateTemplateName( templateSelector.EnumerableTemplate, TemplateSelectionKind.IEnumerable );
+            var enumeratorTemplate = this.ValidateTemplateName( templateSelector.EnumeratorTemplate, TemplateSelectionKind.IEnumerator );
 
             var selectedTemplate = defaultTemplate;
 

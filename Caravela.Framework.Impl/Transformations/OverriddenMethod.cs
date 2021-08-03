@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.Transformations
                     context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
                     (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
-                    this.Template.MustInterpretAsAsync(),
+                    this.Template,
                     expandYieldProceed );
 
                 var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( this.Template.Declaration! );
@@ -243,28 +243,7 @@ namespace Caravela.Framework.Impl.Transformations
                         // The target method is an async iterator.
                         // Generate: `( await RuntimeAspectHelper.BufferAsync( BASE(ARGS) ) )` 
 
-                        var arguments = ArgumentList( SingletonSeparatedList( Argument( invocationExpression ) ) );
-
-                        var cancellationTokenParameter = this.OverriddenDeclaration.Parameters
-                            .OfParameterType<CancellationToken>()
-                            .LastOrDefault( p => p.Attributes.Any( a => a.Type.Name == "EnumeratorCancellationAttribute" ) );
-
-                        if ( cancellationTokenParameter != null )
-                        {
-                            arguments = arguments.AddArguments( Argument( IdentifierName( cancellationTokenParameter.Name ) ) );
-                        }
-
-                        var bufferExpression =
-                            InvocationExpression(
-                                    MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        this.OverriddenDeclaration.GetSyntaxFactory().GetTypeSyntax( typeof(RunTimeAspectHelper) ),
-                                        IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
-                                .WithArgumentList( arguments )
-                                .WithAdditionalAnnotations( Simplifier.Annotation );
-
-                        expression =
-                            ParenthesizedExpression( AwaitExpression( bufferExpression ) ).WithAdditionalAnnotations( Simplifier.Annotation );
+                        expression = GenerateAwaitBufferAsync();
                     }
 
                     return new DynamicExpression( expression, this.OverriddenDeclaration.ReturnType, false );
@@ -282,6 +261,15 @@ namespace Caravela.Framework.Impl.Transformations
                         false );
                 }
             }
+            else if ( this.Template.SelectedKind == TemplateSelectionKind.Async )
+            {
+                if ( this.OverriddenDeclaration.GetIteratorInfoImpl() is { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } )
+                {
+                    var expression = GenerateAwaitBufferAsync();
+
+                    return new DynamicExpression( expression, this.OverriddenDeclaration.ReturnType, false );
+                }
+            }
 
             // This is a default method, or a non-default template.
             // Generate: `BASE(ARGS)`
@@ -289,6 +277,33 @@ namespace Caravela.Framework.Impl.Transformations
                 invocationExpression,
                 this.OverriddenDeclaration.ReturnType,
                 false );
+
+            ExpressionSyntax GenerateAwaitBufferAsync()
+            {
+                var arguments = ArgumentList( SingletonSeparatedList( Argument( invocationExpression ) ) );
+
+                var cancellationTokenParameter = this.OverriddenDeclaration.Parameters
+                    .OfParameterType<CancellationToken>()
+                    .LastOrDefault( p => p.Attributes.Any( a => a.Type.Name == "EnumeratorCancellationAttribute" ) );
+
+                if ( cancellationTokenParameter != null )
+                {
+                    arguments = arguments.AddArguments( Argument( IdentifierName( cancellationTokenParameter.Name ) ) );
+                }
+
+                var bufferExpression =
+                    InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                this.OverriddenDeclaration.GetSyntaxFactory().GetTypeSyntax( typeof(RunTimeAspectHelper) ),
+                                IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
+                        .WithArgumentList( arguments )
+                        .WithAdditionalAnnotations( Simplifier.Annotation );
+
+                var expression = ParenthesizedExpression( AwaitExpression( bufferExpression ) ).WithAdditionalAnnotations( Simplifier.Annotation );
+
+                return expression;
+            }
         }
 
         private ExpressionSyntax CreateInvocationExpression()
