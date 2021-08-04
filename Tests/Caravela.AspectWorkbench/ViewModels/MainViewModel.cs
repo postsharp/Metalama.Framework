@@ -7,13 +7,12 @@ using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Formatting;
 using PostSharp.Patterns.Model;
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 
@@ -26,17 +25,19 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public string Title => this.CurrentPath == null ? "Aspect Workbench" : $"Aspect Workbench - {this.CurrentPath}";
 
-        public string? TestText { get; set; }
+        public string? SourceCode { get; set; }
 
-        public string? ExpectedOutputText { get; set; }
+        public string? ExpectedTransformedCode { get; set; }
 
-        public FlowDocument? ColoredTemplateDocument { get; set; }
+        public FlowDocument? ColoredSourceCodeDocument { get; set; }
 
         public FlowDocument? CompiledTemplateDocument { get; set; }
 
         public string? CompiledTemplatePath { get; set; }
 
-        public FlowDocument? TransformedTargetDocument { get; set; }
+        public FlowDocument? TransformedCodeDocument { get; set; }
+
+        public FlowDocument? IntermediateLinkerCodeCodeDocument { get; set; }
 
         public FlowDocument? ErrorsDocument { get; set; }
 
@@ -44,26 +45,47 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         private string? CurrentPath { get; set; }
 
+        public DetailPaneContent DetailPaneContent { get; set; }
+
+        public string? ActualProgramOutput { get; set; }
+
+        public string? ExpectedProgramOutput { get; set; }
+
+        public Visibility CompiledTemplateVisibility
+            => this.DetailPaneContent == DetailPaneContent.CompiledTemplate ? Visibility.Visible : Visibility.Collapsed;
+
+        public Visibility ProgramOutputVisibility => this.DetailPaneContent == DetailPaneContent.ProgramOutput ? Visibility.Visible : Visibility.Collapsed;
+
+        public Visibility IntermediateLinkerCodeVisibility
+            => this.DetailPaneContent == DetailPaneContent.IntermediateLinkerCode ? Visibility.Visible : Visibility.Collapsed;
+
+        public Visibility HighlightedTemplateVisibility
+            => this.DetailPaneContent == DetailPaneContent.HighlightedTemplate ? Visibility.Visible : Visibility.Collapsed;
+
         public async Task RunTestAsync()
         {
-            if ( this.TestText == null )
+            if ( this.SourceCode == null )
             {
-                throw new InvalidOperationException( $"Property {nameof(this.TestText)} not set." );
+                throw new InvalidOperationException( $"Property {nameof(this.SourceCode)} not set." );
+            }
+            else if ( this.CurrentPath == null )
+            {
+                throw new InvalidOperationException( "The test must be saved before you can run it." );
             }
 
             try
             {
                 this.ErrorsDocument = new FlowDocument();
-                this.TransformedTargetDocument = null;
+                this.TransformedCodeDocument = null;
 
-                var testInput = TestInput.FromSource( this.TestText, this.CurrentPath );
+                var testInput = TestInput.FromSource( this.SourceCode, this.CurrentPath );
 
                 testInput.Options.References.AddRange(
                     TestCompilationFactory.GetMetadataReferences()
                         .Select( r => new TestAssemblyReference { Path = r.FilePath } ) );
 
                 // This is a dirty trick. We should read options from the directory instead.
-                if ( this.TestText.Contains( "[TestTemplate]", StringComparison.Ordinal ) )
+                if ( this.SourceCode.Contains( "[TestTemplate]", StringComparison.Ordinal ) )
                 {
                     testInput.Options.TestRunnerFactoryType = typeof(TemplatingTestRunnerFactory).AssemblyQualifiedName;
                 }
@@ -72,8 +94,6 @@ namespace Caravela.AspectWorkbench.ViewModels
                 using var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions );
 
                 var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, null );
-
-                var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject( testInput.Options ) );
 
                 var compilationStopwatch = Stopwatch.StartNew();
 
@@ -87,12 +107,10 @@ namespace Caravela.AspectWorkbench.ViewModels
                 if ( annotatedTemplateSyntax != null )
                 {
                     // Display the annotated syntax tree.
-                    var sourceText = await testResult.SyntaxTrees.First().InputDocument.GetTextAsync();
-                    var classifier = new TextSpanClassifier( sourceText, testRunner is TemplatingTestRunner );
-                    classifier.Visit( annotatedTemplateSyntax );
-                    var metaSpans = classifier.ClassifiedTextSpans;
-
-                    this.ColoredTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( sourceText, metaSpans );
+                    this.ColoredSourceCodeDocument = SyntaxColorizer.WriteSyntaxColoring(
+                        testResult.SyntaxTrees.First().InputDocument!,
+                        testResult.Diagnostics,
+                        annotatedTemplateSyntax );
                 }
 
                 var errorsDocument = new FlowDocument();
@@ -108,24 +126,39 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                     // Render the transformed tree.
                     var project3 = testRunner.CreateProject( testInput.Options );
-                    var document3 = project3.AddDocument( "name.cs", transformedTemplateSyntax );
-                    var optionSet = (await document3.GetOptionsAsync()).WithChangedOption( FormattingOptions.IndentationSize, 4 );
 
-                    var formattedTransformedSyntaxRoot = Formatter.Format( transformedTemplateSyntax, project3.Solution.Workspace, optionSet );
-                    var text4 = formattedTransformedSyntaxRoot.GetText( Encoding.UTF8 );
-                    var spanMarker = new TextSpanClassifier( text4 );
-                    spanMarker.Visit( formattedTransformedSyntaxRoot );
-                    this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
+                    var document3 = project3.AddDocument(
+                        testSyntaxTree.OutputCompileTimePath ?? "TransformedTemplate.cs",
+                        transformedTemplateSyntax,
+                        filePath: testSyntaxTree.OutputCompileTimePath );
+
+                    var formattedDocument3 = await OutputCodeFormatter.FormatToDocumentAsync( document3, testResult.CompileTimeCompilationDiagnostics );
+
+                    this.CompiledTemplateDocument = SyntaxColorizer.WriteSyntaxColoring( formattedDocument3.Document );
                 }
 
                 var consolidatedOutputSyntax = testResult.GetConsolidatedTestOutput();
                 var consolidatedOutputText = await consolidatedOutputSyntax.SyntaxTree.GetTextAsync();
 
-                // Display the transformed code.
-                this.TransformedTargetDocument = await syntaxColorizer.WriteSyntaxColoring( consolidatedOutputText, null );
+                if ( testResult.OutputProject != null )
+                {
+                    var consolidatedOutputDocument = testResult.OutputProject!.AddDocument( "ConsolidatedOutput.cs", consolidatedOutputSyntax );
+
+                    // Display the transformed code.
+                    this.TransformedCodeDocument = SyntaxColorizer.WriteSyntaxColoring( consolidatedOutputDocument );
+                }
+
+                // Display the intermediate linker code.
+                if ( testResult.IntermediateLinkerCompilation != null )
+                {
+                    var intermediateSyntaxTree = testResult.IntermediateLinkerCompilation.Compilation.SyntaxTrees.First();
+                    var linkerProject = testRunner.CreateProject( testInput.Options );
+                    var linkerDocument = linkerProject.AddDocument( "IntermediateLinkerCode.cs", await intermediateSyntaxTree.GetRootAsync() );
+                    this.IntermediateLinkerCodeCodeDocument = SyntaxColorizer.WriteSyntaxColoring( linkerDocument );
+                }
 
                 // Compare the output and shows the result.
-                if ( BaseTestRunner.NormalizeTestOutput( this.ExpectedOutputText, false ) ==
+                if ( BaseTestRunner.NormalizeTestOutput( this.ExpectedTransformedCode, false ) ==
                      BaseTestRunner.NormalizeTestOutput( consolidatedOutputText.ToString(), false ) )
                 {
                     errorsDocument.Blocks.Add(
@@ -158,6 +191,18 @@ namespace Caravela.AspectWorkbench.ViewModels
                 }
 
                 this.ErrorsDocument = errorsDocument;
+
+                this.ActualProgramOutput = testResult.ProgramOutput;
+
+                if ( this.ActualProgramOutput == this.ExpectedProgramOutput )
+                {
+                    errorsDocument.Blocks.Add( new Paragraph( new Run( "The program output is equal to expectations." ) { Foreground = Brushes.Green } ) );
+                }
+                else
+                {
+                    errorsDocument.Blocks.Add(
+                        new Paragraph( new Run( "The program output code is different than expectations." ) { Foreground = Brushes.Red } ) );
+                }
             }
             catch ( Exception e )
             {
@@ -167,13 +212,15 @@ namespace Caravela.AspectWorkbench.ViewModels
             }
         }
 
-        public void NewTest()
+        public void NewTest( string path )
         {
-            this.TestText = NewTestDefaults.TemplateSource;
-            this.ExpectedOutputText = null;
+            this.SourceCode = NewTestDefaults.TemplateSource;
+            this.ExpectedTransformedCode = null;
             this.CompiledTemplateDocument = null;
-            this.TransformedTargetDocument = null;
-            this.CurrentPath = null;
+            this.TransformedCodeDocument = null;
+            this.ExpectedProgramOutput = null;
+            this.ActualProgramOutput = null;
+            this.CurrentPath = path;
         }
 
         public async Task LoadTestAsync( string filePath )
@@ -182,10 +229,12 @@ namespace Caravela.AspectWorkbench.ViewModels
 
             var input = this._currentTest.Input ?? throw new InvalidOperationException( $"The {nameof(this._currentTest.Input)} property cannot be null." );
 
-            this.TestText = input.SourceCode;
-            this.ExpectedOutputText = this._currentTest.ExpectedOutput;
+            this.SourceCode = input.SourceCode;
+            this.ExpectedTransformedCode = this._currentTest.ExpectedTransformedCode;
+            this.ExpectedProgramOutput = this._currentTest.ExpectedProgramOutput;
             this.CompiledTemplateDocument = null;
-            this.TransformedTargetDocument = null;
+            this.TransformedCodeDocument = null;
+            this.ActualProgramOutput = null;
             this.CurrentPath = filePath;
         }
 
@@ -198,9 +247,9 @@ namespace Caravela.AspectWorkbench.ViewModels
                 throw new ArgumentException( "The path cannot be null or empty." );
             }
 
-            if ( string.IsNullOrEmpty( this.TestText ) )
+            if ( string.IsNullOrEmpty( this.SourceCode ) )
             {
-                throw new InvalidOperationException( $"The {nameof(this.TestText)} property cannot be null." );
+                throw new InvalidOperationException( $"The {nameof(this.SourceCode)} property cannot be null." );
             }
 
             if ( this._currentTest == null )
@@ -208,8 +257,9 @@ namespace Caravela.AspectWorkbench.ViewModels
                 this._currentTest = new TemplateTest();
             }
 
-            this._currentTest.Input = TestInput.FromSource( this.TestText, filePath );
-            this._currentTest.ExpectedOutput = this.ExpectedOutputText ?? string.Empty;
+            this._currentTest.Input = TestInput.FromSource( this.SourceCode, filePath );
+            this._currentTest.ExpectedTransformedCode = this.ExpectedTransformedCode ?? string.Empty;
+            this._currentTest.ExpectedProgramOutput = this.ExpectedProgramOutput ?? string.Empty;
 
             this.CurrentPath = filePath;
 

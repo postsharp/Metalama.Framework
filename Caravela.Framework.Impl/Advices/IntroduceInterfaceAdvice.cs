@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -308,12 +309,14 @@ namespace Caravela.Framework.Impl.Advices
                             memberBuilder = this.GetImplMethodBuilder( interfaceMethod, memberSpec.IsExplicit );
                             interfaceMemberMap.Add( interfaceMethod, memberBuilder );
 
+                            var implementationMethod = (IMethod) memberSpec.AspectInterfaceMember!;
+
                             overrides.Add(
                                 memberSpec.AspectInterfaceMember != null
                                     ? new OverriddenMethod(
                                         this,
                                         (IMethod) memberBuilder,
-                                        (IMethod) memberSpec.AspectInterfaceMember )
+                                        new Template<IMethod>( implementationMethod, TemplateKind.Introduction ) )
                                     : new RedirectedMethod(
                                         this,
                                         (IMethod) memberBuilder,
@@ -339,9 +342,9 @@ namespace Caravela.Framework.Impl.Advices
                                         ? new OverriddenProperty(
                                             this,
                                             (IProperty) memberBuilder,
-                                            (IProperty) memberSpec.AspectInterfaceMember,
-                                            null,
-                                            null )
+                                            new Template<IProperty>( (IProperty) memberSpec.AspectInterfaceMember, TemplateKind.Introduction ),
+                                            default,
+                                            default )
                                         : new RedirectedProperty(
                                             this,
                                             (IProperty) memberBuilder,
@@ -364,9 +367,9 @@ namespace Caravela.Framework.Impl.Advices
                                         ? new OverriddenEvent(
                                             this,
                                             (IEvent) memberBuilder,
-                                            (IEvent) memberSpec.AspectInterfaceMember,
-                                            null,
-                                            null )
+                                            new Template<IEvent>( (IEvent) memberSpec.AspectInterfaceMember, TemplateKind.Introduction ),
+                                            default,
+                                            default )
                                         : new RedirectedEvent(
                                             this,
                                             (IEvent) memberBuilder,

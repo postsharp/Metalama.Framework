@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
@@ -43,40 +44,74 @@ namespace Caravela.Framework.Impl
                 return Array.Empty<AspectClass>();
             }
 
+            // Add the abstract aspect classes from the framework because they define the abstract templates. The knowledge of abstract templates
+            // is used by AspectClass. It is easier to do it here than to do it at the level of CompileTimeProject.
+            var frameworkAspectClasses =
+                new[] { typeof(OverrideMethodAspect), typeof(OverrideEventAspect), typeof(OverrideFieldOrPropertyAspect) }
+                    .Select( t => new AspectTypeData( null, t.FullName, compilation.GetTypeByMetadataNameSafe( t.FullName ), t ) );
+
             // Gets the aspect types in the current compilation, including aspects types in referenced assemblies.
             var aspectTypeDataDictionary =
                 compileTimeProject.ClosureProjects
                     .SelectMany( p => p.AspectTypes.Select( t => (Project: p, TypeName: t) ) )
+                    .Select(
+                        item =>
+                        {
+                            var typeSymbol = compilation.GetTypeByMetadataName( item.TypeName );
+
+                            if ( typeSymbol == null )
+                            {
+                                diagnosticAdder.Report(
+                                    TemplatingDiagnosticDescriptors.CannotFindAspectInCompilation.CreateDiagnostic(
+                                        Location.None,
+                                        (item.TypeName, item.Project.RunTimeIdentity.Name) ) );
+
+                                return null;
+                            }
+
+                            return new AspectTypeData(
+                                item.Project,
+                                item.TypeName,
+                                typeSymbol,
+                                compileTimeProject.AssertNotNull().GetTypeOrNull( typeSymbol.GetReflectionNameSafe() ).AssertNotNull() );
+                        } )
+                    .WhereNotNull()
+                    .Concat( frameworkAspectClasses )
                     .ToDictionary(
                         item => item.TypeName,
-                        item => new AspectTypeData( item.Project, item.TypeName, Type: compilation.GetTypeByMetadataName( item.TypeName ) ) );
+                        item => item );
 
-            return this.GetAspectClasses( aspectTypeDataDictionary, diagnosticAdder );
+            return this.GetAspectClasses( aspectTypeDataDictionary, diagnosticAdder, compilation );
         }
 
         /// <summary>
         /// Creates a list of <see cref="AspectClass"/> given input list of aspect types. This method is used for test only.
         /// </summary>
-        public IReadOnlyList<AspectClass> GetAspectClasses(
+        internal IReadOnlyList<AspectClass> GetAspectClasses(
             IReadOnlyList<INamedTypeSymbol> aspectTypes,
             CompileTimeProject compileTimeProject,
             IDiagnosticAdder diagnosticAdder )
         {
             var aspectTypesDiagnostics = aspectTypes.ToDictionary(
                 t => t.GetReflectionNameSafe(),
-                t => new AspectTypeData( compileTimeProject, t.GetReflectionNameSafe(), t ) );
+                t => new AspectTypeData( compileTimeProject, t.GetReflectionNameSafe(), t, compileTimeProject.GetType( t.GetReflectionNameSafe() ) ) );
 
-            return this.GetAspectClasses( aspectTypesDiagnostics, diagnosticAdder );
+            return this.GetAspectClasses( aspectTypesDiagnostics, diagnosticAdder, null! );
         }
 
         private IReadOnlyList<AspectClass> GetAspectClasses(
             Dictionary<string, AspectTypeData> aspectTypeDataDictionary,
-            IDiagnosticAdder diagnosticAdder )
+            IDiagnosticAdder diagnosticAdder,
+            Compilation compilation )
         {
             // A local function that recursively processes an aspect type.
-            bool TryProcessType( INamedTypeSymbol aspectType, CompileTimeProject project, [NotNullWhen( true )] out AspectClass? metadata )
+            bool TryProcessType(
+                INamedTypeSymbol aspectTypeSymbol,
+                Type aspectReflectionType,
+                CompileTimeProject? project,
+                [NotNullWhen( true )] out AspectClass? metadata )
             {
-                if ( this._aspectClasses.TryGetValue( aspectType, out var existingValue ) )
+                if ( this._aspectClasses.TryGetValue( aspectTypeSymbol, out var existingValue ) )
                 {
                     metadata = existingValue;
 
@@ -85,13 +120,13 @@ namespace Caravela.Framework.Impl
 
                 AspectClass? baseAspectClass = null;
 
-                if ( aspectType.BaseType != null )
+                if ( aspectTypeSymbol.BaseType != null )
                 {
                     // Process the base type.
 
-                    if ( aspectTypeDataDictionary.TryGetValue( aspectType.BaseType.GetReflectionNameSafe(), out var baseData ) )
+                    if ( aspectTypeDataDictionary.TryGetValue( aspectTypeSymbol.BaseType.GetReflectionNameSafe(), out var baseData ) )
                     {
-                        if ( !TryProcessType( aspectType.BaseType, baseData.Project, out baseAspectClass ) )
+                        if ( !TryProcessType( aspectTypeSymbol.BaseType, aspectReflectionType.BaseType, baseData.Project, out baseAspectClass ) )
                         {
                             metadata = null;
 
@@ -104,14 +139,23 @@ namespace Caravela.Framework.Impl
                     }
                 }
 
-                var aspectDriver = this._aspectDriverFactory.GetAspectDriver( aspectType );
+                var aspectDriver = this._aspectDriverFactory.GetAspectDriver( aspectTypeSymbol );
 
-                if ( !AspectClass.TryCreate( this._serviceProvider, aspectType, baseAspectClass, aspectDriver, project, diagnosticAdder, out metadata ) )
+                if ( !AspectClass.TryCreate(
+                    this._serviceProvider,
+                    aspectTypeSymbol,
+                    aspectReflectionType,
+                    baseAspectClass,
+                    aspectDriver,
+                    project,
+                    diagnosticAdder,
+                    compilation,
+                    out metadata ) )
                 {
                     return false;
                 }
 
-                this._aspectClasses.Add( aspectType, metadata );
+                this._aspectClasses.Add( aspectTypeSymbol, metadata );
 
                 return true;
             }
@@ -121,17 +165,7 @@ namespace Caravela.Framework.Impl
 
             foreach ( var attributeTypeData in aspectTypeDataDictionary.Values )
             {
-                if ( attributeTypeData.Type == null )
-                {
-                    diagnosticAdder.Report(
-                        TemplatingDiagnosticDescriptors.CannotFindAspectInCompilation.CreateDiagnostic(
-                            Location.None,
-                            (attributeTypeData.TypeName, attributeTypeData.Project.RunTimeIdentity.Name) ) );
-
-                    continue;
-                }
-
-                if ( TryProcessType( attributeTypeData.Type, attributeTypeData.Project, out var metadata ) )
+                if ( TryProcessType( attributeTypeData.TypeSymbol, attributeTypeData.ReflectionType, attributeTypeData.Project, out var metadata ) )
                 {
                     resultList.Add( metadata );
                 }
@@ -140,6 +174,6 @@ namespace Caravela.Framework.Impl
             return resultList;
         }
 
-        private record AspectTypeData( CompileTimeProject Project, string TypeName, INamedTypeSymbol? Type );
+        private record AspectTypeData( CompileTimeProject? Project, string TypeName, INamedTypeSymbol TypeSymbol, Type ReflectionType );
     }
 }

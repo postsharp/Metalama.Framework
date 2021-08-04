@@ -69,9 +69,20 @@ namespace Caravela.Framework.Code
         IGenericParameterList GenericParameters { get; }
 
         /// <summary>
-        /// Gets a value indicating whether this type or any of its containers does not have generic arguments set.
+        /// Gets a value indicating whether the current type or any of its containers does not have generic arguments set.
         /// </summary>
         bool IsOpenGeneric { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the current type is a generic types, i.e. it has generic parameters or generic arguments.
+        /// </summary>
+        bool IsGeneric { get; }
+
+        /// <summary>
+        /// Gets the original type declaration. In case of generic type instances, this property returns the type declaration. Otherwise,
+        /// this property returns the current type. 
+        /// </summary>
+        INamedType OriginalDeclaration { get; }
 
         /// <summary>
         /// Gets the nested types of the current type.

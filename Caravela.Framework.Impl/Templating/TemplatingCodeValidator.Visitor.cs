@@ -116,7 +116,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var methodSymbol = this._semanticModel.GetDeclaredSymbol( node );
 
-                if ( methodSymbol != null && this._classifier.GetTemplateMemberKind( methodSymbol ) != TemplateMemberKind.None )
+                if ( methodSymbol != null && !this._classifier.GetTemplateInfo( methodSymbol ).IsNone )
                 {
                     if ( this._isDesignTime )
                     {

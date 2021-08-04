@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class ParameterBuilder : DeclarationBuilder, IParameterBuilder
+    internal sealed class ParameterBuilder : DeclarationBuilder, IParameterBuilder, IParameterInternal
     {
         private string? _name;
         private TypedConstant _defaultValue;

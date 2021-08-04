@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
@@ -24,11 +23,29 @@ namespace Caravela.Framework.Impl.Formatting
         /// </summary>
         public static readonly SyntaxAnnotation PossibleRedundantAnnotation = new( "Caravela_PossibleRedundant" );
 
-        public static async ValueTask<CompilationUnitSyntax> FormatAsync(
+        public static async ValueTask<(Document Document, CompilationUnitSyntax Syntax)> FormatToDocumentAsync(
             Document document,
+            IEnumerable<Diagnostic>? diagnostics = null,
             bool reformatAll = true,
             CancellationToken cancellationToken = default )
         {
+            var syntax = await FormatToSyntaxAsync( document, diagnostics, reformatAll, cancellationToken );
+
+            return (document.Project.RemoveDocument( document.Id ).AddDocument( document.Name, syntax, document.Folders, document.FilePath ), syntax);
+        }
+
+        public static async ValueTask<CompilationUnitSyntax> FormatToSyntaxAsync(
+            Document document,
+            IEnumerable<Diagnostic>? diagnostics = null,
+            bool reformatAll = true,
+            CancellationToken cancellationToken = default )
+        {
+            if ( diagnostics != null )
+            {
+                document = document.WithSyntaxRoot(
+                    FormattedCodeWriter.AddDiagnosticAnnotations( (await document.GetSyntaxRootAsync( cancellationToken ))!, document.FilePath, diagnostics ) );
+            }
+
             var documentWithImports = await ImportAdder.AddImportsAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken );
             var simplifiedDocument = await Simplifier.ReduceAsync( documentWithImports, cancellationToken: cancellationToken );
 
@@ -49,7 +66,7 @@ namespace Caravela.Framework.Impl.Formatting
             return outputSyntaxRoot;
         }
 
-        public static async Task<PartialCompilation> FormatAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
+        public static async Task<PartialCompilation> FormatToSyntaxAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
         {
             var (project, syntaxTreeMap) = await CreateProjectFromCompilation( compilation.Compilation, cancellationToken );
 
@@ -67,7 +84,7 @@ namespace Caravela.Framework.Impl.Formatting
                     continue;
                 }
 
-                var formattedSyntaxRoot = await FormatAsync( document, false, cancellationToken );
+                var formattedSyntaxRoot = await FormatToSyntaxAsync( document, null, false, cancellationToken );
 
                 syntaxTreeReplacements.Add( new ModifiedSyntaxTree( syntaxTree.WithRootAndOptions( formattedSyntaxRoot, syntaxTree.Options ), syntaxTree ) );
             }
@@ -94,7 +111,7 @@ namespace Caravela.Framework.Impl.Formatting
                     continue;
                 }
 
-                var formattedSyntaxRoot = await FormatAsync( document, true, cancellationToken );
+                var formattedSyntaxRoot = await FormatToSyntaxAsync( document, null, true, cancellationToken );
 
                 formattedCompilation = formattedCompilation.ReplaceSyntaxTree(
                     syntaxTree,

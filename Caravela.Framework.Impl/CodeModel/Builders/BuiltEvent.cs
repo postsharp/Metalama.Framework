@@ -14,7 +14,7 @@ using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltEvent : BuiltMember, IEvent, IMemberRef<IEvent>
+    internal class BuiltEvent : BuiltMember, IEventInternal, IMemberRef<IEvent>
     {
         public BuiltEvent( EventBuilder builder, CompilationModel compilation ) : base( compilation )
         {

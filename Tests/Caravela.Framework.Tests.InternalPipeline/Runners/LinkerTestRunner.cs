@@ -5,7 +5,7 @@ using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
-using Caravela.Framework.Tests.InternalPipeline.Runners.Linker;
+using Caravela.Framework.Tests.Integration.Runners.Linker;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using System;
@@ -67,7 +67,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             // Attempt to Emit the result.
             var emitResult = cleanCompilation.Emit( Stream.Null );
 
-            testResult.Report( emitResult.Diagnostics );
+            testResult.PipelineDiagnostics.Report( emitResult.Diagnostics );
 
             if ( !emitResult.Success )
             {

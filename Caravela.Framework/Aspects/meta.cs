@@ -6,14 +6,14 @@ using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 // ReSharper disable UnusedParameter.Global
-
+// ReSharper disable once InconsistentNaming
 namespace Caravela.Framework.Aspects
 {
-    // ReSharper disable once InconsistentNaming
-
     /// <summary>
     /// The entry point for the meta model, which can be used in templates to inspect the target code or access other
     /// features of the template language.
@@ -32,19 +32,51 @@ namespace Caravela.Framework.Aspects
         private static InvalidOperationException NewInvalidOperationException()
             => new( "The 'meta' API can be used only in the execution context of a template." );
 
+        private static NotSupportedException NewMustBeTransformedException( [CallerMemberName] string? caller = null )
+            => new( $"Calls to {caller} are supposed to be transformed." );
+
         /// <summary>
         /// Gets access to the declaration being overridden or introduced.
         /// </summary>
         public static IMetaTarget Target => CurrentContext.Target;
 
         /// <summary>
-        /// Injects the logic that has been intercepted. For instance, in an <see cref="OverrideMethodAspect"/>,
+        /// Invokes the logic that has been overwritten. For instance, in an <see cref="OverrideMethodAspect"/>,
         /// calling <see cref="Proceed"/> invokes the method being overridden. Note that the way how the
         /// logic is invoked (as a method call or inlining) is considered an implementation detail.
         /// </summary>
-        /// <returns></returns>
         [TemplateKeyword]
-        public static dynamic? Proceed() => CurrentContext.Proceed() ?? throw NewInvalidOperationException();
+        public static dynamic? Proceed() => throw NewMustBeTransformedException();
+
+        /// <summary>
+        /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>Task&lt;dynamic?&gt;</c>.
+        /// Only use this method when the return type of the method or accessor is task-like. Note that
+        /// the actual return type of the overridden method or accessor is the one of the overwritten semantic, so it
+        /// can be a void <see cref="Task"/>, a <see cref="ValueType"/>, or any other type.
+        /// </summary>
+        public static Task<dynamic?> ProceedAsync() => throw NewMustBeTransformedException();
+
+        /// <summary>
+        /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IEnumerable&lt;dynamic?&gt;</c>.
+        /// </summary>
+        public static IEnumerable<dynamic?> ProceedEnumerable() => throw NewMustBeTransformedException();
+
+        /// <summary>
+        /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IEnumerator&lt;dynamic?&gt;</c>.
+        /// </summary>
+        public static IEnumerator<dynamic?> ProceedEnumerator() => throw NewMustBeTransformedException();
+
+#if NET5_0
+        /// <summary>
+        /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IAsyncEnumerable&lt;dynamic?&gt;</c>.
+        /// </summary>
+        public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => throw NewMustBeTransformedException();
+
+        /// <summary>
+        /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IAsyncEnumerator&lt;dynamic?&gt;</c>.
+        /// </summary>
+        public static IAsyncEnumerator<dynamic?> ProceedAsyncEnumerator() => throw NewMustBeTransformedException();
+#endif
 
         /// <summary>
         /// Requests the debugger to break, if any debugger is attached to the current process.

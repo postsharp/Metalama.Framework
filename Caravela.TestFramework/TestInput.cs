@@ -80,23 +80,20 @@ namespace Caravela.TestFramework
             }
         }
 
-        public static TestInput FromSource( string sourceCode, string? path )
+        public static TestInput FromSource( string sourceCode, string path )
         {
-            if ( path != null )
+            var projectDirectory = FindProjectDirectory( Path.GetDirectoryName( path ) );
+
+            if ( projectDirectory != null )
             {
-                var projectDirectory = FindProjectDirectory( Path.GetDirectoryName( path ) );
+                var directoryOptionsReader = new TestDirectoryOptionsReader( projectDirectory );
 
-                if ( projectDirectory != null )
-                {
-                    var directoryOptionsReader = new TestDirectoryOptionsReader( projectDirectory );
-
-                    return new TestInput(
-                        Path.GetFileNameWithoutExtension( path ),
-                        sourceCode,
-                        directoryOptionsReader,
-                        Path.GetRelativePath( projectDirectory, path ),
-                        path );
-                }
+                return new TestInput(
+                    Path.GetFileNameWithoutExtension( path ),
+                    sourceCode,
+                    directoryOptionsReader,
+                    Path.GetRelativePath( projectDirectory, path ),
+                    path );
             }
 
             return new TestInput( "interactive", sourceCode );

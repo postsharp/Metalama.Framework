@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class Field : Member, IField
+    internal sealed class Field : Member, IFieldInternal
     {
         private readonly IFieldSymbol _symbol;
 

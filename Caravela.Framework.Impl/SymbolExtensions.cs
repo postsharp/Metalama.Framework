@@ -4,17 +4,50 @@
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
+using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl
 {
     internal static class SymbolExtensions
     {
+        public static SpecialType ToOurSpecialType( this RoslynSpecialType type )
+            => type switch
+            {
+                RoslynSpecialType.System_Object => SpecialType.Object,
+                RoslynSpecialType.System_Void => SpecialType.Void,
+                RoslynSpecialType.System_Collections_IEnumerable => SpecialType.IEnumerable,
+                RoslynSpecialType.System_Collections_IEnumerator => SpecialType.IEnumerator,
+                RoslynSpecialType.System_Collections_Generic_IEnumerable_T => SpecialType.IEnumerable_T,
+                RoslynSpecialType.System_Collections_Generic_IEnumerator_T => SpecialType.IEnumerator_T,
+                _ => SpecialType.None
+            };
+
+        public static RoslynSpecialType ToRoslynSpecialType( this SpecialType type )
+            => type switch
+            {
+                SpecialType.Object => RoslynSpecialType.System_Object,
+                SpecialType.Void => RoslynSpecialType.System_Void,
+                SpecialType.IEnumerable => RoslynSpecialType.System_Collections_IEnumerable,
+                SpecialType.IEnumerator => RoslynSpecialType.System_Collections_IEnumerator,
+                SpecialType.IEnumerable_T => RoslynSpecialType.System_Collections_Generic_IEnumerable_T,
+                SpecialType.IEnumerator_T => RoslynSpecialType.System_Collections_Generic_IEnumerator_T,
+
+                // Note that we have special types that Roslyn does not have.
+                _ => RoslynSpecialType.None
+            };
+
         public static bool IsGenericTypeDefinition( this INamedTypeSymbol namedType ) => namedType.TypeArguments.Any( a => a is ITypeParameterSymbol );
 
-        public static bool IsDynamic( this ITypeSymbol? type ) => type is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
+        public static bool IsDynamic( this ITypeSymbol? type, bool strict = false )
+            => type is IDynamicTypeSymbol || (!strict && (type is IArrayTypeSymbol { ElementType: IDynamicTypeSymbol }
+                                                          || (type is INamedTypeSymbol { IsGenericType: true } namedType
+                                                              && IsDynamic( namedType.TypeArguments[0] ))));
 
         public static bool AnyBaseType( this INamedTypeSymbol type, Predicate<INamedTypeSymbol> predicate )
         {
@@ -133,6 +166,30 @@ namespace Caravela.Framework.Impl
 
                 return false;
             }
+        }
+
+        public static bool IsAccessor( this IMethodSymbol method )
+        {
+            return method.MethodKind switch
+            {
+                MethodKind.PropertyGet => true,
+                MethodKind.PropertySet => true,
+                MethodKind.EventAdd => true,
+                MethodKind.EventRemove => true,
+                MethodKind.EventRaise => true,
+                _ => false
+            };
+        }
+
+        public static bool HasModifier( this ISymbol symbol, SyntaxKind kind )
+        {
+            if ( symbol.DeclaringSyntaxReferences.IsEmpty )
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            return symbol.DeclaringSyntaxReferences.Any(
+                r => r.GetSyntax() is MemberDeclarationSyntax member && member.Modifiers.Any( m => m.Kind() == kind ) );
         }
 
         // TODO: Partial methods etc.

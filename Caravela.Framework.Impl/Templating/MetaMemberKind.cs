@@ -27,6 +27,18 @@ namespace Caravela.Framework.Impl.Templating
         /// <summary>
         /// The <see cref="meta.This"/> property.
         /// </summary>
-        This
+        This,
+
+        Proceed,
+
+        ProceedAsync,
+
+        ProceedEnumerable,
+
+        ProceedEnumerator,
+
+        ProceedAsyncEnumerable,
+
+        ProceedAsyncEnumerator
     }
 }

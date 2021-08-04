@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder
+    internal partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder, IMethodInternal
     {
         private readonly MemberBuilder _containingDeclaration;
 

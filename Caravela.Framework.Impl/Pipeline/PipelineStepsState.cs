@@ -36,8 +36,6 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public ImmutableUserDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
 
-        public IDiagnosticAdder DiagnosticAdder => this._diagnostics;
-
         public IReadOnlyList<IAspectSource> ExternalAspectSources => new[] { this._overflowAspectSource };
 
         public PipelineStepsState(
@@ -72,15 +70,32 @@ namespace Caravela.Framework.Impl.Pipeline
         public void Execute( CancellationToken cancellationToken )
         {
             using var enumerator = this._steps.GetEnumerator();
+            var previousAspectLayer = default(OrderedAspectLayer);
 
             while ( enumerator.MoveNext() )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 this._currentStep = enumerator.Current.Value;
+
+                this.DetectUnorderedLayer( ref previousAspectLayer, this._currentStep.AspectLayer );
+
                 var compilationForAspectLayer = this.Compilation.GetCompilationModel().WithAspectLayer( this._currentStep.AspectLayer.AspectLayerId );
                 this.Compilation = this._currentStep!.Execute( compilationForAspectLayer, this, cancellationToken );
             }
+        }
+
+        private void DetectUnorderedLayer( ref OrderedAspectLayer? previousAspectLayer, OrderedAspectLayer currentAspectLayer )
+        {
+            if ( previousAspectLayer != null && previousAspectLayer != currentAspectLayer && previousAspectLayer.Order >= currentAspectLayer.Order )
+            {
+                this._diagnostics.Report(
+                    GeneralDiagnosticDescriptors.UnorderedLayers.CreateDiagnostic(
+                        null,
+                        (previousAspectLayer.AspectLayerId.ToString(), currentAspectLayer.AspectLayerId.ToString()) ) );
+            }
+
+            previousAspectLayer = currentAspectLayer;
         }
 
         public bool AddAspectSources( IEnumerable<IAspectSource> aspectSources )

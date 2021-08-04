@@ -4,6 +4,8 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Caravela.Framework.Aspects
 {
@@ -17,13 +19,48 @@ namespace Caravela.Framework.Aspects
         /// <inheritdoc />
         public virtual void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.AdviceFactory.OverrideMethod( builder.Target, nameof(this.OverrideMethod) );
+#if NET5_0
+            var templates = new MethodTemplateSelector(
+                nameof(this.OverrideMethod),
+                nameof(this.OverrideAsyncMethod),
+                nameof(this.OverrideEnumerableMethod),
+                nameof(this.OverrideEnumeratorMethod),
+                nameof(this.OverrideAsyncEnumerableMethod),
+                nameof(this.OverrideAsyncEnumeratorMethod) );
+#else
+            var templates = new MethodTemplateSelector(
+                nameof(this.OverrideMethod),
+                nameof(this.OverrideAsyncMethod),
+                nameof(this.OverrideEnumerableMethod),
+                nameof(this.OverrideEnumeratorMethod) );
+#endif
+
+            builder.AdviceFactory.OverrideMethod( builder.Target, templates );
         }
 
-        public virtual void BuildEligibility( IEligibilityBuilder<IMethod> builder )
-        {
-            builder.ExceptForInheritance().MustBeNonAbstract();
-        }
+        public virtual void BuildEligibility( IEligibilityBuilder<IMethod> builder ) => builder.ExceptForInheritance().MustBeNonAbstract();
+
+        [Template( TemplateKind.Async )]
+        [Abstract]
+        public virtual Task<dynamic?> OverrideAsyncMethod() => throw new NotSupportedException();
+
+        [Template( TemplateKind.IEnumerable )]
+        [Abstract]
+        public virtual IEnumerable<dynamic?> OverrideEnumerableMethod() => throw new NotSupportedException();
+
+        [Template( TemplateKind.IEnumerator )]
+        [Abstract]
+        public virtual IEnumerator<dynamic?> OverrideEnumeratorMethod() => throw new NotSupportedException();
+
+#if NET5_0
+        [Template( TemplateKind.IAsyncEnumerable )]
+        [Abstract]
+        public virtual IAsyncEnumerable<dynamic?> OverrideAsyncEnumerableMethod() => throw new NotSupportedException();
+
+        [Template( TemplateKind.IAsyncEnumerator )]
+        [Abstract]
+        public virtual IAsyncEnumerable<dynamic?> OverrideAsyncEnumeratorMethod() => throw new NotSupportedException();
+#endif
 
         public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }
 

@@ -9,6 +9,8 @@ namespace Caravela.AspectWorkbench.Model
     {
         public TestInput? Input { get; set; }
 
-        public string? ExpectedOutput { get; set; }
+        public string? ExpectedTransformedCode { get; set; }
+
+        public string? ExpectedProgramOutput { get; set; }
     }
 }

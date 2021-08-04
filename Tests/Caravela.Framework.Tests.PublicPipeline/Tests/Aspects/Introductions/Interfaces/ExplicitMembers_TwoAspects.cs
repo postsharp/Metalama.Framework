@@ -2,7 +2,10 @@
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 using System;
+using Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_TwoAspects;
 
+[assembly:AspectOrder(typeof(IntroductionAttribute), typeof(OverrideAttribute))]
+    
 #pragma warning disable CS0067
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_TwoAspects

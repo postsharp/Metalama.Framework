@@ -149,7 +149,11 @@ namespace Caravela.Framework.Impl.DesignTime
                     var newSyntaxRoot = await modifiedSyntaxTree.Value.NewTree.GetRootAsync( cancellationToken );
 
                     var newDocument = document.WithSyntaxRoot( newSyntaxRoot );
-                    var formattedSyntaxRoot = await OutputCodeFormatter.FormatAsync( newDocument, false, cancellationToken );
+
+                    var formattedSyntaxRoot = await OutputCodeFormatter.FormatToSyntaxAsync(
+                        newDocument,
+                        reformatAll: false,
+                        cancellationToken: cancellationToken );
 
                     solution = solution.WithDocumentSyntaxRoot( document.Id, formattedSyntaxRoot );
                 }

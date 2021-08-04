@@ -83,9 +83,11 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             // We're replacing the whole return statement.
             newNode = Block(
                     LocalDeclarationStatement(
-                        VariableDeclaration(
-                            LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ReturnType ).WithTrailingTrivia( Whitespace( " " ) ),
-                            SingletonSeparatedList( VariableDeclarator( variableDeclarator.Identifier ) ) ) ),
+                            VariableDeclaration(
+                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ReturnType ),
+                                SingletonSeparatedList( VariableDeclarator( variableDeclarator.Identifier ) ) ) )
+                        .NormalizeWhitespace()
+                        .WithTrailingTrivia( ElasticLineFeed ),
                     inlinedTargetBody )
                 .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 

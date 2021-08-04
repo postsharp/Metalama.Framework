@@ -1,7 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,22 +20,29 @@ namespace Caravela.TestFramework
     /// <summary>
     /// Represents the result of a test run.
     /// </summary>
-    public class TestResult : IDiagnosticAdder
+    public class TestResult
     {
         private bool _frozen;
 
         public TestInput? TestInput { get; set; }
 
-        private readonly List<Diagnostic> _diagnostics = new();
         private readonly List<TestSyntaxTree> _syntaxTrees = new();
         private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
 
-        void IDiagnosticAdder.Report( Diagnostic diagnostic ) => this._diagnostics.Add( diagnostic );
+        public DiagnosticList InputCompilationDiagnostics { get; } = new();
 
-        /// <summary>
-        /// Gets the list of diagnostics emitted during test run.
-        /// </summary>
-        public IReadOnlyList<Diagnostic> Diagnostics => this._diagnostics;
+        public DiagnosticList OutputCompilationDiagnostics { get; } = new();
+
+        public DiagnosticList CompileTimeCompilationDiagnostics { get; } = new();
+
+        public DiagnosticList PipelineDiagnostics { get; } = new();
+
+        public IEnumerable<Diagnostic> Diagnostics
+            => this.OutputCompilationDiagnostics
+                .Concat( this.PipelineDiagnostics )
+                .Concat( this.InputCompilationDiagnostics );
+
+        // We don't add the CompileTimeCompilationDiagnostics to Diagnostics because they are already in PipelineDiagnostics.
 
         public IReadOnlyList<TestSyntaxTree> SyntaxTrees => this._syntaxTrees;
 
@@ -83,6 +93,12 @@ namespace Caravela.TestFramework
         internal bool HasOutputCode { get; set; }
 
         public Compilation? CompileTimeCompilation { get; private set; }
+
+        public ICompilation? InitialCompilationModel { get; internal set; }
+
+        internal PartialCompilation? IntermediateLinkerCompilation { get; set; }
+
+        public string? ProgramOutput { get; internal set; }
 
         internal void AddInputDocument( Document document, string? path ) => this._syntaxTrees.Add( new TestSyntaxTree( path, document, this ) );
 
@@ -215,10 +231,15 @@ namespace Caravela.TestFramework
             var consolidatedCompilationUnit = SyntaxFactory.CompilationUnit();
 
             // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
-            var outputSyntaxRoot = this.SyntaxTrees.FirstOrDefault()?.OutputRunTimeSyntaxRoot;
+            var outputSyntaxTree = this.SyntaxTrees.FirstOrDefault();
 
-            if ( this.HasOutputCode && outputSyntaxRoot != null )
+            if ( this.HasOutputCode && outputSyntaxTree is { OutputRunTimeSyntaxRoot: not null } )
             {
+                var outputSyntaxRoot = FormattedCodeWriter.AddDiagnosticAnnotations(
+                    outputSyntaxTree.OutputRunTimeSyntaxRoot,
+                    outputSyntaxTree.InputPath,
+                    this.OutputCompilationDiagnostics );
+
                 // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
                 // passed to this method.
 
@@ -275,8 +296,9 @@ namespace Caravela.TestFramework
                         d => d.Id != "CR0222" &&
                              (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
                               || d.Severity >= DiagnosticSeverity.Warning) )
+                    .OrderBy( d => d.Location.SourceSpan.Start )
+                    .ThenBy( d => d.GetMessage(), StringComparer.Ordinal )
                     .Select( d => $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
-                    .OrderByDescending( s => s )
                     .Select( SyntaxFactory.Comment )
                     .ToList() );
 

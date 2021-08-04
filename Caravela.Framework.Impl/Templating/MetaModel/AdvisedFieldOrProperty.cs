@@ -4,13 +4,14 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Code.Invokers;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.RunTime;
 using System;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdvisedFieldOrProperty<T> : AdviceMember<T>, IAdvisedFieldOrProperty
-        where T : IFieldOrProperty
+    internal class AdvisedFieldOrProperty<T> : AdvisedMember<T>, IAdvisedFieldOrProperty
+        where T : IFieldOrProperty, IDeclarationInternal
     {
         public AdvisedFieldOrProperty( T underlying ) : base( underlying ) { }
 

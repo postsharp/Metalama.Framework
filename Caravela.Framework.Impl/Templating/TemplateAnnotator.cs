@@ -168,10 +168,10 @@ namespace Caravela.Framework.Impl.Templating
             // be called from run-time code.
             if ( this.IsAspectMember( symbol ) )
             {
-                switch ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) )
+                switch ( this._symbolScopeClassifier.GetTemplateInfo( symbol ).AttributeType )
                 {
-                    case TemplateMemberKind.Introduction:
-                    case TemplateMemberKind.InterfaceMember:
+                    case TemplateAttributeType.Introduction:
+                    case TemplateAttributeType.InterfaceMember:
                         return TemplatingScope.RunTimeOnly;
 
                     default:
@@ -237,7 +237,7 @@ namespace Caravela.Framework.Impl.Templating
                 var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
                 // Dynamic local variables are considered compile-time because they must be transformed. 
-                return this._templateMemberClassifier.RequiresCompileTimeExecution( symbol ) || symbol is ILocalSymbol
+                return this._templateMemberClassifier.RequiresCompileTimeExecution( symbol ) || (symbol is ILocalSymbol local && local.Type.IsDynamic( true ))
                     ? TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
                     : TemplatingScope.Dynamic;
             }
@@ -511,7 +511,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                 {
                     // Template code cannot be referenced in a template until this is implemented.
-                    if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) == TemplateMemberKind.Template )
+                    if ( this._symbolScopeClassifier.GetTemplateInfo( symbol ).AttributeType == TemplateAttributeType.Template )
                     {
                         this.ReportDiagnostic(
                             TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate,
@@ -892,7 +892,19 @@ namespace Caravela.Framework.Impl.Templating
 
             var annotatedExpression = this.Visit( node.Expression )!;
 
-            var forEachScope = this.GetNodeScope( annotatedExpression ).GetExpressionValueScope( true ).ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
+            TemplatingScope forEachScope;
+            string reason;
+
+            if ( node.AwaitKeyword.Kind() == SyntaxKind.None )
+            {
+                forEachScope = this.GetNodeScope( annotatedExpression ).GetExpressionValueScope( true ).ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
+                reason = $"foreach ( {node.Type} {node.Identifier} in ... )";
+            }
+            else
+            {
+                forEachScope = TemplatingScope.RunTimeOnly;
+                reason = $"await foreach ( {node.Type} {node.Identifier} in ... )";
+            }
 
             this.SetLocalSymbolScope( local, forEachScope );
 
@@ -900,8 +912,7 @@ namespace Caravela.Framework.Impl.Templating
 
             StatementSyntax annotatedStatement;
 
-            using ( this.WithScopeContext(
-                ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, forEachScope, $"foreach ( {node.Type} {node.Identifier} in ... )" ) ) )
+            using ( this.WithScopeContext( ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, forEachScope, reason ) ) )
             {
                 // Statements of a compile-time control block must have an explicitly-set scope otherwise the template compiler
                 // will look at the scope in the parent node, which is here incorrect.
@@ -912,7 +923,7 @@ namespace Caravela.Framework.Impl.Templating
 
             var transformedNode =
                 ForEachStatement(
-                        default,
+                        node.AwaitKeyword,
                         node.ForEachKeyword,
                         node.OpenParenToken,
                         node.Type.AddTargetScopeAnnotation( forEachScope ),
@@ -1169,7 +1180,7 @@ namespace Caravela.Framework.Impl.Templating
                 symbol = associatedSymbol;
             }
 
-            if ( this._symbolScopeClassifier.GetTemplateMemberKind( symbol ) != TemplateMemberKind.None )
+            if ( !this._symbolScopeClassifier.GetTemplateInfo( symbol ).IsNone )
             {
                 var previousTemplateMember = this._currentTemplateMember;
                 this._currentTemplateMember = symbol;
@@ -1490,16 +1501,37 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitAwaitExpression( AwaitExpressionSyntax node )
         {
-            this.ReportUnsupportedLanguageFeature( node.AwaitKeyword, "await" );
+            // Await is always run-time.
 
-            return base.VisitAwaitExpression( node );
+            ExpressionSyntax transformedExpression;
+
+            using ( this.WithScopeContext( ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, "'await' expression" ) ) )
+            {
+                transformedExpression = this.Visit( node.Expression );
+            }
+
+            return node.WithExpression( transformedExpression ).AddScopeAnnotation( TemplatingScope.RunTimeOnly );
         }
 
         public override SyntaxNode? VisitYieldStatement( YieldStatementSyntax node )
         {
-            this.ReportUnsupportedLanguageFeature( node.YieldKeyword, "yield" );
+            // Yield is always run-time.
 
-            return base.VisitYieldStatement( node );
+            ExpressionSyntax? transformedExpression;
+
+            if ( node.Expression != null )
+            {
+                using ( this.WithScopeContext( ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, "'yield' expression" ) ) )
+                {
+                    transformedExpression = this.Visit( node.Expression );
+                }
+            }
+            else
+            {
+                transformedExpression = null;
+            }
+
+            return node.WithExpression( transformedExpression ).AddScopeAnnotation( TemplatingScope.RunTimeOnly );
         }
 
         #endregion

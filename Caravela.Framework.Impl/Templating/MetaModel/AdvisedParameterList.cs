@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public AdvisedParameterList( IHasParameters method )
         {
             this._method = method;
-            this._parameters = method.Parameters.Select( p => new AdvisedParameter( p ) ).ToArray();
+            this._parameters = method.Parameters.Select( p => new AdvisedParameter( (IParameterInternal) p ) ).ToArray();
         }
 
         public CompilationModel Compilation => (CompilationModel) this._method.Compilation;

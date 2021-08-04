@@ -124,7 +124,7 @@ namespace Caravela.TestFramework
 
                 if ( errors.Any() )
                 {
-                    testResult.Report( errors );
+                    testResult.InputCompilationDiagnostics.Report( errors );
                     testResult.SetFailed( "The initial compilation failed." );
 
                     return testResult;
@@ -220,7 +220,7 @@ namespace Caravela.TestFramework
                 Path.GetDirectoryName( testInput.RelativePath ) ?? "",
                 Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.TransformedCode );
 
-            Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );
+            Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath )! );
 
             var storedTransformedSourceText =
                 File.Exists( actualTransformedPath ) ? NormalizeTestOutput( File.ReadAllText( actualTransformedPath ), formatCode ) : null;
@@ -241,10 +241,10 @@ namespace Caravela.TestFramework
             if ( this.Logger != null )
             {
                 var logger = this.Logger!;
-                logger.WriteLine( "Expected output file: " + expectedTransformedPath );
-                logger.WriteLine( "Actual output file: " + actualTransformedPath );
+                logger.WriteLine( "Expected transformed file: " + expectedTransformedPath );
+                logger.WriteLine( "Actual transformed file: " + actualTransformedPath );
                 logger.WriteLine( "" );
-                logger.WriteLine( "=== ACTUAL OUTPUT ===" );
+                logger.WriteLine( "=== ACTUAL TRANSFORMED CODE ===" );
                 logger.WriteLine( actualTransformedNonNormalizedText );
                 logger.WriteLine( "=====================" );
 
@@ -314,7 +314,7 @@ namespace Caravela.TestFramework
                 var output = testResult.GetConsolidatedTestOutput();
                 var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", output );
 
-                var formattedOutput = await OutputCodeFormatter.FormatAsync( outputDocument );
+                var formattedOutput = await OutputCodeFormatter.FormatToSyntaxAsync( outputDocument );
                 var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.OutputHtml );
                 var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput );
 

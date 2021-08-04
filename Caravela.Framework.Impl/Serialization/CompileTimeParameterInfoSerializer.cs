@@ -21,13 +21,20 @@ namespace Caravela.Framework.Impl.Serialization
             var method = declaringMember as IMethodBase;
             var ordinal = parameter.Index;
 
-            if ( method == null && declaringMember is IProperty property )
+            if ( method == null )
             {
-                method = (property.Getter ?? property.Setter)!;
+                if ( declaringMember is IProperty property )
+                {
+                    method = (property.Getter ?? property.Setter)!;
+                }
+                else
+                {
+                    throw new AssertionFailedException();
+                }
             }
 
             var retrieveMethodBase = this.Service.CompileTimeMethodInfoSerializer.SerializeMethodBase(
-                method!.GetSymbol(),
+                method.GetSymbol().AssertNotNull( Justifications.SerializersNotImplementedForIntroductions ),
                 syntaxFactory );
 
             return ElementAccessExpression(

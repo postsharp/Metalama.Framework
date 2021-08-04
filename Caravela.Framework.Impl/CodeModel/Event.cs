@@ -14,7 +14,7 @@ using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Event : Member, IEvent
+    internal class Event : Member, IEventInternal
     {
         private readonly IEventSymbol _symbol;
 

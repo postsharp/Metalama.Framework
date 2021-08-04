@@ -22,11 +22,6 @@ namespace Caravela.Framework.Code
         MethodKind MethodKind { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the method is <c>readonly</c>.
-        /// </summary>
-        bool IsReadOnly { get; }
-
-        /// <summary>
         /// Gets a <see cref="MethodBase"/> that represents the current method or constructor at run time.
         /// </summary>
         /// <returns>A <see cref="MethodBase"/> that can be used only in run-time code.</returns>

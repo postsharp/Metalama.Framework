@@ -4,7 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Sdk;
+using Caravela.Framework.Impl.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;

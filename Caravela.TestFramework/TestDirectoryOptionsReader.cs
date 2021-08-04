@@ -28,21 +28,15 @@ namespace Caravela.TestFramework
         }
 
         public static TestDirectoryOptionsReader GetInstance( Assembly assembly )
-        {
-            if ( _instances.TryGetValue( assembly, out var instance ) )
-            {
-                return instance;
-            }
-            else
-            {
-                var assemblyInfo = new ReflectionAssemblyInfo( assembly );
-                var discoverer = new TestDiscoverer( assemblyInfo );
-                instance = new TestDirectoryOptionsReader( discoverer.FindProjectDirectory() );
-                _instances.AddOrUpdate( assembly, instance );
-            }
+            => _instances.GetValue(
+                assembly,
+                a =>
+                {
+                    var assemblyInfo = new ReflectionAssemblyInfo( a );
+                    var discoverer = new TestDiscoverer( assemblyInfo );
 
-            return instance;
-        }
+                    return new TestDirectoryOptionsReader( discoverer.FindProjectDirectory() );
+                } );
 
         public TestDirectoryOptions GetDirectoryOptions( string directory ) => this._cache.GetOrAdd( directory, this.GetDirectoryOptionsImpl );
 

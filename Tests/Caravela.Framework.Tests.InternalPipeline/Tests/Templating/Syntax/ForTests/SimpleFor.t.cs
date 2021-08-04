@@ -4,7 +4,7 @@ int Method(int a)
     {
         try
         {
-            return (int)this.Method(a);
+            return this.Method(a);
         }
         catch
         {

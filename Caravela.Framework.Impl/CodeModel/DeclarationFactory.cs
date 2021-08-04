@@ -11,7 +11,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -24,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel
         private readonly ConcurrentDictionary<DeclarationRef<IDeclaration>, object> _cache =
             new( DeclarationRefEqualityComparer<DeclarationRef<IDeclaration>>.Instance );
 
-        private IType? _voidType;
+        private readonly INamedType?[] _specialTypes = new INamedType?[(int) SpecialType.Count];
 
         public DeclarationFactory( CompilationModel compilation )
         {
@@ -147,13 +149,30 @@ namespace Caravela.Framework.Impl.CodeModel
             where T : IType
             => (T) this.GetIType( ((ITypeInternal) type).TypeSymbol.AssertNotNull().WithNullableAnnotation( NullableAnnotation.Annotated ) );
 
-        public IType GetSpecialType( SpecialType specialType )
-            => specialType switch
+        public INamedType GetSpecialType( SpecialType specialType ) => this._specialTypes[(int) specialType] ??= this.GetSpecialTypeCore( specialType );
+
+        private INamedType GetSpecialTypeCore( SpecialType specialType )
+        {
+            var roslynSpecialType = specialType.ToRoslynSpecialType();
+
+            if ( roslynSpecialType != Microsoft.CodeAnalysis.SpecialType.None )
             {
-                SpecialType.Void => this._voidType ??= this.GetTypeByReflectionType( typeof(void) ),
-                SpecialType.Object => this._voidType ??= this.GetTypeByReflectionType( typeof(object) ),
-                _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
-            };
+                return this.GetNamedType( this.RoslynCompilation.GetSpecialType( roslynSpecialType ) );
+            }
+            else
+            {
+                return
+                    specialType switch
+                    {
+                        SpecialType.List_T => (INamedType) this.GetTypeByReflectionType( typeof(List<>) ),
+                        SpecialType.ValueTask => (INamedType) this.GetTypeByReflectionType( typeof(ValueTask) ),
+                        SpecialType.ValueTask_T => (INamedType) this.GetTypeByReflectionType( typeof(ValueTask<>) ),
+                        SpecialType.IAsyncEnumerable_T => this.GetTypeByReflectionName( "System.Collections.Generic.IAsyncEnumerable`1" ),
+                        SpecialType.IAsyncEnumerator_T => this.GetTypeByReflectionName( "System.Collections.Generic.IAsyncEnumerator`1" ),
+                        _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
+                    };
+            }
+        }
 
         object? ITypeFactory.DefaultValue( IType type ) => new DefaultDynamicExpression( type );
 

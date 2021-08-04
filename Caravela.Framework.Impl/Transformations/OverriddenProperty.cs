@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -20,30 +21,27 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
 
-        public IProperty? TemplateProperty { get; }
+        public Template<IProperty> PropertyTemplate { get; }
 
-        public IMethod? GetTemplateMethod { get; }
+        public Template<IMethod> GetTemplate { get; }
 
-        public IMethod? SetTemplateMethod { get; }
+        public Template<IMethod> SetTemplate { get; }
 
         public OverriddenProperty(
             Advice advice,
             IProperty overriddenDeclaration,
-            IProperty? templateProperty,
-            IMethod? getTemplateMethod,
-            IMethod? setTemplateMethod )
+            Template<IProperty> propertyTemplate,
+            Template<IMethod> getTemplate,
+            Template<IMethod> setTemplate )
             : base( advice, overriddenDeclaration )
         {
-            Invariant.Assert( advice != null );
-            Invariant.Assert( overriddenDeclaration != null );
-
             // We need either property template or (one or more) accessor templates, but never both.
-            Invariant.Assert( templateProperty != null || getTemplateMethod != null || setTemplateMethod != null );
-            Invariant.Assert( !(templateProperty != null && (getTemplateMethod != null || setTemplateMethod != null)) );
+            Invariant.Assert( propertyTemplate.IsNotNull || getTemplate.IsNotNull || setTemplate.IsNotNull );
+            Invariant.Assert( !(propertyTemplate.IsNotNull && (getTemplate.IsNotNull || setTemplate.IsNotNull)) );
 
-            this.TemplateProperty = templateProperty;
-            this.GetTemplateMethod = getTemplateMethod;
-            this.SetTemplateMethod = setTemplateMethod;
+            this.PropertyTemplate = propertyTemplate;
+            this.GetTemplate = getTemplate;
+            this.SetTemplate = setTemplate;
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
@@ -55,15 +53,15 @@ namespace Caravela.Framework.Impl.Transformations
                     this.Advice.AspectLayerId,
                     this.OverriddenDeclaration );
 
-                var getTemplateMethod =
-                    this.TemplateProperty != null && !this.TemplateProperty.IsAutoPropertyOrField
-                        ? this.TemplateProperty.Getter
-                        : this.GetTemplateMethod;
+                var getTemplate =
+                    this.PropertyTemplate.Declaration is { IsAutoPropertyOrField: false }
+                        ? new Template<IMethod>( this.PropertyTemplate.Declaration.Getter )
+                        : this.GetTemplate;
 
-                var setTemplateMethod =
-                    this.TemplateProperty != null && !this.TemplateProperty.IsAutoPropertyOrField
-                        ? this.TemplateProperty.Setter
-                        : this.SetTemplateMethod;
+                var setTemplate =
+                    this.PropertyTemplate.Declaration is { IsAutoPropertyOrField: false }
+                        ? new Template<IMethod>( this.PropertyTemplate.Declaration.Setter )
+                        : this.SetTemplate;
 
                 var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly
                     ? SyntaxKind.InitAccessorDeclaration
@@ -74,11 +72,11 @@ namespace Caravela.Framework.Impl.Transformations
 
                 if ( this.OverriddenDeclaration.Getter != null )
                 {
-                    if ( getTemplateMethod != null )
+                    if ( !getTemplate.IsNull )
                     {
                         templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                             context,
-                            getTemplateMethod,
+                            getTemplate,
                             this.OverriddenDeclaration.Getter,
                             out getAccessorBody );
                     }
@@ -96,11 +94,11 @@ namespace Caravela.Framework.Impl.Transformations
 
                 if ( this.OverriddenDeclaration.Setter != null )
                 {
-                    if ( setTemplateMethod != null )
+                    if ( !setTemplate.IsNull )
                     {
                         templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                             context,
-                            setTemplateMethod,
+                            setTemplate,
                             this.OverriddenDeclaration.Setter,
                             out setAccessorBody );
                     }
@@ -127,7 +125,7 @@ namespace Caravela.Framework.Impl.Transformations
                         PropertyDeclaration(
                             List<AttributeListSyntax>(),
                             this.OverriddenDeclaration.GetSyntaxModifierList(),
-                            this.OverriddenDeclaration.GetSyntaxReturnType(),
+                            SyntaxHelpers.CreateSyntaxForPropertyType( this.OverriddenDeclaration ),
                             null,
                             Identifier( propertyName ),
                             AccessorList(
@@ -163,7 +161,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         private bool TryExpandAccessorTemplate(
             in MemberIntroductionContext context,
-            IMethod accessorTemplate,
+            Template<IMethod> accessorTemplate,
             IMethod accessor,
             [NotNullWhen( true )] out BlockSyntax? body )
         {
@@ -192,10 +190,9 @@ namespace Caravela.Framework.Impl.Transformations
                     accessor,
                     new MetaApiProperties(
                         context.DiagnosticSink,
-                        accessorTemplate.GetSymbol(),
+                        accessorTemplate.Cast(),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
-                        proceedExpression,
                         context.ServiceProvider ) );
 
                 var expansionContext = new TemplateExpansionContext(
@@ -204,9 +201,11 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration.Compilation,
                     context.LexicalScopeProvider.GetLexicalScope( accessor ),
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
-                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
+                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
+                    default,
+                    proceedExpression );
 
-                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( accessorTemplate );
+                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( accessorTemplate.Declaration! );
 
                 return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out body );
             }

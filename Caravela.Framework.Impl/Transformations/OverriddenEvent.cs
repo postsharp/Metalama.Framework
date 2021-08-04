@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -20,35 +21,32 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
 
-        public IEvent? TemplateEvent { get; }
+        public Template<IEvent> EventTemplate { get; }
 
-        public IMethod? AddTemplateMethod { get; }
+        public Template<IMethod> AddTemplate { get; }
 
-        public IMethod? RemoveTemplateMethod { get; }
+        public Template<IMethod> RemoveTemplate { get; }
 
         public OverriddenEvent(
             Advice advice,
             IEvent overriddenDeclaration,
-            IEvent? templateEvent,
-            IMethod? addTemplateMethod,
-            IMethod? removeTemplateMethod )
+            Template<IEvent> eventTemplate,
+            Template<IMethod> addTemplate,
+            Template<IMethod> removeTemplate )
             : base( advice, overriddenDeclaration )
         {
-            Invariant.Assert( advice != null );
-            Invariant.Assert( overriddenDeclaration != null );
-
             // We need event template xor both accessor templates.
-            Invariant.Assert( templateEvent != null || (addTemplateMethod != null && removeTemplateMethod != null) );
-            Invariant.Assert( !(templateEvent != null && (addTemplateMethod != null || removeTemplateMethod != null)) );
+            Invariant.Assert( eventTemplate.IsNotNull || (addTemplate.IsNotNull && removeTemplate.IsNotNull) );
+            Invariant.Assert( !(eventTemplate.IsNotNull && (addTemplate.IsNotNull || removeTemplate.IsNotNull)) );
 
-            this.TemplateEvent = templateEvent;
-            this.AddTemplateMethod = addTemplateMethod;
-            this.RemoveTemplateMethod = removeTemplateMethod;
+            this.EventTemplate = eventTemplate;
+            this.AddTemplate = addTemplate;
+            this.RemoveTemplate = removeTemplate;
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            if ( this.TemplateEvent?.IsEventField() == true )
+            if ( this.EventTemplate.Declaration?.IsEventField() == true )
             {
                 throw new AssertionFailedException();
             }
@@ -60,13 +58,18 @@ namespace Caravela.Framework.Impl.Transformations
                     this.Advice.AspectLayerId,
                     this.OverriddenDeclaration );
 
-                var addTemplateMethod = this.TemplateEvent != null ? this.TemplateEvent.Adder : this.AddTemplateMethod;
-                var removeTemplateMethod = this.TemplateEvent != null ? this.TemplateEvent.Remover : this.RemoveTemplateMethod;
+                var addTemplateMethod = this.EventTemplate.Declaration != null
+                    ? new Template<IMethod>( this.EventTemplate.Declaration.Adder )
+                    : this.AddTemplate;
+
+                var removeTemplateMethod = this.EventTemplate.Declaration != null
+                    ? new Template<IMethod>( this.EventTemplate.Declaration.Remover )
+                    : this.RemoveTemplate;
 
                 var templateExpansionError = false;
                 BlockSyntax? addAccessorBody = null;
 
-                if ( addTemplateMethod != null )
+                if ( addTemplateMethod.IsNotNull )
                 {
                     templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                         context,
@@ -81,7 +84,7 @@ namespace Caravela.Framework.Impl.Transformations
 
                 BlockSyntax? removeAccessorBody = null;
 
-                if ( removeTemplateMethod != null )
+                if ( removeTemplateMethod.IsNotNull )
                 {
                     templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                         context,
@@ -108,7 +111,7 @@ namespace Caravela.Framework.Impl.Transformations
                         EventDeclaration(
                             List<AttributeListSyntax>(),
                             this.OverriddenDeclaration.GetSyntaxModifierList(),
-                            this.OverriddenDeclaration.GetSyntaxReturnType(),
+                            SyntaxHelpers.CreateSyntaxForEventType( this.OverriddenDeclaration ),
                             null,
                             Identifier( eventName ),
                             AccessorList(
@@ -137,7 +140,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         private bool TryExpandAccessorTemplate(
             in MemberIntroductionContext context,
-            IMethod accessorTemplate,
+            Template<IMethod> accessorTemplate,
             IMethod accessor,
             [NotNullWhen( true )] out BlockSyntax? body )
         {
@@ -158,10 +161,9 @@ namespace Caravela.Framework.Impl.Transformations
                     accessor,
                     new MetaApiProperties(
                         context.DiagnosticSink,
-                        accessorTemplate.GetSymbol(),
+                        accessorTemplate.Cast(),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
-                        proceedExpression,
                         context.ServiceProvider ) );
 
                 var expansionContext = new TemplateExpansionContext(
@@ -170,9 +172,11 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration.Compilation,
                     context.LexicalScopeProvider.GetLexicalScope( accessor ),
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
-                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
+                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
+                    default,
+                    proceedExpression );
 
-                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( accessorTemplate );
+                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( accessorTemplate.Declaration! );
 
                 return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out body );
             }

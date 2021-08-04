@@ -19,7 +19,7 @@ using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltProperty : BuiltMember, IProperty, IMemberRef<IProperty>
+    internal class BuiltProperty : BuiltMember, IPropertyInternal, IMemberRef<IProperty>
     {
         public BuiltProperty( PropertyBuilder builder, CompilationModel compilation ) : base( compilation )
         {

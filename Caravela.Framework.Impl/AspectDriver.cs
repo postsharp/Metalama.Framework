@@ -6,8 +6,8 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -23,6 +23,7 @@ namespace Caravela.Framework.Impl
     internal class AspectDriver : IAspectDriver
     {
         private readonly UserCodeInvoker _userCodeInvoker;
+        private readonly IServiceProvider _serviceProvider;
         private readonly Compilation _compilation;
         private readonly List<(AttributeData Attribute, ISymbol Member)> _declarativeAdviceAttributes;
 
@@ -31,13 +32,14 @@ namespace Caravela.Framework.Impl
         public AspectDriver( IServiceProvider serviceProvider, INamedTypeSymbol aspectType, Compilation compilation )
         {
             this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
+            this._serviceProvider = serviceProvider;
             this._compilation = compilation;
             this.AspectType = aspectType;
 
             this._declarativeAdviceAttributes =
                 (from member in aspectType.GetMembers()
                  from attribute in member.GetAttributes()
-                 where attribute.AttributeClass?.Is( typeof(AdviceAttribute) ) ?? false
+                 where attribute.AttributeClass?.Is( typeof(IntroduceAttribute) ) ?? false
                  select (attribute, member)).ToList();
         }
 
@@ -107,8 +109,8 @@ namespace Caravela.Framework.Impl
                     compilationModelRevision,
                     diagnosticSink,
                     declarativeAdvices,
-                    compilationModelRevision.Factory.GetNamedType( this.AspectType ),
-                    aspectInstance );
+                    aspectInstance,
+                    this._serviceProvider );
 
                 var aspectBuilder = new AspectBuilder<T>( targetDeclaration, diagnosticSink, declarativeAdvices, adviceFactory, cancellationToken );
 
