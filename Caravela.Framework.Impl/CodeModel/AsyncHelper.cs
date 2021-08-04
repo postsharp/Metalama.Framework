@@ -58,18 +58,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             // We're caching because we're always requesting the same few types.
             // ReSharper disable once InconsistentlySynchronizedField
-            if ( !_cache.TryGetValue( namedType, out var cached ) )
-            {
-                lock ( _cache )
-                {
-                    if ( !_cache.TryGetValue( namedType, out cached ) )
-                    {
-                        cached = GetAwaitableResultTypeCore( namedType );
-
-                        _cache.Add( namedType, cached );
-                    }
-                }
-            }
+            var cached = _cache.GetValue( namedType, GetAwaitableResultTypeCore );
 
             if ( cached != null )
             {

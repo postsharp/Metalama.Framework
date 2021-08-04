@@ -14,35 +14,19 @@ namespace Caravela.Framework.Impl.Templating
     {
         private static readonly ConditionalWeakTable<Compilation, SymbolIdGenerator> _instances = new();
         private readonly ConcurrentDictionary<ISymbol, string> _symbolsToIds = new( SymbolEqualityComparer.Default );
-        private readonly ConcurrentDictionary<string, ISymbol> _idsToSymbols = new(StringComparer.Ordinal);
+        private readonly ConcurrentDictionary<string, ISymbol> _idsToSymbols = new( StringComparer.Ordinal );
         private long _nextId;
 
         private SymbolIdGenerator() { }
 
-        public static SymbolIdGenerator GetInstance( Compilation compilation )
-        {
-            // ReSharper disable once InconsistentlySynchronizedField
-            if ( !_instances.TryGetValue( compilation, out var instance ) )
-            {
-                lock ( _instances )
-                {
-                    if ( !_instances.TryGetValue( compilation, out instance ) )
-                    {
-                        instance = new SymbolIdGenerator();
-                        _instances.Add( compilation, instance );
-                    }
-                }
-            }
-
-            return instance;
-        }
+        public static SymbolIdGenerator GetInstance( Compilation compilation ) => _instances.GetValue( compilation, c => new SymbolIdGenerator() );
 
         public string GetId( ISymbol symbol )
             => this._symbolsToIds.GetOrAdd(
                 symbol,
                 valueFactory: s =>
                 {
-                    var id = Interlocked.Increment( ref this._nextId ).ToString(CultureInfo.InvariantCulture);
+                    var id = Interlocked.Increment( ref this._nextId ).ToString( CultureInfo.InvariantCulture );
                     this._idsToSymbols[id] = symbol;
 
                     return id;

@@ -11,7 +11,6 @@ namespace Caravela.Framework.Impl.CompileTime
     internal partial class SymbolClassificationService : IService
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly object _addSync = new();
         private readonly ConditionalWeakTable<Compilation, ISymbolClassifier> _instances = new();
         private readonly VanillaClassifier _vanillaClassifier;
 
@@ -25,22 +24,13 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Gets an implementation of <see cref="ISymbolClassifier"/> for a given <see cref="Compilation"/>.
         /// </summary>
         public ISymbolClassifier GetClassifier( Compilation compilation )
-        {
-            // ReSharper disable once InconsistentlySynchronizedField
-            if ( !this._instances.TryGetValue( compilation, out var value ) )
-            {
-                lock ( this._addSync )
+            => this._instances.GetValue(
+                compilation,
+                c =>
                 {
-                    if ( !this._instances.TryGetValue( compilation, out value ) )
-                    {
-                        var hasCaravelaReference = compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ) != null;
-                        value = hasCaravelaReference ? new SymbolClassifier( compilation, this._serviceProvider ) : this._vanillaClassifier;
-                        this._instances.Add( compilation, value );
-                    }
-                }
-            }
+                    var hasCaravelaReference = compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ) != null;
 
-            return value;
-        }
+                    return hasCaravelaReference ? new SymbolClassifier( compilation, this._serviceProvider ) : this._vanillaClassifier;
+                } );
     }
 }
