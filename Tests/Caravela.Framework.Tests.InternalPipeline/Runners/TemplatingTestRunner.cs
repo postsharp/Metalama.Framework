@@ -204,13 +204,11 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     .GetMembers( "Template" )
                     .OfType<IMethodSymbol>()
                     .Single();
-                
-                var compiledAspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
-                
-                var compiledTemplateMethodName = TemplateNameHelper.GetCompiledTemplateName(templateMethod);
-                var compiledTemplateMethod = compiledAspectType.GetMethod( compiledTemplateMethodName, BindingFlags.Instance | BindingFlags.Public );
 
-            
+                var compiledAspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
+
+                var compiledTemplateMethodName = TemplateNameHelper.GetCompiledTemplateName( templateMethod );
+                var compiledTemplateMethod = compiledAspectType.GetMethod( compiledTemplateMethodName, BindingFlags.Instance | BindingFlags.Public );
 
                 Invariant.Assert( compiledTemplateMethod != null );
                 var driver = new TemplateDriver( this.ServiceProvider, null!, templateMethod, compiledTemplateMethod );

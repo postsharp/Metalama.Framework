@@ -271,18 +271,21 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     if ( node.AccessorList != null )
                     {
-                        var templateAccessorCount = 0; 
-                        
+                        var templateAccessorCount = 0;
+
                         var getAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration );
-                        var getterIsTemplate = getAccessor != null && (propertyIsTemplate || !this.SymbolClassifier.GetTemplateInfo( propertySymbol.GetMethod!).IsNone);
+
+                        var getterIsTemplate = getAccessor != null
+                                               && (propertyIsTemplate || !this.SymbolClassifier.GetTemplateInfo( propertySymbol.GetMethod! ).IsNone);
 
                         var setAccessor = node.AccessorList.Accessors.SingleOrDefault(
                             a => a.Kind() == SyntaxKind.SetAccessorDeclaration || a.Kind() == SyntaxKind.InitAccessorDeclaration );
-                        var setterIsTemplate = setAccessor != null && ( propertyIsTemplate || !this.SymbolClassifier.GetTemplateInfo( propertySymbol.SetMethod!).IsNone);
+
+                        var setterIsTemplate = setAccessor != null
+                                               && (propertyIsTemplate || !this.SymbolClassifier.GetTemplateInfo( propertySymbol.SetMethod! ).IsNone);
 
                         // Auto properties don't have bodies and so we don't need templates.
-                        
-                        
+
                         if ( getterIsTemplate && (getAccessor!.Body != null || getAccessor.ExpressionBody != null) )
                         {
                             success =
@@ -320,7 +323,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         if ( templateAccessorCount > 0 )
                         {
                             propertyOrAccessorsAreTemplate = true;
-                            
+
                             if ( templateAccessorCount != node.AccessorList.Accessors.Count )
                             {
                                 throw new AssertionFailedException( "When one accessor is a template, the other must also be a template." );
@@ -344,11 +347,9 @@ namespace Caravela.Framework.Impl.CompileTime
                                 out transformedGetDeclaration );
                     }
                 }
-                
-                
+
                 if ( success )
                 {
-                    
                     if ( !propertyOrAccessorsAreTemplate )
                     {
                         yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
@@ -364,7 +365,6 @@ namespace Caravela.Framework.Impl.CompileTime
                     {
                         // The property can be deleted, i.e. it does not need to be inserted back in the member list.
                     }
-                    
 
                     if ( transformedGetDeclaration != null )
                     {
@@ -428,8 +428,6 @@ namespace Caravela.Framework.Impl.CompileTime
                                       out transformedRemoveDeclaration );
                     }
                 }
-                
-             
 
                 if ( success )
                 {
@@ -570,10 +568,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 public TemplatingScope Scope { get; }
 
-                public void Dispose()
-                {
-                    this._parent._currentContext = this._oldContext;
-                }
+                public void Dispose() => this._parent._currentContext = this._oldContext;
             }
         }
     }

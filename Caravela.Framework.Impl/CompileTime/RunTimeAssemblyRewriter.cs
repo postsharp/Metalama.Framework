@@ -92,12 +92,12 @@ namespace Caravela.Compiler
             else if ( symbol is IPropertySymbol property )
             {
                 // In properties, the template attribute can be put on the accessors. 
-                
+
                 if ( property.GetMethod != null && this.MustReplaceByThrow( property.GetMethod ) )
                 {
                     return true;
                 }
-                
+
                 if ( property.SetMethod != null && this.MustReplaceByThrow( property.SetMethod ) )
                 {
                     return true;
@@ -107,8 +107,9 @@ namespace Caravela.Compiler
             return false;
         }
 
-        private bool MustReplaceByThrow( ISymbol? symbol ) => this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
-                                                              !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
+        private bool MustReplaceByThrow( ISymbol symbol )
+            => this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
+               !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
 
         public override SyntaxNode? VisitIndexerDeclaration( IndexerDeclarationSyntax node )
         {

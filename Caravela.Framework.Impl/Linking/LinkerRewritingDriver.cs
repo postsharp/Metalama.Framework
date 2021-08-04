@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
@@ -76,7 +75,8 @@ namespace Caravela.Framework.Impl.Linking
         private bool IsInlineableReference( ResolvedAspectReference aspectReference, MethodKind methodKind )
             => aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable )
                && IsAsync( GetMethod( aspectReference.ContainingSymbol, methodKind ) ) == IsAsync( GetMethod( aspectReference.ResolvedSymbol, methodKind ) )
-               && IsIterator( GetMethod( aspectReference.ContainingSymbol, methodKind  )) == IsIterator( GetMethod( aspectReference.ResolvedSymbol, methodKind ) )
+               && IsIterator( GetMethod( aspectReference.ContainingSymbol, methodKind ) )
+               == IsIterator( GetMethod( aspectReference.ResolvedSymbol, methodKind ) )
                && this.GetInliner( aspectReference, out _ );
 
         private static IMethodSymbol? GetMethod( ISymbol symbol, MethodKind kind )
@@ -96,11 +96,11 @@ namespace Caravela.Framework.Impl.Linking
                     _ => throw new AssertionFailedException()
                 },
                 _ => throw new AssertionFailedException()
-
             };
+
         private static bool IsAsync( IMethodSymbol? symbol ) => symbol is { IsAsync: true };
 
-        private static bool IsIterator(IMethodSymbol? symbol ) => symbol != null && IteratorHelper.IsIterator( symbol );
+        private static bool IsIterator( IMethodSymbol? symbol ) => symbol != null && IteratorHelper.IsIterator( symbol );
 
         private bool GetInliner( ResolvedAspectReference aspectReference, [NotNullWhen( true )] out Inliner? matchingInliner )
         {
@@ -688,7 +688,10 @@ namespace Caravela.Framework.Impl.Linking
                     throw new AssertionFailedException();
             }
 
-            static string CreateName( string name ) => $"__{name}__OriginalImpl";
+            static string CreateName( string name )
+            {
+                return $"__{name}__OriginalImpl";
+            }
         }
 
         private static string GetBackingFieldName( ISymbol symbol )

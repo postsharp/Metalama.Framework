@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 this.PropertyTemplate = propertyTemplate;
 
-                if (! propertyTemplate.Declaration!.IsAutoPropertyOrField )
+                if ( !propertyTemplate.Declaration!.IsAutoPropertyOrField )
                 {
                     this.GetTemplate = new Template<IMethod>( this.PropertyTemplate.Declaration!.Getter );
                     this.SetTemplate = new Template<IMethod>( this.PropertyTemplate.Declaration!.Setter );
@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.Transformations
 
                 var getTemplate = this.GetTemplate;
                 var setTemplate = this.SetTemplate;
-                
+
                 var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly
                     ? SyntaxKind.InitAccessorDeclaration
                     : SyntaxKind.SetAccessorDeclaration;
@@ -175,8 +175,14 @@ namespace Caravela.Framework.Impl.Transformations
                 var proceedExpression =
                     accessor.MethodKind switch
                     {
-                        MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression( this.CreateProceedGetExpression(), this.GetTemplate, this.OverriddenDeclaration.Getter.AssertNotNull(  ) ),
-                        MethodKind.PropertySet => new DynamicExpression( this.CreateProceedSetExpression(), this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ), false ),
+                        MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
+                            this.CreateProceedGetExpression(),
+                            this.GetTemplate,
+                            this.OverriddenDeclaration.Getter.AssertNotNull() ),
+                        MethodKind.PropertySet => new DynamicExpression(
+                            this.CreateProceedSetExpression(),
+                            this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
+                            false ),
                         _ => throw new AssertionFailedException()
                     };
 
@@ -227,18 +233,12 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-        private ExpressionSyntax CreateProceedGetExpression()
-        {
-            return this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertyGetAccessor );
-        }
+        private ExpressionSyntax CreateProceedGetExpression() => this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertyGetAccessor );
 
         private ExpressionSyntax CreateProceedSetExpression()
-        {
-            return
-                AssignmentExpression(
-                    SyntaxKind.SimpleAssignmentExpression,
-                    this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertySetAccessor ),
-                    IdentifierName( "value" ) );
-        }
+            => AssignmentExpression(
+                SyntaxKind.SimpleAssignmentExpression,
+                this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertySetAccessor ),
+                IdentifierName( "value" ) );
     }
 }

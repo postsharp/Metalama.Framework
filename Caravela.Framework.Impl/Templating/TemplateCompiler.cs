@@ -16,7 +16,6 @@ namespace Caravela.Framework.Impl.Templating
 {
     internal class TemplateCompiler
     {
-        
         private readonly IServiceProvider _serviceProvider;
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly ITemplateCompilerObserver? _observer;

@@ -14,64 +14,68 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    static class ProceedHelper
+    internal static class ProceedHelper
     {
-        public static DynamicExpression CreateProceedDynamicExpression( ExpressionSyntax invocationExpression, Template<IMethod> template, IMethod overriddenMethod )
+        public static DynamicExpression CreateProceedDynamicExpression(
+            ExpressionSyntax invocationExpression,
+            Template<IMethod> template,
+            IMethod overriddenMethod )
         {
-            if ( template.SelectedKind == TemplateKind.Default )
+            switch ( template.SelectedKind )
             {
-                if ( overriddenMethod.GetIteratorInfoImpl() is { IsIterator: true } iteratorInfo )
-                {
-                    // The target method is a yield-based iterator.
-
-                    ExpressionSyntax expression;
-
-                    if ( !iteratorInfo.IsAsyncIterator )
+                case TemplateKind.Default when overriddenMethod.GetIteratorInfoImpl() is { IsIterator: true } iteratorInfo:
                     {
-                        // The target method is a non-async iterator.
-                        // Generate:  `RuntimeAspectHelper.Buffer( BASE(ARGS) )`
+                        // The target method is a yield-based iterator.
 
-                        expression =
-                            SyntaxFactory.InvocationExpression(
-                                    SyntaxFactory.MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        overriddenMethod.GetSyntaxFactory().GetTypeSyntax( typeof(RunTimeAspectHelper) ),
-                                        SyntaxFactory.IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
-                                .WithArgumentList( SyntaxFactory.ArgumentList( SyntaxFactory.SingletonSeparatedList( SyntaxFactory.Argument( invocationExpression ) ) ) )
-                                .WithAdditionalAnnotations( Simplifier.Annotation );
+                        ExpressionSyntax expression;
+
+                        if ( !iteratorInfo.IsAsyncIterator )
+                        {
+                            // The target method is a non-async iterator.
+                            // Generate:  `RuntimeAspectHelper.Buffer( BASE(ARGS) )`
+
+                            expression =
+                                SyntaxFactory.InvocationExpression(
+                                        SyntaxFactory.MemberAccessExpression(
+                                            SyntaxKind.SimpleMemberAccessExpression,
+                                            overriddenMethod.GetSyntaxFactory().GetTypeSyntax( typeof(RunTimeAspectHelper) ),
+                                            SyntaxFactory.IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
+                                    .WithArgumentList(
+                                        SyntaxFactory.ArgumentList( SyntaxFactory.SingletonSeparatedList( SyntaxFactory.Argument( invocationExpression ) ) ) )
+                                    .WithAdditionalAnnotations( Simplifier.Annotation );
+                        }
+                        else
+                        {
+                            // The target method is an async iterator.
+                            // Generate: `( await RuntimeAspectHelper.BufferAsync( BASE(ARGS) ) )` 
+
+                            expression = GenerateAwaitBufferAsync();
+                        }
+
+                        return new DynamicExpression( expression, overriddenMethod.ReturnType, false );
                     }
-                    else
+
+                case TemplateKind.Default when overriddenMethod.GetAsyncInfoImpl() is { IsAsync: true, IsAwaitableOrVoid: true } asyncInfo:
                     {
-                        // The target method is an async iterator.
-                        // Generate: `( await RuntimeAspectHelper.BufferAsync( BASE(ARGS) ) )` 
+                        // The target method is an async method (but not an async iterator).
+                        // Generate: `( await BASE(ARGS) )`.
 
-                        expression = GenerateAwaitBufferAsync();
+                        var taskResultType = asyncInfo.ResultType;
+
+                        return new DynamicExpression(
+                            SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( invocationExpression ) )
+                                .WithAdditionalAnnotations( Simplifier.Annotation ),
+                            taskResultType,
+                            false );
                     }
 
-                    return new DynamicExpression( expression, overriddenMethod.ReturnType, false );
-                }
-                else if ( overriddenMethod.GetAsyncInfoImpl() is { IsAsync: true, IsAwaitableOrVoid: true } asyncInfo )
-                {
-                    // The target method is an async method (but not an async iterator).
-                    // Generate: `( await BASE(ARGS) )`.
+                case TemplateKind.Async when overriddenMethod.GetIteratorInfoImpl() is
+                    { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator }:
+                    {
+                        var expression = GenerateAwaitBufferAsync();
 
-                    var taskResultType = asyncInfo.ResultType;
-
-                    return new DynamicExpression(
-                        SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( invocationExpression ) ).WithAdditionalAnnotations( Simplifier.Annotation ),
-                        taskResultType,
-                        false );
-                }
-            }
-            else if ( template.SelectedKind == TemplateKind.Async )
-            {
-                if ( overriddenMethod.GetIteratorInfoImpl() is
-                    { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } )
-                {
-                    var expression = GenerateAwaitBufferAsync();
-
-                    return new DynamicExpression( expression, overriddenMethod.ReturnType, false );
-                }
+                        return new DynamicExpression( expression, overriddenMethod.ReturnType, false );
+                    }
             }
 
             // This is a default method, or a non-default template.
@@ -103,7 +107,8 @@ namespace Caravela.Framework.Impl.Transformations
                         .WithArgumentList( arguments )
                         .WithAdditionalAnnotations( Simplifier.Annotation );
 
-                var expression = SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( bufferExpression ) ).WithAdditionalAnnotations( Simplifier.Annotation );
+                var expression = SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( bufferExpression ) )
+                    .WithAdditionalAnnotations( Simplifier.Annotation );
 
                 return expression;
             }

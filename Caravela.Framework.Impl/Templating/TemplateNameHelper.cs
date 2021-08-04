@@ -2,8 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
-using System;
-using System.Runtime.ConstrainedExecution;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -14,7 +12,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 MethodKind.PropertyGet => GetCompiledTemplateName( $"Get{method.AssociatedSymbol!.Name}" ),
                 MethodKind.PropertySet => GetCompiledTemplateName( $"Set{method.AssociatedSymbol!.Name}" ),
-                 _ => GetCompiledTemplateName( method.Name ),
+                _ => GetCompiledTemplateName( method.Name )
             };
 
         public static string GetCompiledTemplateName( string templateMethodName ) => "__" + templateMethodName;

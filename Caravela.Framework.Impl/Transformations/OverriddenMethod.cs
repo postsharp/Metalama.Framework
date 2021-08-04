@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Serialization;
@@ -42,8 +41,11 @@ namespace Caravela.Framework.Impl.Transformations
         {
             using ( context.DiagnosticSink.WithDefaultScope( this.OverriddenDeclaration ) )
             {
-                var proceedExpression = ProceedHelper.CreateProceedDynamicExpression( this.CreateInvocationExpression(), this.Template, this.OverriddenDeclaration );
-                
+                var proceedExpression = ProceedHelper.CreateProceedDynamicExpression(
+                    this.CreateInvocationExpression(),
+                    this.Template,
+                    this.OverriddenDeclaration );
+
                 var expandYieldProceed = this.CreateYieldProceedStatement( proceedExpression );
 
                 var metaApi = MetaApi.ForMethod(
@@ -210,28 +212,24 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-
         private ExpressionSyntax CreateInvocationExpression()
-        {
-            return
-                InvocationExpression(
-                    this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self ),
-                    ArgumentList(
-                        SeparatedList(
-                            this.OverriddenDeclaration.Parameters.Select(
-                                p =>
+            => InvocationExpression(
+                this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self ),
+                ArgumentList(
+                    SeparatedList(
+                        this.OverriddenDeclaration.Parameters.Select(
+                            p =>
+                            {
+                                var refKind = p.RefKind switch
                                 {
-                                    var refKind = p.RefKind switch
-                                    {
-                                        RefKind.None => default,
-                                        RefKind.In => default,
-                                        RefKind.Out => Token( SyntaxKind.OutKeyword ),
-                                        RefKind.Ref => Token( SyntaxKind.RefKeyword ),
-                                        _ => throw new AssertionFailedException()
-                                    };
+                                    RefKind.None => default,
+                                    RefKind.In => default,
+                                    RefKind.Out => Token( SyntaxKind.OutKeyword ),
+                                    RefKind.Ref => Token( SyntaxKind.RefKeyword ),
+                                    _ => throw new AssertionFailedException()
+                                };
 
-                                    return Argument( null, refKind, IdentifierName( p.Name ) );
-                                } ) ) ) );
-        }
+                                return Argument( null, refKind, IdentifierName( p.Name ) );
+                            } ) ) ) );
     }
 }
