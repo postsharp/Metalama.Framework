@@ -202,7 +202,5 @@ namespace Caravela.Framework.Impl.Templating
                     "Cannot use the {0} method in '{1}' because the return type of the method is compatible with the {0} method.",
                     _category,
                     Error );
-
-        
     }
 }

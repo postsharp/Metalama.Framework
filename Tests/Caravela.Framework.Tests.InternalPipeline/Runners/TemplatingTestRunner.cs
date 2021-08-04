@@ -345,7 +345,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                         this._syntaxSerializationService,
                         compilation.Factory,
                         default,
-                        proceedExpression), roslynTargetMethod);
+                        proceedExpression ), roslynTargetMethod);
 
             static ExpressionSyntax GetProceedInvocation( IMethod targetMethod )
             {

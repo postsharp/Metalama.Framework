@@ -80,7 +80,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public object BaseStatic
             => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
-
         public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;
 
         IDiagnosticSink IMetaApi.Diagnostics => this._common.Diagnostics;

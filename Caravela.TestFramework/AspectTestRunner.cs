@@ -259,7 +259,7 @@ namespace Caravela.TestFramework
         public override void ExecuteAssertions( TestInput testInput, TestResult testResult )
         {
             base.ExecuteAssertions( testInput, testResult );
-            
+
             var expectedProgramOutputPath = Path.Combine(
                 Path.GetDirectoryName( testInput.FullPath )!,
                 Path.GetFileNameWithoutExtension( testInput.FullPath ) + FileExtensions.ProgramOutput );

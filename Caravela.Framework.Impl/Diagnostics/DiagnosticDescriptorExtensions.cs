@@ -20,13 +20,13 @@ namespace Caravela.Framework.Impl.Diagnostics
         /// </summary>
         public static Exception CreateException<T>( this DiagnosticDefinition<T> definition, T arguments )
             => new InvalidUserCodeException( definition.CreateDiagnostic( DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
-        
+
         public static Exception CreateException<T>( this DiagnosticDefinition<T> definition, Location? location, T arguments )
             => new InvalidUserCodeException( definition.CreateDiagnostic( location ?? DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
 
         public static Exception CreateException( this DiagnosticDefinition definition, params object[] arguments )
             => new InvalidUserCodeException( definition.CreateDiagnostic( DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
-        
+
         public static Exception CreateException( this DiagnosticDefinition definition, Location? location, params object[] arguments )
             => new InvalidUserCodeException( definition.CreateDiagnostic( location ?? DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
 

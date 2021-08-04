@@ -29,7 +29,7 @@ namespace Caravela.TestFramework
 
         public static TestDirectoryOptionsReader GetInstance( Assembly assembly )
             => _instances.GetValue(
-                assembly, 
+                assembly,
                 a =>
                 {
                     var assemblyInfo = new ReflectionAssemblyInfo( a );

@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Templating
         private MetaContext? _currentMetaContext;
         private int _nextStatementListId;
         private ISymbol? _rootTemplateSymbol;
-        
+
         public TemplateCompilerRewriter(
             string templateName,
             Compilation runTimeCompilation,
@@ -673,7 +673,8 @@ namespace Caravela.Framework.Impl.Templating
 
                 var invocationExpression = InvocationExpression(
                         this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicDiscardAssignment) ) )
-                    .AddArgumentListArguments( Argument( this.CastToDynamicExpression( (ExpressionSyntax) this._buildTimeOnlyRewriter.Visit(  assignment.Right  ) ) ) );
+                    .AddArgumentListArguments(
+                        Argument( this.CastToDynamicExpression( (ExpressionSyntax) this._buildTimeOnlyRewriter.Visit( assignment.Right ) ) ) );
 
                 return this.WithCallToAddSimplifierAnnotation( invocationExpression );
             }
@@ -1421,7 +1422,6 @@ namespace Caravela.Framework.Impl.Templating
                         }
                     }
                 }
-               
             }
 
             return base.VisitIdentifierName( node );

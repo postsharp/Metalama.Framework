@@ -1,11 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -30,15 +29,14 @@ namespace Caravela.Framework.Impl.Templating
                     {
                         MemberAccessExpressionSyntax memberAccess => memberAccess.Name.Identifier.Text,
                         IdentifierNameSyntax identifier => identifier.Identifier.Text,
-                        _ => throw new AssertionFailedException($"Don't know how to get the member name in {node.Expression.GetType().Name}")
+                        _ => throw new AssertionFailedException( $"Don't know how to get the member name in {node.Expression.GetType().Name}" )
                     };
 
                     transformedNode =
                         node.CopyAnnotationsTo(
                             InvocationExpression(
                                     this._rewriter._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.Proceed) ) )
-                                .WithArgumentList(
-                                    ArgumentList( SeparatedList( new[] { Argument( SyntaxFactoryEx.LiteralExpression( methodName ) ) } ) ) ) )!;
+                                .WithArgumentList( ArgumentList( SeparatedList( new[] { Argument( SyntaxFactoryEx.LiteralExpression( methodName ) ) } ) ) ) )!;
 
                     return true;
                 }

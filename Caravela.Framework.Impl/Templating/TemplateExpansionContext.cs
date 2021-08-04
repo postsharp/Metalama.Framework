@@ -345,7 +345,15 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public IDynamicExpression? Proceed( string methodName ) => new ProceedExpression( methodName, this );
+        public IDynamicExpression? Proceed( string methodName )
+        {
+            if ( this._proceedExpression == null )
+            {
+                throw new AssertionFailedException( "No proceed expression was provided." );
+            }
+
+            return new ProceedExpression( methodName, this );
+        }
 
         public StatementSyntax CreateYieldProceedStatement()
         {
@@ -361,12 +369,12 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        class ProceedExpression : IDynamicExpression
+        private class ProceedExpression : IDynamicExpression
         {
-            private TemplateExpansionContext _parent;
-            private string _methodName;
+            private readonly TemplateExpansionContext _parent;
+            private readonly string _methodName;
 
-            public ProceedExpression(  string methodName, TemplateExpansionContext parent )
+            public ProceedExpression( string methodName, TemplateExpansionContext parent )
             {
                 this._methodName = methodName;
                 this._parent = parent;
@@ -382,7 +390,8 @@ namespace Caravela.Framework.Impl.Templating
                     nameof(meta.ProceedAsync) => targetMethod.GetAsyncInfoImpl().IsAwaitable,
                     nameof(meta.ProceedEnumerable) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerable or EnumerableKind
                         .UntypedIEnumerable,
-                    nameof(meta.ProceedEnumerator) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator,
+                    nameof(meta.ProceedEnumerator) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind
+                        .UntypedIEnumerator,
                     "ProceedAsyncEnumerable" => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IAsyncEnumerable,
                     "ProceedAsyncEnumerator" => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IAsyncEnumerator,
                     _ => throw new ArgumentOutOfRangeException()
@@ -391,14 +400,14 @@ namespace Caravela.Framework.Impl.Templating
                 if ( !isValid )
                 {
                     throw TemplatingDiagnosticDescriptors.CannotUseSpecificProceedInThisContext.CreateException(
-                        location, 
-                        (this._methodName,  targetMethod) );
+                        location,
+                        (this._methodName, targetMethod) );
                 }
 
-                return this._parent._proceedExpression.CreateExpression( expressionText, location );
+                return this._parent._proceedExpression!.CreateExpression( expressionText, location );
             }
 
-            public IType ExpressionType => this._parent._proceedExpression.ExpressionType;
+            public IType ExpressionType => this._parent._proceedExpression!.ExpressionType;
         }
     }
 }

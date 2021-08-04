@@ -100,19 +100,19 @@ namespace Caravela.Framework.Impl.Templating
 
                     case nameof(meta.Proceed):
                         return MetaMemberKind.Proceed;
-                    
+
                     case nameof(meta.ProceedAsync):
                         return MetaMemberKind.ProceedAsync;
-                    
+
                     case nameof(meta.ProceedEnumerable):
                         return MetaMemberKind.ProceedEnumerable;
-                    
+
                     case nameof(meta.ProceedEnumerator):
                         return MetaMemberKind.ProceedEnumerator;
-                    
+
                     case "ProceedAsyncEnumerable":
                         return MetaMemberKind.ProceedAsyncEnumerable;
-                    
+
                     case "ProceedAsyncEnumerator":
                         return MetaMemberKind.ProceedAsyncEnumerator;
 

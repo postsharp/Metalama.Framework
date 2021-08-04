@@ -43,6 +43,5 @@ namespace Caravela.Framework.Aspects
         IDiagnosticSink Diagnostics { get; }
 
         void DebugBreak();
-
     }
 }
