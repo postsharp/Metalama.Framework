@@ -85,9 +85,30 @@ namespace Caravela.Compiler
         {
             var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 
-            return this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
-                   !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
+            if ( this.MustReplaceByThrow( symbol ) )
+            {
+                return true;
+            }
+            else if ( symbol is IPropertySymbol property )
+            {
+                // In properties, the template attribute can be put on the accessors. 
+                
+                if ( property.GetMethod != null && this.MustReplaceByThrow( property.GetMethod ) )
+                {
+                    return true;
+                }
+                
+                if ( property.SetMethod != null && this.MustReplaceByThrow( property.SetMethod ) )
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
+
+        private bool MustReplaceByThrow( ISymbol? symbol ) => this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
+                                                              !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
 
         public override SyntaxNode? VisitIndexerDeclaration( IndexerDeclarationSyntax node )
         {

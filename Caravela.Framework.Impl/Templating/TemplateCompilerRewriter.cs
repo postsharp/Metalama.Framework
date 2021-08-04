@@ -217,7 +217,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // The node itself does not need to be transformed because it is compile time, but it needs to be converted
                 // into a run-time value. However, calls to variants of Proceed must be transformed into calls to the standard Proceed.
-                return this.CreateRunTimeExpression( (ExpressionSyntax) this._buildTimeOnlyRewriter.Visit( node ) );
+                return this.CreateRunTimeExpression( (ExpressionSyntax) this._buildTimeOnlyRewriter.Visit( node ), node );
             }
             else
             {
@@ -439,13 +439,13 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression ) => this.CreateRunTimeExpression( expression );
+        protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression ) => this.CreateRunTimeExpression( expression, originalExpression );
 
         /// <summary>
         /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="RuntimeExpression"/>
         /// that represents the input.
         /// </summary>
-        private ExpressionSyntax CreateRunTimeExpression( ExpressionSyntax expression )
+        private ExpressionSyntax CreateRunTimeExpression( ExpressionSyntax expression, SyntaxNode originalExpression )
         {
             switch ( expression.Kind() )
             {
@@ -538,8 +538,8 @@ namespace Caravela.Framework.Impl.Templating
                     when type is INamedTypeSymbol { IsGenericType: true } namedType2 && namedType2.TypeArguments[0] is IDynamicTypeSymbol &&
                          type.ContainingNamespace.ToDisplayString() == "System.Collections.Generic":
 
-                    var expressionText = SyntaxFactoryEx.LiteralExpression( expression.ToString() );
-                    var location = this._templateMetaSyntaxFactory.Location( this._syntaxTreeAnnotationMap.GetLocation( expression ) );
+                    var expressionText = SyntaxFactoryEx.LiteralExpression( originalExpression.ToString() );
+                    var location = this._templateMetaSyntaxFactory.Location( this._syntaxTreeAnnotationMap.GetLocation( originalExpression ) );
 
                     return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.GetDynamicSyntax) ) )
                         .AddArgumentListArguments(
@@ -732,7 +732,7 @@ namespace Caravela.Framework.Impl.Templating
                                 return Argument( transformedExpression );
 
                             default:
-                                return Argument( this.CreateRunTimeExpression( transformedExpression ) );
+                                return Argument( this.CreateRunTimeExpression( transformedExpression, a.Expression ) );
                         }
                     }
                     else
@@ -754,7 +754,9 @@ namespace Caravela.Framework.Impl.Templating
             else if ( this._templateMemberClassifier.IsRunTimeMethod( node.Expression ) )
             {
                 // Replace `meta.RunTime(x)` to `x`.
-                return this.CreateRunTimeExpression( node.ArgumentList.Arguments[0].Expression );
+                var expression = node.ArgumentList.Arguments[0].Expression;
+
+                return this.CreateRunTimeExpression( expression, expression );
             }
             else
             {

@@ -260,7 +260,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 var propertySymbol = (IPropertySymbol) this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
                 var propertyIsTemplate = !this.SymbolClassifier.GetTemplateInfo( propertySymbol ).IsNone;
-               
+                var propertyOrAccessorsAreTemplate = propertyIsTemplate;
 
                 var success = true;
                 SyntaxNode? transformedGetDeclaration = null;
@@ -271,6 +271,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     if ( node.AccessorList != null )
                     {
+                        var templateAccessorCount = 0; 
+                        
                         var getAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration );
                         var getterIsTemplate = getAccessor != null && (propertyIsTemplate || !this.SymbolClassifier.GetTemplateInfo( propertySymbol.GetMethod!).IsNone);
 
@@ -279,7 +281,8 @@ namespace Caravela.Framework.Impl.CompileTime
                         var setterIsTemplate = setAccessor != null && ( propertyIsTemplate || !this.SymbolClassifier.GetTemplateInfo( propertySymbol.SetMethod!).IsNone);
 
                         // Auto properties don't have bodies and so we don't need templates.
-
+                        
+                        
                         if ( getterIsTemplate && (getAccessor!.Body != null || getAccessor.ExpressionBody != null) )
                         {
                             success =
@@ -293,6 +296,8 @@ namespace Caravela.Framework.Impl.CompileTime
                                     this._cancellationToken,
                                     out _,
                                     out transformedGetDeclaration );
+
+                            templateAccessorCount++;
                         }
 
                         if ( setterIsTemplate && (setAccessor!.Body != null || setAccessor.ExpressionBody != null) )
@@ -308,6 +313,18 @@ namespace Caravela.Framework.Impl.CompileTime
                                     this._cancellationToken,
                                     out _,
                                     out transformedSetDeclaration );
+
+                            templateAccessorCount++;
+                        }
+
+                        if ( templateAccessorCount > 0 )
+                        {
+                            propertyOrAccessorsAreTemplate = true;
+                            
+                            if ( templateAccessorCount != node.AccessorList.Accessors.Count )
+                            {
+                                throw new AssertionFailedException( "When one accessor is a template, the other must also be a template." );
+                            }
                         }
                     }
                     else if ( propertyIsTemplate && node is PropertyDeclarationSyntax { ExpressionBody: not null } propertyNode )
@@ -331,7 +348,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 
                 if ( success )
                 {
-                    if ( !propertyIsTemplate )
+                    
+                    if ( !propertyOrAccessorsAreTemplate )
                     {
                         yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
                     }
@@ -346,6 +364,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     {
                         // The property can be deleted, i.e. it does not need to be inserted back in the member list.
                     }
+                    
 
                     if ( transformedGetDeclaration != null )
                     {

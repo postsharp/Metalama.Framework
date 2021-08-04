@@ -23,7 +23,7 @@ namespace Caravela.Framework.Aspects
                 "get_" + nameof(this.OverrideEnumerableProperty),
                 "get_" + nameof(this.OverrideEnumeratorProperty) );
 
-            builder.AdviceFactory.OverrideFieldOrPropertyAccessors( builder.Target, getterTemplateSelector, "get_" + nameof(this.OverrideProperty) );
+            builder.AdviceFactory.OverrideFieldOrPropertyAccessors( builder.Target, getterTemplateSelector, "set_" + nameof(this.OverrideProperty) );
         }
 
         public virtual void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder ) => builder.ExceptForInheritance().MustBeNonAbstract();

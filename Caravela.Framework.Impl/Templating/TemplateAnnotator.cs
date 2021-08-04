@@ -1174,13 +1174,13 @@ namespace Caravela.Framework.Impl.Templating
         {
             var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node )!;
 
-            if ( symbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } )
-            {
-                // We have an accessor, but we need the property or the event.
-                symbol = associatedSymbol;
-            }
+            // Detect if the current member is a template.
+            var isTemplate = !this._symbolScopeClassifier.GetTemplateInfo( symbol ).IsNone
+                             || (symbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol }
+                                 && !this._symbolScopeClassifier.GetTemplateInfo( associatedSymbol ).IsNone);
 
-            if ( !this._symbolScopeClassifier.GetTemplateInfo( symbol ).IsNone )
+            // If it is a template, update the currentTemplateMember field.
+            if ( isTemplate )
             {
                 var previousTemplateMember = this._currentTemplateMember;
                 this._currentTemplateMember = symbol;

@@ -42,8 +42,12 @@ namespace Caravela.Framework.Impl.Transformations
             if ( propertyTemplate.IsNotNull )
             {
                 this.PropertyTemplate = propertyTemplate;
-                this.GetTemplate = new Template<IMethod>( this.PropertyTemplate.Declaration!.Getter );
-                this.SetTemplate = new Template<IMethod>( this.PropertyTemplate.Declaration!.Setter );
+
+                if (! propertyTemplate.Declaration!.IsAutoPropertyOrField )
+                {
+                    this.GetTemplate = new Template<IMethod>( this.PropertyTemplate.Declaration!.Getter );
+                    this.SetTemplate = new Template<IMethod>( this.PropertyTemplate.Declaration!.Setter );
+                }
             }
             else
             {
@@ -61,16 +65,9 @@ namespace Caravela.Framework.Impl.Transformations
                     this.Advice.AspectLayerId,
                     this.OverriddenDeclaration );
 
-                var getTemplate =
-                    this.PropertyTemplate.Declaration is { IsAutoPropertyOrField: false }
-                        ? new Template<IMethod>( this.PropertyTemplate.Declaration.Getter )
-                        : this.GetTemplate;
-
-                var setTemplate =
-                    this.PropertyTemplate.Declaration is { IsAutoPropertyOrField: false }
-                        ? new Template<IMethod>( this.PropertyTemplate.Declaration.Setter )
-                        : this.SetTemplate;
-
+                var getTemplate = this.GetTemplate;
+                var setTemplate = this.SetTemplate;
+                
                 var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly
                     ? SyntaxKind.InitAccessorDeclaration
                     : SyntaxKind.SetAccessorDeclaration;
@@ -80,7 +77,7 @@ namespace Caravela.Framework.Impl.Transformations
 
                 if ( this.OverriddenDeclaration.Getter != null )
                 {
-                    if ( !getTemplate.IsNull )
+                    if ( getTemplate.IsNotNull )
                     {
                         templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                             context,
@@ -102,7 +99,7 @@ namespace Caravela.Framework.Impl.Transformations
 
                 if ( this.OverriddenDeclaration.Setter != null )
                 {
-                    if ( !setTemplate.IsNull )
+                    if ( setTemplate.IsNotNull )
                     {
                         templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                             context,
