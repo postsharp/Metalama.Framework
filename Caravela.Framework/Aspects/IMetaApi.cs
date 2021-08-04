@@ -44,11 +44,5 @@ namespace Caravela.Framework.Aspects
 
         void DebugBreak();
 
-        /// <summary>
-        /// Invoke the next version of the target declaration.
-        /// </summary>
-        /// <param name="kind"></param>
-        /// <returns></returns>
-        dynamic? Proceed( TemplateKind kind );
     }
 }

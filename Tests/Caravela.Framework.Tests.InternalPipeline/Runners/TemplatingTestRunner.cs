@@ -335,7 +335,6 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     template,
                     ImmutableDictionary.Create<string, object?>().Add( "TestKey", "TestValue" ),
                     default,
-                    proceedExpression,
                     augmentedServiceProvider ) );
 
             return (new TemplateExpansionContext(
@@ -344,7 +343,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
                         compilation,
                         lexicalScope,
                         this._syntaxSerializationService,
-                        compilation.Factory ), roslynTargetMethod);
+                        compilation.Factory,
+                        default,
+                        proceedExpression), roslynTargetMethod);
 
             static ExpressionSyntax GetProceedInvocation( IMethod targetMethod )
             {

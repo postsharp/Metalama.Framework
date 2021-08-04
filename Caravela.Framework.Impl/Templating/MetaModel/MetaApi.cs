@@ -80,17 +80,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public object BaseStatic
             => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
-        public object? Proceed( TemplateKind templateKind )
-        {
-            if ( templateKind != TemplateKind.Default && templateKind != this._common.Template.SelectedKind )
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(templateKind),
-                    $"This method cannot be used in the context of a {this._common.Template.SelectedKind} template." );
-            }
-
-            return this._common.ProceedExpression;
-        }
 
         public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;
 

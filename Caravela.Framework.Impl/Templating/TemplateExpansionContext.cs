@@ -26,6 +26,7 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly Template<IMethod> _templateMethod;
         private readonly Func<TemplateExpansionContext, StatementSyntax>? _expandYieldProceed;
+        private readonly IDynamicExpression? _proceedExpression;
 
         public TemplateLexicalScope LexicalScope { get; }
 
@@ -38,7 +39,8 @@ namespace Caravela.Framework.Impl.Templating
             TemplateLexicalScope lexicalScope,
             SyntaxSerializationService syntaxSerializationService,
             ICompilationElementFactory syntaxFactory,
-            Template<IMethod> templateMethod = default,
+            Template<IMethod> templateMethod,
+            IDynamicExpression? proceedExpression,
             Func<TemplateExpansionContext, StatementSyntax>? expandYieldProceed = null )
         {
             this._templateMethod = templateMethod;
@@ -49,6 +51,7 @@ namespace Caravela.Framework.Impl.Templating
             this.SyntaxSerializationService = syntaxSerializationService;
             this.SyntaxFactory = syntaxFactory;
             this.LexicalScope = lexicalScope;
+            this._proceedExpression = proceedExpression;
             Invariant.Assert( this.DiagnosticSink.DefaultScope != null );
             Invariant.Assert( this.DiagnosticSink.DefaultScope!.Equals( this.MetaApi.Declaration ) );
         }
@@ -342,6 +345,8 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        public IDynamicExpression? Proceed( string methodName ) => new ProceedExpression( methodName, this );
+
         public StatementSyntax CreateYieldProceedStatement()
         {
             if ( this._expandYieldProceed != null )
@@ -354,6 +359,46 @@ namespace Caravela.Framework.Impl.Templating
                     SyntaxKind.YieldReturnStatement,
                     ((IDynamicExpression) meta.Proceed()!).CreateExpression() );
             }
+        }
+
+        class ProceedExpression : IDynamicExpression
+        {
+            private TemplateExpansionContext _parent;
+            private string _methodName;
+
+            public ProceedExpression(  string methodName, TemplateExpansionContext parent )
+            {
+                this._methodName = methodName;
+                this._parent = parent;
+            }
+
+            public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null )
+            {
+                var targetMethod = this._parent.MetaApi.Target.Method;
+
+                var isValid = this._methodName switch
+                {
+                    nameof(meta.Proceed) => true,
+                    nameof(meta.ProceedAsync) => targetMethod.GetAsyncInfoImpl().IsAwaitable,
+                    nameof(meta.ProceedEnumerable) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerable or EnumerableKind
+                        .UntypedIEnumerable,
+                    nameof(meta.ProceedEnumerator) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator,
+                    "ProceedAsyncEnumerable" => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IAsyncEnumerable,
+                    "ProceedAsyncEnumerator" => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IAsyncEnumerator,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+
+                if ( !isValid )
+                {
+                    throw TemplatingDiagnosticDescriptors.CannotUseSpecificProceedInThisContext.CreateException(
+                        location, 
+                        (this._methodName,  targetMethod) );
+                }
+
+                return this._parent._proceedExpression.CreateExpression( expressionText, location );
+            }
+
+            public IType ExpressionType => this._parent._proceedExpression.ExpressionType;
         }
     }
 }

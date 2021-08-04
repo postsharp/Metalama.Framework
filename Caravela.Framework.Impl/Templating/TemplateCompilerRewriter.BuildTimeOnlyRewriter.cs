@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating
@@ -19,16 +20,41 @@ namespace Caravela.Framework.Impl.Templating
                 this._rewriter = rewriter;
             }
 
-            public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
+            public bool TryRewriteProceedInvocation( InvocationExpressionSyntax node, out InvocationExpressionSyntax transformedNode )
             {
-                if ( this._rewriter._templateMemberClassifier.GetMetaMemberKind( node ) == MetaMemberKind.Proceed )
+                var kind = this._rewriter._templateMemberClassifier.GetMetaMemberKind( node.Expression );
+
+                if ( kind.IsAnyProceed() )
                 {
-                    return node.WithIdentifier( SyntaxFactory.Identifier( nameof(meta.Proceed) ) );
+                    var methodName = node.Expression switch
+                    {
+                        MemberAccessExpressionSyntax memberAccess => memberAccess.Name.Identifier.Text,
+                        IdentifierNameSyntax identifier => identifier.Identifier.Text,
+                        _ => throw new AssertionFailedException($"Don't know how to get the member name in {node.Expression.GetType().Name}")
+                    };
+
+                    transformedNode =
+                        node.CopyAnnotationsTo(
+                            InvocationExpression(
+                                    this._rewriter._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.Proceed) ) )
+                                .WithArgumentList(
+                                    ArgumentList( SeparatedList( new[] { Argument( SyntaxFactoryEx.LiteralExpression( methodName ) ) } ) ) ) )!;
+
+                    return true;
                 }
                 else
                 {
-                    return node;
+                    transformedNode = node;
+
+                    return false;
                 }
+            }
+
+            public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
+            {
+                this.TryRewriteProceedInvocation( node, out var transformedNode );
+
+                return transformedNode;
             }
         }
     }

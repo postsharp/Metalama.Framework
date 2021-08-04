@@ -193,5 +193,16 @@ namespace Caravela.Framework.Impl.Templating
                     "information available in '{0}'.",
                     _category,
                     Error );
+
+        internal static readonly DiagnosticDefinition<(string MethodName, IDeclaration TargetDeclaration)>
+            CannotUseSpecificProceedInThisContext
+                = new(
+                    "CR0223",
+                    "Cannot use a specific Proceed variant in the current context.",
+                    "Cannot use the {0} method in '{1}' because the return type of the method is compatible with the {0} method.",
+                    _category,
+                    Error );
+
+        
     }
 }

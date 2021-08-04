@@ -41,23 +41,40 @@ namespace Caravela.Framework.Aspects
         public static IMetaTarget Target => CurrentContext.Target;
 
         /// <summary>
-        /// Injects the logic that has been intercepted. For instance, in an <see cref="OverrideMethodAspect"/>,
+        /// Invokes the logic that has been overwritten. For instance, in an <see cref="OverrideMethodAspect"/>,
         /// calling <see cref="Proceed"/> invokes the method being overridden. Note that the way how the
         /// logic is invoked (as a method call or inlining) is considered an implementation detail.
         /// </summary>
-        /// <returns></returns>
         [TemplateKeyword]
-        public static dynamic? Proceed() => CurrentContext.Proceed( TemplateKind.Default );
+        public static dynamic? Proceed() => throw NewMustBeTransformedException();
 
+        /// <summary>
+        /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>Task&lt;dynamic?&gt;</c>.
+        /// Only use this method when the return type of the method or accessor is task-like. Note that
+        /// the actual return type of the overridden method or accessor is the one of the overwritten semantic, so it
+        /// can be a void <see cref="Task"/>, a <see cref="ValueType"/>, or any other type.
+        /// </summary>
         public static Task<dynamic?> ProceedAsync() => throw NewMustBeTransformedException();
 
+        /// <summary>
+        /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IEnumerable&lt;dynamic?&gt;</c>.
+        /// </summary>
         public static IEnumerable<dynamic?> ProceedEnumerable() => throw NewMustBeTransformedException();
 
+        /// <summary>
+        /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IEnumerator&lt;dynamic?&gt;</c>.
+        /// </summary>
         public static IEnumerator<dynamic?> ProceedEnumerator() => throw NewMustBeTransformedException();
 
 #if NET5_0
+        /// <summary>
+        /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IAsyncEnumerable&lt;dynamic?&gt;</c>.
+        /// </summary>
         public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => throw NewMustBeTransformedException();
 
+        /// <summary>
+        /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IAsyncEnumerator&lt;dynamic?&gt;</c>.
+        /// </summary>
         public static IAsyncEnumerator<dynamic?> ProceedAsyncEnumerator() => throw NewMustBeTransformedException();
 #endif
 

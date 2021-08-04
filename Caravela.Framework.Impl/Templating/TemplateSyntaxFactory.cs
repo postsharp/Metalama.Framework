@@ -301,6 +301,8 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        public static IDynamicExpression? Proceed( string methodName ) => ExpansionContext.Proceed( methodName );
+
         public static StatementSyntax YieldProceed() => ExpansionContext.CreateYieldProceedStatement();
 
         public static ValueTask<dynamic?> ProceedAsync() => meta.Proceed();

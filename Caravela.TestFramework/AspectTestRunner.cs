@@ -259,14 +259,14 @@ namespace Caravela.TestFramework
         public override void ExecuteAssertions( TestInput testInput, TestResult testResult )
         {
             base.ExecuteAssertions( testInput, testResult );
+            
+            var expectedProgramOutputPath = Path.Combine(
+                Path.GetDirectoryName( testInput.FullPath )!,
+                Path.GetFileNameWithoutExtension( testInput.FullPath ) + FileExtensions.ProgramOutput );
 
             // Compare with expected program outputs.
-            if ( testResult.ProgramOutput != null )
+            if ( !string.IsNullOrWhiteSpace( testResult.ProgramOutput ) )
             {
-                var expectedProgramOutputPath = Path.Combine(
-                    Path.GetDirectoryName( testInput.FullPath )!,
-                    Path.GetFileNameWithoutExtension( testInput.FullPath ) + FileExtensions.ProgramOutput );
-
                 // If the expectation file does not exist, create it with some placeholder content.
                 if ( !File.Exists( expectedProgramOutputPath ) )
                 {
@@ -282,6 +282,10 @@ namespace Caravela.TestFramework
                 var expectedOutput = File.ReadAllText( expectedProgramOutputPath );
 
                 Assert.Equal( expectedOutput, testResult.ProgramOutput );
+            }
+            else if ( File.Exists( expectedProgramOutputPath ) && string.IsNullOrWhiteSpace( File.ReadAllText( expectedProgramOutputPath ) ) )
+            {
+                File.Delete( expectedProgramOutputPath );
             }
         }
     }

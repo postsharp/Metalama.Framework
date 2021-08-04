@@ -18,7 +18,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         Template<IMemberOrNamedType> Template,
         IReadOnlyDictionary<string, object?> Tags,
         AspectLayerId AspectLayerId,
-        IDynamicExpression ProceedExpression,
         IServiceProvider ServiceProvider )
     {
         public AspectPipelineDescription PipelineDescription { get; } = ServiceProvider.GetService<AspectPipelineDescription>();

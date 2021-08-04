@@ -673,7 +673,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 var invocationExpression = InvocationExpression(
                         this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicDiscardAssignment) ) )
-                    .AddArgumentListArguments( Argument( this.CastToDynamicExpression( assignment.Right ) ) );
+                    .AddArgumentListArguments( Argument( this.CastToDynamicExpression( (ExpressionSyntax) this._buildTimeOnlyRewriter.Visit(  assignment.Right  ) ) ) );
 
                 return this.WithCallToAddSimplifierAnnotation( invocationExpression );
             }
@@ -706,6 +706,10 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     return SyntaxFactoryEx.LiteralExpression( name );
                 }
+            }
+            else if ( this._buildTimeOnlyRewriter.TryRewriteProceedInvocation( node, out var proceedNode ) )
+            {
+                return proceedNode;
             }
 
             if ( transformationKind != TransformationKind.Transform &&
@@ -1417,12 +1421,7 @@ namespace Caravela.Framework.Impl.Templating
                         }
                     }
                 }
-                else if ( this._templateMemberClassifier.GetMetaMemberKind( symbol ) == MetaMemberKind.Proceed )
-                {
-                    // Any Proceed method variant must be replaced by the original Proceed because some of these variants do not
-                    // exist in .NET Standard 2.0.
-                    return node.WithIdentifier( Identifier( nameof(meta.Proceed) ) );
-                }
+               
             }
 
             return base.VisitIdentifierName( node );

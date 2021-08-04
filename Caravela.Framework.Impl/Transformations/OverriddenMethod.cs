@@ -56,7 +56,6 @@ namespace Caravela.Framework.Impl.Transformations
                         this.Template.Cast(),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
-                        proceedExpression,
                         context.ServiceProvider ) );
 
                 var expansionContext = new TemplateExpansionContext(
@@ -67,6 +66,7 @@ namespace Caravela.Framework.Impl.Transformations
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
                     (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
                     this.Template,
+                    proceedExpression,
                     expandYieldProceed );
 
                 var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( this.Template.Declaration! );

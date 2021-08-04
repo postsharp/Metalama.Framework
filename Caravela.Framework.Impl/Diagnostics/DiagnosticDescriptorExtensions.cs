@@ -18,14 +18,17 @@ namespace Caravela.Framework.Impl.Diagnostics
         /// The diagnostic location is taken from <see cref="DiagnosticContext"/>. This method must be called in user-called code
         /// in case of precondition failure (i.e. when the responsibility of the error lays on the user).
         /// </summary>
-        /// <param name="definition"></param>
-        /// <param name="arguments"></param>
-        /// <returns></returns>
         public static Exception CreateException<T>( this DiagnosticDefinition<T> definition, T arguments )
             => new InvalidUserCodeException( definition.CreateDiagnostic( DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
+        
+        public static Exception CreateException<T>( this DiagnosticDefinition<T> definition, Location? location, T arguments )
+            => new InvalidUserCodeException( definition.CreateDiagnostic( location ?? DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
 
         public static Exception CreateException( this DiagnosticDefinition definition, params object[] arguments )
             => new InvalidUserCodeException( definition.CreateDiagnostic( DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
+        
+        public static Exception CreateException( this DiagnosticDefinition definition, Location? location, params object[] arguments )
+            => new InvalidUserCodeException( definition.CreateDiagnostic( location ?? DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
 
         /// <summary>
         /// Instantiates a <see cref="Diagnostic"/> based on the current descriptor and given arguments.
