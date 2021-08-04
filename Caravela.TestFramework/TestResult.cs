@@ -296,8 +296,9 @@ namespace Caravela.TestFramework
                         d => d.Id != "CR0222" &&
                              (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
                               || d.Severity >= DiagnosticSeverity.Warning) )
+                    .OrderBy( d => d.Location.SourceSpan.Start )
+                    .ThenBy( d => d.GetMessage(), StringComparer.Ordinal )
                     .Select( d => $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
-                    .OrderByDescending( s => s )
                     .Select( SyntaxFactory.Comment )
                     .ToList() );
 
