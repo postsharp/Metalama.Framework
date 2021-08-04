@@ -6,5 +6,5 @@ string Method(MyClass1 a)
     global::System.Console.WriteLine("ct=" + ct);
     global::System.Console.WriteLine("Oops");
     global::System.Console.WriteLine("MyClass1");
-    return (string)this.Method(a);
+    return this.Method(a);
 }

@@ -12,5 +12,5 @@ int Method(int a)
 
     // Oops 4
 
-    return (int)this.Method(a);
+    return this.Method(a);
 }

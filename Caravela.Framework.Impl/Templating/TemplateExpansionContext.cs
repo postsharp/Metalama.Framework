@@ -123,13 +123,27 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                // TODO: validate the returnExpression according to the method's return type.
-                return
-                    ReturnStatement(
-                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                        CastExpression( ParseTypeName( returnType.ToDisplayString() ), returnExpression )
-                            .WithAdditionalAnnotations( Simplifier.Annotation ),
-                        Token( SyntaxKind.SemicolonToken ) );
+                var compilation = returnType.GetCompilationModel().RoslynCompilation;
+
+                if ( RuntimeExpression.TryFindExpressionType( returnExpression, compilation, out var expressionType ) &&
+                     compilation.HasImplicitConversion( expressionType, returnType.GetSymbol() ))
+                {
+                    // No need to emit a cast.
+                    return
+                        ReturnStatement(
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                            returnExpression,
+                            Token( SyntaxKind.SemicolonToken ) );
+                }
+                else
+                {
+                    return
+                        ReturnStatement(
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                            CastExpression( ParseTypeName( returnType.ToDisplayString() ), returnExpression )
+                                .WithAdditionalAnnotations( Simplifier.Annotation ),
+                            Token( SyntaxKind.SemicolonToken ) );
+                }
             }
         }
 

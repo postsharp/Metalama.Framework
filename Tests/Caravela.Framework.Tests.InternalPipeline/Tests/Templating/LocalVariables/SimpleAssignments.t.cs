@@ -6,5 +6,5 @@ int Method(int a)
     global::System.Console.WriteLine(a0);
     global::System.Console.WriteLine(x);
     global::System.Console.WriteLine(0);
-    return (int)this.Method(a);
+    return this.Method(a);
 }

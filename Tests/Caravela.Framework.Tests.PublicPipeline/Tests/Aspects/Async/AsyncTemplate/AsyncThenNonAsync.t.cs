@@ -23,7 +23,7 @@ private async Task<int> __AsyncMethod__OriginalImpl(int a)
 public global::System.Threading.Tasks.Task<global::System.Int32> __Override__AsyncMethod__By__Aspect2(global::System.Int32 a)
 {
     global::System.Console.WriteLine("Non-async intercept");
-    return (System.Threading.Tasks.Task<int>)this.__AsyncMethod__OriginalImpl(a);
+    return this.__AsyncMethod__OriginalImpl(a);
 }        
         [Aspect1]
         [Aspect2]

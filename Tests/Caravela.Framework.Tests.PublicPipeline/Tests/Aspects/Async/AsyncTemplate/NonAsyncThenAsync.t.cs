@@ -6,7 +6,7 @@ class TargetCode
         public Task<int> AsyncMethod(int a)
 {
     global::System.Console.WriteLine("Non-async intercept");
-    return (System.Threading.Tasks.Task<int>)this.__Override__AsyncMethod__By__Aspect2(a);
+    return this.__Override__AsyncMethod__By__Aspect2(a);
 }
 
 private async Task<int> __AsyncMethod__OriginalImpl(int a)
@@ -28,7 +28,7 @@ public async global::System.Threading.Tasks.Task<global::System.Int32> __Overrid
         public Task<int> NonAsyncMethod(int a)
 {
     global::System.Console.WriteLine("Non-async intercept");
-    return (System.Threading.Tasks.Task<int>)this.__Override__NonAsyncMethod__By__Aspect2(a);
+    return this.__Override__NonAsyncMethod__By__Aspect2(a);
 }
 
 private Task<int> __NonAsyncMethod__OriginalImpl(int a)

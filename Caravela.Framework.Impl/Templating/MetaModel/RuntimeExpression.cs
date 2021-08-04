@@ -181,9 +181,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             };
         }
 
-        private static bool TryFindExpressionType( SyntaxNode node, Compilation compilation, out ITypeSymbol? type )
+        public static bool TryFindExpressionType( SyntaxNode node, Compilation compilation, out ITypeSymbol? type )
         {
-           
             // If we don't know the exact type, check if we have a type annotation on the syntax.
 
             var typeAnnotation = node.GetAnnotations( _typeIdAnnotationName ).FirstOrDefault();
