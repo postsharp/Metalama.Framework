@@ -67,9 +67,9 @@ namespace Caravela.Framework.Impl.CodeModel
                 return this.TypeSymbol.Name switch
                 {
                     "IAsyncEnumerable" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
-                        => SpecialType.IAsyncEnumerable,
+                        => SpecialType.IAsyncEnumerable_T,
                     "IAsyncEnumerator" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
-                        => SpecialType.IAsyncEnumerator,
+                        => SpecialType.IAsyncEnumerator_T,
                     nameof(ValueTask) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
                         => this.TypeSymbol.IsGenericType ? SpecialType.ValueTask_T : SpecialType.ValueTask,
                     _ => SpecialType.None

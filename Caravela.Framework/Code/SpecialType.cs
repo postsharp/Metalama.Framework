@@ -51,17 +51,17 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// <c>System.Collections.Generic.List</c>.
         /// </summary>
-        List,
+        List_T,
 
         /// <summary>
         /// <c>System.Collections.Generic.IAsyncEnumerable</c>.
         /// </summary>
-        IAsyncEnumerable,
+        IAsyncEnumerable_T,
 
         /// <summary>
         /// <c>System.Collections.Generic.IAsyncEnumerator</c>.
         /// </summary>
-        IAsyncEnumerator,
+        IAsyncEnumerator_T,
 
         ValueTask,
 
