@@ -37,7 +37,6 @@ namespace Caravela.Framework.Aspects
 
         dynamic BaseStatic { get; }
 
-        // Gets the properties that were passed by the aspect initializer.
         IReadOnlyDictionary<string, object?> Tags { get; }
 
         IDiagnosticSink Diagnostics { get; }
