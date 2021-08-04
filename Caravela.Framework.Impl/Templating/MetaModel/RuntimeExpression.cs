@@ -11,8 +11,6 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -25,7 +23,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         private readonly string? _expressionTypeName;
         private ITypeSymbol? _expressionType;
-   
 
         /// <summary>
         /// Gets a value indicating whether it is legal to use the <c>out</c> or <c>ref</c> argument modifier with this expression.
@@ -67,12 +64,14 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             return this._expressionType;
         }
 
-        private static ExpressionSyntax AddTypeAnnotation(ExpressionSyntax node, ITypeSymbol? type, Compilation? compilation)
+        private static ExpressionSyntax AddTypeAnnotation( ExpressionSyntax node, ITypeSymbol? type, Compilation? compilation )
         {
             if ( type != null && compilation != null && !node.GetAnnotations( _typeIdAnnotationName ).Any() )
             {
                 return node.WithAdditionalAnnotations(
-                    new SyntaxAnnotation( _typeIdAnnotationName,  SymbolIdGenerator.GetInstance( compilation! ).GetId( type ).ToString( CultureInfo.InvariantCulture ) ) );
+                    new SyntaxAnnotation(
+                        _typeIdAnnotationName,
+                        SymbolIdGenerator.GetInstance( compilation! ).GetId( type ).ToString( CultureInfo.InvariantCulture ) ) );
             }
             else
             {
@@ -231,7 +230,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     return this.Syntax;
                 }
             }
-           
+
             // We may need a cast. We are not sure, but we cannot do more. This could be removed later in the simplification step.
             var cast = (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression( targetTypeSymbol, this.Syntax );
 

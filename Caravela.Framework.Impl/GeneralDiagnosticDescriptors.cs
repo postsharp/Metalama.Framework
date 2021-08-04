@@ -112,11 +112,6 @@ namespace Caravela.Framework.Impl
                 "CR0030", _category, "The compile-time project in assembly '{0}' is corrupted.", Error,
                 "The compile-time project resource file was corrupted." );
 
-        public static readonly DiagnosticDefinition<(ISymbol TemplateMethod, ISymbol[] RunTimeOnlyTypes)>
-            VirtualTemplateCannotReferenceRunTimeOnlyTypes = new(
-                "CR0031", _category, "The template '{0}' cannot be virtual because it references the following runtime-only types: {1}.", Error,
-                "A template cannot be virtual when it references run-time-only types." );
-
         public static readonly DiagnosticDefinition<(ISymbol TemplateMethod, string BaseClassName)>
             TemplateWithSameNameAlreadyDefined = new(
                 "CR0032", _category, "The class '{1}' already defines a template named '{0}'. Template names must be unique.", Error,
@@ -135,8 +130,8 @@ namespace Caravela.Framework.Impl
 
         public static readonly DiagnosticDefinition<(string Layer1, string Layer2)> UnorderedLayers = new(
             "CR0035", _category,
-            "The aspect layers '{0}' and '{1}' are not strongly ordered. Add an [assembly: " + nameof(AspectOrderAttribute) + 
-            "(...)] attribute to specify the order relationship between these two layers, otherwise the compilation will be non-deterministic.", 
+            "The aspect layers '{0}' and '{1}' are not strongly ordered. Add an [assembly: " + nameof(AspectOrderAttribute) +
+            "(...)] attribute to specify the order relationship between these two layers, otherwise the compilation will be non-deterministic.",
             Warning,
             "Two layers are not strongly ordered."
         );
@@ -144,8 +139,8 @@ namespace Caravela.Framework.Impl
         public static readonly DiagnosticDefinition<(string ClassName, string MemberName, string ExpectedAttribute, string ActualAttribute)>
             TemplateIsOfTheWrongKind = new(
                 "CR0036", _category,
-                "The template '{0}.{1}' was expected to be annotated with the '[Template(TemplateKind.{2})]' attribute, " + 
-                "but it is annotated with '[Template(TemplateKind.{3})]'.", 
+                "The template '{0}.{1}' was expected to be annotated with the '[Template(TemplateKind.{2})]' attribute, " +
+                "but it is annotated with '[Template(TemplateKind.{3})]'.",
                 Error,
                 "The member does not have a template custom attribute." );
 

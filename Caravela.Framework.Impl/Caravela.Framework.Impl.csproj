@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\IsExternalInit.cs" Link="IsExternalInit.cs" />
     
     <!-- We have to embed the netstandard2.0 build of Caravela.Framework so we can reference it to create
          the compile-time assembly. See ReferenceAssemblyLocator                                           -->
@@ -45,6 +44,12 @@
     <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" />
     
   </ItemGroup>
+    
+   <ItemGroup>
+     <Compile Include="..\IsExternalInit.cs">
+       <Link>SystemTypes\IsExternalInit.cs</Link>
+     </Compile>
+   </ItemGroup>
   
   <!-- Obfuscation -->
   <PropertyGroup>

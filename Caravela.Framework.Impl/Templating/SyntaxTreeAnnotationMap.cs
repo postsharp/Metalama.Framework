@@ -29,6 +29,7 @@ namespace Caravela.Framework.Impl.Templating
         private const string _declaredSymbolAnnotationKind = "declared";
         private const string _expressionTypeAnnotationKind = "type";
         private readonly SymbolIdGenerator _symbolIdGenerator;
+
         internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create(
             _symbolAnnotationKind,
             _declaredSymbolAnnotationKind,
@@ -149,7 +150,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     if ( !this._symbolToAnnotationMap.TryGetValue( symbolInfo.Symbol, out var annotation ) )
                     {
-                        annotation = new SyntaxAnnotation( _symbolAnnotationKind, this._symbolIdGenerator.GetId( symbolInfo.Symbol ));
+                        annotation = new SyntaxAnnotation( _symbolAnnotationKind, this._symbolIdGenerator.GetId( symbolInfo.Symbol ) );
                         this._symbolToAnnotationMap[symbolInfo.Symbol] = annotation;
                         this._annotationToSymbolMap[annotation] = symbolInfo.Symbol;
                     }
@@ -162,7 +163,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     if ( !this._declaredSymbolToAnnotationMap.TryGetValue( declaredSymbol, out var annotation ) )
                     {
-                        annotation = new SyntaxAnnotation( _declaredSymbolAnnotationKind, this._symbolIdGenerator.GetId( declaredSymbol ));
+                        annotation = new SyntaxAnnotation( _declaredSymbolAnnotationKind, this._symbolIdGenerator.GetId( declaredSymbol ) );
                         this._declaredSymbolToAnnotationMap[declaredSymbol] = annotation;
                         this._annotationToDeclaredSymbolMap[annotation] = declaredSymbol;
                     }
@@ -307,12 +308,11 @@ namespace Caravela.Framework.Impl.Templating
 
             return null;
         }
-        
-        
+
         /// <summary>
         /// Gets a the expression type of a node when the compilation is known. 
         /// </summary>
-        internal static bool TryGetExpressionType( SyntaxNode node, Compilation compilation, [NotNullWhen(true)] out ISymbol? symbol )
+        internal static bool TryGetExpressionType( SyntaxNode node, Compilation compilation, [NotNullWhen( true )] out ISymbol? symbol )
         {
             var annotation = node.GetAnnotations( _expressionTypeAnnotationKind ).SingleOrDefault();
 
@@ -325,6 +325,7 @@ namespace Caravela.Framework.Impl.Templating
             else
             {
                 symbol = null;
+
                 return false;
             }
         }

@@ -28,6 +28,10 @@ namespace Caravela.Framework.Impl.Templating
         /// The <see cref="meta.This"/> property.
         /// </summary>
         This,
+
+        /// <summary>
+        /// Any <c>meta.Proceed*</c> method.
+        /// </summary>
         Proceed
     }
 }

@@ -131,6 +131,5 @@ namespace Caravela.Framework.Impl.Templating
 
             return transformedSyntaxRoot != null && templateCompilerRewriter.Success;
         }
-
     }
 }

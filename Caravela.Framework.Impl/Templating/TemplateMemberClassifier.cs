@@ -61,8 +61,8 @@ namespace Caravela.Framework.Impl.Templating
 
             var nodeSymbol = this._syntaxTreeAnnotationMap.GetSymbol( originalNode );
 
-            return (nodeSymbol is IMethodSymbol method && method.ReturnType.IsDynamic(strict)) ||
-                   (nodeSymbol is IPropertySymbol property && property.Type.IsDynamic(strict));
+            return (nodeSymbol is IMethodSymbol method && method.ReturnType.IsDynamic( strict )) ||
+                   (nodeSymbol is IPropertySymbol property && property.Type.IsDynamic( strict ));
         }
 
 #pragma warning disable CA1822 // Static anyway.
@@ -99,6 +99,11 @@ namespace Caravela.Framework.Impl.Templating
                         return MetaMemberKind.This;
 
                     case nameof(meta.Proceed):
+                    case nameof(meta.ProceedAsync):
+                    case nameof(meta.ProceedEnumerable):
+                    case nameof(meta.ProceedEnumerator):
+                    case "ProceedAsyncEnumerable":
+                    case "ProceedAsyncEnumerator":
                         return MetaMemberKind.Proceed;
 
                     default:

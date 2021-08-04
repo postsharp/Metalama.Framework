@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     var hasCaravelaReference = compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ) != null;
 
-                    return hasCaravelaReference ? new SymbolClassifier( compilation, this._serviceProvider ) : this._vanillaClassifier;
+                    return hasCaravelaReference ? new SymbolClassifier( c, this._serviceProvider ) : this._vanillaClassifier;
                 } );
     }
 }

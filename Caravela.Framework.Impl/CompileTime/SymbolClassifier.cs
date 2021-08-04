@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 (typeof(Task<>), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(ValueTask), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(ValueTask<>), Scope: TemplatingScope.RunTimeOnly, false)
-            }.ToDictionary( t => t.ReflectionType.Name, t => ( t.ReflectionType.Namespace, t.Scope, t.MembersOnly) );
+            }.ToDictionary( t => t.ReflectionType.Name, t => (t.ReflectionType.Namespace, t.Scope, t.MembersOnly) );
 
         private readonly Compilation _compilation;
         private readonly INamedTypeSymbol _compileTimeAttribute;

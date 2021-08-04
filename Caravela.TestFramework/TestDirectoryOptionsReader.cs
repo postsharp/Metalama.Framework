@@ -32,7 +32,7 @@ namespace Caravela.TestFramework
                 assembly, 
                 a =>
                 {
-                    var assemblyInfo = new ReflectionAssemblyInfo( assembly );
+                    var assemblyInfo = new ReflectionAssemblyInfo( a );
                     var discoverer = new TestDiscoverer( assemblyInfo );
 
                     return new TestDirectoryOptionsReader( discoverer.FindProjectDirectory() );

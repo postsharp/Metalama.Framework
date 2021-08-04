@@ -315,12 +315,6 @@ namespace Caravela.Framework.Impl.Templating
                 case IDynamicExpression dynamicExpression:
                     return dynamicExpression.CreateExpression( expressionText, location );
 
-                case Task<object?> task:
-                    return ((IDynamicExpression?) task.Result)?.CreateExpression( expressionText, location );
-
-                case DynamicEnumerable enumerable:
-                    return ((IDynamicExpression?) enumerable.Expression)?.CreateExpression( expressionText, location );
-
                 default:
                     throw new ArgumentOutOfRangeException( nameof(expression), $"Don't know how to extract the syntax from '{expression}'." );
             }

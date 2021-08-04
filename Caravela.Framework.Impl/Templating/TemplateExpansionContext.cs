@@ -126,7 +126,7 @@ namespace Caravela.Framework.Impl.Templating
                 var compilation = returnType.GetCompilationModel().RoslynCompilation;
 
                 if ( RuntimeExpression.TryFindExpressionType( returnExpression, compilation, out var expressionType ) &&
-                     compilation.HasImplicitConversion( expressionType, returnType.GetSymbol() ))
+                     compilation.HasImplicitConversion( expressionType, returnType.GetSymbol() ) )
                 {
                     // No need to emit a cast.
                     return

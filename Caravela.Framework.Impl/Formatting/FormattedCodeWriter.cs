@@ -4,7 +4,9 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.Text;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Formatting
@@ -14,6 +16,44 @@ namespace Caravela.Framework.Impl.Formatting
         protected const string CSharpClassTagName = "csharp";
         protected const string DiagnosticTagName = "diagnostic";
         public const string DiagnosticAnnotationName = "caravela-diagnostic";
+
+        public static T AddDiagnosticAnnotations<T>( T syntaxRoot, string? filePath, IEnumerable<Diagnostic>? diagnostics )
+            where T : SyntaxNode
+        {
+            if ( diagnostics == null || filePath == null )
+            {
+                return syntaxRoot;
+            }
+
+            var fileName = Path.GetFileName( filePath );
+
+            var outputSyntaxRoot = syntaxRoot;
+
+            foreach ( var diagnostic in diagnostics )
+            {
+                var position = diagnostic.Location.GetLineSpan();
+
+                if ( !position.IsValid || !position.Path.EndsWith( filePath, StringComparison.OrdinalIgnoreCase ) )
+                {
+                    // The diagnostic is not in the current document.
+                    continue;
+                }
+
+                if ( Path.GetFileName( diagnostic.Location.SourceTree!.FilePath ) == fileName )
+                {
+                    var node = outputSyntaxRoot.FindNode( diagnostic.Location.SourceSpan );
+
+                    outputSyntaxRoot = outputSyntaxRoot.ReplaceNode(
+                        node,
+                        node.WithAdditionalAnnotations(
+                            new SyntaxAnnotation(
+                                DiagnosticAnnotationName,
+                                diagnostic.Severity + ": " + diagnostic.GetMessage() ) ) );
+                }
+            }
+
+            return outputSyntaxRoot;
+        }
 
         protected static (SourceText SourceText, ClassifiedTextSpanCollection TextSpans) GetClassifiedTextSpans(
             Document document,
@@ -68,11 +108,13 @@ namespace Caravela.Framework.Impl.Formatting
                 visitor.Visit( syntaxTree.GetRoot() );
             }
 
-            if ( diagnostics != null )
+            if ( diagnostics != null && document.FilePath != null )
             {
                 foreach ( var diagnostic in diagnostics )
                 {
-                    if ( diagnostic.Location.SourceTree?.FilePath != document.FilePath )
+                    var position = diagnostic.Location.GetLineSpan();
+
+                    if ( !position.IsValid || !position.Path.EndsWith( document.FilePath, StringComparison.OrdinalIgnoreCase ) )
                     {
                         // The diagnostic is not in the current document.
                         continue;
@@ -80,7 +122,7 @@ namespace Caravela.Framework.Impl.Formatting
 
                     foreach ( var span in classifiedTextSpans.GetClassifiedSpans( diagnostic.Location.SourceSpan ) )
                     {
-                        if ( diagnostic.Location.SourceSpan.Contains( span.Span ) )
+                        if ( diagnostic.Location.SourceSpan.IntersectsWith( span.Span ) )
                         {
                             classifiedTextSpans.SetTag(
                                 diagnostic.Location.SourceSpan,

@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Observers
 {
@@ -16,5 +17,7 @@ namespace Caravela.Framework.Impl.Observers
         /// Method called by <see cref="CompileTimeCompilationBuilder.TryCreateCompileTimeCompilation"/>.
         /// </summary>
         void OnCompileTimeCompilation( Compilation compilation );
+
+        void OnCompileTimeCompilationEmit( Compilation compilation, ImmutableArray<Diagnostic> diagnostics );
     }
 }

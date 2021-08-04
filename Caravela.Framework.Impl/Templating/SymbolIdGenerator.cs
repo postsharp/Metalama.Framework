@@ -19,15 +19,15 @@ namespace Caravela.Framework.Impl.Templating
 
         private SymbolIdGenerator() { }
 
-        public static SymbolIdGenerator GetInstance( Compilation compilation ) => _instances.GetValue( compilation, c => new SymbolIdGenerator() );
+        public static SymbolIdGenerator GetInstance( Compilation compilation ) => _instances.GetValue( compilation, _ => new SymbolIdGenerator() );
 
         public string GetId( ISymbol symbol )
             => this._symbolsToIds.GetOrAdd(
                 symbol,
-                valueFactory: s =>
+                s =>
                 {
                     var id = Interlocked.Increment( ref this._nextId ).ToString( CultureInfo.InvariantCulture );
-                    this._idsToSymbols[id] = symbol;
+                    this._idsToSymbols[id] = s;
 
                     return id;
                 } );

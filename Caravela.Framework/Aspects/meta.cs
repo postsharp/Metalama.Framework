@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,6 +32,9 @@ namespace Caravela.Framework.Aspects
         private static InvalidOperationException NewInvalidOperationException()
             => new( "The 'meta' API can be used only in the execution context of a template." );
 
+        private static NotSupportedException NewMustBeTransformedException( [CallerMemberName] string? caller = null )
+            => new( $"Calls to {caller} are supposed to be transformed." );
+
         /// <summary>
         /// Gets access to the declaration being overridden or introduced.
         /// </summary>
@@ -45,17 +48,17 @@ namespace Caravela.Framework.Aspects
         /// <returns></returns>
         [TemplateKeyword]
         public static dynamic? Proceed() => CurrentContext.Proceed( TemplateKind.Default );
-        
-        public static Task<dynamic?> ProceedAsync() => Task.FromResult( CurrentContext.Proceed( TemplateKind.Async )! );
 
-        public static IEnumerable<dynamic?> ProceedEnumerable() => new DynamicEnumerable( CurrentContext.Proceed( TemplateKind.IEnumerable ) );
+        public static Task<dynamic?> ProceedAsync() => throw NewMustBeTransformedException();
 
-        public static IEnumerator<dynamic?> ProceedEnumerator() => new DynamicEnumerable( CurrentContext.Proceed( TemplateKind.IEnumerator ) );
+        public static IEnumerable<dynamic?> ProceedEnumerable() => throw NewMustBeTransformedException();
+
+        public static IEnumerator<dynamic?> ProceedEnumerator() => throw NewMustBeTransformedException();
 
 #if NET5_0
-        public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => new DynamicEnumerable( CurrentContext.Proceed( TemplateKind.IAsyncEnumerable ) );
+        public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => throw NewMustBeTransformedException();
 
-        public static IAsyncEnumerator<dynamic?> ProceedAsyncEnumerator() => new DynamicEnumerable( CurrentContext.Proceed( TemplateKind.IAsyncEnumerator ) );
+        public static IAsyncEnumerator<dynamic?> ProceedAsyncEnumerator() => throw NewMustBeTransformedException();
 #endif
 
         /// <summary>

@@ -3,8 +3,10 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Observers;
 using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,6 +25,9 @@ namespace Caravela.TestFramework
 
             public void OnCompileTimeCompilation( Compilation compilation )
                 => Task.Run( () => this._testResult.SetCompileTimeCompilationAsync( compilation ) ).Wait();
+
+            public void OnCompileTimeCompilationEmit( Compilation compilation, ImmutableArray<Diagnostic> diagnostics )
+                => this._testResult.CompileTimeCompilationDiagnostics.Report( diagnostics );
 
             public void OnAnnotatedSyntaxNode( SyntaxNode sourceSyntaxRoot, SyntaxNode annotatedSyntaxRoot )
             {

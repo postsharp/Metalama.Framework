@@ -3,6 +3,7 @@
 
 // ReSharper disable RedundantUsingDirective
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
@@ -18,7 +19,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
@@ -36,10 +36,11 @@ namespace Caravela.Framework.Impl.Templating
         private readonly SerializableTypes _serializableTypes;
         private readonly TemplateMetaSyntaxFactoryImpl _templateMetaSyntaxFactory;
         private readonly TemplateMemberClassifier _templateMemberClassifier;
+        private readonly BuildTimeOnlyRewriter _buildTimeOnlyRewriter;
         private MetaContext? _currentMetaContext;
         private int _nextStatementListId;
         private ISymbol? _rootTemplateSymbol;
-
+        
         public TemplateCompilerRewriter(
             string templateName,
             Compilation runTimeCompilation,
@@ -57,6 +58,7 @@ namespace Caravela.Framework.Impl.Templating
             this._serializableTypes = serializableTypes;
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
             this._templateMemberClassifier = new TemplateMemberClassifier( runTimeCompilation, syntaxTreeAnnotationMap, serviceProvider );
+            this._buildTimeOnlyRewriter = new BuildTimeOnlyRewriter( this );
         }
 
         public bool Success { get; private set; } = true;
@@ -70,9 +72,6 @@ namespace Caravela.Framework.Impl.Templating
                 this.Success = false;
             }
         }
-
-        private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression )
-            => CastExpression( targetType, CastExpression( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), ParenthesizedExpression( expression ) ) );
 
         private static string NormalizeSpace( string statementComment )
         {
@@ -217,8 +216,8 @@ namespace Caravela.Framework.Impl.Templating
                  node.GetScopeFromAnnotation().GetValueOrDefault().GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
             {
                 // The node itself does not need to be transformed because it is compile time, but it needs to be converted
-                // into a run-time value.
-                return this.CreateRunTimeExpression( (ExpressionSyntax) node );
+                // into a run-time value. However, calls to variants of Proceed must be transformed into calls to the standard Proceed.
+                return this.CreateRunTimeExpression( (ExpressionSyntax) this._buildTimeOnlyRewriter.Visit( node ) );
             }
             else
             {
@@ -1390,30 +1389,39 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode VisitIdentifierName( IdentifierNameSyntax node )
         {
-            if ( node.Identifier.Kind() == SyntaxKind.IdentifierToken && !node.IsVar && this.GetTransformationKind( node ) == TransformationKind.Transform )
+            if ( node.Identifier.Kind() == SyntaxKind.IdentifierToken && !node.IsVar )
             {
-                // Fully qualifies simple identifiers.
-
                 var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
-                if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
+                if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
                 {
-                    return this.Transform( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( namespaceOrType ) )!;
-                }
-                else if ( symbol != null && symbol.IsStatic && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
-                {
-                    switch ( symbol.Kind )
+                    // Fully qualifies simple identifiers.
+
+                    if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                     {
-                        case SymbolKind.Field:
-                        case SymbolKind.Property:
-                        case SymbolKind.Event:
-                        case SymbolKind.Method:
-                            // We have an access to a field or method with a "using static", or a non-qualified static member access.
-                            return this.MetaSyntaxFactory.MemberAccessExpression(
-                                this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
-                                this.Transform( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( symbol.ContainingType ) )!,
-                                this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
+                        return this.Transform( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( namespaceOrType ) )!;
                     }
+                    else if ( symbol is { IsStatic: true } && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
+                    {
+                        switch ( symbol.Kind )
+                        {
+                            case SymbolKind.Field:
+                            case SymbolKind.Property:
+                            case SymbolKind.Event:
+                            case SymbolKind.Method:
+                                // We have an access to a field or method with a "using static", or a non-qualified static member access.
+                                return this.MetaSyntaxFactory.MemberAccessExpression(
+                                    this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
+                                    this.Transform( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( symbol.ContainingType ) )!,
+                                    this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
+                        }
+                    }
+                }
+                else if ( this._templateMemberClassifier.GetMetaMemberKind( symbol ) == MetaMemberKind.Proceed )
+                {
+                    // Any Proceed method variant must be replaced by the original Proceed because some of these variants do not
+                    // exist in .NET Standard 2.0.
+                    return node.WithIdentifier( Identifier( nameof(meta.Proceed) ) );
                 }
             }
 

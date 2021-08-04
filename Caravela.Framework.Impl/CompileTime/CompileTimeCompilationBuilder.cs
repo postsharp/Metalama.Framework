@@ -306,6 +306,8 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
                 }
 
+                this._observer?.OnCompileTimeCompilationEmit( compileTimeCompilation, emitResult.Diagnostics );
+
                 // Reports a diagnostic in the original syntax tree.
                 void ReportDiagnostics( IEnumerable<Diagnostic> diagnostics )
                 {
