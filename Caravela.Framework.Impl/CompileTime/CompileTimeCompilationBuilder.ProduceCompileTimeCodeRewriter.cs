@@ -259,12 +259,8 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var propertySymbol = (IPropertySymbol) this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
-                if ( this.SymbolClassifier.GetTemplateInfo( propertySymbol ).IsNone )
-                {
-                    yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
-
-                    yield break;
-                }
+                var propertyIsTemplate = !this.SymbolClassifier.GetTemplateInfo( propertySymbol ).IsNone;
+               
 
                 var success = true;
                 SyntaxNode? transformedGetDeclaration = null;
@@ -276,13 +272,15 @@ namespace Caravela.Framework.Impl.CompileTime
                     if ( node.AccessorList != null )
                     {
                         var getAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration );
+                        var getterIsTemplate = getAccessor != null && (propertyIsTemplate || !this.SymbolClassifier.GetTemplateInfo( propertySymbol.GetMethod!).IsNone);
 
                         var setAccessor = node.AccessorList.Accessors.SingleOrDefault(
                             a => a.Kind() == SyntaxKind.SetAccessorDeclaration || a.Kind() == SyntaxKind.InitAccessorDeclaration );
+                        var setterIsTemplate = setAccessor != null && ( propertyIsTemplate || !this.SymbolClassifier.GetTemplateInfo( propertySymbol.SetMethod!).IsNone);
 
                         // Auto properties don't have bodies and so we don't need templates.
 
-                        if ( getAccessor != null && (getAccessor.Body != null || getAccessor.ExpressionBody != null) )
+                        if ( getterIsTemplate && (getAccessor!.Body != null || getAccessor.ExpressionBody != null) )
                         {
                             success =
                                 success &&
@@ -297,7 +295,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                     out transformedGetDeclaration );
                         }
 
-                        if ( setAccessor != null && (setAccessor.Body != null || setAccessor.ExpressionBody != null) )
+                        if ( setterIsTemplate && (setAccessor!.Body != null || setAccessor.ExpressionBody != null) )
                         {
                             success =
                                 success &&
@@ -312,7 +310,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                     out transformedSetDeclaration );
                         }
                     }
-                    else if ( node is PropertyDeclarationSyntax { ExpressionBody: not null } propertyNode )
+                    else if ( propertyIsTemplate && node is PropertyDeclarationSyntax { ExpressionBody: not null } propertyNode )
                     {
                         // Expression bodied property.
                         // TODO: Does this preserve trivia in expression body?
@@ -329,11 +327,16 @@ namespace Caravela.Framework.Impl.CompileTime
                                 out transformedGetDeclaration );
                     }
                 }
-
+                
+                
                 if ( success )
                 {
-                    if ( propertySymbol.IsOverride && propertySymbol.OverriddenProperty!.IsAbstract
-                                                   && propertySymbol.OverriddenProperty.ContainingAssembly.Name == _frameworkAssemblyName )
+                    if ( !propertyIsTemplate )
+                    {
+                        yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
+                    }
+                    else if ( propertySymbol.IsOverride && propertySymbol.OverriddenProperty!.IsAbstract
+                                                        && propertySymbol.OverriddenProperty.ContainingAssembly.Name == _frameworkAssemblyName )
                     {
                         // If the property implements an abstract property of the framework, it cannot be removed.
 
@@ -406,6 +409,8 @@ namespace Caravela.Framework.Impl.CompileTime
                                       out transformedRemoveDeclaration );
                     }
                 }
+                
+             
 
                 if ( success )
                 {

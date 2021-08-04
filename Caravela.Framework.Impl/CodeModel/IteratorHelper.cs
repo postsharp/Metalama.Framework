@@ -45,11 +45,22 @@ namespace Caravela.Framework.Impl.CodeModel
                 return default;
             }
 
-            var isIterator = methodSymbol.DeclaringSyntaxReferences.Any(
-                r => r.GetSyntax() is MethodDeclarationSyntax { Body: { } body } &&
-                     FindYieldVisitor.Instance.VisitBlock( body ) );
+            var isIterator = IsIterator( methodSymbol );
 
             return new IteratorInfo( isIterator, iteratorKind, method );
+        }
+
+        public static bool IsIterator( IMethodSymbol method )
+        {
+            var isIterator = method.DeclaringSyntaxReferences.Any(
+                r => r.GetSyntax() switch
+                {
+                    MethodDeclarationSyntax { Body: { } body } => FindYieldVisitor.Instance.VisitBlock( body ),
+                    AccessorDeclarationSyntax { Body: { } body } => FindYieldVisitor.Instance.VisitBlock( body ),
+                    _ => false
+                } );
+
+            return isIterator;
         }
 
         // We use the Impl suffix to resolve an ambiguity with the public API.

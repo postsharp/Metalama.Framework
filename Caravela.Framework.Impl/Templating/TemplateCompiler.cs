@@ -16,8 +16,7 @@ namespace Caravela.Framework.Impl.Templating
 {
     internal class TemplateCompiler
     {
-        public const string TemplateMethodSuffix = "_Template";
-
+        
         private readonly IServiceProvider _serviceProvider;
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly ITemplateCompilerObserver? _observer;

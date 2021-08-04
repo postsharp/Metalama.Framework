@@ -10,15 +10,11 @@ using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.RunTime;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using RefKind = Caravela.Framework.Code.RefKind;
 using SpecialType = Caravela.Framework.Code.SpecialType;
@@ -46,7 +42,8 @@ namespace Caravela.Framework.Impl.Transformations
         {
             using ( context.DiagnosticSink.WithDefaultScope( this.OverriddenDeclaration ) )
             {
-                var proceedExpression = this.CreateProceedExpression();
+                var proceedExpression = ProceedHelper.CreateProceedDynamicExpression( this.CreateInvocationExpression(), this.Template, this.OverriddenDeclaration );
+                
                 var expandYieldProceed = this.CreateYieldProceedStatement( proceedExpression );
 
                 var metaApi = MetaApi.ForMethod(
@@ -213,100 +210,6 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-        private DynamicExpression CreateProceedExpression()
-        {
-            var invocationExpression = this.CreateInvocationExpression();
-
-            if ( this.Template.SelectedKind == TemplateKind.Default )
-            {
-                if ( this.OverriddenDeclaration.GetIteratorInfoImpl() is { IsIterator: true } iteratorInfo )
-                {
-                    // The target method is a yield-based iterator.
-
-                    ExpressionSyntax expression;
-
-                    if ( !iteratorInfo.IsAsyncIterator )
-                    {
-                        // The target method is a non-async iterator.
-                        // Generate:  `RuntimeAspectHelper.Buffer( BASE(ARGS) )`
-
-                        expression =
-                            InvocationExpression(
-                                    MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        this.OverriddenDeclaration.GetSyntaxFactory().GetTypeSyntax( typeof(RunTimeAspectHelper) ),
-                                        IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
-                                .WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( invocationExpression ) ) ) )
-                                .WithAdditionalAnnotations( Simplifier.Annotation );
-                    }
-                    else
-                    {
-                        // The target method is an async iterator.
-                        // Generate: `( await RuntimeAspectHelper.BufferAsync( BASE(ARGS) ) )` 
-
-                        expression = GenerateAwaitBufferAsync();
-                    }
-
-                    return new DynamicExpression( expression, this.OverriddenDeclaration.ReturnType, false );
-                }
-                else if ( this.OverriddenDeclaration.GetAsyncInfoImpl() is { IsAsync: true, IsAwaitableOrVoid: true } asyncInfo )
-                {
-                    // The target method is an async method (but not an async iterator).
-                    // Generate: `( await BASE(ARGS) )`.
-
-                    var taskResultType = asyncInfo.ResultType;
-
-                    return new DynamicExpression(
-                        ParenthesizedExpression( AwaitExpression( invocationExpression ) ).WithAdditionalAnnotations( Simplifier.Annotation ),
-                        taskResultType,
-                        false );
-                }
-            }
-            else if ( this.Template.SelectedKind == TemplateKind.Async )
-            {
-                if ( this.OverriddenDeclaration.GetIteratorInfoImpl() is
-                    { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } )
-                {
-                    var expression = GenerateAwaitBufferAsync();
-
-                    return new DynamicExpression( expression, this.OverriddenDeclaration.ReturnType, false );
-                }
-            }
-
-            // This is a default method, or a non-default template.
-            // Generate: `BASE(ARGS)`
-            return new DynamicExpression(
-                invocationExpression,
-                this.OverriddenDeclaration.ReturnType,
-                false );
-
-            ExpressionSyntax GenerateAwaitBufferAsync()
-            {
-                var arguments = ArgumentList( SingletonSeparatedList( Argument( invocationExpression ) ) );
-
-                var cancellationTokenParameter = this.OverriddenDeclaration.Parameters
-                    .OfParameterType<CancellationToken>()
-                    .LastOrDefault( p => p.Attributes.Any( a => a.Type.Name == "EnumeratorCancellationAttribute" ) );
-
-                if ( cancellationTokenParameter != null )
-                {
-                    arguments = arguments.AddArguments( Argument( IdentifierName( cancellationTokenParameter.Name ) ) );
-                }
-
-                var bufferExpression =
-                    InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                this.OverriddenDeclaration.GetSyntaxFactory().GetTypeSyntax( typeof(RunTimeAspectHelper) ),
-                                IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
-                        .WithArgumentList( arguments )
-                        .WithAdditionalAnnotations( Simplifier.Annotation );
-
-                var expression = ParenthesizedExpression( AwaitExpression( bufferExpression ) ).WithAdditionalAnnotations( Simplifier.Annotation );
-
-                return expression;
-            }
-        }
 
         private ExpressionSyntax CreateInvocationExpression()
         {

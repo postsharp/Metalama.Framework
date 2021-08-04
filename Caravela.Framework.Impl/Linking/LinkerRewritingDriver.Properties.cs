@@ -81,8 +81,8 @@ namespace Caravela.Framework.Impl.Linking
                 return false;
             }
 
-            return (getAspectReferences.Count == 0 || this.IsInlineableReference( getAspectReferences[0] ))
-                   && (setAspectReferences.Count == 0 || this.IsInlineableReference( setAspectReferences[0] ));
+            return (getAspectReferences.Count == 0 || this.IsInlineableReference( getAspectReferences[0], MethodKind.PropertyGet ))
+                   && (setAspectReferences.Count == 0 || this.IsInlineableReference( setAspectReferences[0], MethodKind.PropertySet ));
         }
 
         private bool HasAnyAspectReferences( IPropertySymbol symbol, ResolvedAspectReferenceSemantic semantic )

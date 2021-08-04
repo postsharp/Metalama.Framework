@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using System;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Aspects
 {
@@ -17,21 +18,39 @@ namespace Caravela.Framework.Aspects
         /// <inheritdoc />
         public virtual void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.AdviceFactory.OverrideFieldOrProperty( builder.Target, nameof(this.OverrideProperty) );
+            var getterTemplateSelector = new GetterTemplateSelector(
+                "get_" + nameof(this.OverrideProperty),
+                "get_" + nameof(this.OverrideEnumerableProperty),
+                "get_" + nameof(this.OverrideEnumeratorProperty) );
+
+            builder.AdviceFactory.OverrideFieldOrPropertyAccessors( builder.Target, getterTemplateSelector, "get_" + nameof(this.OverrideProperty) );
         }
 
-        public virtual void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder )
-        {
-            builder.ExceptForInheritance().MustBeNonAbstract();
-        }
+        public virtual void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder ) => builder.ExceptForInheritance().MustBeNonAbstract();
 
         public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }
 
-        [Template]
         public abstract dynamic? OverrideProperty
         {
+            [Template]
             get;
+
+            [Template]
             set;
+        }
+
+        public virtual IEnumerable<dynamic?> OverrideEnumerableProperty
+        {
+            [Abstract]
+            [Template( TemplateKind.IEnumerable )]
+            get => throw new NotSupportedException();
+        }
+
+        public virtual IEnumerable<dynamic?> OverrideEnumeratorProperty
+        {
+            [Abstract]
+            [Template( TemplateKind.IEnumerator )]
+            get => throw new NotSupportedException();
         }
     }
 }

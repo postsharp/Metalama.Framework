@@ -3,20 +3,20 @@
 
 using Microsoft.CodeAnalysis;
 using System;
+using System.Runtime.ConstrainedExecution;
 
 namespace Caravela.Framework.Impl.Templating
 {
     internal static class TemplateNameHelper
     {
-        public static string GetCompiledTemplateName( IMethodSymbol originalSymbol )
-            => originalSymbol switch
+        public static string GetCompiledTemplateName( IMethodSymbol method )
+            => method.MethodKind switch
             {
-                { ContainingSymbol: INamedTypeSymbol _ } => GetCompiledTemplateName( originalSymbol.Name ),
-                { ContainingSymbol: IPropertySymbol property, MethodKind: MethodKind.PropertyGet } => GetCompiledTemplateName( $"__get_{property.Name}" ),
-                { ContainingSymbol: IPropertySymbol property, MethodKind: MethodKind.PropertySet } => GetCompiledTemplateName( $"__set_{property.Name}" ),
-                _ => throw new NotSupportedException()
+                MethodKind.PropertyGet => GetCompiledTemplateName( $"Get{method.AssociatedSymbol!.Name}" ),
+                MethodKind.PropertySet => GetCompiledTemplateName( $"Set{method.AssociatedSymbol!.Name}" ),
+                 _ => GetCompiledTemplateName( method.Name ),
             };
 
-        public static string GetCompiledTemplateName( string templateMethodName ) => templateMethodName + TemplateCompiler.TemplateMethodSuffix;
+        public static string GetCompiledTemplateName( string templateMethodName ) => "__" + templateMethodName;
     }
 }

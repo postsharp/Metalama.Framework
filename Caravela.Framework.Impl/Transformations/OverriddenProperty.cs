@@ -39,9 +39,17 @@ namespace Caravela.Framework.Impl.Transformations
             Invariant.Assert( propertyTemplate.IsNotNull || getTemplate.IsNotNull || setTemplate.IsNotNull );
             Invariant.Assert( !(propertyTemplate.IsNotNull && (getTemplate.IsNotNull || setTemplate.IsNotNull)) );
 
-            this.PropertyTemplate = propertyTemplate;
-            this.GetTemplate = getTemplate;
-            this.SetTemplate = setTemplate;
+            if ( propertyTemplate.IsNotNull )
+            {
+                this.PropertyTemplate = propertyTemplate;
+                this.GetTemplate = new Template<IMethod>( this.PropertyTemplate.Declaration!.Getter );
+                this.SetTemplate = new Template<IMethod>( this.PropertyTemplate.Declaration!.Setter );
+            }
+            else
+            {
+                this.GetTemplate = getTemplate;
+                this.SetTemplate = setTemplate;
+            }
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
@@ -167,23 +175,13 @@ namespace Caravela.Framework.Impl.Transformations
         {
             using ( context.DiagnosticSink.WithDefaultScope( accessor ) )
             {
-                var proceedExpressionSyntax =
+                var proceedExpression =
                     accessor.MethodKind switch
                     {
-                        MethodKind.PropertyGet => this.CreateGetExpression(),
-                        MethodKind.PropertySet => this.CreateSetExpression(),
+                        MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression( this.CreateProceedGetExpression(), this.GetTemplate, this.OverriddenDeclaration.Getter.AssertNotNull(  ) ),
+                        MethodKind.PropertySet => new DynamicExpression( this.CreateProceedSetExpression(), this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ), false ),
                         _ => throw new AssertionFailedException()
                     };
-
-                var proceedExpressionType =
-                    accessor.MethodKind switch
-                    {
-                        MethodKind.PropertyGet => this.OverriddenDeclaration.Type,
-                        MethodKind.PropertySet => this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
-                        _ => throw new AssertionFailedException()
-                    };
-
-                var proceedExpression = new DynamicExpression( proceedExpressionSyntax, proceedExpressionType, false );
 
                 var metaApi = MetaApi.ForFieldOrProperty(
                     this.OverriddenDeclaration,
@@ -221,23 +219,23 @@ namespace Caravela.Framework.Impl.Transformations
             switch ( accessorDeclarationKind )
             {
                 case SyntaxKind.GetAccessorDeclaration:
-                    return Block( ReturnStatement( this.CreateGetExpression() ) );
+                    return Block( ReturnStatement( this.CreateProceedGetExpression() ) );
 
                 case SyntaxKind.SetAccessorDeclaration:
                 case SyntaxKind.InitAccessorDeclaration:
-                    return Block( ExpressionStatement( this.CreateSetExpression() ) );
+                    return Block( ExpressionStatement( this.CreateProceedSetExpression() ) );
 
                 default:
                     throw new AssertionFailedException();
             }
         }
 
-        private ExpressionSyntax CreateGetExpression()
+        private ExpressionSyntax CreateProceedGetExpression()
         {
             return this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertyGetAccessor );
         }
 
-        private ExpressionSyntax CreateSetExpression()
+        private ExpressionSyntax CreateProceedSetExpression()
         {
             return
                 AssignmentExpression(

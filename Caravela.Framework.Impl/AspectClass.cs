@@ -116,13 +116,6 @@ namespace Caravela.Framework.Impl
 
             foreach ( var memberSymbol in type.GetMembers() )
             {
-                if ( memberSymbol is IMethodSymbol { AssociatedSymbol: not null } )
-                {
-                    // Skip accessors.
-
-                    continue;
-                }
-
                 var templateInfo = symbolClassifier.GetTemplateInfo( memberSymbol );
                 var aspectClassMember = new AspectClassMember( memberSymbol.Name, this, templateInfo, memberSymbol is IMethodSymbol { IsAsync: true } );
 

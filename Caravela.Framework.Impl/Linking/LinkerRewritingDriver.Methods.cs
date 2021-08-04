@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.Linking
                         return false;
                     }
 
-                    return this.IsInlineableReference( aspectReferences[0] );
+                    return this.IsInlineableReference( aspectReferences[0], MethodKind.Ordinary );
 
                 default:
                     throw new AssertionFailedException();
