@@ -97,7 +97,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 var compilationStopwatch = Stopwatch.StartNew();
 
-                var testResult = await testRunner.RunTestAsync( testInput );
+                var testResult = await testRunner.RunAsync( testInput );
                 compilationStopwatch.Stop();
 
                 var testSyntaxTree = testResult.SyntaxTrees.First();
