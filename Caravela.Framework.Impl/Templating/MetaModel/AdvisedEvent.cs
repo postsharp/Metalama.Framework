@@ -20,23 +20,23 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IMethod Signature => this.EventType.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
-        public IAdvisedMethod Adder => new AdvisedMethod( (IMethodInternal) this.Underlying.Adder );
+        public IAdvisedMethod AddMethod => new AdvisedMethod( (IMethodInternal) this.Underlying.AddMethod );
 
         [Memo]
-        public IAdvisedMethod Remover => new AdvisedMethod( (IMethodInternal) this.Underlying.Remover );
+        public IAdvisedMethod RemoveMethod => new AdvisedMethod( (IMethodInternal) this.Underlying.RemoveMethod );
 
         [Memo]
-        public IAdvisedMethod? Raiser => this.Underlying.Raiser != null ? new AdvisedMethod( (IMethodInternal) this.Underlying.Raiser ) : null;
+        public IAdvisedMethod? RaiseMethod => this.Underlying.RaiseMethod != null ? new AdvisedMethod( (IMethodInternal) this.Underlying.RaiseMethod ) : null;
 
         public IInvokerFactory<IEventInvoker> Invokers => this.Underlying.Invokers;
 
         public IEvent? OverriddenEvent => this.Underlying.OverriddenEvent;
 
-        IMethod IEvent.Adder => this.Adder;
+        IMethod IEvent.AddMethod => this.AddMethod;
 
-        IMethod IEvent.Remover => this.Remover;
+        IMethod IEvent.RemoveMethod => this.RemoveMethod;
 
-        IMethod? IEvent.Raiser => this.Raiser;
+        IMethod? IEvent.RaiseMethod => this.RaiseMethod;
 
         public IReadOnlyList<IEvent> ExplicitInterfaceImplementations => this.Underlying.ExplicitInterfaceImplementations;
 

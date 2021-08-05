@@ -13,7 +13,7 @@ using System.Linq;
 namespace Caravela.Framework.Impl.Advices
 {
     internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice
-        where TMember : IMemberOrNamedType
+        where TMember : class, IMemberOrNamedType
         where TBuilder : MemberOrNamedTypeBuilder
     {
         public IntroductionScope Scope { get; }

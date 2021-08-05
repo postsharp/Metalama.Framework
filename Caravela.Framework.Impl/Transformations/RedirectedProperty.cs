@@ -57,21 +57,21 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 return new[]
                     {
-                        this.OverriddenDeclaration.Getter != null
+                        this.OverriddenDeclaration.GetMethod != null
                             ? AccessorDeclaration(
                                 SyntaxKind.GetAccessorDeclaration,
                                 List<AttributeListSyntax>(),
-                                this.OverriddenDeclaration.Getter.GetSyntaxModifierList(),
+                                this.OverriddenDeclaration.GetMethod.GetSyntaxModifierList(),
                                 CreateGetterBody(),
                                 null )
                             : null,
-                        this.OverriddenDeclaration.Setter != null
+                        this.OverriddenDeclaration.SetMethod != null
                             ? AccessorDeclaration(
                                 this.OverriddenDeclaration.Writeability != Writeability.InitOnly
                                     ? SyntaxKind.SetAccessorDeclaration
                                     : SyntaxKind.InitAccessorDeclaration,
                                 List<AttributeListSyntax>(),
-                                this.OverriddenDeclaration.Setter.GetSyntaxModifierList(),
+                                this.OverriddenDeclaration.SetMethod.GetSyntaxModifierList(),
                                 CreateSetterBody(),
                                 null )
                             : null

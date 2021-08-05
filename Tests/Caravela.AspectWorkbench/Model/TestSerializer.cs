@@ -54,10 +54,15 @@ namespace Caravela.AspectWorkbench.Model
             var expectedTransformedCodeFilePath = GetExpectedTransformedCodeFilePath( filePath );
             await File.WriteAllTextAsync( expectedTransformedCodeFilePath, test.ExpectedTransformedCode );
 
-            if ( !string.IsNullOrWhiteSpace( test.ExpectedTransformedCode ) )
+            var expectedProgramOutputFilePath = GetExpectedProgramOutputFilePath( filePath );
+            
+            if ( !string.IsNullOrWhiteSpace( test.ExpectedProgramOutput ) )
             {
-                var expectedProgramOutputFilePath = GetExpectedProgramOutputFilePath( filePath );
                 await File.WriteAllTextAsync( expectedProgramOutputFilePath, test.ExpectedProgramOutput );
+            }
+            else if ( File.Exists( expectedProgramOutputFilePath ) )
+            {
+                File.Delete( expectedProgramOutputFilePath );
             }
         }
     }

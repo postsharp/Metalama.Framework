@@ -316,7 +316,7 @@ namespace Caravela.Framework.Impl.Advices
                                     ? new OverriddenMethod(
                                         this,
                                         (IMethod) memberBuilder,
-                                        new Template<IMethod>( implementationMethod, TemplateKind.Introduction ) )
+                                        Template.Create( implementationMethod, TemplateKind.Introduction ) )
                                     : new RedirectedMethod(
                                         this,
                                         (IMethod) memberBuilder,
@@ -342,7 +342,7 @@ namespace Caravela.Framework.Impl.Advices
                                         ? new OverriddenProperty(
                                             this,
                                             (IProperty) memberBuilder,
-                                            new Template<IProperty>( (IProperty) memberSpec.AspectInterfaceMember, TemplateKind.Introduction ),
+                                            Template.Create( (IProperty) memberSpec.AspectInterfaceMember, TemplateKind.Introduction ),
                                             default,
                                             default )
                                         : new RedirectedProperty(
@@ -367,7 +367,7 @@ namespace Caravela.Framework.Impl.Advices
                                         ? new OverriddenEvent(
                                             this,
                                             (IEvent) memberBuilder,
-                                            new Template<IEvent>( (IEvent) memberSpec.AspectInterfaceMember, TemplateKind.Introduction ),
+                                            Template.Create( (IEvent) memberSpec.AspectInterfaceMember, TemplateKind.Introduction ),
                                             default,
                                             default )
                                         : new RedirectedEvent(
@@ -444,8 +444,8 @@ namespace Caravela.Framework.Impl.Advices
                 this,
                 this.TargetDeclaration,
                 interfaceProperty.Name,
-                interfaceProperty.Getter != null || (!isExplicit && targetProperty.Getter != null),
-                interfaceProperty.Setter != null || (!isExplicit && targetProperty.Setter != null),
+                interfaceProperty.GetMethod != null || (!isExplicit && targetProperty.GetMethod != null),
+                interfaceProperty.SetMethod != null || (!isExplicit && targetProperty.SetMethod != null),
                 isAutoProperty,
                 interfaceProperty.Writeability == Writeability.InitOnly );
 
@@ -468,27 +468,27 @@ namespace Caravela.Framework.Impl.Advices
             {
                 propertyBuilder.Accessibility = Accessibility.Public;
 
-                if ( propertyBuilder.Getter != null )
+                if ( propertyBuilder.GetMethod != null )
                 {
-                    if ( interfaceProperty.Getter != null )
+                    if ( interfaceProperty.GetMethod != null )
                     {
-                        propertyBuilder.Getter.Accessibility = Accessibility.Public;
+                        propertyBuilder.GetMethod.Accessibility = Accessibility.Public;
                     }
                     else
                     {
-                        propertyBuilder.Getter.Accessibility = targetProperty.Getter.AssertNotNull().Accessibility;
+                        propertyBuilder.GetMethod.Accessibility = targetProperty.GetMethod.AssertNotNull().Accessibility;
                     }
                 }
 
-                if ( propertyBuilder.Setter != null )
+                if ( propertyBuilder.SetMethod != null )
                 {
-                    if ( interfaceProperty.Setter != null )
+                    if ( interfaceProperty.SetMethod != null )
                     {
-                        propertyBuilder.Setter.Accessibility = Accessibility.Public;
+                        propertyBuilder.SetMethod.Accessibility = Accessibility.Public;
                     }
                     else
                     {
-                        propertyBuilder.Setter.Accessibility = targetProperty.Setter.AssertNotNull().Accessibility;
+                        propertyBuilder.SetMethod.Accessibility = targetProperty.SetMethod.AssertNotNull().Accessibility;
                     }
                 }
             }

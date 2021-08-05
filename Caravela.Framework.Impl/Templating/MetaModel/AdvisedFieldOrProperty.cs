@@ -17,9 +17,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IType Type => this.Underlying.Type;
 
-        public IMethod? Getter => this.Underlying.Getter;
+        public IMethod? GetMethod => this.Underlying.GetMethod;
 
-        public IMethod? Setter => this.Underlying.Setter;
+        public IMethod? SetMethod => this.Underlying.SetMethod;
 
         public Writeability Writeability => this.Underlying.Writeability;
 

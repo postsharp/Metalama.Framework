@@ -21,14 +21,14 @@ namespace Caravela.Framework.Code
         /// an object that does not map to source code but allows to add aspects and advices as with a normal method. In case of fields,
         /// this property returns a pseudo-method that can be the target of aspects and advices, as if the field were a property.
         /// </summary>
-        IMethod? Getter { get; }
+        IMethod? GetMethod { get; }
 
         /// <summary>
         /// Gets the property getter, or <c>null</c> if the property is read-only. In case of automatic properties, this property returns
         /// an object that does not map to source code but allows to add aspects and advices as with a normal method. In case of fields,
         /// this property returns a pseudo-method that can be the target of aspects and advices, as if the field were a property.
         /// </summary>
-        IMethod? Setter { get; }
+        IMethod? SetMethod { get; }
 
         /// <summary>
         /// Gets writeability of the field or property, i.e. the situations in which the field or property can be written.

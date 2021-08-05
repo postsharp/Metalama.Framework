@@ -39,9 +39,24 @@ namespace Caravela.Framework.Impl.Transformations
             Invariant.Assert( propertyTemplate.IsNotNull || getTemplate.IsNotNull || setTemplate.IsNotNull );
             Invariant.Assert( !(propertyTemplate.IsNotNull && (getTemplate.IsNotNull || setTemplate.IsNotNull)) );
 
-            this.PropertyTemplate = propertyTemplate;
-            this.GetTemplate = getTemplate;
-            this.SetTemplate = setTemplate;
+            if ( propertyTemplate.IsNotNull )
+            {
+                this.PropertyTemplate = propertyTemplate;
+
+                if ( !propertyTemplate.Declaration!.IsAutoPropertyOrField )
+                {
+                    this.GetTemplate = Template.Create( this.PropertyTemplate.Declaration!.GetMethod );
+                    this.SetTemplate = Template.Create( this.PropertyTemplate.Declaration!.SetMethod );
+                }
+            }
+            else
+            {
+                this.GetTemplate = getTemplate;
+                this.SetTemplate = setTemplate;
+            }
+
+            this.GetTemplate.ValidateTarget( overriddenDeclaration.GetMethod );
+            this.SetTemplate.ValidateTarget( overriddenDeclaration.SetMethod );
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
@@ -53,15 +68,8 @@ namespace Caravela.Framework.Impl.Transformations
                     this.Advice.AspectLayerId,
                     this.OverriddenDeclaration );
 
-                var getTemplate =
-                    this.PropertyTemplate.Declaration is { IsAutoPropertyOrField: false }
-                        ? new Template<IMethod>( this.PropertyTemplate.Declaration.Getter )
-                        : this.GetTemplate;
-
-                var setTemplate =
-                    this.PropertyTemplate.Declaration is { IsAutoPropertyOrField: false }
-                        ? new Template<IMethod>( this.PropertyTemplate.Declaration.Setter )
-                        : this.SetTemplate;
+                var getTemplate = this.GetTemplate;
+                var setTemplate = this.SetTemplate;
 
                 var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly
                     ? SyntaxKind.InitAccessorDeclaration
@@ -70,14 +78,14 @@ namespace Caravela.Framework.Impl.Transformations
                 var templateExpansionError = false;
                 BlockSyntax? getAccessorBody = null;
 
-                if ( this.OverriddenDeclaration.Getter != null )
+                if ( this.OverriddenDeclaration.GetMethod != null )
                 {
-                    if ( !getTemplate.IsNull )
+                    if ( getTemplate.IsNotNull )
                     {
                         templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                             context,
                             getTemplate,
-                            this.OverriddenDeclaration.Getter,
+                            this.OverriddenDeclaration.GetMethod,
                             out getAccessorBody );
                     }
                     else
@@ -92,14 +100,14 @@ namespace Caravela.Framework.Impl.Transformations
 
                 BlockSyntax? setAccessorBody = null;
 
-                if ( this.OverriddenDeclaration.Setter != null )
+                if ( this.OverriddenDeclaration.SetMethod != null )
                 {
-                    if ( !setTemplate.IsNull )
+                    if ( setTemplate.IsNotNull )
                     {
                         templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                             context,
                             setTemplate,
-                            this.OverriddenDeclaration.Setter,
+                            this.OverriddenDeclaration.SetMethod,
                             out setAccessorBody );
                     }
                     else
@@ -136,14 +144,14 @@ namespace Caravela.Framework.Impl.Transformations
                                                 ? AccessorDeclaration(
                                                     SyntaxKind.GetAccessorDeclaration,
                                                     List<AttributeListSyntax>(),
-                                                    this.OverriddenDeclaration.Getter.AssertNotNull().GetSyntaxModifierList(),
+                                                    this.OverriddenDeclaration.GetMethod.AssertNotNull().GetSyntaxModifierList(),
                                                     getAccessorBody )
                                                 : null,
                                             setAccessorBody != null
                                                 ? AccessorDeclaration(
                                                     setAccessorDeclarationKind,
                                                     List<AttributeListSyntax>(),
-                                                    this.OverriddenDeclaration.Setter.AssertNotNull().GetSyntaxModifierList(),
+                                                    this.OverriddenDeclaration.SetMethod.AssertNotNull().GetSyntaxModifierList(),
                                                     setAccessorBody )
                                                 : null
                                         }.Where( a => a != null )
@@ -167,23 +175,19 @@ namespace Caravela.Framework.Impl.Transformations
         {
             using ( context.DiagnosticSink.WithDefaultScope( accessor ) )
             {
-                var proceedExpressionSyntax =
+                var proceedExpression =
                     accessor.MethodKind switch
                     {
-                        MethodKind.PropertyGet => this.CreateGetExpression(),
-                        MethodKind.PropertySet => this.CreateSetExpression(),
+                        MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
+                            this.CreateProceedGetExpression(),
+                            this.GetTemplate,
+                            this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
+                        MethodKind.PropertySet => new DynamicExpression(
+                            this.CreateProceedSetExpression(),
+                            this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
+                            false ),
                         _ => throw new AssertionFailedException()
                     };
-
-                var proceedExpressionType =
-                    accessor.MethodKind switch
-                    {
-                        MethodKind.PropertyGet => this.OverriddenDeclaration.Type,
-                        MethodKind.PropertySet => this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
-                        _ => throw new AssertionFailedException()
-                    };
-
-                var proceedExpression = new DynamicExpression( proceedExpressionSyntax, proceedExpressionType, false );
 
                 var metaApi = MetaApi.ForFieldOrProperty(
                     this.OverriddenDeclaration,
@@ -221,29 +225,23 @@ namespace Caravela.Framework.Impl.Transformations
             switch ( accessorDeclarationKind )
             {
                 case SyntaxKind.GetAccessorDeclaration:
-                    return Block( ReturnStatement( this.CreateGetExpression() ) );
+                    return Block( ReturnStatement( this.CreateProceedGetExpression() ) );
 
                 case SyntaxKind.SetAccessorDeclaration:
                 case SyntaxKind.InitAccessorDeclaration:
-                    return Block( ExpressionStatement( this.CreateSetExpression() ) );
+                    return Block( ExpressionStatement( this.CreateProceedSetExpression() ) );
 
                 default:
                     throw new AssertionFailedException();
             }
         }
 
-        private ExpressionSyntax CreateGetExpression()
-        {
-            return this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertyGetAccessor );
-        }
+        private ExpressionSyntax CreateProceedGetExpression() => this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertyGetAccessor );
 
-        private ExpressionSyntax CreateSetExpression()
-        {
-            return
-                AssignmentExpression(
-                    SyntaxKind.SimpleAssignmentExpression,
-                    this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertySetAccessor ),
-                    IdentifierName( "value" ) );
-        }
+        private ExpressionSyntax CreateProceedSetExpression()
+            => AssignmentExpression(
+                SyntaxKind.SimpleAssignmentExpression,
+                this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertySetAccessor ),
+                IdentifierName( "value" ) );
     }
 }

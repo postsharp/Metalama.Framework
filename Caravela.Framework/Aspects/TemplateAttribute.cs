@@ -12,18 +12,6 @@ namespace Caravela.Framework.Aspects
     [AttributeUsage( AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event )]
     public class TemplateAttribute : CompileTimeOnlyAttribute
     {
-        public TemplateKind TemplateKind { get; }
-
-        public TemplateAttribute()
-        {
-            this.TemplateKind = TemplateKind.Default;
-        }
-
-        public TemplateAttribute( TemplateKind kind )
-        {
-            this.TemplateKind = kind;
-        }
-
         private Accessibility? _accessibility;
         private bool? _isVirtual;
         private bool? _isSealed;

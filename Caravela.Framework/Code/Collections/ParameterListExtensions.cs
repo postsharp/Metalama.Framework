@@ -28,5 +28,7 @@ namespace Caravela.Framework.Code.Collections
         /// </summary>
         public static IEnumerable<IParameter> OfParameterType( this IParameterList parameters, IType type )
             => parameters.Where( p => p.ParameterType.Is( type ) );
+
+        public static IParameter? OfName( this IParameterList list, string name ) => list.SingleOrDefault( p => p.Name == name );
     }
 }

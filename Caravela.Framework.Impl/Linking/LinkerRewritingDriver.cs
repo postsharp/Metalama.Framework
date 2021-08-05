@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 // TODO: A lot methods here are called multiple times. Optimize.
 // TODO: Split into a subclass for each declaration type?
@@ -70,12 +72,35 @@ namespace Caravela.Framework.Impl.Linking
                 _ => throw new AssertionFailedException()
             };
 
-        private bool IsInlineableReference( ResolvedAspectReference aspectReference )
+        private bool IsInlineableReference( ResolvedAspectReference aspectReference, MethodKind methodKind )
             => aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable )
-               && IsAsync( aspectReference.ContainingSymbol ) == IsAsync( aspectReference.ResolvedSymbol )
+               && IsAsync( GetMethod( aspectReference.ContainingSymbol, methodKind ) ) == IsAsync( GetMethod( aspectReference.ResolvedSymbol, methodKind ) )
+               && IsIterator( GetMethod( aspectReference.ContainingSymbol, methodKind ) )
+               == IsIterator( GetMethod( aspectReference.ResolvedSymbol, methodKind ) )
                && this.GetInliner( aspectReference, out _ );
 
-        private static bool IsAsync( ISymbol symbol ) => symbol is IMethodSymbol { IsAsync: true };
+        private static IMethodSymbol? GetMethod( ISymbol symbol, MethodKind kind )
+            => symbol switch
+            {
+                IMethodSymbol method => method,
+                IPropertySymbol property => kind switch
+                {
+                    MethodKind.PropertyGet => property.GetMethod,
+                    MethodKind.PropertySet => property.SetMethod,
+                    _ => throw new AssertionFailedException()
+                },
+                IEventSymbol @event => kind switch
+                {
+                    MethodKind.EventAdd => @event.AddMethod,
+                    MethodKind.EventRemove => @event.RemoveMethod,
+                    _ => throw new AssertionFailedException()
+                },
+                _ => throw new AssertionFailedException()
+            };
+
+        private static bool IsAsync( IMethodSymbol? symbol ) => symbol is { IsAsync: true };
+
+        private static bool IsIterator( IMethodSymbol? symbol ) => symbol != null && IteratorHelper.IsIterator( symbol );
 
         private bool GetInliner( ResolvedAspectReference aspectReference, [NotNullWhen( true )] out Inliner? matchingInliner )
         {
@@ -663,7 +688,17 @@ namespace Caravela.Framework.Impl.Linking
                     throw new AssertionFailedException();
             }
 
-            static string CreateName( string name ) => $"__{name}__OriginalImpl";
+            string CreateName( string name )
+            {
+                var hint = $"{name}_Source";
+                
+                for ( var i = 2; symbol.ContainingType.GetMembers( hint ).Any(); i++ )
+                {
+                    hint = $"{name}_Source{i}";
+                }
+
+                return hint;
+            }
         }
 
         private static string GetBackingFieldName( ISymbol symbol )

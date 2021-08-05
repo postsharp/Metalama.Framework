@@ -38,8 +38,8 @@ namespace Caravela.Framework.Impl.Advices
 
             var templatePropertyDeclaration = templateProperty.Declaration;
             var name = templatePropertyDeclaration?.Name ?? explicitName ?? throw new AssertionFailedException();
-            var hasGet = templatePropertyDeclaration != null ? templatePropertyDeclaration.Getter != null : getTemplate.IsNotNull;
-            var hasSet = templatePropertyDeclaration != null ? templatePropertyDeclaration.Setter != null : setTemplate.IsNotNull;
+            var hasGet = templatePropertyDeclaration != null ? templatePropertyDeclaration.GetMethod != null : getTemplate.IsNotNull;
+            var hasSet = templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : setTemplate.IsNotNull;
 
             this.MemberBuilder = new PropertyBuilder(
                 this,

@@ -6,8 +6,19 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.Advices
 {
+    internal static class Template
+    {
+        public static Template<T> Create<T>( T? implementation, TemplateKind selectedKind, TemplateKind interpretedKind )
+            where T : class, IMemberOrNamedType
+            => new( implementation, selectedKind, interpretedKind );
+
+        public static Template<T> Create<T>( T? implementation, TemplateKind selectedKind = TemplateKind.Default )
+            where T : class, IMemberOrNamedType
+            => new( implementation, selectedKind );
+    }
+
     internal readonly struct Template<T>
-        where T : IMemberOrNamedType
+        where T : class, IMemberOrNamedType
     {
         public T? Declaration { get; }
 
@@ -37,7 +48,7 @@ namespace Caravela.Framework.Impl.Advices
             }
         }
 
-        public Template<IMemberOrNamedType> Cast() => new( this.Declaration!, this.SelectedKind, this.InterpretedKind );
+        public Template<IMemberOrNamedType> Cast() => Template.Create<IMemberOrNamedType>( this.Declaration!, this.SelectedKind, this.InterpretedKind );
 
         public override string ToString() => this.IsNull ? "null" : $"{this.Declaration!.Name}:{this.SelectedKind}";
     }

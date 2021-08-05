@@ -61,11 +61,6 @@ namespace Caravela.Framework.Impl.Linking
                         return false;
                     }
 
-                    if ( inlinedMethod.GetIteratorInfoImpl().IsIterator )
-                    {
-                        return false;
-                    }
-
                     if ( this._analysisRegistry.IsLastOverride( inlinedMethod ) )
                     {
                         // TODO: Seems weird to return true here, what if a condition later returns false?
@@ -79,7 +74,7 @@ namespace Caravela.Framework.Impl.Linking
                         return false;
                     }
 
-                    return this.IsInlineableReference( aspectReferences[0] );
+                    return this.IsInlineableReference( aspectReferences[0], MethodKind.Ordinary );
 
                 default:
                     throw new AssertionFailedException();

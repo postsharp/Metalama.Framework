@@ -10,5 +10,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IteratorInfo GetIteratorInfo( IMethod method ) => method.GetIteratorInfoImpl();
 
         public AsyncInfo GetAsyncInfo( IMethod method ) => method.GetAsyncInfoImpl();
+
+        public AsyncInfo GetAsyncInfo( IType type ) => type.GetAsyncInfoImpl();
     }
 }

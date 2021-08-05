@@ -66,6 +66,10 @@ namespace Caravela.Framework.Code
         ValueTask,
 
         ValueTask_T,
+        
+        Task,
+        
+        Task_T,
 
         // Must be last.
 

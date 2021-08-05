@@ -395,8 +395,8 @@ class C : IDisposable
                 new[] { Default, Finalizer, ExplicitInterfaceImplementation, ConversionOperator, UserDefinedOperator },
                 type.Methods.Select( m => m.MethodKind ) );
 
-            Assert.Equal( new[] { PropertyGet, PropertySet }, type.Properties.SelectMany( p => new[] { p.Getter!.MethodKind, p.Setter!.MethodKind } ) );
-            Assert.Equal( new[] { EventAdd, EventRemove }, type.Events.SelectMany( p => new[] { p.Adder!.MethodKind, p.Remover!.MethodKind } ) );
+            Assert.Equal( new[] { PropertyGet, PropertySet }, type.Properties.SelectMany( p => new[] { p.GetMethod!.MethodKind, p.SetMethod!.MethodKind } ) );
+            Assert.Equal( new[] { EventAdd, EventRemove }, type.Events.SelectMany( p => new[] { p.AddMethod!.MethodKind, p.RemoveMethod!.MethodKind } ) );
             Assert.Single( type.Constructors );
             Assert.NotNull( type.StaticConstructor );
 

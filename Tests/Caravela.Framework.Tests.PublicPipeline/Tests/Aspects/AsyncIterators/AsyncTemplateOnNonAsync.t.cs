@@ -1,23 +1,11 @@
 class TargetCode
     {
         [Aspect]
-public IAsyncEnumerable<int> AsyncEnumerable(int a)
-{
-    return this.__Override__AsyncEnumerable__By__Aspect(a);
-}
-
-private IAsyncEnumerable<int> __AsyncEnumerable__OriginalImpl(int a)
-        {
-            Console.WriteLine("Not Async");
-            return this.AsyncEnumerableImpl(a);
-        }
-
-
-public async global::System.Collections.Generic.IAsyncEnumerable<global::System.Int32> __Override__AsyncEnumerable__By__Aspect(global::System.Int32 a)
+        public  async IAsyncEnumerable<int> AsyncEnumerable(int a)
 {
     await global::System.Threading.Tasks.Task.Yield();
     global::System.Console.WriteLine("Before AsyncEnumerable");
-    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.__AsyncEnumerable__OriginalImpl(a)));
+    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerable_Source(a)));
     global::System.Console.WriteLine("After AsyncEnumerable");
     await global::System.Threading.Tasks.Task.Yield();
     await foreach (var r in result)
@@ -26,7 +14,14 @@ public async global::System.Collections.Generic.IAsyncEnumerable<global::System.
     }
 
     yield break;
-}        
+}
+
+private IAsyncEnumerable<int> AsyncEnumerable_Source(int a)
+        {
+            Console.WriteLine("Not Async");
+            return this.AsyncEnumerableImpl(a);
+        }
+        
         private async IAsyncEnumerable<int> AsyncEnumerableImpl(int a)
         {
             Console.WriteLine("Yield 1");

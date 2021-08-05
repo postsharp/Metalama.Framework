@@ -259,12 +259,8 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var propertySymbol = (IPropertySymbol) this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
-                if ( this.SymbolClassifier.GetTemplateInfo( propertySymbol ).IsNone )
-                {
-                    yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
-
-                    yield break;
-                }
+                var propertyIsTemplate = !this.SymbolClassifier.GetTemplateInfo( propertySymbol ).IsNone;
+                var propertyOrAccessorsAreTemplate = propertyIsTemplate;
 
                 var success = true;
                 SyntaxNode? transformedGetDeclaration = null;
@@ -275,14 +271,22 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     if ( node.AccessorList != null )
                     {
+                        var templateAccessorCount = 0;
+
                         var getAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration );
+
+                        var getterIsTemplate = getAccessor != null
+                                               && (propertyIsTemplate || !this.SymbolClassifier.GetTemplateInfo( propertySymbol.GetMethod! ).IsNone);
 
                         var setAccessor = node.AccessorList.Accessors.SingleOrDefault(
                             a => a.Kind() == SyntaxKind.SetAccessorDeclaration || a.Kind() == SyntaxKind.InitAccessorDeclaration );
 
+                        var setterIsTemplate = setAccessor != null
+                                               && (propertyIsTemplate || !this.SymbolClassifier.GetTemplateInfo( propertySymbol.SetMethod! ).IsNone);
+
                         // Auto properties don't have bodies and so we don't need templates.
 
-                        if ( getAccessor != null && (getAccessor.Body != null || getAccessor.ExpressionBody != null) )
+                        if ( getterIsTemplate && (getAccessor!.Body != null || getAccessor.ExpressionBody != null) )
                         {
                             success =
                                 success &&
@@ -295,9 +299,11 @@ namespace Caravela.Framework.Impl.CompileTime
                                     this._cancellationToken,
                                     out _,
                                     out transformedGetDeclaration );
+
+                            templateAccessorCount++;
                         }
 
-                        if ( setAccessor != null && (setAccessor.Body != null || setAccessor.ExpressionBody != null) )
+                        if ( setterIsTemplate && (setAccessor!.Body != null || setAccessor.ExpressionBody != null) )
                         {
                             success =
                                 success &&
@@ -310,9 +316,21 @@ namespace Caravela.Framework.Impl.CompileTime
                                     this._cancellationToken,
                                     out _,
                                     out transformedSetDeclaration );
+
+                            templateAccessorCount++;
+                        }
+
+                        if ( templateAccessorCount > 0 )
+                        {
+                            propertyOrAccessorsAreTemplate = true;
+
+                            if ( templateAccessorCount != node.AccessorList.Accessors.Count )
+                            {
+                                throw new AssertionFailedException( "When one accessor is a template, the other must also be a template." );
+                            }
                         }
                     }
-                    else if ( node is PropertyDeclarationSyntax { ExpressionBody: not null } propertyNode )
+                    else if ( propertyIsTemplate && node is PropertyDeclarationSyntax { ExpressionBody: not null } propertyNode )
                     {
                         // Expression bodied property.
                         // TODO: Does this preserve trivia in expression body?
@@ -332,8 +350,12 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( success )
                 {
-                    if ( propertySymbol.IsOverride && propertySymbol.OverriddenProperty!.IsAbstract
-                                                   && propertySymbol.OverriddenProperty.ContainingAssembly.Name == _frameworkAssemblyName )
+                    if ( !propertyOrAccessorsAreTemplate )
+                    {
+                        yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
+                    }
+                    else if ( propertySymbol.IsOverride && propertySymbol.OverriddenProperty!.IsAbstract
+                                                        && propertySymbol.OverriddenProperty.ContainingAssembly.Name == _frameworkAssemblyName )
                     {
                         // If the property implements an abstract property of the framework, it cannot be removed.
 
@@ -546,10 +568,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 public TemplatingScope Scope { get; }
 
-                public void Dispose()
-                {
-                    this._parent._currentContext = this._oldContext;
-                }
+                public void Dispose() => this._parent._currentContext = this._oldContext;
             }
         }
     }

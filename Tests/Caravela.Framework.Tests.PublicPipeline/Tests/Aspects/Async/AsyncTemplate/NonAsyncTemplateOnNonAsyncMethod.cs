@@ -26,7 +26,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.NonAs
             return meta.Proceed();
         }
 
-        [Template(TemplateKind.Async)]
+        [Template]
         public Task<dynamic?> OverrideAsyncMethod()
         {
             Console.WriteLine("Getting task");

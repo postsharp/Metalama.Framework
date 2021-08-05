@@ -7,18 +7,18 @@ internal class TargetClass
         public int Property
 {get    {
         global::System.Console.WriteLine("This is the overridden getter.");
-        _ = this.__Override__Property__By__SecondOverrideAttribute;
-        return this.__Override__Property__By__SecondOverrideAttribute;
+        _ = this.Property_SecondOverride;
+        return this.Property_SecondOverride;
     }
 
 set    {
         global::System.Console.WriteLine("This is the overridden setter.");
-        this.__Override__Property__By__SecondOverrideAttribute= value;
-        this.__Override__Property__By__SecondOverrideAttribute= value;
+        this.Property_SecondOverride= value;
+        this.Property_SecondOverride= value;
     }
 }
 
-private int __Property__OriginalImpl
+private int Property_Source
         {
             get
             {
@@ -32,16 +32,16 @@ private int __Property__OriginalImpl
         }
 
 
-public global::System.Int32 __Override__Property__By__SecondOverrideAttribute
+public global::System.Int32 Property_SecondOverride
 {get    {
         global::System.Console.WriteLine("This is the overridden getter.");
-        _ = this.__Property__OriginalImpl;
-        return this.__Property__OriginalImpl;
+        _ = this.Property_Source;
+        return this.Property_Source;
     }
 
 set    {
         global::System.Console.WriteLine("This is the overridden setter.");
-        this.__Property__OriginalImpl= value;
-        this.__Property__OriginalImpl= value;
+        this.Property_Source= value;
+        this.Property_Source= value;
     }
 }    }

@@ -5,7 +5,7 @@ class Target
     this.Foo_Override2();
 }
 
-private void __Foo__OriginalImpl()
+private void Foo_Source()
         {
             Console.WriteLine( "Original");
         }
@@ -15,7 +15,7 @@ void Foo_Override2()
 {
     Console.WriteLine("Before2");
     Console.WriteLine("Before1");
-    this.__Foo__OriginalImpl();
+    this.Foo_Source();
     Console.WriteLine("After1");
     Console.WriteLine("After2");
 }    }

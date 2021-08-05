@@ -199,20 +199,22 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             try
             {
-                var compiledAspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
-                var compiledTemplateMethod = compiledAspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
-
                 var templateMethod = testResult.InputCompilation!.Assembly.GetTypes()
                     .Single( t => string.Equals( t.Name, "Aspect", StringComparison.Ordinal ) )
                     .GetMembers( "Template" )
                     .OfType<IMethodSymbol>()
                     .Single();
 
+                var compiledAspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
+
+                var compiledTemplateMethodName = TemplateNameHelper.GetCompiledTemplateName( templateMethod );
+                var compiledTemplateMethod = compiledAspectType.GetMethod( compiledTemplateMethodName, BindingFlags.Instance | BindingFlags.Public );
+
                 Invariant.Assert( compiledTemplateMethod != null );
                 var driver = new TemplateDriver( this.ServiceProvider, null!, templateMethod, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InputCompilation );
-                var template = new Template<IMemberOrNamedType>( compilationModel.Factory.GetMethod( templateMethod ) );
+                var template = Template.Create<IMemberOrNamedType>( compilationModel.Factory.GetMethod( templateMethod ) );
 
                 var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( this.ServiceProvider, assembly, compilationModel, template );
 

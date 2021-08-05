@@ -49,12 +49,12 @@ namespace Caravela.Framework.Impl.CodeModel
                 this._symbol.Parameters.Select( p => new DeclarationRef<IParameter>( p ) ) );
 
         [Memo]
-        public IMethod? Getter => this._symbol.GetMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.GetMethod );
+        public IMethod? GetMethod => this._symbol.GetMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.GetMethod );
 
         [Memo]
 
         // TODO: get-only properties
-        public IMethod? Setter => this._symbol.SetMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.SetMethod );
+        public IMethod? SetMethod => this._symbol.SetMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.SetMethod );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 

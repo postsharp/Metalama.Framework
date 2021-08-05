@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Serialization
             {
                 if ( declaringMember is IProperty property )
                 {
-                    method = (property.Getter ?? property.Setter)!;
+                    method = (property.GetMethod ?? property.SetMethod)!;
                 }
                 else
                 {

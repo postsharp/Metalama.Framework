@@ -24,9 +24,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IType Type { get; set; }
 
         [Memo]
-        public IMethod? Getter => new PseudoGetter( this );
+        public IMethod? GetMethod => new PseudoGetter( this );
 
-        public IMethod? Setter => new PseudoSetter( this );
+        public IMethod? SetMethod => new PseudoSetter( this );
 
         public override bool IsExplicitInterfaceImplementation => false;
 

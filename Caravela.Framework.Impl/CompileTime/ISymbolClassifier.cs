@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -28,17 +27,14 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public TemplateAttributeType AttributeType { get; }
 
-        public TemplateKind Kind { get; }
+        public TemplateInfo( TemplateAttributeType attributeType ) : this( attributeType, false ) { }
 
-        public TemplateInfo( TemplateAttributeType attributeType, TemplateKind kind ) : this( attributeType, kind, false ) { }
-
-        private TemplateInfo( TemplateAttributeType attributeType, TemplateKind kind, bool isAbstract )
+        private TemplateInfo( TemplateAttributeType attributeType, bool isAbstract )
         {
             this.AttributeType = attributeType;
-            this.Kind = kind;
             this.IsAbstract = isAbstract;
         }
 
-        public TemplateInfo AsAbstract() => new( this.AttributeType, this.Kind, true );
+        public TemplateInfo AsAbstract() => new( this.AttributeType, true );
     }
 }

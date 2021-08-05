@@ -32,12 +32,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethod Signature => this.EventType.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
-        public IMethod Adder => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.Adder );
+        public IMethod AddMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.AddMethod );
 
         [Memo]
-        public IMethod Remover => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.Remover );
+        public IMethod RemoveMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.RemoveMethod );
 
-        public IMethod? Raiser => null;
+        public IMethod? RaiseMethod => null;
 
         [Memo]
         public IInvokerFactory<IEventInvoker> Invokers

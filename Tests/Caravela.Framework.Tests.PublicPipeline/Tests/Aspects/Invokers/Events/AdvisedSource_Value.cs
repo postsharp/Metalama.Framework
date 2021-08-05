@@ -13,12 +13,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedSou
     {
         public override void OverrideAdd(dynamic handler)
         {
-            meta.Target.Event.Adder.Invoke( handler );
+            meta.Target.Event.AddMethod.Invoke( handler );
         }
 
         public override void OverrideRemove(dynamic handler)
         {
-            meta.Target.Event.Remover.Invoke( handler );
+            meta.Target.Event.RemoveMethod.Invoke( handler );
         }
     }
 

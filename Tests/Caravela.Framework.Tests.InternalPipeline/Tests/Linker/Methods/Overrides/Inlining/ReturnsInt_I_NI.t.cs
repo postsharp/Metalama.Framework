@@ -4,12 +4,12 @@ class Target
 {
     Console.WriteLine("Before");
     int result;
-    result = this.__Foo__OriginalImpl();
+    result = this.Foo_Source();
     Console.WriteLine("After");
     return result;
 }
 
-private int __Foo__OriginalImpl()
+private int Foo_Source()
         {
             Console.WriteLine( "Original");
             return 42;

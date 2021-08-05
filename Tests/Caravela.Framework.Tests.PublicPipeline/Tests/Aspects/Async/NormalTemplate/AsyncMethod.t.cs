@@ -20,12 +20,12 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Async.NormalTe
         async Task<int> MethodReturningTaskOfInt(int a)
 {
     global::System.Console.WriteLine("Before");
-    var result = (await this.__MethodReturningTaskOfInt__OriginalImpl(a));
+    var result = (await this.MethodReturningTaskOfInt_Source(a));
     global::System.Console.WriteLine("After");
     return (int)result;
 }
 
-private async Task<int> __MethodReturningTaskOfInt__OriginalImpl(int a)
+private async Task<int> MethodReturningTaskOfInt_Source(int a)
         {
             await Task.Yield();
             return a;
@@ -35,13 +35,13 @@ private async Task<int> __MethodReturningTaskOfInt__OriginalImpl(int a)
         async Task MethodReturningTaskd(int a)
 {
     global::System.Console.WriteLine("Before");
-    await this.__MethodReturningTaskd__OriginalImpl(a);
+    await this.MethodReturningTaskd_Source(a);
     object result = null;
     global::System.Console.WriteLine("After");
     return;
 }
 
-private async Task __MethodReturningTaskd__OriginalImpl(int a)
+private async Task MethodReturningTaskd_Source(int a)
         {
             await Task.Yield();
             Console.WriteLine("Oops");
@@ -51,12 +51,12 @@ private async Task __MethodReturningTaskd__OriginalImpl(int a)
         async ValueTask<int> MethodReturningValueTaskOfInt(int a)
 {
     global::System.Console.WriteLine("Before");
-    var result = (await this.__MethodReturningValueTaskOfInt__OriginalImpl(a));
+    var result = (await this.MethodReturningValueTaskOfInt_Source(a));
     global::System.Console.WriteLine("After");
     return (int)result;
 }
 
-private async ValueTask<int> __MethodReturningValueTaskOfInt__OriginalImpl(int a)
+private async ValueTask<int> MethodReturningValueTaskOfInt_Source(int a)
         {
             await Task.Yield();
             return a;

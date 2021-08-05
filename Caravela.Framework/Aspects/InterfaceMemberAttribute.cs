@@ -12,8 +12,6 @@ namespace Caravela.Framework.Aspects
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
     public sealed class InterfaceMemberAttribute : TemplateAttribute
     {
-        public InterfaceMemberAttribute() : base( TemplateKind.Introduction ) { }
-
         /// <summary>
         /// Gets or sets a value indicating whether the interface member should be introduced explicitly.
         /// </summary>
