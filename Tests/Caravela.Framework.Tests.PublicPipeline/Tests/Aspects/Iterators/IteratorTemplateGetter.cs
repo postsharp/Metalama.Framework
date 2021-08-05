@@ -33,7 +33,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Iterators.Iter
         }
         
         
-        public override IEnumerable<dynamic?> OverrideEnumeratorProperty 
+        public override IEnumerator<dynamic?> OverrideEnumeratorProperty 
         {
         get {
         Console.WriteLine($"Starting {meta.Target.Method.Name}");

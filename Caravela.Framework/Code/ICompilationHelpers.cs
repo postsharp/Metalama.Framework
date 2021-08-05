@@ -8,5 +8,7 @@ namespace Caravela.Framework.Code
         IteratorInfo GetIteratorInfo( IMethod method );
 
         AsyncInfo GetAsyncInfo( IMethod method );
+
+        AsyncInfo GetAsyncInfo( IType type );
     }
 }

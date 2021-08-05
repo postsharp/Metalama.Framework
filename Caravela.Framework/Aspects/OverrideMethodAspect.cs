@@ -59,7 +59,7 @@ namespace Caravela.Framework.Aspects
 
         [Template]
         [Abstract]
-        public virtual IAsyncEnumerable<dynamic?> OverrideAsyncEnumeratorMethod() => throw new NotSupportedException();
+        public virtual IAsyncEnumerator<dynamic?> OverrideAsyncEnumeratorMethod() => throw new NotSupportedException();
 #endif
 
         public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }

@@ -43,6 +43,6 @@ namespace Caravela.Framework.Aspects
 
         [Abstract]
         [Template]
-        public virtual IEnumerable<dynamic?> OverrideEnumeratorProperty => throw new NotSupportedException();
+        public virtual IEnumerator<dynamic?> OverrideEnumeratorProperty => throw new NotSupportedException();
     }
 }

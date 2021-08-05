@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.AsyncIterators
             Console.WriteLine($"Ending {meta.Target.Method.Name}");
         }
 
-        public override async IAsyncEnumerable<dynamic?> OverrideAsyncEnumeratorMethod()
+        public override async IAsyncEnumerator<dynamic?> OverrideAsyncEnumeratorMethod()
         {
             Console.WriteLine($"Starting {meta.Target.Method.Name}");
             var enumerator = meta.ProceedAsyncEnumerator();

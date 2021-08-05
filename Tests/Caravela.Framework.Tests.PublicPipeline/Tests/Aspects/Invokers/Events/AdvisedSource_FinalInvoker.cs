@@ -9,12 +9,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedSou
 {
     public class TestAttribute : OverrideEventAspect
     {
-        public override void OverrideAdd(dynamic handler)
+        public override void OverrideAdd(dynamic value)
         {
             meta.Target.Event.Invokers.Final!.Add(meta.This, meta.Target.Parameters[0].Value);
         }
 
-        public override void OverrideRemove(dynamic handler)
+        public override void OverrideRemove(dynamic value)
         {
             meta.Target.Event.Invokers.Final!.Remove(meta.This, meta.Target.Parameters[0].Value);
         }

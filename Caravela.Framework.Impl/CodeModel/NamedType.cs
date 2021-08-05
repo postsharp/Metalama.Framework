@@ -62,16 +62,36 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 return specialType;
             }
+            else if ( this.IsGeneric )
+            {
+                if ( this.IsOpenGeneric )
+                {
+                    return this.TypeSymbol.Name switch
+                    {
+                        "IAsyncEnumerable" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
+                            => SpecialType.IAsyncEnumerable_T,
+                        "IAsyncEnumerator" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
+                            => SpecialType.IAsyncEnumerator_T,
+                        nameof(ValueTask) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
+                            => SpecialType.ValueTask_T,
+                        nameof(Task) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
+                            => SpecialType.Task_T,
+                        _ => SpecialType.None
+                    };
+                }
+                else
+                {
+                    return SpecialType.None;
+                }
+            }
             else
             {
                 return this.TypeSymbol.Name switch
                 {
-                    "IAsyncEnumerable" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
-                        => SpecialType.IAsyncEnumerable_T,
-                    "IAsyncEnumerator" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
-                        => SpecialType.IAsyncEnumerator_T,
                     nameof(ValueTask) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
-                        => this.TypeSymbol.IsGenericType ? SpecialType.ValueTask_T : SpecialType.ValueTask,
+                        => SpecialType.ValueTask,
+                    nameof(Task) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
+                        => SpecialType.Task,
                     _ => SpecialType.None
                 };
             }

@@ -4,6 +4,8 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Impl.CodeModel;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -40,6 +42,26 @@ namespace Caravela.Framework.Impl.Advices
             }
         }
 
+        private static bool VerifyTemplateType( IReadOnlyList<IType> fromTypes, IReadOnlyList<IType> toTypes )
+        {
+            if ( fromTypes.Count != toTypes.Count )
+            {
+                return false;
+            }
+            else
+            {
+                for ( var i = 0; i < fromTypes.Count; i++ )
+                {
+                    if ( !VerifyTemplateType( fromTypes[i], toTypes[i] ) )
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
         private static bool VerifyTemplateType( IType fromType, IType toType )
         {
             if ( fromType.TypeKind == TypeKind.Dynamic )
@@ -50,10 +72,27 @@ namespace Caravela.Framework.Impl.Advices
             {
                 return true;
             }
-            else
+            else if ( fromType is INamedType { IsGeneric: true } fromNamedType && toType is INamedType toNamedType )
             {
-                return false;
+                if ( fromNamedType.OriginalDeclaration.SpecialType == SpecialType.Task_T
+                     && fromNamedType.GenericArguments[0].TypeKind == TypeKind.Dynamic )
+                {
+                    // We accept Task<dynamic> for any awaitable.
+
+                    if ( toType.SpecialType == SpecialType.Void || toType.GetAsyncInfo().IsAwaitable ||
+                         toNamedType.OriginalDeclaration.SpecialType is SpecialType.IAsyncEnumerable_T or SpecialType.IAsyncEnumerator_T )
+                    {
+                        return true;
+                    }
+                }
+                else if ( fromNamedType.OriginalDeclaration.Equals( toNamedType.OriginalDeclaration ) &&
+                          VerifyTemplateType( fromNamedType.GenericArguments, toNamedType.GenericArguments ) )
+                {
+                    return true;
+                }
             }
+
+            return false;
         }
 
         public static bool IsAsyncTask( this TemplateKind selectionKind )
