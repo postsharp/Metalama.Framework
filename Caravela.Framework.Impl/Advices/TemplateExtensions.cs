@@ -4,7 +4,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Impl.CodeModel;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices

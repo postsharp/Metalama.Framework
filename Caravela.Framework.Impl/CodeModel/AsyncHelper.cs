@@ -23,8 +23,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public static AsyncInfo GetAsyncInfoImpl( this IType type )
         {
             var isAwaitable = TryGetAsyncInfo( type, out var resultType, out var hasMethodBuilder );
+
             return new AsyncInfo( false, isAwaitable, resultType ?? type, hasMethodBuilder );
-            
         }
 
         // Caches the result type of an awaitable for a type, or null if the type is not awaitable.

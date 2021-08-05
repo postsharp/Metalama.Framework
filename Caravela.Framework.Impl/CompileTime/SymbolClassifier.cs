@@ -93,9 +93,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
             switch ( symbol )
             {
-                case IMethodSymbol { AssociatedSymbol: {} associatedSymbol }:
+                case IMethodSymbol { AssociatedSymbol: { } associatedSymbol }:
                     return this.GetTemplateInfo( associatedSymbol );
-                
+
                 case IMethodSymbol { OverriddenMethod: { } overriddenMethod }:
                     // Look at the overriden method.
                     return this.GetTemplateInfo( overriddenMethod!, true );
