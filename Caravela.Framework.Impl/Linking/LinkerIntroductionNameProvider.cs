@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

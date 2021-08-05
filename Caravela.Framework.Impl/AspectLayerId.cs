@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Utilities;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 
@@ -25,8 +24,7 @@ namespace Caravela.Framework.Impl
             this.LayerName = layerName;
             this.AspectShortName = aspectName.Split( '.' ).Last().TrimEnd( "Attribute" );
         }
-        
-        
+
         public static AspectLayerId FromString( string s )
         {
             var parts = s.Split( _separators );
@@ -44,7 +42,7 @@ namespace Caravela.Framework.Impl
         public bool IsNull => this.AspectName == null!;
 
         public string AspectName { get; }
-        
+
         public string AspectShortName { get; }
 
         public string? LayerName { get; }
