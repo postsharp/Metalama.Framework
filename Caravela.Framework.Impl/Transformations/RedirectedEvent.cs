@@ -56,13 +56,13 @@ namespace Caravela.Framework.Impl.Transformations
                         AccessorDeclaration(
                             SyntaxKind.AddAccessorDeclaration,
                             List<AttributeListSyntax>(),
-                            this.OverriddenDeclaration.Adder.GetSyntaxModifierList(),
+                            this.OverriddenDeclaration.AddMethod.GetSyntaxModifierList(),
                             CreateAccessorBody( SyntaxKind.AddAssignmentExpression ),
                             null ),
                         AccessorDeclaration(
                             SyntaxKind.RemoveAccessorDeclaration,
                             List<AttributeListSyntax>(),
-                            this.OverriddenDeclaration.Remover.GetSyntaxModifierList(),
+                            this.OverriddenDeclaration.RemoveMethod.GetSyntaxModifierList(),
                             CreateAccessorBody( SyntaxKind.SubtractAssignmentExpression ),
                             null )
                     }.Where( a => a != null )

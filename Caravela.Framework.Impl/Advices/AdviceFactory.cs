@@ -216,7 +216,7 @@ namespace Caravela.Framework.Impl.Advices
 
         private TemplateRef SelectTemplate( IFieldOrProperty targetFieldOrProperty, in GetterTemplateSelector templateSelector, bool required )
         {
-            var getter = targetFieldOrProperty.Getter;
+            var getter = targetFieldOrProperty.GetMethod;
 
             if ( getter == null )
             {

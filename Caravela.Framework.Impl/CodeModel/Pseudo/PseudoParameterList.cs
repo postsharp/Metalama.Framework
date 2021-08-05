@@ -22,5 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
         IParameter IReadOnlyList<IParameter>.this[ int index ] => this[index];
 
         public IParameter this[ string name ] => this.Single<IParameter>( p => p.Name == name );
+
+        
     }
 }

@@ -10,17 +10,17 @@ namespace Caravela.Framework.Impl.CodeModel
         public static IMethod? GetAccessorImpl( this IEvent @event, MethodKind kind )
             => kind switch
             {
-                MethodKind.EventAdd => @event.Adder,
-                MethodKind.EventRaise => @event.Raiser,
-                MethodKind.EventRemove => @event.Remover,
+                MethodKind.EventAdd => @event.AddMethod,
+                MethodKind.EventRaise => @event.RaiseMethod,
+                MethodKind.EventRemove => @event.RemoveMethod,
                 _ => null
             };
 
         public static IMethod? GetAccessorImpl( this IProperty property, MethodKind kind )
             => kind switch
             {
-                MethodKind.PropertyGet => property.Getter,
-                MethodKind.PropertySet => property.Setter,
+                MethodKind.PropertyGet => property.GetMethod,
+                MethodKind.PropertySet => property.SetMethod,
                 _ => null
             };
     }

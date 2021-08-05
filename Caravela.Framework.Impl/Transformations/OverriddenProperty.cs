@@ -45,8 +45,8 @@ namespace Caravela.Framework.Impl.Transformations
 
                 if ( !propertyTemplate.Declaration!.IsAutoPropertyOrField )
                 {
-                    this.GetTemplate = new Template<IMethod>( this.PropertyTemplate.Declaration!.Getter );
-                    this.SetTemplate = new Template<IMethod>( this.PropertyTemplate.Declaration!.Setter );
+                    this.GetTemplate = Template.Create( this.PropertyTemplate.Declaration!.GetMethod );
+                    this.SetTemplate = Template.Create( this.PropertyTemplate.Declaration!.SetMethod );
                 }
             }
             else
@@ -54,6 +54,9 @@ namespace Caravela.Framework.Impl.Transformations
                 this.GetTemplate = getTemplate;
                 this.SetTemplate = setTemplate;
             }
+
+            this.GetTemplate.ValidateTarget( overriddenDeclaration.GetMethod );
+            this.SetTemplate.ValidateTarget( overriddenDeclaration.SetMethod );
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
@@ -75,14 +78,14 @@ namespace Caravela.Framework.Impl.Transformations
                 var templateExpansionError = false;
                 BlockSyntax? getAccessorBody = null;
 
-                if ( this.OverriddenDeclaration.Getter != null )
+                if ( this.OverriddenDeclaration.GetMethod != null )
                 {
                     if ( getTemplate.IsNotNull )
                     {
                         templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                             context,
                             getTemplate,
-                            this.OverriddenDeclaration.Getter,
+                            this.OverriddenDeclaration.GetMethod,
                             out getAccessorBody );
                     }
                     else
@@ -97,14 +100,14 @@ namespace Caravela.Framework.Impl.Transformations
 
                 BlockSyntax? setAccessorBody = null;
 
-                if ( this.OverriddenDeclaration.Setter != null )
+                if ( this.OverriddenDeclaration.SetMethod != null )
                 {
                     if ( setTemplate.IsNotNull )
                     {
                         templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                             context,
                             setTemplate,
-                            this.OverriddenDeclaration.Setter,
+                            this.OverriddenDeclaration.SetMethod,
                             out setAccessorBody );
                     }
                     else
@@ -141,14 +144,14 @@ namespace Caravela.Framework.Impl.Transformations
                                                 ? AccessorDeclaration(
                                                     SyntaxKind.GetAccessorDeclaration,
                                                     List<AttributeListSyntax>(),
-                                                    this.OverriddenDeclaration.Getter.AssertNotNull().GetSyntaxModifierList(),
+                                                    this.OverriddenDeclaration.GetMethod.AssertNotNull().GetSyntaxModifierList(),
                                                     getAccessorBody )
                                                 : null,
                                             setAccessorBody != null
                                                 ? AccessorDeclaration(
                                                     setAccessorDeclarationKind,
                                                     List<AttributeListSyntax>(),
-                                                    this.OverriddenDeclaration.Setter.AssertNotNull().GetSyntaxModifierList(),
+                                                    this.OverriddenDeclaration.SetMethod.AssertNotNull().GetSyntaxModifierList(),
                                                     setAccessorBody )
                                                 : null
                                         }.Where( a => a != null )
@@ -178,7 +181,7 @@ namespace Caravela.Framework.Impl.Transformations
                         MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
                             this.CreateProceedGetExpression(),
                             this.GetTemplate,
-                            this.OverriddenDeclaration.Getter.AssertNotNull() ),
+                            this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
                         MethodKind.PropertySet => new DynamicExpression(
                             this.CreateProceedSetExpression(),
                             this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),

@@ -225,11 +225,11 @@ class TargetCode
             AssertEx.DynamicEquals( property.Invokers.Final.GetValue( thisExpression ), @"((global::TargetCode)(this)).P" );
 
             AssertEx.DynamicEquals(
-                property.Getter!.Invokers.FinalConditional.Invoke( SyntaxFactory.IdentifierName( "a" ) ),
+                property.GetMethod!.Invokers.FinalConditional.Invoke( SyntaxFactory.IdentifierName( "a" ) ),
                 @"((global::TargetCode)(a))?.P" );
 
             AssertEx.DynamicEquals(
-                property.Getter!.Invokers.Final.Invoke( property.Invokers.Final.GetValue( thisExpression ) ),
+                property.GetMethod!.Invokers.Final.Invoke( property.Invokers.Final.GetValue( thisExpression ) ),
                 @"((global::TargetCode)(this)).P.P" );
         }
 
@@ -276,15 +276,15 @@ class TargetCode
             RuntimeExpression parameterExpression = new( SyntaxFactory.IdentifierName( "value" ) );
 
             AssertEx.DynamicEquals(
-                @event.Adder.Invokers.Final.Invoke( thisExpression, parameterExpression ),
+                @event.AddMethod.Invokers.Final.Invoke( thisExpression, parameterExpression ),
                 @"((global::TargetCode)(this)).MyEvent += value" );
 
             AssertEx.DynamicEquals(
-                @event.Remover.Invokers.Final.Invoke( thisExpression, parameterExpression ),
+                @event.RemoveMethod.Invokers.Final.Invoke( thisExpression, parameterExpression ),
                 @"((global::TargetCode)(this)).MyEvent -= value" );
 
             AssertEx.DynamicEquals(
-                @event.Raiser?.Invokers.Final.Invoke( thisExpression, parameterExpression, parameterExpression ),
+                @event.RaiseMethod?.Invokers.Final.Invoke( thisExpression, parameterExpression, parameterExpression ),
                 @"((global::TargetCode)(this)).MyEvent?.Invoke((global::System.Object? )(value), (global::System.EventArgs)(value))" );
         }
 

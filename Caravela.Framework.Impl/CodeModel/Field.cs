@@ -33,10 +33,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
 
         [Memo]
-        public IMethod? Getter => new PseudoGetter( this );
+        public IMethod? GetMethod => new PseudoGetter( this );
 
         [Memo]
-        public IMethod? Setter => this.Writeability != Writeability.None ? new PseudoSetter( this ) : null;
+        public IMethod? SetMethod => this.Writeability != Writeability.None ? new PseudoSetter( this ) : null;
 
         // TODO: Memo does not work here.
         // [Memo]

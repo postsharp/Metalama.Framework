@@ -214,7 +214,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var driver = new TemplateDriver( this.ServiceProvider, null!, templateMethod, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InputCompilation );
-                var template = new Template<IMemberOrNamedType>( compilationModel.Factory.GetMethod( templateMethod ) );
+                var template = Template.Create<IMemberOrNamedType>( compilationModel.Factory.GetMethod( templateMethod ) );
 
                 var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( this.ServiceProvider, assembly, compilationModel, template );
 

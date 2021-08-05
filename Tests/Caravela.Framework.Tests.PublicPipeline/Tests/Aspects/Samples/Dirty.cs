@@ -34,11 +34,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
                 // this is a contract violation.
                 var dirtyStateProperty = builder.Target.Properties.Where(m => m.Name == nameof(this.DirtyState) && m.Parameters.Count == 0 && m.Type.Is(typeof(DirtyState))).SingleOrDefault();
 
-                if (dirtyStateProperty?.Setter == null)
+                if (dirtyStateProperty?.SetMethod == null)
                 {
                     builder.Diagnostics.Report(_mustHaveDirtyStateSetter, builder.Target);
                 }
-                else if (dirtyStateProperty.Setter.Accessibility != Accessibility.Protected)
+                else if (dirtyStateProperty.SetMethod.Accessibility != Accessibility.Protected)
                 {
                     builder.Diagnostics.Report(_dirtyStateSetterMustBeProtected, dirtyStateProperty);
                 }

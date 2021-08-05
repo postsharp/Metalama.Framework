@@ -35,6 +35,7 @@ namespace Caravela.Framework.Impl.Transformations
             Invariant.Assert( template.IsNotNull );
 
             this.Template = template;
+            this.Template.ValidateTarget( overriddenDeclaration );
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
