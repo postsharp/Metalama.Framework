@@ -650,7 +650,7 @@ namespace Caravela.Framework.Impl.Linking
             return introducedMember.AssertNotNull().Introduction.Advice.Aspect;
         }
 
-        internal static string GetOriginalImplMemberName( ISymbol symbol )
+        private static string GetOriginalImplMemberName( ISymbol symbol )
         {
             switch ( symbol )
             {

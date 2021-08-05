@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.Utilities
                 AddAccessibilityTokens( member, tokens );
             }
 
-            if ( member.IsStatic && (categories & ModifierCategories.Inheritance) != 0 )
+            if ( member.IsStatic && (categories & ModifierCategories.Static) != 0 )
             {
                 tokens.Add( Token( SyntaxKind.StaticKeyword ) );
             }
