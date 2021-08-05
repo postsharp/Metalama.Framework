@@ -4,11 +4,11 @@ class Target
         void Foo()
 {
     Console.WriteLine("Before");
-    this.__Foo__OriginalImpl();
+    this.Foo_Source();
     Console.WriteLine("After");
 }
 
-private void __Foo__OriginalImpl()
+private void Foo_Source()
         {
             Console.WriteLine( "Original");
         }

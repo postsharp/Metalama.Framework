@@ -4,22 +4,22 @@
 
 private string? _make;
         public string? Make {get    {
-        return this.__Make__OriginalImpl;
+        return this.Make_Source;
     }
 
 set    {
         var value_1 = value;
-        if (value_1 != this.__Make__OriginalImpl)
+        if (value_1 != this.Make_Source)
         {
             this.OnPropertyChanged("Make");
-            this.__Make__OriginalImpl= value;
+            this.Make_Source= value;
         }
 
         return;
     }
 }
 
-private string? __Make__OriginalImpl
+private string? Make_Source
 {
     get
     {
@@ -34,22 +34,22 @@ private string? __Make__OriginalImpl
 
 private double _power;
         public double Power {get    {
-        return this.__Power__OriginalImpl;
+        return this.Power_Source;
     }
 
 set    {
         var value_1 = value;
-        if (value_1 != this.__Power__OriginalImpl)
+        if (value_1 != this.Power_Source)
         {
             this.OnPropertyChanged("Power");
-            this.__Power__OriginalImpl= value;
+            this.Power_Source= value;
         }
 
         return;
     }
 }
 
-private double __Power__OriginalImpl
+private double Power_Source
 {
     get
     {

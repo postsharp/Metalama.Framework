@@ -21,8 +21,8 @@ namespace Caravela.Framework.Impl.Linking
 
         internal override string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenDeclaration )
         {
-            var shortAspectName = aspectLayer.AspectName.Split( '.' ).Last();
-            var shortLayerName = aspectLayer.LayerName?.Split( '.' ).Last();
+            var shortAspectName = aspectLayer.AspectShortName;
+            var shortLayerName = aspectLayer.LayerName;
 
             string nameHint;
 
@@ -33,8 +33,8 @@ namespace Caravela.Framework.Impl.Linking
 
                 nameHint =
                     shortLayerName != null
-                        ? $"__Override__{cleanInterfaceName}__{interfaceMember.Name}__By__{shortAspectName}__{shortLayerName}"
-                        : $"__Override__{cleanInterfaceName}__{interfaceMember.Name}__By__{shortAspectName}";
+                        ? $"{cleanInterfaceName}_{interfaceMember.Name}_{shortAspectName}_{shortLayerName}"
+                        : $"{cleanInterfaceName}_{interfaceMember.Name}_{shortAspectName}";
             }
             else
             {
@@ -42,8 +42,8 @@ namespace Caravela.Framework.Impl.Linking
 
                 nameHint =
                     shortLayerName != null
-                        ? $"__Override__{overriddenDeclaration.Name}__By__{shortAspectName}__{shortLayerName}"
-                        : $"__Override__{overriddenDeclaration.Name}__By__{shortAspectName}";
+                        ? $"{overriddenDeclaration.Name}_{shortAspectName}_{shortLayerName}"
+                        : $"{overriddenDeclaration.Name}_{shortAspectName}";
             }
 
             return this.FindUniqueName( targetType, nameHint );

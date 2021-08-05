@@ -10,12 +10,12 @@ class TargetCode
         async Task<int> AsyncMethod(int a)
 {
     await global::System.Threading.Tasks.Task.Yield();
-    var result = await this.__AsyncMethod__OriginalImpl(a);
+    var result = await this.AsyncMethod_Source(a);
     global::System.Console.WriteLine($"result={result}");
     return (int)result;
 }
 
-private async Task<int> __AsyncMethod__OriginalImpl(int a)
+private async Task<int> AsyncMethod_Source(int a)
         {
             await Task.Yield();
             return a;

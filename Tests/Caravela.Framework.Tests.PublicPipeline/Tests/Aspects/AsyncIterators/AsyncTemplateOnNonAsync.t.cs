@@ -5,7 +5,7 @@ class TargetCode
 {
     await global::System.Threading.Tasks.Task.Yield();
     global::System.Console.WriteLine("Before AsyncEnumerable");
-    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.__AsyncEnumerable__OriginalImpl(a)));
+    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerable_Source(a)));
     global::System.Console.WriteLine("After AsyncEnumerable");
     await global::System.Threading.Tasks.Task.Yield();
     await foreach (var r in result)
@@ -16,7 +16,7 @@ class TargetCode
     yield break;
 }
 
-private IAsyncEnumerable<int> __AsyncEnumerable__OriginalImpl(int a)
+private IAsyncEnumerable<int> AsyncEnumerable_Source(int a)
         {
             Console.WriteLine("Not Async");
             return this.AsyncEnumerableImpl(a);
