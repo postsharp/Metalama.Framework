@@ -48,12 +48,16 @@ namespace Caravela.Framework.Code
         /// <returns></returns>
         public static bool Is( this IType left, Type right ) => left.Compilation.InvariantComparer.Is( left, right );
 
-        public static bool Is( this IType left, SpecialType right )
-            => left.Compilation.InvariantComparer.Is( left, left.Compilation.TypeFactory.GetSpecialType( right ) );
+        /// <summary>
+        /// Determines whether a type equals one of the well-known special types.
+        /// </summary>
+        public static bool Equals( this IType left, SpecialType right ) => left.SpecialType == right;
 
         /// <summary>
         /// Generates the <c>default(T)</c> syntax for the type.
         /// </summary>
         public static dynamic? DefaultValue( this IType type ) => type.Compilation.TypeFactory.DefaultValue( type );
+
+        public static AsyncInfo GetAsyncInfo( this IType type ) => ((ICompilationInternal) type.Compilation).Helpers.GetAsyncInfo( type );
     }
 }

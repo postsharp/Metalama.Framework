@@ -10,9 +10,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfRunTi
         [TestTemplate]
         dynamic? Template()
         {
-            if (meta.Parameters[0].Value == null)
+            if (meta.Target.Parameters[0].Value == null)
             {
-                if (meta.Method.Name == "DontThrowMethod")
+                if (meta.Target.Method.Name == "DontThrowMethod")
                 {
                     Console.WriteLine("Oops");
                 }

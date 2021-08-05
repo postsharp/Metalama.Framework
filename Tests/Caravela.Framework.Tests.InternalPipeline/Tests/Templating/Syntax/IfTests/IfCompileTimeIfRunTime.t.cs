@@ -5,5 +5,5 @@ string Method(string a)
         throw new global::System.ArgumentException("IsNullOrEmpty", "a");
     }
 
-    return (string)this.Method(a);
+    return this.Method(a);
 }

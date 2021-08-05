@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     /// <summary>
     /// The implementation of <see cref="IMetaApi"/>.
     /// </summary>
-    internal class MetaApi : IMetaApi
+    internal class MetaApi : IMetaApi, IMetaTarget
     {
         private readonly IAdvisedFieldOrProperty? _fieldOrProperty;
         private readonly IAdvisedMethod? _method;
@@ -26,7 +26,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         private Exception CreateInvalidOperationException( string memberName, string? description = null )
             => TemplatingDiagnosticDescriptors.MemberMemberNotAvailable.CreateException(
-                (this._common.TemplateSymbol, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind, description ?? "I" + memberName) );
+                (this._common.Template.Declaration!, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
+                 description ?? "I" + memberName) );
 
         public IConstructor Constructor => throw new NotImplementedException();
 
@@ -63,9 +64,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                         linkerAnnotation ),
 
                 _ => throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                    (this._common.TemplateSymbol, expressionName, this.Declaration, this.Declaration.DeclarationKind) )
+                    (this._common.Template.Declaration!, expressionName, this.Declaration, this.Declaration.DeclarationKind) )
             };
         }
+
+        public IMetaTarget Target => this;
 
         public object This => this.GetThisOrBase( "meta.This", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
 
@@ -76,8 +79,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public object BaseStatic
             => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
-
-        public object? Proceed() => this._common.ProceedExpression;
 
         public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;
 

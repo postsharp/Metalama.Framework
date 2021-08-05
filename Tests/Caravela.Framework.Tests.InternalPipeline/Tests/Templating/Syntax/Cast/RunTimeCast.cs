@@ -12,9 +12,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Cast.RunTimeCas
         dynamic Template()
         {
             object arg0 = null;
-            if (meta.Parameters.Count > 0)
+            if (meta.Target.Parameters.Count > 0)
             {
-                arg0 = meta.Parameters[0].Value;
+                arg0 = meta.Target.Parameters[0].Value;
                 if (arg0 is string)
                 {
                     string s = (string)arg0;

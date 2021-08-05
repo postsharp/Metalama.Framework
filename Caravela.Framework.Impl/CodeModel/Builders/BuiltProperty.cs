@@ -19,7 +19,7 @@ using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltProperty : BuiltMember, IProperty, IMemberRef<IProperty>
+    internal class BuiltProperty : BuiltMember, IPropertyInternal, IMemberRef<IProperty>
     {
         public BuiltProperty( PropertyBuilder builder, CompilationModel compilation ) : base( compilation )
         {
@@ -47,10 +47,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IType Type => this.PropertyBuilder.Type;
 
         [Memo]
-        public IMethod? Getter => this.PropertyBuilder.Getter != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.Getter ) : null;
+        public IMethod? GetMethod => this.PropertyBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.GetMethod ) : null;
 
         [Memo]
-        public IMethod? Setter => this.PropertyBuilder.Setter != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.Setter ) : null;
+        public IMethod? SetMethod => this.PropertyBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.SetMethod ) : null;
 
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 

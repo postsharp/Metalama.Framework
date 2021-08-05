@@ -299,14 +299,14 @@ class B
             {
                 var valueFromA = project.References
                     .Single( p => p.RunTimeIdentity.Name == compilationA.AssemblyName )
-                    .GetType( "A" )!
+                    .GetType( "A" )
                     .GetProperty( "Version" )!
                     .GetValue( null );
 
                 Assert.Equal( expectedVersion, valueFromA );
 
                 var valueFromB = project
-                    .GetType( "B" )!
+                    .GetType( "B" )
                     .GetProperty( "Version" )!
                     .GetValue( null );
 

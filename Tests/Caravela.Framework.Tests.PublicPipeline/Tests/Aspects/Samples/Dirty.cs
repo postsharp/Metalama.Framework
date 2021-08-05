@@ -24,29 +24,29 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
 
-            if (!builder.TargetDeclaration.ImplementedInterfaces.Any(i => i.Is(typeof(IDirty))))
+            if (!builder.Target.ImplementedInterfaces.Any(i => i.Is(typeof(IDirty))))
             {
-                builder.AdviceFactory.ImplementInterface(builder.TargetDeclaration, typeof(IDirty));
+                builder.AdviceFactory.ImplementInterface(builder.Target, typeof(IDirty));
             }
             else
             {
                 // If the type already implements IDirty, it must have a protected method called OnDirty, otherwise 
                 // this is a contract violation.
-                var dirtyStateProperty = builder.TargetDeclaration.Properties.Where(m => m.Name == nameof(this.DirtyState) && m.Parameters.Count == 0 && m.Type.Is(typeof(DirtyState))).SingleOrDefault();
+                var dirtyStateProperty = builder.Target.Properties.Where(m => m.Name == nameof(this.DirtyState) && m.Parameters.Count == 0 && m.Type.Is(typeof(DirtyState))).SingleOrDefault();
 
-                if (dirtyStateProperty?.Setter == null)
+                if (dirtyStateProperty?.SetMethod == null)
                 {
-                    builder.Diagnostics.Report(_mustHaveDirtyStateSetter, builder.TargetDeclaration);
+                    builder.Diagnostics.Report(_mustHaveDirtyStateSetter, builder.Target);
                 }
-                else if (dirtyStateProperty.Setter.Accessibility != Accessibility.Protected)
+                else if (dirtyStateProperty.SetMethod.Accessibility != Accessibility.Protected)
                 {
                     builder.Diagnostics.Report(_dirtyStateSetterMustBeProtected, dirtyStateProperty);
                 }
             }
 
-            var fieldsOrProperties = builder.TargetDeclaration.Properties
+            var fieldsOrProperties = builder.Target.Properties
                 .Cast<IFieldOrProperty>()
-                .Concat(builder.TargetDeclaration.Fields)
+                .Concat(builder.Target.Fields)
                 .Where(f => f.Writeability == Writeability.All);
 
             foreach (var fieldOrProperty in fieldsOrProperties)

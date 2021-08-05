@@ -2,12 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.DesignTime.Contracts;
+using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
-using Microsoft.CodeAnalysis.Text;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -15,7 +14,7 @@ using System.Windows.Media;
 
 namespace Caravela.AspectWorkbench.ViewModels
 {
-    internal class SyntaxColorizer
+    internal class SyntaxColorizer : FormattedCodeWriter
     {
         private static readonly Dictionary<string, Color> _classificationToColor = new()
         {
@@ -86,41 +85,31 @@ namespace Caravela.AspectWorkbench.ViewModels
             { ClassificationTypeNames.RegexOtherEscape, Colors.Indigo }
         };
 
-        private readonly Project _project;
-
-        public SyntaxColorizer( Project project )
-        {
-            this._project = project;
-        }
-
-        public async Task<FlowDocument> WriteSyntaxColoring( SourceText text, IReadOnlyClassifiedTextSpanCollection? compileTimeSpans )
+        public static FlowDocument WriteSyntaxColoring( Document document, IEnumerable<Diagnostic>? diagnostics = null, SyntaxNode? annotatedSyntaxNode = null )
         {
             static Color WithAlpha( Color brush, double alpha )
             {
                 return Color.FromArgb( (byte) (255 * alpha), brush.R, brush.G, brush.B );
             }
 
-            var document = this._project.AddDocument( "name.cs", text.ToString() );
-
-            var roslynClassifiedSpans =
-                await Classifier.GetClassifiedSpansAsync( document, TextSpan.FromBounds( 0, text.Length ) );
-
-            var ranges = roslynClassifiedSpans.Select(
-                classifiedSpan =>
-                    new TextRange( classifiedSpan, text.GetSubText( classifiedSpan.TextSpan ).ToString() ) );
-
-            ranges = TextRange.FillGaps( text, ranges );
+            var classified = GetClassifiedTextSpans( document, annotatedSyntaxNode, diagnostics );
 
             var paragraph = new Paragraph();
 
-            foreach ( var range in ranges )
+            foreach ( var span in classified.TextSpans )
             {
+                if ( classified.SourceText.Length < span.Span.End )
+                {
+                    // This must be due to a bug upstream. Ignore it.
+                    continue;
+                }
+
                 Color foreground = Colors.Black, background;
                 var fontWeight = FontWeights.Normal;
                 var fontStyle = FontStyles.Normal;
                 TextDecorationCollection? textDecoration = null;
 
-                var category = compileTimeSpans?.GetCategory( range.TextSpan ) ?? TextSpanClassification.Default;
+                var category = span.Classification;
 
                 // Choose foreground.
                 switch ( category )
@@ -142,14 +131,17 @@ namespace Caravela.AspectWorkbench.ViewModels
                         break;
 
                     default:
-                        if ( string.IsNullOrWhiteSpace( range.Text ) )
+                        if ( span.Tags.TryGetValue( CSharpClassTagName, out var csharpClasses ) )
                         {
-                            foreground = Colors.Black;
-                        }
-                        else if ( range.ClassificationType == null || !_classificationToColor.TryGetValue( range.ClassificationType, out foreground ) )
-                        {
-                            // A good point to have a breakpoint.
-                            foreground = Colors.Green;
+                            foreach ( var csClass in csharpClasses.Split( ';' ) )
+                            {
+                                if ( _classificationToColor.TryGetValue( csClass, out var color ) )
+                                {
+                                    foreground = color;
+
+                                    break;
+                                }
+                            }
                         }
 
                         fontWeight = FontWeights.Normal;
@@ -174,11 +166,10 @@ namespace Caravela.AspectWorkbench.ViewModels
                         break;
                 }
 
-                var run = new Run( range.Text )
+                var run = new Run( classified.SourceText.GetSubText( span.Span ).ToString() )
                 {
                     Foreground = new SolidColorBrush( foreground ),
                     Background = new SolidColorBrush( background ),
-                    ToolTip = range.ClassificationType,
                     FontWeight = fontWeight,
                     FontStyle = fontStyle
                 };
@@ -186,6 +177,20 @@ namespace Caravela.AspectWorkbench.ViewModels
                 if ( textDecoration != null )
                 {
                     run.TextDecorations.Add( textDecoration );
+                }
+
+                // Process diagnostic.
+                if ( span.Tags.TryGetValue( DiagnosticTagName, out var diagnostic ) )
+                {
+                    run.ToolTip = diagnostic;
+
+                    run.TextDecorations.Add(
+                        new TextDecoration(
+                            TextDecorationLocation.Underline,
+                            new Pen( diagnostic.StartsWith( "Error", StringComparison.OrdinalIgnoreCase ) ? Brushes.Red : Brushes.Orange, 1 ),
+                            3,
+                            TextDecorationUnit.Pixel,
+                            TextDecorationUnit.Pixel ) );
                 }
 
                 ToolTipService.SetShowOnDisabled( run, true );

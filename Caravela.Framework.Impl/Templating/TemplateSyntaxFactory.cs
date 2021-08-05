@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Formatting;
@@ -14,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.Templating
@@ -133,7 +135,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return SyntaxFactoryEx.EmptyStatement;
             }
-            else if ( expression.ExpressionType.Is( SpecialType.Void ) )
+            else if ( TypeExtensions.Equals( expression.ExpressionType, SpecialType.Void ) )
             {
                 return SyntaxFactory.ExpressionStatement( expression.CreateExpression( expressionText, location ) );
             }
@@ -163,7 +165,7 @@ namespace Caravela.Framework.Impl.Templating
 
             var runtimeExpression = value.CreateExpression( expressionText, location );
 
-            if ( value.ExpressionType.Is( SpecialType.Void ) )
+            if ( TypeExtensions.Equals( value.ExpressionType, SpecialType.Void ) )
             {
                 // If the method is void, we invoke the method as a statement (so we don't loose the side effect) and we define a local that
                 // we assign to the default value. The local is necessary because it may be referenced later.
@@ -296,6 +298,27 @@ namespace Caravela.Framework.Impl.Templating
 
                 default:
                     return SyntaxFactory.ConditionalExpression( condition, whenTrue, whenFalse );
+            }
+        }
+
+        public static IDynamicExpression? Proceed( string methodName ) => ExpansionContext.Proceed( methodName );
+
+        public static StatementSyntax YieldProceed() => ExpansionContext.CreateYieldProceedStatement();
+
+        public static ValueTask<dynamic?> ProceedAsync() => meta.Proceed();
+
+        public static ExpressionSyntax? GetDynamicSyntax( object? expression, string? expressionText, Location? location = null )
+        {
+            switch ( expression )
+            {
+                case null:
+                    return null;
+
+                case IDynamicExpression dynamicExpression:
+                    return dynamicExpression.CreateExpression( expressionText, location );
+
+                default:
+                    throw new ArgumentOutOfRangeException( nameof(expression), $"Don't know how to extract the syntax from '{expression}'." );
             }
         }
 

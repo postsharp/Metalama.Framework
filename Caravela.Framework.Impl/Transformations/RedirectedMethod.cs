@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.Transformations
                     MethodDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        SyntaxHelpers.CreateSyntaxForEventType( this.OverriddenDeclaration ),
+                        SyntaxHelpers.CreateSyntaxForReturnType( this.OverriddenDeclaration ),
                         null,
                         Identifier(
                             context.IntroductionNameProvider.GetOverrideName(

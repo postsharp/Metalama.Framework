@@ -21,35 +21,35 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
 
-        public IEvent? TemplateEvent { get; }
+        public Template<IEvent> EventTemplate { get; }
 
-        public IMethod? AddTemplateMethod { get; }
+        public Template<IMethod> AddTemplate { get; }
 
-        public IMethod? RemoveTemplateMethod { get; }
+        public Template<IMethod> RemoveTemplate { get; }
 
         public OverriddenEvent(
             Advice advice,
             IEvent overriddenDeclaration,
-            IEvent? templateEvent,
-            IMethod? addTemplateMethod,
-            IMethod? removeTemplateMethod )
+            Template<IEvent> eventTemplate,
+            Template<IMethod> addTemplate,
+            Template<IMethod> removeTemplate )
             : base( advice, overriddenDeclaration )
         {
-            Invariant.Assert( advice != null );
-            Invariant.Assert( overriddenDeclaration != null );
-
             // We need event template xor both accessor templates.
-            Invariant.Assert( templateEvent != null || (addTemplateMethod != null && removeTemplateMethod != null) );
-            Invariant.Assert( !(templateEvent != null && (addTemplateMethod != null || removeTemplateMethod != null)) );
+            Invariant.Assert( eventTemplate.IsNotNull || (addTemplate.IsNotNull && removeTemplate.IsNotNull) );
+            Invariant.Assert( !(eventTemplate.IsNotNull && (addTemplate.IsNotNull || removeTemplate.IsNotNull)) );
 
-            this.TemplateEvent = templateEvent;
-            this.AddTemplateMethod = addTemplateMethod;
-            this.RemoveTemplateMethod = removeTemplateMethod;
+            this.EventTemplate = eventTemplate;
+            this.AddTemplate = addTemplate;
+            this.RemoveTemplate = removeTemplate;
+
+            this.AddTemplate.ValidateTarget( overriddenDeclaration.AddMethod );
+            this.AddTemplate.ValidateTarget( overriddenDeclaration.RemoveMethod );
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            if ( this.TemplateEvent?.IsEventField() == true )
+            if ( this.EventTemplate.Declaration?.IsEventField() == true )
             {
                 throw new AssertionFailedException();
             }
@@ -61,18 +61,23 @@ namespace Caravela.Framework.Impl.Transformations
                     this.Advice.AspectLayerId,
                     this.OverriddenDeclaration );
 
-                var addTemplateMethod = this.TemplateEvent != null ? this.TemplateEvent.Adder : this.AddTemplateMethod;
-                var removeTemplateMethod = this.TemplateEvent != null ? this.TemplateEvent.Remover : this.RemoveTemplateMethod;
+                var addTemplateMethod = this.EventTemplate.Declaration != null
+                    ? Template.Create( this.EventTemplate.Declaration.AddMethod )
+                    : this.AddTemplate;
+
+                var removeTemplateMethod = this.EventTemplate.Declaration != null
+                    ? Template.Create( this.EventTemplate.Declaration.RemoveMethod )
+                    : this.RemoveTemplate;
 
                 var templateExpansionError = false;
                 BlockSyntax? addAccessorBody = null;
 
-                if ( addTemplateMethod != null )
+                if ( addTemplateMethod.IsNotNull )
                 {
                     templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                         context,
                         addTemplateMethod,
-                        this.OverriddenDeclaration.Adder,
+                        this.OverriddenDeclaration.AddMethod,
                         out addAccessorBody );
                 }
                 else
@@ -82,12 +87,12 @@ namespace Caravela.Framework.Impl.Transformations
 
                 BlockSyntax? removeAccessorBody = null;
 
-                if ( removeTemplateMethod != null )
+                if ( removeTemplateMethod.IsNotNull )
                 {
                     templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                         context,
                         removeTemplateMethod,
-                        this.OverriddenDeclaration.Remover,
+                        this.OverriddenDeclaration.RemoveMethod,
                         out removeAccessorBody );
                 }
                 else
@@ -119,12 +124,12 @@ namespace Caravela.Framework.Impl.Transformations
                                         AccessorDeclaration(
                                             SyntaxKind.AddAccessorDeclaration,
                                             List<AttributeListSyntax>(),
-                                            this.OverriddenDeclaration.Adder.AssertNotNull().GetSyntaxModifierList(),
+                                            this.OverriddenDeclaration.AddMethod.AssertNotNull().GetSyntaxModifierList(),
                                             addAccessorBody.AssertNotNull() ),
                                         AccessorDeclaration(
                                             SyntaxKind.RemoveAccessorDeclaration,
                                             List<AttributeListSyntax>(),
-                                            this.OverriddenDeclaration.Remover.AssertNotNull().GetSyntaxModifierList(),
+                                            this.OverriddenDeclaration.RemoveMethod.AssertNotNull().GetSyntaxModifierList(),
                                             removeAccessorBody.AssertNotNull() )
                                     } ) ) ),
                         this.Advice.AspectLayerId,
@@ -138,7 +143,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         private bool TryExpandAccessorTemplate(
             in MemberIntroductionContext context,
-            IMethod accessorTemplate,
+            Template<IMethod> accessorTemplate,
             IMethod accessor,
             [NotNullWhen( true )] out BlockSyntax? body )
         {
@@ -159,10 +164,9 @@ namespace Caravela.Framework.Impl.Transformations
                     accessor,
                     new MetaApiProperties(
                         context.DiagnosticSink,
-                        accessorTemplate.GetSymbol(),
+                        accessorTemplate.Cast(),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
-                        proceedExpression,
                         context.ServiceProvider ) );
 
                 var expansionContext = new TemplateExpansionContext(
@@ -171,9 +175,11 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration.Compilation,
                     context.LexicalScopeProvider.GetLexicalScope( accessor ),
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
-                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
+                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
+                    default,
+                    proceedExpression );
 
-                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( accessorTemplate );
+                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( accessorTemplate.Declaration! );
 
                 return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out body );
             }
@@ -200,21 +206,15 @@ namespace Caravela.Framework.Impl.Transformations
         }
 
         private ExpressionSyntax CreateAddExpression()
-        {
-            return
-                AssignmentExpression(
-                    SyntaxKind.AddAssignmentExpression,
-                    this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventAddAccessor ),
-                    IdentifierName( "value" ) );
-        }
+            => AssignmentExpression(
+                SyntaxKind.AddAssignmentExpression,
+                this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventAddAccessor ),
+                IdentifierName( "value" ) );
 
         private ExpressionSyntax CreateRemoveExpression()
-        {
-            return
-                AssignmentExpression(
-                    SyntaxKind.SubtractAssignmentExpression,
-                    this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventRemoveAccessor ),
-                    IdentifierName( "value" ) );
-        }
+            => AssignmentExpression(
+                SyntaxKind.SubtractAssignmentExpression,
+                this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventRemoveAccessor ),
+                IdentifierName( "value" ) );
     }
 }

@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Misc.Throw
         
             try
             {
-                throw new ArgumentNullException(meta.Parameters[0].Name);
+                throw new ArgumentNullException(meta.Target.Parameters[0].Name);
             }
             catch 
             {

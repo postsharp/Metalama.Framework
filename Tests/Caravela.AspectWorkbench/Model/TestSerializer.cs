@@ -10,21 +10,36 @@ namespace Caravela.AspectWorkbench.Model
 {
     internal static class TestSerializer
     {
-        private static string GetExpectedOutputFilePath( string testFilePath ) => Path.ChangeExtension( testFilePath, FileExtensions.TransformedCode );
+        private static string GetExpectedTransformedCodeFilePath( string testFilePath ) => Path.ChangeExtension( testFilePath, FileExtensions.TransformedCode );
+
+        private static string GetExpectedProgramOutputFilePath( string testFilePath ) => Path.ChangeExtension( testFilePath, FileExtensions.ProgramOutput );
 
         public static async Task<TemplateTest> LoadFromFileAsync( string filePath )
         {
             var testSource = await File.ReadAllTextAsync( filePath );
 
-            var expectedOutputFilePath = GetExpectedOutputFilePath( filePath );
-            string? expectedOutput = null;
+            var expectedTransformedCodeFilePath = GetExpectedTransformedCodeFilePath( filePath );
+            string? expectedTransformedCode = null;
 
-            if ( File.Exists( expectedOutputFilePath ) )
+            if ( File.Exists( expectedTransformedCodeFilePath ) )
             {
-                expectedOutput = await File.ReadAllTextAsync( expectedOutputFilePath );
+                expectedTransformedCode = await File.ReadAllTextAsync( expectedTransformedCodeFilePath );
             }
 
-            return new TemplateTest { Input = TestInput.FromSource( testSource, filePath ), ExpectedOutput = expectedOutput };
+            var expectedProgramOutputFilePath = GetExpectedProgramOutputFilePath( filePath );
+            string? expectedProgramOutput = null;
+
+            if ( File.Exists( expectedProgramOutputFilePath ) )
+            {
+                expectedProgramOutput = await File.ReadAllTextAsync( expectedProgramOutputFilePath );
+            }
+
+            return new TemplateTest
+            {
+                Input = TestInput.FromSource( testSource, filePath ),
+                ExpectedTransformedCode = expectedTransformedCode,
+                ExpectedProgramOutput = expectedProgramOutput
+            };
         }
 
         public static async Task SaveToFileAsync( TemplateTest test, string filePath )
@@ -36,8 +51,19 @@ namespace Caravela.AspectWorkbench.Model
 
             await File.WriteAllTextAsync( filePath, test.Input.SourceCode );
 
-            var expectedOutputFilePath = GetExpectedOutputFilePath( filePath );
-            await File.WriteAllTextAsync( expectedOutputFilePath, test.ExpectedOutput );
+            var expectedTransformedCodeFilePath = GetExpectedTransformedCodeFilePath( filePath );
+            await File.WriteAllTextAsync( expectedTransformedCodeFilePath, test.ExpectedTransformedCode );
+
+            var expectedProgramOutputFilePath = GetExpectedProgramOutputFilePath( filePath );
+            
+            if ( !string.IsNullOrWhiteSpace( test.ExpectedProgramOutput ) )
+            {
+                await File.WriteAllTextAsync( expectedProgramOutputFilePath, test.ExpectedProgramOutput );
+            }
+            else if ( File.Exists( expectedProgramOutputFilePath ) )
+            {
+                File.Delete( expectedProgramOutputFilePath );
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
 int Method(int a)
 {
-    return (int)this.Method(a);
+    return this.Method(a);
 }

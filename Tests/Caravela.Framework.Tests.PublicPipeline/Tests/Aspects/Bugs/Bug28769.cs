@@ -9,7 +9,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Bug28769
     {
         public override dynamic? OverrideMethod()
         {
-            var parameterNamesCompileTime = meta.Parameters.Select(p => p.Name).ToArray();
+            var parameterNamesCompileTime = meta.Target.Parameters.Select(p => p.Name).ToArray();
             var parameterNames = meta.RunTime(parameterNamesCompileTime);
             return null;
         }

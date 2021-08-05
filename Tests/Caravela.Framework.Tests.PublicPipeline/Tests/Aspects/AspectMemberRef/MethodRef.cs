@@ -9,13 +9,13 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.MethodRef
 
     public class RetryAttribute : OverrideMethodAspect
     {
-        public string GetParameterName() => meta.Parameters.First().Name;
+        public string GetParameterName() => meta.Target.Parameters.First().Name;
         public static string GetParameterNameStatic(IParameter p) => p.Name;
     
         public override dynamic? OverrideMethod()
         {
            Console.WriteLine( this.GetParameterName() );
-           Console.WriteLine( GetParameterNameStatic(meta.Parameters.First()) );
+           Console.WriteLine( GetParameterNameStatic(meta.Target.Parameters.First()) );
            return meta.Proceed();
         }
     }

@@ -77,7 +77,8 @@ namespace Caravela.TestFramework
             {
                 var parsedSyntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
                 var prunedSyntaxRoot = new InactiveCodeRemover().Visit( parsedSyntaxTree.GetRoot() );
-                var document = project.AddDocument( fileName, prunedSyntaxRoot, filePath: fileName );
+                var transformedSyntaxRoot = this.PreprocessSyntaxRoot( testInput, prunedSyntaxRoot );
+                var document = project.AddDocument( fileName, transformedSyntaxRoot, filePath: fileName );
                 project = document.Project;
 
                 return document;
@@ -123,7 +124,7 @@ namespace Caravela.TestFramework
 
                 if ( errors.Any() )
                 {
-                    testResult.Report( errors );
+                    testResult.InputCompilationDiagnostics.Report( errors );
                     testResult.SetFailed( "The initial compilation failed." );
 
                     return testResult;
@@ -131,6 +132,17 @@ namespace Caravela.TestFramework
             }
 
             return testResult;
+        }
+
+        /// <summary>
+        /// Processes syntax root of the test file before it is added to the test project.
+        /// </summary>
+        /// <param name="testInput"></param>
+        /// <param name="syntaxRoot"></param>
+        /// <returns></returns>
+        protected virtual SyntaxNode PreprocessSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot )
+        {
+            return syntaxRoot;
         }
 
         private static void ValidateCustomAttributes( Compilation compilation )
@@ -208,7 +220,7 @@ namespace Caravela.TestFramework
                 Path.GetDirectoryName( testInput.RelativePath ) ?? "",
                 Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.TransformedCode );
 
-            Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );
+            Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath )! );
 
             var storedTransformedSourceText =
                 File.Exists( actualTransformedPath ) ? NormalizeTestOutput( File.ReadAllText( actualTransformedPath ), formatCode ) : null;
@@ -229,10 +241,10 @@ namespace Caravela.TestFramework
             if ( this.Logger != null )
             {
                 var logger = this.Logger!;
-                logger.WriteLine( "Expected output file: " + expectedTransformedPath );
-                logger.WriteLine( "Actual output file: " + actualTransformedPath );
+                logger.WriteLine( "Expected transformed file: " + expectedTransformedPath );
+                logger.WriteLine( "Actual transformed file: " + actualTransformedPath );
                 logger.WriteLine( "" );
-                logger.WriteLine( "=== ACTUAL OUTPUT ===" );
+                logger.WriteLine( "=== ACTUAL TRANSFORMED CODE ===" );
                 logger.WriteLine( actualTransformedNonNormalizedText );
                 logger.WriteLine( "=====================" );
 
@@ -302,7 +314,7 @@ namespace Caravela.TestFramework
                 var output = testResult.GetConsolidatedTestOutput();
                 var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", output );
 
-                var formattedOutput = await OutputCodeFormatter.FormatAsync( outputDocument );
+                var formattedOutput = await OutputCodeFormatter.FormatToSyntaxAsync( outputDocument );
                 var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.OutputHtml );
                 var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput );
 

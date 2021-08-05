@@ -4,5 +4,5 @@ int Method(int a)
     var ct = $"ParameterCount=1    ";
     var rt = $"Value={a, -5:x}";
     var both = $"field={a}";
-    return (int)this.Method(a);
+    return this.Method(a);
 }

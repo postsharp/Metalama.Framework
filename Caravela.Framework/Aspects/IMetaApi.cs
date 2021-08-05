@@ -1,12 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Code.Advised;
-using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Validation;
-using System;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Aspects
@@ -19,55 +15,10 @@ namespace Caravela.Framework.Aspects
     [InternalImplement]
     internal interface IMetaApi
     {
-        [Obsolete( "Not implemented." )]
-        IConstructor Constructor { get; }
-
-        IMethodBase MethodBase { get; }
-
-        IAdvisedField Field { get; }
-
-        IAdvisedFieldOrProperty FieldOrProperty { get; }
-
-        IDeclaration Declaration { get; }
-
-        IMember Member { get; }
-
         /// <summary>
-        /// Gets the method metadata, or the accessor if this is a template for a field, property or event.
+        /// Gets access to the declaration being overridden or introduced.
         /// </summary>
-        /// <remarks>
-        /// To invoke the method, use <see cref="IMethodInvoker.Invoke"/>,
-        /// e.g. <c>meta.Method.Invoke(1, 2, 3);</c>.
-        /// </remarks>
-        IAdvisedMethod Method { get; }
-
-        /// <summary>
-        /// Gets the target field or property, or null if the advice does not target a field or a property.
-        /// </summary>
-        IAdvisedProperty Property { get; }
-
-        /// <summary>
-        /// Gets the target event, or null if the advice does not target an event.
-        /// </summary>
-        IAdvisedEvent Event { get; }
-
-        /// <summary>
-        /// Gets the list of parameters of <see cref="Method"/>.
-        /// </summary>
-        IAdvisedParameterList Parameters { get; }
-
-        // Gets the project configuration.
-        // IProject Project { get; }
-
-        /// <summary>
-        /// Gets the code model of current type including the introductions of the current aspect type.
-        /// </summary>
-        INamedType Type { get; }
-
-        /// <summary>
-        /// Gets the code model of the whole compilation.
-        /// </summary>
-        ICompilation Compilation { get; }
+        IMetaTarget Target { get; }
 
         /// <summary>
         /// Gets an object that gives <c>dynamic</c> access to the instance members of the type. Equivalent to the <c>this</c> C# keyword.
@@ -86,17 +37,10 @@ namespace Caravela.Framework.Aspects
 
         dynamic BaseStatic { get; }
 
-        // Gets the properties that were passed by the aspect initializer.
         IReadOnlyDictionary<string, object?> Tags { get; }
 
         IDiagnosticSink Diagnostics { get; }
 
         void DebugBreak();
-
-        /// <summary>
-        /// Invoke the next version of the target declaration.
-        /// </summary>
-        /// <returns></returns>
-        dynamic? Proceed();
     }
 }

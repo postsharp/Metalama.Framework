@@ -14,9 +14,9 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
     {
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.AdviceFactory.ImplementInterface(builder.TargetDeclaration, typeof(INotifyPropertyChanged));
+            builder.AdviceFactory.ImplementInterface(builder.Target, typeof(INotifyPropertyChanged));
 
-            foreach(var property in builder.TargetDeclaration.Properties
+            foreach(var property in builder.Target.Properties
                 .Where(p => p.Accessibility == Accessibility.Public && p.Writeability == Writeability.All))
             {
                 builder.AdviceFactory.OverrideFieldOrPropertyAccessors(property, null, nameof(SetPropertyTemplate));
@@ -29,17 +29,17 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
         [Introduce]
         protected virtual void OnPropertyChanged( string name )
         {
-            meta.This.PropertyChanged?.Invoke(meta.This, new PropertyChangedEventArgs(meta.Parameters[0].Value));
+            meta.This.PropertyChanged?.Invoke(meta.This, new PropertyChangedEventArgs(meta.Target.Parameters[0].Value));
         }
 
         [Template]
         public dynamic? SetPropertyTemplate()
         {
-            var value = meta.Parameters[0].Value;
+            var value = meta.Target.Parameters[0].Value;
 
-            if (value != meta.Property.Value)
+            if (value != meta.Target.Property.Value)
             {
-                meta.This.OnPropertyChanged(meta.Property.Name);
+                meta.This.OnPropertyChanged(meta.Target.Property.Name);
 
                 // TODO: Fix after Proceed refactoring (28573).
                 meta.Proceed();

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Diagnostics;
@@ -82,7 +83,7 @@ namespace Caravela.Framework.Impl
                 _category,
                 Error );
 
-        public static readonly DiagnosticDefinition<(INamedType AspectType, string MethodName)> AspectMustHaveExactlyOneTemplateMember = new(
+        public static readonly DiagnosticDefinition<(string AspectType, string MethodName)> AspectMustHaveExactlyOneTemplateMember = new(
             "CR0025",
             "The aspect type must have exactly one member of a given name otherwise it cannot be used as a dynamic advice.",
             "The type '{0}' must have exactly one member named '{1}'.",
@@ -111,10 +112,29 @@ namespace Caravela.Framework.Impl
                 "CR0030", _category, "The compile-time project in assembly '{0}' is corrupted.", Error,
                 "The compile-time project resource file was corrupted." );
 
-        public static readonly DiagnosticDefinition<(ISymbol TemplateMethod, ISymbol[] RunTimeOnlyTypes)>
-            VirtualTemplateCannotReferenceRunTimeOnlyTypes = new(
-                "CR0031", _category, "The template '{0}' cannot be virtual because it references the following runtime-only types: {1}.", Error,
-                "A template cannot be virtual when it references run-time-only types." );
+        public static readonly DiagnosticDefinition<(ISymbol TemplateMethod, string BaseClassName)>
+            TemplateWithSameNameAlreadyDefined = new(
+                "CR0032", _category, "The class '{1}' already defines a template named '{0}'. Template names must be unique.", Error,
+                "The class already defines a template of the same name." );
+
+        public static readonly DiagnosticDefinition<(string ClassName, string MemberName, string AttributeName)>
+            MemberDoesNotHaveTemplateAttribute = new(
+                "CR0033", _category, "The class '{0}' defines a member named '{1}', but the member is not annotated with the '{2}' custom attribute.", Error,
+                "The member does not have a template custom attribute." );
+
+        public static readonly DiagnosticDefinition<(string ClassName, string MemberName, string ExpectedAttribute, string ActualAttribute)>
+            TemplateIsOfTheWrongType = new(
+                "CR0034", _category,
+                "The template '{0}.{1}' was expected to be annotated with the [{2}] attribute, but it is annotated with [{3}].", Error,
+                "The member does not have a template custom attribute." );
+
+        public static readonly DiagnosticDefinition<(string Layer1, string Layer2)> UnorderedLayers = new(
+            "CR0035", _category,
+            "The aspect layers '{0}' and '{1}' are not strongly ordered. Add an [assembly: " + nameof(AspectOrderAttribute) +
+            "(...)] attribute to specify the order relationship between these two layers, otherwise the compilation will be non-deterministic.",
+            Warning,
+            "Two layers are not strongly ordered."
+        );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>

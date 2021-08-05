@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Misc.ElementAccess
         {
            Console.WriteLine( (string?) meta.Tags["TestKey"] );
            Console.WriteLine( meta.This[0] );
-           Console.WriteLine( meta.Parameters[0].Value );
+           Console.WriteLine( meta.Target.Parameters[0].Value );
 
            return 0;
         }

@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.Compile
         [TestTemplate]
         dynamic? Template()
         {
-            var p = meta.Parameters.Where(a => a.Name.Length > 8).Count();
+            var p = meta.Target.Parameters.Where(a => a.Name.Length > 8).Count();
             Console.WriteLine(p);
             
             return meta.Proceed();

@@ -39,11 +39,11 @@ namespace Caravela.Framework.Code.Builders
         /// <summary>
         /// Gets the <see cref="IMethodBuilder"/> for the getter.
         /// </summary>
-        new IMethodBuilder? Getter { get; }
+        new IMethodBuilder? GetMethod { get; }
 
         /// <summary>
         /// Gets the <see cref="IMethodBuilder"/> for the setter.
         /// </summary>
-        new IMethodBuilder? Setter { get; }
+        new IMethodBuilder? SetMethod { get; }
     }
 }

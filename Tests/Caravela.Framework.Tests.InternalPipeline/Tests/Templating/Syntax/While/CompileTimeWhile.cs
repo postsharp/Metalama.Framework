@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.CompileTi
         dynamic? Template()
         {
             var i = meta.CompileTime(0);
-            while (i < meta.Method.Name.Length)
+            while (i < meta.Target.Method.Name.Length)
             {
                 i++;
             }

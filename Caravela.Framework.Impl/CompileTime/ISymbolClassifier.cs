@@ -11,13 +11,30 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal interface ISymbolClassifier
     {
-        TemplatingScope? GetTemplatingScope( AttributeData attribute );
-
-        TemplateMemberKind GetTemplateMemberKind( ISymbol symbol );
+        TemplateInfo GetTemplateInfo( ISymbol symbol );
 
         /// <summary>
         /// Gets the scope of a symbol in the context of a template.
         /// </summary>
         TemplatingScope GetTemplatingScope( ISymbol symbol );
+    }
+
+    internal readonly struct TemplateInfo
+    {
+        public bool IsNone => this.AttributeType == TemplateAttributeType.None;
+
+        public bool IsAbstract { get; }
+
+        public TemplateAttributeType AttributeType { get; }
+
+        public TemplateInfo( TemplateAttributeType attributeType ) : this( attributeType, false ) { }
+
+        private TemplateInfo( TemplateAttributeType attributeType, bool isAbstract )
+        {
+            this.AttributeType = attributeType;
+            this.IsAbstract = isAbstract;
+        }
+
+        public TemplateInfo AsAbstract() => new( this.AttributeType, true );
     }
 }

@@ -14,7 +14,7 @@ using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Event : Member, IEvent
+    internal class Event : Member, IEventInternal
     {
         private readonly IEventSymbol _symbol;
 
@@ -35,14 +35,14 @@ namespace Caravela.Framework.Impl.CodeModel
         public IMethod Signature => this.EventType.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
-        public IMethod Adder => this.Compilation.Factory.GetMethod( this._symbol.AddMethod! );
+        public IMethod AddMethod => this.Compilation.Factory.GetMethod( this._symbol.AddMethod! );
 
         [Memo]
-        public IMethod Remover => this.Compilation.Factory.GetMethod( this._symbol.RemoveMethod! );
+        public IMethod RemoveMethod => this.Compilation.Factory.GetMethod( this._symbol.RemoveMethod! );
 
         // TODO: pseudo-accessor
         [Memo]
-        public IMethod? Raiser
+        public IMethod? RaiseMethod
             => this._symbol.RaiseMethod == null
                 ? new PseudoRaiser( this )
                 : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );

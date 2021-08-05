@@ -11,7 +11,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Parameter : Declaration, IParameter
+    internal class Parameter : Declaration, IParameterInternal
     {
         public IParameterSymbol ParameterSymbol { get; }
 

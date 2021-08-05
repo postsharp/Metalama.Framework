@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="originalNode"></param>
         /// <returns></returns>
-        public bool IsDynamicType( SyntaxNode originalNode )
+        public bool IsDynamicType( SyntaxNode originalNode, bool strict = false )
         {
             var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( originalNode );
 
@@ -61,8 +61,8 @@ namespace Caravela.Framework.Impl.Templating
 
             var nodeSymbol = this._syntaxTreeAnnotationMap.GetSymbol( originalNode );
 
-            return (nodeSymbol is IMethodSymbol method && method.ReturnType.IsDynamic()) ||
-                   (nodeSymbol is IPropertySymbol property && property.Type.IsDynamic());
+            return (nodeSymbol is IMethodSymbol method && method.ReturnType.IsDynamic( strict )) ||
+                   (nodeSymbol is IPropertySymbol property && property.Type.IsDynamic( strict ));
         }
 
 #pragma warning disable CA1822 // Static anyway.
@@ -97,6 +97,24 @@ namespace Caravela.Framework.Impl.Templating
 
                     case nameof(meta.This):
                         return MetaMemberKind.This;
+
+                    case nameof(meta.Proceed):
+                        return MetaMemberKind.Proceed;
+
+                    case nameof(meta.ProceedAsync):
+                        return MetaMemberKind.ProceedAsync;
+
+                    case nameof(meta.ProceedEnumerable):
+                        return MetaMemberKind.ProceedEnumerable;
+
+                    case nameof(meta.ProceedEnumerator):
+                        return MetaMemberKind.ProceedEnumerator;
+
+                    case "ProceedAsyncEnumerable":
+                        return MetaMemberKind.ProceedAsyncEnumerable;
+
+                    case "ProceedAsyncEnumerator":
+                        return MetaMemberKind.ProceedAsyncEnumerator;
 
                     default:
                         return MetaMemberKind.Default;

@@ -8,5 +8,5 @@ double Method(double r)
     global::System.Console.WriteLine(area_1);
     var StringBuilder_1 = new object ();
     global::System.Console.WriteLine(StringBuilder_1.ToString());
-    return (double)this.Method(r);
+    return this.Method(r);
 }

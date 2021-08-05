@@ -11,7 +11,7 @@ namespace Caravela.Framework.Aspects
     /// </summary>
     /// <seealso href="@introducing-members"/>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
-    public class IntroduceAttribute : AdviceAttribute
+    public class IntroduceAttribute : TemplateAttribute
     {
         /// <summary>
         /// Gets or sets the name of the aspect layer into which the member will be introduced. The layer must have been defined in the implementation of the

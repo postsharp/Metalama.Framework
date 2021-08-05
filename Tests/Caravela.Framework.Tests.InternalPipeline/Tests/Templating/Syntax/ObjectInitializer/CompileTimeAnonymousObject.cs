@@ -12,8 +12,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Comp
         {
             var x = meta.CompileTime( new
             {
-                Arg0 = meta.Parameters[0].Name,
-                Count = meta.Parameters.Count
+                Arg0 = meta.Target.Parameters[0].Name,
+                Count = meta.Target.Parameters.Count
             } );
 
 

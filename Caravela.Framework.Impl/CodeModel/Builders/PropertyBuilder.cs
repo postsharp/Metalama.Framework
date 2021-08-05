@@ -23,7 +23,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class PropertyBuilder : MemberBuilder, IPropertyBuilder
+    internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyInternal
     {
         private readonly bool _hasInitOnlySetter;
 
@@ -34,8 +34,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public Writeability Writeability
             => this switch
             {
-                { Setter: null, IsAutoPropertyOrField: false } => Writeability.None,
-                { Setter: null, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
+                { SetMethod: null, IsAutoPropertyOrField: false } => Writeability.None,
+                { SetMethod: null, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
                 { _hasInitOnlySetter: true } => Writeability.InitOnly,
                 _ => Writeability.All
             };
@@ -50,13 +50,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IType Type { get; set; }
 
-        public IMethodBuilder? Getter { get; }
+        public IMethodBuilder? GetMethod { get; }
 
-        IMethod? IFieldOrProperty.Getter => this.Getter;
+        IMethod? IFieldOrProperty.GetMethod => this.GetMethod;
 
-        IMethod? IFieldOrProperty.Setter => this.Setter;
+        IMethod? IFieldOrProperty.SetMethod => this.SetMethod;
 
-        public IMethodBuilder? Setter { get; }
+        public IMethodBuilder? SetMethod { get; }
 
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 
@@ -92,16 +92,19 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             : base( parentAdvice, targetType, name )
         {
             // TODO: Sanity checks.
+
+            Invariant.Assert( hasGetter || hasSetter );
+
             this.Type = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(object) );
 
             if ( hasGetter )
             {
-                this.Getter = new AccessorBuilder( this, MethodKind.PropertyGet );
+                this.GetMethod = new AccessorBuilder( this, MethodKind.PropertyGet );
             }
 
             if ( hasSetter )
             {
-                this.Setter = new AccessorBuilder( this, MethodKind.PropertySet );
+                this.SetMethod = new AccessorBuilder( this, MethodKind.PropertySet );
             }
 
             this.IsAutoPropertyOrField = isAutoProperty;
@@ -173,7 +176,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             AccessorListSyntax GenerateAccessorList()
             {
-                switch (this.Getter, this.Setter)
+                switch (Getter: this.GetMethod, Setter: this.SetMethod)
                 {
                     case (not null, not null):
                         return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
@@ -193,9 +196,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 var tokens = new List<SyntaxToken>();
 
-                if ( this.Getter!.Accessibility != this.Accessibility )
+                if ( this.GetMethod!.Accessibility != this.Accessibility )
                 {
-                    this.Getter.Accessibility.AddTokens( tokens );
+                    this.GetMethod.Accessibility.AddTokens( tokens );
                 }
 
                 // TODO: Attributes.
@@ -221,9 +224,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 var tokens = new List<SyntaxToken>();
 
-                if ( this.Setter!.Accessibility != this.Accessibility )
+                if ( this.SetMethod!.Accessibility != this.Accessibility )
                 {
-                    this.Setter.Accessibility.AddTokens( tokens );
+                    this.SetMethod.Accessibility.AddTokens( tokens );
                 }
 
                 return
@@ -243,8 +246,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethod? GetAccessor( MethodKind methodKind )
             => methodKind switch
             {
-                MethodKind.PropertyGet => this.Getter,
-                MethodKind.PropertySet => this.Setter,
+                MethodKind.PropertyGet => this.GetMethod,
+                MethodKind.PropertySet => this.SetMethod,
                 _ => null
             };
 

@@ -16,16 +16,16 @@ namespace Caravela.Framework.Code.Builders
         /// <summary>
         /// Gets the <see cref="IMethodBuilder"/> for the event adder.
         /// </summary>
-        new IMethodBuilder Adder { get; }
+        new IMethodBuilder AddMethod { get; }
 
         /// <summary>
         /// Gets the <see cref="IMethodBuilder"/> for the event remover.
         /// </summary>
-        new IMethodBuilder Remover { get; }
+        new IMethodBuilder RemoveMethod { get; }
 
         /// <summary>
         /// Gets the <see cref="IMethodBuilder"/> for the event raiser.
         /// </summary>
-        new IMethodBuilder? Raiser { get; }
+        new IMethodBuilder? RaiseMethod { get; }
     }
 }

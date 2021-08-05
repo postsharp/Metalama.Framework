@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
         [TestTemplate]
         dynamic? Template()
         {
-            int a = meta.Parameters.Count;
+            int a = meta.Target.Parameters.Count;
             int b = 0;
             try
             {

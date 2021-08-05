@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Templating.Dynamic.Issue288
         dynamic? Template()
         {
             
-            var field = meta.Type.FieldsAndProperties.Single();
+            var field = meta.Target.Type.FieldsAndProperties.Single();
             
             dynamic? clone = null;
             dynamic? clonedValue = null;

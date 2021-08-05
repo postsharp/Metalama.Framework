@@ -32,6 +32,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         TypeKind IType.TypeKind => TypeKind.GenericParameter;
 
+        public SpecialType SpecialType => SpecialType.None;
+
         public Type ToType() => throw new NotImplementedException();
 
         ICompilation ICompilationElement.Compilation => this.Compilation;

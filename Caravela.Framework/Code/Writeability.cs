@@ -31,6 +31,6 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// The field or property can be set at all times (e.g. this is a non-<c>readonly</c> field or a property with a <c>set</c> accessor).
         /// </summary>
-        All = 3,
+        All = 3
     }
 }

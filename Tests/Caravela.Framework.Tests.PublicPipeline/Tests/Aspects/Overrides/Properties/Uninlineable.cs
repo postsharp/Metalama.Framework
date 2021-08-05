@@ -2,6 +2,9 @@
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 using System;
+using Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Uninlineable;
+
+[assembly: AspectOrder(typeof(FirstOverrideAttribute), typeof(SecondOverrideAttribute))]
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Uninlineable
 {
@@ -10,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         void IAspect<IProperty>.BuildAspect(IAspectBuilder<IProperty> builder)
         {
-            builder.AdviceFactory.OverrideFieldOrPropertyAccessors(builder.TargetDeclaration, nameof(GetTemplate), nameof(SetTemplate));
+            builder.AdviceFactory.OverrideFieldOrPropertyAccessors(builder.Target, nameof(GetTemplate), nameof(SetTemplate));
         }
         
         [Template]
@@ -35,7 +38,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         void IAspect<IProperty>.BuildAspect(IAspectBuilder<IProperty> builder)
         {
-            builder.AdviceFactory.OverrideFieldOrPropertyAccessors(builder.TargetDeclaration, nameof(GetTemplate), nameof(SetTemplate));
+            builder.AdviceFactory.OverrideFieldOrPropertyAccessors(builder.Target, nameof(GetTemplate), nameof(SetTemplate));
         }
 
         [Template]

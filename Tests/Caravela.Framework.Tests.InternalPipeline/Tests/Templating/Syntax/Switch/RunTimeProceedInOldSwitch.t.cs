@@ -10,6 +10,6 @@ int Method(int a)
             var x = this.Method(a);
             break;
     }
-    
-    return (int)this.Method(a);
+
+    return this.Method(a);
 }

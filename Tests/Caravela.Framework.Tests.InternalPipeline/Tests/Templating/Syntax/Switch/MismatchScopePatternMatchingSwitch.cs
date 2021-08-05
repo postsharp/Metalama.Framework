@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.Mismatch
                 case IParameter p:
                     Console.WriteLine("0");
                     break;
-                case IEnumerable<object> e when e.Count() == meta.Parameters.Count:
+                case IEnumerable<object> e when e.Count() == meta.Target.Parameters.Count:
                 default:
                     Console.WriteLine("Default");
                     break;

@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Unsa
         [TestTemplate]
         dynamic? Template()
         {
-            int i = meta.Parameters.Count;
+            int i = meta.Target.Parameters.Count;
             unsafe
             {
                 int* p = &i;
