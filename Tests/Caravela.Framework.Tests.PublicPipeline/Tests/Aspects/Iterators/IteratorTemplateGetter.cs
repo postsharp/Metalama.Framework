@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Iterators.Iter
         set => throw new NotImplementedException(); 
         }
 
-        public override IEnumerable<dynamic> OverrideEnumerableProperty  
+        public override IEnumerable<dynamic?> OverrideEnumerableProperty  
         {
         get {
          Console.WriteLine($"Starting {meta.Target.Method.Name}");
@@ -33,7 +33,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Iterators.Iter
         }
         
         
-        public override IEnumerable<dynamic> OverrideEnumeratorProperty 
+        public override IEnumerable<dynamic?> OverrideEnumeratorProperty 
         {
         get {
         Console.WriteLine($"Starting {meta.Target.Method.Name}");

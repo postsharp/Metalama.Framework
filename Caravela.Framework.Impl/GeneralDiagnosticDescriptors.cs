@@ -136,14 +136,6 @@ namespace Caravela.Framework.Impl
             "Two layers are not strongly ordered."
         );
 
-        public static readonly DiagnosticDefinition<(string ClassName, string MemberName, string ExpectedAttribute, string ActualAttribute)>
-            TemplateIsOfTheWrongKind = new(
-                "CR0036", _category,
-                "The template '{0}.{1}' was expected to be annotated with the '[Template(TemplateKind.{2})]' attribute, " +
-                "but it is annotated with '[Template(TemplateKind.{3})]'.",
-                Error,
-                "The member does not have a template custom attribute." );
-
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(

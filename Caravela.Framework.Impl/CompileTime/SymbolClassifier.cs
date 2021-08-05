@@ -88,11 +88,14 @@ namespace Caravela.Framework.Impl.CompileTime
             // Look for a [InterfaceMember] attribute on the symbol.
             if ( symbol.GetAttributes().Any( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._interfaceMemberAttribute ) ) )
             {
-                return new TemplateInfo( TemplateAttributeType.InterfaceMember, TemplateKind.Introduction );
+                return new TemplateInfo( TemplateAttributeType.InterfaceMember );
             }
 
             switch ( symbol )
             {
+                case IMethodSymbol { AssociatedSymbol: {} associatedSymbol }:
+                    return this.GetTemplateInfo( associatedSymbol );
+                
                 case IMethodSymbol { OverriddenMethod: { } overriddenMethod }:
                     // Look at the overriden method.
                     return this.GetTemplateInfo( overriddenMethod!, true );
@@ -113,20 +116,13 @@ namespace Caravela.Framework.Impl.CompileTime
             switch ( templateAttribute.AttributeClass?.Name )
             {
                 case nameof(IntroduceAttribute):
-                    return new TemplateInfo( TemplateAttributeType.Introduction, TemplateKind.Introduction );
+                    return new TemplateInfo( TemplateAttributeType.Introduction );
 
                 case nameof(InterfaceMemberAttribute):
-                    return new TemplateInfo( TemplateAttributeType.InterfaceMember, TemplateKind.Introduction );
+                    return new TemplateInfo( TemplateAttributeType.InterfaceMember );
 
                 default:
-                    if ( templateAttribute.ConstructorArguments.IsEmpty )
-                    {
-                        return new TemplateInfo( TemplateAttributeType.Template, TemplateKind.Default );
-                    }
-                    else
-                    {
-                        return new TemplateInfo( TemplateAttributeType.Template, (TemplateKind) templateAttribute.ConstructorArguments[0].Value! );
-                    }
+                    return new TemplateInfo( TemplateAttributeType.Template );
             }
         }
 

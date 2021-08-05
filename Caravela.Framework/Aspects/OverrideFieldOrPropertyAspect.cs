@@ -30,27 +30,19 @@ namespace Caravela.Framework.Aspects
 
         public virtual void BuildAspectClass( IAspectClassBuilder builder ) { }
 
+        [Template]
         public abstract dynamic? OverrideProperty
         {
-            [Template]
             get;
-
-            [Template]
             set;
         }
 
-        public virtual IEnumerable<dynamic?> OverrideEnumerableProperty
-        {
-            [Abstract]
-            [Template( TemplateKind.IEnumerable )]
-            get => throw new NotSupportedException();
-        }
+        [Abstract]
+        [Template]
+        public virtual IEnumerable<dynamic?> OverrideEnumerableProperty => throw new NotSupportedException();
 
-        public virtual IEnumerable<dynamic?> OverrideEnumeratorProperty
-        {
-            [Abstract]
-            [Template( TemplateKind.IEnumerator )]
-            get => throw new NotSupportedException();
-        }
+        [Abstract]
+        [Template]
+        public virtual IEnumerable<dynamic?> OverrideEnumeratorProperty => throw new NotSupportedException();
     }
 }

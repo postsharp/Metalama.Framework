@@ -102,12 +102,6 @@ namespace Caravela.Framework.Impl.Advices
                         (template.AspectClass.FullName, templateName!, expectedAttribute, actualAttribute) );
                 }
 
-                if ( templateKind != template.TemplateInfo.Kind )
-                {
-                    throw GeneralDiagnosticDescriptors.TemplateIsOfTheWrongKind.CreateException(
-                        (template.AspectClass.FullName, templateName!, templateKind.ToString(), template.TemplateInfo.Kind.ToString()) );
-                }
-
                 return new TemplateRef( template, templateKind );
             }
             else

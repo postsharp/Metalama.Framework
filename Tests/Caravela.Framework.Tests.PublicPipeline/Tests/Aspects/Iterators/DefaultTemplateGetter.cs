@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Aspects.Iterators.Defa
 {
     class Aspect : OverrideFieldOrPropertyAspect
     {
-        public override dynamic OverrideProperty 
+        public override dynamic? OverrideProperty 
         { 
         get {
             Console.WriteLine($"Before {meta.Target.Member.Name}");
