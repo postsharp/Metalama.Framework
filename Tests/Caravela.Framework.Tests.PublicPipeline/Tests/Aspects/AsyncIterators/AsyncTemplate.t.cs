@@ -5,7 +5,7 @@ class TargetCode
 {
     await global::System.Threading.Tasks.Task.Yield();
     global::System.Console.WriteLine("Before AsyncEnumerable");
-    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.__AsyncEnumerable__OriginalImpl(a)));
+    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerable_Source(a)));
     global::System.Console.WriteLine("After AsyncEnumerable");
     await global::System.Threading.Tasks.Task.Yield();
     await foreach (var r in result)
@@ -16,7 +16,7 @@ class TargetCode
     yield break;
 }
 
-private async IAsyncEnumerable<int> __AsyncEnumerable__OriginalImpl(int a)
+private async IAsyncEnumerable<int> AsyncEnumerable_Source(int a)
         {
             Console.WriteLine("Yield 1");
             yield return 1;
@@ -33,7 +33,7 @@ private async IAsyncEnumerable<int> __AsyncEnumerable__OriginalImpl(int a)
 {
     await global::System.Threading.Tasks.Task.Yield();
     global::System.Console.WriteLine("Before AsyncEnumerableCancellable");
-    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.__AsyncEnumerableCancellable__OriginalImpl(a, token), token));
+    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerableCancellable_Source(a, token), token));
     global::System.Console.WriteLine("After AsyncEnumerableCancellable");
     await global::System.Threading.Tasks.Task.Yield();
     await foreach (var r in result)
@@ -44,7 +44,7 @@ private async IAsyncEnumerable<int> __AsyncEnumerable__OriginalImpl(int a)
     yield break;
 }
 
-private async IAsyncEnumerable<int> __AsyncEnumerableCancellable__OriginalImpl(int a, [EnumeratorCancellation] CancellationToken token)
+private async IAsyncEnumerable<int> AsyncEnumerableCancellable_Source(int a, [EnumeratorCancellation] CancellationToken token)
         {
             Console.WriteLine("Yield 1");
             yield return 1;
@@ -62,7 +62,7 @@ private async IAsyncEnumerable<int> __AsyncEnumerableCancellable__OriginalImpl(i
 {
     await global::System.Threading.Tasks.Task.Yield();
     global::System.Console.WriteLine("Before AsyncEnumerator");
-    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.__AsyncEnumerator__OriginalImpl(a)));
+    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerator_Source(a)));
     global::System.Console.WriteLine("After AsyncEnumerator");
     await global::System.Threading.Tasks.Task.Yield();
     var enumerator = result;
@@ -81,7 +81,7 @@ private async IAsyncEnumerable<int> __AsyncEnumerableCancellable__OriginalImpl(i
     yield break;
 }
 
-private async IAsyncEnumerator<int> __AsyncEnumerator__OriginalImpl(int a)
+private async IAsyncEnumerator<int> AsyncEnumerator_Source(int a)
         {
             Console.WriteLine("Yield 1");
             yield return 1;
@@ -99,7 +99,7 @@ private async IAsyncEnumerator<int> __AsyncEnumerator__OriginalImpl(int a)
 {
     await global::System.Threading.Tasks.Task.Yield();
     global::System.Console.WriteLine("Before AsyncEnumeratorCancellable");
-    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.__AsyncEnumeratorCancellable__OriginalImpl(a, token)));
+    var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumeratorCancellable_Source(a, token)));
     global::System.Console.WriteLine("After AsyncEnumeratorCancellable");
     await global::System.Threading.Tasks.Task.Yield();
     var enumerator = result;
@@ -118,7 +118,7 @@ private async IAsyncEnumerator<int> __AsyncEnumerator__OriginalImpl(int a)
     yield break;
 }
 
-private async IAsyncEnumerator<int> __AsyncEnumeratorCancellable__OriginalImpl(int a, CancellationToken token)
+private async IAsyncEnumerator<int> AsyncEnumeratorCancellable_Source(int a, CancellationToken token)
         {
             Console.WriteLine("Yield 1");
             yield return 1;

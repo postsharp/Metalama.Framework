@@ -4,7 +4,7 @@ class TargetCode
         public async IAsyncEnumerable<int> Enumerable(int a)
 {
     global::System.Console.WriteLine($"Starting Enumerable");
-    await foreach (var item in this.__Enumerable__OriginalImpl(a))
+    await foreach (var item in this.Enumerable_Source(a))
     {
         global::System.Console.WriteLine($" Intercepting {item}");
         yield return item;
@@ -13,7 +13,7 @@ class TargetCode
     global::System.Console.WriteLine($"Ending Enumerable");
 }
 
-private async IAsyncEnumerable<int> __Enumerable__OriginalImpl(int a)
+private async IAsyncEnumerable<int> Enumerable_Source(int a)
         {
             await Task.Yield();
             Console.WriteLine("Yield 1");
@@ -28,7 +28,7 @@ private async IAsyncEnumerable<int> __Enumerable__OriginalImpl(int a)
         public async IAsyncEnumerator<int> Enumerator(int a)
 {
     global::System.Console.WriteLine($"Starting Enumerator");
-    var enumerator = this.__Enumerator__OriginalImpl(a);
+    var enumerator = this.Enumerator_Source(a);
     while (await enumerator.MoveNextAsync())
     {
         global::System.Console.WriteLine($" Intercepting {enumerator.Current}");
@@ -38,7 +38,7 @@ private async IAsyncEnumerable<int> __Enumerable__OriginalImpl(int a)
     global::System.Console.WriteLine($"Ending Enumerator");
 }
 
-private async IAsyncEnumerator<int> __Enumerator__OriginalImpl(int a)
+private async IAsyncEnumerator<int> Enumerator_Source(int a)
         {
             await Task.Yield();
             Console.WriteLine("Yield 1");

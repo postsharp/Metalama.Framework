@@ -4,10 +4,10 @@
         public int OverrideInt() 
 {
     global::System.Console.WriteLine("Introduced");
-    return this.__OverrideInt__OriginalImpl();
+    return this.OverrideInt_Source();
 }
 
-private int __OverrideInt__OriginalImpl()
+private int OverrideInt_Source()
         {
             return 1;
         }
@@ -15,10 +15,10 @@ private int __OverrideInt__OriginalImpl()
         public void OverrideVoid()
 {
     global::System.Console.WriteLine("Introduced");
-    this.__OverrideVoid__OriginalImpl();
+    this.OverrideVoid_Source();
 }
 
-private void __OverrideVoid__OriginalImpl()
+private void OverrideVoid_Source()
         {
         }
 

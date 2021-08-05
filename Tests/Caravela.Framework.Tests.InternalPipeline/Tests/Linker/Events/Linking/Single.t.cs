@@ -4,15 +4,15 @@ class Target
 
         event EventHandler? Foo
 {add    {
-        this.__Foo__OriginalImpl+= value;
+        this.Foo_Source+= value;
     }
 
 remove    {
-        this.__Foo__OriginalImpl-= value;
+        this.Foo_Source-= value;
     }
 }
 
-private event EventHandler? __Foo__OriginalImpl
+private event EventHandler? Foo_Source
         {
             add
             {

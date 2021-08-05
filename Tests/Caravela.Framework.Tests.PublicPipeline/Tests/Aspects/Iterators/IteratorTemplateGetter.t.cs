@@ -3,7 +3,7 @@ class TargetCode
         [Aspect]
         public IEnumerable<int> Enumerable {get    {
         global::System.Console.WriteLine($"Starting get_Enumerable");
-        foreach (var item in this.__Enumerable__OriginalImpl)
+        foreach (var item in this.Enumerable_Source)
         {
             global::System.Console.WriteLine($" Intercepting {item}");
             yield return item;
@@ -13,7 +13,7 @@ class TargetCode
     }
 }
 
-private IEnumerable<int> __Enumerable__OriginalImpl
+private IEnumerable<int> Enumerable_Source
 { get 
         {
             Console.WriteLine("Yield 1");
@@ -27,7 +27,7 @@ private IEnumerable<int> __Enumerable__OriginalImpl
         [Aspect]
         public IEnumerator<int> Enumerator  {get    {
         global::System.Console.WriteLine($"Starting get_Enumerator");
-        var enumerator = this.__Enumerator__OriginalImpl;
+        var enumerator = this.Enumerator_Source;
         while (enumerator.MoveNext())
         {
             global::System.Console.WriteLine($" Intercepting {enumerator.Current}");
@@ -38,7 +38,7 @@ private IEnumerable<int> __Enumerable__OriginalImpl
     }
 }
 
-private IEnumerator<int> __Enumerator__OriginalImpl
+private IEnumerator<int> Enumerator_Source
 { get 
         {
             Console.WriteLine("Yield 1");
@@ -52,7 +52,7 @@ private IEnumerator<int> __Enumerator__OriginalImpl
         [Aspect]
         public IEnumerable OldEnumerable  {get    {
         global::System.Console.WriteLine($"Starting get_OldEnumerable");
-        foreach (var item in this.__OldEnumerable__OriginalImpl)
+        foreach (var item in this.OldEnumerable_Source)
         {
             global::System.Console.WriteLine($" Intercepting {item}");
             yield return item;
@@ -62,7 +62,7 @@ private IEnumerator<int> __Enumerator__OriginalImpl
     }
 }
 
-private IEnumerable __OldEnumerable__OriginalImpl
+private IEnumerable OldEnumerable_Source
 { get 
         {
             Console.WriteLine("Yield 1");
@@ -76,7 +76,7 @@ private IEnumerable __OldEnumerable__OriginalImpl
           [Aspect]
         public IEnumerator OldEnumerator  {get    {
         global::System.Console.WriteLine($"Starting get_OldEnumerator");
-        var enumerator = this.__OldEnumerator__OriginalImpl;
+        var enumerator = this.OldEnumerator_Source;
         while (enumerator.MoveNext())
         {
             global::System.Console.WriteLine($" Intercepting {enumerator.Current}");
@@ -87,7 +87,7 @@ private IEnumerable __OldEnumerable__OriginalImpl
     }
 }
 
-private IEnumerator __OldEnumerator__OriginalImpl
+private IEnumerator OldEnumerator_Source
 { get 
         {
             Console.WriteLine("Yield 1");

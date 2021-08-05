@@ -4,11 +4,11 @@ class TargetCode
         public IEnumerable<int> Enumerable(int a)
 {
     global::System.Console.WriteLine("Begin Enumerable");
-    var x = this.__Enumerable__OriginalImpl(a);
+    var x = this.Enumerable_Source(a);
     return (System.Collections.Generic.IEnumerable<int>)x;
 }
 
-private IEnumerable<int> __Enumerable__OriginalImpl(int a)
+private IEnumerable<int> Enumerable_Source(int a)
         {
             Console.WriteLine("Yield 1");
             yield return 1;
@@ -22,10 +22,10 @@ private IEnumerable<int> __Enumerable__OriginalImpl(int a)
         public IEnumerator<int> Enumerator(int a)
 {
     global::System.Console.WriteLine("Begin Enumerator");
-    return this.__Enumerator__OriginalImpl(a);
+    return this.Enumerator_Source(a);
 }
 
-private IEnumerator<int> __Enumerator__OriginalImpl(int a)
+private IEnumerator<int> Enumerator_Source(int a)
         {
             Console.WriteLine("Yield 1");
             yield return 1;
@@ -39,11 +39,11 @@ private IEnumerator<int> __Enumerator__OriginalImpl(int a)
         public IEnumerable OldEnumerable(int a)
 {
     global::System.Console.WriteLine("Begin OldEnumerable");
-    var x = this.__OldEnumerable__OriginalImpl(a);
+    var x = this.OldEnumerable_Source(a);
     return (System.Collections.IEnumerable)x;
 }
 
-private IEnumerable __OldEnumerable__OriginalImpl(int a)
+private IEnumerable OldEnumerable_Source(int a)
         {
             Console.WriteLine("Yield 1");
             yield return 1;
@@ -57,10 +57,10 @@ private IEnumerable __OldEnumerable__OriginalImpl(int a)
         public IEnumerator OldEnumerator(int a)
 {
     global::System.Console.WriteLine("Begin OldEnumerator");
-    return this.__OldEnumerator__OriginalImpl(a);
+    return this.OldEnumerator_Source(a);
 }
 
-private IEnumerator __OldEnumerator__OriginalImpl(int a)
+private IEnumerator OldEnumerator_Source(int a)
         {
             Console.WriteLine("Yield 1");
             yield return 1;

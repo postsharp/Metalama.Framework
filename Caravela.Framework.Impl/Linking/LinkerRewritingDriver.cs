@@ -688,9 +688,16 @@ namespace Caravela.Framework.Impl.Linking
                     throw new AssertionFailedException();
             }
 
-            static string CreateName( string name )
+            string CreateName( string name )
             {
-                return $"__{name}__OriginalImpl";
+                var hint = $"{name}_Source";
+                
+                for ( var i = 2; symbol.ContainingType.GetMembers( hint ).Any(); i++ )
+                {
+                    hint = $"{name}_Source{i}";
+                }
+
+                return hint;
             }
         }
 

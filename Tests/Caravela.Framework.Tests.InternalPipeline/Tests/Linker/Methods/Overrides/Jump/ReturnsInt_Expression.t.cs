@@ -1,9 +1,9 @@
 class Target
     {
         int Foo(int x)
-{return this.__Foo__OriginalImpl(x);}
+{return this.Foo_Source(x);}
 
-private int __Foo__OriginalImpl(int x)
+private int Foo_Source(int x)
         {
             Console.WriteLine( "Original Start");
             if (x == 0)
