@@ -106,7 +106,7 @@ namespace Caravela.TestFramework.XunitFramework
                                     else
                                     {
                                         var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, logger );
-                                        Task.Run( () => testRunner.RunAndAssertAsync( testInput ) );
+                                        Task.Run( () => testRunner.RunAndAssertAsync( testInput ) ).Wait();
 
                                         executionMessageSink.OnMessage( new TestPassed( test, testStopwatch.GetSeconds(), logger.ToString() ) );
 

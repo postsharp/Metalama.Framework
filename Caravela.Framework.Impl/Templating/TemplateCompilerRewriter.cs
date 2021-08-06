@@ -75,8 +75,6 @@ namespace Caravela.Framework.Impl.Templating
 
         private static string NormalizeSpace( string statementComment )
         {
-            // TODO: Replace this with something more GC-friendly.
-
             statementComment = statementComment.Replace( '\n', ' ' ).Replace( '\r', ' ' );
 
             while ( true )
@@ -439,7 +437,8 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression ) => this.CreateRunTimeExpression( expression, originalExpression );
+        protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression )
+            => this.CreateRunTimeExpression( expression, originalExpression );
 
         /// <summary>
         /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="RuntimeExpression"/>

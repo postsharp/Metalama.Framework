@@ -45,6 +45,8 @@ namespace Caravela.Framework.Impl.Formatting
             }
         }
 
+        public static SyntaxToken AddGeneratedCodeAnnotation( this SyntaxToken node ) => node.WithAdditionalAnnotations( GeneratedCode );
+
         [return: NotNullIfNotNull( "node" )]
         public static T? AddGeneratedCodeAnnotation<T>( this T? node )
             where T : SyntaxNode

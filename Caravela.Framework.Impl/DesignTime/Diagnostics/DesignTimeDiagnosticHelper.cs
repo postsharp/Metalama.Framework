@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -66,7 +67,7 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
                     // Find the node in the new syntax tree corresponding to the node in the old syntax tree.
                     var oldNode = reportSourceTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
 
-                    if ( !TryFindOldNodeInNewTree( oldNode, newSyntaxTree, out var newNode ) )
+                    if ( !NodeFinder.TryFindOldNodeInNewTree( oldNode, newSyntaxTree, out var newNode ) )
                     {
                         // We could not find the old node in the new tree. This should not happen if cache invalidation is correct.
                         continue;
@@ -112,61 +113,5 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
             }
         }
 
-        private static bool TryFindOldNodeInNewTree( SyntaxNode oldNode, SyntaxTree newTree, out SyntaxNode newNode )
-        {
-            // Create a stack with the position of each ancestor node with respect to its parent.
-            // We only position ourselves with respect to other nodes of the same kind, as we want to be less sensitive to changes in the new
-            // syntax tree.
-
-            Stack<(SyntaxKind Kind, int Position)> stack = new();
-
-            for ( var oldNodeCursor = oldNode; oldNodeCursor?.Parent != null; oldNodeCursor = oldNodeCursor.Parent )
-            {
-                var syntaxKind = oldNodeCursor.Kind();
-                var childrenOfSameKind = oldNodeCursor.Parent.ChildNodes().Where( n => n.Kind() == syntaxKind );
-
-                var index = 0;
-
-                foreach ( var childOfSameKind in childrenOfSameKind )
-                {
-                    if ( childOfSameKind == oldNodeCursor )
-                    {
-                        stack.Push( (syntaxKind, index) );
-                        index = -1;
-
-                        break;
-                    }
-
-                    index++;
-                }
-
-                if ( index != -1 )
-                {
-                    // We should have found ourselves in the parent node.
-                    throw new AssertionFailedException();
-                }
-            }
-
-            // Navigate the inverted stack from the new root.
-            newNode = newTree.GetRoot();
-
-            while ( stack.Count > 0 )
-            {
-                var slice = stack.Pop();
-                var childrenOfSameKind = newNode.ChildNodes().Where( n => n.Kind() == slice.Kind );
-                var childAtPosition = childrenOfSameKind.ElementAtOrDefault( slice.Position );
-
-                if ( childAtPosition == null )
-                {
-                    return false;
-                }
-                else
-                {
-                    newNode = childAtPosition;
-                }
-            }
-
-            return true;
-        }
     }
 }

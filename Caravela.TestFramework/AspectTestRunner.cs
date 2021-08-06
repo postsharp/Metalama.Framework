@@ -270,7 +270,17 @@ namespace Caravela.TestFramework
             // Compare with expected program outputs.
             string? expectedOutput;
 
-            if ( !string.IsNullOrWhiteSpace( testResult.ProgramOutput ) )
+            var actualProgramOutput = NormalizeEndOfLines( testResult.ProgramOutput );
+
+            // Update the file in obj/transformed if it is different.
+            var actualProgramOutputPath = Path.Combine(
+                this.ProjectDirectory!,
+                "obj",
+                "transformed",
+                Path.GetDirectoryName( testInput.RelativePath ) ?? "",
+                Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.ProgramOutput );
+
+            if ( !string.IsNullOrWhiteSpace( actualProgramOutput ) )
             {
                 // If the expectation file does not exist, create it with some placeholder content.
                 if ( !File.Exists( expectedProgramOutputPath ) )
@@ -280,22 +290,33 @@ namespace Caravela.TestFramework
                         "TODO: Replace this file with the correct program output. See the test output for the actual transformed code." );
                 }
 
-                this.Logger?.WriteLine( "=== ACTUAL TRANSFORMED CODE ===" );
-                this.Logger?.WriteLine( testResult.ProgramOutput );
+                if ( actualProgramOutput != expectedProgramOutputPath )
+                {
+                    File.WriteAllText( actualProgramOutputPath, actualProgramOutput );
+                }
+
+                this.Logger?.WriteLine( "=== ACTUAL PROGRAM OUTPUT ===" );
+                this.Logger?.WriteLine( actualProgramOutput );
                 this.Logger?.WriteLine( "=====================" );
 
-                expectedOutput = File.ReadAllText( expectedProgramOutputPath );
+                expectedOutput = NormalizeEndOfLines( File.ReadAllText( expectedProgramOutputPath ) );
             }
             else
             {
-                expectedOutput = null;
+                expectedOutput = "";
 
                 if ( File.Exists( expectedProgramOutputPath ) && string.IsNullOrWhiteSpace( File.ReadAllText( expectedProgramOutputPath ) ) )
                 {
                     File.Delete( expectedProgramOutputPath );
                 }
+
+                if ( File.Exists( actualProgramOutputPath ) )
+                {
+                    File.Delete( actualProgramOutputPath );
+                }
             }
 
+            state["actualProgramOutput"] = expectedOutput;
             state["expectedProgramOutput"] = expectedOutput;
         }
 
@@ -304,7 +325,8 @@ namespace Caravela.TestFramework
             base.ExecuteAssertions( testInput, testResult, state );
 
             var expectedOutput = (string) state["expectedProgramOutput"]!;
-            Assert.Equal( expectedOutput, testResult.ProgramOutput );
+            var actualOutput = (string) state["actualProgramOutput"]!;
+            Assert.Equal( expectedOutput, actualOutput );
         }
     }
 }

@@ -184,12 +184,12 @@ namespace Caravela.TestFramework
             }
         }
 
-        private protected static string NormalizeEndOfLines( string s ) => _newLineRegex.Replace( s, "\n" ).Trim();
+        private protected static string NormalizeEndOfLines( string? s ) => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, "\n" ).Trim();
 
         internal static string? NormalizeTestOutput( string? s, bool preserveFormatting )
             => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting );
 
-        internal static string? NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting )
+        private static string? NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting )
         {
             if ( preserveFormatting )
             {

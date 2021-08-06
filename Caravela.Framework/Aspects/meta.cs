@@ -38,6 +38,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets access to the declaration being overridden or introduced.
         /// </summary>
+        [TemplateKeyword]
         public static IMetaTarget Target => CurrentContext.Target;
 
         /// <summary>

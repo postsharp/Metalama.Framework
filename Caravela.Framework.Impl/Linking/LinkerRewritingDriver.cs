@@ -288,11 +288,12 @@ namespace Caravela.Framework.Impl.Linking
             {
                 return
                     GotoStatement(
-                        SyntaxKind.GotoStatement,
-                        Token( SyntaxKind.GotoKeyword ).WithLeadingTrivia( ElasticLineFeed ).WithTrailingTrivia( ElasticSpace ),
-                        default,
-                        IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                        Token( SyntaxKind.SemicolonToken ) );
+                            SyntaxKind.GotoStatement,
+                            Token( SyntaxKind.GotoKeyword ).WithLeadingTrivia( ElasticLineFeed ).WithTrailingTrivia( ElasticSpace ),
+                            default,
+                            IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
+                            Token( SyntaxKind.SemicolonToken ) )
+                        .AddGeneratedCodeAnnotation();
             }
         }
 
@@ -691,7 +692,7 @@ namespace Caravela.Framework.Impl.Linking
             string CreateName( string name )
             {
                 var hint = $"{name}_Source";
-                
+
                 for ( var i = 2; symbol.ContainingType.GetMembers( hint ).Any(); i++ )
                 {
                     hint = $"{name}_Source{i}";
