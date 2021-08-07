@@ -1,4 +1,4 @@
-﻿using Caravela.Framework.Aspects;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.TestFramework;
@@ -44,7 +44,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
             else
             {
                 // Invoke the base method.
-                clone = meta.Target.Method.Invokers.Base.Invoke(meta.This);
+                clone = meta.Cast(meta.Target.Type, meta.Target.Method.Invokers.Base.Invoke(meta.This));
             }
 
             // Select clonable fields.
@@ -71,6 +71,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
         }
     }
 
+    
     class ManuallyCloneable : ICloneable
     {
         public object Clone()
@@ -80,13 +81,22 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
     }
 
     // <target>
-    [DeepClone]
-    class AutomaticallyCloneable
+    class Targets
     {
-        int a;
+        [DeepClone]
+        class AutomaticallyCloneable
+        {
+            int a;
 
-        ManuallyCloneable? b;
+            ManuallyCloneable? b;
 
-        AutomaticallyCloneable? c;
+            AutomaticallyCloneable? c;
+        }
+
+        [DeepClone]
+        class Derived : AutomaticallyCloneable
+        {
+            private string d;
+        }
     }
 }

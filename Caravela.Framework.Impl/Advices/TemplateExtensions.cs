@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 return true;
             }
-            else if ( fromType.Is( toType ) )
+            else if ( fromType.Is( toType, ConversionKind.Implicit ) )
             {
                 return true;
             }

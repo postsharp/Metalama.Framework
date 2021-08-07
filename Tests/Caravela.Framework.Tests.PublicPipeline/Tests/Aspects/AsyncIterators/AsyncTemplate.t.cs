@@ -65,17 +65,12 @@ private async IAsyncEnumerable<int> AsyncEnumerableCancellable_Source(int a, [En
     var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerator_Source(a)));
     global::System.Console.WriteLine("After AsyncEnumerator");
     await global::System.Threading.Tasks.Task.Yield();
-    var enumerator = result;
-    try
+    await using (result)
     {
-        while (await enumerator.MoveNextAsync())
+        while (await result.MoveNextAsync())
         {
-            yield return enumerator.Current;
+            yield return result.Current;
         }
-    }
-    finally
-    {
-        await enumerator.DisposeAsync();
     }
 
     yield break;
@@ -102,17 +97,12 @@ private async IAsyncEnumerator<int> AsyncEnumerator_Source(int a)
     var result = (await global::Caravela.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumeratorCancellable_Source(a, token)));
     global::System.Console.WriteLine("After AsyncEnumeratorCancellable");
     await global::System.Threading.Tasks.Task.Yield();
-    var enumerator = result;
-    try
+    await using (result)
     {
-        while (await enumerator.MoveNextAsync())
+        while (await result.MoveNextAsync())
         {
-            yield return enumerator.Current;
+            yield return result.Current;
         }
-    }
-    finally
-    {
-        await enumerator.DisposeAsync();
     }
 
     yield break;

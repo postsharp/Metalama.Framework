@@ -76,19 +76,18 @@ namespace Caravela.Framework.Impl.Utilities
                     tokens.Add( Token( SyntaxKind.NewKeyword ) );
                 }
 
-                if ( member.IsAbstract )
-                {
-                    tokens.Add( Token( SyntaxKind.AbstractKeyword ) );
-                }
-
-                if ( member.IsVirtual )
-                {
-                    tokens.Add( Token( SyntaxKind.VirtualKeyword ) );
-                }
-
+                // The following modifiers are exclusive in C# but not in the symbol model.
                 if ( member.IsOverride )
                 {
                     tokens.Add( Token( SyntaxKind.OverrideKeyword ) );
+                } 
+                else if ( member.IsAbstract )
+                {
+                    tokens.Add( Token( SyntaxKind.AbstractKeyword ) );
+                }
+                else if ( member.IsVirtual )
+                {
+                    tokens.Add( Token( SyntaxKind.VirtualKeyword ) );
                 }
 
                 if ( member.IsSealed )

@@ -50,10 +50,7 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxTreeAnnotationMap.AnnotationKinds.AddRange(
                 new[] { _scopeAnnotationKind, _noIndentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind } );
 
-        public static bool HasScopeAnnotation( this SyntaxNode node )
-        {
-            return node.HasAnnotations( _scopeAnnotationKind );
-        }
+        public static bool HasScopeAnnotation( this SyntaxNode node ) => node.HasAnnotations( _scopeAnnotationKind );
 
         public static TemplatingScope? GetScopeFromAnnotation( this SyntaxNode node )
         {
@@ -263,7 +260,12 @@ namespace Caravela.Framework.Impl.Templating
             where T : SyntaxNode
             => node.WithAdditionalAnnotations( _templateAnnotation );
 
-        public static bool IsTemplateFromAnnotation( this SyntaxNode node ) => node.HasAnnotation( _templateAnnotation );
+        public static bool IsTemplateFromAnnotation( this SyntaxNode node )
+            => node switch
+            {
+                AccessorDeclarationSyntax accessor => node.HasAnnotation( _templateAnnotation ) || IsTemplateFromAnnotation( accessor.Parent! ),
+                _ => node.HasAnnotation( _templateAnnotation )
+            };
 
         public static T AddScopeMismatchAnnotation<T>( this T node )
             where T : SyntaxNode

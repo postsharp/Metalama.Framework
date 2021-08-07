@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -43,7 +44,9 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly INamedTypeSymbol _templateAttribute;
         private readonly INamedTypeSymbol _ignoreUnlessOverriddenAttribute;
         private readonly INamedTypeSymbol _interfaceMemberAttribute;
-        private readonly Dictionary<ISymbol, TemplatingScope?> _cacheFromAttributes = new( SymbolEqualityComparer.Default );
+        private readonly ConcurrentDictionary<ISymbol, TemplatingScope?> _cacheScopeFromAttributes = new( SymbolEqualityComparer.Default );
+        private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
+        private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
         public SymbolClassifier( Compilation compilation, IServiceProvider serviceProvider )
@@ -60,6 +63,11 @@ namespace Caravela.Framework.Impl.CompileTime
         public TemplateInfo GetTemplateInfo( ISymbol symbol ) => this.GetTemplateInfo( symbol, false );
 
         private TemplateInfo GetTemplateInfo( ISymbol symbol, bool isInherited )
+            => isInherited
+                ? this._cacheInheritedTemplateInfo.GetOrAdd( symbol, s => this.GetTemplateInfoCore( s, true ) )
+                : this._cacheNonInheritedTemplateInfo.GetOrAdd( symbol, s => this.GetTemplateInfoCore( s, false ) );
+
+        private TemplateInfo GetTemplateInfoCore( ISymbol symbol, bool isInherited )
         {
             // Look for a [Template] attribute on the symbol.
             var templateAttribute = symbol
@@ -86,9 +94,12 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             // Look for a [InterfaceMember] attribute on the symbol.
-            if ( symbol.GetAttributes().Any( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._interfaceMemberAttribute ) ) )
+            var interfaceMemberAttribute =
+                symbol.GetAttributes().SingleOrDefault( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._interfaceMemberAttribute ) );
+
+            if ( interfaceMemberAttribute != null )
             {
-                return new TemplateInfo( TemplateAttributeType.InterfaceMember );
+                return new TemplateInfo( TemplateAttributeType.InterfaceMember, interfaceMemberAttribute );
             }
 
             switch ( symbol )
@@ -105,7 +116,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return this.GetTemplateInfo( overriddenProperty!, true );
 
                 default:
-                    return default;
+                    return TemplateInfo.None;
             }
         }
 
@@ -116,13 +127,13 @@ namespace Caravela.Framework.Impl.CompileTime
             switch ( templateAttribute.AttributeClass?.Name )
             {
                 case nameof(IntroduceAttribute):
-                    return new TemplateInfo( TemplateAttributeType.Introduction );
+                    return new TemplateInfo( TemplateAttributeType.Introduction, templateAttribute );
 
                 case nameof(InterfaceMemberAttribute):
-                    return new TemplateInfo( TemplateAttributeType.InterfaceMember );
+                    return new TemplateInfo( TemplateAttributeType.InterfaceMember, templateAttribute );
 
                 default:
-                    return new TemplateInfo( TemplateAttributeType.Template );
+                    return new TemplateInfo( TemplateAttributeType.Template, templateAttribute );
             }
         }
 
@@ -310,13 +321,13 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             TemplatingScope? AddToCache( TemplatingScope? scope )
             {
-                this._cacheFromAttributes[symbol] = scope;
+                this._cacheScopeFromAttributes[symbol] = scope;
 
                 return scope;
             }
 
             // From cache.
-            if ( this._cacheFromAttributes.TryGetValue( symbol, out var scopeFromCache ) )
+            if ( this._cacheScopeFromAttributes.TryGetValue( symbol, out var scopeFromCache ) )
             {
                 return scopeFromCache;
             }

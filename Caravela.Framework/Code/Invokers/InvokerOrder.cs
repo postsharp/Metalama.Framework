@@ -9,7 +9,7 @@ namespace Caravela.Framework.Code.Invokers
     public enum InvokerOrder
     {
         /// <summary>
-        /// Final (equivalent to <c>this</c> in C#).
+        /// Final (equivalent to <c>this</c> in C#, including resolution of <c>virtual</c> calls).
         /// </summary>
         Default,
 

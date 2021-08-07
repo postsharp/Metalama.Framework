@@ -269,10 +269,9 @@ namespace Caravela.Framework.Impl.Linking
                                     }.Where( a => a != null )
                                     .AssertNoneNull() ) )
                         .NormalizeWhitespace()
-                    : property.AccessorList;
+                    : property.AccessorList.AddSourceCodeAnnotation();
 
-            var initializer =
-                property.Initializer;
+            var initializer = property.Initializer;
 
             return
                 PropertyDeclaration(
@@ -288,7 +287,7 @@ namespace Caravela.Framework.Impl.Linking
                         null )
                     .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
-                    .WithInitializer( initializer )
+                    .WithInitializer( initializer.AddSourceCodeAnnotation() )
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithAccessorList( accessorList )
                     .AddGeneratedCodeAnnotation();

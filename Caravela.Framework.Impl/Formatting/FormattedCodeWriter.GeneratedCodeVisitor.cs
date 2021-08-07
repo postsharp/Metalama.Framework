@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Formatting
         {
             private readonly ClassifiedTextSpanCollection _textSpans;
 
-            public GeneratedCodeVisitor( ClassifiedTextSpanCollection textSpans )
+            public GeneratedCodeVisitor( ClassifiedTextSpanCollection textSpans ) : base( SyntaxWalkerDepth.Token )
             {
                 this._textSpans = textSpans;
             }

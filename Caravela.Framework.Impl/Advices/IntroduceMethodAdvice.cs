@@ -31,6 +31,7 @@ namespace Caravela.Framework.Impl.Advices
             Invariant.Assert( templateMethod.IsNotNull );
 
             this.MemberBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Declaration.AssertNotNull().Name );
+            this.MemberBuilder.ApplyTemplateAttribute( templateMethod.TemplateInfo.Attribute );
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
@@ -150,10 +151,9 @@ namespace Caravela.Framework.Impl.Advices
                                 AdviceResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateDiagnostic(
                                         this.TargetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration,
-                                         existingDeclaration.DeclaringType) ) );
+                                        (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
                         }
-                        else if ( !compilation.InvariantComparer.Equals( this.Builder.ReturnType, existingDeclaration.ReturnType ) )
+                        else if ( !compilation.InvariantComparer.Is( this.Builder.ReturnType, existingDeclaration.ReturnType, ConversionKind.ImplicitReference ) )
                         {
                             return
                                 AdviceResult.Create(

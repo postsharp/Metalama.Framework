@@ -312,6 +312,7 @@ namespace Caravela.Framework.Impl.Templating
             switch ( expression )
             {
                 case null:
+                    // This is typically because we are emitting the return value of a void method.
                     return null;
 
                 case IDynamicExpression dynamicExpression:

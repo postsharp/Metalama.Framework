@@ -80,12 +80,12 @@ namespace Caravela.Framework.Impl
             IServiceProvider serviceProvider,
             INamedTypeSymbol aspectTypeSymbol,
             AspectClass? baseClass,
-            IAspectDriver? aspectDriver,
             CompileTimeProject? project,
             Type aspectType,
             IAspect? prototype,
             IDiagnosticAdder diagnosticAdder,
-            Compilation compilation )
+            Compilation compilation,
+            AspectDriverFactory aspectDriverFactory )
         {
             this.FullName = aspectTypeSymbol.GetReflectionNameSafe();
             this.DisplayName = aspectTypeSymbol.Name.TrimEnd( "Attribute" );
@@ -94,19 +94,25 @@ namespace Caravela.Framework.Impl
             this.Project = project;
             this._serviceProvider = serviceProvider;
             this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
-            this._aspectDriver = aspectDriver;
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
             this.AspectType = aspectType;
             this._prototypeAspectInstance = prototype;
             this.Members = this.GetMembers( compilation, aspectTypeSymbol, diagnosticAdder );
+
+            // This must be called after Members is built and assigned.
+            this._aspectDriver = aspectDriverFactory.GetAspectDriver( this, aspectTypeSymbol );
+
         }
 
+        public bool TryGetInterfaceMember( ISymbol symbol, [NotNullWhen(true)] out AspectClassMember? member )
+            => this.Members.TryGetValue( DocumentationCommentId.CreateDeclarationId( symbol ), out member ) && member.TemplateInfo.AttributeType == TemplateAttributeType.InterfaceMember;
+        
         private ImmutableDictionary<string, AspectClassMember> GetMembers( Compilation compilation, INamedTypeSymbol type, IDiagnosticAdder diagnosticAdder )
         {
             if ( compilation == null! )
             {
                 // This is a test scenario where templates must not be detected.
-                return null!;
+                return ImmutableDictionary<string,AspectClassMember>.Empty;
             }
 
             var symbolClassifier = this._serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );
@@ -116,12 +122,30 @@ namespace Caravela.Framework.Impl
 
             foreach ( var memberSymbol in type.GetMembers() )
             {
-                var templateInfo = symbolClassifier.GetTemplateInfo( memberSymbol );
-                var aspectClassMember = new AspectClassMember( memberSymbol.Name, this, templateInfo, memberSymbol is IMethodSymbol { IsAsync: true } );
+                var templateInfo = symbolClassifier.GetTemplateInfo( memberSymbol ).AssertNotNull();
+                var memberName = memberSymbol.Name;
+
+                if ( templateInfo.AttributeType == TemplateAttributeType.Introduction && memberSymbol is IMethodSymbol { AssociatedSymbol: not null } )
+                {
+                    // This is an accessor of an introduced event or property. We don't index them.
+                    continue;
+                }
+                else if ( templateInfo.AttributeType == TemplateAttributeType.InterfaceMember )
+                {
+                    // For interface members, we don't require a unique name.
+                    memberName = DocumentationCommentId.CreateDeclarationId( memberSymbol );
+                }
+
+                var aspectClassMember = new AspectClassMember(
+                    memberName,
+                    this,
+                    templateInfo,
+                    memberSymbol is IMethodSymbol { IsAsync: true },
+                    memberSymbol );
 
                 if ( !templateInfo.IsNone )
                 {
-                    if ( members.TryGetValue( memberSymbol.Name, out var existingMember ) && !memberSymbol.IsOverride &&
+                    if ( members.TryGetValue( memberName, out var existingMember ) && !memberSymbol.IsOverride &&
                          !existingMember.TemplateInfo.IsNone )
                     {
                         // The template is already defined and we are not overwriting a template of the base class.
@@ -134,13 +158,13 @@ namespace Caravela.Framework.Impl
                     }
 
                     // Add or replace the template.
-                    members[memberSymbol.Name] = aspectClassMember;
+                    members[memberName] = aspectClassMember;
                 }
                 else
                 {
-                    if ( !members.ContainsKey( memberSymbol.Name ) )
+                    if ( !members.ContainsKey( memberName ) )
                     {
-                        members.Add( memberSymbol.Name, aspectClassMember );
+                        members.Add( memberName, aspectClassMember );
                     }
                 }
             }
@@ -182,10 +206,10 @@ namespace Caravela.Framework.Impl
             INamedTypeSymbol aspectTypeSymbol,
             Type aspectReflectionType,
             AspectClass? baseAspectClass,
-            IAspectDriver? aspectDriver,
             CompileTimeProject? compileTimeProject,
             IDiagnosticAdder diagnosticAdder,
             Compilation compilation,
+            AspectDriverFactory aspectDriverFactory,
             [NotNullWhen( true )] out AspectClass? aspectClass )
         {
             var prototype = aspectTypeSymbol.IsAbstract ? null : (IAspect) FormatterServices.GetUninitializedObject( aspectReflectionType ).AssertNotNull();
@@ -194,12 +218,12 @@ namespace Caravela.Framework.Impl
                 serviceProvider,
                 aspectTypeSymbol,
                 baseAspectClass,
-                aspectDriver,
                 compileTimeProject,
                 aspectReflectionType,
                 prototype,
                 diagnosticAdder,
-                compilation );
+                compilation,
+                aspectDriverFactory );
 
             aspectClass.Initialize();
 

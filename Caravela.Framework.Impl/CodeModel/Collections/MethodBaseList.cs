@@ -129,7 +129,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 }
 
                 return
-                    (parameterInfo.Value.Type == null || payload.Compilation.InvariantComparer.Is( parameterInfo.Value.Type, expectedType ))
+                    (parameterInfo.Value.Type == null || payload.Compilation.InvariantComparer.Is( parameterInfo.Value.Type, expectedType, ConversionKind.Implicit ))
                     && (parameterInfo.Value.RefKind == null || expectedRefKind == parameterInfo.Value.RefKind);
             }
         }

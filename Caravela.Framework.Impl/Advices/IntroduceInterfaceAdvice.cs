@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
@@ -12,14 +13,15 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text;
 
 namespace Caravela.Framework.Impl.Advices
 {
     internal partial class ImplementInterfaceAdvice : Advice
     {
-        private readonly List<(IMethod Method, InterfaceMemberAttribute Attribute)> _aspectInterfaceMethods;
-        private readonly List<(IProperty Property, InterfaceMemberAttribute Attribute)> _aspectInterfaceProperties;
-        private readonly List<(IEvent Event, InterfaceMemberAttribute Attribute)> _aspectInterfaceEvents;
+        private readonly List<(IMethod Method, TemplateInfo TemplateInfo)> _aspectInterfaceMethods = new();
+        private readonly List<(IProperty Property, TemplateInfo TemplateInfo)> _aspectInterfaceProperties = new();
+        private readonly List<(IEvent Event, TemplateInfo TemplateInfo)> _aspectInterfaceEvents = new();
         private readonly Dictionary<INamedType, (bool IsIntroduced, bool Dummy)> _introducedAndImplementedInterfaces;
         private readonly List<IntroducedInterfaceSpecification> _introducedInterfaceTypes;
 
@@ -30,9 +32,6 @@ namespace Caravela.Framework.Impl.Advices
             INamedType targetType,
             string? layerName ) : base( aspect, targetType, layerName, null )
         {
-            this._aspectInterfaceMethods = new List<(IMethod Method, InterfaceMemberAttribute Attribute)>();
-            this._aspectInterfaceProperties = new List<(IProperty Property, InterfaceMemberAttribute Attribute)>();
-            this._aspectInterfaceEvents = new List<(IEvent Event, InterfaceMemberAttribute Attribute)>();
             this._introducedInterfaceTypes = new List<IntroducedInterfaceSpecification>();
 
             // Initialize with interface the target type already implements.
@@ -50,7 +49,7 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var aspectMethod in aspectType.Methods )
             {
-                if ( TryGetInterfaceMemberAttribute( aspectMethod, out var interfaceMemberAttribute ) )
+                if ( TryGetInterfaceMemberTemplateInfo( aspectMethod, out var interfaceMemberAttribute ) )
                 {
                     this._aspectInterfaceMethods.Add( (aspectMethod, interfaceMemberAttribute) );
                 }
@@ -58,7 +57,7 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var aspectProperty in aspectType.Properties )
             {
-                if ( TryGetInterfaceMemberAttribute( aspectProperty, out var interfaceMemberAttribute ) )
+                if ( TryGetInterfaceMemberTemplateInfo( aspectProperty, out var interfaceMemberAttribute ) )
                 {
                     this._aspectInterfaceProperties.Add( (aspectProperty, interfaceMemberAttribute) );
                 }
@@ -66,35 +65,25 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var aspectEvent in aspectType.Events )
             {
-                if ( TryGetInterfaceMemberAttribute( aspectEvent, out var interfaceMemberAttribute ) )
+                if ( TryGetInterfaceMemberTemplateInfo( aspectEvent, out var interfaceMemberAttribute ) )
                 {
                     this._aspectInterfaceEvents.Add( (aspectEvent, interfaceMemberAttribute) );
                 }
             }
 
-            bool TryGetInterfaceMemberAttribute(
+            bool TryGetInterfaceMemberTemplateInfo(
                 IMember member,
-                [NotNullWhen( true )] out InterfaceMemberAttribute? interfaceMemberAttribute )
+                [NotNullWhen( true )] out TemplateInfo? templateInfo )
             {
-                var interfaceMemberAttributeType = compilation.TypeFactory.GetTypeByReflectionType( typeof(InterfaceMemberAttribute) );
-
-                var interfaceMemberIAttribute = member.Attributes.SingleOrDefault(
-                    a => compilation.InvariantComparer.Equals( interfaceMemberAttributeType, a.Constructor.DeclaringType ) );
-
-                if ( interfaceMemberIAttribute != null )
+                if ( this.Aspect.AspectClass.TryGetInterfaceMember( member.GetSymbol().AssertNotNull(  Justifications.ImplementingIntroducedInterfacesNotSupported), out var aspectClassMember ) )
                 {
-                    var isExplicitValue = interfaceMemberIAttribute.NamedArguments.Where( aa => aa.Key == nameof(InterfaceMemberAttribute.IsExplicit) )
-                        .Select( aa => aa.Value )
-                        .LastOrDefault();
-
-                    var isExplicit = isExplicitValue.IsAssigned && (bool) isExplicitValue.Value!;
-                    interfaceMemberAttribute = new InterfaceMemberAttribute() { IsExplicit = isExplicit };
+                    templateInfo = aspectClassMember.TemplateInfo;
 
                     return true;
                 }
                 else
                 {
-                    interfaceMemberAttribute = null;
+                    templateInfo = null;
 
                     return false;
                 }
@@ -207,13 +196,12 @@ namespace Caravela.Framework.Impl.Advices
                             diagnosticAdder.Report(
                                 AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, interfaceType, matchingAspectMethod.Method,
-                                     interfaceMethod) ) );
+                                    (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, interfaceType, matchingAspectMethod.Method, interfaceMethod) ) );
                         }
                         else
                         {
                             memberSpecifications.Add(
-                                new MemberSpecification( interfaceMethod, null, matchingAspectMethod.Method, matchingAspectMethod.Attribute.IsExplicit ) );
+                                new MemberSpecification( interfaceMethod, null, matchingAspectMethod.Method,  matchingAspectMethod.TemplateInfo ) );
                         }
                     }
 
@@ -247,7 +235,7 @@ namespace Caravela.Framework.Impl.Advices
                                     interfaceProperty,
                                     null,
                                     matchingAspectProperty.Property,
-                                    matchingAspectProperty.Attribute.IsExplicit ) );
+                                    matchingAspectProperty.TemplateInfo ) );
                         }
                     }
 
@@ -273,7 +261,7 @@ namespace Caravela.Framework.Impl.Advices
                         else
                         {
                             memberSpecifications.Add(
-                                new MemberSpecification( interfaceEvent, null, matchingAspectEvent.Event, matchingAspectEvent.Attribute.IsExplicit ) );
+                                new MemberSpecification( interfaceEvent, null, matchingAspectEvent.Event, matchingAspectEvent.TemplateInfo ) );
                         }
                     }
 
@@ -316,7 +304,7 @@ namespace Caravela.Framework.Impl.Advices
                                     ? new OverriddenMethod(
                                         this,
                                         (IMethod) memberBuilder,
-                                        Template.Create( implementationMethod, TemplateKind.Introduction ) )
+                                        Template.Create( implementationMethod, memberSpec.TemplateInfo, TemplateKind.Introduction ) )
                                     : new RedirectedMethod(
                                         this,
                                         (IMethod) memberBuilder,
@@ -342,7 +330,7 @@ namespace Caravela.Framework.Impl.Advices
                                         ? new OverriddenProperty(
                                             this,
                                             (IProperty) memberBuilder,
-                                            Template.Create( (IProperty) memberSpec.AspectInterfaceMember, TemplateKind.Introduction ),
+                                            Template.Create( (IProperty) memberSpec.AspectInterfaceMember, memberSpec.TemplateInfo, TemplateKind.Introduction ),
                                             default,
                                             default )
                                         : new RedirectedProperty(
@@ -367,7 +355,7 @@ namespace Caravela.Framework.Impl.Advices
                                         ? new OverriddenEvent(
                                             this,
                                             (IEvent) memberBuilder,
-                                            Template.Create( (IEvent) memberSpec.AspectInterfaceMember, TemplateKind.Introduction ),
+                                            Template.Create( (IEvent) memberSpec.AspectInterfaceMember, memberSpec.TemplateInfo, TemplateKind.Introduction ),
                                             default,
                                             default )
                                         : new RedirectedEvent(

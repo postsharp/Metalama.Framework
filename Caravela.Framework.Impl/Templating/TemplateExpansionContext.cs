@@ -188,7 +188,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             // We are in an async iterator (or async stream), and we cannot have a return statement.
             // Generate this instead:
-            // try
+            // async using ( var enumerator = METHOD() )
             // {
             //     while ( await enumerator.MoveNextAsync() )
             //     {
@@ -197,12 +197,6 @@ namespace Caravela.Framework.Impl.Templating
             //         cancellationToken.ThrowIfCancellationRequested();
             //     }
             // }
-            // finally
-            // {
-            //     await enumerator.DisposeAsync();
-            // }
-
-            var enumerator = this.LexicalScope.GetUniqueIdentifier( "enumerator" );
 
             // TODO: Possible optimization
             // We could assume that the result is an AsyncEnumerableList. The class also implements IEnumerable without
@@ -218,53 +212,65 @@ namespace Caravela.Framework.Impl.Templating
                                             IdentifierName("ThrowIfCancellationRequested"))))
              */
 
-            var local =
-                LocalDeclarationStatement(
-                    VariableDeclaration(
-                            IdentifierName(
-                                Identifier(
-                                    TriviaList(),
-                                    SyntaxKind.VarKeyword,
-                                    "var",
-                                    "var",
-                                    TriviaList() ) ) )
-                        .WithVariables(
-                            SingletonSeparatedList(
-                                VariableDeclarator( Identifier( enumerator ) )
-                                    .WithInitializer( EqualsValueClause( returnExpression ) ) ) ) );
+            VariableDeclarationSyntax? local;
+            ExpressionSyntax? usingExpression;
+            IdentifierNameSyntax? enumeratorIdentifier;
+            UsingStatementSyntax usingStatement;
 
-            var tryStatement =
-                TryStatement()
-                    .WithBlock(
-                        Block(
-                            SingletonList<StatementSyntax>(
-                                WhileStatement(
-                                    AwaitExpression(
-                                        InvocationExpression(
-                                            MemberAccessExpression(
-                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                IdentifierName( enumerator ),
-                                                IdentifierName( "MoveNextAsync" ) ) ) ),
-                                    Block(
-                                        YieldStatement(
-                                            SyntaxKind.YieldReturnStatement,
-                                            MemberAccessExpression(
-                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                IdentifierName( enumerator ),
-                                                IdentifierName( "Current" ) ) ) ) ) ) ) )
-                    .WithFinally(
-                        FinallyClause(
-                            Block(
-                                SingletonList<StatementSyntax>(
-                                    ExpressionStatement(
-                                        AwaitExpression(
-                                            InvocationExpression(
-                                                MemberAccessExpression(
-                                                    SyntaxKind.SimpleMemberAccessExpression,
-                                                    IdentifierName( enumerator ),
-                                                    IdentifierName( "DisposeAsync" ) ) ) ) ) ) ) ) );
+            if ( returnExpression is IdentifierNameSyntax returnIdentifier )
+            {
+                local = null;
+                usingExpression = returnExpression;
+                enumeratorIdentifier = returnIdentifier;
+            }
+            else
+            {
+                var enumerator = this.LexicalScope.GetUniqueIdentifier( "enumerator" );
 
-            return Block( local, tryStatement, CreateYieldBreakStatement() ).NormalizeWhitespace().WithFlattenBlockAnnotation();
+                local = VariableDeclaration(
+                        IdentifierName(
+                            Identifier(
+                                default,
+                                SyntaxKind.VarKeyword,
+                                "var",
+                                "var",
+                                TriviaList( ElasticSpace ) ) ) )
+                    .WithVariables(
+                        SingletonSeparatedList(
+                            VariableDeclarator( Identifier( enumerator ) )
+                                .WithInitializer( EqualsValueClause( returnExpression ) ) ) );
+
+                usingExpression = null;
+                enumeratorIdentifier = IdentifierName( enumerator );
+            }
+
+            var whileStatement = WhileStatement(
+                AwaitExpression(
+                    InvocationExpression(
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            enumeratorIdentifier,
+                            IdentifierName( "MoveNextAsync" ) ) ) ),
+                Block(
+                    YieldStatement(
+                        SyntaxKind.YieldReturnStatement,
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            enumeratorIdentifier,
+                            IdentifierName( "Current" ) ) ) ) );
+
+            usingStatement = UsingStatement(
+                Token( SyntaxKind.AwaitKeyword ),
+                Token( SyntaxKind.UsingKeyword ),
+                Token( SyntaxKind.OpenParenToken ),
+                local!,
+                usingExpression!,
+                Token( SyntaxKind.CloseParenToken ),
+                Block( whileStatement ) );
+
+            return Block( usingStatement, CreateYieldBreakStatement() )
+                .NormalizeWhitespace()
+                .WithFlattenBlockAnnotation();
         }
 
         private static YieldStatementSyntax CreateYieldBreakStatement()

@@ -71,6 +71,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                                                     LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ReturnType ),
                                                     SingletonSeparatedList( VariableDeclarator( this.ReturnVariableName.AssertNotNull() ) ) ) )
                                             .WithLeadingTrivia( ElasticLineFeed )
+                                            .AddGeneratedCodeAnnotation()
                                         : null,
                                     linkedBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                                     this._labelUsed

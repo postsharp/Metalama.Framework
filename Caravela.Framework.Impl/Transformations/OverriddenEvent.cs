@@ -62,11 +62,11 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration );
 
                 var addTemplateMethod = this.EventTemplate.Declaration != null
-                    ? Template.Create( this.EventTemplate.Declaration.AddMethod )
+                    ? Template.Create( this.EventTemplate.Declaration.AddMethod, this.AddTemplate.TemplateInfo )
                     : this.AddTemplate;
 
                 var removeTemplateMethod = this.EventTemplate.Declaration != null
-                    ? Template.Create( this.EventTemplate.Declaration.RemoveMethod )
+                    ? Template.Create( this.EventTemplate.Declaration.RemoveMethod, this.RemoveTemplate.TemplateInfo )
                     : this.RemoveTemplate;
 
                 var templateExpansionError = false;

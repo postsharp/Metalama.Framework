@@ -232,8 +232,7 @@ namespace Caravela.Framework.Impl.Linking
         }
 
         private static BlockSyntax GetImplicitAdderBody( IMethodSymbol symbol )
-        {
-            return Block(
+            => Block(
                 ExpressionStatement(
                     AssignmentExpression(
                         SyntaxKind.AddAssignmentExpression,
@@ -244,11 +243,9 @@ namespace Caravela.Framework.Impl.Linking
                                 : ThisExpression(),
                             IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ) ) );
-        }
 
         private static BlockSyntax GetImplicitRemoverBody( IMethodSymbol symbol )
-        {
-            return Block(
+            => Block(
                 ExpressionStatement(
                     AssignmentExpression(
                         SyntaxKind.SubtractAssignmentExpression,
@@ -259,7 +256,6 @@ namespace Caravela.Framework.Impl.Linking
                                 : ThisExpression(),
                             IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ) ) );
-        }
 
         private static FieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
             => GetEventBackingField( eventDeclaration.Type, symbol );
@@ -268,65 +264,56 @@ namespace Caravela.Framework.Impl.Linking
             => GetEventBackingField( eventFieldDeclaration.Declaration.Type, symbol );
 
         private static FieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, IEventSymbol symbol )
-        {
-            return
-                FieldDeclaration(
-                        List<AttributeListSyntax>(),
-                        symbol.IsStatic
-                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                        VariableDeclaration(
-                            eventType,
-                            SingletonSeparatedList( VariableDeclarator( Identifier( GetBackingFieldName( symbol ) ) ) ) ) )
-                    .NormalizeWhitespace()
-                    .WithLeadingTrivia( ElasticLineFeed )
-                    .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
-                    .AddGeneratedCodeAnnotation();
-        }
+            => FieldDeclaration(
+                    List<AttributeListSyntax>(),
+                    symbol.IsStatic
+                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                    VariableDeclaration(
+                        eventType,
+                        SingletonSeparatedList( VariableDeclarator( Identifier( GetBackingFieldName( symbol ) ) ) ) ) )
+                .NormalizeWhitespace()
+                .WithLeadingTrivia( ElasticLineFeed )
+                .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
+                .AddGeneratedCodeAnnotation();
 
         private static MemberDeclarationSyntax GetOriginalImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )
-        {
-            return
-                EventDeclaration(
-                        List<AttributeListSyntax>(),
-                        symbol.IsStatic
-                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                        @event.Type,
-                        null,
-                        Identifier( GetOriginalImplMemberName( symbol ) ),
-                        null )
-                    .NormalizeWhitespace()
-                    .WithLeadingTrivia( ElasticLineFeed )
-                    .WithTrailingTrivia( ElasticLineFeed )
-                    .WithAccessorList( @event.AccessorList )
-                    .AddGeneratedCodeAnnotation();
-        }
+            => EventDeclaration(
+                    List<AttributeListSyntax>(),
+                    symbol.IsStatic
+                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                    @event.Type,
+                    null,
+                    Identifier( GetOriginalImplMemberName( symbol ) ),
+                    null )
+                .NormalizeWhitespace()
+                .WithLeadingTrivia( ElasticLineFeed )
+                .WithTrailingTrivia( ElasticLineFeed )
+                .WithAccessorList( @event.AccessorList.AddSourceCodeAnnotation() )
+                .AddGeneratedCodeAnnotation();
 
         private static MemberDeclarationSyntax GetOriginalImplEventField( TypeSyntax eventType, IEventSymbol symbol )
-        {
-            return
-                EventDeclaration(
-                        List<AttributeListSyntax>(),
-                        symbol.IsStatic
-                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                        eventType,
-                        null,
-                        Identifier( GetOriginalImplMemberName( symbol ) ),
-                        AccessorList(
-                            List(
-                                new[]
-                                {
-                                    AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull() ) ),
-                                    AccessorDeclaration(
-                                        SyntaxKind.RemoveAccessorDeclaration,
-                                        GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) )
-                                } ) ) )
-                    .NormalizeWhitespace()
-                    .WithLeadingTrivia( ElasticLineFeed )
-                    .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
-                    .AddGeneratedCodeAnnotation();
-        }
+            => EventDeclaration(
+                    List<AttributeListSyntax>(),
+                    symbol.IsStatic
+                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                    eventType,
+                    null,
+                    Identifier( GetOriginalImplMemberName( symbol ) ),
+                    AccessorList(
+                        List(
+                            new[]
+                            {
+                                AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull() ) ),
+                                AccessorDeclaration(
+                                    SyntaxKind.RemoveAccessorDeclaration,
+                                    GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) )
+                            } ) ) )
+                .NormalizeWhitespace()
+                .WithLeadingTrivia( ElasticLineFeed )
+                .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
+                .AddGeneratedCodeAnnotation();
     }
 }

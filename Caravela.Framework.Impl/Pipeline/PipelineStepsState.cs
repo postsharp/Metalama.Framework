@@ -70,7 +70,7 @@ namespace Caravela.Framework.Impl.Pipeline
         public void Execute( CancellationToken cancellationToken )
         {
             using var enumerator = this._steps.GetEnumerator();
-            var previousAspectLayer = default(OrderedAspectLayer);
+            PipelineStep? previousStep = null;
 
             while ( enumerator.MoveNext() )
             {
@@ -78,24 +78,32 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 this._currentStep = enumerator.Current.Value;
 
-                this.DetectUnorderedLayer( ref previousAspectLayer, this._currentStep.AspectLayer );
+                this.DetectUnorderedSteps( ref previousStep, this._currentStep );
 
                 var compilationForAspectLayer = this.Compilation.GetCompilationModel().WithAspectLayer( this._currentStep.AspectLayer.AspectLayerId );
                 this.Compilation = this._currentStep!.Execute( compilationForAspectLayer, this, cancellationToken );
             }
         }
 
-        private void DetectUnorderedLayer( ref OrderedAspectLayer? previousAspectLayer, OrderedAspectLayer currentAspectLayer )
+        private void DetectUnorderedSteps( ref PipelineStep? previousStep, PipelineStep currentStep )
         {
-            if ( previousAspectLayer != null && previousAspectLayer != currentAspectLayer && previousAspectLayer.Order >= currentAspectLayer.Order )
+            if ( previousStep != null )
             {
-                this._diagnostics.Report(
-                    GeneralDiagnosticDescriptors.UnorderedLayers.CreateDiagnostic(
-                        null,
-                        (previousAspectLayer.AspectLayerId.ToString(), currentAspectLayer.AspectLayerId.ToString()) ) );
+                if ( previousStep.AspectLayer != currentStep.AspectLayer && previousStep.AspectLayer.Order >= currentStep.AspectLayer.Order)
+                {
+                    this._diagnostics.Report(
+                        GeneralDiagnosticDescriptors.UnorderedLayers.CreateDiagnostic(
+                            null,
+                            (previousStep.AspectLayer.AspectLayerId.ToString(), currentStep.AspectLayer.AspectLayerId.ToString()) ) );
+                }
+
+                if ( previousStep.AspectLayer == currentStep.AspectLayer && previousStep.Id.Depth >= currentStep.Id.Depth )
+                {
+                    throw new AssertionFailedException( "Steps with lower depth must be processed before steps with higher depth." );
+                }
             }
 
-            previousAspectLayer = currentAspectLayer;
+            previousStep = currentStep;
         }
 
         public bool AddAspectSources( IEnumerable<IAspectSource> aspectSources )

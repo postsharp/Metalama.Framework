@@ -49,6 +49,11 @@ namespace Caravela.Framework.Impl.Advices
                 hasSet,
                 this.TemplateMember != null && this.TemplateMember.IsAutoPropertyOrField,
                 this.TemplateMember != null && this.TemplateMember.Writeability == Writeability.InitOnly );
+
+            if ( templateProperty.IsNotNull )
+            {
+                this.MemberBuilder.ApplyTemplateAttribute( templateProperty.TemplateInfo.Attribute );
+            }
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )

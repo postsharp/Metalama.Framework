@@ -55,27 +55,32 @@ namespace Caravela.Framework.Aspects
         /// the actual return type of the overridden method or accessor is the one of the overwritten semantic, so it
         /// can be a void <see cref="Task"/>, a <see cref="ValueType"/>, or any other type.
         /// </summary>
+        [TemplateKeyword]
         public static Task<dynamic?> ProceedAsync() => throw NewMustBeTransformedException();
 
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IEnumerable&lt;dynamic?&gt;</c>.
         /// </summary>
+        [TemplateKeyword]
         public static IEnumerable<dynamic?> ProceedEnumerable() => throw NewMustBeTransformedException();
 
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IEnumerator&lt;dynamic?&gt;</c>.
         /// </summary>
+        [TemplateKeyword]
         public static IEnumerator<dynamic?> ProceedEnumerator() => throw NewMustBeTransformedException();
 
 #if NET5_0
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IAsyncEnumerable&lt;dynamic?&gt;</c>.
         /// </summary>
+        [TemplateKeyword]
         public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => throw NewMustBeTransformedException();
 
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IAsyncEnumerator&lt;dynamic?&gt;</c>.
         /// </summary>
+        [TemplateKeyword]
         public static IAsyncEnumerator<dynamic?> ProceedAsyncEnumerator() => throw NewMustBeTransformedException();
 #endif
 
@@ -209,10 +214,7 @@ namespace Caravela.Framework.Aspects
 
         private class InitializeCookie : IDisposable
         {
-            public void Dispose()
-            {
-                _currentContext.Value = null;
-            }
+            public void Dispose() => _currentContext.Value = null;
         }
     }
 }

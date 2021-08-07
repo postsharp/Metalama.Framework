@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.Advices
                     $"The template '{symbol}' is a {declaration.DeclarationKind} but it was expected to be an {typeof(T).Name}" );
             }
 
-            return Template.Create( typedSymbol, this.SelectedKind, this.InterpretedKind );
+            return Template.Create( typedSymbol, this.TemplateMember.TemplateInfo, this.SelectedKind, this.InterpretedKind );
         }
 
         public TemplateRef InterpretedAs( TemplateKind interpretedKind ) => new( this.TemplateMember, this.SelectedKind, interpretedKind );
