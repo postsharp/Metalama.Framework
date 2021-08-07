@@ -81,6 +81,9 @@ namespace Caravela.Framework.Impl.Serialization
             this.RegisterSerializer( new CompileTimeParameterInfoSerializer( this ) );
             this.RegisterSerializer( new CompileTimeReturnParameterInfoSerializer( this ) );
             this.RegisterSerializer( new CompileTimeFieldOrPropertyInfoSerializer( this ) );
+            
+            // Hacks
+            this.RegisterSerializer( new ExpressionSerializer( this ) );
         }
 
         internal TypeSerializer TypeSerializer { get; }

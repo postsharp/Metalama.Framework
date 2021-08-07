@@ -79,11 +79,11 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                     this._method.GenericArguments.Select( a => a.GetSymbol() ) )
                 : SyntaxFactory.IdentifierName( this._method.Name );
 
-            var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromValue( args ) );
+            var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromValue( args, this.Compilation ) );
 
             if ( this._method.MethodKind == MethodKind.LocalFunction )
             {
-                var instanceExpression = RuntimeExpression.FromValue( instance );
+                var instanceExpression = RuntimeExpression.FromValue( instance, this.Compilation );
 
                 if ( instanceExpression != null )
                 {
@@ -99,7 +99,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                     false );
             }
 
-            var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromValue( instance! ) );
+            var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromValue( instance!, this.Compilation ) );
 
             if ( this._invokerOperator == InvokerOperator.Default )
             {

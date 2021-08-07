@@ -93,6 +93,8 @@ namespace Caravela.Framework.Impl.Advices
             {
                 // There is no existing declaration, we will introduce and override the introduced.
                 var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template );
+                this.MemberBuilder.IsOverride = false;
+                this.MemberBuilder.IsNew = false;
 
                 return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
             }
@@ -132,6 +134,7 @@ namespace Caravela.Framework.Impl.Advices
                         else
                         {
                             this.MemberBuilder.IsNew = true;
+                            this.MemberBuilder.IsOverride = false;
                             this.MemberBuilder.OverriddenMethod = existingDeclaration;
                             var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template );
 
@@ -165,6 +168,7 @@ namespace Caravela.Framework.Impl.Advices
                         else
                         {
                             this.MemberBuilder.IsOverride = true;
+                            this.MemberBuilder.IsNew = false;
                             this.MemberBuilder.OverriddenMethod = existingDeclaration;
                             var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template );
 

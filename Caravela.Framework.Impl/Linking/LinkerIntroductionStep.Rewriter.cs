@@ -160,15 +160,13 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             node = node
                                 .WithIdentifier( node.Identifier.WithTrailingTrivia() )
-                                .WithBaseList( BaseList( SeparatedList( additionalBaseList ) ) )
+                                .WithBaseList( BaseList( SeparatedList( additionalBaseList ) ).AddGeneratedCodeAnnotation() )
                                 .WithTrailingTrivia( node.Identifier.TrailingTrivia );
                         }
                         else
                         {
-                            node = node.WithBaseList( BaseList( node.BaseList.Types.AddRange( additionalBaseList ) ) );
+                            node = node.WithBaseList( BaseList( node.BaseList.Types.AddRange( additionalBaseList.Select( i => i.AddGeneratedCodeAnnotation() ) ) ) );
                         }
-
-                        node = node.AddGeneratedCodeAnnotation();
                     }
 
                     return node;

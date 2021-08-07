@@ -13,6 +13,35 @@ using System.Diagnostics;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
+    internal class UserExpression : IExpression
+    {
+        public IDynamicExpression Underlying { get; }
+
+        public UserExpression( RuntimeExpression? underlying, ICompilation compilation )
+        {
+            if ( underlying == null )
+            {
+                this.Underlying = new DefaultDynamicExpression( compilation.TypeFactory.GetSpecialType( SpecialType.Object ) );
+            }
+            else
+            {
+                var type = underlying.ExpressionType != null
+                    ? compilation.GetCompilationModel().Factory.GetIType( underlying.ExpressionType )
+                    : compilation.TypeFactory.GetSpecialType( SpecialType.Object ).MakeNullable();
+                
+                this.Underlying = new DynamicExpression( underlying.Syntax, type, false );
+            }
+        }
+
+        public IType Type => this.Underlying.ExpressionType;
+
+        public object? Value
+        {
+            get => this.Underlying;
+            set => throw new NotSupportedException();
+        }
+    }
+    
     /// <summary>
     /// The implementation of <see cref="IMetaApi"/>.
     /// </summary>
@@ -98,6 +127,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 Debugger.Break();
             }
         }
+
+        public IExpression Expression( object? expression ) => new UserExpression( RuntimeExpression.FromValue( expression, this.Compilation ), this.Compilation );
 
         public AspectExecutionScenario ExecutionScenario => this._common.PipelineDescription.ExecutionScenario;
 

@@ -6,7 +6,7 @@ int Method(int a)
     this.Method(a);
     _ = this.Method(2).Foo();
     _ = this.Method(a).Foo();
-    _ = this.Method((global::System.Int32)(2));
+    _ = this.Method(2);
     _ = this.Method(a);
     var x = this.Method(2).Foo();
     var y = this.Method(a).Foo();

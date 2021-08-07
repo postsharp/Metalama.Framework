@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -54,8 +55,22 @@ namespace Caravela.Framework.Impl.Templating
         {
             var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( originalNode );
 
+            if ( expressionType is IDynamicTypeSymbol )
+            {
+                // Roslyn returns a dynamic type even for methods returning a non-dynamic type, as long as they have at least
+                // one dynamic argument. We don't want to fix the Roslyn type resolution, but in the specific case of void methods,
+                // we can do it without a chance of being ever wrong. It allows meta.DefineExpression to work.
+                if ( originalNode is InvocationExpressionSyntax && 
+                     this._syntaxTreeAnnotationMap.GetSymbol( originalNode ) is IMethodSymbol { ReturnsVoid: true } )
+                {
+                    return false;
+                }
+
+            }
+
             if ( expressionType.IsDynamic() )
             {
+                
                 return true;
             }
 

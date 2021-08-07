@@ -33,6 +33,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                             SyntaxKind.SimpleMemberAccessExpression,
                             LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this._type.GetSymbol() ),
                             SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
-                        .WithAspectReferenceAnnotation( this._linkerAnnotation ) );
+                        .WithAspectReferenceAnnotation( this._linkerAnnotation ),
+                this._type.Compilation);
     }
 }

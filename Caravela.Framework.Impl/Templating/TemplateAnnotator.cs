@@ -710,7 +710,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return node.AddScopeAnnotation( TemplatingScope.Both );
             }
-
+            
             // If we have any out/ref argument that assigns a compile-time variable, the whole method call is compile-time, and we cannot
             // be in a run-time-conditional block.
             var compileTimeOutArguments = node.ArgumentList.Arguments.Where(
@@ -1335,9 +1335,11 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitExpressionStatement( ExpressionStatementSyntax node )
         {
-            var transformedNode = (ExpressionStatementSyntax) base.VisitExpressionStatement( node )!;
+            var transformedExpression = this.Visit( node.Expression )!;
+            var expressionScope = this.GetNodeScope( transformedExpression );
+            var statementScope = expressionScope.GetExpressionExecutionScope();
 
-            return transformedNode.WithScopeAnnotationFrom( transformedNode.Expression );
+            return node.WithExpression( transformedExpression ).AddScopeAnnotation( expressionScope ).AddTargetScopeAnnotation( statementScope );
         }
 
         public override SyntaxNode? VisitCastExpression( CastExpressionSyntax node )

@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     expression );
             }
 
-            return new RuntimeExpression( expression );
+            return new RuntimeExpression( expression, this.ExpressionType.Compilation );
         }
 
         public IType ExpressionType { get; }

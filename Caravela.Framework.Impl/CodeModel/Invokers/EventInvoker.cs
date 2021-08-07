@@ -47,27 +47,27 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         public object Add( object? instance, object? value )
         {
-            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ), AspectReferenceTargetKind.EventAddAccessor );
+            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance, this.Compilation ), AspectReferenceTargetKind.EventAddAccessor );
 
-            var expression = AssignmentExpression( SyntaxKind.AddAssignmentExpression, eventAccess, RuntimeExpression.GetSyntaxFromValue( value ) );
+            var expression = AssignmentExpression( SyntaxKind.AddAssignmentExpression, eventAccess, RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
 
             return new DynamicExpression( expression, this.Member.EventType, false );
         }
 
         public object Remove( object? instance, object? value )
         {
-            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ), AspectReferenceTargetKind.EventRemoveAccessor );
+            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance, this.Compilation ), AspectReferenceTargetKind.EventRemoveAccessor );
 
-            var expression = AssignmentExpression( SyntaxKind.SubtractAssignmentExpression, eventAccess, RuntimeExpression.GetSyntaxFromValue( value ) );
+            var expression = AssignmentExpression( SyntaxKind.SubtractAssignmentExpression, eventAccess, RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
 
             return new DynamicExpression( expression, this.Member.EventType, false );
         }
 
         public object? Raise( object? instance, params object?[] args )
         {
-            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ), AspectReferenceTargetKind.EventRaiseAccessor );
+            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance, this.Compilation ), AspectReferenceTargetKind.EventRaiseAccessor );
 
-            var arguments = this.Member.GetArguments( this.Member.Signature.Parameters, RuntimeExpression.FromValue( args ) );
+            var arguments = this.Member.GetArguments( this.Member.Signature.Parameters, RuntimeExpression.FromValue( args, this.Compilation ) );
 
             var expression = ConditionalAccessExpression(
                 eventAccess,

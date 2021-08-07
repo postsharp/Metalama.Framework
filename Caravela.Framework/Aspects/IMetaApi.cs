@@ -4,6 +4,7 @@
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Validation;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace Caravela.Framework.Aspects
 {
@@ -42,5 +43,7 @@ namespace Caravela.Framework.Aspects
         IDiagnosticSink Diagnostics { get; }
 
         void DebugBreak();
+
+        IExpression Expression( object? expression );
     }
 }

@@ -21,8 +21,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     {
         private const string _typeIdAnnotationName = "caravela-typeid";
 
-        private readonly string? _expressionTypeName;
-        private ITypeSymbol? _expressionType;
+        /// <summary>
+        /// Gets the expression type, or <c>null</c> if the expression is actually the <c>null</c> or <c>default</c> expression.
+        /// </summary>
+        public ITypeSymbol? ExpressionType { get; }
 
         /// <summary>
         /// Gets a value indicating whether it is legal to use the <c>out</c> or <c>ref</c> argument modifier with this expression.
@@ -48,22 +50,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 _ => SyntaxFactory.ExpressionStatement( runtimeExpression.Syntax )
             };
 
-        private ITypeSymbol? GetExpressionType( ITypeFactory typeFactory )
-        {
-            if ( this._expressionType == null )
-            {
-                if ( this._expressionTypeName == null )
-                {
-                    // We don't know the expression type, for instance because it is a `null` expression.
-                    return null;
-                }
-
-                this._expressionType = typeFactory.GetTypeByReflectionName( this._expressionTypeName.AssertNotNull() ).GetSymbol();
-            }
-
-            return this._expressionType;
-        }
-
         private static ExpressionSyntax AddTypeAnnotation( ExpressionSyntax node, ITypeSymbol? type, Compilation? compilation )
         {
             if ( type != null && compilation != null && !node.GetAnnotations( _typeIdAnnotationName ).Any() )
@@ -79,53 +65,40 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
         }
 
-        private RuntimeExpression( ExpressionSyntax syntax, Compilation? compilation, ITypeSymbol? expressionType, bool isReferenceable )
+        public RuntimeExpression( ExpressionSyntax syntax, Compilation compilation, ITypeSymbol? expressionType, bool isReferenceable )
         {
-            this.Syntax = AddTypeAnnotation( syntax, expressionType, compilation );
-            this._expressionType = expressionType;
+            
+            if ( expressionType == null )
+            {
+                // This should happen only for null and default expressions.
+                TryFindExpressionType( syntax, compilation, out expressionType );
+            }
+            else
+            {
+                syntax = AddTypeAnnotation( syntax, expressionType, compilation );
+            }
+            
+            this.Syntax = syntax;
+            this.ExpressionType = expressionType;
             this.IsReferenceable = isReferenceable;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RuntimeExpression"/> class by passing a type name. This constructor
-        /// is called from generated code and must not be changed or removed.
-        /// </summary>
-        /// <param name="syntax"></param>
-        /// <param name="typeName"></param>
-        /// <param name="isReferenceable"></param>
-        public RuntimeExpression( ExpressionSyntax syntax, string typeName )
-        {
-            this.Syntax = syntax;
-            this._expressionTypeName = typeName;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RuntimeExpression"/> class and passes a flag telling that the
-        /// instance represents the <c>null</c> expression. This constructor is called from generated code and must not be changed or removed.
-        /// </summary>
-        /// <param name="syntax"></param>
-        /// <param name="typeName"></param>
-        /// <param name="isReferenceable"></param>
-        public RuntimeExpression( ExpressionSyntax syntax, bool isNull )
-        {
-            this.Syntax = syntax;
-            _ = isNull;
-        }
 
         public RuntimeExpression( ExpressionSyntax syntax, IType type, bool isReferenceable = false )
             : this( syntax, type.GetCompilationModel().RoslynCompilation, type.GetSymbol(), isReferenceable ) { }
 
-        public RuntimeExpression( ExpressionSyntax syntax )
-            : this( syntax, null, null, false ) { }
+        public RuntimeExpression( ExpressionSyntax syntax, ICompilation compilation, IType? expressionType = null )
+            : this( syntax, compilation.GetCompilationModel().RoslynCompilation, expressionType?.GetSymbol(), false ) { }
 
-        public static ExpressionSyntax GetSyntaxFromValue( object? value )
-            => FromValue( value )?.Syntax ?? SyntaxFactory.LiteralExpression( SyntaxKind.NullKeyword );
+        public static ExpressionSyntax GetSyntaxFromValue( object? value, ICompilation compilation )
+            => FromValue( value, compilation )?.Syntax ?? SyntaxFactory.LiteralExpression( SyntaxKind.NullKeyword );
 
-        public static RuntimeExpression? FromValue( object? value )
+        public static RuntimeExpression? FromValue( object? value, ICompilation compilation )
         {
             switch ( value )
             {
                 case null:
+                    // TODO: we should probably return a RunTimeExpression that represents null.
                     return null;
 
                 case RuntimeExpression runtimeExpression:
@@ -135,14 +108,14 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     return dynamicMember.CreateExpression();
 
                 case ExpressionSyntax syntax:
-                    return new RuntimeExpression( syntax );
+                    return new RuntimeExpression( syntax, compilation );
 
                 default:
                     var expression = SyntaxFactoryEx.LiteralExpressionOrNull( value );
 
                     if ( expression != null )
                     {
-                        return new RuntimeExpression( expression );
+                        return new RuntimeExpression( expression, compilation, compilation.TypeFactory.GetTypeByReflectionType( value.GetType() ) );
                     }
                     else
                     {
@@ -153,7 +126,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
         }
 
-        public static RuntimeExpression[]? FromValue( object?[]? array )
+        public static RuntimeExpression[]? FromValue( object?[]? array, ICompilation compilation )
         {
             RuntimeExpression[] ConvertArray()
             {
@@ -166,7 +139,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
                 for ( var i = 0; i < newArray.Length; i++ )
                 {
-                    newArray[i] = FromValue( array[i] ).AssertNotNull();
+                    newArray[i] = FromValue( array[i], compilation ).AssertNotNull();
                 }
 
                 return newArray;
@@ -219,13 +192,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             var targetTypeSymbol = targetType.GetSymbol();
             var compilation = targetType.GetCompilationModel().RoslynCompilation;
 
-            var expressionType = this.GetExpressionType( targetType.Compilation.TypeFactory );
-
-            if ( expressionType != null || TryFindExpressionType( this.Syntax, compilation, out expressionType ) )
+            if ( this.ExpressionType != null )
             {
                 // If we know the type of the current expression, check if a cast is necessary.
 
-                if ( compilation.HasImplicitConversion( expressionType, targetType.GetSymbol() ) )
+                if ( compilation.HasImplicitConversion( this.ExpressionType, targetType.GetSymbol() ) )
                 {
                     return this.Syntax;
                 }
@@ -236,7 +207,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
             var expression = (addsParenthesis ? SyntaxFactory.ParenthesizedExpression( cast ) : cast).WithAdditionalAnnotations( Simplifier.Annotation );
 
-            return AddTypeAnnotation( expression, this._expressionType, compilation );
+            return AddTypeAnnotation( expression, this.ExpressionType, compilation );
         }
 
         public override string ToString() => this.Syntax.ToString();

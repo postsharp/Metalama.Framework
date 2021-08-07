@@ -14,6 +14,13 @@ using System.Threading.Tasks;
 // ReSharper disable once InconsistentNaming
 namespace Caravela.Framework.Aspects
 {
+    [CompileTimeOnly]
+    public interface IExpression
+    {
+        IType Type { get; }
+        dynamic? Value { get; set; }
+    }
+    
     /// <summary>
     /// The entry point for the meta model, which can be used in templates to inspect the target code or access other
     /// features of the template language.
@@ -205,6 +212,17 @@ namespace Caravela.Framework.Aspects
         [TemplateKeyword]
         public static dynamic? Cast( IType type, dynamic? value ) => type.Compilation.TypeFactory.Cast( type, value );
 
+        /// <summary>
+        /// Creates a compile-time <see cref="IExpression"/> object that represents an <i>expression</i>, i.e. the syntax or code, and not the result
+        /// itself. This <see cref="IExpression"/> can then be used in other run-time expressions. This method allows to generate expressions that
+        /// depend on compile-time conditions.
+        /// </summary>
+        /// <param name="expression">A run-time expression, possibly containing compile-time sub-expressions.</param>
+        /// <param name="definedException">A compile-time object representing <see cref="expression"/>. Note that may have to specify the
+        /// type of the <c>out</c> variable explicitly, as <c>out var</c> does not work when another argument is dynamic.</param>
+        [TemplateKeyword]
+        public static void DefineExpression( dynamic? expression, out IExpression definedException ) => definedException = CurrentContext.Expression( expression );
+
         internal static IDisposable WithContext( IMetaApi current )
         {
             _currentContext.Value = current;
@@ -217,4 +235,5 @@ namespace Caravela.Framework.Aspects
             public void Dispose() => _currentContext.Value = null;
         }
     }
+
 }
