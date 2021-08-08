@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     expression );
             }
 
-            return new RuntimeExpression( expression, this.ExpressionType.Compilation );
+            return new RuntimeExpression( expression, this.ExpressionType );
         }
 
         public bool IsAssignable => false;

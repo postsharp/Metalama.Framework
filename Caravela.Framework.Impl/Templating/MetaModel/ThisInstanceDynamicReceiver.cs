@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         RuntimeExpression IDynamicReceiver.CreateMemberAccessExpression( string member )
             => new( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( Identifier( member ) ) )
-                        .WithAspectReferenceAnnotation( this._linkerAnnotation ), this._type.Compilation );
+                        .WithAspectReferenceAnnotation( this._linkerAnnotation ), this._type );
 
         // TODO: Add linker annotations.
     }

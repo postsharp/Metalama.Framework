@@ -85,9 +85,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public RuntimeExpression( ExpressionSyntax syntax, IType type, bool isReferenceable = false )
             : this( syntax, type.GetCompilationModel().RoslynCompilation, type.GetSymbol(), isReferenceable ) { }
 
-        public RuntimeExpression( ExpressionSyntax syntax, ICompilation compilation, IType? expressionType = null )
-            : this( syntax, compilation.GetCompilationModel().RoslynCompilation, expressionType?.GetSymbol(), false ) { }
-
+        // This overload must be used only in tests or when the expression type is really unknown.
+        public RuntimeExpression( ExpressionSyntax syntax, ICompilation compilation )
+            : this( syntax, compilation.GetCompilationModel().RoslynCompilation, null, false ) { }
+        
         public static ExpressionSyntax GetSyntaxFromValue( object? value, ICompilation compilation )
             => FromValue( value, compilation )?.Syntax ?? SyntaxFactory.LiteralExpression( SyntaxKind.NullKeyword );
 
@@ -112,7 +113,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
                     if ( expression != null )
                     {
-                        return new RuntimeExpression( expression, compilation, compilation.TypeFactory.GetTypeByReflectionType( value.GetType() ) );
+                        return new RuntimeExpression( expression, compilation.TypeFactory.GetTypeByReflectionType( value.GetType() ) );
                     }
                     else
                     {
