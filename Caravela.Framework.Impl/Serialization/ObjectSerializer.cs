@@ -48,7 +48,8 @@ namespace Caravela.Framework.Impl.Serialization
         public abstract Type InputType { get; }
 
         /// <summary>
-        /// Gets the run-time type, or <c>null</c> if the type is unknown.
+        /// Gets the run-time type, or <c>null</c> if the type is unknown by the serializer, then it is assumed to be
+        /// the same as the input type.
         /// </summary>
         public abstract Type? OutputType { get; }
 
