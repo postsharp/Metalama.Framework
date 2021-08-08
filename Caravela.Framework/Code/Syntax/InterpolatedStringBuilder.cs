@@ -18,6 +18,11 @@ namespace Caravela.Framework.Code.Syntax
 
         private InterpolatedStringBuilder() { }
 
+        private InterpolatedStringBuilder( InterpolatedStringBuilder prototype )
+        {
+            this._items.AddRange( prototype._items );
+        }
+
         /// <summary>
         /// Creates a new <see cref="InterpolatedStringBuilder"/>.
         /// </summary>
@@ -52,5 +57,7 @@ namespace Caravela.Framework.Code.Syntax
         }
 
         ISyntax ISyntaxBuilder.ToSyntax() => this.ToInterpolatedString();
+
+        public InterpolatedStringBuilder Clone() => new( this );
     }
 }

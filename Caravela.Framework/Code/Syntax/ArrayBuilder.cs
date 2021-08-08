@@ -29,6 +29,12 @@ namespace Caravela.Framework.Code.Syntax
             this.ItemType = itemType;
         }
 
+        private ArrayBuilder( ArrayBuilder prototype )
+        {
+            this._items.AddRange( prototype._items );
+            this.ItemType = prototype.ItemType;
+        }
+
         /// <summary>
         /// Adds an item to the array.
         /// </summary>
@@ -61,5 +67,7 @@ namespace Caravela.Framework.Code.Syntax
         /// Creates an <see cref="ArrayBuilder"/> where the item type is <see cref="object"/>.
         /// </summary>
         public static ArrayBuilder Create() => new( typeof(object) );
+
+        public ArrayBuilder Clone() => new( this );
     }
 }

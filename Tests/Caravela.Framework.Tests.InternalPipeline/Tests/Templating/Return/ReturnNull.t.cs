@@ -6,5 +6,5 @@ string Method(string a, string b)
     }
 
     var result = this.Method(a, b);
-    return (string)result;
+    return (global::System.String)(result);
 }

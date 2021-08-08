@@ -12,7 +12,7 @@ private IGreetingService? _service1;
             this._service_Source= value ?? throw new global::System.InvalidOperationException($"Cannot get a service of type Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905.IGreetingService?.");
         }
 
-        return (Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905.IGreetingService? )value;
+        return (global::Caravela.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905.IGreetingService? )(value);
     }
 
 set    {

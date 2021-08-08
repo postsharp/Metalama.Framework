@@ -6,7 +6,7 @@ static class TargetCode
     global::System.Console.WriteLine($"Before Enumerable");
     var result = global::Caravela.Framework.RunTime.RunTimeAspectHelper.Buffer(global::Caravela.Framework.Tests.Integration.Templating.Aspects.Iterators.DefaultTemplateStatic.TargetCode.Enumerable_Source(a));
     global::System.Console.WriteLine($"After Enumerable");
-    return (System.Collections.Generic.IEnumerable<int>)result;
+    return (global::System.Collections.Generic.IEnumerable<global::System.Int32>)(result);
 }
 
 private static IEnumerable<int> Enumerable_Source(int a)
@@ -25,7 +25,7 @@ private static IEnumerable<int> Enumerable_Source(int a)
     global::System.Console.WriteLine($"Before Enumerator");
     var result = global::Caravela.Framework.RunTime.RunTimeAspectHelper.Buffer(global::Caravela.Framework.Tests.Integration.Templating.Aspects.Iterators.DefaultTemplateStatic.TargetCode.Enumerator_Source(a));
     global::System.Console.WriteLine($"After Enumerator");
-    return (System.Collections.Generic.IEnumerator<int>)result;
+    return (global::System.Collections.Generic.IEnumerator<global::System.Int32>)(result);
 }
 
 private static IEnumerator<int> Enumerator_Source(int a)
@@ -44,7 +44,7 @@ private static IEnumerator<int> Enumerator_Source(int a)
     global::System.Console.WriteLine($"Before OldEnumerable");
     var result = global::Caravela.Framework.RunTime.RunTimeAspectHelper.Buffer(global::Caravela.Framework.Tests.Integration.Templating.Aspects.Iterators.DefaultTemplateStatic.TargetCode.OldEnumerable_Source(a));
     global::System.Console.WriteLine($"After OldEnumerable");
-    return (System.Collections.IEnumerable)result;
+    return (global::System.Collections.IEnumerable)(result);
 }
 
 private static IEnumerable OldEnumerable_Source(int a)
@@ -63,7 +63,7 @@ private static IEnumerable OldEnumerable_Source(int a)
     global::System.Console.WriteLine($"Before OldEnumerator");
     var result = global::Caravela.Framework.RunTime.RunTimeAspectHelper.Buffer(global::Caravela.Framework.Tests.Integration.Templating.Aspects.Iterators.DefaultTemplateStatic.TargetCode.OldEnumerator_Source(a));
     global::System.Console.WriteLine($"After OldEnumerator");
-    return (System.Collections.IEnumerator)result;
+    return (global::System.Collections.IEnumerator)(result);
 }
 
 private static IEnumerator OldEnumerator_Source(int a)

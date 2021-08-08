@@ -1,5 +1,5 @@
 int Method(int a)
 {
     object? x = a;
-    return (int)x;
+    return (global::System.Int32)(x);
 }

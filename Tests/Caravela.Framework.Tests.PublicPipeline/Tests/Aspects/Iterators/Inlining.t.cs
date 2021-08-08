@@ -5,7 +5,7 @@ class TargetCode
 {
     global::System.Console.WriteLine("Begin Enumerable");
     var x = this.Enumerable_Source(a);
-    return (System.Collections.Generic.IEnumerable<int>)x;
+    return (global::System.Collections.Generic.IEnumerable<global::System.Int32>)(x);
 }
 
 private IEnumerable<int> Enumerable_Source(int a)
@@ -40,7 +40,7 @@ private IEnumerator<int> Enumerator_Source(int a)
 {
     global::System.Console.WriteLine("Begin OldEnumerable");
     var x = this.OldEnumerable_Source(a);
-    return (System.Collections.IEnumerable)x;
+    return (global::System.Collections.IEnumerable)(x);
 }
 
 private IEnumerable OldEnumerable_Source(int a)
