@@ -56,5 +56,7 @@ namespace Caravela.Framework.Aspects
         object BuildArray( ArrayBuilder arrayBuilder );
 
         object BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder );
+
+        IExpression Parse( string code );
     }
 }

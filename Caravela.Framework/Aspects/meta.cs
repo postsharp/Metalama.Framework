@@ -206,8 +206,8 @@ namespace Caravela.Framework.Aspects
         public static void Comment( params string?[] lines ) => throw new NotSupportedException();
 
         /// <summary>
-        /// Creates a compile-time <see cref="IExpression"/> object that represents an <i>expression</i>, i.e. the syntax or code, and not the result
-        /// itself. This <see cref="IExpression"/> can then be used in other run-time expressions. This method allows to generate expressions that
+        /// Creates a compile-time object that represents a run-time <i>expression</i>, i.e. the syntax or code, and not the result
+        /// itself. The returned <see cref="IExpression"/> can then be used in other run-time expressions. This method allows to generate expressions that
         /// depend on compile-time conditions.
         /// </summary>
         /// <param name="expression">A run-time expression, possibly containing compile-time sub-expressions.</param>
@@ -216,6 +216,11 @@ namespace Caravela.Framework.Aspects
         [TemplateKeyword]
         public static void DefineExpression( dynamic? expression, out IExpression definedException )
             => definedException = CurrentContext.CodeBuilder.Expression( expression );
+
+        /// <summary>
+        /// Parses a string containing a C# expression and returns an <see cref="IExpression"/> allowing to use this expression in a template.
+        /// </summary>
+        public static IExpression ParseExpression( string code ) => CurrentContext.CodeBuilder.Parse( code );
 
         internal static IDisposable WithContext( IMetaApi current )
         {

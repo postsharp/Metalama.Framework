@@ -8,6 +8,9 @@ using Caravela.Framework.Code.Syntax;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Formatting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -107,6 +110,13 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public object BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder )
             => new InterpolatedStringDynamicExpression( interpolatedStringBuilder, this.Compilation );
+
+        public IExpression Parse( string code )
+        {
+            var expression = SyntaxFactory.ParseExpression( code ).WithAdditionalAnnotations( Formatter.Annotation );
+
+            return new UserExpression( new RuntimeExpression( expression, this.Compilation ), this.Compilation );
+        }
 
         public AspectExecutionScenario ExecutionScenario => this._common.PipelineDescription.ExecutionScenario;
 
