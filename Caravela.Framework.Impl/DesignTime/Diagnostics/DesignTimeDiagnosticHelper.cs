@@ -112,6 +112,5 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
                 }
             }
         }
-
     }
 }

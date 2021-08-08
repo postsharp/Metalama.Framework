@@ -80,7 +80,7 @@ namespace Caravela.Framework.Impl.Utilities
                 if ( member.IsOverride )
                 {
                     tokens.Add( Token( SyntaxKind.OverrideKeyword ) );
-                } 
+                }
                 else if ( member.IsAbstract )
                 {
                     tokens.Add( Token( SyntaxKind.AbstractKeyword ) );

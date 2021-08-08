@@ -211,7 +211,7 @@ namespace Caravela.Framework.Impl.Templating
                     "The 'dynamic' keyword cannot be used in the local variable '{0}' because it is not initialized. Use 'var'.",
                     _category,
                     Error );
-        
+
         internal static readonly DiagnosticDefinition<string>
             CallToExpressionMustHaveExplicitCast
                 = new(

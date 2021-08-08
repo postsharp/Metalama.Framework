@@ -453,9 +453,7 @@ namespace Caravela.Framework.Impl.Templating
                 case SyntaxKind.DefaultLiteralExpression:
                     return InvocationExpression(
                             this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
-                        .AddArgumentListArguments(
-                            Argument( this.MetaSyntaxFactory.LiteralExpression( this.Transform( expression.Kind() ) ) ));
-
+                        .AddArgumentListArguments( Argument( this.MetaSyntaxFactory.LiteralExpression( this.Transform( expression.Kind() ) ) ) );
 
                 case SyntaxKind.DefaultExpression:
                     // Don't transform default or null.
@@ -497,17 +495,13 @@ namespace Caravela.Framework.Impl.Templating
             // A local function that wraps the input `expression` into a LiteralExpression.
             ExpressionSyntax CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind syntaxKind )
             {
-                return InvocationExpression(
-                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
+                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
                     .AddArgumentListArguments(
                         Argument(
                             this.MetaSyntaxFactory.LiteralExpression(
                                 this.Transform( syntaxKind ),
                                 this.MetaSyntaxFactory.Literal( expression ) ) ),
-                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateDeclarationId( type ) ) ) )
-                        
-                        );
-     
+                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateDeclarationId( type ) ) ) ) );
             }
 
             if ( type is IErrorTypeSymbol )
@@ -562,13 +556,10 @@ namespace Caravela.Framework.Impl.Templating
                                     .AddArgumentListArguments(
                                         Argument(
                                             InvocationExpression(
-                                                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember(
-                                                        nameof(TemplateSyntaxFactory.Boolean) ) )
+                                                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.Boolean) ) )
                                                 .AddArgumentListArguments( Argument( expression ) ) ) ) ),
-                            Argument(
-                                LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( "T:System.Boolean" ) ) ));
+                            Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( "T:System.Boolean" ) ) ) );
 
-                    
                 case null:
                     throw new AssertionFailedException( $"Cannot convert {expression.Kind()} '{expression}' to a run-time value." );
 
@@ -1313,7 +1304,6 @@ namespace Caravela.Framework.Impl.Templating
                && expression.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
                && this.GetTransformationKind( expression ) != TransformationKind.Transform
                && this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol;
-
 
         public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
         {

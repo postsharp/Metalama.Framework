@@ -25,7 +25,7 @@ namespace Caravela.Framework.Aspects
         public virtual void BuildAspect( IAspectBuilder<IMethod> builder )
         {
             this.EnsureBuildAspectNotCalled();
-            
+
 #if NET5_0
             var templates = new MethodTemplateSelector(
                 nameof(this.OverrideMethod),

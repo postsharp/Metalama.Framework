@@ -6,7 +6,6 @@ using Caravela.Framework.Code.Syntax;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Validation;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 
 namespace Caravela.Framework.Aspects
 {

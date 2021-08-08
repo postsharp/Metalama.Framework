@@ -710,7 +710,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return node.AddScopeAnnotation( TemplatingScope.Both );
             }
-            
+
             // If we have any out/ref argument that assigns a compile-time variable, the whole method call is compile-time, and we cannot
             // be in a run-time-conditional block.
             var compileTimeOutArguments = node.ArgumentList.Arguments.Where(

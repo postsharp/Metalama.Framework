@@ -324,8 +324,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var proceedExpression =
                 new DynamicExpression(
                     GetProceedInvocation( targetMethod ),
-                    targetMethod.ReturnType,
-                    false );
+                    targetMethod.ReturnType );
 
             var additionalServices = new ServiceProvider();
             additionalServices.AddService( new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ) );

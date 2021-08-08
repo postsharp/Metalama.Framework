@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Caravela.Framework.Aspects;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
@@ -8,8 +11,8 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal class TemplateInfo
     {
-        public static TemplateInfo None { get; } = new(); 
-        
+        public static TemplateInfo None { get; } = new();
+
         public bool IsNone => this.AttributeType == TemplateAttributeType.None;
 
         public bool IsAbstract { get; }
@@ -26,7 +29,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private TemplateInfo()
         {
-            this.Attribute = new();
+            this.Attribute = new TemplateAttribute();
             this.AttributeType = TemplateAttributeType.None;
         }
 
@@ -48,8 +51,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 TemplateAttributeType.InterfaceMember => new InterfaceMemberAttribute(),
                 _ => throw new AssertionFailedException()
             };
-            
-            
+
             var namedArguments = attributeData.NamedArguments.ToDictionary( p => p.Key, p => p.Value );
 
             bool TryGetNamedArgument<TArg>( string argumentName, [NotNullWhen( true )] out TArg? value )

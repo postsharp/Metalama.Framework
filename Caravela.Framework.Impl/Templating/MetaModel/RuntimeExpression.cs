@@ -90,7 +90,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             : this( syntax, compilation.GetCompilationModel().RoslynCompilation, null, false ) { }
         
         public static ExpressionSyntax GetSyntaxFromValue( object? value, ICompilation compilation )
-            => FromValue( value, compilation )?.Syntax ?? SyntaxFactory.LiteralExpression( SyntaxKind.NullKeyword );
+            => FromValue( value, compilation ).Syntax;
 
         public static RuntimeExpression FromValue( object? value, ICompilation compilation )
         {

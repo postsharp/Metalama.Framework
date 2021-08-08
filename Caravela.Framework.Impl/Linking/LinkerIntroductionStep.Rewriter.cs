@@ -165,7 +165,8 @@ namespace Caravela.Framework.Impl.Linking
                         }
                         else
                         {
-                            node = node.WithBaseList( BaseList( node.BaseList.Types.AddRange( additionalBaseList.Select( i => i.AddGeneratedCodeAnnotation() ) ) ) );
+                            node = node.WithBaseList(
+                                BaseList( node.BaseList.Types.AddRange( additionalBaseList.Select( i => i.AddGeneratedCodeAnnotation() ) ) ) );
                         }
                     }
 

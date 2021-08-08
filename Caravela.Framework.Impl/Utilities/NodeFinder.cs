@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Utilities
     {
         public static bool TryFindOldNodeInNewTree( SyntaxNode oldNode, SyntaxTree newTree, out SyntaxNode newNode )
             => TryFindOldNodeInNewRoot( oldNode, newTree.GetRoot(), out newNode );
-        
+
         public static bool TryFindOldNodeInNewRoot( SyntaxNode oldNode, SyntaxNode newRoot, out SyntaxNode newNode )
         {
             // Create a stack with the position of each ancestor node with respect to its parent.

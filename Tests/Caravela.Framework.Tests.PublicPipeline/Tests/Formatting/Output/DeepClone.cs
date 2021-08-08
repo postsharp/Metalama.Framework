@@ -8,8 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-#pragma warning disable CS0067
-#pragma warning disable CS0169
+#pragma warning disable CS0067, CS8618, CS8602, CS8603, CS0169
 
 namespace Caravela.Framework.Tests.Integration.Tests.Formatting.Output
 {

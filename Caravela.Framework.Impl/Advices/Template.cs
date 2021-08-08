@@ -33,7 +33,11 @@ namespace Caravela.Framework.Impl.Advices
 
         public bool IsNotNull => this.SelectedKind != TemplateKind.None;
 
-        public Template( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind = TemplateKind.Default ) : this( implementation, templateInfo, selectedKind, selectedKind ) { }
+        public Template( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind = TemplateKind.Default ) : this(
+            implementation,
+            templateInfo,
+            selectedKind,
+            selectedKind ) { }
 
         public Template( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind, TemplateKind interpretedKind )
         {
@@ -52,7 +56,8 @@ namespace Caravela.Framework.Impl.Advices
             }
         }
 
-        public Template<IMemberOrNamedType> Cast() => Template.Create<IMemberOrNamedType>( this.Declaration!, this.TemplateInfo, this.SelectedKind, this.InterpretedKind );
+        public Template<IMemberOrNamedType> Cast()
+            => Template.Create<IMemberOrNamedType>( this.Declaration!, this.TemplateInfo, this.SelectedKind, this.InterpretedKind );
 
         public override string ToString() => this.IsNull ? "null" : $"{this.Declaration!.Name}:{this.SelectedKind}";
     }

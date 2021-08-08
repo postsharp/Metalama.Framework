@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         protected override void AssertNoArgument() => this.Member.CheckArguments( this.Property.Parameters, null );
 
-        private ExpressionSyntax CreateIndexerAccess( RuntimeExpression? instance, RuntimeExpression[]? args )
+        private ExpressionSyntax CreateIndexerAccess( RuntimeExpression instance, RuntimeExpression[]? args )
         {
             if ( this.Member.DeclaringType!.IsOpenGeneric )
             {
@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                 propertyAccess,
                 RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
 
-            return new DynamicExpression( expression, this.Member.Type, false );
+            return new DynamicExpression( expression, this.Member.Type );
         }
 
         public PropertyInvoker( IProperty member, InvokerOrder order, InvokerOperator invokerOperator ) : base( member, order, invokerOperator ) { }

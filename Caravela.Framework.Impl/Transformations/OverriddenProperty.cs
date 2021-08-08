@@ -184,8 +184,7 @@ namespace Caravela.Framework.Impl.Transformations
                             this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
                         MethodKind.PropertySet => new DynamicExpression(
                             this.CreateProceedSetExpression(),
-                            this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
-                            false ),
+                            this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ) ),
                         _ => throw new AssertionFailedException()
                     };
 

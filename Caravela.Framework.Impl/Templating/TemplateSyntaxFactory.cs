@@ -237,7 +237,7 @@ namespace Caravela.Framework.Impl.Templating
                         expression.Syntax,
                         SyntaxFactory.IdentifierName( member ) )
                     .WithAdditionalAnnotations( Simplifier.Annotation ),
-                ExpansionContext.Compilation);
+                ExpansionContext.Compilation );
         }
 
         public static SyntaxToken GetUniqueIdentifier( string hint ) => SyntaxFactory.Identifier( ExpansionContext.LexicalScope.GetUniqueIdentifier( hint ) );
@@ -324,11 +324,11 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-
         public static RuntimeExpression RuntimeExpression( ExpressionSyntax syntax, string? type = null )
         {
             var compilation = ExpansionContext.Compilation.GetCompilationModel().RoslynCompilation;
             var expressionType = type != null ? (ITypeSymbol?) DocumentationCommentId.GetFirstSymbolForDeclarationId( type, compilation ) : null;
+
             return new RuntimeExpression( syntax, compilation, expressionType, false );
         }
 

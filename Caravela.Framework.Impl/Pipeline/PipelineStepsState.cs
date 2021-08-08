@@ -89,7 +89,7 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             if ( previousStep != null )
             {
-                if ( previousStep.AspectLayer != currentStep.AspectLayer && previousStep.AspectLayer.Order >= currentStep.AspectLayer.Order)
+                if ( previousStep.AspectLayer != currentStep.AspectLayer && previousStep.AspectLayer.Order >= currentStep.AspectLayer.Order )
                 {
                     this._diagnostics.Report(
                         GeneralDiagnosticDescriptors.UnorderedLayers.CreateDiagnostic(

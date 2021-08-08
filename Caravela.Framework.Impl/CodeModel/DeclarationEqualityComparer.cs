@@ -38,8 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool Is( IType left, IType right, ConversionKind kind ) => this.Is( left.GetSymbol(), right.GetSymbol(), kind );
 
         public bool Is( IType left, Type right, ConversionKind kind ) => this.Is( left.GetSymbol(), this._reflectionMapper.GetTypeSymbol( right ), kind );
-        
-        
+
         private bool Is( ITypeSymbol left, ITypeSymbol right, ConversionKind kind )
         {
             var conversion = this._compilation.ClassifyConversion( left, right );
@@ -48,10 +47,10 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 case ConversionKind.Implicit:
                     return conversion.IsImplicit;
-                
+
                 case ConversionKind.ImplicitReference:
                     return conversion.IsImplicit && !conversion.IsBoxing && !conversion.IsUserDefined && !conversion.IsDynamic;
-                
+
                 default:
                     throw new ArgumentOutOfRangeException( nameof(kind) );
             }

@@ -13,8 +13,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
-using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 // TODO: A lot methods here are called multiple times. Optimize.
 // TODO: Split into a subclass for each declaration type?

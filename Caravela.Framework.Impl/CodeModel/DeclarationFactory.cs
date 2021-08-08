@@ -78,8 +78,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     ? new ReferencedAssembly( (IAssemblySymbol) l.GetSymbol( this.Compilation )!, this.CompilationModel )
                     : this.CompilationModel );
 
-        [return:NotNullIfNotNull("typeSymbol")]
-        public IType? GetIType( ITypeSymbol? typeSymbol )
+        public IType GetIType( ITypeSymbol typeSymbol )
             => (IType) this._cache.GetOrAdd(
                 typeSymbol.ToRef(),
                 l => CodeModelFactory.CreateIType( (ITypeSymbol) l.GetSymbol( this.Compilation )!, this.CompilationModel ) );

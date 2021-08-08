@@ -101,18 +101,18 @@ namespace Caravela.Framework.Impl
 
             // This must be called after Members is built and assigned.
             this._aspectDriver = aspectDriverFactory.GetAspectDriver( this, aspectTypeSymbol );
-
         }
 
-        public bool TryGetInterfaceMember( ISymbol symbol, [NotNullWhen(true)] out AspectClassMember? member )
-            => this.Members.TryGetValue( DocumentationCommentId.CreateDeclarationId( symbol ), out member ) && member.TemplateInfo.AttributeType == TemplateAttributeType.InterfaceMember;
-        
+        public bool TryGetInterfaceMember( ISymbol symbol, [NotNullWhen( true )] out AspectClassMember? member )
+            => this.Members.TryGetValue( DocumentationCommentId.CreateDeclarationId( symbol ), out member )
+               && member.TemplateInfo.AttributeType == TemplateAttributeType.InterfaceMember;
+
         private ImmutableDictionary<string, AspectClassMember> GetMembers( Compilation compilation, INamedTypeSymbol type, IDiagnosticAdder diagnosticAdder )
         {
             if ( compilation == null! )
             {
                 // This is a test scenario where templates must not be detected.
-                return ImmutableDictionary<string,AspectClassMember>.Empty;
+                return ImmutableDictionary<string, AspectClassMember>.Empty;
             }
 
             var symbolClassifier = this._serviceProvider.GetService<SymbolClassificationService>().GetClassifier( compilation );

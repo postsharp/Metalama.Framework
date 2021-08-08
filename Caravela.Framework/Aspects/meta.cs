@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Code.Syntax;
 using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -212,7 +211,7 @@ namespace Caravela.Framework.Aspects
         /// depend on compile-time conditions.
         /// </summary>
         /// <param name="expression">A run-time expression, possibly containing compile-time sub-expressions.</param>
-        /// <param name="definedException">A compile-time object representing <see cref="expression"/>. Note that may have to specify the
+        /// <param name="definedException">A compile-time object representing <paramref name="expression"/>. Note that may have to specify the
         /// type of the <c>out</c> variable explicitly, as <c>out var</c> does not work when another argument is dynamic.</param>
         [TemplateKeyword]
         public static void DefineExpression( dynamic? expression, out IExpression definedException )

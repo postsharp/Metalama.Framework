@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         protected virtual void AssertNoArgument() { }
 
-        private ExpressionSyntax CreateEventExpression( RuntimeExpression? instance, AspectReferenceTargetKind targetKind )
+        private ExpressionSyntax CreateEventExpression( RuntimeExpression instance, AspectReferenceTargetKind targetKind )
         {
             if ( this.Member.DeclaringType!.IsOpenGeneric )
             {
@@ -47,25 +47,37 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         public object Add( object? instance, object? value )
         {
-            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance, this.Compilation ), AspectReferenceTargetKind.EventAddAccessor );
+            var eventAccess = this.CreateEventExpression(
+                RuntimeExpression.FromValue( instance, this.Compilation ),
+                AspectReferenceTargetKind.EventAddAccessor );
 
-            var expression = AssignmentExpression( SyntaxKind.AddAssignmentExpression, eventAccess, RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
+            var expression = AssignmentExpression(
+                SyntaxKind.AddAssignmentExpression,
+                eventAccess,
+                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
 
-            return new DynamicExpression( expression, this.Member.EventType, false );
+            return new DynamicExpression( expression, this.Member.EventType );
         }
 
         public object Remove( object? instance, object? value )
         {
-            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance, this.Compilation ), AspectReferenceTargetKind.EventRemoveAccessor );
+            var eventAccess = this.CreateEventExpression(
+                RuntimeExpression.FromValue( instance, this.Compilation ),
+                AspectReferenceTargetKind.EventRemoveAccessor );
 
-            var expression = AssignmentExpression( SyntaxKind.SubtractAssignmentExpression, eventAccess, RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
+            var expression = AssignmentExpression(
+                SyntaxKind.SubtractAssignmentExpression,
+                eventAccess,
+                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
 
-            return new DynamicExpression( expression, this.Member.EventType, false );
+            return new DynamicExpression( expression, this.Member.EventType );
         }
 
         public object? Raise( object? instance, params object?[] args )
         {
-            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance, this.Compilation ), AspectReferenceTargetKind.EventRaiseAccessor );
+            var eventAccess = this.CreateEventExpression(
+                RuntimeExpression.FromValue( instance, this.Compilation ),
+                AspectReferenceTargetKind.EventRaiseAccessor );
 
             var arguments = this.Member.GetArguments( this.Member.Signature.Parameters, RuntimeExpression.FromValue( args, this.Compilation ) );
 
@@ -75,8 +87,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             return new DynamicExpression(
                 expression,
-                this.Member.Signature.ReturnType,
-                false );
+                this.Member.Signature.ReturnType );
         }
 
         public IEventInvoker Base => throw new NotImplementedException();

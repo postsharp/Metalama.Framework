@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Advices
             public IMember? AspectInterfaceMember { get; }
 
             public bool IsExplicit => ((InterfaceMemberAttribute) this.TemplateInfo.Attribute).IsExplicit;
-            
+
             public TemplateInfo TemplateInfo { get; }
 
             public MemberSpecification( IMember interfaceMember, IMember? targetMember, IMember? aspectInterfaceMember, TemplateInfo templateInfo )

@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
     internal abstract class Invoker : IInvoker
     {
         protected AspectReferenceSpecification AspectReference { get; }
-        
+
         protected ICompilation Compilation { get; }
 
         protected Invoker( IDeclaration declaration, InvokerOrder order )

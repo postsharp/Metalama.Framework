@@ -27,29 +27,29 @@ namespace Caravela.Framework.Code
         /// <c>object</c>.
         /// </summary>
         Object,
-        
+
         Byte,
-        
+
         SByte,
-        
+
         Int16,
-        
+
         UInt16,
-        
+
         Int32,
-        
+
         UInt32,
-        
+
         Int64,
-        
+
         UInt64,
-        
+
         String,
-        
+
         Decimal,
-        
+
         Single,
-        
+
         Double,
 
         /// <summary>
@@ -90,9 +90,9 @@ namespace Caravela.Framework.Code
         ValueTask,
 
         ValueTask_T,
-        
+
         Task,
-        
+
         Task_T,
 
         // Must be last.

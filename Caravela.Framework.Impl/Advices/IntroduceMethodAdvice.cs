@@ -154,9 +154,13 @@ namespace Caravela.Framework.Impl.Advices
                                 AdviceResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateDiagnostic(
                                         this.TargetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                                        (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration,
+                                         existingDeclaration.DeclaringType) ) );
                         }
-                        else if ( !compilation.InvariantComparer.Is( this.Builder.ReturnType, existingDeclaration.ReturnType, ConversionKind.ImplicitReference ) )
+                        else if ( !compilation.InvariantComparer.Is(
+                            this.Builder.ReturnType,
+                            existingDeclaration.ReturnType,
+                            ConversionKind.ImplicitReference ) )
                         {
                             return
                                 AdviceResult.Create(

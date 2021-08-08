@@ -74,7 +74,9 @@ namespace Caravela.Framework.Impl.Advices
                 IMember member,
                 [NotNullWhen( true )] out TemplateInfo? templateInfo )
             {
-                if ( this.Aspect.AspectClass.TryGetInterfaceMember( member.GetSymbol().AssertNotNull(  Justifications.ImplementingIntroducedInterfacesNotSupported), out var aspectClassMember ) )
+                if ( this.Aspect.AspectClass.TryGetInterfaceMember(
+                    member.GetSymbol().AssertNotNull( Justifications.ImplementingIntroducedInterfacesNotSupported ),
+                    out var aspectClassMember ) )
                 {
                     templateInfo = aspectClassMember.TemplateInfo;
 
@@ -195,12 +197,13 @@ namespace Caravela.Framework.Impl.Advices
                             diagnosticAdder.Report(
                                 AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, interfaceType, matchingAspectMethod.Method, interfaceMethod) ) );
+                                    (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, interfaceType, matchingAspectMethod.Method,
+                                     interfaceMethod) ) );
                         }
                         else
                         {
                             memberSpecifications.Add(
-                                new MemberSpecification( interfaceMethod, null, matchingAspectMethod.Method,  matchingAspectMethod.TemplateInfo ) );
+                                new MemberSpecification( interfaceMethod, null, matchingAspectMethod.Method, matchingAspectMethod.TemplateInfo ) );
                         }
                     }
 

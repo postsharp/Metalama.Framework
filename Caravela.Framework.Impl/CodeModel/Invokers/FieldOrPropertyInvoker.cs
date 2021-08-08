@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         protected virtual void AssertNoArgument() { }
 
-        private ExpressionSyntax CreatePropertyExpression( RuntimeExpression? instance, AspectReferenceTargetKind targetKind )
+        private ExpressionSyntax CreatePropertyExpression( RuntimeExpression instance, AspectReferenceTargetKind targetKind )
         {
             if ( this.Member.DeclaringType!.IsOpenGeneric )
             {
@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                 propertyAccess,
                 RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
 
-            return new DynamicExpression( expression, this.Member.Type, false );
+            return new DynamicExpression( expression, this.Member.Type );
         }
     }
 }
