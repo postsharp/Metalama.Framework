@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.UnassignedLoca
         [TestTemplate]
         dynamic? Template()
         {
-            dynamic result;
+            dynamic? result;
             result = meta.Proceed();
             return result;
         }

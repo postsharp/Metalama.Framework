@@ -26,6 +26,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null ) => throw new NotSupportedException();
 
+        public bool IsAssignable => false;
+
         public IType ExpressionType => this._type;
 
         public RuntimeExpression CreateMemberAccessExpression( string member )
@@ -34,6 +36,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                             LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this._type.GetSymbol() ),
                             SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
                         .WithAspectReferenceAnnotation( this._linkerAnnotation ),
-                this._type.Compilation);
+                    this._type.Compilation );
     }
 }

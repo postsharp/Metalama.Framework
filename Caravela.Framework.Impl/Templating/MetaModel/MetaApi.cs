@@ -4,48 +4,21 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
+using Caravela.Framework.Code.Syntax;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class UserExpression : IExpression
-    {
-        public IDynamicExpression Underlying { get; }
-
-        public UserExpression( RuntimeExpression? underlying, ICompilation compilation )
-        {
-            if ( underlying == null )
-            {
-                this.Underlying = new DefaultDynamicExpression( compilation.TypeFactory.GetSpecialType( SpecialType.Object ) );
-            }
-            else
-            {
-                var type = underlying.ExpressionType != null
-                    ? compilation.GetCompilationModel().Factory.GetIType( underlying.ExpressionType )
-                    : compilation.TypeFactory.GetSpecialType( SpecialType.Object ).MakeNullable();
-                
-                this.Underlying = new DynamicExpression( underlying.Syntax, type, false );
-            }
-        }
-
-        public IType Type => this.Underlying.ExpressionType;
-
-        public object? Value
-        {
-            get => this.Underlying;
-            set => throw new NotSupportedException();
-        }
-    }
-    
     /// <summary>
     /// The implementation of <see cref="IMetaApi"/>.
     /// </summary>
-    internal class MetaApi : IMetaApi, IMetaTarget
+    internal class MetaApi : IMetaApi, IMetaTarget, IMetaCodeBuilder
     {
         private readonly IAdvisedFieldOrProperty? _fieldOrProperty;
         private readonly IAdvisedMethod? _method;
@@ -83,8 +56,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public ICompilation Compilation { get; }
 
         private ThisInstanceDynamicReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
-        {
-            return this._type switch
+            => this._type switch
             {
                 null => throw this.CreateInvalidOperationException( expressionName ),
                 { IsStatic: false } when this.Declaration is IMemberOrNamedType { IsStatic: false }
@@ -95,9 +67,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 _ => throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
                     (this._common.Template.Declaration!, expressionName, this.Declaration, this.Declaration.DeclarationKind) )
             };
-        }
 
         public IMetaTarget Target => this;
+
+        public IMetaCodeBuilder CodeBuilder => this;
 
         public object This => this.GetThisOrBase( "meta.This", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
 
@@ -128,7 +101,13 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
         }
 
-        public IExpression Expression( object? expression ) => new UserExpression( RuntimeExpression.FromValue( expression, this.Compilation ), this.Compilation );
+        public IExpression Expression( object? expression )
+            => new UserExpression( RuntimeExpression.FromValue( expression, this.Compilation ), this.Compilation );
+
+        public object BuildArray( ArrayBuilder arrayBuilder ) => new ArrayDynamicExpression( arrayBuilder, this.Compilation );
+
+        public object BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder )
+            => new InterpolatedStringDynamicExpression( interpolatedStringBuilder, this.Compilation );
 
         public AspectExecutionScenario ExecutionScenario => this._common.PipelineDescription.ExecutionScenario;
 

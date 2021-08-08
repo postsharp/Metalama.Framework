@@ -31,6 +31,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             return new RuntimeExpression( expression, this.ExpressionType.Compilation );
         }
 
+        public bool IsAssignable => false;
+
         public IType ExpressionType { get; }
     }
 }

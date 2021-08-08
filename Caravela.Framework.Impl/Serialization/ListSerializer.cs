@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Serialization
 
         public override Type InputType => typeof(IEnumerable<>);
 
-        public override Type OutputType => typeof(List<>);
+        public override Type? OutputType => typeof(List<>);
 
         public override int Priority => 1;
 

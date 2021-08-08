@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
+using Caravela.Framework.Code.Syntax;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -32,10 +33,16 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         DeclarationOrigin IDeclaration.Origin => this.Underlying.Origin;
 
+        public IType Type => this.Underlying.ParameterType;
+
+        public bool IsAssignable => true;
+
         public object? Value
         {
-            get => new DynamicExpression( SyntaxFactory.IdentifierName( this.Underlying.Name! ), this.Underlying.ParameterType, true );
-            set => throw new NotImplementedException();
+            get => this.ToSyntax();
+            set => throw new NotSupportedException();
         }
+
+        public ISyntax ToSyntax() => new DynamicExpression( SyntaxFactory.IdentifierName( this.Underlying.Name! ), this.Underlying.ParameterType, true, true );
     }
 }

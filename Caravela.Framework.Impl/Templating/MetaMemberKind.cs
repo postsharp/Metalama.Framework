@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Templating
         ProceedAsyncEnumerable,
 
         ProceedAsyncEnumerator,
-        
+
         Expression
     }
 }

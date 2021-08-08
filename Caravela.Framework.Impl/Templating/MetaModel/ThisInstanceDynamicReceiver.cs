@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -23,6 +24,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         }
 
         public RuntimeExpression CreateExpression( string? expressionText, Location? location = null ) => new( ThisExpression(), this._type );
+
+        public bool IsAssignable => this._type.TypeKind == TypeKind.Struct;
 
         public IType ExpressionType => this._type;
 

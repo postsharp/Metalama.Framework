@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.Serialization
 
         public override Type InputType => typeof(Enum);
 
-        public override Type OutputType => throw new NotSupportedException();
+        public override Type? OutputType => throw new NotSupportedException();
 
         public EnumSerializer( SyntaxSerializationService service ) : base( service ) { }
     }

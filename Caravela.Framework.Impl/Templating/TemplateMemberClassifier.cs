@@ -4,7 +4,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -60,17 +59,15 @@ namespace Caravela.Framework.Impl.Templating
                 // Roslyn returns a dynamic type even for methods returning a non-dynamic type, as long as they have at least
                 // one dynamic argument. We don't want to fix the Roslyn type resolution, but in the specific case of void methods,
                 // we can do it without a chance of being ever wrong. It allows meta.DefineExpression to work.
-                if ( originalNode is InvocationExpressionSyntax && 
+                if ( originalNode is InvocationExpressionSyntax &&
                      this._syntaxTreeAnnotationMap.GetSymbol( originalNode ) is IMethodSymbol { ReturnsVoid: true } )
                 {
                     return false;
                 }
-
             }
 
             if ( expressionType.IsDynamic() )
             {
-                
                 return true;
             }
 
@@ -99,19 +96,19 @@ namespace Caravela.Framework.Impl.Templating
 
         public MetaMemberKind GetMetaMemberKind( ISymbol? symbol )
         {
-            if ( symbol == null || !SymbolEqualityComparer.Default.Equals( symbol.ContainingType, this._metaType ) )
+            if ( symbol == null )
             {
                 return MetaMemberKind.None;
             }
-            else
+            else if ( SymbolEqualityComparer.Default.Equals( symbol.ContainingType, this._metaType ) )
             {
                 switch ( symbol.Name )
                 {
-                    case nameof(meta.Comment):
-                        return MetaMemberKind.Comment;
-
                     case nameof(meta.This):
                         return MetaMemberKind.This;
+
+                    case nameof(meta.Comment):
+                        return MetaMemberKind.Comment;
 
                     case nameof(meta.Proceed):
                         return MetaMemberKind.Proceed;
@@ -134,6 +131,10 @@ namespace Caravela.Framework.Impl.Templating
                     default:
                         return MetaMemberKind.Default;
                 }
+            }
+            else
+            {
+                return MetaMemberKind.None;
             }
         }
     }

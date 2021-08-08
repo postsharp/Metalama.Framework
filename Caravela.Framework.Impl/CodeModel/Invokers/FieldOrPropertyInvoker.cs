@@ -54,7 +54,8 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             => new DynamicExpression(
                 this.CreatePropertyExpression( RuntimeExpression.FromValue( instance, this.Compilation ), AspectReferenceTargetKind.PropertyGetAccessor ),
                 this._invokerOperator == InvokerOperator.Default ? this.Member.Type : this.Member.Type.MakeNullable(),
-                this.Member is Field );
+                this.Member is Field,
+                this.Member.Writeability != Writeability.None );
 
         public object SetValue( object? instance, object? value )
         {
@@ -63,9 +64,14 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                 throw new NotSupportedException( "Conditional access is not supported for SetValue." );
             }
 
-            var propertyAccess = this.CreatePropertyExpression( RuntimeExpression.FromValue( instance, this.Compilation ), AspectReferenceTargetKind.PropertySetAccessor );
+            var propertyAccess = this.CreatePropertyExpression(
+                RuntimeExpression.FromValue( instance, this.Compilation ),
+                AspectReferenceTargetKind.PropertySetAccessor );
 
-            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
+            var expression = AssignmentExpression(
+                SyntaxKind.SimpleAssignmentExpression,
+                propertyAccess,
+                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
 
             return new DynamicExpression( expression, this.Member.Type, false );
         }

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Syntax;
 using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -14,13 +15,6 @@ using System.Threading.Tasks;
 // ReSharper disable once InconsistentNaming
 namespace Caravela.Framework.Aspects
 {
-    [CompileTimeOnly]
-    public interface IExpression
-    {
-        IType Type { get; }
-        dynamic? Value { get; set; }
-    }
-    
     /// <summary>
     /// The entry point for the meta model, which can be used in templates to inspect the target code or access other
     /// features of the template language.
@@ -34,7 +28,7 @@ namespace Caravela.Framework.Aspects
     {
         private static readonly AsyncLocal<IMetaApi?> _currentContext = new();
 
-        private static IMetaApi CurrentContext => _currentContext.Value ?? throw NewInvalidOperationException();
+        internal static IMetaApi CurrentContext => _currentContext.Value ?? throw NewInvalidOperationException();
 
         private static InvalidOperationException NewInvalidOperationException()
             => new( "The 'meta' API can be used only in the execution context of a template." );
@@ -193,16 +187,6 @@ namespace Caravela.Framework.Aspects
         public static IReadOnlyList<IAspectInstance> UpstreamAspects => throw new NotImplementedException();
 
         /// <summary>
-        /// Injects a comment to the target code.
-        /// </summary>
-        /// <param name="lines">A list of comment lines, without the <c>//</c> prefix. Null strings are processed as blank ones and will inject a blank comment line.</param>
-        /// <remarks>
-        /// This method is not able to add a comment to an empty block. The block must contain at least one statement.
-        /// </remarks>
-        [TemplateKeyword]
-        public static void Comment( params string?[] lines ) => throw NewInvalidOperationException();
-
-        /// <summary>
         /// Generates the cast syntax for the specified type.  
         /// </summary>
         /// <param name="type"></param>
@@ -213,6 +197,16 @@ namespace Caravela.Framework.Aspects
         public static dynamic? Cast( IType type, dynamic? value ) => type.Compilation.TypeFactory.Cast( type, value );
 
         /// <summary>
+        /// Injects a comment to the target code.
+        /// </summary>
+        /// <param name="lines">A list of comment lines, without the <c>//</c> prefix. Null strings are processed as blank ones and will inject a blank comment line.</param>
+        /// <remarks>
+        /// This method is not able to add a comment to an empty block. The block must contain at least one statement.
+        /// </remarks>
+        [TemplateKeyword]
+        public static void Comment( params string?[] lines ) => throw new NotSupportedException();
+
+        /// <summary>
         /// Creates a compile-time <see cref="IExpression"/> object that represents an <i>expression</i>, i.e. the syntax or code, and not the result
         /// itself. This <see cref="IExpression"/> can then be used in other run-time expressions. This method allows to generate expressions that
         /// depend on compile-time conditions.
@@ -221,7 +215,8 @@ namespace Caravela.Framework.Aspects
         /// <param name="definedException">A compile-time object representing <see cref="expression"/>. Note that may have to specify the
         /// type of the <c>out</c> variable explicitly, as <c>out var</c> does not work when another argument is dynamic.</param>
         [TemplateKeyword]
-        public static void DefineExpression( dynamic? expression, out IExpression definedException ) => definedException = CurrentContext.Expression( expression );
+        public static void DefineExpression( dynamic? expression, out IExpression definedException )
+            => definedException = CurrentContext.CodeBuilder.Expression( expression );
 
         internal static IDisposable WithContext( IMetaApi current )
         {
@@ -235,5 +230,4 @@ namespace Caravela.Framework.Aspects
             public void Dispose() => _currentContext.Value = null;
         }
     }
-
 }

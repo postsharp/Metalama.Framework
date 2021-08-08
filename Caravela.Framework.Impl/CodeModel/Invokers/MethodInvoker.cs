@@ -85,7 +85,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
             {
                 var instanceExpression = RuntimeExpression.FromValue( instance, this.Compilation );
 
-                if ( instanceExpression != null )
+                if ( instanceExpression.Syntax.Kind() != SyntaxKind.NullLiteralExpression )
                 {
                     throw GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction.CreateException( this._method );
                 }

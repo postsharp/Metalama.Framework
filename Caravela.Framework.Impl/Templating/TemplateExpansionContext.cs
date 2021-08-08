@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Templating
 {
     // TODO: This is a temporary implementation of TemplateExpansionContext.
 
-    internal class TemplateExpansionContext
+    internal partial class TemplateExpansionContext
     {
         private readonly Template<IMethod> _templateMethod;
         private readonly Func<TemplateExpansionContext, StatementSyntax>? _expandYieldProceed;
@@ -373,47 +373,6 @@ namespace Caravela.Framework.Impl.Templating
                     SyntaxKind.YieldReturnStatement,
                     ((IDynamicExpression) meta.Proceed()!).CreateExpression() );
             }
-        }
-
-        private class ProceedExpression : IDynamicExpression
-        {
-            private readonly TemplateExpansionContext _parent;
-            private readonly string _methodName;
-
-            public ProceedExpression( string methodName, TemplateExpansionContext parent )
-            {
-                this._methodName = methodName;
-                this._parent = parent;
-            }
-
-            public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null )
-            {
-                var targetMethod = this._parent.MetaApi.Target.Method;
-
-                var isValid = this._methodName switch
-                {
-                    nameof(meta.Proceed) => true,
-                    nameof(meta.ProceedAsync) => targetMethod.GetAsyncInfoImpl().IsAwaitable,
-                    nameof(meta.ProceedEnumerable) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerable or EnumerableKind
-                        .UntypedIEnumerable,
-                    nameof(meta.ProceedEnumerator) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind
-                        .UntypedIEnumerator,
-                    "ProceedAsyncEnumerable" => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IAsyncEnumerable,
-                    "ProceedAsyncEnumerator" => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IAsyncEnumerator,
-                    _ => throw new ArgumentOutOfRangeException()
-                };
-
-                if ( !isValid )
-                {
-                    throw TemplatingDiagnosticDescriptors.CannotUseSpecificProceedInThisContext.CreateException(
-                        location,
-                        (this._methodName, targetMethod) );
-                }
-
-                return this._parent._proceedExpression!.CreateExpression( expressionText, location );
-            }
-
-            public IType ExpressionType => this._parent._proceedExpression!.ExpressionType;
         }
     }
 }

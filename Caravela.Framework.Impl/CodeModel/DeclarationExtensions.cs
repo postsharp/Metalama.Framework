@@ -198,7 +198,7 @@ namespace Caravela.Framework.Impl.CodeModel
             return arguments.ToArray();
         }
 
-        internal static ExpressionSyntax GetReceiverSyntax<T>( this T declaration, RuntimeExpression? instance )
+        internal static ExpressionSyntax GetReceiverSyntax<T>( this T declaration, RuntimeExpression instance )
             where T : IMember
         {
             if ( declaration.IsStatic )
@@ -206,7 +206,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( declaration.DeclaringType!.GetSymbol() );
             }
 
-            if ( instance == null )
+            if ( instance.Syntax.Kind() == SyntaxKind.NullLiteralExpression )
             {
                 throw GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember.CreateException( declaration );
             }

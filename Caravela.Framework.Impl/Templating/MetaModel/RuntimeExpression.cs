@@ -67,7 +67,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public RuntimeExpression( ExpressionSyntax syntax, Compilation compilation, ITypeSymbol? expressionType, bool isReferenceable )
         {
-            
             if ( expressionType == null )
             {
                 // This should happen only for null and default expressions.
@@ -77,12 +76,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             {
                 syntax = AddTypeAnnotation( syntax, expressionType, compilation );
             }
-            
+
             this.Syntax = syntax;
             this.ExpressionType = expressionType;
             this.IsReferenceable = isReferenceable;
         }
-
 
         public RuntimeExpression( ExpressionSyntax syntax, IType type, bool isReferenceable = false )
             : this( syntax, type.GetCompilationModel().RoslynCompilation, type.GetSymbol(), isReferenceable ) { }
@@ -93,13 +91,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public static ExpressionSyntax GetSyntaxFromValue( object? value, ICompilation compilation )
             => FromValue( value, compilation )?.Syntax ?? SyntaxFactory.LiteralExpression( SyntaxKind.NullKeyword );
 
-        public static RuntimeExpression? FromValue( object? value, ICompilation compilation )
+        public static RuntimeExpression FromValue( object? value, ICompilation compilation )
         {
             switch ( value )
             {
                 case null:
-                    // TODO: we should probably return a RunTimeExpression that represents null.
-                    return null;
+                    return new RuntimeExpression( SyntaxFactoryEx.Null, compilation );
 
                 case RuntimeExpression runtimeExpression:
                     return runtimeExpression;

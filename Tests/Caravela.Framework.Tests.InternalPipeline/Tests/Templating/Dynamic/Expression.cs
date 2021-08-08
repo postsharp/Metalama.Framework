@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.Expression
