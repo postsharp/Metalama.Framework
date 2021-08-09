@@ -5,13 +5,13 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Linking.Inlining
 {
-    internal abstract class PropertyInliner : Inliner 
+    internal abstract class EventInliner : Inliner 
     {
         public override bool IsValidForTargetSymbol( ISymbol symbol )
         {
             return
-                symbol is IPropertySymbol
-                || symbol is IMethodSymbol { AssociatedSymbol: IPropertySymbol };
+                symbol is IEventSymbol
+                || symbol is IMethodSymbol { AssociatedSymbol: IEventSymbol };
         }
     }
 }

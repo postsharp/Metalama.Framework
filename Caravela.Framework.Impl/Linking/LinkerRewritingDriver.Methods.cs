@@ -14,90 +14,14 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal partial class LinkerRewritingDriver
     {
-        /// <summary>
-        /// Determines whether the method will be discarded in the final compilation (unreferenced or inlined declarations).
-        /// </summary>
-        /// <param name="symbol">Override method symbol or overridden method symbol.</param>
-        /// <returns></returns>
-        private bool IsDiscarded( IMethodSymbol symbol, ResolvedAspectReferenceSemantic semantic )
-        {
-            if ( symbol.MethodKind != MethodKind.Ordinary )
-            {
-                throw new AssertionFailedException();
-            }
-
-            var declarationFlags = GetDeclarationFlags( symbol );
-
-            if ( declarationFlags.HasFlag( LinkerDeclarationFlags.NotDiscardable ) )
-            {
-                return false;
-            }
-
-            if ( this._analysisRegistry.IsOverride( symbol ) )
-            {
-                var aspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
-                var overrideTarget = this._analysisRegistry.GetOverrideTarget( symbol );
-                var lastOverride = this._analysisRegistry.GetLastOverride( overrideTarget.AssertNotNull() );
-
-                if ( SymbolEqualityComparer.Default.Equals( symbol, lastOverride ) )
-                {
-                    return this.IsInlineable( symbol, semantic );
-                }
-                else
-                {
-                    return this.IsInlineable( symbol, semantic ) || aspectReferences.Count == 0;
-                }
-            }
-
-            return false;
-        }
-
-        private bool IsInlineable( IMethodSymbol symbol, ResolvedAspectReferenceSemantic semantic )
-        {
-            switch ( symbol.MethodKind )
-            {
-                case MethodKind.Ordinary:
-                case MethodKind.ExplicitInterfaceImplementation:
-                    var declarationFlags = GetDeclarationFlags( symbol );
-
-                    if ( declarationFlags.HasFlag( LinkerDeclarationFlags.NotInlineable ) )
-                    {
-                        return false;
-                    }
-
-                    if ( this._analysisRegistry.IsLastOverride( symbol ) )
-                    {
-                        // Last overrides should be inlined if not marked as not-inlineable.
-                        return true;
-                    }
-
-                    var aspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
-
-                    if ( aspectReferences.Count != 1 )
-                    {
-                        return false;
-                    }
-
-                    return this.IsInlineableReference( aspectReferences[0] );
-
-                default:
-                    throw new AssertionFailedException();
-            }
-        }
-
-        private bool HasAnyAspectReferences( IMethodSymbol symbol, ResolvedAspectReferenceSemantic semantic )
-        {
-            return this._analysisRegistry.GetAspectReferences( symbol, semantic ).Count > 0;
-        }
-
         public IReadOnlyList<MemberDeclarationSyntax> RewriteMethod( MethodDeclarationSyntax methodDeclaration, IMethodSymbol symbol )
         {
-            if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
+            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IMethodSymbol) this._analysisRegistry.GetLastOverride( symbol );
+                var lastOverride = (IMethodSymbol) this._introductionRegistry.GetLastOverride( symbol );
 
-                if ( this.IsInlineable( lastOverride, ResolvedAspectReferenceSemantic.Default ) )
+                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     members.Add( GetLinkedDeclaration() );
                 }
@@ -106,17 +30,18 @@ namespace Caravela.Framework.Impl.Linking
                     members.Add( GetTrampolineMethod( methodDeclaration, lastOverride ) );
                 }
 
-                if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original )
-                     && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
+                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
+                    && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     members.Add( GetOriginalImplMethod( methodDeclaration, symbol ) );
                 }
 
                 return members;
             }
-            else if ( this._analysisRegistry.IsOverride( symbol ) )
+            else if ( this._introductionRegistry.IsOverride( symbol ) )
             {
-                if ( this.IsDiscarded( symbol, ResolvedAspectReferenceSemantic.Default ) )
+                if ( !this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
+                    || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }

@@ -12,12 +12,10 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 {
     internal class MethodLocalDeclarationInliner : MethodInliner
     {
-        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[] { SyntaxKind.ReturnStatement };
-
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax has to be in form: <type> <local> = <annotated_method_expression>( <arguments> );
-            if ( aspectReference.ResolvedSymbol is not IMethodSymbol )
+            if ( aspectReference.ResolvedSemantic.Symbol is not IMethodSymbol )
             {
                 return false;
             }
@@ -69,7 +67,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var variableDeclaration = (VariableDeclarationSyntax) variableDeclarator.Parent.AssertNotNull();
             var localDeclaration = (LocalDeclarationStatementSyntax) variableDeclaration.Parent.AssertNotNull();
 
-            var targetSymbol = (aspectReference.ResolvedSymbol as IMethodSymbol).AssertNotNull();
+            var targetSymbol = (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol).AssertNotNull();
 
             // Change the target local variable.
             var contextWithLocal = context.WithReturnLocal( targetSymbol, variableDeclarator.Identifier.ValueText );

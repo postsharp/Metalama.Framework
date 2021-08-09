@@ -50,58 +50,6 @@ namespace Caravela.Framework.Impl.Linking
             this.ReferenceResolver = referenceResolver;
         }
 
-        public bool IsDiscarded( ISymbol symbol, ResolvedAspectReferenceSemantic semantic )
-            => symbol switch
-            {
-                IMethodSymbol methodSymbol => this.IsDiscarded( methodSymbol, semantic ),
-                IPropertySymbol propertySymbol => this.IsDiscarded( propertySymbol, semantic ),
-                IEventSymbol eventSymbol => this.IsDiscarded( eventSymbol, semantic ),
-                IFieldSymbol => false,
-                _ => throw new AssertionFailedException()
-            };
-
-        private bool IsInlineable( ISymbol symbol, ResolvedAspectReferenceSemantic semantic )
-            => symbol switch
-            {
-                IMethodSymbol methodSymbol => this.IsInlineable( methodSymbol, semantic ),
-                IPropertySymbol propertySymbol => this.IsInlineable( propertySymbol, semantic ),
-                IEventSymbol eventSymbol => this.IsInlineable( eventSymbol, semantic ),
-                IFieldSymbol => false,
-                _ => throw new AssertionFailedException()
-            };
-
-        private bool IsInlineableReference( ResolvedAspectReference aspectReference )
-            => aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable )
-               && this.GetInliner( aspectReference, out _ );
-
-        private bool GetInliner( ResolvedAspectReference aspectReference, [NotNullWhen( true )] out Inliner? matchingInliner )
-        {
-            if ( !SymbolEqualityComparer.Default.Equals( aspectReference.ContainingSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType ) )
-            {
-                // Never inline method from another type.
-                matchingInliner = null;
-
-                return false;
-            }
-
-            var semanticModel = this.IntermediateCompilation.GetSemanticModel( aspectReference.Expression.SyntaxTree );
-
-            foreach ( var inliner in this._inliners )
-            {
-                if ( inliner.CanInline( aspectReference, semanticModel ) )
-                {
-                    // We have inliner that will be able to inline the reference.
-                    matchingInliner = inliner;
-
-                    return true;
-                }
-            }
-
-            matchingInliner = null;
-
-            return false;
-        }
-
         /// <summary>
         /// Assembles a linked body of the method/accessor, where aspect reference annotations are replaced by target symbols and inlineable references are inlined.
         /// </summary>
@@ -158,20 +106,16 @@ namespace Caravela.Framework.Impl.Linking
                 // Collect syntax node replacements from inliners and redirect the rest to correct targets.
                 foreach ( var aspectReference in containedAspectReferences )
                 {
-                    if ( aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable ) && SymbolEqualityComparer.Default.Equals( aspectReference.ContainingSymbol, aspectReference.ResolvedSymbol) )
+                    if ( aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable ) 
+                        && SymbolEqualityComparer.Default.Equals( aspectReference.ContainingSymbol, aspectReference.ResolvedSemantic.Symbol) )
                     {
-                        // Inlineable self-reference would cause 
+                        // Inlineable self-reference would cause a stack overflow.
                         throw new AssertionFailedException();
                     }
 
-                    if ( this.IsInlineable( aspectReference.ResolvedSymbol, aspectReference.Semantic ) )
+                    if ( this._analysisRegistry.IsInlineable( aspectReference.ResolvedSemantic, out var inliningSpecification ) )
                     {
-                        if ( !this.GetInliner( aspectReference, out var inliner ) )
-                        {
-                            throw new AssertionFailedException();
-                        }
-
-                        inliner.Inline( inliningContext, aspectReference, out var replacedNode, out var newNode );
+                        inliningSpecification.SelectedInliners[aspectReference].Inline( inliningContext, aspectReference, out var replacedNode, out var newNode );
                         replacements.Add( replacedNode, newNode );
                     }
                     else
@@ -278,7 +222,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             var declaration = symbol.GetPrimaryDeclaration();
 
-            if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
+            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
                 // Override targets are implicitly linked, i.e. no replacement of aspect references is necessary.
                 isImplicitlyLinked = true;
@@ -291,7 +235,7 @@ namespace Caravela.Framework.Impl.Linking
                     case AccessorDeclarationSyntax accessorDecl:
                         var body = (SyntaxNode?) accessorDecl.Body ?? accessorDecl.ExpressionBody;
 
-                        if ( body != null && !(symbol.AssociatedSymbol != null && IsExplicitInterfaceEventField( symbol.AssociatedSymbol )) )
+                        if ( body != null && !(symbol.AssociatedSymbol != null && symbol.AssociatedSymbol.IsExplicitInterfaceEventField()) )
                         {
                             return body;
                         }
@@ -312,7 +256,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            if ( this._analysisRegistry.IsOverride( symbol ) )
+            if ( this._introductionRegistry.IsOverride( symbol ) )
             {
                 isImplicitlyLinked = false;
 
@@ -329,7 +273,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            if ( symbol.AssociatedSymbol != null && IsExplicitInterfaceEventField( symbol.AssociatedSymbol ) )
+            if ( symbol.AssociatedSymbol != null && symbol.AssociatedSymbol.IsExplicitInterfaceEventField() )
             {
                 isImplicitlyLinked = true;
 
@@ -455,12 +399,12 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns></returns>
         public bool IsRewriteTarget( ISymbol symbol )
         {
-            if ( this._analysisRegistry.IsOverride( symbol ) || this._analysisRegistry.IsOverrideTarget( symbol ) )
+            if ( this._introductionRegistry.IsOverride( symbol ) || this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
                 return true;
             }
 
-            if ( IsExplicitInterfaceEventField( symbol ) )
+            if ( symbol.IsExplicitInterfaceEventField() )
             {
                 return true;
             }
@@ -505,17 +449,17 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns></returns>
         private IMethodSymbol GetBodySource( IMethodSymbol symbol )
         {
-            if ( this._analysisRegistry.IsOverride( symbol ) )
+            if ( this._introductionRegistry.IsOverride( symbol ) )
             {
                 return symbol;
             }
 
-            if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
+            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
-                return (IMethodSymbol) this._analysisRegistry.GetLastOverride( symbol ).AssertNotNull();
+                return (IMethodSymbol) this._introductionRegistry.GetLastOverride( symbol ).AssertNotNull();
             }
 
-            if ( symbol.AssociatedSymbol != null && IsExplicitInterfaceEventField( symbol.AssociatedSymbol ) )
+            if ( symbol.AssociatedSymbol != null && symbol.AssociatedSymbol.IsExplicitInterfaceEventField() )
             {
                 return symbol;
             }
@@ -525,25 +469,26 @@ namespace Caravela.Framework.Impl.Linking
 
         private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference )
         {
-            if ( !SymbolEqualityComparer.Default.Equals( aspectReference.ResolvedSymbol.ContainingType, aspectReference.ResolvedSymbol.ContainingType ) )
+            if ( !SymbolEqualityComparer.Default.Equals( aspectReference.ResolvedSemantic.Symbol.ContainingType, aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
             {
                 throw new AssertionFailedException();
             }
 
-            var targetSymbol = aspectReference.ResolvedSymbol;
-            var targetSemantic = aspectReference.Semantic;
-            if ( this._analysisRegistry.IsLastOverride( targetSymbol ) )
+            var targetSymbol = aspectReference.ResolvedSemantic.Symbol;
+            var targetSemanticKind = aspectReference.ResolvedSemantic.Kind;
+            if ( this._introductionRegistry.IsLastOverride( targetSymbol ) )
             {
                 // If something is resolved to the last override, we will point to the target declaration instead.
                 targetSymbol = aspectReference.OriginalSymbol;
-                targetSemantic = ResolvedAspectReferenceSemantic.Default;
+                targetSemanticKind = IntermediateSymbolSemanticKind.Default;
             }
 
             // Determine the target name. Specifically, handle case when the resolved symbol points to the original implementation.
             var targetMemberName =
-                targetSemantic switch
+                targetSemanticKind switch
                 {
-                    ResolvedAspectReferenceSemantic.Original => GetOriginalImplMemberName( targetSymbol ),
+                    IntermediateSymbolSemanticKind.Default when this._introductionRegistry.IsOverrideTarget( targetSymbol ) => GetOriginalImplMemberName( targetSymbol ),
+                    IntermediateSymbolSemanticKind.Base => GetEmptyImplMemberName( targetSymbol ),
                     _ => targetSymbol.Name
                 };
 
@@ -638,44 +583,50 @@ namespace Caravela.Framework.Impl.Linking
         }
 
         internal static string GetOriginalImplMemberName( ISymbol symbol )
+            => GetSpecialMemberName( symbol, "OriginalImpl" );
+
+        internal static string GetEmptyImplMemberName( ISymbol symbol )
+            => GetSpecialMemberName( symbol, "EmptyImpl" );
+
+        internal static string GetSpecialMemberName( ISymbol symbol, string suffix )
         {
             switch ( symbol )
             {
                 case IMethodSymbol methodSymbol:
                     if ( methodSymbol.ExplicitInterfaceImplementations.Any() )
                     {
-                        return CreateName( methodSymbol.ExplicitInterfaceImplementations[0].Name );
+                        return CreateName( methodSymbol.ExplicitInterfaceImplementations[0].Name, suffix );
                     }
                     else
                     {
-                        return CreateName( methodSymbol.Name );
+                        return CreateName( methodSymbol.Name, suffix );
                     }
 
                 case IPropertySymbol propertySymbol:
                     if ( propertySymbol.ExplicitInterfaceImplementations.Any() )
                     {
-                        return CreateName( propertySymbol.ExplicitInterfaceImplementations[0].Name );
+                        return CreateName( propertySymbol.ExplicitInterfaceImplementations[0].Name, suffix );
                     }
                     else
                     {
-                        return CreateName( propertySymbol.Name );
+                        return CreateName( propertySymbol.Name, suffix );
                     }
 
                 case IEventSymbol eventSymbol:
                     if ( eventSymbol.ExplicitInterfaceImplementations.Any() )
                     {
-                        return CreateName( eventSymbol.ExplicitInterfaceImplementations[0].Name );
+                        return CreateName( eventSymbol.ExplicitInterfaceImplementations[0].Name, suffix );
                     }
                     else
                     {
-                        return CreateName( eventSymbol.Name );
+                        return CreateName( eventSymbol.Name, suffix );
                     }
 
                 default:
                     throw new AssertionFailedException();
             }
 
-            static string CreateName( string name ) => $"__{name}__OriginalImpl";
+            static string CreateName( string name, string suffix ) => $"__{name}__{suffix}";
         }
 
         private static string GetBackingFieldName( ISymbol symbol )
@@ -746,42 +697,6 @@ namespace Caravela.Framework.Impl.Linking
                     }
                 }
             }
-        }
-
-        private static LinkerDeclarationFlags GetDeclarationFlags( ISymbol symbol )
-        {
-            // TODO: Partials?
-            var declaration = symbol.GetPrimaryDeclaration();
-
-            switch ( declaration )
-            {
-                case MemberDeclarationSyntax memberDeclaration:
-                    return memberDeclaration.GetLinkerDeclarationFlags();
-
-                case VariableDeclaratorSyntax variableDeclarator:
-                    return ((MemberDeclarationSyntax?) variableDeclarator.Parent?.Parent).AssertNotNull().GetLinkerDeclarationFlags();
-
-                case null:
-                    return default;
-
-                default:
-                    throw new AssertionFailedException();
-            }
-        }
-
-        private static bool IsExplicitInterfaceEventField( ISymbol symbol )
-        {
-            if ( symbol is IEventSymbol eventSymbol )
-            {
-                var declaration = eventSymbol.GetPrimaryDeclaration();
-
-                if ( declaration != null && declaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField ) )
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }

@@ -73,7 +73,7 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
 
                                 break;
 
-                            case "after":
+                            case "self":
                                 order = AspectReferenceOrder.Self;
 
                                 break;

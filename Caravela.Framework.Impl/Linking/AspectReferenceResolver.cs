@@ -11,9 +11,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 // Ordered declaration versions (intermediate compilation):
-//  * Overridden declaration (introduced)
-//  * Target declaration, base semantic (introduced, no overridden)
-//  * Target declaration, default semantic (introduced or source code)
+//  * Overridden declaration (base class declaration)
+//  * Target declaration, base semantic (if from source code)
+//  * Target declaration, default semantic (if introduced, no overridden declaration)
 //  * Override 1
 //  ...
 //  * Override n
@@ -23,15 +23,15 @@ using System.Linq;
 // The reference we are trying to resolve also originates in of the aspect layers.
 
 // Declaration versions projected to global aspect layer order:
-// * Layer 0:   Overridden declaration.
-// * Layer 0:   Target declaration, default semantic (source code).
-// * Layer 0:   Target declaration, base semantic (introduced, no overridden declaration).
+// * Layer 0:   Overridden declaration (base class declaration).
+// * Layer 0:   Target declaration, default semantic (if from source code).
+// * Layer 0:   Target declaration, base semantic (if introduced, no overridden declaration).
 // ...
-// * Layer k:   Target Declaration, default semantic (introduced).
+// * Layer k:   Target Declaration, default semantic (if introduced, overridden declaration exists).
 // ...
-// * Layer l_1: Override 1.
+// * Layer l_1: After override 1.
 // ...
-// * Layer l_n: Override n.
+// * Layer l_n: After override n.
 // ...
 // * Layer m:   Target declaration, final semantic.
 
@@ -52,12 +52,19 @@ namespace Caravela.Framework.Impl.Linking
     internal class AspectReferenceResolver
     {
         private readonly LinkerIntroductionRegistry _introductionRegistry;
-        private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
+        private readonly IReadOnlyList<AspectLayerId> _orderedLayers;
+        private readonly IReadOnlyDictionary<AspectLayerId, int> _layerIndex;
 
         public AspectReferenceResolver( LinkerIntroductionRegistry introductionRegistry, IReadOnlyList<OrderedAspectLayer> orderedAspectLayers )
         {
             this._introductionRegistry = introductionRegistry;
-            this._orderedAspectLayers = orderedAspectLayers;
+            var indexedLayers = 
+                ((IEnumerable<AspectLayerId>)new[] { AspectLayerId.Null })
+                .Concat( orderedAspectLayers.Select(x => x.AspectLayerId) )
+                .Select( ( al, i ) => (AspectLayerId: al, Index: i) );
+
+            this._orderedLayers = indexedLayers.Select( x => x.AspectLayerId ).ToReadOnlyList();
+            this._layerIndex = indexedLayers.ToDictionary( x => x.AspectLayerId, x => x.Index );
         }
 
         public ResolvedAspectReference Resolve(
@@ -77,190 +84,156 @@ namespace Caravela.Framework.Impl.Linking
                 //       This may depend on the declaring assembly or on presence of compilation errors.
 
                 // It's not possible to reference the introduced explicit interface implementation directly, so the reference expression
-                // is in form "((<interface_type>)this).<member>", which means that the symbol points to interface member. We will transition to the real member of the type
-                // before doing the rest of resolution.
+                // is in form "((<interface_type>)this).<member>", which means that the symbol points to interface member. We will transition
+                // to the real member (explicit implementation) of the type before doing the rest of resolution.
 
                 // Replace the referenced symbol with the overridden interface implementation.                
                 referencedSymbol = containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
             }
 
             // TODO: Optimize (most of this can be precomputed).
-            var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (o.AspectLayerId, Index: i) ).ToReadOnlyList();
-            var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceSpecification.AspectLayerId ).Index;
+            var annotationLayerIndex = this._layerIndex[referenceSpecification.AspectLayerId];
 
             var targetMemberIntroduction = this._introductionRegistry.GetIntroducedMemberForSymbol( referencedSymbol );
-            var overrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
+            var targetMemberIntroductionIndex =
+                targetMemberIntroduction != null
+                ? this._layerIndex[targetMemberIntroduction.AspectLayerId]
+                : default(int?);
+
+            var overrideIntroductions = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
+            var overrideIndices = overrideIntroductions.Select( o => (Index: this._layerIndex[o.AspectLayerId], Override: o) ).OrderBy(x => x.Index).ToReadOnlyList();
+
+            int resolvedIndex;
+            LinkerIntroducedMember? resolvedIntroducedMember = null;
 
             switch ( referenceSpecification.Order )
             {
                 case AspectReferenceOrder.Original:
-                    {
-                        if ( targetMemberIntroduction != null )
-                        {
-                            // The target member is introduced.
-                        }
-                        else
-                        {
-                            var originalSymbol = GetSourceDeclarationSymbol( referencedSymbol );
-                        }
-
-                        return new ResolvedAspectReference(
-                            containingSymbol,
-                            referencedSymbol,
-                            GetCorrespodingSymbolForResolvedSymbol( referencedSymbol, originalSymbol ),
-                            SymbolEqualityComparer.Default.Equals( referencedSymbol, originalSymbol )
-                                ? ResolvedAspectReferenceSemantic.Original
-                                : ResolvedAspectReferenceSemantic.Default,
-                            expression,
-                            referenceSpecification );
-                    }
-
-                case AspectReferenceOrder.Self:
-                    referencedIntroduction = GetClosestSucceedingOverride( overrides, indexedLayers, annotationLayerIndex );
-
-                    if ( referencedIntroduction != null )
-                    {
-                        // There is a preceding override, resolve to override symbol.
-                        return new ResolvedAspectReference(
-                            containingSymbol,
-                            referencedSymbol,
-                            this.GetSymbolFromIntroducedMember( referencedSymbol, referencedIntroduction ),
-                            ResolvedAspectReferenceSemantic.Default,
-                            expression,
-                            referenceSpecification );
-                    }
-                    else
-                    {
-                        // There is no preceding override, this is reference to the original body.
-                        return new ResolvedAspectReference(
-                            containingSymbol,
-                            referencedSymbol,
-                            GetCorrespodingSymbolForResolvedSymbol( referencedSymbol, referencedSymbol ),
-                            ResolvedAspectReferenceSemantic.Default,
-                            expression,
-                            referenceSpecification );
-                    }
+                    resolvedIndex = 0;
+                    break;
 
                 case AspectReferenceOrder.Base:
-                    referencedIntroduction = GetClosestPrecedingOverride( overrides, indexedLayers, annotationLayerIndex );
+                    // TODO: optimize.
 
-                    if ( referencedIntroduction != null )
+                    var lowerOverride = overrideIndices.Where( x => x.Index < annotationLayerIndex ).LastOrDefault();
+
+                    if (lowerOverride.Override != null)
                     {
-                        // There is a succeeding override, resolve to override symbol.
-                        return new ResolvedAspectReference(
-                            containingSymbol,
-                            referencedSymbol,
-                            this.GetSymbolFromIntroducedMember( referencedSymbol, referencedIntroduction ),
-                            ResolvedAspectReferenceSemantic.Default,
-                            expression,
-                            referenceSpecification );
+                        resolvedIndex = lowerOverride.Index;
+                        resolvedIntroducedMember = lowerOverride.Override;
+                    }
+                    else if ( targetMemberIntroductionIndex != null && targetMemberIntroductionIndex.Value < annotationLayerIndex)
+                    {
+                        resolvedIndex = targetMemberIntroductionIndex.Value;
+                        resolvedIntroducedMember = targetMemberIntroduction;
                     }
                     else
                     {
-                        // No override after the referencing aspect, point to the final declaration.
-                        var originalSymbol = GetSourceDeclarationSymbol( referencedSymbol );
-
-                        return new ResolvedAspectReference(
-                            containingSymbol,
-                            referencedSymbol,
-                            GetCorrespodingSymbolForResolvedSymbol( referencedSymbol, originalSymbol ),
-                            SymbolEqualityComparer.Default.Equals( referencedSymbol, originalSymbol )
-                                ? ResolvedAspectReferenceSemantic.Original
-                                : ResolvedAspectReferenceSemantic.Default,
-                            expression,
-                            referenceSpecification );
+                        resolvedIndex = 0;
                     }
 
+                    break;
+
+                case AspectReferenceOrder.Self:
+                    // TODO: optimize.
+
+                    var lowerOrEqualOverride = overrideIndices.Where( x => x.Index <= annotationLayerIndex ).LastOrDefault();
+
+                    if ( lowerOrEqualOverride.Override != null )
+                    {
+                        resolvedIndex = lowerOrEqualOverride.Index;
+                        resolvedIntroducedMember = lowerOrEqualOverride.Override;
+                    }
+                    else if ( targetMemberIntroductionIndex != null && targetMemberIntroductionIndex.Value <= annotationLayerIndex )
+                    {
+                        resolvedIndex = targetMemberIntroductionIndex.Value;
+                        resolvedIntroducedMember = targetMemberIntroduction;
+                    }
+                    else
+                    {
+                        resolvedIndex = 0;
+                    }
+
+                    break;
+
                 case AspectReferenceOrder.Final:
-                    // Final reference order is always resolved to the final declaration.
-                    return new ResolvedAspectReference(
-                        containingSymbol,
-                        referencedSymbol,
-                        referencedSymbol,
-                        ResolvedAspectReferenceSemantic.Default,
-                        expression,
-                        referenceSpecification );
+                    var lastOverride = overrideIndices.LastOrDefault();
+                    resolvedIndex = this._orderedLayers.Count - 1;
+                    break;
 
                 default:
                     throw new AssertionFailedException();
             }
-            if ( overrides.Count > 0 )
+
+            // At this point resolvedIndex should be 0, this._orderedLayers.Count - 1 or be equal to index of one of the overrides.
+            Invariant.Assert( resolvedIndex == 0 || resolvedIndex == this._orderedLayers.Count - 1 || overrideIndices.Any( x => x.Index == resolvedIndex ) );
+
+            if ( resolvedIndex == 0)
             {
-                LinkerIntroducedMember? referencedIntroduction;
-
-
+                if ( targetMemberIntroduction == null )
+                {
+                    // There is no introduction, i.e. this is a user source symbol.
+                    return new ResolvedAspectReference(
+                        containingSymbol,
+                        referencedSymbol,
+                        new IntermediateSymbolSemantic( 
+                            referencedSymbol, 
+                            IntermediateSymbolSemanticKind.Default ),
+                        expression,
+                        referenceSpecification );
+                }
+                else
+                {
+                    // There is an introduction and this reference points to a state before that introduction.
+                    if ( referencedSymbol.IsOverride )
+                    {
+                        // Introduction is an override, resolve to symbol in the base class.
+                        return new ResolvedAspectReference(
+                            containingSymbol,
+                            referencedSymbol,
+                            new IntermediateSymbolSemantic(
+                                GetOverriddenSymbol(referencedSymbol).AssertNotNull(),
+                                IntermediateSymbolSemanticKind.Default ),
+                            expression,
+                            referenceSpecification );
+                    }
+                    else
+                    {
+                        // Introduction is a new member, resolve to base semantics, i.e. empty method.
+                        return new ResolvedAspectReference(
+                            containingSymbol,
+                            referencedSymbol,
+                            new IntermediateSymbolSemantic(
+                                referencedSymbol,
+                                IntermediateSymbolSemanticKind.Base ),
+                            expression,
+                            referenceSpecification );
+                    }
+                }
+            }
+            else if ( resolvedIndex < this._orderedLayers.Count - 1)
+            {
+                // One of the overrides or the introduced member.
+                return new ResolvedAspectReference(
+                    containingSymbol,
+                    referencedSymbol,
+                    new IntermediateSymbolSemantic(
+                        this.GetSymbolFromIntroducedMember( referencedSymbol, resolvedIntroducedMember.AssertNotNull()),
+                        IntermediateSymbolSemanticKind.Default ),
+                    expression,
+                    referenceSpecification );
             }
             else
             {
                 return new ResolvedAspectReference(
                     containingSymbol,
                     referencedSymbol,
-                    referencedSymbol,
-                    ResolvedAspectReferenceSemantic.Default,
+                    new IntermediateSymbolSemantic(
+                        referencedSymbol,
+                        IntermediateSymbolSemanticKind.Final ),
                     expression,
                     referenceSpecification );
             }
-        }
-
-        private static ISymbol GetSourceDeclarationSymbol( ISymbol referencedSymbol )
-        {
-            if ( referencedSymbol is IMethodSymbol methodSymbol )
-            {
-                if ( methodSymbol.OverriddenMethod != null )
-                {
-                    return methodSymbol.OverriddenMethod;
-                }
-            }
-            else if ( referencedSymbol is IPropertySymbol propertySymbol )
-            {
-                if ( propertySymbol.OverriddenProperty != null )
-                {
-                    return propertySymbol.OverriddenProperty;
-                }
-            }
-            else if ( referencedSymbol is IEventSymbol eventSymbol )
-            {
-                var overridenAccessor = eventSymbol.AddMethod?.OverriddenMethod ?? eventSymbol.RemoveMethod?.OverriddenMethod;
-
-                if ( overridenAccessor != null )
-                {
-                    return overridenAccessor.AssociatedSymbol.AssertNotNull();
-                }
-            }
-
-            return referencedSymbol;
-        }
-
-        private static LinkerIntroducedMember? GetClosestSucceedingOverride(
-            IReadOnlyList<LinkerIntroducedMember>? overrides,
-            IReadOnlyList<(AspectLayerId AspectLayerId, int Index)>? indexedLayers,
-            int annotationLayerIndex )
-        {
-            return
-            (
-                from o in overrides
-                join oal in indexedLayers
-                    on o.AspectLayerId equals oal.AspectLayerId
-                where oal.Index >= annotationLayerIndex
-                orderby oal.Index
-                select o
-            ).FirstOrDefault();
-        }
-
-        private static LinkerIntroducedMember? GetClosestPrecedingOverride(
-            IReadOnlyList<LinkerIntroducedMember>? overrides,
-            IReadOnlyList<(AspectLayerId AspectLayerId, int Index)>? indexedLayers,
-            int annotationLayerIndex )
-        {
-            return
-            (
-                from o in overrides
-                join oal in indexedLayers
-                    on o.AspectLayerId equals oal.AspectLayerId
-                where oal.Index < annotationLayerIndex
-                orderby oal.Index
-                select o
-            ).LastOrDefault();
         }
 
         private ISymbol GetSymbolFromIntroducedMember( ISymbol referencedSymbol, LinkerIntroducedMember resolvedIntroduction )
@@ -269,6 +242,14 @@ namespace Caravela.Framework.Impl.Linking
 
             return GetCorrespodingSymbolForResolvedSymbol( referencedSymbol, symbol );
         }
+
+        private static ISymbol? GetOverriddenSymbol( ISymbol symbol ) => symbol switch
+        {
+            IMethodSymbol methodSymbol => methodSymbol.OverriddenMethod,
+            IPropertySymbol propertySymbol => propertySymbol.OverriddenProperty,
+            IEventSymbol eventSymbol => eventSymbol.OverriddenEvent,
+            _ => throw new AssertionFailedException(),
+        };
 
         /// <summary>
         /// Gets a symbol that corresponds to the referenced symbol for the resolved symbol. 

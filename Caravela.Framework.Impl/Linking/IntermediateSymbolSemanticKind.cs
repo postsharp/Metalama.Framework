@@ -3,7 +3,10 @@
 
 namespace Caravela.Framework.Impl.Linking
 {
-    internal enum ResolvedAspectReferenceSemantic
+    /// <summary>
+    /// Described semantics of a symbol in intermediate compilation. This allows to differentiate between versions of override targets.
+    /// </summary>
+    internal enum IntermediateSymbolSemanticKind
     {
         /// <summary>
         /// Default symbol semantic, i.e. version in the intermediate compilation.

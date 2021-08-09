@@ -14,12 +14,10 @@ namespace Caravela.Framework.Impl.Linking.Inlining
     /// </summary>
     internal class MethodDiscardInliner : MethodInliner
     {
-        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[] { SyntaxKind.ReturnStatement };
-
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax has to be in form: _ = <annotated_method_expression( <arguments> );
-            if ( aspectReference.ResolvedSymbol is not IMethodSymbol )
+            if ( aspectReference.ResolvedSemantic.Symbol is not IMethodSymbol )
             {
                 return false;
             }
@@ -69,7 +67,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var assignmentExpression = (AssignmentExpressionSyntax) invocationExpression.Parent.AssertNotNull();
             var expressionStatement = (ExpressionStatementSyntax) assignmentExpression.Parent.AssertNotNull();
 
-            var targetSymbol = (aspectReference.ResolvedSymbol as IMethodSymbol).AssertNotNull();
+            var targetSymbol = (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol).AssertNotNull();
 
             // Change the target local variable.
             var contextWithDiscard = context.WithDiscard( targetSymbol );

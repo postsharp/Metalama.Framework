@@ -19,7 +19,7 @@ using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 namespace Caravela.Framework.Impl.Linking
 {
     /// <summary>
-    /// Stores information about introductions.
+    /// Stores information about introductions and intermediate compilation.
     /// </summary>
     internal class LinkerIntroductionRegistry
     {
@@ -248,44 +248,165 @@ namespace Caravela.Framework.Impl.Linking
         public IEnumerable<ISymbol> GetOverriddenMembers()
         {
             // TODO: This is not efficient.
-            var overriddenMembers = new List<ISymbol>();
+            var returned = new HashSet<ISymbol>( SymbolEqualityComparer.Default );
 
-            foreach ( var intermediateSyntaxTree in this._intermediateCompilation.SyntaxTrees )
+            foreach ( var introducedMember in this.GetIntroducedMembers() )
             {
-                var semanticModel = this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree );
+                var symbol = this.GetSymbolForIntroducedMember( introducedMember );
 
-                foreach ( var methodDeclaration in intermediateSyntaxTree.GetRoot().DescendantNodes().OfType<MethodDeclarationSyntax>() )
+                if (this.IsOverride( symbol ) )
                 {
-                    var methodSymbol = semanticModel.GetDeclaredSymbol( methodDeclaration );
-
-                    if ( methodSymbol != null && this._overrideTargetsByOriginalSymbolName.ContainsKey( methodSymbol ) )
+                    if ( returned.Add( symbol ) )
                     {
-                        overriddenMembers.Add( methodSymbol );
-                    }
-                }
-
-                foreach ( var propertyDeclaration in intermediateSyntaxTree.GetRoot().DescendantNodes().OfType<PropertyDeclarationSyntax>() )
-                {
-                    var propertySymbol = semanticModel.GetDeclaredSymbol( propertyDeclaration );
-
-                    if ( propertySymbol != null && this._overrideTargetsByOriginalSymbolName.ContainsKey( propertySymbol ) )
-                    {
-                        overriddenMembers.Add( propertySymbol );
-                    }
-                }
-
-                foreach ( var eventDeclaration in intermediateSyntaxTree.GetRoot().DescendantNodes().OfType<EventDeclarationSyntax>() )
-                {
-                    var eventSymbol = semanticModel.GetDeclaredSymbol( eventDeclaration );
-
-                    if ( eventSymbol != null && this._overrideTargetsByOriginalSymbolName.ContainsKey( eventSymbol ) )
-                    {
-                        overriddenMembers.Add( eventSymbol );
+                        yield return this.GetOverrideTarget( symbol ).AssertNotNull();
                     }
                 }
             }
+        }
 
-            return overriddenMembers;
+        public ISymbol? GetOverrideTarget( ISymbol symbol )
+        {
+            switch ( symbol )
+            {
+                case IMethodSymbol { MethodKind: MethodKind.PropertyGet } getterSymbol:
+                    return ((IPropertySymbol?) this.GetOverrideTarget( getterSymbol.AssociatedSymbol.AssertNotNull() ))?.GetMethod;
+
+                case IMethodSymbol { MethodKind: MethodKind.PropertySet } setterSymbol:
+                    return ((IPropertySymbol?) this.GetOverrideTarget( setterSymbol.AssociatedSymbol.AssertNotNull() ))?.SetMethod;
+
+                case IMethodSymbol { MethodKind: MethodKind.EventAdd } adderSymbol:
+                    return ((IEventSymbol?) this.GetOverrideTarget( adderSymbol.AssociatedSymbol.AssertNotNull() ))?.AddMethod;
+
+                case IMethodSymbol { MethodKind: MethodKind.EventRemove } removerSymbol:
+                    return ((IEventSymbol?) this.GetOverrideTarget( removerSymbol.AssociatedSymbol.AssertNotNull() ))?.RemoveMethod;
+
+                default:
+                    var introducedMember = this.GetIntroducedMemberForSymbol( symbol );
+
+                    if ( introducedMember == null )
+                    {
+                        return null;
+                    }
+
+                    return this.GetOverrideTarget( introducedMember );
+            }
+        }
+
+        /// <summary>
+        /// Gets the last (outermost) override of the method.
+        /// </summary>
+        /// <param name="symbol">Method symbol.</param>
+        /// <returns>Symbol.</returns>
+        public ISymbol GetLastOverride( ISymbol symbol )
+        {
+            switch ( symbol )
+            {
+                case IMethodSymbol { MethodKind: MethodKind.PropertyGet } getterSymbol:
+                    return ((IPropertySymbol) this.GetLastOverride( getterSymbol.AssociatedSymbol.AssertNotNull() )).GetMethod.AssertNotNull();
+
+                case IMethodSymbol { MethodKind: MethodKind.PropertySet } setterSymbol:
+                    return ((IPropertySymbol) this.GetLastOverride( setterSymbol.AssociatedSymbol.AssertNotNull() )).SetMethod.AssertNotNull();
+
+                case IMethodSymbol { MethodKind: MethodKind.EventAdd } adderSymbol:
+                    return ((IEventSymbol) this.GetLastOverride( adderSymbol.AssociatedSymbol.AssertNotNull() )).AddMethod.AssertNotNull();
+
+                case IMethodSymbol { MethodKind: MethodKind.EventRemove } removerSymbol:
+                    return ((IEventSymbol) this.GetLastOverride( removerSymbol.AssociatedSymbol.AssertNotNull() )).RemoveMethod.AssertNotNull();
+
+                default:
+                    var lastOverride = this.GetOverridesForSymbol( symbol ).LastOrDefault();
+
+                    if ( lastOverride == null )
+                    {
+                        return symbol;
+                    }
+
+                    return this.GetSymbolForIntroducedMember( lastOverride );
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the symbol represents override target.
+        /// </summary>
+        /// <param name="symbol">Symbol.</param>
+        /// <returns><c>True</c> if the method is override target, otherwise <c>false</c>.</returns>
+        public bool IsOverrideTarget( ISymbol symbol )
+        {
+            if ( symbol is IMethodSymbol methodSymbol
+                 && (methodSymbol.MethodKind == MethodKind.PropertyGet
+                     || methodSymbol.MethodKind == MethodKind.PropertySet
+                     || methodSymbol.MethodKind == MethodKind.EventAdd
+                     || methodSymbol.MethodKind == MethodKind.EventRemove) )
+            {
+                return this.IsOverrideTarget( methodSymbol.AssociatedSymbol.AssertNotNull() );
+            }
+
+            return this.GetOverridesForSymbol( symbol ).Count > 0;
+        }
+
+        /// <summary>
+        /// Determines whether the symbol represents an override method.
+        /// </summary>
+        /// <param name="symbol">Symbol.</param>
+        /// <returns></returns>
+        public bool IsOverride( ISymbol symbol )
+        {
+            if ( symbol is IMethodSymbol methodSymbol
+                 && (methodSymbol.MethodKind == MethodKind.PropertyGet
+                     || methodSymbol.MethodKind == MethodKind.PropertySet
+                     || methodSymbol.MethodKind == MethodKind.EventAdd
+                     || methodSymbol.MethodKind == MethodKind.EventRemove) )
+            {
+                return this.IsOverride( methodSymbol.AssociatedSymbol.AssertNotNull() );
+            }
+
+            var introducedMember = this.GetIntroducedMemberForSymbol( symbol );
+
+            if ( introducedMember == null )
+            {
+                return false;
+            }
+
+            return introducedMember.Semantic == IntroducedMemberSemantic.Override;
+        }
+
+        public bool IsLastOverride( ISymbol symbol )
+        {
+            return this.IsOverride( symbol ) && SymbolEqualityComparer.Default.Equals(
+                symbol,
+                this.GetLastOverride( this.GetOverrideTarget( symbol ).AssertNotNull() ) );
+        }
+
+        public ISymbol? GetPreviousOverride( ISymbol symbol )
+        {
+            var overrideTarget = this.GetOverrideTarget( symbol );
+
+            if ( overrideTarget != null )
+            {
+                var overrides = this.GetOverridesForSymbol( overrideTarget );
+                var matched = false;
+
+                foreach ( var introducedMember in overrides.Reverse() )
+                {
+                    var overrideSymbol = this.GetSymbolForIntroducedMember( introducedMember );
+
+                    if ( matched )
+                    {
+                        return overrideSymbol;
+                    }
+
+                    if ( SymbolEqualityComparer.Default.Equals( overrideSymbol, symbol ) )
+                    {
+                        matched = true;
+                    }
+                }
+
+                return null;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

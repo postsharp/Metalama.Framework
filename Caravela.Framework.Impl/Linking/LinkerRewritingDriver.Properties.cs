@@ -16,95 +16,21 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal partial class LinkerRewritingDriver
     {
-        /// <summary>
-        /// Determines whether the property will be discarded in the final compilation (unreferenced or inlined declarations).
-        /// </summary>
-        /// <param name="symbol">Override property symbol or overridden property symbol.</param>
-        /// <returns></returns>
-        private bool IsDiscarded( IPropertySymbol symbol, ResolvedAspectReferenceSemantic semantic )
-        {
-            if ( symbol.GetPrimaryDeclaration().AssertNotNull().GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotDiscardable ) )
-            {
-                return false;
-            }
-
-            if ( this._analysisRegistry.IsOverride( symbol ) )
-            {
-                var overrideTarget = this._analysisRegistry.GetOverrideTarget( symbol );
-                var lastOverride = this._analysisRegistry.GetLastOverride( overrideTarget.AssertNotNull() );
-                var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertyGetAccessor );
-                var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertySetAccessor );
-
-                if ( SymbolEqualityComparer.Default.Equals( symbol, lastOverride ) )
-                {
-                    return this.IsInlineable( symbol, semantic );
-                }
-                else
-                {
-                    return this.IsInlineable( symbol, semantic ) || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0);
-                }
-            }
-
-            return false;
-        }
-
-        private bool IsInlineable( IPropertySymbol symbol, ResolvedAspectReferenceSemantic semantic )
-        {
-            if ( GetDeclarationFlags( symbol ).HasFlag( LinkerDeclarationFlags.NotInlineable ) )
-            {
-                return false;
-            }
-
-            if ( this._analysisRegistry.IsLastOverride( symbol ) )
-            {
-                // Last overrides should be inlined if not marked as not-inlineable.
-                return true;
-            }
-
-            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
-            var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertyGetAccessor );
-            var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertySetAccessor );
-
-            if ( selfAspectReferences.Count > 0 )
-            {
-                // TODO: We may need to deal with this case.
-                return false;
-            }
-
-            if ( getAspectReferences.Count > 1 || setAspectReferences.Count > 1
-                                               || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0) )
-            {
-                return false;
-            }
-
-            return (getAspectReferences.Count == 0 || this.IsInlineableReference( getAspectReferences[0] ))
-                   && (setAspectReferences.Count == 0 || this.IsInlineableReference( setAspectReferences[0] ));
-        }
-
-        private bool HasAnyAspectReferences( IPropertySymbol symbol, ResolvedAspectReferenceSemantic semantic )
-        {
-            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
-            var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertyGetAccessor );
-            var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertySetAccessor );
-
-            return selfAspectReferences.Count > 0 || getAspectReferences.Count > 0 || setAspectReferences.Count > 0;
-        }
-
         private IReadOnlyList<MemberDeclarationSyntax> RewriteProperty( PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol )
         {
-            if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
+            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IPropertySymbol) this._analysisRegistry.GetLastOverride( symbol );
+                var lastOverride = (IPropertySymbol) this._introductionRegistry.GetLastOverride( symbol );
 
                 if ( IsAutoPropertyDeclaration( propertyDeclaration )
-                     && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
+                     && this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic(symbol, IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     // Backing field for auto property.
                     members.Add( GetPropertyBackingField( propertyDeclaration, symbol ) );
                 }
 
-                if ( this.IsInlineable( lastOverride, ResolvedAspectReferenceSemantic.Default ) )
+                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     members.Add( GetLinkedDeclaration() );
                 }
@@ -113,17 +39,18 @@ namespace Caravela.Framework.Impl.Linking
                     members.Add( GetTrampolineProperty( propertyDeclaration, lastOverride ) );
                 }
 
-                if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original )
-                     && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
+                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
+                    && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ))
                 {
                     members.Add( GetOriginalImplProperty( propertyDeclaration, symbol ) );
                 }
 
                 return members;
             }
-            else if ( this._analysisRegistry.IsOverride( symbol ) )
+            else if ( this._introductionRegistry.IsOverride( symbol ) )
             {
-                if ( this.IsDiscarded( symbol, ResolvedAspectReferenceSemantic.Default ) )
+                if ( !this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
+                    || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }

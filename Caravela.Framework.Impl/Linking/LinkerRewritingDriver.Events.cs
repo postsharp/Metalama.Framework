@@ -15,99 +15,24 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal partial class LinkerRewritingDriver
     {
-        /// <summary>
-        /// Determines whether the event will be discarded in the final compilation (unreferenced or inlined declarations).
-        /// </summary>
-        /// <param name="symbol">Override event symbol or overridden event symbol.</param>
-        /// <returns></returns>
-        private bool IsDiscarded( IEventSymbol symbol, ResolvedAspectReferenceSemantic semantic )
-        {
-            if ( symbol.GetPrimaryDeclaration().AssertNotNull().GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotDiscardable ) )
-            {
-                return false;
-            }
-
-            if ( this._analysisRegistry.IsOverride( symbol ) )
-            {
-                var addAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventAddAccessor );
-                var removeAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventRemoveAccessor );
-
-                if ( addAspectReferences.Count == 0 && removeAspectReferences.Count == 0 )
-                {
-                    return true;
-                }
-
-                if ( this.IsInlineable( symbol, semantic ) )
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private bool IsInlineable( IEventSymbol symbol, ResolvedAspectReferenceSemantic semantic )
-        {
-            if ( GetDeclarationFlags( symbol ).HasFlag( LinkerDeclarationFlags.NotInlineable ) )
-            {
-                return false;
-            }
-
-            if ( this._analysisRegistry.IsLastOverride( symbol ) )
-            {
-                // Last overrides should be inlined if not marked as not-inlineable.
-                return true;
-            }
-
-            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
-            var addAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventAddAccessor );
-            var removeAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventRemoveAccessor );
-
-            if ( selfAspectReferences.Count > 0 )
-            {
-                // TODO: We may need to deal with this case.
-                return false;
-            }
-
-            if ( addAspectReferences.Count > 1 || removeAspectReferences.Count > 1 )
-            {
-                return false;
-            }
-
-            if ( addAspectReferences.Count == 0 && removeAspectReferences.Count == 0 )
-            {
-                return false;
-            }
-
-            return (addAspectReferences.Count == 0 || this.IsInlineableReference( addAspectReferences[0] ))
-                   && (removeAspectReferences.Count == 0 || this.IsInlineableReference( removeAspectReferences[0] ));
-        }
-
-        private bool HasAnyAspectReferences( IEventSymbol symbol, ResolvedAspectReferenceSemantic semantic )
-        {
-            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
-            var addAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventAddAccessor );
-            var removeAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.EventRemoveAccessor );
-
-            return selfAspectReferences.Count > 0 || addAspectReferences.Count > 0 || removeAspectReferences.Count > 0;
-        }
-
         private IReadOnlyList<MemberDeclarationSyntax> RewriteEvent( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
         {
-            if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
+            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members =
                     eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField )
                         ? new List<MemberDeclarationSyntax> { GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration() }
                         : new List<MemberDeclarationSyntax> { GetLinkedDeclaration() };
 
-                if ( !this.IsInlineable( (IEventSymbol) this._analysisRegistry.GetLastOverride( symbol ), ResolvedAspectReferenceSemantic.Default ) )
+                var lastOverride = (IEventSymbol) this._introductionRegistry.GetLastOverride( symbol );
+
+                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     members.Add( GetTrampolineEvent( eventDeclaration, symbol ) );
                 }
 
-                if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original )
-                     && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
+                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
+                    && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField ) )
                     {
@@ -130,7 +55,8 @@ namespace Caravela.Framework.Impl.Linking
                     return new MemberDeclarationSyntax[] { GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration().NormalizeWhitespace() };
                 }
 
-                if ( this.IsDiscarded( symbol, ResolvedAspectReferenceSemantic.Default ) )
+                if ( !this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
+                    || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) ) 
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
@@ -169,77 +95,6 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private IReadOnlyList<MemberDeclarationSyntax> RewriteEventField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
-        {
-            if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
-            {
-                var members = new List<MemberDeclarationSyntax>();
-
-                if ( this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
-                {
-                    members.Add( GetEventBackingField( eventFieldDeclaration, symbol ) );
-                }
-
-                members.Add( GetLinkedDeclaration() );
-
-                if ( !this.IsInlineable( (IEventSymbol) this._analysisRegistry.GetLastOverride( symbol ), ResolvedAspectReferenceSemantic.Default ) )
-                {
-                    members.Add( GetTrampolineEvent( eventFieldDeclaration, symbol ) );
-                }
-
-                if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original )
-                     && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
-                {
-                    members.Add( GetOriginalImplEventField( eventFieldDeclaration.Declaration.Type, symbol ) );
-                }
-
-                return members;
-            }
-            else
-            {
-                if ( this.IsDiscarded( symbol, ResolvedAspectReferenceSemantic.Default ) )
-                {
-                    return Array.Empty<MemberDeclarationSyntax>();
-                }
-
-                return new[] { GetLinkedDeclaration() };
-            }
-
-            MemberDeclarationSyntax GetLinkedDeclaration()
-            {
-                var transformedAdd =
-                    AccessorDeclaration(
-                        SyntaxKind.AddAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        TokenList(),
-                        this.GetLinkedBody(
-                            this.GetBodySource( symbol.AddMethod.AssertNotNull() ),
-                            InliningContext.Create( this, symbol.AddMethod.AssertNotNull() ) ) );
-
-                var transformedRemove =
-                    AccessorDeclaration(
-                        SyntaxKind.RemoveAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        TokenList(),
-                        this.GetLinkedBody(
-                            this.GetBodySource( symbol.RemoveMethod.AssertNotNull() ),
-                            InliningContext.Create( this, symbol.RemoveMethod.AssertNotNull() ) ) );
-
-                return
-                    EventDeclaration(
-                            List<AttributeListSyntax>(),
-                            eventFieldDeclaration.Modifiers,
-                            Token( SyntaxKind.EventKeyword ).WithTrailingTrivia( ElasticSpace ),
-                            eventFieldDeclaration.Declaration.Type,
-                            null,
-                            Identifier( symbol.Name ),
-                            AccessorList( List( new[] { transformedAdd, transformedRemove } ) ),
-                            MissingToken( SyntaxKind.SemicolonToken ) )
-                        .WithLeadingTrivia( eventFieldDeclaration.GetLeadingTrivia() )
-                        .WithTrailingTrivia( eventFieldDeclaration.GetTrailingTrivia() );
-            }
-        }
-
         private static BlockSyntax GetImplicitAdderBody( IMethodSymbol symbol )
         {
             return Block(
@@ -272,9 +127,6 @@ namespace Caravela.Framework.Impl.Linking
 
         private static FieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
             => GetEventBackingField( eventDeclaration.Type, symbol );
-
-        private static FieldDeclarationSyntax GetEventBackingField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
-            => GetEventBackingField( eventFieldDeclaration.Declaration.Type, symbol );
 
         private static FieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, IEventSymbol symbol )
         {
@@ -309,32 +161,6 @@ namespace Caravela.Framework.Impl.Linking
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithAccessorList( @event.AccessorList )
-                    .AddGeneratedCodeAnnotation();
-        }
-
-        private static MemberDeclarationSyntax GetOriginalImplEventField( TypeSyntax eventType, IEventSymbol symbol )
-        {
-            return
-                EventDeclaration(
-                        List<AttributeListSyntax>(),
-                        symbol.IsStatic
-                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                        eventType,
-                        null,
-                        Identifier( GetOriginalImplMemberName( symbol ) ),
-                        AccessorList(
-                            List(
-                                new[]
-                                {
-                                    AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull() ) ),
-                                    AccessorDeclaration(
-                                        SyntaxKind.RemoveAccessorDeclaration,
-                                        GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) )
-                                } ) ) )
-                    .NormalizeWhitespace()
-                    .WithLeadingTrivia( ElasticLineFeed )
-                    .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
                     .AddGeneratedCodeAnnotation();
         }
     }

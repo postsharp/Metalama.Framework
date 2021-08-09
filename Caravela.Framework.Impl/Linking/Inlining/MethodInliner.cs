@@ -23,5 +23,10 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                     .Select( ( x, i ) => (Argument: x, Index: i) )
                     .Any( a => !SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( a.Argument ).Symbol, contextMethod.Parameters[a.Index] ) );
         }
+
+        public override bool IsValidForTargetSymbol( ISymbol symbol )
+        {
+            return symbol is IMethodSymbol { AssociatedSymbol: null };
+        }
     }
 }

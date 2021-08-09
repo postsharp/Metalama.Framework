@@ -11,13 +11,11 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 {
     internal class PropertySetValueAssignmentInliner : PropertyInliner
     {
-        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[] { SyntaxKind.ReturnStatement };
-
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax needs to be in form: <annotated_property_expression> = value;
-            if ( aspectReference.ResolvedSymbol is not IPropertySymbol
-                 && (aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol is not IPropertySymbol )
+            if ( aspectReference.ResolvedSemantic.Symbol is not IPropertySymbol
+                 && (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol is not IPropertySymbol )
             {
                 return false;
             }
@@ -56,8 +54,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var expressionStatement = (ExpressionStatementSyntax) assignmentExpression.Parent.AssertNotNull();
 
             var targetSymbol =
-                aspectReference.ResolvedSymbol as IPropertySymbol
-                ?? (IPropertySymbol) ((aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
+                aspectReference.ResolvedSemantic.Symbol as IPropertySymbol
+                ?? (IPropertySymbol) ((aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
 
             // Get the final inlined body of the target property setter. 
             var inlinedTargetBody = context.GetLinkedBody( targetSymbol.SetMethod.AssertNotNull() );
