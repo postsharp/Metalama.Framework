@@ -58,7 +58,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IInvokerFactory<IMethodInvoker> Invokers
             => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
 
-        public override bool IsReadOnly => this.MethodSymbol.IsReadOnly;
+        public bool IsReadOnly => this.MethodSymbol.IsReadOnly;
 
         public override bool IsExplicitInterfaceImplementation => !this.MethodSymbol.ExplicitInterfaceImplementations.IsEmpty;
 
