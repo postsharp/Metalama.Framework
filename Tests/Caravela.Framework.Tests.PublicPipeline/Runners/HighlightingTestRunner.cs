@@ -82,12 +82,14 @@ namespace Caravela.Framework.Tests.Integration.Runners
             this._htmlEpilogue = epilogueBuilder.ToString();
         }
 
-        protected override HtmlCodeWriter CreateHtmlCodeWriter( TestOptions options )
+        private protected override bool CompareTransformedCode => false;
+
+        private protected override HtmlCodeWriter CreateHtmlCodeWriter( TestOptions options )
             => new( new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault(), _htmlProlog, this._htmlEpilogue ) );
 
-        public override void ExecuteAssertions( TestInput testInput, TestResult testResult )
+        private protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
-            // We do NOT run the base assertions because we don't want the *.t.cs files, and this is not the point of these tests anyway.
+            base.ExecuteAssertions( testInput, testResult, state );
 
             Assert.NotNull( testInput.ProjectDirectory );
             Assert.NotNull( testInput.RelativePath );

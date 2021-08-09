@@ -82,9 +82,7 @@ namespace Caravela.Framework.Impl.Linking
         }
 
         private bool HasAnyAspectReferences( IMethodSymbol symbol, ResolvedAspectReferenceSemantic semantic )
-        {
-            return this._analysisRegistry.GetAspectReferences( symbol, semantic ).Count > 0;
-        }
+            => this._analysisRegistry.GetAspectReferences( symbol, semantic ).Count > 0;
 
         private IReadOnlyList<MemberDeclarationSyntax> RewriteMethod( MethodDeclarationSyntax methodDeclaration, IMethodSymbol symbol )
         {
@@ -173,8 +171,8 @@ namespace Caravela.Framework.Impl.Linking
                     .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
-                    .WithBody( method.Body )
-                    .WithExpressionBody( method.ExpressionBody )
+                    .WithBody( method.Body.AddSourceCodeAnnotation() )
+                    .WithExpressionBody( method.ExpressionBody.AddSourceCodeAnnotation() )
                     .AddGeneratedCodeAnnotation();
         }
     }

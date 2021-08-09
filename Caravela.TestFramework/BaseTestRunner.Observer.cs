@@ -5,10 +5,12 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Observers;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace Caravela.TestFramework
 {
@@ -37,9 +39,26 @@ namespace Caravela.TestFramework
                         .Single( x => x.item.InputSyntaxTree.FilePath == sourceSyntaxRoot.SyntaxTree.FilePath )
                         .item;
 
-                var previousRoot = originalSyntaxTree.AnnotatedSyntaxRoot ?? sourceSyntaxRoot.SyntaxTree.GetRoot();
+                SyntaxNode previousRoot;
+                SyntaxNode previousNode;
 
-                originalSyntaxTree.AnnotatedSyntaxRoot = previousRoot.ReplaceNode( sourceSyntaxRoot, annotatedSyntaxRoot );
+                if ( originalSyntaxTree.AnnotatedSyntaxRoot == null )
+                {
+                    // This is the first time we are called.
+                    previousRoot = sourceSyntaxRoot.SyntaxTree.GetRoot();
+                    previousNode = sourceSyntaxRoot;
+                }
+                else
+                {
+                    // This is the second time we are called. We need to locate the node in the tree we created the previous
+                    // time we were called.
+                    previousRoot = originalSyntaxTree.AnnotatedSyntaxRoot;
+                    Assert.True( NodeFinder.TryFindOldNodeInNewRoot( sourceSyntaxRoot, previousRoot, out previousNode ) );
+                }
+
+                originalSyntaxTree.AnnotatedSyntaxRoot = previousRoot.ReplaceNode( previousNode, annotatedSyntaxRoot );
+
+                Assert.NotSame( originalSyntaxTree.AnnotatedSyntaxRoot, previousRoot );
             }
 
             public void OnInitialCompilationModelCreated( ICompilation compilation ) => this._testResult.InitialCompilationModel = compilation;

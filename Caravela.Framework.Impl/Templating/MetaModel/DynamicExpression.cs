@@ -12,10 +12,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         private readonly ExpressionSyntax _expression;
         private readonly bool _isReferenceable;
 
-        public DynamicExpression( ExpressionSyntax expression, IType type, bool isReferenceable )
+        public DynamicExpression( ExpressionSyntax expression, IType type, bool isReferenceable = false, bool isAssignable = false )
         {
             this._expression = expression;
             this.ExpressionType = type;
+            this.IsAssignable = isAssignable;
             this._isReferenceable = isReferenceable;
         }
 
@@ -23,5 +24,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             => new( this._expression, this.ExpressionType, this._isReferenceable );
 
         public IType ExpressionType { get; }
+
+        public bool IsAssignable { get; }
     }
 }

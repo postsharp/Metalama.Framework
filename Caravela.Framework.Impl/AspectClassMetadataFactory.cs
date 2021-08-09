@@ -139,17 +139,15 @@ namespace Caravela.Framework.Impl
                     }
                 }
 
-                var aspectDriver = this._aspectDriverFactory.GetAspectDriver( aspectTypeSymbol );
-
                 if ( !AspectClass.TryCreate(
                     this._serviceProvider,
                     aspectTypeSymbol,
                     aspectReflectionType,
                     baseAspectClass,
-                    aspectDriver,
                     project,
                     diagnosticAdder,
                     compilation,
+                    this._aspectDriverFactory,
                     out metadata ) )
                 {
                     return false;

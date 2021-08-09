@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Templating
 {
     // TODO: This is a temporary implementation of TemplateExpansionContext.
 
-    internal class TemplateExpansionContext
+    internal partial class TemplateExpansionContext
     {
         private readonly Template<IMethod> _templateMethod;
         private readonly Func<TemplateExpansionContext, StatementSyntax>? _expandYieldProceed;
@@ -143,7 +143,7 @@ namespace Caravela.Framework.Impl.Templating
                     return
                         ReturnStatement(
                             Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                            CastExpression( ParseTypeName( returnType.ToDisplayString() ), returnExpression )
+                            LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression( returnType.GetSymbol(), returnExpression )
                                 .WithAdditionalAnnotations( Simplifier.Annotation ),
                             Token( SyntaxKind.SemicolonToken ) );
                 }
@@ -188,7 +188,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             // We are in an async iterator (or async stream), and we cannot have a return statement.
             // Generate this instead:
-            // try
+            // async using ( var enumerator = METHOD() )
             // {
             //     while ( await enumerator.MoveNextAsync() )
             //     {
@@ -197,12 +197,6 @@ namespace Caravela.Framework.Impl.Templating
             //         cancellationToken.ThrowIfCancellationRequested();
             //     }
             // }
-            // finally
-            // {
-            //     await enumerator.DisposeAsync();
-            // }
-
-            var enumerator = this.LexicalScope.GetUniqueIdentifier( "enumerator" );
 
             // TODO: Possible optimization
             // We could assume that the result is an AsyncEnumerableList. The class also implements IEnumerable without
@@ -218,53 +212,65 @@ namespace Caravela.Framework.Impl.Templating
                                             IdentifierName("ThrowIfCancellationRequested"))))
              */
 
-            var local =
-                LocalDeclarationStatement(
-                    VariableDeclaration(
-                            IdentifierName(
-                                Identifier(
-                                    TriviaList(),
-                                    SyntaxKind.VarKeyword,
-                                    "var",
-                                    "var",
-                                    TriviaList() ) ) )
-                        .WithVariables(
-                            SingletonSeparatedList(
-                                VariableDeclarator( Identifier( enumerator ) )
-                                    .WithInitializer( EqualsValueClause( returnExpression ) ) ) ) );
+            VariableDeclarationSyntax? local;
+            ExpressionSyntax? usingExpression;
+            IdentifierNameSyntax? enumeratorIdentifier;
+            UsingStatementSyntax usingStatement;
 
-            var tryStatement =
-                TryStatement()
-                    .WithBlock(
-                        Block(
-                            SingletonList<StatementSyntax>(
-                                WhileStatement(
-                                    AwaitExpression(
-                                        InvocationExpression(
-                                            MemberAccessExpression(
-                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                IdentifierName( enumerator ),
-                                                IdentifierName( "MoveNextAsync" ) ) ) ),
-                                    Block(
-                                        YieldStatement(
-                                            SyntaxKind.YieldReturnStatement,
-                                            MemberAccessExpression(
-                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                IdentifierName( enumerator ),
-                                                IdentifierName( "Current" ) ) ) ) ) ) ) )
-                    .WithFinally(
-                        FinallyClause(
-                            Block(
-                                SingletonList<StatementSyntax>(
-                                    ExpressionStatement(
-                                        AwaitExpression(
-                                            InvocationExpression(
-                                                MemberAccessExpression(
-                                                    SyntaxKind.SimpleMemberAccessExpression,
-                                                    IdentifierName( enumerator ),
-                                                    IdentifierName( "DisposeAsync" ) ) ) ) ) ) ) ) );
+            if ( returnExpression is IdentifierNameSyntax returnIdentifier )
+            {
+                local = null;
+                usingExpression = returnExpression;
+                enumeratorIdentifier = returnIdentifier;
+            }
+            else
+            {
+                var enumerator = this.LexicalScope.GetUniqueIdentifier( "enumerator" );
 
-            return Block( local, tryStatement, CreateYieldBreakStatement() ).NormalizeWhitespace().WithFlattenBlockAnnotation();
+                local = VariableDeclaration(
+                        IdentifierName(
+                            Identifier(
+                                default,
+                                SyntaxKind.VarKeyword,
+                                "var",
+                                "var",
+                                TriviaList( ElasticSpace ) ) ) )
+                    .WithVariables(
+                        SingletonSeparatedList(
+                            VariableDeclarator( Identifier( enumerator ) )
+                                .WithInitializer( EqualsValueClause( returnExpression ) ) ) );
+
+                usingExpression = null;
+                enumeratorIdentifier = IdentifierName( enumerator );
+            }
+
+            var whileStatement = WhileStatement(
+                AwaitExpression(
+                    InvocationExpression(
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            enumeratorIdentifier,
+                            IdentifierName( "MoveNextAsync" ) ) ) ),
+                Block(
+                    YieldStatement(
+                        SyntaxKind.YieldReturnStatement,
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            enumeratorIdentifier,
+                            IdentifierName( "Current" ) ) ) ) );
+
+            usingStatement = UsingStatement(
+                Token( SyntaxKind.AwaitKeyword ),
+                Token( SyntaxKind.UsingKeyword ),
+                Token( SyntaxKind.OpenParenToken ),
+                local!,
+                usingExpression!,
+                Token( SyntaxKind.CloseParenToken ),
+                Block( whileStatement ) );
+
+            return Block( usingStatement, CreateYieldBreakStatement() )
+                .NormalizeWhitespace()
+                .WithFlattenBlockAnnotation();
         }
 
         private static YieldStatementSyntax CreateYieldBreakStatement()
@@ -367,47 +373,6 @@ namespace Caravela.Framework.Impl.Templating
                     SyntaxKind.YieldReturnStatement,
                     ((IDynamicExpression) meta.Proceed()!).CreateExpression() );
             }
-        }
-
-        private class ProceedExpression : IDynamicExpression
-        {
-            private readonly TemplateExpansionContext _parent;
-            private readonly string _methodName;
-
-            public ProceedExpression( string methodName, TemplateExpansionContext parent )
-            {
-                this._methodName = methodName;
-                this._parent = parent;
-            }
-
-            public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null )
-            {
-                var targetMethod = this._parent.MetaApi.Target.Method;
-
-                var isValid = this._methodName switch
-                {
-                    nameof(meta.Proceed) => true,
-                    nameof(meta.ProceedAsync) => targetMethod.GetAsyncInfoImpl().IsAwaitable,
-                    nameof(meta.ProceedEnumerable) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerable or EnumerableKind
-                        .UntypedIEnumerable,
-                    nameof(meta.ProceedEnumerator) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind
-                        .UntypedIEnumerator,
-                    "ProceedAsyncEnumerable" => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IAsyncEnumerable,
-                    "ProceedAsyncEnumerator" => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IAsyncEnumerator,
-                    _ => throw new ArgumentOutOfRangeException()
-                };
-
-                if ( !isValid )
-                {
-                    throw TemplatingDiagnosticDescriptors.CannotUseSpecificProceedInThisContext.CreateException(
-                        location,
-                        (this._methodName, targetMethod) );
-                }
-
-                return this._parent._proceedExpression!.CreateExpression( expressionText, location );
-            }
-
-            public IType ExpressionType => this._parent._proceedExpression!.ExpressionType;
         }
     }
 }

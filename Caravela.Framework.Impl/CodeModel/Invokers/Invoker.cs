@@ -11,9 +11,12 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
     {
         protected AspectReferenceSpecification AspectReference { get; }
 
+        protected ICompilation Compilation { get; }
+
         protected Invoker( IDeclaration declaration, InvokerOrder order )
         {
             this.Order = order;
+            this.Compilation = declaration.Compilation;
 
             var linkingOrder = order switch
             {

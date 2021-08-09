@@ -34,13 +34,13 @@ namespace Caravela.TestFramework
             : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
         // We don't want the base class to report errors in the input compilation because the pipeline does.
-        protected override bool ReportInvalidInputCompilation => false;
+        private protected override bool ReportInvalidInputCompilation => false;
 
         /// <summary>
         /// Runs the aspect test with the given name and source.
         /// </summary>
         /// <returns>The result of the test execution.</returns>
-        public override async Task<TestResult> RunTestAsync( TestInput testInput )
+        private protected override async Task<TestResult> RunAsync( TestInput testInput, Dictionary<string, object?> state )
         {
             if ( this._runCount > 0 )
             {
@@ -52,7 +52,7 @@ namespace Caravela.TestFramework
                 this._runCount++;
             }
 
-            var testResult = await base.RunTestAsync( testInput );
+            var testResult = await base.RunAsync( testInput, state );
 
             using var domain = new UnloadableCompileTimeDomain();
             var testProjectOptions = (TestProjectOptions?) this.ServiceProvider.GetService( typeof(TestProjectOptions) );
@@ -76,7 +76,10 @@ namespace Caravela.TestFramework
                 await testResult.SetOutputCompilationAsync( resultCompilation );
 
                 // Emit binary and report diagnostics.
-                bool MustBeReported( Diagnostic d ) => d.Severity >= minimalVerbosity && !testInput.Options.IgnoredDiagnostics.Contains( d.Id );
+                bool MustBeReported( Diagnostic d )
+                {
+                    return d.Severity >= minimalVerbosity && !testInput.Options.IgnoredDiagnostics.Contains( d.Id );
+                }
 
                 if ( !testInput.Options.OutputCompilationDisabled.GetValueOrDefault() )
                 {
@@ -256,16 +259,28 @@ namespace Caravela.TestFramework
             return mainMethod;
         }
 
-        public override void ExecuteAssertions( TestInput testInput, TestResult testResult )
+        private protected override void SaveResults( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
-            base.ExecuteAssertions( testInput, testResult );
+            base.SaveResults( testInput, testResult, state );
 
             var expectedProgramOutputPath = Path.Combine(
                 Path.GetDirectoryName( testInput.FullPath )!,
                 Path.GetFileNameWithoutExtension( testInput.FullPath ) + FileExtensions.ProgramOutput );
 
             // Compare with expected program outputs.
-            if ( !string.IsNullOrWhiteSpace( testResult.ProgramOutput ) )
+            string? expectedOutput;
+
+            var actualProgramOutput = NormalizeEndOfLines( testResult.ProgramOutput );
+
+            // Update the file in obj/transformed if it is different.
+            var actualProgramOutputPath = Path.Combine(
+                this.ProjectDirectory!,
+                "obj",
+                "transformed",
+                Path.GetDirectoryName( testInput.RelativePath ) ?? "",
+                Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.ProgramOutput );
+
+            if ( !string.IsNullOrWhiteSpace( actualProgramOutput ) )
             {
                 // If the expectation file does not exist, create it with some placeholder content.
                 if ( !File.Exists( expectedProgramOutputPath ) )
@@ -275,18 +290,43 @@ namespace Caravela.TestFramework
                         "TODO: Replace this file with the correct program output. See the test output for the actual transformed code." );
                 }
 
-                this.Logger?.WriteLine( "=== ACTUAL TRANSFORMED CODE ===" );
-                this.Logger?.WriteLine( testResult.ProgramOutput );
+                if ( actualProgramOutput != expectedProgramOutputPath )
+                {
+                    File.WriteAllText( actualProgramOutputPath, actualProgramOutput );
+                }
+
+                this.Logger?.WriteLine( "=== ACTUAL PROGRAM OUTPUT ===" );
+                this.Logger?.WriteLine( actualProgramOutput );
                 this.Logger?.WriteLine( "=====================" );
 
-                var expectedOutput = File.ReadAllText( expectedProgramOutputPath );
-
-                Assert.Equal( expectedOutput, testResult.ProgramOutput );
+                expectedOutput = NormalizeEndOfLines( File.ReadAllText( expectedProgramOutputPath ) );
             }
-            else if ( File.Exists( expectedProgramOutputPath ) && string.IsNullOrWhiteSpace( File.ReadAllText( expectedProgramOutputPath ) ) )
+            else
             {
-                File.Delete( expectedProgramOutputPath );
+                expectedOutput = "";
+
+                if ( File.Exists( expectedProgramOutputPath ) && string.IsNullOrWhiteSpace( File.ReadAllText( expectedProgramOutputPath ) ) )
+                {
+                    File.Delete( expectedProgramOutputPath );
+                }
+
+                if ( File.Exists( actualProgramOutputPath ) )
+                {
+                    File.Delete( actualProgramOutputPath );
+                }
             }
+
+            state["actualProgramOutput"] = expectedOutput;
+            state["expectedProgramOutput"] = expectedOutput;
+        }
+
+        private protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        {
+            base.ExecuteAssertions( testInput, testResult, state );
+
+            var expectedOutput = (string) state["expectedProgramOutput"]!;
+            var actualOutput = (string) state["actualProgramOutput"]!;
+            Assert.Equal( expectedOutput, actualOutput );
         }
     }
 }

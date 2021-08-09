@@ -5,8 +5,8 @@ namespace Caravela.Framework.Code.Advised
 {
     /// <summary>
     /// Represents the property being overwritten or introduced. This interface extends <see cref="IProperty"/> but introduces
-    /// the <see cref="IHasRuntimeValue.Value"/> property, which allows you to read or write the property.
-    /// It also overrides the <see cref="Parameters"/> property to expose their <see cref="IHasRuntimeValue.Value"/> property.
+    /// the <see cref="IExpression.Value"/> property, which allows you to read or write the property.
+    /// It also overrides the <see cref="Parameters"/> property to expose their <see cref="IExpression.Value"/> property.
     /// </summary>
     public interface IAdvisedProperty : IProperty, IAdvisedFieldOrProperty
     {

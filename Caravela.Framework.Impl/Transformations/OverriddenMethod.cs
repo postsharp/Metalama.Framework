@@ -15,8 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using RefKind = Caravela.Framework.Code.RefKind;
-using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.Transformations
 {
@@ -86,21 +84,7 @@ namespace Caravela.Framework.Impl.Transformations
                     if ( this.Template.MustInterpretAsAsync() )
                     {
                         // If the template is async but the overridden declaration is not, we have to add an async modifier.
-
                         modifiers = modifiers.Add( Token( SyntaxKind.AsyncKeyword ) );
-
-                        /*
-                        // The return type needs to be changed from void to ValueTask.
-                        if ( this.OverriddenDeclaration.ReturnType.SpecialType == SpecialType.Void )
-                            
-                        var taskType = this.OverriddenDeclaration.ReturnType.SpecialType == SpecialType.Void
-                            ? this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.ValueTask )
-                            : this.OverriddenDeclaration.GetCompilationModel()
-                                .Factory.GetSpecialType( SpecialType.ValueTask_T )
-                                .WithGenericArguments( this.OverriddenDeclaration.ReturnType );
-
-                        returnType = LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( taskType.GetSymbol() );
-                        */
                     }
                 }
                 else
@@ -125,7 +109,6 @@ namespace Caravela.Framework.Impl.Transformations
 
                 var overrides = new[]
                 {
-                    // TODO: async, change type
                     new IntroducedMember(
                         this,
                         MethodDeclaration(

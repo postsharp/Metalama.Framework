@@ -8,5 +8,6 @@ namespace Caravela.Framework.Impl
         public const string SerializersNotImplementedForIntroductions = "Serializers are not implemented for introductions.";
         public const string TemplateMembersHaveSymbol = "Template members are known to have symbols.";
         public const string TypesAlwaysHaveSymbol = "Types are known to have symbols.";
+        public const string ImplementingIntroducedInterfacesNotSupported = "Implementing introduced interfaces is not supported.";
     }
 }

@@ -9,12 +9,12 @@ namespace Caravela.Framework.Code.Invokers
     public enum InvokerOperator
     {
         /// <summary>
-        /// Default '.' operator.
+        /// Default (<c>.</c>) operator.
         /// </summary>
         Default,
 
         /// <summary>
-        /// Conditional ('?.') operator.
+        /// Null-conditional <c>'?.'</c> operator.
         /// </summary>
         Conditional
     }

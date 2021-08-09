@@ -236,7 +236,8 @@ namespace Caravela.Framework.Impl.Templating
                         SyntaxKind.SimpleMemberAccessExpression,
                         expression.Syntax,
                         SyntaxFactory.IdentifierName( member ) )
-                    .WithAdditionalAnnotations( Simplifier.Annotation ) );
+                    .WithAdditionalAnnotations( Simplifier.Annotation ),
+                ExpansionContext.Compilation );
         }
 
         public static SyntaxToken GetUniqueIdentifier( string hint ) => SyntaxFactory.Identifier( ExpansionContext.LexicalScope.GetUniqueIdentifier( hint ) );
@@ -312,6 +313,7 @@ namespace Caravela.Framework.Impl.Templating
             switch ( expression )
             {
                 case null:
+                    // This is typically because we are emitting the return value of a void method.
                     return null;
 
                 case IDynamicExpression dynamicExpression:
@@ -320,6 +322,14 @@ namespace Caravela.Framework.Impl.Templating
                 default:
                     throw new ArgumentOutOfRangeException( nameof(expression), $"Don't know how to extract the syntax from '{expression}'." );
             }
+        }
+
+        public static RuntimeExpression RuntimeExpression( ExpressionSyntax syntax, string? type = null )
+        {
+            var compilation = ExpansionContext.Compilation.GetCompilationModel().RoslynCompilation;
+            var expressionType = type != null ? (ITypeSymbol?) DocumentationCommentId.GetFirstSymbolForDeclarationId( type, compilation ) : null;
+
+            return new RuntimeExpression( syntax, compilation, expressionType, false );
         }
 
         private class InitializeCookie : IDisposable

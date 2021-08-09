@@ -3,7 +3,7 @@ int Method(int a)
     try
     {
         var result = this.Method(a);
-        return (int)result;
+        return (global::System.Int32)(result);
     }
     catch
     {

@@ -1,4 +1,4 @@
-﻿using Caravela.Framework.Aspects;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.TestFramework;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 
 #pragma warning disable CS0067
-#pragma warning disable CS0169
+#pragma warning disable CS0169, CS8618, CS8602, CS8603
 
 namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
 {
@@ -33,19 +33,18 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
         [Template(IsVirtual = true)]
         public virtual dynamic CloneImpl()
         {
-            // Define a local variable of the same type as the target type.
-            var clone = meta.Target.Type.DefaultValue();
-
-            if (meta.Target.Method.Invokers.Base == null)
+            IExpression baseCall;
+          
+            if (!meta.Target.Method.IsOverride)
             {
-                // Invoke base.MemberwiseClone().
-                clone = meta.Cast(meta.Target.Type, meta.Base.MemberwiseClone());
+                meta.DefineExpression( meta.Base.MemberwiseClone(), out baseCall);
             }
             else
             {
-                // Invoke the base method.
-                clone = meta.Target.Method.Invokers.Base.Invoke(meta.This);
+                meta.DefineExpression( meta.Target.Method.Invokers.Base.Invoke(meta.This), out baseCall);
             }
+            
+            var clone = meta.Cast(meta.Target.Type, baseCall);
 
             // Select clonable fields.
             var clonableFields =
@@ -71,6 +70,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
         }
     }
 
+    
     class ManuallyCloneable : ICloneable
     {
         public object Clone()
@@ -80,13 +80,22 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
     }
 
     // <target>
-    [DeepClone]
-    class AutomaticallyCloneable
+    class Targets
     {
-        int a;
+        [DeepClone]
+        class AutomaticallyCloneable
+        {
+            int a;
 
-        ManuallyCloneable? b;
+            ManuallyCloneable? b;
 
-        AutomaticallyCloneable? c;
+            AutomaticallyCloneable? c;
+        }
+
+        [DeepClone]
+        class Derived : AutomaticallyCloneable
+        {
+            private string d;
+        }
     }
 }

@@ -75,8 +75,6 @@ namespace Caravela.Framework.Impl.Templating
 
         private static string NormalizeSpace( string statementComment )
         {
-            // TODO: Replace this with something more GC-friendly.
-
             statementComment = statementComment.Replace( '\n', ' ' ).Replace( '\r', ' ' );
 
             while ( true )
@@ -439,7 +437,8 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression ) => this.CreateRunTimeExpression( expression, originalExpression );
+        protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression )
+            => this.CreateRunTimeExpression( expression, originalExpression );
 
         /// <summary>
         /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="RuntimeExpression"/>
@@ -452,18 +451,9 @@ namespace Caravela.Framework.Impl.Templating
                 // TODO: We need to transform null and default values though. How to do this right then?
                 case SyntaxKind.NullLiteralExpression:
                 case SyntaxKind.DefaultLiteralExpression:
-                    // new RuntimeExpression(LiteralExpression(Null/DefaultLiteralExpression), true)
-                    return ObjectCreationExpression(
-                        Token( SyntaxKind.NewKeyword ).WithTrailingTrivia( Space ),
-                        this.MetaSyntaxFactory.Type( typeof(RuntimeExpression) ),
-                        ArgumentList(
-                            SeparatedList(
-                                new[]
-                                {
-                                    Argument( this.MetaSyntaxFactory.LiteralExpression( this.Transform( expression.Kind() ) ) ),
-                                    Argument( this.Transform( true ) )
-                                } ) ),
-                        null );
+                    return InvocationExpression(
+                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
+                        .AddArgumentListArguments( Argument( this.MetaSyntaxFactory.LiteralExpression( this.Transform( expression.Kind() ) ) ) );
 
                 case SyntaxKind.DefaultExpression:
                     // Don't transform default or null.
@@ -505,21 +495,13 @@ namespace Caravela.Framework.Impl.Templating
             // A local function that wraps the input `expression` into a LiteralExpression.
             ExpressionSyntax CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind syntaxKind )
             {
-                // new RuntimeExpression(LiteralExpression(syntaxKind, Literal(expression)), type)
-                return ObjectCreationExpression(
-                    Token( SyntaxKind.NewKeyword ).WithTrailingTrivia( Space ),
-                    this.MetaSyntaxFactory.Type( typeof(RuntimeExpression) ),
-                    ArgumentList(
-                        SeparatedList(
-                            new[]
-                            {
-                                Argument(
-                                    this.MetaSyntaxFactory.LiteralExpression(
-                                        this.Transform( syntaxKind ),
-                                        this.MetaSyntaxFactory.Literal( expression ) ) ),
-                                Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateReferenceId( type ) ) ) )
-                            } ) ),
-                    null );
+                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
+                    .AddArgumentListArguments(
+                        Argument(
+                            this.MetaSyntaxFactory.LiteralExpression(
+                                this.Transform( syntaxKind ),
+                                this.MetaSyntaxFactory.Literal( expression ) ) ),
+                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateDeclarationId( type ) ) ) ) );
             }
 
             if ( type is IErrorTypeSymbol )
@@ -566,26 +548,17 @@ namespace Caravela.Framework.Impl.Templating
                     return CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind.CharacterLiteralExpression );
 
                 case nameof(Boolean):
-                    // new RuntimeExpression(LiteralExpression(BooleanKeyword(expression)), "System.Boolean")
-                    return ObjectCreationExpression(
-                        Token( SyntaxKind.NewKeyword ).WithTrailingTrivia( Space ),
-                        this.MetaSyntaxFactory.Type( typeof(RuntimeExpression) ),
-                        ArgumentList(
-                            SeparatedList(
-                                new[]
-                                {
-                                    Argument(
-                                        InvocationExpression( this.MetaSyntaxFactory.SyntaxFactoryMethod( nameof(LiteralExpression) ) )
-                                            .AddArgumentListArguments(
-                                                Argument(
-                                                    InvocationExpression(
-                                                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember(
-                                                                nameof(TemplateSyntaxFactory.Boolean) ) )
-                                                        .AddArgumentListArguments( Argument( expression ) ) ) ) ),
-                                    Argument(
-                                        LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateReferenceId( type ) ) ) )
-                                } ) ),
-                        null );
+                    return InvocationExpression(
+                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
+                        .AddArgumentListArguments(
+                            Argument(
+                                InvocationExpression( this.MetaSyntaxFactory.SyntaxFactoryMethod( nameof(LiteralExpression) ) )
+                                    .AddArgumentListArguments(
+                                        Argument(
+                                            InvocationExpression(
+                                                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.Boolean) ) )
+                                                .AddArgumentListArguments( Argument( expression ) ) ) ) ),
+                            Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( "T:System.Boolean" ) ) ) );
 
                 case null:
                     throw new AssertionFailedException( $"Cannot convert {expression.Kind()} '{expression}' to a run-time value." );
@@ -1328,8 +1301,9 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         private bool IsCompileTimeDynamic( ExpressionSyntax? expression )
             => expression != null
-               && this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol
-               && this.GetTransformationKind( expression ) != TransformationKind.Transform;
+               && expression.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
+               && this.GetTransformationKind( expression ) != TransformationKind.Transform
+               && this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol;
 
         public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
         {

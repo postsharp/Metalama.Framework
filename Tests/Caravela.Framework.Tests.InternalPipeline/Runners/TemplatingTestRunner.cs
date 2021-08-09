@@ -81,10 +81,11 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// Runs the template test with name and source provided in the <paramref name="testInput"/>.
         /// </summary>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
+        /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
-        public override async Task<TestResult> RunTestAsync( TestInput testInput )
+        private protected override async Task<TestResult> RunAsync( TestInput testInput, Dictionary<string, object?> state )
         {
-            var testResult = await base.RunTestAsync( testInput );
+            var testResult = await base.RunAsync( testInput, state );
 
             if ( !testResult.Success )
             {
@@ -214,7 +215,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var driver = new TemplateDriver( this.ServiceProvider, null!, templateMethod, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InputCompilation );
-                var template = Template.Create<IMemberOrNamedType>( compilationModel.Factory.GetMethod( templateMethod ) );
+                var template = Template.Create<IMemberOrNamedType>( compilationModel.Factory.GetMethod( templateMethod ), TemplateInfo.None );
 
                 var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( this.ServiceProvider, assembly, compilationModel, template );
 
@@ -323,8 +324,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var proceedExpression =
                 new DynamicExpression(
                     GetProceedInvocation( targetMethod ),
-                    targetMethod.ReturnType,
-                    false );
+                    targetMethod.ReturnType );
 
             var additionalServices = new ServiceProvider();
             additionalServices.AddService( new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ) );

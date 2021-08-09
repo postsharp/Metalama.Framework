@@ -97,7 +97,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 var compilationStopwatch = Stopwatch.StartNew();
 
-                var testResult = await testRunner.RunTestAsync( testInput );
+                var testResult = await testRunner.RunAsync( testInput );
                 compilationStopwatch.Stop();
 
                 var testSyntaxTree = testResult.SyntaxTrees.First();
@@ -140,9 +140,11 @@ namespace Caravela.AspectWorkbench.ViewModels
                 var consolidatedOutputSyntax = testResult.GetConsolidatedTestOutput();
                 var consolidatedOutputText = await consolidatedOutputSyntax.SyntaxTree.GetTextAsync();
 
-                if ( testResult.OutputProject != null )
+                var project = testResult.OutputProject ?? testResult.InputProject;
+
+                if ( project != null )
                 {
-                    var consolidatedOutputDocument = testResult.OutputProject!.AddDocument( "ConsolidatedOutput.cs", consolidatedOutputSyntax );
+                    var consolidatedOutputDocument = project!.AddDocument( "ConsolidatedOutput.cs", consolidatedOutputSyntax );
 
                     // Display the transformed code.
                     this.TransformedCodeDocument = SyntaxColorizer.WriteSyntaxColoring( consolidatedOutputDocument );

@@ -27,7 +27,7 @@ namespace Caravela.Framework.Aspects
     {
         private static readonly AsyncLocal<IMetaApi?> _currentContext = new();
 
-        private static IMetaApi CurrentContext => _currentContext.Value ?? throw NewInvalidOperationException();
+        internal static IMetaApi CurrentContext => _currentContext.Value ?? throw NewInvalidOperationException();
 
         private static InvalidOperationException NewInvalidOperationException()
             => new( "The 'meta' API can be used only in the execution context of a template." );
@@ -38,6 +38,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets access to the declaration being overridden or introduced.
         /// </summary>
+        [TemplateKeyword]
         public static IMetaTarget Target => CurrentContext.Target;
 
         /// <summary>
@@ -54,27 +55,32 @@ namespace Caravela.Framework.Aspects
         /// the actual return type of the overridden method or accessor is the one of the overwritten semantic, so it
         /// can be a void <see cref="Task"/>, a <see cref="ValueType"/>, or any other type.
         /// </summary>
+        [TemplateKeyword]
         public static Task<dynamic?> ProceedAsync() => throw NewMustBeTransformedException();
 
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IEnumerable&lt;dynamic?&gt;</c>.
         /// </summary>
+        [TemplateKeyword]
         public static IEnumerable<dynamic?> ProceedEnumerable() => throw NewMustBeTransformedException();
 
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IEnumerator&lt;dynamic?&gt;</c>.
         /// </summary>
+        [TemplateKeyword]
         public static IEnumerator<dynamic?> ProceedEnumerator() => throw NewMustBeTransformedException();
 
 #if NET5_0
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IAsyncEnumerable&lt;dynamic?&gt;</c>.
         /// </summary>
+        [TemplateKeyword]
         public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => throw NewMustBeTransformedException();
 
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IAsyncEnumerator&lt;dynamic?&gt;</c>.
         /// </summary>
+        [TemplateKeyword]
         public static IAsyncEnumerator<dynamic?> ProceedAsyncEnumerator() => throw NewMustBeTransformedException();
 #endif
 
@@ -180,16 +186,6 @@ namespace Caravela.Framework.Aspects
         public static IReadOnlyList<IAspectInstance> UpstreamAspects => throw new NotImplementedException();
 
         /// <summary>
-        /// Injects a comment to the target code.
-        /// </summary>
-        /// <param name="lines">A list of comment lines, without the <c>//</c> prefix. Null strings are processed as blank ones and will inject a blank comment line.</param>
-        /// <remarks>
-        /// This method is not able to add a comment to an empty block. The block must contain at least one statement.
-        /// </remarks>
-        [TemplateKeyword]
-        public static void Comment( params string?[] lines ) => throw NewInvalidOperationException();
-
-        /// <summary>
         /// Generates the cast syntax for the specified type.  
         /// </summary>
         /// <param name="type"></param>
@@ -198,6 +194,33 @@ namespace Caravela.Framework.Aspects
         /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static dynamic? Cast( IType type, dynamic? value ) => type.Compilation.TypeFactory.Cast( type, value );
+
+        /// <summary>
+        /// Injects a comment to the target code.
+        /// </summary>
+        /// <param name="lines">A list of comment lines, without the <c>//</c> prefix. Null strings are processed as blank ones and will inject a blank comment line.</param>
+        /// <remarks>
+        /// This method is not able to add a comment to an empty block. The block must contain at least one statement.
+        /// </remarks>
+        [TemplateKeyword]
+        public static void Comment( params string?[] lines ) => throw new NotSupportedException();
+
+        /// <summary>
+        /// Creates a compile-time object that represents a run-time <i>expression</i>, i.e. the syntax or code, and not the result
+        /// itself. The returned <see cref="IExpression"/> can then be used in other run-time expressions. This method allows to generate expressions that
+        /// depend on compile-time conditions.
+        /// </summary>
+        /// <param name="expression">A run-time expression, possibly containing compile-time sub-expressions.</param>
+        /// <param name="definedException">A compile-time object representing <paramref name="expression"/>. Note that may have to specify the
+        /// type of the <c>out</c> variable explicitly, as <c>out var</c> does not work when another argument is dynamic.</param>
+        [TemplateKeyword]
+        public static void DefineExpression( dynamic? expression, out IExpression definedException )
+            => definedException = CurrentContext.CodeBuilder.Expression( expression );
+
+        /// <summary>
+        /// Parses a string containing a C# expression and returns an <see cref="IExpression"/> allowing to use this expression in a template.
+        /// </summary>
+        public static IExpression ParseExpression( string code ) => CurrentContext.CodeBuilder.Parse( code );
 
         internal static IDisposable WithContext( IMetaApi current )
         {
@@ -208,10 +231,7 @@ namespace Caravela.Framework.Aspects
 
         private class InitializeCookie : IDisposable
         {
-            public void Dispose()
-            {
-                _currentContext.Value = null;
-            }
+            public void Dispose() => _currentContext.Value = null;
         }
     }
 }

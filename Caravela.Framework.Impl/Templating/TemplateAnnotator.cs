@@ -568,13 +568,55 @@ namespace Caravela.Framework.Impl.Templating
             return nodeOrToken;
         }
 
+        public override SyntaxNode? VisitMemberBindingExpression( MemberBindingExpressionSyntax node )
+        {
+            var transformedName = this.Visit( node.Name );
+
+            return node.WithName( transformedName ).WithScopeAnnotationFrom( transformedName );
+        }
+
         public override SyntaxNode? VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
         {
-            var transformedName = this.Visit( node.Name )!;
+            this.VisitAccessExceptionCore(
+                node.Expression,
+                node.Name,
+                node.OperatorToken,
+                out var transformedExpression,
+                out var transformedName,
+                out var transformedOperator,
+                out var scope );
 
-            var nameScope = this.GetNodeScope( transformedName );
+            return node.Update( transformedExpression, transformedOperator, (SimpleNameSyntax) transformedName ).AddScopeAnnotation( scope );
+        }
+
+        public override SyntaxNode? VisitConditionalAccessExpression( ConditionalAccessExpressionSyntax node )
+        {
+            this.VisitAccessExceptionCore(
+                node.Expression,
+                node.WhenNotNull,
+                node.OperatorToken,
+                out var transformedExpression,
+                out var transformedWhenNotNull,
+                out var transformedOperator,
+                out var scope );
+
+            return node.Update( transformedExpression, transformedOperator, transformedWhenNotNull ).AddScopeAnnotation( scope );
+        }
+
+        private void VisitAccessExceptionCore(
+            ExpressionSyntax left,
+            ExpressionSyntax right,
+            SyntaxToken operatorToken,
+            out ExpressionSyntax transformedLeft,
+            out ExpressionSyntax transformedRight,
+            out SyntaxToken transformedOperator,
+            out TemplatingScope scope )
+        {
+            transformedRight = this.Visit( right )!;
+
+            var nameScope = this.GetNodeScope( transformedRight );
             ScopeContext? context = null;
-            var scope = TemplatingScope.Both;
+            scope = TemplatingScope.Both;
 
             switch ( nameScope )
             {
@@ -582,7 +624,7 @@ namespace Caravela.Framework.Impl.Templating
                 case TemplatingScope.CompileTimeOnlyReturningBoth:
                 case TemplatingScope.CompileTimeOnlyReturningRuntimeOnly:
                     // If the member is compile-time (because of rules on the symbol), the expression on the left MUST be compile-time.
-                    context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a compile-time-only member '{node.Name}'" );
+                    context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a compile-time-only member '{right}'" );
                     scope = nameScope;
 
                     break;
@@ -594,10 +636,10 @@ namespace Caravela.Framework.Impl.Templating
 
                     break;
 
-                case TemplatingScope.Unknown when this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol:
+                case TemplatingScope.Unknown when this._syntaxTreeAnnotationMap.GetExpressionType( left ) is IDynamicTypeSymbol:
                     // This is a member access of a dynamic receiver.
                     scope = TemplatingScope.RunTimeOnly;
-                    context = ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, $"a member of the run-time-only '{node.Name}'" );
+                    context = ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, $"a member of the run-time-only '{right}'" );
 
                     break;
 
@@ -609,24 +651,21 @@ namespace Caravela.Framework.Impl.Templating
 
             using ( this.WithScopeContext( context ) )
             {
-                var transformedExpression = this.Visit( node.Expression )!;
+                transformedLeft = this.Visit( left )!;
 
                 if ( scope == TemplatingScope.Both )
                 {
-                    scope = this.GetNodeScope( transformedExpression );
+                    scope = this.GetNodeScope( transformedLeft );
                 }
 
                 // If both sides of the member are template keywords, display the . as a template keyword too.
-                var transformedOperatorToken = node.OperatorToken;
+                transformedOperator = operatorToken;
 
-                if ( transformedExpression.GetColorFromAnnotation() == TextSpanClassification.TemplateKeyword &&
-                     transformedName.GetColorFromAnnotation() == TextSpanClassification.TemplateKeyword )
+                if ( transformedLeft.GetColorFromAnnotation() == TextSpanClassification.TemplateKeyword &&
+                     transformedRight.GetColorFromAnnotation() == TextSpanClassification.TemplateKeyword )
                 {
-                    transformedOperatorToken = transformedOperatorToken.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
+                    transformedOperator = transformedOperator.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
                 }
-
-                return node.Update( transformedExpression, transformedOperatorToken, transformedName )
-                    .AddScopeAnnotation( scope );
             }
         }
 
@@ -1124,6 +1163,18 @@ namespace Caravela.Framework.Impl.Templating
         {
             var transformedType = this.Visit( node.Type )!;
 
+            if ( this._templateMemberClassifier.IsDynamicType( transformedType )
+                 && !(node.Type is IdentifierNameSyntax { Identifier: { Text: "var" } }) )
+            {
+                foreach ( var variable in node.Variables.Where( v => v.Initializer == null ) )
+                {
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.CannotUseDynamicInUninitializedLocal,
+                        variable.Identifier,
+                        variable.Identifier.Text );
+                }
+            }
+
             if ( this.GetNodeScope( transformedType ) == TemplatingScope.CompileTimeOnly )
             {
                 using ( this.WithScopeContext(
@@ -1284,9 +1335,11 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitExpressionStatement( ExpressionStatementSyntax node )
         {
-            var transformedNode = (ExpressionStatementSyntax) base.VisitExpressionStatement( node )!;
+            var transformedExpression = this.Visit( node.Expression )!;
+            var expressionScope = this.GetNodeScope( transformedExpression );
+            var statementScope = expressionScope.GetExpressionExecutionScope();
 
-            return transformedNode.WithScopeAnnotationFrom( transformedNode.Expression );
+            return node.WithExpression( transformedExpression ).AddScopeAnnotation( expressionScope ).AddTargetScopeAnnotation( statementScope );
         }
 
         public override SyntaxNode? VisitCastExpression( CastExpressionSyntax node )
@@ -1455,9 +1508,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public override SyntaxNode? VisitReturnStatement( ReturnStatementSyntax node )
-        {
-            return base.VisitReturnStatement( node ).AddScopeAnnotation( TemplatingScope.RunTimeOnly );
-        }
+            => base.VisitReturnStatement( node ).AddScopeAnnotation( TemplatingScope.RunTimeOnly );
 
         #region Unsupported Features
 

@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl
                  "Unexpected exception in Caravela." );
 
         public static readonly
-            DiagnosticDefinition<(ITypeSymbol AspectType, DeclarationKind DeclarationKind, IDeclaration Declaration, ITypeSymbol InterfaceType)>
+            DiagnosticDefinition<(string AspectType, DeclarationKind DeclarationKind, IDeclaration Declaration, ITypeSymbol InterfaceType)>
             AspectAppliedToIncorrectDeclaration =
                 new( "CR0003", _category, "Aspect '{0}' cannot be applied to {1} '{2}', because this aspect does not implement the '{3}' interface.", Error,
                      "Aspect applied to incorrect kind of declaration." );
@@ -90,7 +90,7 @@ namespace Caravela.Framework.Impl
             _category,
             Error );
 
-        public static readonly DiagnosticDefinition<(INamedTypeSymbol AspectType, string ExceptionType, string Exception)> ExceptionInUserCode = new(
+        public static readonly DiagnosticDefinition<(string AspectType, string ExceptionType, string Exception)> ExceptionInUserCode = new(
             "CR0026", _category, "The aspect '{0}' has thrown an exception of the '{1}': {2}", Error, "The aspect has thrown an exception." );
 
         public static readonly DiagnosticDefinition<AssemblyIdentity> CannotFindCompileTimeAssembly = new(

@@ -18,6 +18,6 @@ namespace Caravela.Framework.Impl.Diagnostics
         };
 
         public static SymbolDisplayFormat? ToRoslyn( this CodeDisplayFormat? codeDisplayFormat )
-            => codeDisplayFormat == null ? SymbolDisplayFormat.CSharpErrorMessageFormat : _map[codeDisplayFormat];
+            => codeDisplayFormat == null ? SymbolDisplayFormat.CSharpShortErrorMessageFormat : _map[codeDisplayFormat];
     }
 }

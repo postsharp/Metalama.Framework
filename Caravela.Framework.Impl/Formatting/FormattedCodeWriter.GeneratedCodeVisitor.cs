@@ -14,9 +14,17 @@ namespace Caravela.Framework.Impl.Formatting
         {
             private readonly ClassifiedTextSpanCollection _textSpans;
 
-            public GeneratedCodeVisitor( ClassifiedTextSpanCollection textSpans )
+            public GeneratedCodeVisitor( ClassifiedTextSpanCollection textSpans ) : base( SyntaxWalkerDepth.Token )
             {
                 this._textSpans = textSpans;
+            }
+
+            public override void VisitToken( SyntaxToken token )
+            {
+                if ( token.HasAnnotation( FormattingAnnotations.GeneratedCode ) )
+                {
+                    this._textSpans.Add( token.Span, TextSpanClassification.GeneratedCode );
+                }
             }
 
             public override void Visit( SyntaxNode? node )

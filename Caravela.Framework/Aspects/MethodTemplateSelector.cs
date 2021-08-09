@@ -62,7 +62,7 @@ namespace Caravela.Framework.Aspects
 
         /// <summary>
         /// Gets a value indicating whether the <see cref="EnumerableTemplate"/>, <see cref="EnumeratorTemplate"/>, <see cref="AsyncEnumerableTemplate"/>,
-        /// <see cref="AsyncEnumeratorTemplate"/> must be applied to all methods returning compatible return type (if set to <c>true</c>),
+        /// <see cref="AsyncEnumeratorTemplate"/> must be applied to all methods returning a compatible return type (if set to <c>true</c>),
         /// instead of only to methods using the <c>yield</c> statement.
         /// </summary>
         public bool UseEnumerableTemplateForAnyEnumerable { get; }
@@ -91,7 +91,7 @@ namespace Caravela.Framework.Aspects
         /// See <see cref="UseAsyncTemplateForAnyAwaitable"/> for details.  
         /// </param>
         /// <param name="useEnumerableTemplateForAnyEnumerable">Indicates whether the <see cref="EnumerableTemplate"/>, <see cref="EnumeratorTemplate"/>, <see cref="AsyncEnumerableTemplate"/>,
-        /// <see cref="AsyncEnumeratorTemplate"/> must be applied to all methods returning compatible return type (if set to <c>true</c>),
+        /// <see cref="AsyncEnumeratorTemplate"/> must be applied to all methods returning a compatible return type (if set to <c>true</c>),
         /// instead of only to methods using the <c>yield</c> statement.
         /// See <see cref="UseEnumerableTemplateForAnyEnumerable"/> for details.
         /// </param>

@@ -202,5 +202,23 @@ namespace Caravela.Framework.Impl.Templating
                     "Cannot use the {0} method in '{1}' because the return type of the method is compatible with the {0} method.",
                     _category,
                     Error );
+
+        internal static readonly DiagnosticDefinition<string>
+            CannotUseDynamicInUninitializedLocal
+                = new(
+                    "CR0224",
+                    "Cannot declare local variable with the dynamic type if the variable is not initialized.",
+                    "The 'dynamic' keyword cannot be used in the local variable '{0}' because it is not initialized. Use 'var'.",
+                    _category,
+                    Error );
+
+        internal static readonly DiagnosticDefinition<string>
+            CallToExpressionMustHaveExplicitCast
+                = new(
+                    "CR0225",
+                    "Calls to meta.Expression must be explicitly cast to IExpression.",
+                    "The call to '{0}' must be explicitly cast to IExpression.",
+                    _category,
+                    Error );
     }
 }

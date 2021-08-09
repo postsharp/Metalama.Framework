@@ -55,7 +55,7 @@ namespace Caravela.AspectWorkbench.Model
             await File.WriteAllTextAsync( expectedTransformedCodeFilePath, test.ExpectedTransformedCode );
 
             var expectedProgramOutputFilePath = GetExpectedProgramOutputFilePath( filePath );
-            
+
             if ( !string.IsNullOrWhiteSpace( test.ExpectedProgramOutput ) )
             {
                 await File.WriteAllTextAsync( expectedProgramOutputFilePath, test.ExpectedProgramOutput );

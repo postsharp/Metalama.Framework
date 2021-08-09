@@ -81,6 +81,9 @@ namespace Caravela.Framework.Impl.Serialization
             this.RegisterSerializer( new CompileTimeParameterInfoSerializer( this ) );
             this.RegisterSerializer( new CompileTimeReturnParameterInfoSerializer( this ) );
             this.RegisterSerializer( new CompileTimeFieldOrPropertyInfoSerializer( this ) );
+
+            // Dynamic syntax
+            this.RegisterSerializer( new DynamicSyntaxSerializer( this ) );
         }
 
         internal TypeSerializer TypeSerializer { get; }
@@ -117,7 +120,7 @@ namespace Caravela.Framework.Impl.Serialization
         public SerializableTypes GetSerializableTypes( ISyntaxFactory syntaxFactory )
             => new( this._supportedContractTypes.Keys.Distinct().Select( syntaxFactory.GetTypeSymbol ).ToImmutableHashSet() );
 
-        public bool TryGetSerializer<T>( T obj, [NotNullWhen( true )] out ObjectSerializer? serializer )
+        private bool TryGetSerializer<T>( T obj, [NotNullWhen( true )] out ObjectSerializer? serializer )
         {
             switch ( obj )
             {
@@ -214,7 +217,8 @@ namespace Caravela.Framework.Impl.Serialization
             return contractTypeDeclaration;
         }
 
-        private static bool ValidateContractType( Type contractType, ObjectSerializer serializer ) => contractType.IsAssignableFrom( serializer.OutputType );
+        private static bool ValidateContractType( Type contractType, ObjectSerializer serializer )
+            => serializer.OutputType == null || contractType.IsAssignableFrom( serializer.OutputType );
 
         /// <summary>
         /// Serializes an object into a Roslyn expression that would create it. For example, serializes a list containing "4" and "8" into <c>new System.Collections.Generic.List&lt;System.Int32&gt;{4, 8}</c>.

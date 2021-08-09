@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
+using System.Runtime.Serialization;
 
 namespace Caravela.Framework.Aspects
 {
@@ -20,6 +21,11 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <param name="builder">An object that allows the aspect to configure characteristics like
         /// description, dependencies, or layers.</param>
+        /// <remarks>
+        /// Do not reference instance class members in your implementation of  <see cref="BuildAspectClass"/>.
+        /// Indeed, this method is called on an instance obtained using <see cref="FormatterServices.GetUninitializedObject"/>, that is,
+        /// <i>without invoking the class constructor</i>.
+        /// </remarks>
         void BuildAspectClass( IAspectClassBuilder builder )
 #if NET5_0
         { }

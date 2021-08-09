@@ -39,6 +39,8 @@ namespace Caravela.Framework.Impl.Templating
 
         ProceedAsyncEnumerable,
 
-        ProceedAsyncEnumerator
+        ProceedAsyncEnumerator,
+
+        Expression
     }
 }

@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IGenericParameterList GenericParameters
             => new GenericParameterList(
                 this,
-                this.MethodSymbol.TypeParameters.Select( tp => DeclarationRef.FromSymbol<IGenericParameter>( tp ) ) );
+                this.MethodSymbol.TypeParameters.Select( DeclarationRef.FromSymbol<IGenericParameter> ) );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 

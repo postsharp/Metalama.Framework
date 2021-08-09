@@ -4,19 +4,19 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Builders;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.Impl.Advices
 {
     internal static class AdviceAttributeFactory
     {
         public static bool TryCreateAdvice<T>(
-            this AttributeData attribute,
+            this TemplateInfo template,
             AspectInstance aspect,
             IDiagnosticAdder diagnosticAdder,
             T aspectTargetDeclaration,
@@ -25,28 +25,10 @@ namespace Caravela.Framework.Impl.Advices
             [NotNullWhen( true )] out Advice? advice )
             where T : IDeclaration
         {
-            var namedArguments = attribute.NamedArguments.ToDictionary( p => p.Key, p => p.Value );
-
-            bool TryGetNamedArgument<TArg>( string name, [NotNullWhen( true )] out TArg? value )
+            switch ( template.AttributeType )
             {
-                if ( namedArguments.TryGetValue( name, out var objectValue ) && objectValue.Value != null )
-                {
-                    value = (TArg) objectValue.Value;
-
-                    return true;
-                }
-
-                value = default;
-
-                return false;
-            }
-
-            switch ( attribute.AttributeClass?.Name )
-            {
-                case nameof(IntroduceAttribute):
+                case TemplateAttributeType.Introduction:
                     {
-                        TryGetNamedArgument<IntroductionScope>( nameof(IntroduceAttribute.Scope), out var scope );
-                        TryGetNamedArgument<OverrideStrategy>( nameof(IntroduceAttribute.WhenExists), out var conflictBehavior );
                         IMemberBuilder builder;
                         INamedType targetType;
 
@@ -63,11 +45,9 @@ namespace Caravela.Framework.Impl.Advices
                                 break;
 
                             default:
-                                // TODO: This error should probably not be reported when the aspect is used, but when it is compiled, because it does not depend on a specific target.
-                                // However, we don't have the infrastructure to do it now.
                                 diagnosticAdder.Report(
                                     AdviceDiagnosticDescriptors.CannotUseIntroduceWithoutDeclaringType.CreateDiagnostic(
-                                        attribute.GetLocation(),
+                                        aspectTargetDeclaration.GetDiagnosticLocation(),
                                         (aspect.AspectClass.DisplayName, templateDeclaration.DeclarationKind, aspectTargetDeclaration.DeclarationKind) ) );
 
                                 advice = null;
@@ -81,9 +61,9 @@ namespace Caravela.Framework.Impl.Advices
                                 var introduceMethodAdvice = new IntroduceMethodAdvice(
                                     aspect,
                                     targetType,
-                                    Template.Create( templateMethod, TemplateKind.Introduction ),
-                                    scope,
-                                    conflictBehavior,
+                                    Template.Create( templateMethod, template, TemplateKind.Introduction ),
+                                    template.Attribute.Scope,
+                                    template.Attribute.WhenExists,
                                     layerName,
                                     null );
 
@@ -97,11 +77,11 @@ namespace Caravela.Framework.Impl.Advices
                                     aspect,
                                     targetType,
                                     null,
-                                    Template.Create( templateProperty, TemplateKind.Introduction ),
+                                    Template.Create( templateProperty, template, TemplateKind.Introduction ),
                                     default,
                                     default,
-                                    scope,
-                                    conflictBehavior,
+                                    template.Attribute.Scope,
+                                    template.Attribute.WhenExists,
                                     layerName,
                                     null );
 
@@ -115,11 +95,11 @@ namespace Caravela.Framework.Impl.Advices
                                     aspect,
                                     targetType,
                                     null,
-                                    Template.Create( templateEvent, TemplateKind.Introduction ),
+                                    Template.Create( templateEvent, template, TemplateKind.Introduction ),
                                     default,
                                     default,
-                                    scope,
-                                    conflictBehavior,
+                                    template.Attribute.Scope,
+                                    template.Attribute.WhenExists,
                                     layerName,
                                     null );
 
@@ -133,9 +113,9 @@ namespace Caravela.Framework.Impl.Advices
                                     aspect,
                                     targetType,
                                     null,
-                                    Template.Create( templateField, TemplateKind.Introduction ),
-                                    scope,
-                                    conflictBehavior,
+                                    Template.Create( templateField, template, TemplateKind.Introduction ),
+                                    template.Attribute.Scope,
+                                    template.Attribute.WhenExists,
                                     layerName );
 
                                 advice = introduceFieldAdvice;
@@ -149,31 +129,13 @@ namespace Caravela.Framework.Impl.Advices
 
                         advice.Initialize( Array.Empty<Advice>(), diagnosticAdder );
 
-                        if ( TryGetNamedArgument<string>( nameof(IntroduceAttribute.Name), out var name ) )
-                        {
-                            builder.Name = name;
-                        }
-
-                        if ( TryGetNamedArgument<bool>( nameof(IntroduceAttribute.IsVirtual), out var isVirtual ) )
-                        {
-                            builder.IsVirtual = isVirtual;
-                        }
-
-                        if ( TryGetNamedArgument<bool>( nameof(IntroduceAttribute.IsSealed), out var isSealed ) )
-                        {
-                            builder.IsSealed = isSealed;
-                        }
-
-                        if ( TryGetNamedArgument<Accessibility>( nameof(IntroduceAttribute.Accessibility), out var accessibility ) )
-                        {
-                            builder.Accessibility = accessibility;
-                        }
+                        ((MemberBuilder) builder).ApplyTemplateAttribute( template.Attribute );
 
                         return true;
                     }
             }
 
-            throw new NotImplementedException( $"No implementation for advice attribute {attribute.AttributeClass}." );
+            throw new NotImplementedException( $"No implementation for advice attribute {template.AttributeType}." );
         }
     }
 }

@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.References;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -34,9 +35,25 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public int GetHashCode( INamedType obj ) => SymbolEqualityComparer.Default.GetHashCode( obj.GetSymbol() );
 
-        public bool Is( IType left, IType right )
-            => this._compilation.HasImplicitConversion( ((ITypeInternal) left).TypeSymbol, ((ITypeInternal) right).TypeSymbol );
+        public bool Is( IType left, IType right, ConversionKind kind ) => this.Is( left.GetSymbol(), right.GetSymbol(), kind );
 
-        public bool Is( IType left, Type right ) => this._compilation.HasImplicitConversion( left.GetSymbol(), this._reflectionMapper.GetTypeSymbol( right ) );
+        public bool Is( IType left, Type right, ConversionKind kind ) => this.Is( left.GetSymbol(), this._reflectionMapper.GetTypeSymbol( right ), kind );
+
+        private bool Is( ITypeSymbol left, ITypeSymbol right, ConversionKind kind )
+        {
+            var conversion = this._compilation.ClassifyConversion( left, right );
+
+            switch ( kind )
+            {
+                case ConversionKind.Implicit:
+                    return conversion.IsImplicit;
+
+                case ConversionKind.ImplicitReference:
+                    return conversion.IsImplicit && !conversion.IsBoxing && !conversion.IsUserDefined && !conversion.IsDynamic;
+
+                default:
+                    throw new ArgumentOutOfRangeException( nameof(kind) );
+            }
+        }
     }
 }

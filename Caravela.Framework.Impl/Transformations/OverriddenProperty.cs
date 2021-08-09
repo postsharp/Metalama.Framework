@@ -45,8 +45,8 @@ namespace Caravela.Framework.Impl.Transformations
 
                 if ( !propertyTemplate.Declaration!.IsAutoPropertyOrField )
                 {
-                    this.GetTemplate = Template.Create( this.PropertyTemplate.Declaration!.GetMethod );
-                    this.SetTemplate = Template.Create( this.PropertyTemplate.Declaration!.SetMethod );
+                    this.GetTemplate = Template.Create( this.PropertyTemplate.Declaration!.GetMethod, this.GetTemplate.TemplateInfo );
+                    this.SetTemplate = Template.Create( this.PropertyTemplate.Declaration!.SetMethod, this.GetTemplate.TemplateInfo );
                 }
             }
             else
@@ -184,8 +184,7 @@ namespace Caravela.Framework.Impl.Transformations
                             this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
                         MethodKind.PropertySet => new DynamicExpression(
                             this.CreateProceedSetExpression(),
-                            this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
-                            false ),
+                            this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ) ),
                         _ => throw new AssertionFailedException()
                     };
 

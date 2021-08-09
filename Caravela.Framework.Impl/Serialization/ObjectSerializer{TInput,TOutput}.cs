@@ -29,6 +29,6 @@ namespace Caravela.Framework.Impl.Serialization
 
         public sealed override Type InputType => typeof(TInput);
 
-        public sealed override Type OutputType => typeof(TOutput);
+        public override Type? OutputType => typeof(TOutput);
     }
 }

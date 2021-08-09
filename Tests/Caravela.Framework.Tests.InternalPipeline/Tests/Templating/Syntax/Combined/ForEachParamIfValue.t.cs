@@ -11,5 +11,5 @@ string Method(object a, object b)
     }
 
     var result = this.Method(a, b);
-    return (string)result;
+    return (global::System.String)(result);
 }

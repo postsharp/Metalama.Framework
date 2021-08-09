@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.Transformations
                             expression = GenerateAwaitBufferAsync();
                         }
 
-                        return new DynamicExpression( expression, overriddenMethod.ReturnType, false );
+                        return new DynamicExpression( expression, overriddenMethod.ReturnType );
                     }
 
                 case TemplateKind.Default when overriddenMethod.GetAsyncInfoImpl() is { IsAsync: true, IsAwaitableOrVoid: true } asyncInfo:
@@ -68,8 +68,7 @@ namespace Caravela.Framework.Impl.Transformations
                         return new DynamicExpression(
                             SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( invocationExpression ) )
                                 .WithAdditionalAnnotations( Simplifier.Annotation ),
-                            taskResultType,
-                            false );
+                            taskResultType );
                     }
 
                 case TemplateKind.Async when overriddenMethod.GetIteratorInfoImpl() is
@@ -77,7 +76,7 @@ namespace Caravela.Framework.Impl.Transformations
                     {
                         var expression = GenerateAwaitBufferAsync();
 
-                        return new DynamicExpression( expression, overriddenMethod.ReturnType, false );
+                        return new DynamicExpression( expression, overriddenMethod.ReturnType );
                     }
             }
 
@@ -85,8 +84,7 @@ namespace Caravela.Framework.Impl.Transformations
             // Generate: `BASE(ARGS)`
             return new DynamicExpression(
                 invocationExpression,
-                overriddenMethod.ReturnType,
-                false );
+                overriddenMethod.ReturnType );
 
             ExpressionSyntax GenerateAwaitBufferAsync()
             {

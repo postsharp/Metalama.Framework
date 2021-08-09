@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -25,10 +26,11 @@ namespace Caravela.TestFramework
         private static readonly Regex _spaceRegex = new( " +", RegexOptions.Compiled );
         private static readonly Regex _newLineRegex = new( "( *[\n|\r])+", RegexOptions.Compiled );
         private readonly MetadataReference[] _additionalAssemblies;
+        private static readonly AsyncLocal<bool> _isTestRunning = new();
 
-        public IServiceProvider ServiceProvider { get; }
+        protected IServiceProvider ServiceProvider { get; }
 
-        public BaseTestRunner(
+        protected BaseTestRunner(
             IServiceProvider serviceProvider,
             string? projectDirectory,
             IEnumerable<MetadataReference> metadataReferences,
@@ -50,14 +52,24 @@ namespace Caravela.TestFramework
 
         public ITestOutputHelper? Logger { get; }
 
-        protected virtual TestResult CreateTestResult() => new();
+        public async Task RunAndAssertAsync( TestInput testInput )
+        {
+            Dictionary<string, object?> state = new( StringComparer.Ordinal );
+            var testResult = await this.RunAsync( testInput, state );
+            this.SaveResults( testInput, testResult, state );
+            this.ExecuteAssertions( testInput, testResult, state );
+        }
+
+        public Task<TestResult> RunAsync( TestInput testInput )
+            => this.RunAsync( testInput, new Dictionary<string, object?>( StringComparer.InvariantCulture ) );
 
         /// <summary>
         /// Runs a test.
         /// </summary>
         /// <param name="testInput"></param>
+        /// <param name="state"></param>
         /// <returns></returns>
-        public virtual async Task<TestResult> RunTestAsync( TestInput testInput )
+        private protected virtual async Task<TestResult> RunAsync( TestInput testInput, Dictionary<string, object?> state )
         {
             if ( testInput.Options.InvalidSourceOptions.Count > 0 )
             {
@@ -66,72 +78,88 @@ namespace Caravela.TestFramework
                     string.Join( ", ", testInput.Options.InvalidSourceOptions ) );
             }
 
-            var testResult = this.CreateTestResult();
-
-            // Source. Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
-            // which is more difficult to test.
-            var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER", "CARAVELA" );
-            var project = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions );
-
-            Document AddDocument( string fileName, string sourceCode )
+            if ( _isTestRunning.Value )
             {
-                var parsedSyntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
-                var prunedSyntaxRoot = new InactiveCodeRemover().Visit( parsedSyntaxTree.GetRoot() );
-                var transformedSyntaxRoot = this.PreprocessSyntaxRoot( testInput, prunedSyntaxRoot );
-                var document = project.AddDocument( fileName, transformedSyntaxRoot, filePath: fileName );
-                project = document.Project;
-
-                return document;
+                throw new InvalidOperationException( "A test is already running." );
+            }
+            else
+            {
+                _isTestRunning.Value = true;
             }
 
-            var sourceFileName = testInput.TestName + ".cs";
-            var mainDocument = AddDocument( sourceFileName, testInput.SourceCode );
-
-            var syntaxTree = (await mainDocument.GetSyntaxTreeAsync())!;
-
-            testResult.AddInputDocument( mainDocument, testInput.FullPath );
-
-            var initialCompilation = CSharpCompilation.Create(
-                "test",
-                new[] { syntaxTree },
-                project.MetadataReferences,
-                (CSharpCompilationOptions?) project.CompilationOptions );
-
-            foreach ( var includedFile in testInput.Options.IncludedFiles )
+            try
             {
-                var includedFullPath = Path.GetFullPath( Path.Combine( Path.GetDirectoryName( testInput.FullPath )!, includedFile ) );
-                var includedText = File.ReadAllText( includedFullPath );
-                var includedFileName = Path.GetFileName( includedFullPath );
+                var testResult = new TestResult();
 
-                var includedDocument = AddDocument( includedFileName, includedText );
+                // Source. Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
+                // which is more difficult to test.
+                var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER", "CARAVELA" );
+                var project = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions );
 
-                testResult.AddInputDocument( includedDocument, includedFullPath );
-
-                var includedSyntaxTree = (await includedDocument.GetSyntaxTreeAsync())!;
-                initialCompilation = initialCompilation.AddSyntaxTrees( includedSyntaxTree );
-            }
-
-            ValidateCustomAttributes( initialCompilation );
-
-            testResult.InputProject = project;
-            testResult.TestInput = testInput;
-            testResult.InputCompilation = initialCompilation;
-
-            if ( this.ReportInvalidInputCompilation )
-            {
-                var diagnostics = initialCompilation.GetDiagnostics();
-                var errors = diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToArray();
-
-                if ( errors.Any() )
+                Document AddDocument( string fileName, string sourceCode )
                 {
-                    testResult.InputCompilationDiagnostics.Report( errors );
-                    testResult.SetFailed( "The initial compilation failed." );
+                    var parsedSyntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
+                    var prunedSyntaxRoot = new InactiveCodeRemover().Visit( parsedSyntaxTree.GetRoot() );
+                    var transformedSyntaxRoot = this.PreprocessSyntaxRoot( testInput, prunedSyntaxRoot, state );
+                    var document = project.AddDocument( fileName, transformedSyntaxRoot, filePath: fileName );
+                    project = document.Project;
 
-                    return testResult;
+                    return document;
                 }
-            }
 
-            return testResult;
+                var sourceFileName = testInput.TestName + ".cs";
+                var mainDocument = AddDocument( sourceFileName, testInput.SourceCode );
+
+                var syntaxTree = (await mainDocument.GetSyntaxTreeAsync())!;
+
+                testResult.AddInputDocument( mainDocument, testInput.FullPath );
+
+                var initialCompilation = CSharpCompilation.Create(
+                    "test",
+                    new[] { syntaxTree },
+                    project.MetadataReferences,
+                    (CSharpCompilationOptions?) project.CompilationOptions );
+
+                foreach ( var includedFile in testInput.Options.IncludedFiles )
+                {
+                    var includedFullPath = Path.GetFullPath( Path.Combine( Path.GetDirectoryName( testInput.FullPath )!, includedFile ) );
+                    var includedText = File.ReadAllText( includedFullPath );
+                    var includedFileName = Path.GetFileName( includedFullPath );
+
+                    var includedDocument = AddDocument( includedFileName, includedText );
+
+                    testResult.AddInputDocument( includedDocument, includedFullPath );
+
+                    var includedSyntaxTree = (await includedDocument.GetSyntaxTreeAsync())!;
+                    initialCompilation = initialCompilation.AddSyntaxTrees( includedSyntaxTree );
+                }
+
+                ValidateCustomAttributes( initialCompilation );
+
+                testResult.InputProject = project;
+                testResult.TestInput = testInput;
+                testResult.InputCompilation = initialCompilation;
+
+                if ( this.ReportInvalidInputCompilation )
+                {
+                    var diagnostics = initialCompilation.GetDiagnostics();
+                    var errors = diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToArray();
+
+                    if ( errors.Any() )
+                    {
+                        testResult.InputCompilationDiagnostics.Report( errors );
+                        testResult.SetFailed( "The initial compilation failed." );
+
+                        return testResult;
+                    }
+                }
+
+                return testResult;
+            }
+            finally
+            {
+                _isTestRunning.Value = false;
+            }
         }
 
         /// <summary>
@@ -139,11 +167,10 @@ namespace Caravela.TestFramework
         /// </summary>
         /// <param name="testInput"></param>
         /// <param name="syntaxRoot"></param>
+        /// <param name="state"></param>
         /// <returns></returns>
-        protected virtual SyntaxNode PreprocessSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot )
-        {
-            return syntaxRoot;
-        }
+        private protected virtual SyntaxNode PreprocessSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot, Dictionary<string, object?> state )
+            => syntaxRoot;
 
         private static void ValidateCustomAttributes( Compilation compilation )
         {
@@ -157,9 +184,9 @@ namespace Caravela.TestFramework
             }
         }
 
-        public static string NormalizeEndOfLines( string s ) => _newLineRegex.Replace( s, "\n" ).Trim();
+        private protected static string NormalizeEndOfLines( string? s ) => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, "\n" ).Trim();
 
-        public static string? NormalizeTestOutput( string? s, bool preserveFormatting )
+        internal static string? NormalizeTestOutput( string? s, bool preserveFormatting )
             => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting );
 
         private static string? NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting )
@@ -179,11 +206,18 @@ namespace Caravela.TestFramework
             }
         }
 
-        public virtual void ExecuteAssertions( TestInput testInput, TestResult testResult )
+        private protected virtual bool CompareTransformedCode => true;
+
+        private protected virtual void SaveResults( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
             if ( this.ProjectDirectory == null )
             {
                 throw new InvalidOperationException( "This method cannot be called when the test path is unknown." );
+            }
+
+            if ( !this.CompareTransformedCode )
+            {
+                return;
             }
 
             var formatCode = testInput.Options.FormatOutput.GetValueOrDefault( true );
@@ -255,16 +289,30 @@ namespace Caravela.TestFramework
                 }
             }
 
+            state["expectedTransformedSourceText"] = expectedTransformedSourceText;
+            state["actualTransformedNormalizedSourceText"] = actualTransformedNormalizedSourceText;
+        }
+
+        private protected virtual void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        {
+            if ( !this.CompareTransformedCode )
+            {
+                return;
+            }
+
+            var expectedTransformedSourceText = (string) state["expectedTransformedSourceText"]!;
+            var actualTransformedNormalizedSourceText = (string) state["actualTransformedNormalizedSourceText"]!;
+
             Assert.Equal( expectedTransformedSourceText, actualTransformedNormalizedSourceText );
         }
 
-        protected virtual bool ReportInvalidInputCompilation => true;
+        private protected virtual bool ReportInvalidInputCompilation => true;
 
         /// <summary>
         /// Creates a new project that is used to compile the test source.
         /// </summary>
         /// <returns>A new project instance.</returns>
-        public Project CreateProject( TestOptions options )
+        internal Project CreateProject( TestOptions options )
         {
             var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null, this._additionalAssemblies );
 
@@ -284,7 +332,7 @@ namespace Caravela.TestFramework
             return project;
         }
 
-        protected async Task WriteHtmlAsync( TestInput testInput, TestResult testResult )
+        private protected async Task WriteHtmlAsync( TestInput testInput, TestResult testResult )
         {
             var htmlCodeWriter = this.CreateHtmlCodeWriter( testInput.Options );
 
@@ -327,7 +375,7 @@ namespace Caravela.TestFramework
             }
         }
 
-        protected virtual HtmlCodeWriter CreateHtmlCodeWriter( TestOptions options )
+        private protected virtual HtmlCodeWriter CreateHtmlCodeWriter( TestOptions options )
             => new( new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault() ) );
 
         private void WriteHtml( TestSyntaxTree testSyntaxTree, string htmlDirectory, HtmlCodeWriter htmlCodeWriter )

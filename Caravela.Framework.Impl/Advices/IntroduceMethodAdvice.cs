@@ -31,6 +31,7 @@ namespace Caravela.Framework.Impl.Advices
             Invariant.Assert( templateMethod.IsNotNull );
 
             this.MemberBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Declaration.AssertNotNull().Name );
+            this.MemberBuilder.ApplyTemplateAttribute( templateMethod.TemplateInfo.Attribute );
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
@@ -92,6 +93,8 @@ namespace Caravela.Framework.Impl.Advices
             {
                 // There is no existing declaration, we will introduce and override the introduced.
                 var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template );
+                this.MemberBuilder.IsOverride = false;
+                this.MemberBuilder.IsNew = false;
 
                 return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
             }
@@ -131,6 +134,7 @@ namespace Caravela.Framework.Impl.Advices
                         else
                         {
                             this.MemberBuilder.IsNew = true;
+                            this.MemberBuilder.IsOverride = false;
                             this.MemberBuilder.OverriddenMethod = existingDeclaration;
                             var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template );
 
@@ -153,7 +157,10 @@ namespace Caravela.Framework.Impl.Advices
                                         (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
                         }
-                        else if ( !compilation.InvariantComparer.Equals( this.Builder.ReturnType, existingDeclaration.ReturnType ) )
+                        else if ( !compilation.InvariantComparer.Is(
+                            this.Builder.ReturnType,
+                            existingDeclaration.ReturnType,
+                            ConversionKind.ImplicitReference ) )
                         {
                             return
                                 AdviceResult.Create(
@@ -165,6 +172,7 @@ namespace Caravela.Framework.Impl.Advices
                         else
                         {
                             this.MemberBuilder.IsOverride = true;
+                            this.MemberBuilder.IsNew = false;
                             this.MemberBuilder.OverriddenMethod = existingDeclaration;
                             var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template );
 

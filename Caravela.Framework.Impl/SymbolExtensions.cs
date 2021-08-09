@@ -19,6 +19,18 @@ namespace Caravela.Framework.Impl
         public static SpecialType ToOurSpecialType( this RoslynSpecialType type )
             => type switch
             {
+                RoslynSpecialType.System_Byte => SpecialType.Byte,
+                RoslynSpecialType.System_SByte => SpecialType.SByte,
+                RoslynSpecialType.System_Int16 => SpecialType.Int16,
+                RoslynSpecialType.System_Int32 => SpecialType.Int32,
+                RoslynSpecialType.System_Int64 => SpecialType.Int64,
+                RoslynSpecialType.System_UInt16 => SpecialType.UInt16,
+                RoslynSpecialType.System_UInt32 => SpecialType.UInt32,
+                RoslynSpecialType.System_UInt64 => SpecialType.UInt64,
+                RoslynSpecialType.System_String => SpecialType.String,
+                RoslynSpecialType.System_Decimal => SpecialType.Decimal,
+                RoslynSpecialType.System_Single => SpecialType.Single,
+                RoslynSpecialType.System_Double => SpecialType.Double,
                 RoslynSpecialType.System_Object => SpecialType.Object,
                 RoslynSpecialType.System_Void => SpecialType.Void,
                 RoslynSpecialType.System_Collections_IEnumerable => SpecialType.IEnumerable,
@@ -31,6 +43,18 @@ namespace Caravela.Framework.Impl
         public static RoslynSpecialType ToRoslynSpecialType( this SpecialType type )
             => type switch
             {
+                SpecialType.Byte => RoslynSpecialType.System_Byte,
+                SpecialType.SByte => RoslynSpecialType.System_SByte,
+                SpecialType.Int16 => RoslynSpecialType.System_Int16,
+                SpecialType.Int32 => RoslynSpecialType.System_Int32,
+                SpecialType.Int64 => RoslynSpecialType.System_Int64,
+                SpecialType.UInt16 => RoslynSpecialType.System_UInt16,
+                SpecialType.UInt32 => RoslynSpecialType.System_UInt32,
+                SpecialType.UInt64 => RoslynSpecialType.System_UInt64,
+                SpecialType.String => RoslynSpecialType.System_String,
+                SpecialType.Decimal => RoslynSpecialType.System_Decimal,
+                SpecialType.Single => RoslynSpecialType.System_Single,
+                SpecialType.Double => RoslynSpecialType.System_Double,
                 SpecialType.Object => RoslynSpecialType.System_Object,
                 SpecialType.Void => RoslynSpecialType.System_Void,
                 SpecialType.IEnumerable => RoslynSpecialType.System_Collections_IEnumerable,
