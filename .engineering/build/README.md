@@ -10,12 +10,10 @@ Make sure you have read and understood [PostSharp Engineering](../README.md) bef
     - [CreateLocalPackages.ps1](#createlocalpackagesps1)
     - [RestoreRelease.ps1](#restorereleaseps1)
     - [Kill.ps1](#killps1)
-    - [RestoreRelease.ps1](#restorereleaseps1-1)
   - [Imported scripts](#imported-scripts)
-    - [AssemblyMetadata.props and AssemblyMetadata.targets](#assemblymetadataprops-and-assemblymetadatatargets)
-    - [CompilerOptions.props](#compileroptionsprops)
-    - [Engineering.Directories.props](#engineeringdirectoriesprops)
-    - [Engineering.Versions.props](#engineeringversionsprops)
+    - [AssemblyMetadata.targets](#assemblymetadatatargets)
+    - [BuildOptions.props](#buildoptionsprops)
+    - [Versions.props](#versionsprops)
     - [SourceLink.props](#sourcelinkprops)
   - [NuGet packages metadata](#nuget-packages-metadata)
     - [Installation and configuration](#installation-and-configuration)
@@ -42,29 +40,21 @@ Used by CI pipeline. See [Continuous integration](#continuous-integration) for d
 
 Kills all processes which might hold any files from the repository.
 
-### RestoreRelease.ps1
-
-TODO: Unused?
-
 ## Imported scripts
 
 The scripts listed below are meant to be imported in
 - `Directory.Build.props` (*.props)
 - `Directory.Build.targets` (*.targets)
 
-### AssemblyMetadata.props and AssemblyMetadata.targets
+### AssemblyMetadata.targets
 
 Add package versions to assembly metadata.
 
-### CompilerOptions.props
+### BuildOptions.props
 
-Sets the compiler options like language version or nullability.
+Sets the compiler options like language version, nullability and other build options like output path.
 
-### Engineering.Directories.props
-
-Sets the common directories like the output path.
-
-### Engineering.Versions.props
+### Versions.props
 
 Manages versioning. See [Versioning](#versioning) for details on usage of this feature.
 

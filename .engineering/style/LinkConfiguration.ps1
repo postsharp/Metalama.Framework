@@ -1,3 +1,5 @@
+# This script will link the `.editorconfig` file to the repository root and the `sln.DotSettings` next to each `.sln` solution file in the repository with a name corresponding to the solution name.
+
 # Stop after first error.
 $ErrorActionPreference = "Stop"
 

@@ -1,16 +1,16 @@
 <Project>
 
     <!-- LocalBuildId.props is created by CreateLocalPackages.ps1. It is used on development environments only (not on build servers) -->
-    <Import Project="LocalBuildId.props" Condition="Exists('LocalBuildId.props')" />  
+    <Import Project="LocalBuildId.props" Condition="Exists('LocalBuildId.props')" />
     <Import Project=".engineering-local\Versions.props" />
     <Import Project=".engineering\build\Engineering.Versions.props" />
-    <Import Project=".engineering\build\Engineering.Directories.props" />
     <Import Project=".engineering-local\Packaging.props" />
-    <Import Project=".engineering-local\Repo.Build.props" />
 
-    <Import Project=".engineering\build\CompilerOptions.props" />
+    <!-- Imports a script that exports a few MSBuild properties to the compiler. We try to import and not to copy to avoid duplication. -->
+    <Import Project="..\Caravela.Framework.Package\Caravela.CompilerVisibleProperties.props" />
+
+    <Import Project=".engineering\build\BuildOptions.props" />
     <Import Project=".engineering\style\CodeQuality.props" />
-    <Import Project=".engineering\build\AssemblyMetadata.props" />
     <Import Project=".engineering\build\SourceLink.props" />
 
 </Project>
