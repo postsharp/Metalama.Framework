@@ -1,7 +1,7 @@
 <Project>
     <PropertyGroup>
+        <ProductName>Caravela</ProductName>
         <MainVersion>0.3.6</MainVersion>
-        <!-- Empty for RTM. -->
         <PackageVersionSuffix>-preview</PackageVersionSuffix>
     </PropertyGroup>
 </Project>

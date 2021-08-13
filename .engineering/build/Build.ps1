@@ -24,7 +24,7 @@ param (
 # Creates a public build
 [switch] $Public = $false,
 
-# Creates CaravelaVersion.props but does not build the project
+# Creates $(ProductName)Version.props but does not build the project
 [switch] $Prepare = $false,
 
 # Runs the test suite,
@@ -32,12 +32,15 @@ param (
 
 )
 
-$ErrorActionPreference = "Stop" 
+$ErrorActionPreference = "Stop"
 
 # Check that we are in the root of a GIT repository.
 If ( -Not ( Test-Path -Path ".\.git" ) ) {
     throw "This script has to run in a GIT repository root!"
 }
+
+$ProductName = $(Select-Xml '/Project/PropertyGroup/ProductName/text()' .\.engineering-local\MainVersion.props).Node.Value
+$PropsFilePath = ".engineering-local\$($ProductName)Version.props"
 
 if ( $Release ) {
     $configuration = "release"
@@ -51,13 +54,12 @@ function Clean() {
         Remove-Item "artifacts\bin\Debug\*.nupkg"
     }
 
-    if ( Test-Path CaravelaVersion.props ) {
-        Remove-Item CaravelaVersion.props
+    if ( Test-Path $PropsFilePath ) {
+        Remove-Item $PropsFilePath
     }
 }
 
 function CreateVersionFile() {
-    $repoName = $(Split-Path $(Get-Location).Path -leaf) -replace '[^a-zA-Z0-9]', ''
     $timestamp = [System.DateTime]::Now.ToString('MMdd.HHmm')
         
     if ( $Local ) {
@@ -81,8 +83,8 @@ function CreateVersionFile() {
 <Project>
     <Import Project="MainVersion.props" />
     <PropertyGroup>
-        <$($repoName)Version>$packageVersion</$($repoName)Version>
-        <$($repoName)AssemblyVersion>$assemblyVersion</$($repoName)AssemblyVersion>
+        <$($ProductName)Version>$packageVersion</$($ProductName)Version>
+        <$($ProductName)AssemblyVersion>$assemblyVersion</$($ProductName)AssemblyVersion>
     </PropertyGroup>
     <PropertyGroup>
         <!-- Adds the local output directories as nuget sources for referencing projects. -->
@@ -98,7 +100,7 @@ function CreateVersionFile() {
 </Project>
 "@
 
-    New-Item .engineering-local\$($repoName)Version.props -Value $props | Out-Null
+    New-Item $PropsFilePath -Value $props | Out-Null
 }
 
 function Restore() {
