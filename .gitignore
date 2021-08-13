@@ -38,7 +38,8 @@ _ReSharper*/
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/**/shelf
-LocalBuildId.props
 /publish/
 /tools/
-**/inspectcode.xmlCaravelaVersion.props
+**/inspectcode.xml
+/.local
+/.engineering-local/CaravelaVersion.props

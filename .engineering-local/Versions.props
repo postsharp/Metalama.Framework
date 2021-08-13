@@ -7,13 +7,13 @@
     <Import Project="MainVersion.props" Condition="!Exists('CaravelaVersion.props')" />
 
     <PropertyGroup Condition="!Exists('CaravelaVersion.props')">
-        <ProductVersion>$(MainVersion)$(PackageVersionSuffix)</ProductVersion>
-        <ProductAssemblyVersion>$(MainVersion)</ProductAssemblyVersion>
+        <CaravelaVersion>$(MainVersion)$(PackageVersionSuffix)</CaravelaVersion>
+        <CaravelaAssemblyVersion>$(MainVersion)</CaravelaAssemblyVersion>
     </PropertyGroup>
 
     <PropertyGroup>
-        <AssemblyVersion>$(ProductAssemblyVersion)</AssemblyVersion>
-        <Version>$(ProductVersion)</Version>
+        <AssemblyVersion>$(CaravelaAssemblyVersion)</AssemblyVersion>
+        <Version>$(CaravelaVersion)</Version>
     </PropertyGroup>
 
     <!-- Versions of dependencies -->
