@@ -18,12 +18,8 @@
 
 
   <!-- Versions of dependencies -->
-  <PropertyGroup>
-    <CaravelaVersion>$(ProductVersion)</CaravelaVersion>
-  </PropertyGroup>
-
   <Target Name="ValidateVersion">
-    <Error Text="The ProductVersion property is not defined. Check that Directory.Build.props have been properly imported." Condition="'$(ProductVersion)'==''"/>
+    <Error Text="The ProductVersion property is not defined. Check that Directory.Build.props have been properly imported." Condition="'$(CaravelaVersion)'==''"/>
   </Target>
 
 </Project>
