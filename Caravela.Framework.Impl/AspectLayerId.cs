@@ -2,8 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.AspectOrdering;
-using Microsoft.CodeAnalysis;
+using Caravela.Framework.Impl.Utilities;
 using System;
+using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
@@ -15,14 +16,13 @@ namespace Caravela.Framework.Impl
 
         public static bool operator !=( AspectLayerId left, AspectLayerId right ) => !left.Equals( right );
 
-        public AspectLayerId( INamedTypeSymbol aspectType, string? layerName = null ) : this( aspectType.MetadataName, layerName ) { }
-
         public AspectLayerId( AspectClass aspectClass, string? layerName = null ) : this( aspectClass.FullName, layerName ) { }
 
         public AspectLayerId( string aspectName, string? layerName = null )
         {
             this.AspectName = aspectName;
             this.LayerName = layerName;
+            this.AspectShortName = aspectName.Split( '.' ).Last().TrimEnd( "Attribute" );
         }
 
         public static AspectLayerId FromString( string s )
@@ -42,6 +42,8 @@ namespace Caravela.Framework.Impl
         public bool IsNull => this.AspectName == null!;
 
         public string AspectName { get; }
+
+        public string AspectShortName { get; }
 
         public string? LayerName { get; }
 

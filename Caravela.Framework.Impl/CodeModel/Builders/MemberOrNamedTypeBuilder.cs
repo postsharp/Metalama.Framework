@@ -6,10 +6,8 @@ using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Accessibility = Caravela.Framework.Code.Accessibility;
 
@@ -18,10 +16,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOrNamedTypeBuilder, IMemberIntroduction, IObservableTransformation
     {
         public bool IsSealed { get; set; }
-
-        public bool IsReadOnly { get; set; }
-
-        public bool IsOverride { get; set; }
 
         public bool IsNew { get; set; }
 
@@ -36,7 +30,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsAbstract { get; set; }
 
         public bool IsStatic { get; set; }
-        
+
         public sealed override IDeclaration ContainingDeclaration => this.DeclaringType;
 
         public MemberOrNamedTypeBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice )
@@ -47,9 +41,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
 
-        public abstract MemberDeclarationSyntax InsertPositionNode { get; }
+        public abstract InsertPosition InsertPosition { get; }
 
         // TODO: This is temporary.
-        SyntaxTree ISyntaxTreeTransformation.TargetSyntaxTree => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
+        SyntaxTree ISyntaxTreeTransformation.TargetSyntaxTree => ((NamedType) this.DeclaringType).Symbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
     }
 }

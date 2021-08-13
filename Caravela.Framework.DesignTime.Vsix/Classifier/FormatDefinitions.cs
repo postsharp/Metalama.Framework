@@ -20,7 +20,7 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
         public const string CompileTimeVariableName = "Caravela/CompileTimeVariable";
         private const double _backgroundOpacity = 0.3;
         private static readonly Color _background = Colors.LightSteelBlue;
-
+        /*
 #pragma warning disable SA1401 // Fields should be private
 
         [Export( typeof( ClassificationTypeDefinition ) )]
@@ -40,6 +40,7 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
         internal static ClassificationTypeDefinition? TemplateKeyword;
 
 #pragma warning restore SA1401 // Fields should be private
+        */
 
         [Export( typeof( EditorFormatDefinition ) )]
         [Name( CompileTimeName )]

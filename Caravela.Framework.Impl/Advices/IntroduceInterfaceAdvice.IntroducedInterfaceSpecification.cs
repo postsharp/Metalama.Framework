@@ -15,6 +15,8 @@ namespace Caravela.Framework.Impl.Advices
 
             public IReadOnlyList<MemberSpecification> MemberSpecifications { get; }
 
+            // ReSharper disable  UnusedAutoPropertyAccessor.Local
+
             public OverrideStrategy OverrideStrategy { get; }
 
             public Dictionary<string, object?>? Tags { get; }

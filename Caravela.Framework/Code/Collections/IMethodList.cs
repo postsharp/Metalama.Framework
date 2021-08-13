@@ -19,7 +19,7 @@ namespace Caravela.Framework.Code.Collections
         /// <param name="argumentTypes">Constraint on reflection types of arguments. <c>Null</c>items in the list signify any type.</param>
         /// <param name="isStatic">Constraint on staticity of the method.</param>
         /// <param name="declaredOnly"><c>True</c> if only declared methods should be considered or <c>false</c> if all methods, including those declared in base types should be considered.</param>
-        /// <returns>Enumeration of methods matching specified constraints.</returns>
+        /// <returns>Enumeration of methods matching specified constraints. If <paramref name="declaredOnly" /> is set to <c>false</c>, only the top-most visible method of the same signature is included.</returns>
         IEnumerable<IMethod> OfCompatibleSignature(
             string name,
             int? genericParameterCount,

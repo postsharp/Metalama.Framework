@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Pipeline;
 using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Options
@@ -24,5 +25,23 @@ namespace Caravela.Framework.Impl.Options
         /// the project will not be modified. 
         /// </summary>
         bool IsFrameworkEnabled { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the output syntax trees must be formatted.
+        /// </summary>
+        bool FormatOutput { get; }
+
+        bool FormatCompileTimeCode { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the user code processed by Caravela is trusted.
+        /// </summary>
+        bool IsUserCodeTrusted { get; }
+
+        /// <summary>
+        /// Invoked when project options have been applied globally or contextually through the <see cref="ServiceProviderFactory"/>,
+        /// and are then overridden by options provided by the compiler.
+        /// </summary>
+        IProjectOptions Apply( IProjectOptions options );
     }
 }

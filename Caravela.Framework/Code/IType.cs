@@ -11,6 +11,7 @@ namespace Caravela.Framework.Code
     /// A class, struct, enum or delegate are represented as an <see cref="INamedType"/>, which
     /// derive from <see cref="IType"/>.
     /// </summary>
+    /// <seealso cref="TypeExtensions"/>
     [CompileTimeOnly]
     public interface IType : ICompilationElement, IDisplayable
     {
@@ -20,10 +21,15 @@ namespace Caravela.Framework.Code
         TypeKind TypeKind { get; }
 
         /// <summary>
+        /// Gets the <see cref="Code.SpecialType"/> enumeration value for the current type. Provides a fast to determine whether
+        /// the current type is of a well-known type. 
+        /// </summary>
+        SpecialType SpecialType { get; }
+
+        /// <summary>
         /// Gets a reflection <see cref="Type"/> that represents the current type at run time.
         /// </summary>
         /// <returns>A <see cref="Type"/> that can be used only in run-time code.</returns>
-        [return: RunTimeOnly]
         Type ToType();
     }
 }

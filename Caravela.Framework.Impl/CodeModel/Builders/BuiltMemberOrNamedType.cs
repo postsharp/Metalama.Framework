@@ -26,10 +26,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsSealed => this.MemberOrNamedTypeBuilder.IsSealed;
 
-        public bool IsReadOnly => this.MemberOrNamedTypeBuilder.IsReadOnly;
-
-        public bool IsOverride => this.MemberOrNamedTypeBuilder.IsOverride;
-
         public bool IsNew => this.MemberOrNamedTypeBuilder.IsNew;
 
         public INamedType? DeclaringType => this.Compilation.Factory.GetDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType );

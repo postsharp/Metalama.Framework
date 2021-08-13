@@ -80,9 +80,8 @@ namespace Caravela.Framework.Impl.Templating
 
                     var referencedSymbol = symbolInfo.Symbol;
 
-                    if ( referencedSymbol != null &&
-                         this._classifier.GetTemplatingScope( referencedSymbol ) == TemplatingScope.CompileTimeOnly &&
-                         !node.AncestorsAndSelf()
+                    if ( referencedSymbol is { } and not ITypeParameterSymbol &&
+                         this._classifier.GetTemplatingScope( referencedSymbol ) == TemplatingScope.CompileTimeOnly && !node.AncestorsAndSelf()
                              .Any( n => n is TypeOfExpressionSyntax || (n is InvocationExpressionSyntax invocation && invocation.IsNameOf()) ) )
                     {
                         if ( this._alreadyReportedDiagnostics.Add( referencedSymbol ) &&
@@ -117,7 +116,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var methodSymbol = this._semanticModel.GetDeclaredSymbol( node );
 
-                if ( methodSymbol != null && this._classifier.GetTemplateMemberKind( methodSymbol ) != TemplateMemberKind.None )
+                if ( methodSymbol != null && !this._classifier.GetTemplateInfo( methodSymbol ).IsNone )
                 {
                     if ( this._isDesignTime )
                     {

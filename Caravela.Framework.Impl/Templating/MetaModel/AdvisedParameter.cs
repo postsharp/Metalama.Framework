@@ -3,15 +3,17 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
+using Caravela.Framework.Code.Syntax;
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdvisedParameter : AdviceDeclaration<IParameter>, IAdvisedParameter
+    internal class AdvisedParameter : AdvisedDeclaration<IParameterInternal>, IAdvisedParameter
     {
-        public AdvisedParameter( IParameter p ) : base( p ) { }
+        public AdvisedParameter( IParameter p ) : base( (IParameterInternal) p ) { }
 
         public RefKind RefKind => this.Underlying.RefKind;
 
@@ -31,10 +33,16 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         DeclarationOrigin IDeclaration.Origin => this.Underlying.Origin;
 
-        public dynamic Value
+        public IType Type => this.Underlying.ParameterType;
+
+        public bool IsAssignable => true;
+
+        public object? Value
         {
-            get => new DynamicExpression( SyntaxFactory.IdentifierName( this.Underlying.Name! ), this.Underlying.ParameterType, true );
-            set => throw new NotImplementedException();
+            get => this.ToSyntax();
+            set => throw new NotSupportedException();
         }
+
+        public ISyntax ToSyntax() => new DynamicExpression( SyntaxFactory.IdentifierName( this.Underlying.Name! ), this.Underlying.ParameterType, true, true );
     }
 }

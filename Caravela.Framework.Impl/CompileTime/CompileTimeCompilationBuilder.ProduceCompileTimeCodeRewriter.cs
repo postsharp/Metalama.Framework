@@ -32,12 +32,12 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         private sealed class ProduceCompileTimeCodeRewriter : CompileTimeBaseRewriter
         {
+            private static readonly string? _frameworkAssemblyName = typeof(OverrideMethodAspect).Assembly.GetName().Name;
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Caravela_HasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
-            private readonly ISymbolClassifier _symbolClassifier;
             private Context _currentContext;
 
             public bool Success { get; private set; } = true;
@@ -57,7 +57,6 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._diagnosticAdder = diagnosticAdder;
                 this._templateCompiler = templateCompiler;
                 this._cancellationToken = cancellationToken;
-                this._symbolClassifier = serviceProvider.GetService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
                 this._currentContext = new Context( TemplatingScope.Both, this );
             }
 
@@ -214,35 +213,11 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
-            private void CheckVirtualTemplateSignature( ISymbol templateSymbol, IEnumerable<ISymbol> typesInSignature )
-            {
-                // Select run-time-only types.
-                var runTimeOnlyParameters =
-                    typesInSignature
-                        .Distinct( SymbolEqualityComparer.Default )
-                        .WhereNotNull()
-                        .Where( t => t is not IDynamicTypeSymbol )
-                        .Where( t => this._symbolClassifier.GetTemplatingScope( t ) == TemplatingScope.RunTimeOnly )
-                        .ToArray();
-
-                if ( runTimeOnlyParameters.Length > 0 )
-                {
-                    // If we have run-time-only types in the signature, we cannot replace the method body, and this is an error.
-
-                    this._diagnosticAdder.Report(
-                        GeneralDiagnosticDescriptors.VirtualTemplateCannotReferenceRunTimeOnlyTypes.CreateDiagnostic(
-                            templateSymbol.GetDiagnosticLocation(),
-                            (templateSymbol, runTimeOnlyParameters) ) );
-
-                    this.Success = false;
-                }
-            }
-
             private new IEnumerable<MethodDeclarationSyntax> VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
                 var methodSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
 
-                if ( methodSymbol == null || this.SymbolClassifier.GetTemplateMemberKind( methodSymbol ) == TemplateMemberKind.None )
+                if ( methodSymbol == null || this.SymbolClassifier.GetTemplateInfo( methodSymbol ).IsNone )
                 {
                     yield return (MethodDeclarationSyntax) base.VisitMethodDeclaration( node ).AssertNotNull();
 
@@ -262,21 +237,14 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( success )
                 {
-                    if ( !methodSymbol.IsVirtual && !methodSymbol.IsOverride && !methodSymbol.IsAbstract )
+                    if ( methodSymbol.IsOverride && methodSymbol.OverriddenMethod!.IsAbstract
+                                                 && methodSymbol.OverriddenMethod.ContainingAssembly.Name == _frameworkAssemblyName )
                     {
-                        // The method can be deleted, i.e. it does not need to be inserted back in the member list.
+                        yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                     }
                     else
                     {
-                        // If the method is virtual/override, it cannot be removed.
-
-                        var runTimeOnlyParameters =
-                            methodSymbol.Parameters.Select( p => p.Type )
-                                .Prepend( methodSymbol.ReturnType );
-
-                        this.CheckVirtualTemplateSignature( methodSymbol, runTimeOnlyParameters );
-
-                        yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                        // The method can be deleted, i.e. it does not need to be inserted back in the member list.
                     }
 
                     yield return (MethodDeclarationSyntax) transformedNode.AssertNotNull();
@@ -291,12 +259,8 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var propertySymbol = (IPropertySymbol) this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
-                if ( this.SymbolClassifier.GetTemplateMemberKind( propertySymbol ) == TemplateMemberKind.None )
-                {
-                    yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
-
-                    yield break;
-                }
+                var propertyIsTemplate = !this.SymbolClassifier.GetTemplateInfo( propertySymbol ).IsNone;
+                var propertyOrAccessorsAreTemplate = propertyIsTemplate;
 
                 var success = true;
                 SyntaxNode? transformedGetDeclaration = null;
@@ -307,14 +271,22 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     if ( node.AccessorList != null )
                     {
+                        var templateAccessorCount = 0;
+
                         var getAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration );
+
+                        var getterIsTemplate = getAccessor != null
+                                               && (propertyIsTemplate || !this.SymbolClassifier.GetTemplateInfo( propertySymbol.GetMethod! ).IsNone);
 
                         var setAccessor = node.AccessorList.Accessors.SingleOrDefault(
                             a => a.Kind() == SyntaxKind.SetAccessorDeclaration || a.Kind() == SyntaxKind.InitAccessorDeclaration );
 
+                        var setterIsTemplate = setAccessor != null
+                                               && (propertyIsTemplate || !this.SymbolClassifier.GetTemplateInfo( propertySymbol.SetMethod! ).IsNone);
+
                         // Auto properties don't have bodies and so we don't need templates.
 
-                        if ( getAccessor != null && (getAccessor.Body != null || getAccessor.ExpressionBody != null) )
+                        if ( getterIsTemplate && (getAccessor!.Body != null || getAccessor.ExpressionBody != null) )
                         {
                             success =
                                 success &&
@@ -327,9 +299,11 @@ namespace Caravela.Framework.Impl.CompileTime
                                     this._cancellationToken,
                                     out _,
                                     out transformedGetDeclaration );
+
+                            templateAccessorCount++;
                         }
 
-                        if ( setAccessor != null && (setAccessor.Body != null || setAccessor.ExpressionBody != null) )
+                        if ( setterIsTemplate && (setAccessor!.Body != null || setAccessor.ExpressionBody != null) )
                         {
                             success =
                                 success &&
@@ -342,9 +316,21 @@ namespace Caravela.Framework.Impl.CompileTime
                                     this._cancellationToken,
                                     out _,
                                     out transformedSetDeclaration );
+
+                            templateAccessorCount++;
+                        }
+
+                        if ( templateAccessorCount > 0 )
+                        {
+                            propertyOrAccessorsAreTemplate = true;
+
+                            if ( templateAccessorCount != node.AccessorList.Accessors.Count )
+                            {
+                                throw new AssertionFailedException( "When one accessor is a template, the other must also be a template." );
+                            }
                         }
                     }
-                    else if ( node is PropertyDeclarationSyntax { ExpressionBody: not null } propertyNode )
+                    else if ( propertyIsTemplate && node is PropertyDeclarationSyntax { ExpressionBody: not null } propertyNode )
                     {
                         // Expression bodied property.
                         // TODO: Does this preserve trivia in expression body?
@@ -364,21 +350,20 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( success )
                 {
-                    if ( !propertySymbol.IsVirtual && !propertySymbol.IsOverride && !propertySymbol.IsAbstract )
+                    if ( !propertyOrAccessorsAreTemplate )
                     {
-                        // The property can be deleted, i.e. it does not need to be inserted back in the member list.
+                        yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
+                    }
+                    else if ( propertySymbol.IsOverride && propertySymbol.OverriddenProperty!.IsAbstract
+                                                        && propertySymbol.OverriddenProperty.ContainingAssembly.Name == _frameworkAssemblyName )
+                    {
+                        // If the property implements an abstract property of the framework, it cannot be removed.
+
+                        yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                     }
                     else
                     {
-                        // If the property is virtual/override, it cannot be removed.
-
-                        var runTimeOnlyParameters =
-                            propertySymbol.Parameters.Select( p => p.Type )
-                                .Prepend( propertySymbol.Type );
-
-                        this.CheckVirtualTemplateSignature( propertySymbol, runTimeOnlyParameters );
-
-                        yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                        // The property can be deleted, i.e. it does not need to be inserted back in the member list.
                     }
 
                     if ( transformedGetDeclaration != null )
@@ -401,7 +386,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var eventSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
-                if ( this.SymbolClassifier.GetTemplateMemberKind( eventSymbol ) == TemplateMemberKind.None )
+                if ( this.SymbolClassifier.GetTemplateInfo( eventSymbol ).IsNone )
                 {
                     yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
 
@@ -417,8 +402,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     if ( node.AccessorList != null )
                     {
-                        var addAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.AddAccessorDeclaration );
-                        var removeAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.RemoveAccessorDeclaration );
+                        var addAccessor = node.AccessorList.Accessors.Single( a => a.Kind() == SyntaxKind.AddAccessorDeclaration );
+                        var removeAccessor = node.AccessorList.Accessors.Single( a => a.Kind() == SyntaxKind.RemoveAccessorDeclaration );
 
                         success = success &&
                                   this._templateCompiler.TryCompile(
@@ -583,10 +568,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 public TemplatingScope Scope { get; }
 
-                public void Dispose()
-                {
-                    this._parent._currentContext = this._oldContext;
-                }
+                public void Dispose() => this._parent._currentContext = this._oldContext;
             }
         }
     }

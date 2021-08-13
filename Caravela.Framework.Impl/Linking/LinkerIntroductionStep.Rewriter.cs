@@ -2,10 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Formatting;
+using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -23,13 +25,13 @@ namespace Caravela.Framework.Impl.Linking
         {
             private readonly CompilationModel _compilation;
             private readonly ImmutableMultiValueDictionary<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
-            private readonly IntroductionCollection _introducedMemberCollection;
+            private readonly SyntaxTransformationCollection _introducedMemberCollection;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
             public Rewriter(
-                IntroductionCollection introducedMemberCollection,
+                SyntaxTransformationCollection introducedMemberCollection,
                 ImmutableMultiValueDictionary<IDeclaration, ScopedSuppression> diagnosticSuppressions,
                 CompilationModel compilation )
             {
@@ -133,34 +135,46 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     foreach ( var member in node.Members )
                     {
-                        using ( var memberSuppressions = this.WithSuppressions( member ) )
+                        var visitedMember = (MemberDeclarationSyntax?) this.Visit( member );
+
+                        if ( visitedMember != null )
                         {
-                            var memberWithSuppressions = this.AddSuppression( member, memberSuppressions.NewSuppressions );
-                            members.Add( memberWithSuppressions );
+                            using ( var memberSuppressions = this.WithSuppressions( member ) )
+                            {
+                                var memberWithSuppressions = this.AddSuppression( visitedMember, memberSuppressions.NewSuppressions );
+                                members.Add( memberWithSuppressions );
+                            }
                         }
 
                         // We have to call AddIntroductionsOnPosition outside of the previous suppression scope, otherwise we don't get new suppressions.
-                        AddIntroductionsOnPosition( member );
+                        AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ) );
                     }
 
-                    AddIntroductionsOnPosition( node );
+                    AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ) );
 
                     node = this.AddSuppression( node, classSuppressions.NewSuppressions ).WithMembers( List( members ) );
 
                     if ( additionalBaseList.Any() )
                     {
-                        node = node.WithBaseList(
-                                node.BaseList != null
-                                    ? BaseList( node.BaseList.Types.AddRange( additionalBaseList ) )
-                                    : BaseList( SeparatedList( additionalBaseList ) ).NormalizeWhitespace() )
-                            .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
+                        if ( node.BaseList == null )
+                        {
+                            node = node
+                                .WithIdentifier( node.Identifier.WithTrailingTrivia() )
+                                .WithBaseList( BaseList( SeparatedList( additionalBaseList ) ).AddGeneratedCodeAnnotation() )
+                                .WithTrailingTrivia( node.Identifier.TrailingTrivia );
+                        }
+                        else
+                        {
+                            node = node.WithBaseList(
+                                BaseList( node.BaseList.Types.AddRange( additionalBaseList.Select( i => i.AddGeneratedCodeAnnotation() ) ) ) );
+                        }
                     }
 
                     return node;
                 }
 
                 // TODO: Try to avoid closure allocation.
-                void AddIntroductionsOnPosition( MemberDeclarationSyntax position )
+                void AddIntroductionsOnPosition( InsertPosition position )
                 {
                     foreach ( var introducedMember in this._introducedMemberCollection.GetIntroducedMembersOnPosition( position ) )
                     {
@@ -170,7 +184,7 @@ namespace Caravela.Framework.Impl.Linking
 
                         introducedNode = introducedNode.NormalizeWhitespace()
                             .WithLeadingTrivia( LineFeed, LineFeed )
-                            .WithAdditionalAnnotations( AspectPipelineAnnotations.GeneratedCode );
+                            .AddGeneratedCodeAnnotation();
 
                         if ( introducedMember.Declaration != null )
                         {
@@ -181,8 +195,48 @@ namespace Caravela.Framework.Impl.Linking
                         }
 
                         members.Add( introducedNode );
+
+                        if ( introducedMember.Introduction is IDeclarationBuilder builder )
+                        {
+                            // Recursively add members dependent on this introduction
+                            AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.After, builder ) );
+                        }
                     }
                 }
+            }
+
+            public override SyntaxNode? VisitVariableDeclarator( VariableDeclaratorSyntax node )
+            {
+                if ( this._introducedMemberCollection.IsRemovedSyntax( node ) )
+                {
+                    return null;
+                }
+
+                return base.VisitVariableDeclarator( node );
+            }
+
+            public override SyntaxNode? VisitFieldDeclaration( FieldDeclarationSyntax node )
+            {
+                var visitedNode = (FieldDeclarationSyntax?) base.VisitFieldDeclaration( node );
+
+                if ( visitedNode != null && !visitedNode.Declaration.Variables.Any() )
+                {
+                    return null;
+                }
+
+                return visitedNode;
+            }
+
+            public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+            {
+                var visitedNode = (EventFieldDeclarationSyntax?) base.VisitEventFieldDeclaration( node );
+
+                if ( visitedNode != null && !visitedNode.Declaration.Variables.Any() )
+                {
+                    return null;
+                }
+
+                return visitedNode;
             }
 
             public override SyntaxNode? VisitPragmaWarningDirectiveTrivia( PragmaWarningDirectiveTriviaSyntax node )
@@ -204,12 +258,14 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 static string GetErrorCode( ExpressionSyntax expression )
-                    => expression switch
+                {
+                    return expression switch
                     {
                         IdentifierNameSyntax identifier => identifier.Identifier.Text,
                         LiteralExpressionSyntax literal => $"CS{literal.Token.Value:0000}",
                         _ => throw new AssertionFailedException()
                     };
+                }
             }
 
             // The following methods remove the #if code and replaces with its content, but it's not sure that this is the right

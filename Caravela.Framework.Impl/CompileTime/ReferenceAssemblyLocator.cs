@@ -3,8 +3,8 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public ReferenceAssemblyLocator( IServiceProvider serviceProvider )
         {
-            this._cacheDirectory = serviceProvider.GetService<IDirectoryOptions>().AssemblyLocatorCacheDirectory;
+            this._cacheDirectory = serviceProvider.GetService<IPathOptions>().AssemblyLocatorCacheDirectory;
 
             this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
 
@@ -101,7 +101,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this.StandardCompileTimeMetadataReferences =
                 this.SystemAssemblyPaths
                     .Concat( caravelaImplementationPaths )
-                    .Select( c => (MetadataReference) MetadataReference.CreateFromFile( c ) )
+                    .Select( MetadataReferenceCache.GetFromFile )
                     .Prepend( frameworkAssemblyReference )
                     .ToImmutableArray();
         }

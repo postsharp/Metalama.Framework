@@ -16,11 +16,6 @@
     
   </PropertyGroup>
 
-  
-  <!-- Internal NuGet reposority source -->
-  <PropertyGroup>
-    <RestoreAdditionalProjectSources>$(MSBuildThisFileDirectory)..\..\artifacts\bin\$(Configuration)</RestoreAdditionalProjectSources>
-  </PropertyGroup>
 
   <!-- Versions of dependencies -->
   <PropertyGroup>

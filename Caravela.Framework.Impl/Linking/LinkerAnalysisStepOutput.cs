@@ -12,19 +12,23 @@ namespace Caravela.Framework.Impl.Linking
     internal class LinkerAnalysisStepOutput
     {
         public LinkerAnalysisStepOutput(
-            ImmutableUserDiagnosticList diagnostics,
+            UserDiagnosticSink diagnosticSink,
             PartialCompilation intermediateCompilation,
-            LinkerAnalysisRegistry analysisRegistry )
+            LinkerIntroductionRegistry introductionRegistry,
+            LinkerAnalysisRegistry analysisRegistry,
+            AspectReferenceResolver referenceResolver )
         {
-            this.Diagnostics = diagnostics;
+            this.DiagnosticSink = diagnosticSink;
             this.IntermediateCompilation = intermediateCompilation;
+            this.IntroductionRegistry = introductionRegistry;
             this.AnalysisRegistry = analysisRegistry;
+            this.ReferenceResolver = referenceResolver;
         }
 
         /// <summary>
         /// Gets diagnostic sink.
         /// </summary>
-        public ImmutableUserDiagnosticList Diagnostics { get; }
+        public UserDiagnosticSink DiagnosticSink { get; }
 
         /// <summary>
         /// Gets the intermediate compilation (produced in introduction step).
@@ -32,8 +36,15 @@ namespace Caravela.Framework.Impl.Linking
         public PartialCompilation IntermediateCompilation { get; }
 
         /// <summary>
+        /// Gets the introduction registry.
+        /// </summary>
+        public LinkerIntroductionRegistry IntroductionRegistry { get; }
+
+        /// <summary>
         /// Gets the analysis registry.
         /// </summary>
         public LinkerAnalysisRegistry AnalysisRegistry { get; }
+
+        public AspectReferenceResolver ReferenceResolver { get; }
     }
 }

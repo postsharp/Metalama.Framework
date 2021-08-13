@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -21,8 +21,8 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IMethod TargetMethod { get; }
 
-        public RedirectedMethod( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod, AspectLinkerOptions? linkerOptions = null )
-            : base( advice, overriddenDeclaration, linkerOptions )
+        public RedirectedMethod( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod )
+            : base( advice, overriddenDeclaration )
         {
             Invariant.Assert( targetMethod != null );
 
@@ -44,17 +44,20 @@ namespace Caravela.Framework.Impl.Transformations
                     MethodDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        this.OverriddenDeclaration.GetSyntaxReturnType(),
+                        SyntaxHelpers.CreateSyntaxForReturnType( this.OverriddenDeclaration ),
                         null,
-                        Identifier( context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration ) ),
-                        this.OverriddenDeclaration.GetSyntaxTypeParameterList(),
-                        this.OverriddenDeclaration.GetSyntaxParameterList(),
-                        this.OverriddenDeclaration.GetSyntaxConstraintClauses(),
+                        Identifier(
+                            context.IntroductionNameProvider.GetOverrideName(
+                                this.OverriddenDeclaration.DeclaringType,
+                                this.Advice.AspectLayerId,
+                                this.OverriddenDeclaration ) ),
+                        SyntaxHelpers.CreateSyntaxForTypeParameterList( this.OverriddenDeclaration ),
+                        SyntaxHelpers.CreateSyntaxForParameterList( this.OverriddenDeclaration ),
+                        SyntaxHelpers.CreateSyntaxForConstraintClauses( this.OverriddenDeclaration ),
                         body,
                         null ),
                     this.Advice.AspectLayerId,
                     IntroducedMemberSemantic.Override,
-                    this.LinkerOptions,
                     this.OverriddenDeclaration )
             };
 
@@ -62,20 +65,22 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 return
                     InvocationExpression(
-                            GetInvocationTargetExpression(),
-                            ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) )
-                        .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkingOrder.Default ) );
+                        GetInvocationTargetExpression(),
+                        ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) );
             }
 
             ExpressionSyntax GetInvocationTargetExpression()
             {
-                return
+                var expression =
                     this.OverriddenDeclaration.IsStatic
-                        ? IdentifierName( this.OverriddenDeclaration.Name )
+                        ? (ExpressionSyntax) IdentifierName( this.OverriddenDeclaration.Name )
                         : MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             ThisExpression(),
                             IdentifierName( this.OverriddenDeclaration.Name ) );
+
+                return expression
+                    .WithAspectReferenceAnnotation( this.Advice.AspectLayerId, AspectReferenceOrder.Base );
             }
         }
     }

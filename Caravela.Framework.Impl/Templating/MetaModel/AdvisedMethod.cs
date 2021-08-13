@@ -12,28 +12,27 @@ using MethodBase = System.Reflection.MethodBase;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdvisedMethod : AdviceMember<IMethod>, IAdvisedMethod
+    internal class AdvisedMethod : AdvisedMember<IMethodInternal>, IAdvisedMethod
     {
-        public AdvisedMethod( IMethod underlying ) : base( underlying ) { }
+        public AdvisedMethod( IMethod underlying ) : base( (IMethodInternal) underlying ) { }
 
         public IMethodList LocalFunctions => this.Underlying.LocalFunctions;
 
-        public dynamic Invoke( params dynamic?[] args )
+        public object? Invoke( params object?[] args )
         {
             if ( this.Invokers.Base != null )
             {
                 return this.Invokers.Base.Invoke( this.IsStatic ? null : this.This, args );
             }
-            else if ( this.ReturnType.Is( SpecialType.Void ) )
+            else if ( TypeExtensions.Equals( this.ReturnType, SpecialType.Void ) )
             {
-                return new EmptyStatementDynamicExpression();
+                return null;
             }
             else
             {
                 return new DynamicExpression(
                     LanguageServiceFactory.CSharpSyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol() ),
-                    this.ReturnType,
-                    false );
+                    this.ReturnType );
             }
         }
 
@@ -67,5 +66,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.Underlying.ExplicitInterfaceImplementations;
 
         public MethodInfo ToMethodInfo() => this.Underlying.ToMethodInfo();
+
+        public IMemberWithAccessors? DeclaringMember => this.Underlying.DeclaringMember;
     }
 }

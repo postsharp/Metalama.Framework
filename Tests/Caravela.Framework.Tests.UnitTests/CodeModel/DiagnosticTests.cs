@@ -50,8 +50,8 @@ class C<T> : object
             // Properties
             AssertLocation( "AutomaticProperty", type.Properties.OfName( "AutomaticProperty" ).Single().GetDiagnosticLocation() );
             var property = type.Properties.OfName( "Property" ).Single();
-            AssertLocation( "get", property.Getter!.GetDiagnosticLocation() );
-            AssertLocation( "set", property.Setter!.GetDiagnosticLocation() );
+            AssertLocation( "get", property.GetMethod!.GetDiagnosticLocation() );
+            AssertLocation( "set", property.SetMethod!.GetDiagnosticLocation() );
 
             // Fields
             AssertLocation( "field1", type.Fields.OfName( "field1" ).Single().GetDiagnosticLocation() );

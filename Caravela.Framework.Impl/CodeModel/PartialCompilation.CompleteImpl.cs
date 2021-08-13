@@ -7,37 +7,34 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract partial class PartialCompilation
+    public abstract partial class PartialCompilation
     {
         /// <summary>
         /// Represents a complete compilation, containing all syntax trees.
         /// </summary>
         private class CompleteImpl : PartialCompilation
         {
-            public CompleteImpl( Compilation compilation ) : base( compilation ) { }
+            public CompleteImpl( Compilation compilation )
+                : base( compilation ) { }
+
+            public CompleteImpl(
+                PartialCompilation baseCompilation,
+                IReadOnlyList<ModifiedSyntaxTree>? modifiedSyntaxTrees,
+                IReadOnlyList<SyntaxTree>? addedTrees )
+                : base( baseCompilation, modifiedSyntaxTrees, addedTrees ) { }
 
             [Memo]
-            public override IReadOnlyCollection<SyntaxTree> SyntaxTrees => this.Compilation.SyntaxTrees.ToImmutableArray();
+            public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees
+                => this.Compilation.SyntaxTrees.ToImmutableDictionary( s => s.FilePath, s => s );
 
             public override IEnumerable<ITypeSymbol> Types => this.Compilation.Assembly.GetTypes();
 
             public override bool IsPartial => false;
 
             public override PartialCompilation UpdateSyntaxTrees(
-                IReadOnlyList<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees,
-                IReadOnlyList<SyntaxTree> addedTrees )
-            {
-                var compilation = this.Compilation;
-
-                foreach ( var replacedTree in replacedTrees )
-                {
-                    compilation = compilation.ReplaceSyntaxTree( replacedTree.OldTree, replacedTree.NewTree );
-                }
-
-                compilation = compilation.AddSyntaxTrees( addedTrees );
-
-                return new CompleteImpl( compilation );
-            }
+                IReadOnlyList<ModifiedSyntaxTree>? replacedTrees = null,
+                IReadOnlyList<SyntaxTree>? addedTrees = null )
+                => new CompleteImpl( this, replacedTrees, addedTrees );
         }
     }
 }

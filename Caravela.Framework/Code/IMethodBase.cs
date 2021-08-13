@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code.Collections;
 using System.Reflection;
 
@@ -23,15 +22,9 @@ namespace Caravela.Framework.Code
         MethodKind MethodKind { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the method is <c>readonly</c>.
-        /// </summary>
-        bool IsReadOnly { get; }
-
-        /// <summary>
         /// Gets a <see cref="MethodBase"/> that represents the current method or constructor at run time.
         /// </summary>
         /// <returns>A <see cref="MethodBase"/> that can be used only in run-time code.</returns>
-        [return: RunTimeOnly]
         MethodBase ToMethodBase();
     }
 }

@@ -2,9 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Sdk;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
@@ -12,6 +13,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using Attribute = System.Attribute;
 using TypedConstant = Microsoft.CodeAnalysis.TypedConstant;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
@@ -20,10 +22,12 @@ namespace Caravela.Framework.Impl.CompileTime
     internal class AttributeDeserializer
     {
         private readonly ICompileTimeTypeResolver _compileTimeTypeResolver;
+        private readonly UserCodeInvoker _userCodeInvoker;
 
-        public AttributeDeserializer( ICompileTimeTypeResolver compileTimeTypeResolver )
+        public AttributeDeserializer( IServiceProvider serviceProvider, ICompileTimeTypeResolver compileTimeTypeResolver )
         {
             this._compileTimeTypeResolver = compileTimeTypeResolver;
+            this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
         }
 
         public bool TryCreateAttribute<T>( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
@@ -140,7 +144,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 parameters[i] = translatedArg;
             }
 
-            attributeInstance = (Attribute) constructor.Invoke( parameters ).AssertNotNull();
+            var localAttributeInstance = attributeInstance =
+                attributeInstance = this._userCodeInvoker.Invoke( () => (Attribute) constructor.Invoke( parameters ) ).AssertNotNull();
 
             foreach ( var (name, value) in attribute.NamedArguments )
             {
@@ -156,7 +161,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         return false;
                     }
 
-                    property.SetValue( attributeInstance, translatedValue );
+                    this._userCodeInvoker.Invoke( () => property.SetValue( localAttributeInstance, translatedValue ) );
                 }
                 else if ( (field = type.GetField( name )) != null )
                 {
@@ -167,7 +172,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         return false;
                     }
 
-                    field.SetValue( attributeInstance, translatedValue );
+                    this._userCodeInvoker.Invoke( () => field.SetValue( localAttributeInstance, translatedValue ) );
                 }
                 else
                 {

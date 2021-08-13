@@ -60,9 +60,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public IReadOnlyList<CompileTimeProject> References { get; }
 
-        [Memo]
-        public IReadOnlyList<CompileTimeProject> ClosureProjects
-            => this.SelectManyRecursive( p => p.References, includeThis: true, throwOnDuplicate: false ).ToImmutableList();
+        public IReadOnlyList<CompileTimeProject> ClosureProjects { get; }
 
         /// <summary>
         /// Gets the list of transformed code files in the current project. 
@@ -73,7 +71,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.
         /// </summary>
         /// <returns></returns>
-        public MetadataReference ToMetadataReference() => MetadataReference.CreateFromFile( this.AssertNotEmpty()._compiledAssemblyPath! );
+        public MetadataReference ToMetadataReference() => MetadataReferenceCache.GetFromFile( this.AssertNotEmpty()._compiledAssemblyPath! );
 
         /// <summary>
         /// Gets the unique hash of the project, computed from the source code.
@@ -110,6 +108,7 @@ namespace Caravela.Framework.Impl.CompileTime
         }
 
         private CompileTimeProject(
+            IServiceProvider serviceProvider,
             CompileTimeDomain domain,
             AssemblyIdentity runTimeIdentity,
             AssemblyIdentity compileTimeIdentity,
@@ -127,12 +126,16 @@ namespace Caravela.Framework.Impl.CompileTime
             this.RunTimeIdentity = runTimeIdentity;
             this.CompileTimeIdentity = compileTimeIdentity;
             this.References = references;
+            this.ClosureProjects = this.SelectManyRecursive( p => p.References, true, false ).ToImmutableList();
+            this.DiagnosticManifest = this.GetDiagnosticManifest( serviceProvider );
+            this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.Select( p => p.DiagnosticManifest ).ToList() );
         }
 
         /// <summary>
         /// Creates a <see cref="CompileTimeProject"/> that includes source code.
         /// </summary>
         public static CompileTimeProject Create(
+            IServiceProvider serviceProvider,
             CompileTimeDomain domain,
             AssemblyIdentity runTimeIdentity,
             AssemblyIdentity compileTimeIdentity,
@@ -141,17 +144,19 @@ namespace Caravela.Framework.Impl.CompileTime
             string? compiledAssemblyPath,
             string sourceDirectory,
             Func<string, TextMapFile?> getLocationMap )
-            => new( domain, runTimeIdentity, compileTimeIdentity, references, manifest, compiledAssemblyPath, getLocationMap, sourceDirectory );
+            => new( serviceProvider, domain, runTimeIdentity, compileTimeIdentity, references, manifest, compiledAssemblyPath, getLocationMap,
+                    sourceDirectory );
 
         /// <summary>
         /// Creates a <see cref="CompileTimeProject"/> that does not include any source code.
         /// </summary>
         public static CompileTimeProject CreateEmpty(
+            IServiceProvider serviceProvider,
             CompileTimeDomain domain,
             AssemblyIdentity runTimeIdentity,
             AssemblyIdentity compileTimeIdentity,
             IReadOnlyList<CompileTimeProject>? references = null )
-            => new( domain, runTimeIdentity, compileTimeIdentity, references ?? Array.Empty<CompileTimeProject>(), null, null, null, null );
+            => new( serviceProvider, domain, runTimeIdentity, compileTimeIdentity, references ?? Array.Empty<CompileTimeProject>(), null, null, null, null );
 
         /// <summary>
         /// Serializes the current project (its manifest and source code) into a stream that can be embedded as a managed resource.
@@ -202,7 +207,12 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         /// <param name="reflectionName"></param>
         /// <returns></returns>
-        public Type? GetType( string reflectionName ) => this.IsEmpty ? null : this.Assembly!.GetType( reflectionName, false );
+        public Type? GetTypeOrNull( string reflectionName ) => this.IsEmpty ? null : this.Assembly!.GetType( reflectionName, false );
+
+        public Type GetType( string reflectionName )
+            => this.GetTypeOrNull( reflectionName ) ?? throw new ArgumentOutOfRangeException(
+                nameof(reflectionName),
+                $"Cannot find a type named '{reflectionName}' in the compile-time project '{this.CompileTimeIdentity}'." );
 
         public CompileTimeFile? FindCodeFileFromTransformedPath( string transformedCodePath )
             => this.CodeFiles.Where( t => transformedCodePath.EndsWith( t.TransformedPath, StringComparison.OrdinalIgnoreCase ) )
@@ -239,17 +249,16 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <summary>
         /// Gets the list of diagnostics and suppressions defined in the current project.
         /// </summary>
-        [Memo]
-        public DiagnosticManifest DiagnosticManifest => this.GetDiagnosticManifestImpl();
+        public DiagnosticManifest DiagnosticManifest { get; }
 
-        [Memo]
-        public DiagnosticManifest ClosureDiagnosticManifest => new( this.ClosureProjects.Select( p => p.DiagnosticManifest ).ToList() );
+        public DiagnosticManifest ClosureDiagnosticManifest { get; }
 
-        private DiagnosticManifest GetDiagnosticManifestImpl()
+        private DiagnosticManifest GetDiagnosticManifest( IServiceProvider serviceProvider )
         {
-            var aspectTypes = this.AspectTypes.Select( this.GetType ).WhereNotNull().ToArray();
-            var diagnostics = DiagnosticDefinitionHelper.GetDiagnosticDefinitions( aspectTypes ).ToImmutableArray();
-            var suppressions = DiagnosticDefinitionHelper.GetSuppressionDefinitions( aspectTypes ).ToImmutableArray();
+            var aspectTypes = this.AspectTypes.Select( this.GetTypeOrNull ).WhereNotNull().ToArray();
+            var service = new DiagnosticDefinitionDiscoveryService( serviceProvider );
+            var diagnostics = service.GetDiagnosticDefinitions( aspectTypes ).ToImmutableArray();
+            var suppressions = service.GetSuppressionDefinitions( aspectTypes ).ToImmutableArray();
 
             return new DiagnosticManifest( diagnostics, suppressions );
         }

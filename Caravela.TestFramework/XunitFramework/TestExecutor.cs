@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
@@ -34,9 +35,7 @@ namespace Caravela.TestFramework.XunitFramework
             IMessageSink executionMessageSink,
             ITestFrameworkDiscoveryOptions discoveryOptions,
             ITestFrameworkExecutionOptions executionOptions )
-        {
-            throw new NotImplementedException();
-        }
+            => throw new NotImplementedException();
 
         void ITestFrameworkExecutor.RunTests(
             IEnumerable<ITestCase> testCases,
@@ -107,8 +106,7 @@ namespace Caravela.TestFramework.XunitFramework
                                     else
                                     {
                                         var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, logger );
-                                        var testResult = testRunner.RunTest( testInput );
-                                        testRunner.ExecuteAssertions( testInput, testResult );
+                                        Task.Run( () => testRunner.RunAndAssertAsync( testInput ) ).Wait();
 
                                         executionMessageSink.OnMessage( new TestPassed( test, testStopwatch.GetSeconds(), logger.ToString() ) );
 

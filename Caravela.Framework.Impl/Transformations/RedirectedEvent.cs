@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -21,8 +21,8 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IEvent TargetEvent { get; }
 
-        public RedirectedEvent( Advice advice, IEvent overriddenDeclaration, IEvent targetEvent, AspectLinkerOptions? linkerOptions = null )
-            : base( advice, overriddenDeclaration, linkerOptions )
+        public RedirectedEvent( Advice advice, IEvent overriddenDeclaration, IEvent targetEvent )
+            : base( advice, overriddenDeclaration )
         {
             this.TargetEvent = targetEvent;
         }
@@ -36,13 +36,16 @@ namespace Caravela.Framework.Impl.Transformations
                     EventDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        this.OverriddenDeclaration.GetSyntaxReturnType(),
+                        SyntaxHelpers.CreateSyntaxForEventType( this.OverriddenDeclaration ),
                         null,
-                        Identifier( context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration ) ),
+                        Identifier(
+                            context.IntroductionNameProvider.GetOverrideName(
+                                this.OverriddenDeclaration.DeclaringType,
+                                this.Advice.AspectLayerId,
+                                this.OverriddenDeclaration ) ),
                         AccessorList( List( GetAccessors() ) ) ),
                     this.Advice.AspectLayerId,
                     IntroducedMemberSemantic.Override,
-                    this.LinkerOptions,
                     this.OverriddenDeclaration )
             };
 
@@ -53,13 +56,13 @@ namespace Caravela.Framework.Impl.Transformations
                         AccessorDeclaration(
                             SyntaxKind.AddAccessorDeclaration,
                             List<AttributeListSyntax>(),
-                            this.OverriddenDeclaration.Adder.GetSyntaxModifierList(),
+                            this.OverriddenDeclaration.AddMethod.GetSyntaxModifierList(),
                             CreateAccessorBody( SyntaxKind.AddAssignmentExpression ),
                             null ),
                         AccessorDeclaration(
                             SyntaxKind.RemoveAccessorDeclaration,
                             List<AttributeListSyntax>(),
-                            this.OverriddenDeclaration.Remover.GetSyntaxModifierList(),
+                            this.OverriddenDeclaration.RemoveMethod.GetSyntaxModifierList(),
                             CreateAccessorBody( SyntaxKind.SubtractAssignmentExpression ),
                             null )
                     }.Where( a => a != null )
@@ -83,7 +86,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration.IsStatic
                         ? IdentifierName( this.OverriddenDeclaration.Name )
                         : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this.OverriddenDeclaration.Name ) )
-                            .AddLinkerAnnotation( new LinkerAnnotation( this.Advice.AspectLayerId, LinkingOrder.Default ) );
+                            .WithAspectReferenceAnnotation( this.Advice.AspectLayerId, AspectReferenceOrder.Base );
             }
         }
     }

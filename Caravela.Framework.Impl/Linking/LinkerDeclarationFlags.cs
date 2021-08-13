@@ -9,6 +9,12 @@ namespace Caravela.Framework.Impl.Linking
     internal enum LinkerDeclarationFlags
     {
         None = 0,
-        EventField = 1
+
+        /// <summary>
+        /// Used to denote event field declaration where event field declaration is not possible (e.g. explicit interface implementation with event field template).
+        /// </summary>
+        EventField = 1,
+
+        NotInlineable = 1 << 15
     }
 }

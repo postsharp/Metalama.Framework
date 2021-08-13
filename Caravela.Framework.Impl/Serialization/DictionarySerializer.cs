@@ -29,6 +29,7 @@ namespace Caravela.Framework.Impl.Serialization
 
             var creationExpression = ObjectCreationExpression( syntaxFactory.GetTypeSyntax( dictionaryType ) );
 
+            // TODO: Don't use dynamic typing here.
             dynamic dictionary = obj;
             object defaultComparer = GetDefaultComparer( dictionary );
             object actualComparer = dictionary.Comparer;
@@ -126,7 +127,7 @@ namespace Caravela.Framework.Impl.Serialization
 
         public override Type InputType => typeof(IReadOnlyDictionary<,>);
 
-        public override Type OutputType => typeof(Dictionary<,>);
+        public override Type? OutputType => typeof(Dictionary<,>);
 
         public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(IDictionary<,>) );
     }

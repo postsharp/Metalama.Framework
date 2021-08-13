@@ -18,7 +18,7 @@ using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Method : MethodBase, IMethod
+    internal class Method : MethodBase, IMethodInternal
     {
         public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IGenericParameterList GenericParameters
             => new GenericParameterList(
                 this,
-                this.MethodSymbol.TypeParameters.Select( tp => DeclarationRef.FromSymbol<IGenericParameter>( tp ) ) );
+                this.MethodSymbol.TypeParameters.Select( DeclarationRef.FromSymbol<IGenericParameter> ) );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
@@ -55,9 +55,10 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ) );
+        public IInvokerFactory<IMethodInvoker> Invokers
+            => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
 
-        public override bool IsReadOnly => this.MethodSymbol.IsReadOnly;
+        public bool IsReadOnly => this.MethodSymbol.IsReadOnly;
 
         public override bool IsExplicitInterfaceImplementation => !this.MethodSymbol.ExplicitInterfaceImplementations.IsEmpty;
 
@@ -85,6 +86,11 @@ namespace Caravela.Framework.Impl.CodeModel
             => ((IMethodSymbol) this.Symbol).ExplicitInterfaceImplementations.Select( m => this.Compilation.Factory.GetMethod( m ) ).ToList();
 
         public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
+
+        public IMemberWithAccessors? DeclaringMember
+            => this.MethodSymbol.AssociatedSymbol != null
+                ? this.Compilation.Factory.GetDeclaration( this.MethodSymbol.AssociatedSymbol ) as IMemberWithAccessors
+                : null;
 
         public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
     }

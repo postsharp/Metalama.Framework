@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\IsExternalInit.cs" Link="IsExternalInit.cs" />
     
     <!-- We have to embed the netstandard2.0 build of Caravela.Framework so we can reference it to create
          the compile-time assembly. See ReferenceAssemblyLocator                                           -->
@@ -19,7 +18,7 @@
   <ItemGroup>
 	  <!-- We cannot use InternalsVisibleTo for Caravela.TestFramework because of obfuscation in the release build. -->
     <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests" />
-    <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration" />
+    <InternalsVisibleTo Include="Caravela.Framework.Tests.InternalPipeline" />
     <InternalsVisibleTo Include="Caravela.Framework.CompilerAddIn" />
     </ItemGroup>
     
@@ -31,7 +30,6 @@
     <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" />
     <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
-    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
     <ProjectReference Include="..\Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj" />
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
@@ -46,6 +44,12 @@
     <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" />
     
   </ItemGroup>
+    
+   <ItemGroup>
+     <Compile Include="..\IsExternalInit.cs">
+       <Link>SystemTypes\IsExternalInit.cs</Link>
+     </Compile>
+   </ItemGroup>
   
   <!-- Obfuscation -->
   <PropertyGroup>
@@ -54,6 +58,7 @@
       ObfuscateRootPath=$(MSBuildThisFileDirectory)
     </PostSharpProperties>
     <PostSharpSearchPath>$(OutputPath)\netstandard2.0</PostSharpSearchPath>
+    <PostSharpDisabledMessages>PS0131</PostSharpDisabledMessages>
   </PropertyGroup>
 
   <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">

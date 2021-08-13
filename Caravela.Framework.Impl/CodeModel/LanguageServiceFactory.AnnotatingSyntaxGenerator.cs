@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Simplification;
 using System.Collections.Generic;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -18,6 +19,28 @@ namespace Caravela.Framework.Impl.CodeModel
             public AnnotatingSyntaxGenerator( SyntaxGenerator syntaxGenerator )
             {
                 this._syntaxGenerator = syntaxGenerator;
+            }
+
+            public TypeOfExpressionSyntax TypeOfExpression( ITypeSymbol type )
+            {
+                TypeSyntax typeSyntax = this.TypeExpression( type.WithNullableAnnotation( NullableAnnotation.NotAnnotated ) );
+
+                if ( type is INamedTypeSymbol { IsGenericType: true } genericType )
+                {
+                    if ( genericType.IsGenericTypeDefinition() )
+                    {
+                        typeSyntax = (TypeSyntax) UnboundTypeRewriter.Instance.Visit( typeSyntax );
+                    }
+                    else
+                    {
+                        NullableAnnotationRewriter rewriter = new( type );
+                        typeSyntax = (TypeSyntax) rewriter.Visit( typeSyntax );
+
+                        // We have to remove the nullable annotations but only for reference types.
+                    }
+                }
+
+                return (TypeOfExpressionSyntax) this._syntaxGenerator.TypeOfExpression( typeSyntax );
             }
 
             public TypeSyntax TypeExpression( ITypeSymbol symbol )
@@ -57,8 +80,35 @@ namespace Caravela.Framework.Impl.CodeModel
             }
 
             public ExpressionSyntax NameExpression( INamespaceOrTypeSymbol symbol )
-                => (ExpressionSyntax) this._syntaxGenerator.NameExpression( symbol )
-                    .WithAdditionalAnnotations( Simplifier.Annotation );
+            {
+                ExpressionSyntax expression;
+
+                switch ( symbol )
+                {
+                    case ITypeSymbol typeSymbol:
+                        if ( typeSymbol.NullableAnnotation == NullableAnnotation.Annotated )
+                        {
+                            return NullableType(
+                                (TypeSyntax) this._syntaxGenerator.NameExpression( typeSymbol.WithNullableAnnotation( NullableAnnotation.None ) ) );
+                        }
+                        else
+                        {
+                            expression = (ExpressionSyntax) this._syntaxGenerator.NameExpression( typeSymbol );
+                        }
+
+                        break;
+
+                    case INamespaceSymbol namespaceSymbol:
+                        expression = (ExpressionSyntax) this._syntaxGenerator.NameExpression( namespaceSymbol );
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+
+                return expression.WithAdditionalAnnotations( Simplifier.Annotation );
+            }
 
             public ThisExpressionSyntax ThisExpression() => (ThisExpressionSyntax) this._syntaxGenerator.ThisExpression();
 
@@ -68,7 +118,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public TypeSyntax ArrayTypeExpression( ExpressionSyntax type )
             {
-                return (TypeSyntax) this._syntaxGenerator.ArrayTypeExpression( type ).WithAdditionalAnnotations( Simplifier.Annotation );
+                var arrayType = (ArrayTypeSyntax) this._syntaxGenerator.ArrayTypeExpression( type ).WithAdditionalAnnotations( Simplifier.Annotation );
+
+                // Roslyn does not specify the rank properly so it needs to be fixed up.
+
+                return arrayType.WithRankSpecifiers(
+                    SingletonList( ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) );
             }
         }
     }

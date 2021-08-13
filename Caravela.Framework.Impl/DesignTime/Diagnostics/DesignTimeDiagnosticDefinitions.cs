@@ -4,6 +4,7 @@
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
@@ -34,13 +35,14 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
         /// <summary>
         /// Gets the set of <see cref="DiagnosticDescriptor"/> that are defined by Caravela itself.
         /// </summary>
-        public static ImmutableDictionary<string, DiagnosticDescriptor> StandardDiagnosticDescriptors { get; } = DiagnosticDefinitionHelper
+        public static ImmutableDictionary<string, DiagnosticDescriptor> StandardDiagnosticDescriptors { get; } = new DiagnosticDefinitionDiscoveryService()
             .GetDiagnosticDefinitions(
                 typeof(TemplatingDiagnosticDescriptors),
                 typeof(DesignTimeDiagnosticDescriptors),
                 typeof(GeneralDiagnosticDescriptors),
                 typeof(SerializationDiagnosticDescriptors),
-                typeof(AdviceDiagnosticDescriptors) )
+                typeof(AdviceDiagnosticDescriptors),
+                typeof(AspectLinkerDiagnosticDescriptors) )
             .Select( d => d.ToRoslynDescriptor() )
             .ToImmutableDictionary( d => d.Id, d => d, StringComparer.CurrentCultureIgnoreCase );
 

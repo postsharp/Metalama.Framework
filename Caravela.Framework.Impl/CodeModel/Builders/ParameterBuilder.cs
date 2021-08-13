@@ -9,16 +9,23 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class ParameterBuilder : DeclarationBuilder, IParameterBuilder
+    internal sealed class ParameterBuilder : DeclarationBuilder, IParameterBuilder, IParameterInternal
     {
-        private readonly string? _name;
+        private string? _name;
         private TypedConstant _defaultValue;
 
         public RefKind RefKind { get; set; }
 
         public IType ParameterType { get; set; }
 
-        public string Name => this._name ?? throw new NotSupportedException( "Cannot get the name of a return parameter." );
+        public string Name
+        {
+            get => this._name ?? throw new NotSupportedException( "Cannot get the name of a return parameter." );
+            set
+                => this._name = this._name != null
+                    ? value ?? throw new NotSupportedException( "Cannot set the parameter name to null." )
+                    : throw new NotSupportedException( "Cannot set the name of a return parameter." );
+        }
 
         public int Index { get; }
 

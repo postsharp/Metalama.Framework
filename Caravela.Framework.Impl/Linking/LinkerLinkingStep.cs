@@ -2,8 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Pipeline;
-using Microsoft.CodeAnalysis;
+using Caravela.Framework.Impl.Linking.Inlining;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking
@@ -40,26 +39,50 @@ namespace Caravela.Framework.Impl.Linking
 
         public override AspectLinkerResult Execute( LinkerAnalysisStepOutput input )
         {
-            var finalCompilation = input.IntermediateCompilation.Compilation;
-            var linkingRewriter = new LinkingRewriter( input.IntermediateCompilation.Compilation, input.AnalysisRegistry );
+            var inliners = new Inliner[]
+            {
+                new MethodAssignmentInliner(),
+                new MethodLocalDeclarationInliner(),
+                new MethodReturnStatementInliner(),
+                new MethodCastReturnStatementInliner(),
+                new MethodInvocationInliner(),
+                new MethodDiscardInliner(),
+                new PropertyGetAssignmentInliner(),
+                new PropertyGetReturnInliner(),
+                new PropertyGetCastReturnInliner(),
+                new PropertyGetLocalDeclarationInliner(),
+                new PropertySetValueAssignmentInliner(),
+                new EventAddAssignmentInliner(),
+                new EventRemoveAssignmentInliner()
+            };
+
+            var rewritingDriver = new LinkerRewritingDriver(
+                input.IntermediateCompilation.Compilation,
+                input.IntroductionRegistry,
+                input.AnalysisRegistry,
+                input.ReferenceResolver,
+                input.DiagnosticSink,
+                inliners );
+
+            var linkingRewriter = new LinkingRewriter( input.IntermediateCompilation.Compilation, rewritingDriver );
             var cleanupRewriter = new CleanupRewriter();
 
-            List<SyntaxTree> newTrees = new();
+            List<ModifiedSyntaxTree> replacedTrees = new();
 
-            // TODO: visit only modified trees (add an annotation to modified trees)
-            foreach ( var syntaxTree in input.IntermediateCompilation.SyntaxTrees )
+            foreach ( var modifiedSyntaxTree in input.IntermediateCompilation.ModifiedSyntaxTrees )
             {
+                var syntaxTree = modifiedSyntaxTree.Value.NewTree;
+
                 // Run the linking rewriter for this tree.
                 var linkedRoot = linkingRewriter.Visit( syntaxTree.GetRoot() );
-                var cleanRoot = cleanupRewriter.Visit( linkedRoot ).WithAdditionalAnnotations( AspectPipelineAnnotations.ModifiedSyntaxTree );
+                var cleanRoot = cleanupRewriter.Visit( linkedRoot );
 
                 var newSyntaxTree = syntaxTree.WithRootAndOptions( cleanRoot, syntaxTree.Options );
 
-                newTrees.Add( newSyntaxTree );
-                finalCompilation = finalCompilation.ReplaceSyntaxTree( syntaxTree, newSyntaxTree );
+                replacedTrees.Add( new ModifiedSyntaxTree( newSyntaxTree, syntaxTree ) );
             }
 
-            return new AspectLinkerResult( PartialCompilation.CreatePartial( finalCompilation, newTrees ), input.Diagnostics );
+            return new AspectLinkerResult( input.IntermediateCompilation.UpdateSyntaxTrees( replacedTrees ), input.DiagnosticSink.ToImmutable() );
         }
     }
 }

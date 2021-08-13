@@ -1,0 +1,7 @@
+<Project>
+    <PropertyGroup>
+        <MainVersion>0.3.6</MainVersion>
+        <!-- Empty for RTM. -->
+        <PackageVersionSuffix>-preview</PackageVersionSuffix>
+    </PropertyGroup>
+</Project>

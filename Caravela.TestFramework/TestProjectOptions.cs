@@ -9,13 +9,13 @@ using System.IO;
 namespace Caravela.TestFramework
 {
     /// <summary>
-    /// An implementation of <see cref="IProjectOptions"/> that can be used in tests.
+    /// An implementation of <see cref="IProjectOptions"/> and <see cref="IPathOptions"/> that can be used in tests.
     /// </summary>
-    public class TestProjectOptions : DefaultDirectoryOptions, IProjectOptions, IDisposable
+    public class TestProjectOptions : DefaultPathOptions, IProjectOptions, IDisposable
     {
         public TestProjectOptions()
         {
-            var directory = Path.Combine( Path.GetTempPath(), "Caravela.TestFramework", Guid.NewGuid().ToString() );
+            var directory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
             this.CompileTimeProjectCacheDirectory = directory;
 
             Directory.CreateDirectory( directory );
@@ -38,6 +38,14 @@ namespace Caravela.TestFramework
         public ImmutableArray<object> PlugIns => ImmutableArray<object>.Empty;
 
         public bool IsFrameworkEnabled => true;
+
+        public bool FormatOutput => false;
+
+        public bool FormatCompileTimeCode { get; set; }
+
+        public bool IsUserCodeTrusted => true;
+
+        public IProjectOptions Apply( IProjectOptions options ) => options;
 
         public void Dispose()
         {

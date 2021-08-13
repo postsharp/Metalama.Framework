@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Invokers;
@@ -11,10 +10,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltEvent : BuiltMember, IEvent, IMemberRef<IEvent>
+    internal class BuiltEvent : BuiltMember, IEventInternal, IMemberRef<IEvent>
     {
         public BuiltEvent( EventBuilder builder, CompilationModel compilation ) : base( compilation )
         {
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public EventBuilder EventBuilder { get; }
 
-        public override DeclarationBuilder Builder => this.EventBuilder;
+        public override MemberBuilder MemberBuilder => this.EventBuilder;
 
         public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.EventBuilder;
 
@@ -32,27 +32,28 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethod Signature => this.EventType.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
-        public IMethod Adder => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.Adder );
+        public IMethod AddMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.AddMethod );
 
         [Memo]
-        public IMethod Remover => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.Remover );
+        public IMethod RemoveMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.RemoveMethod );
 
-        public IMethod? Raiser => null;
+        public IMethod? RaiseMethod => null;
 
         [Memo]
-        public IInvokerFactory<IEventInvoker> Invokers => new InvokerFactory<IEventInvoker>( order => new EventInvoker( this, order ), false );
+        public IInvokerFactory<IEventInvoker> Invokers
+            => new InvokerFactory<IEventInvoker>( ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ), false );
+
+        public IEvent? OverriddenEvent => this.EventBuilder.OverriddenEvent;
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
-        public IReadOnlyList<IEvent> ExplicitInterfaceImplementations => Array.Empty<IEvent>();
+        public IReadOnlyList<IEvent> ExplicitInterfaceImplementations => this.EventBuilder.ExplicitInterfaceImplementations;
 
-        [return: RunTimeOnly]
-        public EventInfo ToEventInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 
         IEvent IDeclarationRef<IEvent>.Resolve( CompilationModel compilation ) => (IEvent) this.GetForCompilation( compilation );
 
         ISymbol IDeclarationRef<IEvent>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+
+        public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
     }
 }

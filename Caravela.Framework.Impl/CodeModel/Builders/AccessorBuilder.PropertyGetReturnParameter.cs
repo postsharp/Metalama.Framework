@@ -24,7 +24,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter reference kind." );
             }
 
-            public override string Name => throw new NotSupportedException( "Cannot get the name of a return parameter." );
+            public override string Name
+            {
+                get => throw new NotSupportedException( "Cannot get the name of a return parameter." );
+                set => throw new NotSupportedException( "Cannot set the name of a return parameter." );
+            }
+
+            public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+                => this.Accessor.ToDisplayString( format, context ) + "@<return>";
         }
     }
 }

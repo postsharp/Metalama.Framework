@@ -5,8 +5,10 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Sdk;
+using Caravela.Framework.Impl.Sdk;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -16,34 +18,40 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl
 {
+    // TODO: AspectDriver should not store a reference to a Compilation we should not store references to a Roslyn compilation.
+    
     /// <summary>
     /// Executes aspects.
     /// </summary>
     internal class AspectDriver : IAspectDriver
     {
+        private readonly UserCodeInvoker _userCodeInvoker;
+        private readonly IServiceProvider _serviceProvider;
         private readonly Compilation _compilation;
-        private readonly List<(AttributeData Attribute, ISymbol Member)> _declarativeAdviceAttributes;
+        private readonly List<AspectClassMember> _declarativeAdviceAttributes;
 
-        public INamedTypeSymbol AspectType { get; }
+        public AspectClass AspectClass { get; }
 
-        public AspectDriver( INamedTypeSymbol aspectType, Compilation compilation )
+        public AspectDriver( IServiceProvider serviceProvider, AspectClass aspectClass, Compilation compilation )
         {
+            this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
+            this._serviceProvider = serviceProvider;
             this._compilation = compilation;
-            this.AspectType = aspectType;
+            this.AspectClass = aspectClass;
 
-            this._declarativeAdviceAttributes =
-                (from member in aspectType.GetMembers()
-                 from attribute in member.GetAttributes()
-                 where attribute.AttributeClass?.Is( typeof(AdviceAttribute) ) ?? false
-                 select (attribute, member)).ToList();
+            // Introductions must have a deterministic order because of testing.
+            this._declarativeAdviceAttributes = aspectClass.Members.Where( m => m.Value.TemplateInfo.AttributeType == TemplateAttributeType.Introduction )
+                .Select( m => m.Value )
+                .OrderBy( m => m.Symbol.GetPrimarySyntaxReference()?.SyntaxTree.FilePath )
+                .ThenBy( m => m.Symbol.GetPrimarySyntaxReference()?.Span.Start )
+                .ToList();
         }
 
         internal AspectInstanceResult ExecuteAspect(
             AspectInstance aspectInstance,
             CompilationModel compilationModelRevision,
             CancellationToken cancellationToken )
-        {
-            return aspectInstance.TargetDeclaration switch
+            => aspectInstance.TargetDeclaration switch
             {
                 ICompilation compilation => this.EvaluateAspect( compilation, aspectInstance, compilationModelRevision, cancellationToken ),
                 INamedType type => this.EvaluateAspect( type, aspectInstance, compilationModelRevision, cancellationToken ),
@@ -54,7 +62,6 @@ namespace Caravela.Framework.Impl
                 IEvent @event => this.EvaluateAspect( @event, aspectInstance, compilationModelRevision, cancellationToken ),
                 _ => throw new NotImplementedException()
             };
-        }
 
         private AspectInstanceResult EvaluateAspect<T>(
             T targetDeclaration,
@@ -64,11 +71,13 @@ namespace Caravela.Framework.Impl
             where T : class, IDeclaration
         {
             static AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
-                => new(
+            {
+                return new(
                     false,
                     new ImmutableUserDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<Advice>.Empty,
                     ImmutableArray<IAspectSource>.Empty );
+            }
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -85,7 +94,7 @@ namespace Caravela.Framework.Impl
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectDeclaration.CreateDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (this.AspectType, targetDeclaration.DeclarationKind, targetDeclaration, interfaceType) );
+                        (AspectType: this.AspectClass.DisplayName, targetDeclaration.DeclarationKind, targetDeclaration, interfaceType) );
 
                 return CreateResultForError( diagnostic );
             }
@@ -96,7 +105,7 @@ namespace Caravela.Framework.Impl
             {
                 var declarativeAdvices =
                     this._declarativeAdviceAttributes
-                        .Select( x => CreateDeclarativeAdvice( aspectInstance, diagnosticSink, targetDeclaration, x.Attribute, x.Member ) )
+                        .Select( x => CreateDeclarativeAdvice( aspectInstance, diagnosticSink, targetDeclaration, x.TemplateInfo, x.Symbol ) )
                         .WhereNotNull()
                         .ToArray();
 
@@ -104,14 +113,14 @@ namespace Caravela.Framework.Impl
                     compilationModelRevision,
                     diagnosticSink,
                     declarativeAdvices,
-                    compilationModelRevision.Factory.GetNamedType( this.AspectType ),
-                    aspectInstance );
+                    aspectInstance,
+                    this._serviceProvider );
 
                 var aspectBuilder = new AspectBuilder<T>( targetDeclaration, diagnosticSink, declarativeAdvices, adviceFactory, cancellationToken );
 
                 try
                 {
-                    aspectOfT.BuildAspect( aspectBuilder );
+                    this._userCodeInvoker.Invoke( () => aspectOfT.BuildAspect( aspectBuilder ) );
                 }
                 catch ( InvalidUserCodeException e )
                 {
@@ -128,7 +137,7 @@ namespace Caravela.Framework.Impl
                 {
                     var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (this.AspectType, e.GetType().Name, e) );
+                        (AspectType: this.AspectClass.DisplayName, e.GetType().Name, e.Format( 5 )) );
 
                     return CreateResultForError( diagnostic );
                 }
@@ -148,11 +157,11 @@ namespace Caravela.Framework.Impl
             AspectInstance aspect,
             IDiagnosticAdder diagnosticAdder,
             T aspectTarget,
-            AttributeData templateAttributeData,
+            TemplateInfo template,
             ISymbol templateDeclaration )
             where T : IDeclaration
         {
-            templateAttributeData.TryCreateAdvice(
+            template.TryCreateAdvice(
                 aspect,
                 diagnosticAdder,
                 aspectTarget,

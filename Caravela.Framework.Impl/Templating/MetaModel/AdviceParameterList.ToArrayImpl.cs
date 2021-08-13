@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 this._parent = parent;
             }
 
-            public RuntimeExpression? CreateExpression( string? expressionText, Location? location = null )
+            public RuntimeExpression CreateExpression( string? expressionText, Location? location = null )
             {
                 var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
 
@@ -38,6 +38,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     array,
                     this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) ) );
             }
+
+            public bool IsAssignable => false;
+
+            public IType ExpressionType => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );
         }
     }
 }

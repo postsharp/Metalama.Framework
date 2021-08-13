@@ -5,16 +5,11 @@
         <!-- To avoid unintended publishing of artefacts, all items must be explicitly specified without wildcard -->
 
         <ShippedFile Include="$(PackagesDir)\Caravela.Framework.$(Version).nupkg" />
+        <ShippedFile Include="$(PackagesDir)\Caravela.TestFramework.$(Version).nupkg" />
         <ShippedFile Include="$(PackagesDir)\Caravela.Framework.Redist.$(Version).nupkg" />
         <ShippedFile Include="$(PackagesDir)\Caravela.Framework.Sdk.$(Version).nupkg" />
-
-        <!--
-        <ShippedFile Include="$(PackagesDir)\Caravela.$(Version).vsix" />
-        -->
-
-        <!-- We don't include the test framework because it has dependencies on implementation packages. -->
-        <!-- <ShippedFile Include="$(PackagesDir)\Caravela.TestFramework.$(Version).nupkg"/> -->
-
+        <ShippedFile Include="$(PackagesDir)\Caravela.Framework.Impl.$(Version).nupkg" />
+        <ShippedFile Include="$(PackagesDir)\Caravela.Framework.DesignTime.Contracts.$(Version).nupkg" />
 
     </ItemGroup>
 

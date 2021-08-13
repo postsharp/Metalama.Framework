@@ -1,5 +1,0 @@
-<Project>
-    <Target Name="Build">
-        <!-- Intentionally disabling build. This file is imported conditionally when obfuscation is turned on. -->
-    </Target>
-</Project>

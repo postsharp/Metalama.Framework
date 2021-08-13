@@ -11,62 +11,78 @@ namespace Caravela.Framework.Tests.UnitTests
 {
     public class TestSkipList
     {
-        // We repeat all tests many times because skip list is a random data structure.
-        private const int _repeat = 100;
-
-        [Theory]
-        [Repeat( _repeat )]
-        public void TestOrdering( int attempt )
+        private static void Repeat( Action action )
         {
-            var skipList = new SkipListIndexedDictionary<int, uint>();
+            // We repeat all tests many times because skip list is a random data structure.
+            // If there are problems in SkipList, increase this number temporarily.
 
-            var random = new Random();
-
-            for ( var i = 0; i < 10000; i++ )
+            for ( var i = 0; i < 10; i++ )
             {
-                skipList.Set( random.Next(), 0xdeadbeef );
-            }
-
-            var old = int.MinValue;
-
-            foreach ( var pair in skipList )
-            {
-                Assert.True( old < pair.Key );
-                old = pair.Key;
+                action();
             }
         }
 
-        [Theory]
-        [Repeat( _repeat )]
-        public void TestConflict( int attempt )
+        [Fact]
+        public void TestOrdering()
         {
-            var skipList = new SkipListIndexedDictionary<int, int>();
+            Repeat(
+                () =>
+                {
+                    var skipList = new SkipListIndexedDictionary<int, uint>();
 
-            for ( var i = 0; i < 100; i++ )
-            {
-                skipList.Add( i, i );
-            }
+                    var random = new Random();
 
-            Assert.Throws<ArgumentException>( () => skipList.Add( 20, 20 ) );
+                    for ( var i = 0; i < 10000; i++ )
+                    {
+                        skipList.Set( random.Next(), 0xdeadbeef );
+                    }
+
+                    var old = int.MinValue;
+
+                    foreach ( var pair in skipList )
+                    {
+                        Assert.True( old < pair.Key );
+                        old = pair.Key;
+                    }
+                } );
         }
 
-        [Theory]
-        [Repeat( _repeat )]
-        public void TestCount( int attempt )
+        [Fact]
+        public void TestConflict()
         {
-            var skipList = new SkipListIndexedDictionary<int, uint>();
-            Assert.Empty( skipList );
-            skipList.Set( 1, 1 );
-            Assert.Single( skipList );
-            skipList.Set( 1, 1 );
-            Assert.Single( skipList );
-            skipList.Set( 2, 2 );
-            Assert.Equal( 2, skipList.Count );
+            Repeat(
+                () =>
+                {
+                    var skipList = new SkipListIndexedDictionary<int, int>();
+
+                    for ( var i = 0; i < 100; i++ )
+                    {
+                        skipList.Add( i, i );
+                    }
+
+                    Assert.Throws<ArgumentException>( () => skipList.Add( 20, 20 ) );
+                } );
         }
 
-        [Theory( Skip = "Buggy, so we try not to use the Remove method." )]
-        [Repeat( _repeat )]
-        public void TestRemove( int attempt )
+        [Fact]
+        public void TestCount()
+        {
+            Repeat(
+                () =>
+                {
+                    var skipList = new SkipListIndexedDictionary<int, uint>();
+                    Assert.Empty( skipList );
+                    skipList.Set( 1, 1 );
+                    Assert.Single( skipList );
+                    skipList.Set( 1, 1 );
+                    Assert.Single( skipList );
+                    skipList.Set( 2, 2 );
+                    Assert.Equal( 2, skipList.Count );
+                } );
+        }
+
+        [Fact( Skip = "Buggy, so we try not to use the Remove method." )]
+        public void TestRemove()
         {
             var skipList = new SkipListIndexedDictionary<int, int>();
             Assert.Empty( skipList );
@@ -86,40 +102,46 @@ namespace Caravela.Framework.Tests.UnitTests
             skipList.Add( 3, 3 );
         }
 
-        [Theory]
-        [Repeat( _repeat )]
-        public void TestIndexOf( int attempt )
+        [Fact]
+        public void TestIndexOf()
         {
-            const int n = 100;
-            var skipList = new SkipListIndexedDictionary<int, int>();
+            Repeat(
+                () =>
+                {
+                    const int n = 100;
+                    var skipList = new SkipListIndexedDictionary<int, int>();
 
-            for ( var i = 0; i < n; i++ )
-            {
-                skipList.Add( i, i );
-            }
+                    for ( var i = 0; i < n; i++ )
+                    {
+                        skipList.Add( i, i );
+                    }
 
-            for ( var j = 0; j < n; j++ )
-            {
-                Assert.Equal( j, skipList.IndexOf( j ) );
-            }
+                    for ( var j = 0; j < n; j++ )
+                    {
+                        Assert.Equal( j, skipList.IndexOf( j ) );
+                    }
+                } );
         }
 
-        [Theory]
-        [Repeat( _repeat )]
-        public void TestGetByIndex( int attempt )
+        [Fact]
+        public void TestGetByIndex()
         {
-            const int n = 100;
-            var skipList = new SkipListIndexedDictionary<int, int>();
+            Repeat(
+                () =>
+                {
+                    const int n = 100;
+                    var skipList = new SkipListIndexedDictionary<int, int>();
 
-            for ( var i = 0; i < n; i++ )
-            {
-                skipList.Add( i, i );
-            }
+                    for ( var i = 0; i < n; i++ )
+                    {
+                        skipList.Add( i, i );
+                    }
 
-            for ( var j = 0; j < n; j++ )
-            {
-                Assert.Equal( j, skipList.GetAt( j ).Key );
-            }
+                    for ( var j = 0; j < n; j++ )
+                    {
+                        Assert.Equal( j, skipList.GetAt( j ).Key );
+                    }
+                } );
         }
     }
 }

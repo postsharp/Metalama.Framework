@@ -38,6 +38,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 .WithBody( null )
                 .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
                 .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
+                .WithModifiers( TokenList( method.Modifiers.Where( m => m.Kind() != SyntaxKind.AsyncKeyword ) ) )
                 .NormalizeWhitespace()
                 .WithLeadingTrivia( method.GetLeadingTrivia() )
                 .WithTrailingTrivia( LineFeed, LineFeed );
@@ -160,13 +161,6 @@ namespace Caravela.Framework.Impl.CompileTime
             return ThrowExpression(
                 ObjectCreationExpression( ParseTypeName( "System.NotSupportedException" ) )
                     .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( message ) ) ) ) );
-        }
-
-        protected TemplatingScope GetTemplatingScope( MemberDeclarationSyntax node )
-        {
-            var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
-
-            return this.SymbolClassifier.GetTemplatingScope( symbol );
         }
     }
 }

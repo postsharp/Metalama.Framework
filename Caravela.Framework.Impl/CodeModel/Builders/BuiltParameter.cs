@@ -3,12 +3,11 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
-using System;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltParameter : BuiltDeclaration, IParameter
+    internal class BuiltParameter : BuiltDeclaration, IParameterInternal
     {
         public BuiltParameter( IParameterBuilder builder, CompilationModel compilation ) : base( compilation )
         {
@@ -35,6 +34,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IMemberOrNamedType DeclaringMember => this.Compilation.Factory.GetDeclaration( this.ParameterBuilder.DeclaringMember );
 
-        public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
+        public ParameterInfo ToParameterInfo() => this.ParameterBuilder.ToParameterInfo();
     }
 }

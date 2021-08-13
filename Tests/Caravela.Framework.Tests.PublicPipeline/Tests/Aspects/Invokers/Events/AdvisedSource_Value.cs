@@ -1,0 +1,40 @@
+﻿// @Skipped #28884
+
+using System;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
+using Caravela.TestFramework;
+
+#pragma warning disable CS0067
+
+namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedSource_Value
+{
+    public class TestAttribute : OverrideEventAspect
+    {
+        public override void OverrideAdd(dynamic handler)
+        {
+            meta.Target.Event.AddMethod.Invoke( handler );
+        }
+
+        public override void OverrideRemove(dynamic handler)
+        {
+            meta.Target.Event.RemoveMethod.Invoke( handler );
+        }
+    }
+
+    // <target>
+    internal class TargetClass
+    {
+        private EventHandler? _field;
+
+        [Test]
+        public event EventHandler Event
+        {
+            add => this._field += value;
+            remove => this._field -= value;
+        }
+
+        [Test]
+        public event EventHandler? EventField;
+    }
+}

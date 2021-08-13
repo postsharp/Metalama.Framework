@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -75,7 +76,8 @@ namespace Caravela.Framework.Impl.CodeModel
             switch ( type )
             {
                 case CompileTimeType compileTimeType:
-                    return (ITypeSymbol) compileTimeType.Target.GetSymbol( this.Compilation );
+                    return (ITypeSymbol) compileTimeType.Target.GetSymbol( this.Compilation )
+                        .AssertNotNull( Justifications.SerializersNotImplementedForIntroductions );
 
                 default:
                     return this._symbolCache.GetOrAdd( type, this.GetTypeSymbolCore );
@@ -99,7 +101,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             if ( type is CompileTimeType compileTimeType )
             {
-                return (ITypeSymbol) compileTimeType.Target.GetSymbol( this.Compilation );
+                return (ITypeSymbol) compileTimeType.Target.GetSymbol( this.Compilation ).AssertNotNull( Justifications.TypesAlwaysHaveSymbol );
             }
 
             if ( type.IsByRef )
@@ -136,7 +138,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 if ( indexOfQuote >= 0 )
                 {
                     var arityString = type.Name.Substring( indexOfQuote + 1 );
-                    arity = int.Parse( arityString );
+                    arity = int.Parse( arityString, CultureInfo.InvariantCulture );
                 }
 
                 var declaringTypeGenericArguments = genericArguments.Take( genericArguments.Length - arity ).ToArray();

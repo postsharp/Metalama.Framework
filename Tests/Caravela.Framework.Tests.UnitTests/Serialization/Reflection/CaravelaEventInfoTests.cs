@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeEvent( code );
 
             this.AssertEqual(
-                @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetEvent(""Activated"")",
+                @"typeof(global::Target).GetEvent(""Activated"")",
                 serialized );
 
             TestExpression<EventInfo>(
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeEvent( code );
 
             this.AssertEqual(
-                @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetEvent(""Activated"")",
+                @"typeof(global::Target).GetEvent(""Activated"")",
                 serialized );
 
             TestExpression<EventInfo>(
@@ -64,7 +64,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeEvent( code );
 
             this.AssertEqual(
-                @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).GetEvent(""Activated"")",
+                @"typeof(global::Target<>).GetEvent(""Activated"")",
                 serialized );
 
             TestExpression<EventInfo>(

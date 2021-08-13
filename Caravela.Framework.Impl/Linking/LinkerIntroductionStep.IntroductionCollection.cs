@@ -2,11 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 
@@ -17,28 +19,30 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Collection of introduced members for given transformations. Id is added to the nodes to allow tracking.
         /// </summary>
-        private class IntroductionCollection
+        private class SyntaxTransformationCollection
         {
             private readonly List<LinkerIntroducedMember> _introducedMembers;
-            private readonly Dictionary<MemberDeclarationSyntax, List<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
+            private readonly Dictionary<InsertPosition, List<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
             private readonly Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>> _introducedInterfacesByTargetTypeDecl;
+            private readonly HashSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
 
             private int _nextId;
 
             public IReadOnlyList<LinkerIntroducedMember> IntroducedMembers => this._introducedMembers;
 
-            public IntroductionCollection()
+            public SyntaxTransformationCollection()
             {
                 this._introducedMembers = new List<LinkerIntroducedMember>();
-                this._introducedMembersByInsertPosition = new Dictionary<MemberDeclarationSyntax, List<LinkerIntroducedMember>>();
+                this._introducedMembersByInsertPosition = new Dictionary<InsertPosition, List<LinkerIntroducedMember>>();
                 this._introducedInterfacesByTargetTypeDecl = new Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>>();
+                this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
             }
 
             public void Add( IMemberIntroduction memberIntroduction, IEnumerable<IntroducedMember> introducedMembers )
             {
                 foreach ( var introducedMember in introducedMembers )
                 {
-                    var id = Interlocked.Increment( ref this._nextId ).ToString();
+                    var id = Interlocked.Increment( ref this._nextId ).ToString( CultureInfo.InvariantCulture );
                     var idAnnotation = new SyntaxAnnotation( LinkerIntroductionRegistry.IntroducedNodeIdAnnotationId, id );
 
                     // TODO: Roslyn adds Id annotation to nodes that are tracked, which we may use instead of our own annotation.
@@ -49,9 +53,9 @@ namespace Caravela.Framework.Impl.Linking
 
                     this._introducedMembers.Add( linkerIntroducedMember );
 
-                    if ( !this._introducedMembersByInsertPosition.TryGetValue( memberIntroduction.InsertPositionNode, out var nodes ) )
+                    if ( !this._introducedMembersByInsertPosition.TryGetValue( memberIntroduction.InsertPosition, out var nodes ) )
                     {
-                        this._introducedMembersByInsertPosition[memberIntroduction.InsertPositionNode] = nodes = new List<LinkerIntroducedMember>();
+                        this._introducedMembersByInsertPosition[memberIntroduction.InsertPosition] = nodes = new List<LinkerIntroducedMember>();
                     }
 
                     nodes.Add( linkerIntroducedMember );
@@ -63,8 +67,7 @@ namespace Caravela.Framework.Impl.Linking
                 var targetTypeSymbol = ((INamedType) interfaceImplementationIntroduction.ContainingDeclaration).GetSymbol();
 
                 // Heuristic: select the file with the shortest path.
-                var targetTypeDecl =
-                    (BaseTypeDeclarationSyntax) targetTypeSymbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).First().GetSyntax();
+                var targetTypeDecl = (BaseTypeDeclarationSyntax) targetTypeSymbol.GetPrimaryDeclaration().AssertNotNull();
 
                 if ( !this._introducedInterfacesByTargetTypeDecl.TryGetValue( targetTypeDecl, out var interfaceList ) )
                 {
@@ -74,7 +77,26 @@ namespace Caravela.Framework.Impl.Linking
                 interfaceList.AddRange( introducedInterfaces );
             }
 
-            public IEnumerable<LinkerIntroducedMember> GetIntroducedMembersOnPosition( MemberDeclarationSyntax position )
+            internal void AddRemovedSyntax( SyntaxNode removedSyntax )
+            {
+                switch ( removedSyntax )
+                {
+                    case VariableDeclaratorSyntax variableDeclarator:
+                        this._removedVariableDeclaratorSyntax.Add( variableDeclarator );
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+            public bool IsRemovedSyntax( VariableDeclaratorSyntax memberDeclaration )
+            {
+                return this._removedVariableDeclaratorSyntax.Contains( memberDeclaration );
+            }
+
+            public IEnumerable<LinkerIntroducedMember> GetIntroducedMembersOnPosition( InsertPosition position )
             {
                 if ( this._introducedMembersByInsertPosition.TryGetValue( position, out var introducedMembers ) )
                 {

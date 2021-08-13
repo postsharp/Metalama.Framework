@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using System.Reflection;
 
 namespace Caravela.Framework.Code
@@ -52,7 +51,6 @@ namespace Caravela.Framework.Code
         /// Gets a <see cref="ParameterInfo"/> that represents the current parameter at run time.
         /// </summary>
         /// <returns>A <see cref="ParameterInfo"/> that can be used only in run-time code.</returns>
-        [return: RunTimeOnly]
         ParameterInfo ToParameterInfo();
     }
 }

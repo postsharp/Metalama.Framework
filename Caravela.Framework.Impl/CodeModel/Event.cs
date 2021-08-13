@@ -4,15 +4,17 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Invokers;
+using Caravela.Framework.Impl.CodeModel.Pseudo;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Event : Member, IEvent
+    internal class Event : Member, IEventInternal
     {
         private readonly IEventSymbol _symbol;
 
@@ -24,7 +26,8 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IInvokerFactory<IEventInvoker> Invokers => new InvokerFactory<IEventInvoker>( order => new EventInvoker( this, order ) );
+        public IInvokerFactory<IEventInvoker> Invokers
+            => new InvokerFactory<IEventInvoker>( ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ) );
 
         [Memo]
         public INamedType EventType => (INamedType) this.Compilation.Factory.GetIType( this._symbol.Type );
@@ -32,17 +35,34 @@ namespace Caravela.Framework.Impl.CodeModel
         public IMethod Signature => this.EventType.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
-        public IMethod Adder => this.Compilation.Factory.GetMethod( this._symbol.AddMethod! );
+        public IMethod AddMethod => this.Compilation.Factory.GetMethod( this._symbol.AddMethod! );
 
         [Memo]
-        public IMethod Remover => this.Compilation.Factory.GetMethod( this._symbol.RemoveMethod! );
+        public IMethod RemoveMethod => this.Compilation.Factory.GetMethod( this._symbol.RemoveMethod! );
 
         // TODO: pseudo-accessor
         [Memo]
-        public IMethod? Raiser
+        public IMethod? RaiseMethod
             => this._symbol.RaiseMethod == null
-                ? new PseudoAccessor( this, AccessorSemantic.Raise )
+                ? new PseudoRaiser( this )
                 : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );
+
+        public IEvent? OverriddenEvent
+        {
+            get
+            {
+                var overriddenEvent = this._symbol.OverriddenEvent;
+
+                if ( overriddenEvent != null )
+                {
+                    return this.Compilation.Factory.GetEvent( overriddenEvent );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
 
         [Memo]
         public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
@@ -53,6 +73,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 
         public override bool IsExplicitInterfaceImplementation => !this._symbol.ExplicitInterfaceImplementations.IsEmpty;
+
+        public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
         public override bool IsAsync => false;
 

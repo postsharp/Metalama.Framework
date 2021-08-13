@@ -3,7 +3,8 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Formatting;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -19,12 +20,14 @@ namespace Caravela.Framework.Impl.Templating
 {
     internal class TemplateDriver
     {
+        private readonly UserCodeInvoker _userCodeInvoker;
         private readonly ISymbol _sourceTemplateSymbol;
         private readonly MethodInfo _templateMethod;
         private readonly AspectClass _aspectClass;
 
-        public TemplateDriver( AspectClass aspectClass, ISymbol sourceTemplateSymbol, MethodInfo compiledTemplateMethodInfo )
+        public TemplateDriver( IServiceProvider serviceProvider, AspectClass aspectClass, ISymbol sourceTemplateSymbol, MethodInfo compiledTemplateMethodInfo )
         {
+            this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
             this._sourceTemplateSymbol = sourceTemplateSymbol;
             this._templateMethod = compiledTemplateMethodInfo ?? throw new ArgumentNullException( nameof(compiledTemplateMethodInfo) );
             this._aspectClass = aspectClass;
@@ -40,7 +43,7 @@ namespace Caravela.Framework.Impl.Templating
             var errorCountBefore = templateExpansionContext.DiagnosticSink.ErrorCount;
 
             using ( TemplateSyntaxFactory.WithContext( templateExpansionContext ) )
-            using ( meta.WithContext( templateExpansionContext.MetaApi, templateExpansionContext.ProceedImplementation ) )
+            using ( meta.WithContext( templateExpansionContext.MetaApi ) )
             {
                 SyntaxNode output;
 
@@ -48,7 +51,8 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     try
                     {
-                        output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() );
+                        output = this._userCodeInvoker.Invoke(
+                            () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() ) );
                     }
                     catch ( TargetInvocationException ex ) when ( ex.InnerException != null )
                     {
@@ -68,7 +72,7 @@ namespace Caravela.Framework.Impl.Templating
                                 (this._sourceTemplateSymbol,
                                  templateExpansionContext.MetaApi.Declaration,
                                  userException.GetType().Name,
-                                 userException.ToString()) ) );
+                                 userException.Message.TrimEnd( "." )) ) );
 
                         block = null;
 
@@ -83,7 +87,7 @@ namespace Caravela.Framework.Impl.Templating
                 block = block.NormalizeWhitespace();
 
                 // We add generated-code annotations to the statements and not to the block itself so that the brackets don't get colored.
-                block = block.AddSourceCodeAnnotation();
+                block = block.AddGeneratedCodeAnnotation();
 
                 return errorCountAfter == errorCountBefore;
             }
@@ -95,6 +99,12 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // We are in the template test and there is no aspect class. 
                 return null;
+            }
+
+            if ( this._aspectClass.Project == null )
+            {
+                // We should not get here because a null project is only for the abstract classes of the framework.
+                throw new AssertionFailedException();
             }
 
             // TODO: This method needs to be rewritten. Ideally, the PDB would be mapped to the source file, it would not be necessary

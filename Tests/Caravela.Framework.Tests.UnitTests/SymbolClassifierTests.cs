@@ -5,7 +5,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Sdk;
 using System.Linq;
 using Xunit;
 
@@ -105,7 +104,7 @@ class C
             var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes.OfName( "C" ).Single();
             this.AssertScope( type, TemplatingScope.CompileTimeOnly );
-            this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.CompileTimeOnly );
+            this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.CompileTimeOnlyReturningBoth );
             this.AssertScope( type.Methods.OfName( "M" ).Single(), TemplatingScope.CompileTimeOnly );
         }
 

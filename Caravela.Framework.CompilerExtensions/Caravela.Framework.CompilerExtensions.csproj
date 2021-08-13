@@ -24,24 +24,31 @@
 
 		<!-- TODO: These two assemblies must be included because they are not a part of csc.exe, but it would be better to include them in csc.exe -->
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" PrivateAssets="all">
-		<GeneratePathProperty>true</GeneratePathProperty></PackageReference>
+		    <GeneratePathProperty>true</GeneratePathProperty>
+		    </PackageReference>
 		<EmbeddedResource Include="$(PkgMicrosoft_CodeAnalysis_CSharp_Workspaces)\lib\netstandard2.0\Microsoft.CodeAnalysis.CSharp.Workspaces.dll" Link="Resources\Microsoft.CodeAnalysis.CSharp.Workspaces.dll" />
-		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" PrivateAssets="all"><GeneratePathProperty>true</GeneratePathProperty></PackageReference>
+		
+		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" PrivateAssets="all">
+		    <GeneratePathProperty>true</GeneratePathProperty>
+		</PackageReference>
 		<EmbeddedResource Include="$(PkgMicrosoft_CodeAnalysis_Workspaces_Common)\lib\netstandard2.0\Microsoft.CodeAnalysis.Workspaces.dll" Link="Resources\Microsoft.CodeAnalysis.Workspaces.dll" />
 
 
-		<PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" PrivateAssets="all"><GeneratePathProperty>true</GeneratePathProperty></PackageReference>
+		<PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" PrivateAssets="all">
+		    <GeneratePathProperty>true</GeneratePathProperty>
+		</PackageReference>
 		<EmbeddedResource Include="$(PkgMicrosoft_Bcl_HashCode)\lib\netstandard2.0\Microsoft.Bcl.HashCode.dll" Link="Resources\Microsoft.Bcl.HashCode.dll" />
 
-		<PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" PrivateAssets="all"><GeneratePathProperty>true</GeneratePathProperty></PackageReference>
+		<PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" PrivateAssets="all">
+		    <GeneratePathProperty>true</GeneratePathProperty>
+		</PackageReference>
 		<EmbeddedResource Include="$(PkgK4os_Hash_xxHash)\lib\netstandard2.0\K4os.Hash.xxHash.dll" Link="Resources\K4os.Hash.xxHash.dll" />
 
 
-		<PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" PrivateAssets="all"><GeneratePathProperty>true</GeneratePathProperty></PackageReference>
+		<PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" PrivateAssets="all">
+		    <GeneratePathProperty>true</GeneratePathProperty>
+		</PackageReference>
 		<EmbeddedResource Include="$(PkgNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" Link="Resources\Newtonsoft.Json.dll" />
-
-		<PackageReference Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" PrivateAssets="all"><GeneratePathProperty>true</GeneratePathProperty></PackageReference>
-		<EmbeddedResource Include="$(PkgSystem_Reflection_MetadataLoadContext)\lib\netstandard2.0\System.Reflection.MetadataLoadContext.dll" Link="Resources\System.Reflection.MetadataLoadContext.dll" />
 
 		<EmbeddedResource Include="$(OutputPath)\Caravela.Framework.Impl.dll" Link="Resources\Caravela.Framework.Impl.dll" />
 		<EmbeddedResource Include="$(OutputPath)\Caravela.Framework.DesignTime.Contracts.dll" Link="Resources\Caravela.Framework.DesignTime.Contracts.dll" />

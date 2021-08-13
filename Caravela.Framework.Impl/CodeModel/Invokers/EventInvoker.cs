@@ -16,14 +16,19 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
     {
         public IEvent Member { get; }
 
-        public EventInvoker( IEvent member, InvokerOrder order ) : base( member, order )
+        public EventInvoker( IEvent member, InvokerOrder order, InvokerOperator invokerOperator ) : base( member, order )
         {
             this.Member = member;
+
+            if ( invokerOperator == InvokerOperator.Conditional )
+            {
+                throw new NotSupportedException( "Conditional access is not supported for events." );
+            }
         }
 
         protected virtual void AssertNoArgument() { }
 
-        private ExpressionSyntax CreateEventExpression( RuntimeExpression? instance )
+        private ExpressionSyntax CreateEventExpression( RuntimeExpression instance, AspectReferenceTargetKind targetKind )
         {
             if ( this.Member.DeclaringType!.IsOpenGeneric )
             {
@@ -32,47 +37,57 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             this.AssertNoArgument();
 
-            return MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                this.Member.GetReceiverSyntax( instance ),
-                IdentifierName( this.Member.Name ) );
+            return
+                MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        this.Member.GetReceiverSyntax( instance ),
+                        IdentifierName( this.Member.Name ) )
+                    .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
         }
 
-        public object AddDelegate( object? instance, object? value )
+        public object Add( object? instance, object? value )
         {
-            // TODO: Use LinkerAnnotation.
+            var eventAccess = this.CreateEventExpression(
+                RuntimeExpression.FromValue( instance, this.Compilation ),
+                AspectReferenceTargetKind.EventAddAccessor );
 
-            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ) );
+            var expression = AssignmentExpression(
+                SyntaxKind.AddAssignmentExpression,
+                eventAccess,
+                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
 
-            var expression = AssignmentExpression( SyntaxKind.AddAssignmentExpression, eventAccess, RuntimeExpression.GetSyntaxFromValue( value ) );
-
-            return new DynamicExpression( expression, this.Member.EventType, false );
+            return new DynamicExpression( expression, this.Member.EventType );
         }
 
-        public object RemoveDelegate( object? instance, object? value )
+        public object Remove( object? instance, object? value )
         {
-            // TODO: Use LinkerAnnotation.
+            var eventAccess = this.CreateEventExpression(
+                RuntimeExpression.FromValue( instance, this.Compilation ),
+                AspectReferenceTargetKind.EventRemoveAccessor );
 
-            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ) );
+            var expression = AssignmentExpression(
+                SyntaxKind.SubtractAssignmentExpression,
+                eventAccess,
+                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
 
-            var expression = AssignmentExpression( SyntaxKind.SubtractAssignmentExpression, eventAccess, RuntimeExpression.GetSyntaxFromValue( value ) );
-
-            return new DynamicExpression( expression, this.Member.EventType, false );
+            return new DynamicExpression( expression, this.Member.EventType );
         }
 
-        public dynamic Raise( dynamic? instance, params dynamic?[] args )
+        public object? Raise( object? instance, params object?[] args )
         {
-            var eventAccess = this.CreateEventExpression( RuntimeExpression.FromValue( instance ) );
+            var eventAccess = this.CreateEventExpression(
+                RuntimeExpression.FromValue( instance, this.Compilation ),
+                AspectReferenceTargetKind.EventRaiseAccessor );
 
-            var arguments = this.Member.GetArguments( this.Member.Signature.Parameters, RuntimeExpression.FromValue( args ) );
+            var arguments = this.Member.GetArguments( this.Member.Signature.Parameters, RuntimeExpression.FromValue( args, this.Compilation ) );
 
-            var expression = InvocationExpression( ConditionalAccessExpression( eventAccess, MemberBindingExpression( IdentifierName( "Invoke" ) ) ) )
-                .AddArgumentListArguments( arguments );
+            var expression = ConditionalAccessExpression(
+                eventAccess,
+                InvocationExpression( MemberBindingExpression( IdentifierName( "Invoke" ) ) ).AddArgumentListArguments( arguments ) );
 
             return new DynamicExpression(
                 expression,
-                this.Member.Signature.ReturnType,
-                false );
+                this.Member.Signature.ReturnType );
         }
 
         public IEventInvoker Base => throw new NotImplementedException();

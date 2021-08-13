@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
@@ -15,7 +15,14 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" />
     <ProjectReference Include="..\..\Caravela.Framework\Caravela.Framework.csproj" />
-    <ProjectReference Include="..\Caravela.Framework.Tests.Integration\Caravela.Framework.Tests.Integration.csproj" />
+    <ProjectReference Include="..\Caravela.Framework.Tests.PublicPipeline\Caravela.Framework.Tests.PublicPipeline.csproj" />
+    <ProjectReference Include="..\Caravela.Framework.Tests.InternalPipeline\Caravela.Framework.Tests.InternalPipeline.csproj" />
+  </ItemGroup>
+  
+  <!-- Disable this project when obfuscation is enabled -->
+  <ItemGroup Condition="'$(Obfuscate)'=='True'">
+      <Compile Remove="**\*" />
+      <Page Remove="**\*" />
   </ItemGroup>
 
 </Project>

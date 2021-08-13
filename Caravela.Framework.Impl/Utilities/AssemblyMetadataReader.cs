@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -32,19 +33,7 @@ namespace Caravela.Framework.Impl.Utilities
         /// <summary>
         /// Gets an <see cref="AssemblyMetadataReader"/> for a given <see cref="Assembly"/>.
         /// </summary>
-        public static AssemblyMetadataReader GetInstance( Assembly assembly )
-        {
-            lock ( _instances )
-            {
-                if ( !_instances.TryGetValue( assembly, out var reader ) )
-                {
-                    reader = new AssemblyMetadataReader( assembly );
-                    _instances.Add( assembly, reader );
-                }
-
-                return reader;
-            }
-        }
+        public static AssemblyMetadataReader GetInstance( Assembly assembly ) => _instances.GetValue( assembly, a => new AssemblyMetadataReader( a ) );
 
         /// <summary>
         /// Gets the package version with which the current assembly was built.
@@ -67,7 +56,7 @@ namespace Caravela.Framework.Impl.Utilities
         /// </summary>
         public static string BuildId
             => MainInstance.Version.ToString( 3 ) + "-" +
-               string.Join( "", MainInstance.ModuleId.ToByteArray().Take( 4 ).Select( i => i.ToString( "x2" ) ) );
+               string.Join( "", MainInstance.ModuleId.ToByteArray().Take( 4 ).Select( i => i.ToString( "x2", CultureInfo.InvariantCulture ) ) );
 
         public static AssemblyMetadataReader MainInstance => GetInstance( typeof(AssemblyMetadataReader).Assembly );
     }

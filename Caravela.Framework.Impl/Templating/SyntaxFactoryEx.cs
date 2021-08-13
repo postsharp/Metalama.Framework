@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Linq;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.Templating
@@ -12,11 +13,14 @@ namespace Caravela.Framework.Impl.Templating
     /// <summary>
     /// Helper methods that would ideally be in the <see cref="SyntaxFactory"/> class.
     /// </summary>
-    internal static class SyntaxFactoryEx
+    public static class SyntaxFactoryEx
     {
         public static LiteralExpressionSyntax Null => SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression );
 
         public static LiteralExpressionSyntax LiteralExpression( object? obj )
+            => LiteralExpressionOrNull( obj ) ?? throw new ArgumentOutOfRangeException( nameof(obj) );
+
+        public static LiteralExpressionSyntax? LiteralExpressionOrNull( object? obj )
             => obj switch
             {
                 string s => LiteralExpression( s ),
@@ -30,7 +34,7 @@ namespace Caravela.Framework.Impl.Templating
                 double s => LiteralExpression( s ),
                 float s => LiteralExpression( s ),
                 decimal s => LiteralExpression( s ),
-                _ => throw new ArgumentOutOfRangeException()
+                _ => null
             };
 
         public static LiteralExpressionSyntax LiteralExpression( string? s )
@@ -66,9 +70,20 @@ namespace Caravela.Framework.Impl.Templating
         public static LiteralExpressionSyntax LiteralExpression( char c )
             => SyntaxFactory.LiteralExpression( SyntaxKind.CharacterLiteralExpression, SyntaxFactory.Literal( c ) );
 
+        private static ExpressionSyntax EmptyExpression => SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) );
+
         public static StatementSyntax EmptyStatement
-            => SyntaxFactory.ExpressionStatement( SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) ) )
+            => SyntaxFactory.ExpressionStatement( EmptyExpression )
                 .WithSemicolonToken( SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
+
+        public static IdentifierNameSyntax DiscardToken
+            => SyntaxFactory.IdentifierName(
+                SyntaxFactory.Identifier(
+                    default,
+                    SyntaxKind.UnderscoreToken,
+                    "_",
+                    "_",
+                    default ) );
 
         public static SyntaxToken RefKindToken( RefKind refKind )
             => refKind switch
@@ -78,5 +93,77 @@ namespace Caravela.Framework.Impl.Templating
                 RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
                 _ => default
             };
+
+        /// <summary>
+        /// Generates a string that contains C# code that instantiates the given node
+        /// using SyntaxFactory. Used for debugging.
+        /// </summary>
+        public static string ToSyntaxFactoryDebug( this SyntaxNode node, Compilation compilation )
+        {
+            MetaSyntaxRewriter rewriter = new( compilation );
+            var normalized = NormalizeRewriter.Instance.Visit( node );
+            var transformedNode = rewriter.Visit( normalized );
+
+            return transformedNode.ToFullString();
+        }
+
+        private class NormalizeRewriter : CSharpSyntaxRewriter
+        {
+            public static readonly NormalizeRewriter Instance = new();
+
+            public NormalizeRewriter() : base( true ) { }
+
+            public override SyntaxNode? VisitQualifiedName( QualifiedNameSyntax node )
+            {
+                if ( node.Parent == null )
+                {
+                    throw new AssertionFailedException();
+                }
+
+                // The following list of exceptions is incomplete. If you get into an InvalidCastException in the rewriter, you have to extend it.
+                if ( !node.AncestorsAndSelf()
+                    .Any(
+                        a =>
+                            a is GenericNameSyntax or UsingDirectiveSyntax ||
+                            (a.Parent is NamespaceDeclarationSyntax namespaceDeclaration && namespaceDeclaration.Name == a) ||
+                            (a.Parent is MethodDeclarationSyntax methodDeclaration && methodDeclaration.ReturnType == a) ||
+                            (a.Parent is VariableDeclarationSyntax variable && variable.Type == a) ||
+                            (a.Parent is TypeConstraintSyntax typeConstraint && typeConstraint.Type == a) ||
+                            (a.Parent is ArrayTypeSyntax arrayType && arrayType.ElementType == a) ||
+                            (a.Parent is ObjectCreationExpressionSyntax objectCreation && objectCreation.Type == a) ||
+                            (a.Parent is DefaultExpressionSyntax defaultExpression && defaultExpression.Type == a) ||
+                            (a.Parent is CastExpressionSyntax castExpression && castExpression.Type == a) ) )
+                {
+                    return SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        (ExpressionSyntax) this.Visit( node.Left ),
+                        node.DotToken,
+                        node.Right );
+                }
+                else
+                {
+                    return base.VisitQualifiedName( node );
+                }
+            }
+
+            public override SyntaxNode? VisitXmlComment( XmlCommentSyntax node ) => null;
+
+            public override SyntaxNode? VisitDocumentationCommentTrivia( DocumentationCommentTriviaSyntax node ) => null;
+
+            public override SyntaxTrivia VisitTrivia( SyntaxTrivia trivia )
+            {
+                switch ( trivia.Kind() )
+                {
+                    case SyntaxKind.SingleLineCommentTrivia:
+                    case SyntaxKind.MultiLineCommentTrivia:
+                        return default;
+
+                    default:
+                        return trivia;
+                }
+            }
+
+            public override SyntaxNode? VisitPragmaWarningDirectiveTrivia( PragmaWarningDirectiveTriviaSyntax node ) => null;
+        }
     }
 }

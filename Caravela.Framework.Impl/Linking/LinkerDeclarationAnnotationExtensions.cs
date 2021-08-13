@@ -11,14 +11,14 @@ namespace Caravela.Framework.Impl.Linking
     {
         public const string AnnotationKind = "CaravelaAspectLinkerDeclarationNode";
 
-        public static LinkerDeclarationFlags GetLinkerDeclarationFlags( this MemberDeclarationSyntax node )
+        public static LinkerDeclarationFlags GetLinkerDeclarationFlags( this SyntaxNode node )
         {
             var annotationValue = node.GetAnnotations( AnnotationKind ).SingleOrDefault()?.Data;
 
             return annotationValue != null ? LinkerDeclarationAnnotation.FromString( annotationValue ).Flags : LinkerDeclarationFlags.None;
         }
 
-        public static T AddLinkerDeclarationFlags<T>( this T node, in LinkerDeclarationFlags flags )
+        public static T WithLinkerDeclarationFlags<T>( this T node, in LinkerDeclarationFlags flags )
             where T : MemberDeclarationSyntax
         {
             return node.WithAdditionalAnnotations( new SyntaxAnnotation( AnnotationKind, new LinkerDeclarationAnnotation( flags ).ToString() ) );

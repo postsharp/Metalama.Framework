@@ -17,7 +17,7 @@ using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltMethod : BuiltMember, IMethod, IMemberRef<IMethod>
+    internal class BuiltMethod : BuiltMember, IMethodInternal, IMemberRef<IMethod>
     {
         public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation )
         {
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public MethodBuilder MethodBuilder { get; }
 
-        public override DeclarationBuilder Builder => this.MethodBuilder;
+        public override MemberBuilder MemberBuilder => this.MethodBuilder;
 
         public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.MethodBuilder;
 
@@ -40,10 +40,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public MethodKind MethodKind => this.MethodBuilder.MethodKind;
 
+        public bool IsReadOnly => this.MethodBuilder.IsReadOnly;
+
         // TODO: When an interface is introduced, explicit implementation should appear here.
-        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.MethodBuilder.ExplicitInterfaceImplementations;
 
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
+
+        IMemberWithAccessors? IMethod.DeclaringMember => null;
 
         System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
 
@@ -67,7 +71,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers
-            => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), this.OverriddenMethod != null );
+            => new InvokerFactory<IMethodInvoker>(
+                ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ),
+                this.OverriddenMethod != null );
 
         public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this.MethodBuilder.OverriddenMethod );
 

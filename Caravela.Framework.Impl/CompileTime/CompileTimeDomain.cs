@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
+using System.Globalization;
 using System.Reflection;
 using System.Threading;
 
@@ -52,7 +53,7 @@ namespace Caravela.Framework.Impl.CompileTime
         internal Assembly GetOrLoadAssembly( AssemblyIdentity compileTimeIdentity, string path )
             => this._assemblyCache.GetOrAdd( compileTimeIdentity, _ => this.LoadAssembly( path ) );
 
-        public override string ToString() => this._domainId.ToString();
+        public override string ToString() => this._domainId.ToString( CultureInfo.InvariantCulture );
 
         public virtual void Dispose( bool disposing )
         {

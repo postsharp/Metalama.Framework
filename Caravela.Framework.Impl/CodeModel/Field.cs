@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel.Invokers;
+using Caravela.Framework.Impl.CodeModel.Pseudo;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.RunTime;
 using Microsoft.CodeAnalysis;
@@ -11,7 +12,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class Field : Member, IField
+    internal sealed class Field : Member, IFieldInternal
     {
         private readonly IFieldSymbol _symbol;
 
@@ -26,16 +27,16 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
-            => new InvokerFactory<IFieldOrPropertyInvoker>( order => new FieldOrPropertyInvoker( this, order ) );
+            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
 
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
 
         [Memo]
-        public IMethod? Getter => new PseudoAccessor( this, AccessorSemantic.Get );
+        public IMethod? GetMethod => new PseudoGetter( this );
 
         [Memo]
-        public IMethod? Setter => this.Writeability != Writeability.None ? new PseudoAccessor( this, AccessorSemantic.Set ) : null;
+        public IMethod? SetMethod => this.Writeability != Writeability.None ? new PseudoSetter( this ) : null;
 
         // TODO: Memo does not work here.
         // [Memo]

@@ -3,11 +3,12 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
+using Caravela.Framework.Impl.CodeModel;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdvisedField : AdvisedFieldOrProperty<IField>, IAdvisedField
+    internal class AdvisedField : AdvisedFieldOrProperty<IFieldInternal>, IAdvisedField
     {
-        public AdvisedField( IField underlying ) : base( underlying ) { }
+        public AdvisedField( IField underlying ) : base( (IFieldInternal) underlying ) { }
     }
 }

@@ -8,6 +8,8 @@ using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
@@ -26,6 +28,7 @@ namespace Caravela.Framework.Impl.Templating
         private const string _symbolAnnotationKind = "symbol";
         private const string _declaredSymbolAnnotationKind = "declared";
         private const string _expressionTypeAnnotationKind = "type";
+        private readonly SymbolIdGenerator _symbolIdGenerator;
 
         internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create(
             _symbolAnnotationKind,
@@ -41,7 +44,10 @@ namespace Caravela.Framework.Impl.Templating
         private readonly Dictionary<ITypeSymbol, SyntaxAnnotation> _typeToAnnotationMap = new();
         private readonly Dictionary<SyntaxAnnotation, ITypeSymbol> _annotationToTypeMap = new();
 
-        private int _nextId;
+        public SyntaxTreeAnnotationMap( Compilation compilation )
+        {
+            this._symbolIdGenerator = SymbolIdGenerator.GetInstance( compilation );
+        }
 
         /// <summary>
         /// Annotates a syntax tree with annotations that can later be resolved using the get methods of this class.
@@ -78,7 +84,8 @@ namespace Caravela.Framework.Impl.Templating
 
                 this._indexToLocationMap.Add( (originalNode.SyntaxTree, originalNode.Span) );
 
-                annotatedNode = annotatedNode.WithAdditionalAnnotations( new SyntaxAnnotation( _locationAnnotationKind, index.ToString() ) );
+                annotatedNode = annotatedNode.WithAdditionalAnnotations(
+                    new SyntaxAnnotation( _locationAnnotationKind, index.ToString( CultureInfo.InvariantCulture ) ) );
             }
 
             return annotatedNode;
@@ -143,8 +150,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     if ( !this._symbolToAnnotationMap.TryGetValue( symbolInfo.Symbol, out var annotation ) )
                     {
-                        this._nextId++;
-                        annotation = new SyntaxAnnotation( _symbolAnnotationKind, this._nextId.ToString() );
+                        annotation = new SyntaxAnnotation( _symbolAnnotationKind, this._symbolIdGenerator.GetId( symbolInfo.Symbol ) );
                         this._symbolToAnnotationMap[symbolInfo.Symbol] = annotation;
                         this._annotationToSymbolMap[annotation] = symbolInfo.Symbol;
                     }
@@ -157,8 +163,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     if ( !this._declaredSymbolToAnnotationMap.TryGetValue( declaredSymbol, out var annotation ) )
                     {
-                        this._nextId++;
-                        annotation = new SyntaxAnnotation( _declaredSymbolAnnotationKind, this._nextId.ToString() );
+                        annotation = new SyntaxAnnotation( _declaredSymbolAnnotationKind, this._symbolIdGenerator.GetId( declaredSymbol ) );
                         this._declaredSymbolToAnnotationMap[declaredSymbol] = annotation;
                         this._annotationToDeclaredSymbolMap[annotation] = declaredSymbol;
                     }
@@ -171,8 +176,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     if ( !this._typeToAnnotationMap.TryGetValue( typeInfo.Type, out var annotation ) )
                     {
-                        this._nextId++;
-                        annotation = new SyntaxAnnotation( _expressionTypeAnnotationKind, this._nextId.ToString() );
+                        annotation = new SyntaxAnnotation( _expressionTypeAnnotationKind, this._symbolIdGenerator.GetId( typeInfo.Type ) );
                         this._typeToAnnotationMap[typeInfo.Type] = annotation;
                         this._annotationToTypeMap[annotation] = typeInfo.Type;
                     }
@@ -194,7 +198,7 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                var tuple = this._indexToLocationMap[int.Parse( annotation.Data! )];
+                var tuple = this._indexToLocationMap[int.Parse( annotation.Data!, CultureInfo.InvariantCulture )];
 
                 return Location.Create( tuple.Tree, tuple.Span );
             }
@@ -303,6 +307,27 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Gets a the expression type of a node when the compilation is known. 
+        /// </summary>
+        internal static bool TryGetExpressionType( SyntaxNode node, Compilation compilation, [NotNullWhen( true )] out ISymbol? symbol )
+        {
+            var annotation = node.GetAnnotations( _expressionTypeAnnotationKind ).SingleOrDefault();
+
+            if ( annotation is not null )
+            {
+                symbol = SymbolIdGenerator.GetInstance( compilation ).GetSymbol( annotation.Data! );
+
+                return true;
+            }
+            else
+            {
+                symbol = null;
+
+                return false;
+            }
         }
     }
 }

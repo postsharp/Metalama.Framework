@@ -2,19 +2,18 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 // ReSharper disable UnusedParameter.Global
-
+// ReSharper disable once InconsistentNaming
 namespace Caravela.Framework.Aspects
 {
-    // ReSharper disable once InconsistentNaming
-
     /// <summary>
     /// The entry point for the meta model, which can be used in templates to inspect the target code or access other
     /// features of the template language.
@@ -28,23 +27,62 @@ namespace Caravela.Framework.Aspects
     {
         private static readonly AsyncLocal<IMetaApi?> _currentContext = new();
 
-        private static readonly AsyncLocal<object?> _proceedImplementation = new();
-
-        private static IMetaApi CurrentContext => _currentContext.Value ?? throw NewInvalidOperationException();
+        internal static IMetaApi CurrentContext => _currentContext.Value ?? throw NewInvalidOperationException();
 
         private static InvalidOperationException NewInvalidOperationException()
             => new( "The 'meta' API can be used only in the execution context of a template." );
 
+        private static NotSupportedException NewMustBeTransformedException( [CallerMemberName] string? caller = null )
+            => new( $"Calls to {caller} are supposed to be transformed." );
+
         /// <summary>
-        /// Injects the logic that has been intercepted. For instance, in an <see cref="OverrideMethodAspect"/>,
+        /// Gets access to the declaration being overridden or introduced.
+        /// </summary>
+        [TemplateKeyword]
+        public static IMetaTarget Target => CurrentContext.Target;
+
+        /// <summary>
+        /// Invokes the logic that has been overwritten. For instance, in an <see cref="OverrideMethodAspect"/>,
         /// calling <see cref="Proceed"/> invokes the method being overridden. Note that the way how the
         /// logic is invoked (as a method call or inlining) is considered an implementation detail.
         /// </summary>
-        /// <returns></returns>
-        [Proceed]
         [TemplateKeyword]
-        [return: RunTimeOnly]
-        public static dynamic Proceed() => _proceedImplementation.Value ?? throw NewInvalidOperationException();
+        public static dynamic? Proceed() => throw NewMustBeTransformedException();
+
+        /// <summary>
+        /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>Task&lt;dynamic?&gt;</c>.
+        /// Only use this method when the return type of the method or accessor is task-like. Note that
+        /// the actual return type of the overridden method or accessor is the one of the overwritten semantic, so it
+        /// can be a void <see cref="Task"/>, a <see cref="ValueType"/>, or any other type.
+        /// </summary>
+        [TemplateKeyword]
+        public static Task<dynamic?> ProceedAsync() => throw NewMustBeTransformedException();
+
+        /// <summary>
+        /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IEnumerable&lt;dynamic?&gt;</c>.
+        /// </summary>
+        [TemplateKeyword]
+        public static IEnumerable<dynamic?> ProceedEnumerable() => throw NewMustBeTransformedException();
+
+        /// <summary>
+        /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IEnumerator&lt;dynamic?&gt;</c>.
+        /// </summary>
+        [TemplateKeyword]
+        public static IEnumerator<dynamic?> ProceedEnumerator() => throw NewMustBeTransformedException();
+
+#if NET5_0
+        /// <summary>
+        /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IAsyncEnumerable&lt;dynamic?&gt;</c>.
+        /// </summary>
+        [TemplateKeyword]
+        public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => throw NewMustBeTransformedException();
+
+        /// <summary>
+        /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IAsyncEnumerator&lt;dynamic?&gt;</c>.
+        /// </summary>
+        [TemplateKeyword]
+        public static IAsyncEnumerator<dynamic?> ProceedAsyncEnumerator() => throw NewMustBeTransformedException();
+#endif
 
         /// <summary>
         /// Requests the debugger to break, if any debugger is attached to the current process.
@@ -63,6 +101,7 @@ namespace Caravela.Framework.Aspects
         /// <returns>Exactly <paramref name="expression"/>, but coerced as a compile-time expression.</returns>
         /// <seealso href="@templates"/>
         [return: NotNullIfNotNull( "expression" )]
+        [return: CompileTimeOnly]
         [TemplateKeyword]
         public static T? CompileTime<T>( T? expression ) => expression;
 
@@ -75,61 +114,8 @@ namespace Caravela.Framework.Aspects
         /// <returns>A value that is structurally equivalent to the compile-time <paramref name="value"/>.</returns>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
+        [return: NotNullIfNotNull( "value" )]
         public static T? RunTime<T>( T? value ) => value;
-
-        /// <summary>
-        /// Gets the method metadata, or the accessor if this is a template for a field, property or event.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static IAdvisedMethod Method => CurrentContext.Method;
-
-        /// <summary>
-        /// Gets the target property, or throws an exception if the advice does not target a property.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static IAdvisedProperty Property => CurrentContext.Property;
-
-        /// <summary>
-        /// Gets the target field or property, or throws an exception if the advice does not target a field or a property.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static IAdvisedFieldOrProperty FieldOrProperty => CurrentContext.FieldOrProperty;
-
-        /// <summary>
-        /// Gets the target member (method, constructor, field, property or event, but not a nested type), or
-        /// throws an exception if the advice does not target member.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static IMember Member => CurrentContext.Member;
-
-        /// <summary>
-        /// Gets the target event, or throws an exception if the advice does not target an event.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static IAdvisedEvent Event => CurrentContext.Event;
-
-        /// <summary>
-        /// Gets the list of parameters of the current <see cref="Method"/> or <see cref="Property"/>, or throws an
-        /// exception if the advice of the target is neither a method.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static IAdvisedParameterList Parameters => CurrentContext.Parameters;
-
-        // Gets the project configuration.
-        // IProject Project { get; }
-
-        /// <summary>
-        /// Gets the target type of the advice. If the advice is applied to a member, this property returns the declaring
-        /// type of the member.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static INamedType Type => CurrentContext.Type;
-
-        /// <summary>
-        /// Gets the code model of the whole compilation.
-        /// </summary>
-        /// <seealso href="@templates"/>
-        public static ICompilation Compilation => CurrentContext.Compilation;
 
         /// <summary>
         /// Gets a <c>dynamic</c> object that represents an instance of the target type. It can be used as a value (e.g. as a method argument)
@@ -142,7 +128,6 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="Base"/>
         /// <seealso cref="ThisStatic"/>
         /// <seealso href="@templates"/>
-        [RunTimeOnly]
         [TemplateKeyword]
         public static dynamic This => CurrentContext.This;
 
@@ -155,7 +140,6 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="This"/>
         /// <seealso cref="BaseStatic"/>
         /// <seealso href="@templates"/>
-        [RunTimeOnly]
         [TemplateKeyword]
         public static dynamic Base => CurrentContext.Base;
 
@@ -168,7 +152,6 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="This"/>
         /// <seealso cref="BaseStatic"/>
         /// <seealso href="@templates"/>
-        [RunTimeOnly]
         [TemplateKeyword]
         public static dynamic ThisStatic => CurrentContext.ThisStatic;
 
@@ -181,7 +164,6 @@ namespace Caravela.Framework.Aspects
         /// <seealso cref="Base"/>
         /// <seealso cref="ThisStatic"/>
         /// <seealso href="@templates"/>
-        [RunTimeOnly]
         [TemplateKeyword]
         public static dynamic BaseStatic => CurrentContext.BaseStatic;
 
@@ -204,6 +186,16 @@ namespace Caravela.Framework.Aspects
         public static IReadOnlyList<IAspectInstance> UpstreamAspects => throw new NotImplementedException();
 
         /// <summary>
+        /// Generates the cast syntax for the specified type.  
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="value">Must be explicitly cast to <c>object</c> otherwise the C# compiler will emit an error.</param>
+        /// <returns></returns>
+        /// <seealso href="@templates"/>
+        [TemplateKeyword]
+        public static dynamic? Cast( IType type, dynamic? value ) => type.Compilation.TypeFactory.Cast( type, value );
+
+        /// <summary>
         /// Injects a comment to the target code.
         /// </summary>
         /// <param name="lines">A list of comment lines, without the <c>//</c> prefix. Null strings are processed as blank ones and will inject a blank comment line.</param>
@@ -211,34 +203,35 @@ namespace Caravela.Framework.Aspects
         /// This method is not able to add a comment to an empty block. The block must contain at least one statement.
         /// </remarks>
         [TemplateKeyword]
-        public static void Comment( params string?[] lines ) => throw NewInvalidOperationException();
+        public static void Comment( params string?[] lines ) => throw new NotSupportedException();
 
         /// <summary>
-        /// Generates the cast syntax for the specified type.  
+        /// Creates a compile-time object that represents a run-time <i>expression</i>, i.e. the syntax or code, and not the result
+        /// itself. The returned <see cref="IExpression"/> can then be used in other run-time expressions. This method allows to generate expressions that
+        /// depend on compile-time conditions.
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="value">Must be explicitly cast to <c>object</c> otherwise the C# compiler will emit an error.</param>
-        /// <returns></returns>
-        /// <seealso href="@templates"/>
-        [return: RunTimeOnly]
+        /// <param name="expression">A run-time expression, possibly containing compile-time sub-expressions.</param>
+        /// <param name="definedException">A compile-time object representing <paramref name="expression"/>. Note that may have to specify the
+        /// type of the <c>out</c> variable explicitly, as <c>out var</c> does not work when another argument is dynamic.</param>
         [TemplateKeyword]
-        public static dynamic? Cast( IType type, dynamic? value ) => type.Compilation.TypeFactory.Cast( type, value );
+        public static void DefineExpression( dynamic? expression, out IExpression definedException )
+            => definedException = CurrentContext.CodeBuilder.Expression( expression );
 
-        internal static IDisposable WithContext( IMetaApi current, object proceedImpl )
+        /// <summary>
+        /// Parses a string containing a C# expression and returns an <see cref="IExpression"/> allowing to use this expression in a template.
+        /// </summary>
+        public static IExpression ParseExpression( string code ) => CurrentContext.CodeBuilder.Parse( code );
+
+        internal static IDisposable WithContext( IMetaApi current )
         {
             _currentContext.Value = current;
-            _proceedImplementation.Value = proceedImpl;
 
             return new InitializeCookie();
         }
 
         private class InitializeCookie : IDisposable
         {
-            public void Dispose()
-            {
-                _currentContext.Value = null;
-                _proceedImplementation.Value = null;
-            }
+            public void Dispose() => _currentContext.Value = null;
         }
     }
 }

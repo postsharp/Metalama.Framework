@@ -6,10 +6,8 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
-using System.IO;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
@@ -19,55 +17,47 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public sealed class SourceTransformer : ISourceTransformer
     {
-        public Compilation Execute( TransformerContext transformerContext )
+        public Compilation Execute( TransformerContext context )
         {
-            var projectOptions = new ProjectOptions( transformerContext.GlobalOptions, transformerContext.Plugins );
+            var projectOptions = new ProjectOptions( context.GlobalOptions, context.Plugins );
 
             try
             {
                 using CompileTimeAspectPipeline pipeline = new(
                     projectOptions,
-                    new CompileTimeDomain(),
                     false,
-                    null,
-                    new CompilationAssemblyLocator( transformerContext.Compilation ) );
+                    assemblyLocator: new CompilationAssemblyLocator( context.Compilation ) );
 
                 if ( pipeline.TryExecute(
-                    new DiagnosticAdder( transformerContext.ReportDiagnostic ),
-                    transformerContext.Compilation,
+                    new DiagnosticAdder( context.ReportDiagnostic ),
+                    context.Compilation,
                     CancellationToken.None,
                     out var compilation,
                     out var additionalResources ) )
                 {
-                    transformerContext.ManifestResources.AddRange( additionalResources );
+                    context.ManifestResources.AddRange( additionalResources );
 
                     return compilation;
                 }
                 else
                 {
                     // The pipeline failed.
-                    return transformerContext.Compilation;
+                    return context.Compilation;
                 }
             }
             catch ( Exception e )
             {
-                var tempPath = DefaultDirectoryOptions.Instance.CrashReportDirectory;
+                var mustRethrow = true;
 
-                RetryHelper.Retry(
-                    () =>
-                    {
-                        if ( !Directory.Exists( tempPath ) )
-                        {
-                            Directory.CreateDirectory( tempPath );
-                        }
-                    } );
+                ServiceProviderFactory.AsyncLocalProvider.GetOptionalService<ICompileTimeExceptionHandler>()
+                    ?.ReportException( e, context.ReportDiagnostic, out mustRethrow );
 
-                var reportFile = Path.Combine( tempPath, $"exception-{Guid.NewGuid()}.txt" );
-                File.WriteAllText( reportFile, e.ToString() );
+                if ( mustRethrow )
+                {
+                    throw;
+                }
 
-                transformerContext.ReportDiagnostic( GeneralDiagnosticDescriptors.UnhandledException.CreateDiagnostic( null, (e.Message, reportFile) ) );
-
-                return transformerContext.Compilation;
+                return context.Compilation;
             }
         }
     }

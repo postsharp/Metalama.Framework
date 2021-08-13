@@ -15,12 +15,9 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
     {
         protected IProperty Property => (IProperty) this.Member;
 
-        protected override void AssertNoArgument()
-        {
-            this.Member.CheckArguments( this.Property.Parameters, null );
-        }
+        protected override void AssertNoArgument() => this.Member.CheckArguments( this.Property.Parameters, null );
 
-        private ExpressionSyntax CreateIndexerAccess( RuntimeExpression? instance, RuntimeExpression[]? args )
+        private ExpressionSyntax CreateIndexerAccess( RuntimeExpression instance, RuntimeExpression[]? args )
         {
             if ( this.Member.DeclaringType!.IsOpenGeneric )
             {
@@ -36,24 +33,27 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
         }
 
         public object GetIndexerValue( object? instance, params object?[] args )
-        {
-            return new DynamicExpression(
+            => new DynamicExpression(
                 this.CreateIndexerAccess(
-                    RuntimeExpression.FromValue( instance ),
-                    RuntimeExpression.FromValue( args ) ),
+                    RuntimeExpression.FromValue( instance, this.Compilation ),
+                    RuntimeExpression.FromValue( args, this.Compilation ) ),
                 this.Member.Type,
-                false );
-        }
+                this.Member.Writeability != Writeability.None );
 
         public object SetIndexerValue( object? instance, object value, params object?[] args )
         {
-            var propertyAccess = this.CreateIndexerAccess( RuntimeExpression.FromValue( instance ), RuntimeExpression.FromValue( args ) );
+            var propertyAccess = this.CreateIndexerAccess(
+                RuntimeExpression.FromValue( instance, this.Compilation ),
+                RuntimeExpression.FromValue( args, this.Compilation ) );
 
-            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.GetSyntaxFromValue( value ) );
+            var expression = AssignmentExpression(
+                SyntaxKind.SimpleAssignmentExpression,
+                propertyAccess,
+                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
 
-            return new DynamicExpression( expression, this.Member.Type, false );
+            return new DynamicExpression( expression, this.Member.Type );
         }
 
-        public PropertyInvoker( IProperty member, InvokerOrder order ) : base( member, order ) { }
+        public PropertyInvoker( IProperty member, InvokerOrder order, InvokerOperator invokerOperator ) : base( member, order, invokerOperator ) { }
     }
 }

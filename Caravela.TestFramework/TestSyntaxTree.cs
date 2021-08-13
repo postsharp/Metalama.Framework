@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
 using PostSharp.Patterns;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Caravela.TestFramework
 {
@@ -74,7 +75,7 @@ namespace Caravela.TestFramework
             }
         }
 
-        internal void SetRunTimeCode( SyntaxNode syntaxNode )
+        internal async Task SetRunTimeCodeAsync( SyntaxNode syntaxNode )
         {
             CompilationUnitSyntax compilationUnit;
 
@@ -108,12 +109,10 @@ namespace Caravela.TestFramework
 
             if ( this.Parent.TestInput!.Options.FormatOutput.GetValueOrDefault() )
             {
-                var formattedNode = OutputCodeFormatter.FormatAsync( document ).Result;
+                var formatted = await OutputCodeFormatter.FormatToDocumentAsync( document );
 
-                this.OutputRunTimeDocument = this.Parent.OutputProject!.RemoveDocument( this.InputDocument.Id )
-                    .AddDocument( documentName, formattedNode );
-
-                this.OutputRunTimeSyntaxRoot = formattedNode;
+                this.OutputRunTimeDocument = formatted.Document;
+                this.OutputRunTimeSyntaxRoot = formatted.Syntax;
             }
             else
             {
@@ -121,7 +120,7 @@ namespace Caravela.TestFramework
                 this.OutputRunTimeSyntaxRoot = compilationUnit;
             }
 
-            this.OutputRunTimeSourceText = this.OutputRunTimeDocument.GetSyntaxTreeAsync().Result!.GetText();
+            this.OutputRunTimeSourceText = await (await this.OutputRunTimeDocument.GetSyntaxTreeAsync())!.GetTextAsync();
         }
 
         internal TestSyntaxTree( string? inputPath, Document document, TestResult parent )

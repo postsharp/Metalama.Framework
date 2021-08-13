@@ -1,15 +1,17 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Linking;
-using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Caravela.Framework.Impl.Utilities;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -19,49 +21,53 @@ namespace Caravela.Framework.Impl.Transformations
     /// <summary>
     /// Method override, which expands a template.
     /// </summary>
-    internal class OverriddenMethod : OverriddenMember
+    internal sealed class OverriddenMethod : OverriddenMember
     {
         public new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 
-        public IMethod TemplateMethod { get; }
+        public Template<IMethod> Template { get; }
 
-        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, IMethod templateMethod, AspectLinkerOptions? linkerOptions = null )
-            : base( advice, overriddenDeclaration, linkerOptions )
+        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, Template<IMethod> template )
+            : base( advice, overriddenDeclaration )
         {
-            Invariant.Assert( templateMethod != null );
+            Invariant.Assert( template.IsNotNull );
 
-            this.TemplateMethod = templateMethod;
+            this.Template = template;
+            this.Template.ValidateTarget( overriddenDeclaration );
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             using ( context.DiagnosticSink.WithDefaultScope( this.OverriddenDeclaration ) )
             {
-                var methodName = context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration );
+                var proceedExpression = ProceedHelper.CreateProceedDynamicExpression(
+                    this.CreateInvocationExpression(),
+                    this.Template,
+                    this.OverriddenDeclaration );
+
+                var expandYieldProceed = this.CreateYieldProceedStatement( proceedExpression );
 
                 var metaApi = MetaApi.ForMethod(
                     this.OverriddenDeclaration,
                     new MetaApiProperties(
                         context.DiagnosticSink,
-                        this.TemplateMethod.GetSymbol(),
+                        this.Template.Cast(),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
-                        context.ServiceProvider.GetService<AspectPipelineDescription>() ) );
+                        context.ServiceProvider ) );
 
                 var expansionContext = new TemplateExpansionContext(
                     this.Advice.Aspect.Aspect,
                     metaApi,
                     this.OverriddenDeclaration.Compilation,
-                    new LinkerOverrideMethodProceedImpl(
-                        this.Advice.AspectLayerId,
-                        this.OverriddenDeclaration,
-                        LinkingOrder.Default,
-                        context.SyntaxFactory ),
-                    context.LexicalScope,
+                    context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
-                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
+                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
+                    this.Template,
+                    proceedExpression,
+                    expandYieldProceed );
 
-                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( this.TemplateMethod );
+                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( this.Template.Declaration! );
 
                 if ( !templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out var newMethodBody ) )
                 {
@@ -69,29 +75,145 @@ namespace Caravela.Framework.Impl.Transformations
                     return Enumerable.Empty<IntroducedMember>();
                 }
 
+                TypeSyntax? returnType = null;
+
+                var modifiers = this.OverriddenDeclaration.GetSyntaxModifierList();
+
+                if ( !this.OverriddenDeclaration.IsAsync )
+                {
+                    if ( this.Template.MustInterpretAsAsync() )
+                    {
+                        // If the template is async but the overridden declaration is not, we have to add an async modifier.
+                        modifiers = modifiers.Add( Token( SyntaxKind.AsyncKeyword ) );
+                    }
+                }
+                else
+                {
+                    if ( !this.Template.MustInterpretAsAsync() )
+                    {
+                        // If the template is not async but the overridden declaration is, we have to remove the async modifier.
+                        modifiers = TokenList( modifiers.Where( m => m.Kind() != SyntaxKind.AsyncKeyword ) );
+                    }
+
+                    // If the template is async and the target declaration is `async void`, and regardless of the async flag the template, we have to change the type to ValueTask, otherwise
+                    // it is not awaitable
+
+                    if ( TypeExtensions.Equals( this.OverriddenDeclaration.ReturnType, SpecialType.Void ) )
+                    {
+                        returnType = LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(
+                            this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.ValueTask ).GetSymbol() );
+                    }
+                }
+
+                returnType ??= LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.OverriddenDeclaration.ReturnType.GetSymbol() );
+
                 var overrides = new[]
                 {
                     new IntroducedMember(
                         this,
                         MethodDeclaration(
                             List<AttributeListSyntax>(),
-                            this.OverriddenDeclaration.GetSyntaxModifierList(),
-                            this.OverriddenDeclaration.GetSyntaxReturnType(),
+                            modifiers,
+                            returnType,
                             null,
-                            Identifier( methodName ),
-                            this.OverriddenDeclaration.GetSyntaxTypeParameterList(),
-                            this.OverriddenDeclaration.GetSyntaxParameterList(),
-                            this.OverriddenDeclaration.GetSyntaxConstraintClauses(),
+                            Identifier(
+                                context.IntroductionNameProvider.GetOverrideName(
+                                    this.OverriddenDeclaration.DeclaringType,
+                                    this.Advice.AspectLayerId,
+                                    this.OverriddenDeclaration ) ),
+                            SyntaxHelpers.CreateSyntaxForTypeParameterList( this.OverriddenDeclaration ),
+                            SyntaxHelpers.CreateSyntaxForParameterList( this.OverriddenDeclaration ),
+                            SyntaxHelpers.CreateSyntaxForConstraintClauses( this.OverriddenDeclaration ),
                             newMethodBody,
                             null ),
                         this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.Override,
-                        this.LinkerOptions,
                         this.OverriddenDeclaration )
                 };
 
                 return overrides;
             }
         }
+
+        private Func<TemplateExpansionContext, StatementSyntax>? CreateYieldProceedStatement( IDynamicExpression proceedExpression )
+        {
+            switch ( this.Template.SelectedKind )
+            {
+                case TemplateKind.IEnumerable:
+                case TemplateKind.IEnumerator:
+                    // Generate: `foreach ( var value in PROCEED() ) {   yield return value; }`
+                    return context =>
+                    {
+                        var varName = context.LexicalScope.GetUniqueIdentifier( "value" );
+
+                        return ForEachStatement(
+                            IdentifierName(
+                                Identifier(
+                                    TriviaList(),
+                                    SyntaxKind.VarKeyword,
+                                    "var",
+                                    "var",
+                                    TriviaList() ) ),
+                            Identifier( varName ),
+                            proceedExpression.CreateExpression(),
+                            Block(
+                                SingletonList<StatementSyntax>(
+                                    YieldStatement(
+                                        SyntaxKind.YieldReturnStatement,
+                                        IdentifierName( varName ) ) ) ) );
+                    };
+
+                case TemplateKind.IAsyncEnumerable:
+                case TemplateKind.IAsyncEnumerator:
+                    // Generate: `await foreach ( var value in PROCEED() ) {   yield return value; }`
+                    return context =>
+                    {
+                        // TODO: Not sure how the CancellationToken is handled.
+
+                        var varName = context.LexicalScope.GetUniqueIdentifier( "value" );
+
+                        return ForEachStatement(
+                                IdentifierName(
+                                    Identifier(
+                                        TriviaList(),
+                                        SyntaxKind.VarKeyword,
+                                        "var",
+                                        "var",
+                                        TriviaList() ) ),
+                                Identifier( varName ),
+                                proceedExpression.CreateExpression(),
+                                Block(
+                                    SingletonList<StatementSyntax>(
+                                        YieldStatement(
+                                            SyntaxKind.YieldReturnStatement,
+                                            IdentifierName( varName ) ) ) ) )
+                            .WithAwaitKeyword( Token( SyntaxKind.AwaitKeyword ) );
+                    };
+
+                default:
+                    // No special
+                    return null;
+            }
+        }
+
+        private ExpressionSyntax CreateInvocationExpression()
+            => InvocationExpression(
+                this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self ),
+                ArgumentList(
+                    SeparatedList(
+                        this.OverriddenDeclaration.Parameters.Select(
+                            p =>
+                            {
+                                var refKind = p.RefKind switch
+                                {
+                                    RefKind.None => default,
+                                    RefKind.In => default,
+                                    RefKind.Out => Token( SyntaxKind.OutKeyword ),
+                                    RefKind.Ref => Token( SyntaxKind.RefKeyword ),
+                                    _ => throw new AssertionFailedException()
+                                };
+
+                                return Argument( null, refKind, IdentifierName( p.Name ) );
+                            } ) ) ) );
     }
 }

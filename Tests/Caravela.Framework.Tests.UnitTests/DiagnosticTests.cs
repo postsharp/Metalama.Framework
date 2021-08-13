@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.DesignTime.Diagnostics;
+using System.Globalization;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests
@@ -19,8 +20,8 @@ namespace Caravela.Framework.Tests.UnitTests
             // Test that the formatting strings are valid.
             foreach ( var descriptor in DesignTimeDiagnosticDefinitions.StandardDiagnosticDescriptors.Values )
             {
-                var formattingString = descriptor.MessageFormat.ToString();
-                _ = string.Format( formattingString, args );
+                var formattingString = descriptor.MessageFormat.ToString( CultureInfo.InvariantCulture );
+                _ = string.Format( CultureInfo.InvariantCulture, formattingString, args );
             }
         }
     }

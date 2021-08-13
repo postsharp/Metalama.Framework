@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
@@ -35,7 +36,9 @@ namespace Caravela.Framework.Tests.UnitTests
                     CancellationToken.None,
                     out var compileTimeProject ) );
 
-            var aspectTypeFactory = new AspectClassMetadataFactory( new AspectDriverFactory( compilation.RoslynCompilation, ImmutableArray<object>.Empty ) );
+            var aspectTypeFactory = new AspectClassMetadataFactory(
+                this.ServiceProvider,
+                new AspectDriverFactory( this.ServiceProvider, compilation.RoslynCompilation, ImmutableArray<object>.Empty ) );
 
             var aspectNamedTypes = aspectNames.Select( name => compilation.DeclaredTypes.OfName( name ).Single().GetSymbol() ).ToReadOnlyList();
             var aspectTypes = aspectTypeFactory.GetAspectClasses( aspectNamedTypes, compileTimeProject!, diagnostics ).ToImmutableArray();

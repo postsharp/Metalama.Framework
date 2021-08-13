@@ -47,7 +47,8 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         /// <param name="m"></param>
         /// <returns></returns>
-        public static bool IsVisible( this ISymbol m ) => !m.IsImplicitlyDeclared || (m.Kind == SymbolKind.Method && m.MetadataName == ".ctor");
+        public static bool IsVisible( this ISymbol m )
+            => !m.IsImplicitlyDeclared || (m.Kind == SymbolKind.Method && string.Equals( m.MetadataName, ".ctor", StringComparison.Ordinal ));
 
         /// <summary>
         /// Select all declarations recursively contained in a given declaration (i.e. all children of the tree).
@@ -106,7 +107,7 @@ namespace Caravela.Framework.Impl.CodeModel
             where T : class, IDeclaration
             => ((IDeclarationInternal) declaration).ToRef().Cast<T>();
 
-        public static MemberRef<T> ToMemberLink<T>( this T member )
+        public static MemberRef<T> ToMemberRef<T>( this T member )
             where T : class, IMemberOrNamedType
             => new( ((IDeclarationInternal) member).ToRef() );
 
@@ -129,7 +130,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 if ( argumentsLength < requiredArguments )
                 {
-                    throw GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments.CreateException( (declaration, requiredArguments) );
+                    throw GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments.CreateException( (declaration, requiredArguments, argumentsLength) );
                 }
             }
             else
@@ -197,7 +198,7 @@ namespace Caravela.Framework.Impl.CodeModel
             return arguments.ToArray();
         }
 
-        internal static ExpressionSyntax GetReceiverSyntax<T>( this T declaration, RuntimeExpression? instance )
+        internal static ExpressionSyntax GetReceiverSyntax<T>( this T declaration, RuntimeExpression instance )
             where T : IMember
         {
             if ( declaration.IsStatic )
@@ -205,7 +206,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( declaration.DeclaringType!.GetSymbol() );
             }
 
-            if ( instance == null )
+            if ( instance.Syntax.Kind() == SyntaxKind.NullLiteralExpression )
             {
                 throw GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember.CreateException( declaration );
             }
@@ -327,5 +328,23 @@ namespace Caravela.Framework.Impl.CodeModel
                        sr.GetSyntax() is BasePropertyDeclarationSyntax propertyDecl
                        && propertyDecl.AccessorList != null
                        && propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) );
+
+        internal static IMember GetExplicitInterfaceImplementation( this IMember member )
+        {
+            switch ( member )
+            {
+                case IMethod method:
+                    return method.ExplicitInterfaceImplementations.Single();
+
+                case IProperty property:
+                    return property.ExplicitInterfaceImplementations.Single();
+
+                case IEvent @event:
+                    return @event.ExplicitInterfaceImplementations.Single();
+
+                default:
+                    throw new AssertionFailedException();
+            }
+        }
     }
 }

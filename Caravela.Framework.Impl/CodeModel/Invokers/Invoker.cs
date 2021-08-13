@@ -3,27 +3,29 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
-using Caravela.Framework.Impl.Linking;
 using System;
 
 namespace Caravela.Framework.Impl.CodeModel.Invokers
 {
     internal abstract class Invoker : IInvoker
     {
-        protected LinkerAnnotation LinkerAnnotation { get; }
+        protected AspectReferenceSpecification AspectReference { get; }
+
+        protected ICompilation Compilation { get; }
 
         protected Invoker( IDeclaration declaration, InvokerOrder order )
         {
             this.Order = order;
+            this.Compilation = declaration.Compilation;
 
             var linkingOrder = order switch
             {
-                InvokerOrder.Base => LinkingOrder.Base,
-                InvokerOrder.Default => LinkingOrder.Default,
+                InvokerOrder.Base => AspectReferenceOrder.Base,
+                InvokerOrder.Default => AspectReferenceOrder.Final,
                 _ => throw new ArgumentOutOfRangeException( nameof(order), order, null )
             };
 
-            this.LinkerAnnotation = new LinkerAnnotation(
+            this.AspectReference = new AspectReferenceSpecification(
                 declaration.GetCompilationModel().AspectLayerId,
                 linkingOrder );
         }

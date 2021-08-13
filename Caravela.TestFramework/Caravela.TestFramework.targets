@@ -28,6 +28,7 @@
 // To disable the creation of this file, define the MSBUild property 'CaravelaTestGenerateDefaultRunner' to 'False'.
 // You will have to add you own test suites by deriving from the TestSuite class.
 
+using System.Threading.Tasks%3B
 using Caravela.TestFramework%3B
 using Xunit%3B
 using Xunit.Abstractions%3B
@@ -40,7 +41,7 @@ namespace $(RootNamespace)
     
         [Theory]
         [CurrentProject]
-        public void Tests( string f ) => this.RunTest( f )%3B
+        public Task Tests( string f ) => this.RunTestAsync( f )%3B
     }
 }
 ]]>
@@ -62,16 +63,17 @@ namespace $(RootNamespace)
     <Target Name="CleanTestOutput">
         <ItemGroup>
             <_CleanTestOutput Include="obj\\transformed\**\*.*" />
-            <_CleanTestOutput Include="obj\\highlighted\**\*.*" />
+            <_CleanTestOutput Include="obj\\html\**\*.*" />
         </ItemGroup>
         <RemoveDir Directories="obj\\transformed" />
-        <RemoveDir Directories="obj\\highlighted" />
+        <RemoveDir Directories="obj\\html" />
         <Delete Files="@(_CleanTestOutput)" />
     </Target>
 
     <Target Name="AcceptTestOutput">
         <ItemGroup>
             <_AcceptTestOutput Include="obj\\transformed\**\*.cs" />
+            <_AcceptTestOutput Include="obj\\transformed\**\*.txt" />
         </ItemGroup>
         <Copy
             SourceFiles="@(_AcceptTestOutput)"

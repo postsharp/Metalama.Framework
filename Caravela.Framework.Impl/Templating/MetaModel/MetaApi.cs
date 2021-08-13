@@ -4,9 +4,13 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
+using Caravela.Framework.Code.Syntax;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Options;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Formatting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,7 +20,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     /// <summary>
     /// The implementation of <see cref="IMetaApi"/>.
     /// </summary>
-    internal class MetaApi : IMetaApi
+    internal class MetaApi : IMetaApi, IMetaTarget, IMetaCodeBuilder
     {
         private readonly IAdvisedFieldOrProperty? _fieldOrProperty;
         private readonly IAdvisedMethod? _method;
@@ -26,7 +30,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         private Exception CreateInvalidOperationException( string memberName, string? description = null )
             => TemplatingDiagnosticDescriptors.MemberMemberNotAvailable.CreateException(
-                (this._common.TemplateSymbol, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind, description ?? "I" + memberName) );
+                (this._common.Template.Declaration!, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
+                 description ?? "I" + memberName) );
 
         public IConstructor Constructor => throw new NotImplementedException();
 
@@ -52,9 +57,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public ICompilation Compilation { get; }
 
-        private ThisInstanceDynamicReceiver GetThisOrBase( string expressionName, LinkerAnnotation linkerAnnotation )
-        {
-            return this._type switch
+        private ThisInstanceDynamicReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
+            => this._type switch
             {
                 null => throw this.CreateInvalidOperationException( expressionName ),
                 { IsStatic: false } when this.Declaration is IMemberOrNamedType { IsStatic: false }
@@ -63,17 +67,22 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                         linkerAnnotation ),
 
                 _ => throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                    (this._common.TemplateSymbol, expressionName, this.Declaration, this.Declaration.DeclarationKind) )
+                    (this._common.Template.Declaration!, expressionName, this.Declaration, this.Declaration.DeclarationKind) )
             };
-        }
 
-        public dynamic This => this.GetThisOrBase( "meta.This", new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Default ) );
+        public IMetaTarget Target => this;
 
-        public dynamic Base => this.GetThisOrBase( "meta.Base", new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Base ) );
+        public IMetaCodeBuilder CodeBuilder => this;
 
-        public dynamic ThisStatic => new ThisTypeDynamicReceiver( this.Type, new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Default ) );
+        public object This => this.GetThisOrBase( "meta.This", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
 
-        public dynamic BaseStatic => new ThisTypeDynamicReceiver( this.Type, new LinkerAnnotation( this._common.AspectLayerId, LinkingOrder.Base ) );
+        public object Base => this.GetThisOrBase( "meta.Base", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
+
+        public object ThisStatic
+            => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
+
+        public object BaseStatic
+            => new ThisTypeDynamicReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
         public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;
 
@@ -81,10 +90,32 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public void DebugBreak()
         {
+            var trustOptions = this._common.ServiceProvider.GetService<IProjectOptions>();
+
+            if ( !trustOptions.IsUserCodeTrusted )
+            {
+                return;
+            }
+
             if ( Debugger.IsAttached )
             {
                 Debugger.Break();
             }
+        }
+
+        public IExpression Expression( object? expression )
+            => new UserExpression( RuntimeExpression.FromValue( expression, this.Compilation ), this.Compilation );
+
+        public object BuildArray( ArrayBuilder arrayBuilder ) => new ArrayDynamicExpression( arrayBuilder, this.Compilation );
+
+        public object BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder )
+            => new InterpolatedStringDynamicExpression( interpolatedStringBuilder, this.Compilation );
+
+        public IExpression Parse( string code )
+        {
+            var expression = SyntaxFactory.ParseExpression( code ).WithAdditionalAnnotations( Formatter.Annotation );
+
+            return new UserExpression( new RuntimeExpression( expression, this.Compilation ), this.Compilation );
         }
 
         public AspectExecutionScenario ExecutionScenario => this._common.PipelineDescription.ExecutionScenario;

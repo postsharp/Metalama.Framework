@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Collections;
@@ -19,7 +18,7 @@ using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltAccessor : BuiltDeclaration, IMethod, IMemberRef<IMethod>
+    internal class BuiltAccessor : BuiltDeclaration, IMethodInternal, IMemberRef<IMethod>
     {
         private readonly BuiltMember _builtMember;
 
@@ -74,16 +73,17 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IGenericParameterList GenericParameters => GenericParameterList.Empty;
 
-        public IReadOnlyList<IType> GenericArguments => throw new NotImplementedException();
+        public IReadOnlyList<IType> GenericArguments => this.AccessorBuilder.GenericArguments;
 
         public bool IsOpenGeneric => true;
 
-        public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
+        public IMethod WithGenericArguments( params IType[] genericArguments ) => this.AccessorBuilder.WithGenericArguments( genericArguments );
 
         [Memo]
-        public IInvokerFactory<IMethodInvoker> Invokers => new InvokerFactory<IMethodInvoker>( order => new MethodInvoker( this, order ), false );
+        public IInvokerFactory<IMethodInvoker> Invokers
+            => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ), false );
 
-        public IMethod? OverriddenMethod => throw new NotImplementedException();
+        public IMethod? OverriddenMethod => this.AccessorBuilder.OverriddenMethod;
 
         public INamedType DeclaringType => this._builtMember.DeclaringType;
 
@@ -91,26 +91,16 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IMethod IDeclarationRef<IMethod>.Resolve( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
 
-        ISymbol IDeclarationRef<IMethod>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+        ISymbol? IDeclarationRef<IMethod>.GetSymbol( Compilation compilation ) => this.GetSymbol();
 
-        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.AccessorBuilder.ExplicitInterfaceImplementations;
 
-        [return: RunTimeOnly]
-        public MethodInfo ToMethodInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public MethodInfo ToMethodInfo() => this.AccessorBuilder.ToMethodInfo();
 
-        [return: RunTimeOnly]
-        public System.Reflection.MethodBase ToMethodBase()
-        {
-            throw new NotImplementedException();
-        }
+        IMemberWithAccessors? IMethod.DeclaringMember => (IMemberWithAccessors) this._builtMember;
 
-        [return: RunTimeOnly]
-        public MemberInfo ToMemberInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public System.Reflection.MethodBase ToMethodBase() => this.AccessorBuilder.ToMethodBase();
+
+        public MemberInfo ToMemberInfo() => this.AccessorBuilder.ToMemberInfo();
     }
 }

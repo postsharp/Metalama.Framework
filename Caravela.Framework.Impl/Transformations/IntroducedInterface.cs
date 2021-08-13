@@ -20,26 +20,24 @@ namespace Caravela.Framework.Impl.Transformations
 
         public ImplementInterfaceAdvice Advice { get; }
 
+        Advice ITransformation.Advice => this.Advice;
+
         public INamedType TargetType { get; }
 
-        public SyntaxTree TargetSyntaxTree => this.TargetType.GetSymbol().DeclaringSyntaxReferences.First().SyntaxTree;
+        public SyntaxTree TargetSyntaxTree => this.TargetType.GetSymbol().GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
 
         public IReadOnlyDictionary<IMember, IMember> MemberMap { get; }
-
-        public AspectLinkerOptions? LinkerOptions { get; }
 
         public IntroducedInterface(
             ImplementInterfaceAdvice implementInterfaceAdvice,
             INamedType targetType,
             INamedType interfaceType,
-            Dictionary<IMember, IMember> memberMap,
-            AspectLinkerOptions? linkerOptions )
+            Dictionary<IMember, IMember> memberMap )
         {
             this.Advice = implementInterfaceAdvice;
             this.TargetType = targetType;
             this.InterfaceType = interfaceType;
             this.MemberMap = memberMap;
-            this.LinkerOptions = linkerOptions;
         }
 
         public IEnumerable<BaseTypeSyntax> GetIntroducedInterfaceImplementations()

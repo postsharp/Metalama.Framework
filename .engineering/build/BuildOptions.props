@@ -11,4 +11,9 @@
         <OutputPath>$(MSBuildThisFileDirectory)..\..\artifacts\bin\$(Configuration)</OutputPath>
     </PropertyGroup>
 
+    <!-- Obfuscation -->
+    <PropertyGroup>
+        <Obfuscate Condition="'$(Obfuscate)'=='' AND '$(Configuration)'=='Release'">True</Obfuscate>
+    </PropertyGroup>
+
 </Project>

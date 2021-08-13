@@ -12,7 +12,7 @@ using System.Linq;
 namespace Caravela.Framework.Impl.Templating
 {
     /// <summary>
-    /// Provides methods that tests for classifications of template members, for instance <see cref="IsRunTimeMethod(ISymbol)"/> or <see cref="IsProceed(SyntaxNode)"/>.
+    /// Provides methods that tests for classifications of template members, for instance <see cref="IsRunTimeMethod(ISymbol)"/>.
     /// </summary>
     internal class TemplateMemberClassifier
     {
@@ -32,15 +32,11 @@ namespace Caravela.Framework.Impl.Templating
             this._metaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
         }
 
-        public bool IsCompileTime( ISymbol? symbol )
-            => symbol != null && this._symbolClassifier.GetTemplatingScope( symbol ).DynamicToCompileTimeOnly()
+        public bool RequiresCompileTimeExecution( ISymbol? symbol )
+            => symbol != null && this._symbolClassifier.GetTemplatingScope( symbol ).GetExpressionExecutionScope()
                 == TemplatingScope.CompileTimeOnly;
 
-#pragma warning disable CA1822 // Static anyway.
-        public bool IsDynamicType( ITypeSymbol? type ) => type is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
-#pragma warning restore CA1822
-
-        public bool IsDynamicParameter( ArgumentSyntax argument ) => this.IsDynamicType( this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type );
+        public bool IsDynamicParameter( ArgumentSyntax argument ) => this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type.IsDynamic() ?? false;
 
         public bool IsRunTimeMethod( ISymbol symbol )
             => symbol.Name == nameof(meta.RunTime) &&
@@ -54,53 +50,31 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="originalNode"></param>
         /// <returns></returns>
-        public bool IsDynamicType( SyntaxNode originalNode )
+        public bool IsDynamicType( SyntaxNode originalNode, bool strict = false )
         {
             var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( originalNode );
 
-            if ( this.IsDynamicType( expressionType ) )
+            if ( expressionType is IDynamicTypeSymbol )
+            {
+                // Roslyn returns a dynamic type even for methods returning a non-dynamic type, as long as they have at least
+                // one dynamic argument. We don't want to fix the Roslyn type resolution, but in the specific case of void methods,
+                // we can do it without a chance of being ever wrong. It allows meta.DefineExpression to work.
+                if ( originalNode is InvocationExpressionSyntax &&
+                     this._syntaxTreeAnnotationMap.GetSymbol( originalNode ) is IMethodSymbol { ReturnsVoid: true } )
+                {
+                    return false;
+                }
+            }
+
+            if ( expressionType.IsDynamic() )
             {
                 return true;
             }
 
             var nodeSymbol = this._syntaxTreeAnnotationMap.GetSymbol( originalNode );
 
-            if ( (nodeSymbol is IMethodSymbol method && this.IsDynamicType( method.ReturnType )) ||
-                 (nodeSymbol is IPropertySymbol property && this.IsDynamicType( property.Type )) )
-            {
-                return true;
-            }
-            else
-            {
-                if ( originalNode is InvocationExpressionSyntax invocation
-                     && this._syntaxTreeAnnotationMap.GetSymbol( invocation.Expression ) is IMethodSymbol invokedMethod )
-                {
-                    return invokedMethod.GetReturnTypeAttributes().Any( a => a.AttributeClass?.Name == nameof(RunTimeOnlyAttribute) );
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Determines if a symbol represents a call to <c>meta.Proceed()</c>.
-        /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        public bool IsProceed( SyntaxNode node )
-        {
-            // TODO: This class and usages must be removed.
-
-            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
-
-            if ( symbol == null )
-            {
-                return false;
-            }
-
-            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(ProceedAttribute) );
+            return (nodeSymbol is IMethodSymbol method && method.ReturnType.IsDynamic( strict )) ||
+                   (nodeSymbol is IPropertySymbol property && property.Type.IsDynamic( strict ));
         }
 
 #pragma warning disable CA1822 // Static anyway.
@@ -122,23 +96,45 @@ namespace Caravela.Framework.Impl.Templating
 
         public MetaMemberKind GetMetaMemberKind( ISymbol? symbol )
         {
-            if ( symbol == null || !SymbolEqualityComparer.Default.Equals( symbol.ContainingType, this._metaType ) )
+            if ( symbol == null )
             {
                 return MetaMemberKind.None;
             }
-            else
+            else if ( SymbolEqualityComparer.Default.Equals( symbol.ContainingType, this._metaType ) )
             {
                 switch ( symbol.Name )
                 {
+                    case nameof(meta.This):
+                        return MetaMemberKind.This;
+
                     case nameof(meta.Comment):
                         return MetaMemberKind.Comment;
 
-                    case nameof(meta.This):
-                        return MetaMemberKind.This;
+                    case nameof(meta.Proceed):
+                        return MetaMemberKind.Proceed;
+
+                    case nameof(meta.ProceedAsync):
+                        return MetaMemberKind.ProceedAsync;
+
+                    case nameof(meta.ProceedEnumerable):
+                        return MetaMemberKind.ProceedEnumerable;
+
+                    case nameof(meta.ProceedEnumerator):
+                        return MetaMemberKind.ProceedEnumerator;
+
+                    case "ProceedAsyncEnumerable":
+                        return MetaMemberKind.ProceedAsyncEnumerable;
+
+                    case "ProceedAsyncEnumerator":
+                        return MetaMemberKind.ProceedAsyncEnumerator;
 
                     default:
                         return MetaMemberKind.Default;
                 }
+            }
+            else
+            {
+                return MetaMemberKind.None;
             }
         }
     }

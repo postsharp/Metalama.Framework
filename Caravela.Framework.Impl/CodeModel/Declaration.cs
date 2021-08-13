@@ -9,10 +9,10 @@ using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -52,26 +52,58 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IReadOnlyList<ISymbol> LookupSymbols()
         {
-            if ( this.Symbol.DeclaringSyntaxReferences.Length == 0 )
+            var syntaxReference = this.Symbol.GetPrimarySyntaxReference();
+
+            // Event fields have accessors without declaring syntax references.
+            if ( syntaxReference == null )
             {
-                throw new InvalidOperationException();
+                switch ( this.Symbol )
+                {
+                    case IMethodSymbol { MethodKind: RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } eventAccessorSymbol:
+                        syntaxReference = eventAccessorSymbol.AssociatedSymbol.AssertNotNull().GetPrimarySyntaxReference();
+
+                        if ( syntaxReference == null )
+                        {
+                            throw new AssertionFailedException();
+                        }
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
 
-            var syntaxReference = this.Symbol.DeclaringSyntaxReferences[0];
             var semanticModel = this.Compilation.RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
 
             var bodyNode =
                 syntaxReference.GetSyntax() switch
                 {
-                    MethodDeclarationSyntax methodDeclaration => methodDeclaration.Body,
+                    MethodDeclarationSyntax methodDeclaration => (SyntaxNode?) methodDeclaration.Body ?? methodDeclaration.ExpressionBody,
+                    AccessorDeclarationSyntax accessorDeclaration => (SyntaxNode?) accessorDeclaration.Body ?? accessorDeclaration.ExpressionBody,
+                    ArrowExpressionClauseSyntax _ => null,
                     PropertyDeclarationSyntax _ => null,
                     EventDeclarationSyntax _ => null,
+                    VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } => null,
+                    BaseTypeDeclarationSyntax _ => null,
                     _ => throw new AssertionFailedException()
                 };
 
+            // Accessors have implicit "value" parameter.
+            var implicitSymbols =
+                bodyNode != null
+                    ? Enumerable.Empty<ISymbol>()
+                    : this.Symbol switch
+                    {
+                        IMethodSymbol
+                                { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } methodSymbol =>
+                            methodSymbol.Parameters,
+                        _ => Enumerable.Empty<ISymbol>()
+                    };
+
             var lookupPosition = bodyNode != null ? bodyNode.Span.Start : syntaxReference.Span.Start;
 
-            return semanticModel.LookupSymbols( lookupPosition );
+            return semanticModel.LookupSymbols( lookupPosition ).AddRange( implicitSymbols );
         }
 
         IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();

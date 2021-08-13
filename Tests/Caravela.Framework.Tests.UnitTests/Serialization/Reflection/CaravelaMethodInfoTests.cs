@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.ReflectionMocks;
+using System;
 using System.Linq;
 using System.Reflection;
 using Xunit;
@@ -28,7 +29,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 {
                     Assert.Equal( "Target", info.DeclaringType!.Name );
                     Assert.Equal( "Method", info.Name );
-                    Assert.Equal( 42, info.Invoke( null, new object[0] ) );
+                    Assert.Equal( 42, info.Invoke( null, Array.Empty<object>() ) );
                 } );
         }
 

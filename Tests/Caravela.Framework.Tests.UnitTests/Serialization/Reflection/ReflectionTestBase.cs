@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using System;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -8,11 +9,11 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class ReflectionTestBase : SerializerTestsBase
     {
-        private readonly ITestOutputHelper _helper;
+        public ITestOutputHelper Logger { get; }
 
         public ReflectionTestBase( ITestOutputHelper helper )
         {
-            this._helper = helper;
+            this.Logger = helper;
         }
 
         /// <summary>
@@ -29,10 +30,10 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             }
             else
             {
-                this._helper.WriteLine( "Actual result to compare against:" );
-                this._helper.WriteLine( "----" );
-                this._helper.WriteLine( "@\"" + actual.Replace( "\"", "\"\"" ) + '\"' );
-                this._helper.WriteLine( "----" );
+                this.Logger.WriteLine( "Actual result to compare against:" );
+                this.Logger.WriteLine( "----" );
+                this.Logger.WriteLine( "@\"" + actual.Replace( "\"", "\"\"", StringComparison.Ordinal ) + '\"' );
+                this.Logger.WriteLine( "----" );
                 Assert.Equal( expected, actual );
             }
         }

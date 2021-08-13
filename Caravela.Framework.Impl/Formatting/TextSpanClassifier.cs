@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Formatting
 {
@@ -151,9 +152,9 @@ namespace Caravela.Framework.Impl.Formatting
 
                 this._isInTemplate = false;
             }
-            else if ( this._isInCompileTimeType )
+            else
             {
-                this.Mark( node, TextSpanClassification.CompileTime );
+                this.VisitMember( node );
             }
         }
 
@@ -165,25 +166,62 @@ namespace Caravela.Framework.Impl.Formatting
             }
         }
 
-        public override void VisitFieldDeclaration( FieldDeclarationSyntax node )
-        {
-            this.VisitMember( node );
-        }
+        public override void VisitFieldDeclaration( FieldDeclarationSyntax node ) => this.VisitMember( node );
 
-        public override void VisitEventDeclaration( EventDeclarationSyntax node )
-        {
-            this.VisitMember( node );
-        }
+        public override void VisitEventDeclaration( EventDeclarationSyntax node ) => this.VisitMember( node );
 
         public override void VisitPropertyDeclaration( PropertyDeclarationSyntax node )
         {
-            this.VisitMember( node );
+            if ( node.IsTemplateFromAnnotation() ||
+                 (node.AccessorList != null && node.AccessorList.Accessors.Any( a => a.IsTemplateFromAnnotation() )) )
+            {
+                this._isInTemplate = true;
+
+                this.Mark( node.Type, TextSpanClassification.CompileTime );
+                this.Mark( node.Identifier, TextSpanClassification.CompileTime );
+                this.Mark( node.Modifiers, TextSpanClassification.CompileTime );
+
+                if ( node.AccessorList != null )
+                {
+                    this.Mark( node.AccessorList.OpenBraceToken, TextSpanClassification.CompileTime );
+                    this.Mark( node.AccessorList.CloseBraceToken, TextSpanClassification.CompileTime );
+                }
+
+                // The code is run-time by default in a template method.
+                this.Mark( node.ExpressionBody, TextSpanClassification.RunTime );
+
+                base.VisitPropertyDeclaration( node );
+
+                this._isInTemplate = false;
+            }
+            else
+            {
+                this.VisitMember( node );
+            }
         }
 
-        public override void VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+        public override void VisitAccessorDeclaration( AccessorDeclarationSyntax node )
         {
-            this.VisitMember( node );
+            if ( this._isInTemplate )
+            {
+                this.Mark( node.Keyword, TextSpanClassification.CompileTime );
+                this.Mark( node.Body, TextSpanClassification.RunTime );
+
+                if ( node.ExpressionBody != null )
+                {
+                    this.Mark( node.ExpressionBody.Expression, TextSpanClassification.RunTime );
+                    this.Mark( node.ExpressionBody.ArrowToken, TextSpanClassification.CompileTime );
+                }
+                else if ( node.Body == null )
+                {
+                    this.Mark( node.SemicolonToken, TextSpanClassification.CompileTime );
+                }
+            }
+
+            base.VisitAccessorDeclaration( node );
         }
+
+        public override void VisitEventFieldDeclaration( EventFieldDeclarationSyntax node ) => this.VisitMember( node );
 
         public override void VisitToken( SyntaxToken token )
         {
@@ -200,23 +238,11 @@ namespace Caravela.Framework.Impl.Formatting
             base.VisitToken( token );
         }
 
-        public override void VisitVariableDeclarator( VariableDeclaratorSyntax node )
-        {
-            base.VisitVariableDeclarator( node );
-
-            var colorFromAnnotation = node.Identifier.GetColorFromAnnotation();
-
-            if ( colorFromAnnotation != TextSpanClassification.Default )
-            {
-                this.Mark( node.Identifier, colorFromAnnotation );
-            }
-        }
-
         public override void DefaultVisit( SyntaxNode node )
         {
             if ( this._isInTemplate )
             {
-                if ( node.GetScopeFromAnnotation().GetValueOrDefault().DynamicToCompileTimeOnly() == TemplatingScope.CompileTimeOnly )
+                if ( node.GetScopeFromAnnotation().GetValueOrDefault().GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                 {
                     // This can be overwritten later in a child node.
                     this.Mark( node, TextSpanClassification.CompileTime );

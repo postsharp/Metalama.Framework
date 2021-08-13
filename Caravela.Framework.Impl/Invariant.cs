@@ -65,13 +65,13 @@ namespace Caravela.Framework.Impl
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
-        public static T AssertNotNull<T>( this T? obj )
+        public static T AssertNotNull<T>( this T? obj, string? justification = null )
             where T : class
         {
 #if DEBUG
             if ( obj == null )
             {
-                throw new AssertionFailedException( $"The reference to {typeof(T).Name} must not be not null." );
+                throw new AssertionFailedException( justification ?? $"The reference to {typeof(T).Name} must not be not null." );
             }
 #endif
 
@@ -87,13 +87,13 @@ namespace Caravela.Framework.Impl
 #if !DEBUG
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public static T AssertNotNull<T>( this T? obj )
+        public static T AssertNotNull<T>( this T? obj, string? justification = null )
             where T : struct
         {
 #if DEBUG
             if ( obj == null )
             {
-                throw new AssertionFailedException( $"The reference to {typeof(T).Name} must not be not null." );
+                throw new AssertionFailedException( justification ?? $"The reference to {typeof(T).Name} must not be not null." );
             }
 #endif
 

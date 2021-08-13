@@ -13,11 +13,12 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class Property : Member, IProperty
+    internal sealed class Property : Member, IPropertyInternal
     {
         private readonly IPropertySymbol _symbol;
 
@@ -29,7 +30,8 @@ namespace Caravela.Framework.Impl.CodeModel
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 
         [Memo]
-        public IInvokerFactory<IPropertyInvoker> Invokers => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ) );
+        public IInvokerFactory<IPropertyInvoker> Invokers
+            => new InvokerFactory<IPropertyInvoker>( ( order, invokerOperator ) => new PropertyInvoker( this, order, invokerOperator ) );
 
         public override ISymbol Symbol => this._symbol;
 
@@ -47,14 +49,31 @@ namespace Caravela.Framework.Impl.CodeModel
                 this._symbol.Parameters.Select( p => new DeclarationRef<IParameter>( p ) ) );
 
         [Memo]
-        public IMethod? Getter => this._symbol.GetMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.GetMethod );
+        public IMethod? GetMethod => this._symbol.GetMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.GetMethod );
 
         [Memo]
 
         // TODO: get-only properties
-        public IMethod? Setter => this._symbol.SetMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.SetMethod );
+        public IMethod? SetMethod => this._symbol.SetMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.SetMethod );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Property;
+
+        public IProperty? OverriddenProperty
+        {
+            get
+            {
+                var overriddenProperty = this._symbol.OverriddenProperty;
+
+                if ( overriddenProperty != null )
+                {
+                    return this.Compilation.Factory.GetProperty( overriddenProperty );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
 
         [Memo]
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations
@@ -83,5 +102,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public override bool IsAsync => false;
 
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
+
+        public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
     }
 }

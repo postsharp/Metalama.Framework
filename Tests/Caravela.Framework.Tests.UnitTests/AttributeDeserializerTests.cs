@@ -10,6 +10,8 @@ using System;
 using System.Linq;
 using Xunit;
 
+#pragma warning disable CA1018 // Mark attributes with AttributeUsageAttribute
+
 namespace Caravela.Framework.Tests.UnitTests
 {
     public class AttributeDeserializerTests : TestBase
@@ -18,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests
         {
             // For the ease of testing, we need the custom attributes and helper classes nested here to be considered to 
             // belong to a system library so they can be shared between the compile-time code and the testing code.
-            this.ServiceProvider.ReplaceServiceForTest<SystemTypeResolver>( new HackedSystemTypeResolver( this.ServiceProvider ) );
+            this.ServiceProvider.AddService( new HackedSystemTypeResolver( this.ServiceProvider ) );
         }
 
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null )

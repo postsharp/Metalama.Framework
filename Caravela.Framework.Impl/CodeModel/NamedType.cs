@@ -2,13 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Collections;
-using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
+using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -18,14 +18,18 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
+using SpecialType = Caravela.Framework.Code.SpecialType;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
     internal sealed class NamedType : MemberOrNamedType, ITypeInternal, ISdkNamedType
     {
+        private SpecialType? _specialType;
+
         internal INamedTypeSymbol TypeSymbol { get; }
 
         ITypeSymbol? ISdkType.TypeSymbol => this.TypeSymbol;
@@ -48,6 +52,51 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
             };
 
+        public SpecialType SpecialType => this._specialType ??= this.GetSpecialTypeCore();
+
+        private SpecialType GetSpecialTypeCore()
+        {
+            var specialType = this.TypeSymbol.SpecialType.ToOurSpecialType();
+
+            if ( specialType != SpecialType.None )
+            {
+                return specialType;
+            }
+            else if ( this.IsGeneric )
+            {
+                if ( this.IsOpenGeneric )
+                {
+                    return this.TypeSymbol.Name switch
+                    {
+                        "IAsyncEnumerable" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
+                            => SpecialType.IAsyncEnumerable_T,
+                        "IAsyncEnumerator" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
+                            => SpecialType.IAsyncEnumerator_T,
+                        nameof(ValueTask) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
+                            => SpecialType.ValueTask_T,
+                        nameof(Task) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
+                            => SpecialType.Task_T,
+                        _ => SpecialType.None
+                    };
+                }
+                else
+                {
+                    return SpecialType.None;
+                }
+            }
+            else
+            {
+                return this.TypeSymbol.Name switch
+                {
+                    nameof(ValueTask) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
+                        => SpecialType.ValueTask,
+                    nameof(Task) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
+                        => SpecialType.Task,
+                    _ => SpecialType.None
+                };
+            }
+        }
+
         public Type ToType() => CompileTimeType.Create( this );
 
         public override MemberInfo ToMemberInfo() => this.ToType();
@@ -59,8 +108,11 @@ namespace Caravela.Framework.Impl.CodeModel
                (this.TypeSymbol.TypeKind == RoslynTypeKind.Class && !this.TypeSymbol.IsAbstract &&
                 this.TypeSymbol.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
-        public bool IsOpenGeneric
-            => this.GenericArguments.Any( ga => ga is IGenericParameter ) || (this.ContainingDeclaration as INamedType)?.IsOpenGeneric == true;
+        public bool IsOpenGeneric => this.TypeSymbol.TypeArguments.Any( ga => ga is ITypeParameterSymbol );
+
+        public bool IsGeneric => this.TypeSymbol.IsGenericType;
+
+        public INamedType OriginalDeclaration => this.IsGeneric ? this.Compilation.Factory.GetNamedType( this.TypeSymbol.OriginalDefinition ) : this;
 
         [Memo]
         public INamedTypeList NestedTypes => new NamedTypeList( this, this.TypeSymbol.GetTypeMembers().Select( t => new MemberRef<INamedType>( t ) ) );
@@ -69,25 +121,22 @@ namespace Caravela.Framework.Impl.CodeModel
         public IPropertyList Properties
             => new PropertyList(
                 this,
-                this.TypeSymbol.GetMembers()
-                    .Select(
-                        m => m switch
-                        {
-                            IPropertySymbol p => new MemberRef<IProperty>( p ),
-                            _ => default
-                        } ) );
+                this.TransformMembers<IProperty, IPropertyBuilder, IPropertySymbol>(
+                    this.TypeSymbol
+                        .GetMembers()
+                        .OfType<IPropertySymbol>()
+                        .ToReadOnlyList() ) );
 
         [Memo]
         public IFieldList Fields
             => new FieldList(
                 this,
-                this.TypeSymbol.GetMembers()
-                    .Select(
-                        m => m switch
-                        {
-                            IFieldSymbol { CanBeReferencedByName: true } p => new MemberRef<IField>( p ),
-                            _ => default
-                        } ) );
+                this.TransformMembers<IField, IFieldBuilder, IFieldSymbol>(
+                    this.TypeSymbol
+                        .GetMembers()
+                        .OfType<IFieldSymbol>()
+                        .Where( s => s is { CanBeReferencedByName: true } )
+                        .ToReadOnlyList() ) );
 
         [Memo]
         public IFieldOrPropertyList FieldsAndProperties => new FieldAndPropertiesList( this.Fields, this.Properties );
@@ -96,32 +145,30 @@ namespace Caravela.Framework.Impl.CodeModel
         public IEventList Events
             => new EventList(
                 this,
-                this.TypeSymbol
-                    .GetMembers()
-                    .OfType<IEventSymbol>()
-                    .Select( e => new MemberRef<IEvent>( e ) ) );
+                this.TransformMembers<IEvent, IEventBuilder, IEventSymbol>(
+                    this.TypeSymbol
+                        .GetMembers()
+                        .OfType<IEventSymbol>()
+                        .ToReadOnlyList() ) );
 
         [Memo]
         public IMethodList Methods
             => new MethodList(
                 this,
-                this.TypeSymbol
-                    .GetMembers()
-                    .OfType<IMethodSymbol>()
-                    .Where(
-                        m =>
-                            m.MethodKind != MethodKind.Constructor
-                            && m.MethodKind != MethodKind.StaticConstructor
-                            && m.MethodKind != MethodKind.PropertyGet
-                            && m.MethodKind != MethodKind.PropertySet
-                            && m.MethodKind != MethodKind.EventAdd
-                            && m.MethodKind != MethodKind.EventRemove
-                            && m.MethodKind != MethodKind.EventRaise )
-                    .Select( m => new MemberRef<IMethod>( m ) )
-                    .Concat(
-                        this.Compilation.GetObservableTransformationsOnElement( this )
-                            .OfType<MethodBuilder>()
-                            .Select( m => new MemberRef<IMethod>( m ) ) ) );
+                this.TransformMembers<IMethod, IMethodBuilder, IMethodSymbol>(
+                    this.TypeSymbol
+                        .GetMembers()
+                        .OfType<IMethodSymbol>()
+                        .Where(
+                            m =>
+                                m.MethodKind != MethodKind.Constructor
+                                && m.MethodKind != MethodKind.StaticConstructor
+                                && m.MethodKind != MethodKind.PropertyGet
+                                && m.MethodKind != MethodKind.PropertySet
+                                && m.MethodKind != MethodKind.EventAdd
+                                && m.MethodKind != MethodKind.EventRemove
+                                && m.MethodKind != MethodKind.EventRaise )
+                        .ToReadOnlyList() ) );
 
         [Memo]
         public IConstructorList Constructors
@@ -146,7 +193,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             get
             {
-                var syntaxReference = this.TypeSymbol.DeclaringSyntaxReferences.FirstOrDefault();
+                var syntaxReference = this.TypeSymbol.GetPrimarySyntaxReference();
 
                 if ( syntaxReference == null )
                 {
@@ -311,6 +358,96 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 return false;
             }
+        }
+
+        private IEnumerable<MemberRef<TMember>> TransformMembers<TMember, TBuilder, TSymbol>( IReadOnlyList<TSymbol> symbolMembers )
+            where TMember : class, IMember
+            where TBuilder : IMemberBuilder, TMember
+            where TSymbol : class, ISymbol
+        {
+            var transformations = this.Compilation.GetObservableTransformationsOnElement( this );
+
+            if ( transformations.Length == 0 )
+            {
+                // No transformations.
+                return symbolMembers.Select( x => new MemberRef<TMember>( x ) );
+            }
+
+            if ( !transformations.OfType<TBuilder>().Any( t => t is IReplaceMember ) )
+            {
+                // No replaced members.
+                return
+                    symbolMembers
+                        .Select( x => new MemberRef<TMember>( x ) )
+                        .Concat( transformations.OfType<TBuilder>().Select( x => x.ToMemberRef<TMember>() ) );
+            }
+
+            var allSymbols = new HashSet<TSymbol>( symbolMembers, SymbolEqualityComparer.Default );
+            var replacedSymbols = new HashSet<TSymbol>( SymbolEqualityComparer.Default );
+            var replacedBuilders = new HashSet<TBuilder>();
+            var builders = new List<TBuilder>();
+
+            // Go through transformations, noting replaced symbols and builders.
+            foreach ( var builder in transformations )
+            {
+                if ( builder is IReplaceMember replace )
+                {
+                    if ( replace.ReplacedMember.Target is TSymbol symbol && allSymbols.Contains( replace.ReplacedMember.Target ) )
+                    {
+                        // If the MemberRef points to a symbol just remove from symbol list.
+                        // This prevents needless allocation.
+                        replacedSymbols.Add( symbol );
+                    }
+                    else
+                    {
+                        // Otherwise resolve the MemberRef.
+                        var resolved = replace.ReplacedMember.Resolve( this.Compilation );
+
+                        if ( resolved is TMember )
+                        {
+                            var resolvedSymbol = (TSymbol?) resolved.GetSymbol();
+
+                            if ( resolvedSymbol != null )
+                            {
+                                replacedSymbols.Add( resolvedSymbol );
+                            }
+                            else if ( resolved is TBuilder replacedBuilder )
+                            {
+                                replacedBuilders.Add( replacedBuilder );
+                            }
+                            else
+                            {
+                                throw new AssertionFailedException();
+                            }
+                        }
+                    }
+                }
+
+                if ( builder is TBuilder typedBuilder )
+                {
+                    builders.Add( typedBuilder );
+                }
+            }
+
+            var members = new List<MemberRef<TMember>>();
+
+            foreach ( var symbol in symbolMembers )
+            {
+                if ( !replacedSymbols.Contains( symbol ) )
+                {
+                    members.Add( new MemberRef<TMember>( symbol ) );
+                }
+            }
+
+            foreach ( var builder in builders )
+            {
+                if ( !replacedBuilders.Contains( builder ) )
+                {
+                    members.Add( builder.ToMemberRef<TMember>() );
+                }
+            }
+
+            return members;
         }
     }
 }

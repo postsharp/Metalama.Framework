@@ -9,33 +9,31 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class OverrideFieldOrPropertyAdvice : Advice
+    internal class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrProperty>
     {
-        public IProperty? TemplateProperty { get; }
+        public Template<IProperty> PropertyTemplate { get; }
 
-        public IMethod? GetTemplateMethod { get; }
+        public Template<IMethod> GetTemplate { get; }
 
-        public IMethod? SetTemplateMethod { get; }
-
-        public new IFieldOrProperty TargetDeclaration => (IFieldOrProperty) base.TargetDeclaration;
+        public Template<IMethod> SetTemplate { get; }
 
         public OverrideFieldOrPropertyAdvice(
             AspectInstance aspect,
             IFieldOrProperty targetDeclaration,
-            IProperty? templateProperty,
-            IMethod? getTemplateMethod,
-            IMethod? setTemplateMethod,
-            string layerName,
+            Template<IProperty> propertyTemplate,
+            Template<IMethod> getTemplate,
+            Template<IMethod> setTemplate,
+            string? layerName,
             Dictionary<string, object?>? tags )
             : base( aspect, targetDeclaration, layerName, tags )
         {
             // We need either property template or (one or more) accessor templates, but never both.
-            Invariant.Assert( templateProperty != null || getTemplateMethod != null || setTemplateMethod != null );
-            Invariant.Assert( !(templateProperty != null && (getTemplateMethod != null || setTemplateMethod != null)) );
+            Invariant.Assert( !propertyTemplate.IsNull || !getTemplate.IsNull || !setTemplate.IsNull );
+            Invariant.Assert( !(!propertyTemplate.IsNull && (!getTemplate.IsNull || !setTemplate.IsNull)) );
 
-            this.TemplateProperty = templateProperty;
-            this.GetTemplateMethod = getTemplateMethod;
-            this.SetTemplateMethod = setTemplateMethod;
+            this.PropertyTemplate = propertyTemplate;
+            this.GetTemplate = getTemplate;
+            this.SetTemplate = setTemplate;
         }
 
         public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder ) { }
@@ -45,16 +43,15 @@ namespace Caravela.Framework.Impl.Advices
             // TODO: Translate templates to this compilation.
             if ( this.TargetDeclaration is IField field )
             {
-                var promotedField = new PromotedField( this, field, this.LinkerOptions );
+                var promotedField = new PromotedField( this, field );
 
                 return AdviceResult.Create(
                     promotedField,
-                    new OverriddenProperty( this, promotedField, this.TemplateProperty, this.GetTemplateMethod, this.SetTemplateMethod, this.LinkerOptions ) );
+                    new OverriddenProperty( this, promotedField, this.PropertyTemplate, this.GetTemplate, this.SetTemplate ) );
             }
             else if ( this.TargetDeclaration is IProperty property )
             {
-                return AdviceResult.Create(
-                    new OverriddenProperty( this, property, this.TemplateProperty, this.GetTemplateMethod, this.SetTemplateMethod, this.LinkerOptions ) );
+                return AdviceResult.Create( new OverriddenProperty( this, property, this.PropertyTemplate, this.GetTemplate, this.SetTemplate ) );
             }
             else
             {

@@ -5,14 +5,15 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
+using Caravela.Framework.Impl.CodeModel;
 using System.Collections.Generic;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdvisedProperty : AdvisedFieldOrProperty<IProperty>, IAdvisedProperty
+    internal class AdvisedProperty : AdvisedFieldOrProperty<IPropertyInternal>, IAdvisedProperty
     {
-        public AdvisedProperty( IProperty underlying ) : base( underlying ) { }
+        public AdvisedProperty( IProperty underlying ) : base( (IPropertyInternal) underlying ) { }
 
         public RefKind RefKind => this.Underlying.RefKind;
 
@@ -26,5 +27,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public PropertyInfo ToPropertyInfo() => this.Underlying.ToPropertyInfo();
 
         public new IInvokerFactory<IPropertyInvoker> Invokers => this.Underlying.Invokers;
+
+        public IProperty? OverriddenProperty => this.Underlying.OverriddenProperty;
+
+        public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
     }
 }

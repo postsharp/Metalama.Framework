@@ -23,13 +23,13 @@ namespace Caravela.TestFramework
             return JsonConvert.DeserializeObject<TestDirectoryOptions>( json )!;
         }
 
-        internal override void ApplyDirectoryOptions( TestDirectoryOptions directoryOptions )
+        internal override void ApplyBaseOptions( TestDirectoryOptions baseOptions )
         {
-            base.ApplyDirectoryOptions( directoryOptions );
+            base.ApplyBaseOptions( baseOptions );
 
             if ( this.Exclude == null )
             {
-                this.Exclude = directoryOptions.Exclude;
+                this.Exclude = baseOptions.Exclude;
             }
         }
     }

@@ -7,22 +7,26 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel.Invokers
 {
     internal class FieldOrPropertyInvoker : Invoker, IFieldOrPropertyInvoker
     {
+        private readonly InvokerOperator _invokerOperator;
+
         public IFieldOrProperty Member { get; }
 
-        public FieldOrPropertyInvoker( IFieldOrProperty member, InvokerOrder linkerOrder ) : base( member, linkerOrder )
+        public FieldOrPropertyInvoker( IFieldOrProperty member, InvokerOrder linkerOrder, InvokerOperator invokerOperator ) : base( member, linkerOrder )
         {
+            this._invokerOperator = invokerOperator;
             this.Member = member;
         }
 
         protected virtual void AssertNoArgument() { }
 
-        private ExpressionSyntax CreatePropertyExpression( RuntimeExpression? instance )
+        private ExpressionSyntax CreatePropertyExpression( RuntimeExpression instance, AspectReferenceTargetKind targetKind )
         {
             if ( this.Member.DeclaringType!.IsOpenGeneric )
             {
@@ -31,27 +35,45 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
             this.AssertNoArgument();
 
-            return MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                this.Member.GetReceiverSyntax( instance ),
-                IdentifierName( this.Member.Name ) );
+            var receiver = this.Member.GetReceiverSyntax( instance );
+            var name = IdentifierName( this.Member.Name );
+
+            if ( this._invokerOperator == InvokerOperator.Default )
+            {
+                return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name )
+                    .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
+            }
+            else
+            {
+                return ConditionalAccessExpression( receiver, MemberBindingExpression( name ) )
+                    .WithAspectReferenceAnnotation( this.AspectReference.WithTargetKind( targetKind ) );
+            }
         }
 
         public object GetValue( object? instance )
-        {
-            // TODO: Use LinkerAnnotation.
-            return new DynamicExpression( this.CreatePropertyExpression( RuntimeExpression.FromValue( instance ) ), this.Member.Type, this.Member is Field );
-        }
+            => new DynamicExpression(
+                this.CreatePropertyExpression( RuntimeExpression.FromValue( instance, this.Compilation ), AspectReferenceTargetKind.PropertyGetAccessor ),
+                this._invokerOperator == InvokerOperator.Default ? this.Member.Type : this.Member.Type.MakeNullable(),
+                this.Member is Field,
+                this.Member.Writeability != Writeability.None );
 
         public object SetValue( object? instance, object? value )
         {
-            // TODO: Use LinkerAnnotation.
+            if ( this._invokerOperator == InvokerOperator.Conditional )
+            {
+                throw new NotSupportedException( "Conditional access is not supported for SetValue." );
+            }
 
-            var propertyAccess = this.CreatePropertyExpression( RuntimeExpression.FromValue( instance ) );
+            var propertyAccess = this.CreatePropertyExpression(
+                RuntimeExpression.FromValue( instance, this.Compilation ),
+                AspectReferenceTargetKind.PropertySetAccessor );
 
-            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.GetSyntaxFromValue( value ) );
+            var expression = AssignmentExpression(
+                SyntaxKind.SimpleAssignmentExpression,
+                propertyAccess,
+                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
 
-            return new DynamicExpression( expression, this.Member.Type, false );
+            return new DynamicExpression( expression, this.Member.Type );
         }
     }
 }

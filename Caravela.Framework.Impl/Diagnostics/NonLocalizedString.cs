@@ -6,7 +6,8 @@ using System;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-    internal sealed class NonLocalizedString : LocalizableString
+    // Public because of TryCaravela.
+    public sealed class NonLocalizedString : LocalizableString
     {
         private readonly string _message;
         private readonly object[] _arguments;

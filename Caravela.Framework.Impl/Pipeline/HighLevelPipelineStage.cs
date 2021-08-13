@@ -5,7 +5,8 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Sdk;
+using Caravela.Framework.Impl.Observers;
+using Caravela.Framework.Impl.Sdk;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -40,6 +41,8 @@ namespace Caravela.Framework.Impl.Pipeline
             [NotNullWhen( true )] out PipelineStageResult? result )
         {
             var compilation = CompilationModel.CreateInitialInstance( input.PartialCompilation );
+
+            this.ServiceProvider.GetOptionalService<ICompilationModelObserver>()?.OnInitialCompilationModelCreated( compilation );
 
             var pipelineStepsState = new PipelineStepsState(
                 this._aspectLayers,

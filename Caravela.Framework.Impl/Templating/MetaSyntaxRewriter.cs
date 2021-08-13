@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Templating
     /// Most of this class is machine-generated. This class is meant to be inherited. See the only
     /// inheritor: <see cref="TemplateCompilerRewriter"/>.
     /// </remarks>
-    internal abstract partial class MetaSyntaxRewriter : CSharpSyntaxRewriter
+    internal partial class MetaSyntaxRewriter : CSharpSyntaxRewriter
     {
         private readonly Stack<string> _indentTriviaStack = new();
         private readonly IndentRewriter _indentRewriter;
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="compileTimeCompilation">The <see cref="Compilation"/> used to create the compile-time assembly,
         /// possibly with no source code, but with metadata references. Used to resolve symbols in the compile-time assembly.</param>
-        protected MetaSyntaxRewriter( Compilation compileTimeCompilation )
+        public MetaSyntaxRewriter( Compilation compileTimeCompilation )
         {
             this._indentTriviaStack.Push( "" );
             this._indentRewriter = new IndentRewriter( this );
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        protected abstract TransformationKind GetTransformationKind( SyntaxNode node );
+        protected virtual TransformationKind GetTransformationKind( SyntaxNode node ) => TransformationKind.Transform;
 
         protected void Indent( int level = 1 )
         {
@@ -88,7 +88,7 @@ namespace Caravela.Framework.Impl.Templating
             return node;
         }
 
-        protected virtual ExpressionSyntax TransformExpression( ExpressionSyntax expression ) => expression;
+        protected virtual ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression ) => expression;
 
         /// <summary>
         /// Transforms an put <see cref="SyntaxNode"/> into an output <see cref="ExpressionSyntax"/> instantiating the input <see cref="SyntaxNode"/>,
@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.Templating
                 switch ( node )
                 {
                     case ExpressionSyntax expression:
-                        return this.TransformExpression( (ExpressionSyntax) this.Visit( expression ) );
+                        return this.TransformExpression( (ExpressionSyntax) this.Visit( expression ), expression );
 
                     case ArgumentSyntax argument:
                         return this.TransformArgument( argument );
@@ -203,6 +203,7 @@ namespace Caravela.Framework.Impl.Templating
                         SingletonSeparatedList(
                             Argument(
                                 ArrayCreationExpression(
+                                    Token( SyntaxKind.NewKeyword ).WithTrailingTrivia( Space ),
                                     this.MetaSyntaxFactory.ArrayType<T>(),
                                     InitializerExpression(
                                         SyntaxKind.ArrayInitializerExpression,

@@ -36,8 +36,6 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public ImmutableUserDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
 
-        public IDiagnosticAdder DiagnosticAdder => this._diagnostics;
-
         public IReadOnlyList<IAspectSource> ExternalAspectSources => new[] { this._overflowAspectSource };
 
         public PipelineStepsState(
@@ -72,15 +70,40 @@ namespace Caravela.Framework.Impl.Pipeline
         public void Execute( CancellationToken cancellationToken )
         {
             using var enumerator = this._steps.GetEnumerator();
+            PipelineStep? previousStep = null;
 
             while ( enumerator.MoveNext() )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 this._currentStep = enumerator.Current.Value;
+
+                this.DetectUnorderedSteps( ref previousStep, this._currentStep );
+
                 var compilationForAspectLayer = this.Compilation.GetCompilationModel().WithAspectLayer( this._currentStep.AspectLayer.AspectLayerId );
                 this.Compilation = this._currentStep!.Execute( compilationForAspectLayer, this, cancellationToken );
             }
+        }
+
+        private void DetectUnorderedSteps( ref PipelineStep? previousStep, PipelineStep currentStep )
+        {
+            if ( previousStep != null )
+            {
+                if ( previousStep.AspectLayer != currentStep.AspectLayer && previousStep.AspectLayer.Order >= currentStep.AspectLayer.Order )
+                {
+                    this._diagnostics.Report(
+                        GeneralDiagnosticDescriptors.UnorderedLayers.CreateDiagnostic(
+                            null,
+                            (previousStep.AspectLayer.AspectLayerId.ToString(), currentStep.AspectLayer.AspectLayerId.ToString()) ) );
+                }
+
+                if ( previousStep.AspectLayer == currentStep.AspectLayer && previousStep.Id.Depth >= currentStep.Id.Depth )
+                {
+                    throw new AssertionFailedException( "Steps with lower depth must be processed before steps with higher depth." );
+                }
+            }
+
+            previousStep = currentStep;
         }
 
         public bool AddAspectSources( IEnumerable<IAspectSource> aspectSources )

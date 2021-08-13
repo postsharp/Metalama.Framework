@@ -7,12 +7,15 @@ using Caravela.Framework.Impl.Templating.Mapping;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading;
 
@@ -26,6 +29,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal sealed class CompileTimeProjectLoader : ICompileTimeTypeResolver
     {
+        private static readonly ConcurrentDictionary<string, (byte[]? Resource, DateTime LastFileWrite)> _resourceCache = new();
         private readonly CompileTimeDomain _domain;
         private readonly IServiceProvider _serviceProvider;
         private readonly CompileTimeCompilationBuilder _builder;
@@ -43,7 +47,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this._serviceProvider = serviceProvider;
             this._builder = new CompileTimeCompilationBuilder( serviceProvider, domain );
             this._runTimeAssemblyLocator = serviceProvider.GetOptionalService<IAssemblyLocator>();
-            this.AttributeDeserializer = new AttributeDeserializer( this );
+            this.AttributeDeserializer = new AttributeDeserializer( serviceProvider, this );
             this._systemTypeResolver = serviceProvider.GetService<SystemTypeResolver>();
         }
 
@@ -109,7 +113,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity, cancellationToken );
 
-            var result = compileTimeProject?.GetType( typeSymbol.GetReflectionNameSafe() );
+            var result = compileTimeProject?.GetTypeOrNull( typeSymbol.GetReflectionNameSafe() );
 
             if ( result == null )
             {
@@ -285,9 +289,6 @@ namespace Caravela.Framework.Impl.CompileTime
                 return true;
             }
 
-            var resolver = new PathAssemblyResolver( new[] { typeof(object).Assembly.Location } );
-            using var metadataLoadContext = new MetadataLoadContext( resolver, typeof(object).Assembly.GetName().Name );
-
             // LoadFromAssemblyPath throws for mscorlib
             if ( Path.GetFileNameWithoutExtension( assemblyPath ) == typeof(object).Assembly.GetName().Name )
             {
@@ -296,21 +297,18 @@ namespace Caravela.Framework.Impl.CompileTime
                 return true;
             }
 
-            var runtimeAssembly = metadataLoadContext.LoadFromAssemblyPath( assemblyPath );
-
-            if ( !runtimeAssembly.GetManifestResourceNames().Contains( CompileTimeCompilationBuilder.ResourceName ) )
+            if ( !TryGetCompileTimeResource( assemblyPath, out var resourceStream ) )
             {
                 compileTimeProject = null;
 
                 return true;
             }
 
-            var stream = runtimeAssembly.GetManifestResourceStream( CompileTimeCompilationBuilder.ResourceName ).AssertNotNull();
-            var assemblyName = runtimeAssembly.GetName();
+            var assemblyName = AssemblyName.GetAssemblyName( assemblyPath );
 
             if ( !this.TryDeserializeCompileTimeProject(
                 assemblyName.ToAssemblyIdentity(),
-                stream,
+                resourceStream,
                 diagnosticSink,
                 cancellationToken,
                 out compileTimeProject ) )
@@ -321,6 +319,64 @@ namespace Caravela.Framework.Impl.CompileTime
             this._projects.Add( assemblyIdentity, compileTimeProject );
 
             return true;
+        }
+
+        private static bool TryGetCompileTimeResource( string path, [NotNullWhen( true )] out MemoryStream? resourceStream )
+        {
+            if ( !(_resourceCache.TryGetValue( path, out var result ) && result.LastFileWrite == File.GetLastWriteTime( path )) )
+            {
+                result = GetCompileTimeResourceCore( path );
+                _resourceCache.TryAdd( path, result );
+            }
+
+            if ( result.Resource != null )
+            {
+                resourceStream = new MemoryStream( result.Resource );
+
+                return true;
+            }
+            else
+            {
+                resourceStream = null;
+
+                return false;
+            }
+        }
+
+        private static (byte[]? Resource, DateTime LastFileWrite) GetCompileTimeResourceCore( string path )
+        {
+            var timestamp = File.GetLastWriteTime( path );
+
+            using var stream = new FileStream( path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite );
+            using var peReader = new PEReader( stream );
+
+            var metadataReader = peReader.GetMetadataReader();
+
+            foreach ( var resourceHandle in metadataReader.ManifestResources )
+            {
+                var resource = metadataReader.GetManifestResource( resourceHandle );
+
+                if ( !resource.Implementation.IsNil )
+                {
+                    continue;
+                }
+
+                var resourceName = metadataReader.GetString( resource.Name );
+
+                if ( resourceName.Contains( CompileTimeCompilationBuilder.ResourceName ) )
+                {
+                    unsafe
+                    {
+                        var resourcesSection = peReader.GetSectionData( peReader.PEHeaders.CorHeader!.ResourcesDirectory.RelativeVirtualAddress );
+                        var size = *(int*) (resourcesSection.Pointer + resource.Offset);
+                        var resourceBytes = resourcesSection.GetContent( sizeof(int), size );
+
+                        return (resourceBytes.ToArray(), timestamp);
+                    }
+                }
+            }
+
+            return (null, timestamp);
         }
 
         private bool TryDeserializeCompileTimeProject(
@@ -348,7 +404,7 @@ namespace Caravela.Framework.Impl.CompileTime
             // Read source files.
             List<SyntaxTree> syntaxTrees = new();
 
-            foreach ( var entry in archive.Entries.Where( e => Path.GetExtension( e.Name ) == ".cs" ) )
+            foreach ( var entry in archive.Entries.Where( e => string.Equals( Path.GetExtension( e.Name ), ".cs", StringComparison.OrdinalIgnoreCase ) ) )
             {
                 using var sourceReader = new StreamReader( entry.Open(), Encoding.UTF8 );
                 var sourceText = sourceReader.ReadToEnd();
@@ -400,6 +456,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 CompileTimeCompilationBuilder.GetCompileTimeAssemblyName( manifest.AssemblyName, referenceProjects, manifest.SourceHash );
 
             project = CompileTimeProject.Create(
+                this._serviceProvider,
                 this._domain,
                 runTimeAssemblyIdentity,
                 new AssemblyIdentity( compileTimeAssemblyName ),

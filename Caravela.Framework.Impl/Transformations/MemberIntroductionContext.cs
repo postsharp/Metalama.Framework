@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Templating;
 using System;
 
 namespace Caravela.Framework.Impl.Transformations
@@ -16,19 +15,19 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IntroductionNameProvider IntroductionNameProvider { get; }
 
-        public TemplateLexicalScope LexicalScope { get; }
+        public ITemplateLexicalScopeProvider LexicalScopeProvider { get; }
 
         public ISyntaxFactory SyntaxFactory { get; }
 
         public MemberIntroductionContext(
             UserDiagnosticSink diagnosticSink,
             IntroductionNameProvider introductionNameProvider,
-            TemplateLexicalScope lexicalScope,
+            ITemplateLexicalScopeProvider lexicalScopeProvider,
             ISyntaxFactory syntaxFactory,
             IServiceProvider serviceProvider )
         {
             this.DiagnosticSink = diagnosticSink;
-            this.LexicalScope = lexicalScope;
+            this.LexicalScopeProvider = lexicalScopeProvider;
             this.SyntaxFactory = syntaxFactory;
             this.ServiceProvider = serviceProvider;
             this.IntroductionNameProvider = introductionNameProvider;

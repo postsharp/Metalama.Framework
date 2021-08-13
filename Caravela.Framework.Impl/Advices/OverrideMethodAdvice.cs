@@ -8,27 +8,25 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class OverrideMethodAdvice : Advice
+    internal class OverrideMethodAdvice : OverrideMemberAdvice<IMethod>
     {
-        public IMethod TemplateMethod { get; }
-
-        public new IMethod TargetDeclaration => (IMethod) base.TargetDeclaration;
+        public Template<IMethod> Template { get; }
 
         public OverrideMethodAdvice(
             AspectInstance aspect,
             IMethod targetDeclaration,
-            IMethod templateMethod,
-            string layerName,
+            Template<IMethod> template,
+            string? layerName,
             Dictionary<string, object?>? tags ) : base( aspect, targetDeclaration, layerName, tags )
         {
-            this.TemplateMethod = templateMethod;
+            this.Template = template;
         }
 
         public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder ) { }
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
-            return AdviceResult.Create( new OverriddenMethod( this, this.TargetDeclaration, this.TemplateMethod, this.LinkerOptions ) );
+            return AdviceResult.Create( new OverriddenMethod( this, this.TargetDeclaration, this.Template ) );
         }
     }
 }

@@ -2,12 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Formatting;
+using Caravela.Framework.Impl.Observers;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.Mapping;
 using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Sdk;
 using K4os.Hash.xxHash;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -30,8 +32,10 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly IServiceProvider _serviceProvider;
         private readonly CompileTimeDomain _domain;
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
-        private readonly IDirectoryOptions _directoryOptions;
-        private readonly ICompileTimeCompilationBuilderSpy? _spy;
+        private readonly IPathOptions _pathOptions;
+        private readonly IProjectOptions? _projectOptions;
+        private readonly ICompileTimeCompilationBuilderObserver? _observer;
+        private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
 
         private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
 
@@ -39,10 +43,12 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public CompileTimeCompilationBuilder( IServiceProvider serviceProvider, CompileTimeDomain domain )
         {
-            this._directoryOptions = serviceProvider.GetService<IDirectoryOptions>();
+            this._pathOptions = serviceProvider.GetService<IPathOptions>();
             this._serviceProvider = serviceProvider;
             this._domain = domain;
-            this._spy = serviceProvider.GetOptionalService<ICompileTimeCompilationBuilderSpy>();
+            this._observer = serviceProvider.GetOptionalService<ICompileTimeCompilationBuilderObserver>();
+            this._rewriter = serviceProvider.GetOptionalService<ICompileTimeAssemblyBinaryRewriter>();
+            this._projectOptions = serviceProvider.GetOptionalService<IProjectOptions>();
         }
 
         private static ulong ComputeSourceHash( IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log = null )
@@ -162,9 +168,14 @@ namespace Caravela.Framework.Impl.CompileTime
 
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees.Select( t => t.TransformedTree ) );
 
-            this._spy?.ReportCompileTimeCompilation( compileTimeCompilation );
-
             compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitTrees( compileTimeCompilation );
+
+            if ( this._projectOptions is { FormatCompileTimeCode: true } && OutputCodeFormatter.CanFormat )
+            {
+                compileTimeCompilation = OutputCodeFormatter.FormatAll( compileTimeCompilation );
+            }
+
+            this._observer?.OnCompileTimeCompilation( compileTimeCompilation );
 
             return true;
         }
@@ -269,11 +280,33 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 EmitResult emitResult;
 
-                using ( var peStream = File.Create( outputInfo.Pe ) )
-                using ( var pdbStream = File.Create( outputInfo.Pdb ) )
+                if ( this._rewriter != null )
                 {
-                    emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
+                    // TryCaravela defines a binary rewriter to inject Unbreakable.
+
+                    MemoryStream memoryStream = new();
+                    emitResult = compileTimeCompilation.Emit( memoryStream, null, options: emitOptions, cancellationToken: cancellationToken );
+
+                    if ( emitResult.Success )
+                    {
+                        memoryStream.Seek( 0, SeekOrigin.Begin );
+
+                        using ( var peStream = File.Create( outputInfo.Pe ) )
+                        {
+                            this._rewriter.Rewrite( memoryStream, peStream, outputInfo.Pe );
+                        }
+                    }
                 }
+                else
+                {
+                    using ( var peStream = File.Create( outputInfo.Pe ) )
+                    using ( var pdbStream = File.Create( outputInfo.Pdb ) )
+                    {
+                        emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
+                    }
+                }
+
+                this._observer?.OnCompileTimeCompilationEmit( compileTimeCompilation, emitResult.Diagnostics );
 
                 // Reports a diagnostic in the original syntax tree.
                 void ReportDiagnostics( IEnumerable<Diagnostic> diagnostics )
@@ -312,9 +345,36 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( !emitResult.Success )
                 {
+                    // When the compile-time assembly is invalid, to enable troubleshooting, we store the source files and the list of diagnostics
+                    // to a directory that will not be deleted after the build.
+                    var troubleshootingDirectory = Path.Combine(
+                        TempPathHelper.GetTempPath( "CompileTimeTroubleshooting" ),
+                        Guid.NewGuid().ToString() );
+
+                    Directory.CreateDirectory( troubleshootingDirectory );
+
+                    foreach ( var syntaxTree in compileTimeCompilation.SyntaxTrees )
+                    {
+                        var path = Path.Combine( troubleshootingDirectory, Path.GetFileName( syntaxTree.FilePath ) );
+
+                        using ( var writer = File.CreateText( path ) )
+                        {
+                            syntaxTree.GetText().Write( writer );
+                        }
+                    }
+
+                    var diagnosticPath = Path.Combine( troubleshootingDirectory, "errors.txt" );
+                    var diagnostics = emitResult.Diagnostics.Select( d => d.ToString() ).ToArray();
+                    File.WriteAllLines( diagnosticPath, diagnostics );
+
                     Logger.Instance?.Write(
                         $"TryEmit( '{compileTimeCompilation.AssemblyName}' ): failure: " +
                         string.Join( Environment.NewLine, emitResult.Diagnostics ) );
+
+                    diagnosticSink.Report(
+                        TemplatingDiagnosticDescriptors.CannotEmitCompileTimeAssembly.CreateDiagnostic(
+                            null,
+                            troubleshootingDirectory ) );
 
                     ReportDiagnostics( emitResult.Diagnostics.Where( d => d.Severity >= DiagnosticSeverity.Error ) );
 
@@ -438,9 +498,10 @@ namespace Caravela.Framework.Impl.CompileTime
             Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' ): found on disk. Deserializing." );
 
             // Deserialize the manifest.
-            if ( CompileTimeProjectManifest.TryDeserialize( File.OpenRead( outputPaths.Manifest ), out var manifest ) )
+            if ( CompileTimeProjectManifest.TryDeserialize( RetryHelper.Retry( () => File.OpenRead( outputPaths.Manifest ) ), out var manifest ) )
             {
                 project = CompileTimeProject.Create(
+                    this._serviceProvider,
                     this._domain,
                     runTimeCompilation.Assembly.Identity,
                     new AssemblyIdentity( compileTimeAssemblyName ),
@@ -544,6 +605,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         else
                         {
                             project = CompileTimeProject.CreateEmpty(
+                                this._serviceProvider,
                                 this._domain,
                                 runTimeCompilation.Assembly.Identity,
                                 new AssemblyIdentity( compileTimeAssemblyName ),
@@ -579,6 +641,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );
 
                         project = CompileTimeProject.Create(
+                            this._serviceProvider,
                             this._domain,
                             runTimeCompilation.Assembly.Identity,
                             compileTimeCompilation.Assembly.Identity,
@@ -621,7 +684,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private OutputPaths GetOutputPaths( string compileTimeAssemblyName )
         {
             // We cannot include the full assembly name in the path because we're hitting the max path length.
-            var directory = Path.Combine( this._directoryOptions.CompileTimeProjectCacheDirectory, HashUtilities.HashString( compileTimeAssemblyName ) );
+            var directory = Path.Combine( this._pathOptions.CompileTimeProjectCacheDirectory, HashUtilities.HashString( compileTimeAssemblyName ) );
             var pe = Path.Combine( directory, compileTimeAssemblyName + ".dll" );
             var pdb = Path.ChangeExtension( pe, ".pdb" );
             var manifest = Path.ChangeExtension( pe, ".manifest" );

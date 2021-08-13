@@ -6,6 +6,7 @@ using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Invokers
@@ -13,51 +14,111 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
     internal class MethodInvoker : Invoker, IMethodInvoker
     {
         private readonly IMethod _method;
+        private readonly InvokerOperator _invokerOperator;
 
-        public MethodInvoker( IMethod method, InvokerOrder order ) : base( method, order )
+        public MethodInvoker( IMethod method, InvokerOrder order, InvokerOperator invokerOperator ) : base( method, order )
         {
             this._method = method;
+            this._invokerOperator = invokerOperator;
         }
 
-        public object Invoke( object? instance, params object?[] args )
+        public object? Invoke( object? instance, params object?[] args )
         {
-            // TODO: Use LinkerAnnotation.
-
             if ( this._method.IsOpenGeneric )
             {
                 throw GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember.CreateException( this._method );
             }
 
+            var parametersCount = this._method.Parameters.Count;
+
+            if ( parametersCount > 0 && this._method.Parameters[parametersCount - 1].IsParams )
+            {
+                // The method has a 'params' param.
+                if ( args.Length < parametersCount - 1 )
+                {
+                    throw GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments.CreateException( (this._method, parametersCount - 1, args.Length) );
+                }
+            }
+            else if ( args.Length != parametersCount )
+            {
+                throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (this._method, parametersCount, args.Length) );
+            }
+
+            switch ( this._method.MethodKind )
+            {
+                case MethodKind.Default:
+                case MethodKind.LocalFunction:
+                    return this.InvokeDefaultMethod( instance, args );
+
+                case MethodKind.EventAdd:
+                    return ((IEvent) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.Add( instance, args[0] );
+
+                case MethodKind.EventRaise:
+                    return ((IEvent) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.Raise( instance, args );
+
+                case MethodKind.EventRemove:
+                    return ((IEvent) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.Remove( instance, args[0] );
+
+                case MethodKind.PropertyGet:
+                    return ((IProperty) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.GetValue( instance );
+
+                case MethodKind.PropertySet:
+                    return ((IProperty) this._method.DeclaringMember!).Invokers.GetInvoker( this.Order, this._invokerOperator )!.SetValue( instance, args[0] );
+
+                default:
+                    throw new NotImplementedException(
+                        $"Cannot generate syntax to invoke the method '{this._method}' because method kind {this._method.MethodKind} is not implemented." );
+            }
+        }
+
+        private object InvokeDefaultMethod( object? instance, object?[] args )
+        {
             var name = this._method.GenericArguments.Any()
                 ? LanguageServiceFactory.CSharpSyntaxGenerator.GenericName(
                     this._method.Name,
                     this._method.GenericArguments.Select( a => a.GetSymbol() ) )
                 : SyntaxFactory.IdentifierName( this._method.Name );
 
-            var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromValue( args ) );
+            var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromValue( args, this.Compilation ) );
 
             if ( this._method.MethodKind == MethodKind.LocalFunction )
             {
-                var instanceExpression = RuntimeExpression.FromValue( instance );
+                var instanceExpression = RuntimeExpression.FromValue( instance, this.Compilation );
 
-                if ( instanceExpression != null )
+                if ( instanceExpression.Syntax.Kind() != SyntaxKind.NullLiteralExpression )
                 {
                     throw GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction.CreateException( this._method );
                 }
 
                 return new DynamicExpression(
-                    SyntaxFactory.InvocationExpression( name ).AddArgumentListArguments( arguments ),
-                    this._method.ReturnType,
-                    false );
+                    SyntaxFactory.InvocationExpression(
+                            name
+                                .WithAspectReferenceAnnotation( this.AspectReference ) )
+                        .AddArgumentListArguments( arguments ),
+                    this._method.ReturnType );
             }
 
-            var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromValue( instance! ) );
+            var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromValue( instance!, this.Compilation ) );
 
-            return new DynamicExpression(
-                SyntaxFactory.InvocationExpression( SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name ) )
-                    .AddArgumentListArguments( arguments ),
-                this._method.ReturnType,
-                false );
+            if ( this._invokerOperator == InvokerOperator.Default )
+            {
+                var invocationExpression = SyntaxFactory.InvocationExpression(
+                        SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name )
+                            .WithAspectReferenceAnnotation( this.AspectReference ) )
+                    .AddArgumentListArguments( arguments );
+
+                return new DynamicExpression( invocationExpression, this._method.ReturnType );
+            }
+            else
+            {
+                var invocationExpression = SyntaxFactory.ConditionalAccessExpression(
+                        receiver,
+                        SyntaxFactory.InvocationExpression( SyntaxFactory.MemberBindingExpression( name ) )
+                            .AddArgumentListArguments( arguments ) )
+                    .WithAspectReferenceAnnotation( this.AspectReference );
+
+                return new DynamicExpression( invocationExpression, this._method.ReturnType.MakeNullable() );
+            }
         }
     }
 }

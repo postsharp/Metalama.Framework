@@ -6,10 +6,13 @@
     <ProjectGuid>{318AC40B-9A06-48C9-941E-CC6850892196}</ProjectGuid>
     <Nullable>enable</Nullable>
     <RuntimeIdentifiers>win</RuntimeIdentifiers>
+    <!-- 'ProductVersion' needs to be changed to 'CaravelaVersion' as soon as the VSX makes it to its own repo. -->
     <TargetVsixContainerName>Caravela.$(ProductVersion).vsix</TargetVsixContainerName>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <!-- 'ProductVersion' needs to be changed to 'CaravelaVersion' as soon as the VSX makes it to its own repo. -->
+    <TargetVsixContainerName>Caravela.$(ProductVersion).vsix</TargetVsixContainerName>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>

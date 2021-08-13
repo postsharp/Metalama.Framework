@@ -3,13 +3,14 @@
 
 using K4os.Hash.xxHash;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Text;
 
 namespace Caravela.Framework.Impl.Utilities
 {
     internal static class HashUtilities
     {
-        public static string HashString( string s ) => XXH64.DigestOf( Encoding.UTF8.GetBytes( s ) ).ToString( "x16" );
+        public static string HashString( string s ) => XXH64.DigestOf( Encoding.UTF8.GetBytes( s ) ).ToString( "x16", CultureInfo.InvariantCulture );
 
         public static void Update( this XXH64 hash, string s ) => hash.Update( Encoding.UTF8.GetBytes( s ) );
 

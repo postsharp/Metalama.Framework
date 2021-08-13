@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract partial class PartialCompilation
+    public abstract partial class PartialCompilation
     {
         /// <summary>
         /// Represents a partial compilation, containing a subset of syntax trees.
@@ -16,50 +16,64 @@ namespace Caravela.Framework.Impl.CodeModel
         private class PartialImpl : PartialCompilation
         {
             private readonly ImmutableArray<ITypeSymbol>? _types;
-            private readonly ImmutableHashSet<SyntaxTree> _syntaxTrees;
+            private readonly ImmutableDictionary<string, SyntaxTree> _syntaxTrees;
 
             public PartialImpl(
                 Compilation compilation,
-                ImmutableHashSet<SyntaxTree> syntaxTrees,
-                ImmutableArray<ITypeSymbol>? types = null )
+                ImmutableDictionary<string, SyntaxTree> syntaxTrees,
+                ImmutableArray<ITypeSymbol>? types )
                 : base( compilation )
             {
                 this._types = types;
                 this._syntaxTrees = syntaxTrees;
             }
 
-            public override IReadOnlyCollection<SyntaxTree> SyntaxTrees => this._syntaxTrees;
+            public PartialImpl(
+                ImmutableDictionary<string, SyntaxTree> syntaxTrees,
+                ImmutableArray<ITypeSymbol>? types,
+                PartialCompilation baseCompilation,
+                IReadOnlyList<ModifiedSyntaxTree>? modifiedSyntaxTrees,
+                IReadOnlyList<SyntaxTree>? addedTrees )
+                : base( baseCompilation, modifiedSyntaxTrees, addedTrees )
+            {
+                this._types = types;
+                this._syntaxTrees = syntaxTrees;
+            }
+
+            public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees => this._syntaxTrees;
 
             public override IEnumerable<ITypeSymbol> Types => this._types ?? throw new NotImplementedException();
 
             public override bool IsPartial => false;
 
             public override PartialCompilation UpdateSyntaxTrees(
-                IReadOnlyList<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees,
-                IReadOnlyList<SyntaxTree> addedTrees )
+                IReadOnlyList<ModifiedSyntaxTree>? replacedTrees = null,
+                IReadOnlyList<SyntaxTree>? addedTrees = null )
             {
-                var compilation = this.Compilation;
-                var syntaxTrees = this._syntaxTrees;
+                var syntaxTrees = this._syntaxTrees.ToBuilder();
 
-                foreach ( var replacement in replacedTrees )
+                if ( replacedTrees != null )
                 {
-                    if ( !this._syntaxTrees.Contains( replacement.OldTree ) )
+                    foreach ( var replacement in replacedTrees )
                     {
-                        throw new KeyNotFoundException();
+                        if ( !this._syntaxTrees.ContainsKey( replacement.FilePath ) )
+                        {
+                            throw new KeyNotFoundException();
+                        }
+
+                        syntaxTrees[replacement.FilePath] = replacement.NewTree;
                     }
-
-                    compilation = compilation.ReplaceSyntaxTree( replacement.OldTree, replacement.NewTree );
-                    syntaxTrees = syntaxTrees.Remove( replacement.OldTree ).Add( replacement.NewTree );
                 }
 
-                compilation = compilation.AddSyntaxTrees( addedTrees );
-
-                foreach ( var addedTree in addedTrees )
+                if ( addedTrees != null )
                 {
-                    syntaxTrees = syntaxTrees.Add( addedTree );
+                    foreach ( var addedTree in addedTrees )
+                    {
+                        syntaxTrees.Add( addedTree.FilePath, addedTree );
+                    }
                 }
 
-                return new PartialImpl( compilation, syntaxTrees );
+                return new PartialImpl( syntaxTrees.ToImmutable(), null, this, replacedTrees, addedTrees );
             }
         }
     }

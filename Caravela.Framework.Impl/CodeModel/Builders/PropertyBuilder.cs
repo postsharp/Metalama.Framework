@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Collections;
@@ -9,13 +8,13 @@ using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Caravela.Framework.Code.MethodKind;
@@ -24,7 +23,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class PropertyBuilder : MemberBuilder, IPropertyBuilder
+    internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyInternal
     {
         private readonly bool _hasInitOnlySetter;
 
@@ -35,8 +34,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public Writeability Writeability
             => this switch
             {
-                { Setter: null, IsAutoPropertyOrField: false } => Writeability.None,
-                { Setter: null, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
+                { SetMethod: null, IsAutoPropertyOrField: false } => Writeability.None,
+                { SetMethod: null, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
                 { _hasInitOnlySetter: true } => Writeability.InitOnly,
                 _ => Writeability.All
             };
@@ -51,23 +50,26 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IType Type { get; set; }
 
-        public IMethodBuilder? Getter { get; }
+        public IMethodBuilder? GetMethod { get; }
 
-        IMethod? IFieldOrProperty.Getter => this.Getter;
+        IMethod? IFieldOrProperty.GetMethod => this.GetMethod;
 
-        public IMethodBuilder? Setter { get; }
+        IMethod? IFieldOrProperty.SetMethod => this.SetMethod;
+
+        public IMethodBuilder? SetMethod { get; }
 
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 
-        IMethod? IFieldOrProperty.Setter => this.Setter;
-
         [Memo]
-        public IInvokerFactory<IPropertyInvoker> Invokers => new InvokerFactory<IPropertyInvoker>( order => new PropertyInvoker( this, order ), false );
+        public IInvokerFactory<IPropertyInvoker> Invokers
+            => new InvokerFactory<IPropertyInvoker>( ( order, invokerOperator ) => new PropertyInvoker( this, order, invokerOperator ), false );
 
-        public AspectLinkerOptions? LinkerOptions { get; }
+        public IProperty? OverriddenProperty { get; set; }
 
-        public override MemberDeclarationSyntax InsertPositionNode
-            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
+        public override InsertPosition InsertPosition
+            => new(
+                InsertPositionRelation.Within,
+                (MemberDeclarationSyntax) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration().AssertNotNull() );
 
         public override DeclarationKind DeclarationKind => throw new NotImplementedException();
 
@@ -75,7 +77,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
-        public bool IsIndexer => this.Name == "Items";
+        public bool IsIndexer => string.Equals( this.Name, "Items", StringComparison.Ordinal );
+
+        public ExpressionSyntax? InitializerSyntax { get; set; }
 
         public PropertyBuilder(
             Advice parentAdvice,
@@ -84,23 +88,23 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             bool hasGetter,
             bool hasSetter,
             bool isAutoProperty,
-            bool hasInitOnlySetter,
-            AspectLinkerOptions? linkerOptions )
+            bool hasInitOnlySetter )
             : base( parentAdvice, targetType, name )
         {
             // TODO: Sanity checks.
 
-            this.LinkerOptions = linkerOptions;
+            Invariant.Assert( hasGetter || hasSetter );
+
             this.Type = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(object) );
 
             if ( hasGetter )
             {
-                this.Getter = new AccessorBuilder( this, MethodKind.PropertyGet );
+                this.GetMethod = new AccessorBuilder( this, MethodKind.PropertyGet );
             }
 
             if ( hasSetter )
             {
-                this.Setter = new AccessorBuilder( this, MethodKind.PropertySet );
+                this.SetMethod = new AccessorBuilder( this, MethodKind.PropertySet );
             }
 
             this.IsAutoPropertyOrField = isAutoProperty;
@@ -161,16 +165,18 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     Identifier( this.Name ),
                     GenerateAccessorList(),
                     null,
-                    null );
+                    this.InitializerSyntax != null
+                        ? EqualsValueClause( this.InitializerSyntax )
+                        : null,
+                    this.InitializerSyntax != null
+                        ? Token( SyntaxKind.SemicolonToken )
+                        : default );
 
-            return new[]
-            {
-                new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this )
-            };
+            return new[] { new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
 
             AccessorListSyntax GenerateAccessorList()
             {
-                switch (this.Getter, this.Setter)
+                switch (Getter: this.GetMethod, Setter: this.SetMethod)
                 {
                     case (not null, not null):
                         return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
@@ -190,9 +196,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 var tokens = new List<SyntaxToken>();
 
-                if ( this.Getter!.Accessibility != this.Accessibility )
+                if ( this.GetMethod!.Accessibility != this.Accessibility )
                 {
-                    this.Getter.Accessibility.AddTokens( tokens );
+                    this.GetMethod.Accessibility.AddTokens( tokens );
                 }
 
                 // TODO: Attributes.
@@ -204,7 +210,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                             Token( SyntaxKind.GetKeyword ),
                             this.IsAutoPropertyOrField
                                 ? null
-                                : Block( ReturnStatement( DefaultExpression( syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
+                                : Block(
+                                    ReturnStatement(
+                                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
+                                        DefaultExpression( syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ),
+                                        Token( SyntaxKind.SemicolonToken ) ) ),
                             null,
                             this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default )
                         .NormalizeWhitespace();
@@ -214,9 +224,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 var tokens = new List<SyntaxToken>();
 
-                if ( this.Setter!.Accessibility != this.Accessibility )
+                if ( this.SetMethod!.Accessibility != this.Accessibility )
                 {
-                    this.Setter.Accessibility.AddTokens( tokens );
+                    this.SetMethod.Accessibility.AddTokens( tokens );
                 }
 
                 return
@@ -233,21 +243,18 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             }
         }
 
-        [return: RunTimeOnly]
-        public PropertyInfo ToPropertyInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public IMethod? GetAccessor( MethodKind methodKind )
+            => methodKind switch
+            {
+                MethodKind.PropertyGet => this.GetMethod,
+                MethodKind.PropertySet => this.SetMethod,
+                _ => null
+            };
 
-        [return: RunTimeOnly]
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public PropertyInfo ToPropertyInfo() => throw new NotImplementedException();
 
-        public void SetExplicitInterfaceImplementation( IProperty interfaceProperty )
-        {
-            this.ExplicitInterfaceImplementations = new[] { interfaceProperty };
-        }
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
+
+        public void SetExplicitInterfaceImplementation( IProperty interfaceProperty ) => this.ExplicitInterfaceImplementations = new[] { interfaceProperty };
     }
 }

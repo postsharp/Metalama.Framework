@@ -20,6 +20,8 @@ using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
 
+#pragma warning disable CA1307 // Specify StringComparison for clarity
+
 namespace Caravela.Framework.Tests.UnitTests.DesignTime
 {
     public class PipelineIntegrationTests
@@ -297,7 +299,7 @@ Target.cs:
 
             // Build the project from the compile-time pipeline.
             using UnloadableCompileTimeDomain domain = new();
-            var compileTimeAspectPipeline = new CompileTimeAspectPipeline( projectOptions, domain, true );
+            var compileTimeAspectPipeline = new CompileTimeAspectPipeline( projectOptions, true, domain );
             DiagnosticList compileDiagnostics = new();
             Assert.True( compileTimeAspectPipeline.TryExecute( compileDiagnostics, compilation5, CancellationToken.None, out _, out _ ) );
 

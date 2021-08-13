@@ -22,12 +22,14 @@ namespace Caravela.Framework.Aspects
         /// Overrides the implementation of a method.
         /// </summary>
         /// <param name="method">The method to override.</param>
-        /// <param name="template">Name of a method in the aspect class whose implementation will be used as a template.
-        /// This property must be annotated with <see cref="TemplateAttribute"/>.</param>
+        /// <param name="templateSelector">Name of a method in the aspect class whose implementation will be used as a template.
+        ///     This property must be annotated with <see cref="TemplateAttribute"/>. To select a different templates according to the kind of target method
+        /// (such as async or iterator methods), use the constructor of the <see cref="MethodTemplateSelector"/> type. To specify a single
+        /// template for all methods, pass a string.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property
-        /// of the <see cref="meta"/> API.</param>
+        ///     of the <see cref="meta"/> API.</param>
         /// <seealso href="@overriding-members"/>
-        void OverrideMethod( IMethod method, string template, Dictionary<string, object?>? tags = null );
+        void OverrideMethod( IMethod method, in MethodTemplateSelector templateSelector, Dictionary<string, object?>? tags = null );
 
         /// <summary>
         /// Introduces a new method or overrides the implementation of the existing one.
@@ -59,7 +61,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="targetDeclaration">The field or property to override.</param>
         /// <param name="template">The name of a property of the aspect class, with a getter, a setter, or both, whose implementation will be used as a template.
         /// This property must be annotated with <see cref="TemplateAttribute"/>.</param>
-        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template property and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
         /// <seealso href="@overriding-members"/>
         void OverrideFieldOrProperty(
@@ -71,9 +73,12 @@ namespace Caravela.Framework.Aspects
         /// Overrides a field or property by specifying a method template for the getter, the setter, or both.
         /// </summary>
         /// <param name="targetDeclaration">The field or property to override.</param>
-        /// <param name="getTemplate">The name of the method of the aspect class whose implementation will be used as a template for the getter, or <c>null</c>
+        /// <param name="getTemplateSelector">The name of the method of the aspect class whose implementation will be used as a template for the getter, or <c>null</c>
         /// if the getter should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
-        /// be <c>T Get()</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.</param>
+        /// be <c>T Get()</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.
+        /// To select a different templates for iterator getters, use the constructor of the <see cref="GetterTemplateSelector"/> type. To specify a single
+        /// template for all properties, pass a string.
+        /// </param>
         /// <param name="setTemplate">The name of the method of the aspect class whose implementation will be used as a template for the getter, or <c>null</c>
         /// if the getter should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
         /// be <c>void Set(T value</c>  where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.</param>
@@ -82,16 +87,26 @@ namespace Caravela.Framework.Aspects
         /// <seealso href="@overriding-members"/>
         void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
-            string? getTemplate = null,
+            in GetterTemplateSelector getTemplateSelector = default,
             string? setTemplate = null,
             Dictionary<string, object?>? tags = null );
 
-        [Obsolete( "Not implemented." )]
+        /// <summary>
+        /// Introduces a field to the target type.
+        /// </summary>
+        /// <param name="targetType">The type into which the property must be introduced.</param>
+        /// <param name="name">Name of the introduced field.</param> 
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        /// field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
+        /// The default strategy is to fail with a compile-time error.</param>
+        /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
+        /// <seealso href="@introducing-members"/>
         IFieldBuilder IntroduceField(
             INamedType targetType,
+            string name,
             IntroductionScope scope = IntroductionScope.Default,
-            OverrideStrategy whenExists = OverrideStrategy.Default,
-            Dictionary<string, object?>? tags = null );
+            OverrideStrategy whenExists = OverrideStrategy.Default );
 
         /// <summary>
         /// Introduces a property to the target type, or overrides the implementation of an existing one, by specifying a property template.
@@ -103,11 +118,11 @@ namespace Caravela.Framework.Aspects
         /// this method.
         /// </param>
         /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
-        /// method. The default scope depends on the scope of the template method. If the method is static, the introduced method is static. However, if the
-        /// template method is non-static, then the introduced method copies of the scope of the target declaration of the aspect.</param>
+        /// property. The default scope depends on the scope of the template property. If the property is static, the introduced property is static. However, if the
+        /// template property is non-static, then the introduced property copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         /// The default strategy is to fail with a compile-time error.</param>
-        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template property and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
@@ -181,7 +196,7 @@ namespace Caravela.Framework.Aspects
         /// template event is non-static, then the introduced event copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when an event of the same name is already declared in the target type.
         /// The default strategy is to fail with a compile-time error.</param>
-        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <param name="tags">An arbitrary dictionary of tags passed to the template event and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IEventBuilder"/> that allows to change the name and the type of the event.</returns>
         /// <seealso href="@introducing-members"/>
@@ -231,7 +246,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="interfaceType">The type of the implemented interface.</param>
         /// <param name="whenExists">Determines the implementation strategy when the interface is already implemented by the target type.
         /// The default strategy is to fail with a compile-time error.</param>
-        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <param name="tags">An arbitrary dictionary of tags passed to templates and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
         /// <seealso href="@implementing-interfaces"/>
         void ImplementInterface(
@@ -247,7 +262,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="interfaceType">The type of the implemented interface.</param>
         /// <param name="whenExists">Determines the implementation strategy when the interface is already implemented by the target type.
         /// The default strategy is to fail with a compile-time error.</param>
-        /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        /// <param name="tags">An arbitrary dictionary of tags passed to templates and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
         /// <seealso href="@implementing-interfaces"/>
         void ImplementInterface(

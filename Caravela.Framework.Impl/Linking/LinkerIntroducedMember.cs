@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Linking
         public string LinkerNodeId { get; }
 
         public LinkerIntroducedMember( string linkerNodeId, MemberDeclarationSyntax linkerAnnotatedSyntax, IntroducedMember original )
-            : base( original.Introduction, linkerAnnotatedSyntax, original.AspectLayerId, original.Semantic, original.LinkerOptions, original.Declaration )
+            : base( original.Introduction, linkerAnnotatedSyntax, original.AspectLayerId, original.Semantic, original.Declaration )
         {
             this.LinkerNodeId = linkerNodeId;
         }

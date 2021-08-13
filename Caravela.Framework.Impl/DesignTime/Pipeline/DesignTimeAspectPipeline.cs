@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
     /// <summary>
     /// The design-time implementation of <see cref="AspectPipeline"/>.
     /// </summary>
-    internal class DesignTimeAspectPipeline : AspectPipeline
+    public class DesignTimeAspectPipeline : AspectPipeline
     {
         private readonly object _configureSync = new();
         private readonly CompilationChangeTracker _compilationChangeTracker = new();
@@ -43,13 +43,13 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         /// </summary>
         public object Sync { get; } = new();
 
-        public DesignTimeAspectPipelineStatus Status { get; private set; }
+        internal DesignTimeAspectPipelineStatus Status { get; private set; }
 
         // It's ok if we return an obsolete project in this case.
-        public IReadOnlyList<AspectClass>? AspectClasses => this._lastKnownConfiguration?.AspectClasses;
+        internal IReadOnlyList<AspectClass>? AspectClasses => this._lastKnownConfiguration?.AspectClasses;
 
         public DesignTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain, bool isTest )
-            : base( projectOptions, domain, AspectExecutionScenario.DesignTime, isTest )
+            : base( projectOptions, AspectExecutionScenario.DesignTime, isTest, domain )
         {
             if ( projectOptions.BuildTouchFile != null )
             {
@@ -117,7 +117,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 foreach ( var syntaxTree in compilation.SyntaxTrees )
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    
+
                     if ( CompileTimeCodeDetector.HasCompileTimeCode( syntaxTree.GetRoot() ) )
                     {
                         newCompileTimeSyntaxTrees = newCompileTimeSyntaxTrees.Add( syntaxTree.FilePath, syntaxTree );
@@ -132,7 +132,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 foreach ( var syntaxTree in compilation.SyntaxTrees )
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    
+
                     if ( this._compileTimeSyntaxTrees.ContainsKey( syntaxTree.FilePath ) )
                     {
                         trees.Add( syntaxTree );
@@ -155,7 +155,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         /// Invalidates the cache given a new <see cref="Compilation"/> and returns the set of changes between
         /// the previous compilation and the new one.
         /// </summary>
-        public CompilationChange InvalidateCache( Compilation newCompilation, CancellationToken cancellationToken )
+        internal CompilationChange InvalidateCache( Compilation newCompilation, CancellationToken cancellationToken )
         {
             lock ( this._configureSync )
             {
