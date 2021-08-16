@@ -20,8 +20,12 @@ This repository contains common development, build and publishig scripts and con
 
 - GIT for Windows with symlink support enabled. This is set in the installation wizzard.
 > Version 2.32.0 fails to support GIT subtree.
+> 
+> Issue: https://github.com/git-for-windows/git/issues/3260
+> 
+> Version 2.31.0: https://github.com/git-for-windows/git/releases/download/v2.31.0.windows.1/Git-2.31.0-64-bit.exe
 - Windows Developer Mode enabled or elevated shell. (To create symlinks.)
-> New-Item CMD-let requires elevation to create symlinks even with Windows Developer Mode enabled.
+> New-Item CMD-let in PowerShell requires elevation to create symlinks even with Windows Developer Mode enabled.
 
 ## Installation
 

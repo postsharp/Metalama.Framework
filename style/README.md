@@ -38,8 +38,10 @@ The code quality configuration is configured in the following files:
 Create `.engineering-local\Cleanup.ps1` file. The content should look like this:
 
 ```
-.engineering/style/Cleanup.ps1 Caravela.sln
+.engineering/style/Cleanup.ps1 'Caravela.sln'
 ```
+
+The second parameter is optional and may contain any parameter applicable to the cleanup script.
 
 ### Usage
 

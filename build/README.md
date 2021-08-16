@@ -7,44 +7,33 @@ Make sure you have read and understood [PostSharp Engineering](../README.md) bef
 - [PostSharp Engineering: Build Features](#postsharp-engineering-build-features)
   - [Table of contents](#table-of-contents)
   - [Executable scripts](#executable-scripts)
-    - [CreateLocalPackages.ps1](#createlocalpackagesps1)
-    - [RestoreRelease.ps1](#restorereleaseps1)
+    - [Build.ps1](#buildps1)
     - [Kill.ps1](#killps1)
-    - [RestoreRelease.ps1](#restorereleaseps1-1)
   - [Imported scripts](#imported-scripts)
-    - [AssemblyMetadata.props and AssemblyMetadata.targets](#assemblymetadataprops-and-assemblymetadatatargets)
-    - [CompilerOptions.props](#compileroptionsprops)
-    - [Engineering.Directories.props](#engineeringdirectoriesprops)
-    - [Engineering.Versions.props](#engineeringversionsprops)
+    - [AssemblyMetadata.targets](#assemblymetadatatargets)
+    - [BuildOptions.props](#buildoptionsprops)
     - [SourceLink.props](#sourcelinkprops)
   - [NuGet packages metadata](#nuget-packages-metadata)
     - [Installation and configuration](#installation-and-configuration)
   - [Versioning](#versioning)
     - [Installation and configuration](#installation-and-configuration-1)
     - [Usage](#usage)
-      - [Product package version and maturity configuration](#product-package-version-and-maturity-configuration)
+      - [Product package version and package version suffix configuration](#product-package-version-and-package-version-suffix-configuration)
       - [Package dependencies versions configuration](#package-dependencies-versions-configuration)
-      - [Creating local development packages](#creating-local-development-packages)
+      - [Local build and testing](#local-build-and-testing)
+      - [Local package referencing](#local-package-referencing)
   - [Continuous integration](#continuous-integration)
     - [Instalation](#instalation)
 
 ## Executable scripts
 
-### CreateLocalPackages.ps1
+### Build.ps1
 
-Creates a new set of nuget packages for local use. See [Versioning](#versioning) for details on usage of this feature.
-
-### RestoreRelease.ps1
-
-Used by CI pipeline. See [Continuous integration](#continuous-integration) for details.
+This is the main build script providing support for build, packaging and testing, both local and withing a CI/CD pipeline.
 
 ### Kill.ps1
 
 Kills all processes which might hold any files from the repository.
-
-### RestoreRelease.ps1
-
-TODO: Unused?
 
 ## Imported scripts
 
@@ -52,21 +41,13 @@ The scripts listed below are meant to be imported in
 - `Directory.Build.props` (*.props)
 - `Directory.Build.targets` (*.targets)
 
-### AssemblyMetadata.props and AssemblyMetadata.targets
+### AssemblyMetadata.targets
 
-Add package versions to assembly metadata.
+Adds package versions to assembly metadata.
 
-### CompilerOptions.props
+### BuildOptions.props
 
-Sets the compiler options like language version or nullability.
-
-### Engineering.Directories.props
-
-Sets the common directories like the output path.
-
-### Engineering.Versions.props
-
-Manages versioning. See [Versioning](#versioning) for details on usage of this feature.
+Sets the compiler options like language version, nullability and other build options like output path.
 
 ### SourceLink.props
 
@@ -74,7 +55,7 @@ Enables SourceLink support.
 
 ## NuGet packages metadata
 
-This section describes centralize NuGet packages metadata management.
+This section describes centralized NuGet packages metadata management.
 
 ### Installation and configuration
 
@@ -119,46 +100,68 @@ This section describes centralized version management.
 
 ### Installation and configuration
 
-1. Add `LocalBuildId.props` to `.gitignore`.
+In this how-to, we use the name `[Product]` as a placeholder for the name of the product contained in a specific repository containing the `.engineering` subtree.
 
-2. Create `.engineering-local\Versions.props` file. The content should look like:
+1. Add `.engineering-local\[Product]Version.props` to `.gitignore`.
+
+2. Create `.engineering-local\MainVersion.props` file. The content should look like:
+
+```
+<Project>
+    <PropertyGroup>
+        <ProductName>[Product]</ProductName>
+        <MainVersion>0.3.6</MainVersion>
+        <PackageVersionSuffix>-preview</PackageVersionSuffix>
+    </PropertyGroup>
+</Project>
+```
+
+3. Create `.engineering-local\Versions.props` file. The content should look like:
 
 ```
 <Project>
 
-  <!-- The version of the product produced by this repository. -->
-  <PropertyGroup>
-    <ProductMainVersion>1.0.0</ProductMainVersion>
-    <!-- Empty for RTM. -->
-    <ProductMaturity>preview</ProductMaturity>
-  </PropertyGroup>
+    <!-- Normally you should call build.ps1 -local -prepare before opening the project in an IDE, and it creates [Product]Version.props. -->
+    <Import Project="[Product]Version.props" Condition="Exists('[Product]Version.props')" />
 
-  <!-- Versions of dependencies -->
-  <PropertyGroup>
-    <SystemCollectionsImmutableVersion>5.0.0</SystemCollectionsImmutableVersion>
-  </PropertyGroup>
+    <!-- However, if you don't, default values are used. -->
+    <Import Project="MainVersion.props" Condition="!Exists('[Product]Version.props')" />
+    
+    <PropertyGroup Condition="!Exists('[Product]Version.props')">
+        <[Product]Version>$(MainVersion)$(PackageVersionSuffix)</[Product]Version>
+        <[Product]AssemblyVersion>$(MainVersion)</[Product]AssemblyVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <AssemblyVersion>$([Product]AssemblyVersion)</AssemblyVersion>
+        <Version>$([Product]Version)</Version>
+    </PropertyGroup>
+
+    <!-- Versions of dependencies -->
+    <PropertyGroup>
+        <RoslynVersion>3.8.0</RoslynVersion>
+        <CaravelaCompilerVersion>3.8.12-preview</CaravelaCompilerVersion>
+        <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
+    </PropertyGroup>
 
 </Project>
 ```
 
-3. Add the following imports to `Directory.Build.props`:
+4. Add the following import to `Directory.Build.props`:
 
 ```
-  <!-- LocalBuildId.props is created by CreateLocalPackages.ps1. It is used on development environments only (not on build servers) -->
-  <Import Project="LocalBuildId.props" Condition="Exists('LocalBuildId.props')" />
   <Import Project=".engineering-local\Versions.props" />
-  <Import Project=".engineering\build\Engineering.Versions.props" />
 ```
 
 ### Usage
 
-#### Product package version and maturity configuration
+#### Product package version and package version suffix configuration
 
-The product package version and maturity configuration is centralized in the `.engineering-local\Versions.props` script via the `ProductMainVersion` and `ProductMaturity` properties. For RTM products, leave the `ProductMaturity` property value empty.
+The product package version and package version suffix configuration is centralized in the `.engineering-local\MainVersion.props` script via the `MainVersion` and `PackageVersionSuffix` properties, respectively. For RTM products, leave the `PackageVersionSuffix` property value empty.
 
 #### Package dependencies versions configuration
 
-Package dependecies vesrions configuration is also centralized in the `.engineering-local\Versions.props` script. Each dependency version is configured in a property named `<[DependencyName]Version>`, eg. `<SystemCollectionsImmutableVersion>`.
+Package dependecies vesrions configuration is centralized in the `.engineering-local\Versions.props` script. Each dependency version is configured in a property named `<[DependencyName]Version>`, eg. `<SystemCollectionsImmutableVersion>`.
 
 This property value is then available in all MSBuild project files in the repository and can be used in the `PackageReference` items. For example:
 
@@ -168,11 +171,33 @@ This property value is then available in all MSBuild project files in the reposi
 </ItemGroup>
 ```
 
-#### Creating local development packages
+#### Local build and testing
 
-To create packages to be used locally, call `& .engineering\build\CreateLocalPackages.ps1` from PowerShell.
+See the initial comments in the `.engineering\build\Build.ps1` script for details.
 
-The script generates a version suffix in `LocalBuildId.props` file and creates NuGet package(s) in `artifacts\bin\Debug` directory. This directory can then be used as a NuGet package repository in other projects.
+#### Local package referencing
+
+Local NuGet packages creating using the `.engineering\build\Build.ps1` script can be referenced in other repositories using the following steps:
+
+1. Add the following import to `Directory.Build.props`.
+
+```
+<Import Project="[PathToReferencedRepo]\[ReferencedProduct]Version.props" Condition="Exists('.local')"/>
+```
+
+> TODO: Should we generate the `.local` file?
+
+2. In the dependencies version, set the default version of the referenced package:
+
+```
+<[ReferencedProduct]Version Condition="'$([ReferencedProduct]Version)'==''">0.3.6-preview</[ReferencedProduct]Version>
+```
+
+3. Add a package reference to projects where required:
+
+```
+<PackageReference Include="[ReferencedPackage]" Version="$([ReferencedProduct]Version)" />
+```
 
 ## Continuous integration
 
@@ -204,3 +229,5 @@ Artifact paths:
 ```
 artifacts\bin\Debug\*.nupkg => artifacts/bin/Debug
 ```
+
+> TODO: Should we switch to the build.ps1 script?

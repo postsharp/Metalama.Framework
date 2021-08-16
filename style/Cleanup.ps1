@@ -8,6 +8,8 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
     throw "This script has to run in a GIT repository root!"
 }
 
+"Cleaning ${Solution} ${Params}"
+
 & dotnet tool install --tool-path tools jetbrains.resharper.globaltools --version 2021.1.1
 
-& ./tools/jb cleanupcode -p=Custom $Solution $Params --disable-settings-layers:"GlobalAll;GlobalPerProduct;SolutionPersonal;ProjectPersonal"
+& ./tools/jb cleanupcode -p=Custom $Solution $Params --toolset=16.0 --disable-settings-layers:"GlobalAll;GlobalPerProduct;SolutionPersonal;ProjectPersonal"

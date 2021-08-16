@@ -1,9 +1,0 @@
-<Project>
-
-    <!-- C# Compiler options-->
-    <PropertyGroup>
-        <LangVersion>latest</LangVersion>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-
-</Project>
