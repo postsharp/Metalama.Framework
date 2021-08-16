@@ -6,7 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## 2021-08-13
 ### Added
-- `.engineering/build/Build.ps1`. See the script initial comment for details.
+- `.engineering/build/Build.ps1`. Actions required:
+  - Remove the `LocalBuildId.props` from `Directory.Build.props`.
+  - Remove the `.engineering\build\Engineering.Versions.props` from `Directory.Build.props`.
+  - Remove the `.engineering\build\Engineering.Directories.props` from `Directory.Build.props`.
 
 ## 2021-08-12
 ### Changed
