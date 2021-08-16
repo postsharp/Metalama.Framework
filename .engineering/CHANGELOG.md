@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 2021-08-13
+### Added
+- `.engineering/build/Build.ps1`. See the script initial comment for details.
+
 ## 2021-08-12
 ### Changed
 - `.engineering/build/AssemblyMetadata.props` merged to `.engineering/build/AssemblyMetadata.targets`. Remove the `.engineering/build/AssemblyMetadata.props` from `Directory.Build.props` if present.
