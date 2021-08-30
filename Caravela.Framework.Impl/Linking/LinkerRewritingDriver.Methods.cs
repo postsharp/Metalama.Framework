@@ -36,6 +36,12 @@ namespace Caravela.Framework.Impl.Linking
                     members.Add( GetOriginalImplMethod( methodDeclaration, symbol ) );
                 }
 
+                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
+                    && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                {
+                    members.Add( GetEmptyImplMethod( methodDeclaration, symbol ) );
+                }
+
                 return members;
             }
             else if ( this._introductionRegistry.IsOverride( symbol ) )
@@ -68,6 +74,21 @@ namespace Caravela.Framework.Impl.Linking
 
         private static MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
         {
+            return GetSpecialImplMethod( method, method.Body, method.ExpressionBody, symbol, GetOriginalImplMemberName( symbol ) );
+        }
+
+        private static MemberDeclarationSyntax GetEmptyImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
+        {
+            var emptyBody =
+                symbol.ReturnsVoid
+                ? Block()
+                : Block( ReturnStatement( DefaultExpression( method.ReturnType ) ) );
+
+            return GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
+        }
+
+        private static MemberDeclarationSyntax GetSpecialImplMethod( MethodDeclarationSyntax method, BlockSyntax? body, ArrowExpressionClauseSyntax? expressionBody, IMethodSymbol symbol, string name )
+        {
             return
                 MethodDeclaration(
                         List<AttributeListSyntax>(),
@@ -76,7 +97,7 @@ namespace Caravela.Framework.Impl.Linking
                             : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
                         method.ReturnType,
                         null,
-                        Identifier( GetOriginalImplMemberName( symbol ) ),
+                        Identifier( name ),
                         method.TypeParameterList,
                         method.ParameterList,
                         method.ConstraintClauses,
@@ -85,8 +106,8 @@ namespace Caravela.Framework.Impl.Linking
                     .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
-                    .WithBody( method.Body )
-                    .WithExpressionBody( method.ExpressionBody )
+                    .WithBody( body )
+                    .WithExpressionBody( expressionBody )
                     .AddGeneratedCodeAnnotation();
         }
     }

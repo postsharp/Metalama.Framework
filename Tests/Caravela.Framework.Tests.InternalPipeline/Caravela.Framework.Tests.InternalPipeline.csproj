@@ -79,9 +79,9 @@
 
   <ItemGroup>
     <None Include="Tests\Linker\Methods\Linking\LocalMember_ThisExpression - Copy.t.cs">
-      <DependentUpon>LocalMember_ThisExpression.t.cs</DependentUpon>
+      <DependentUpon>OverriddenLocalMethod.t.cs</DependentUpon>
     </None>
-    <None Include="Tests\Linker\Methods\Linking\LocalMember_ThisExpression.t.cs" />
+    <None Include="Tests\Linker\Methods\Linking\OverriddenLocalMethod.t.cs" />
   </ItemGroup>
   
 </Project>

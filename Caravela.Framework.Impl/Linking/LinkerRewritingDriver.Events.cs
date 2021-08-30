@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 var lastOverride = (IEventSymbol) this._introductionRegistry.GetLastOverride( symbol );
 
-                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     members.Add( GetTrampolineEvent( eventDeclaration, symbol ) );
                 }
@@ -42,6 +42,12 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         members.Add( GetOriginalImplEvent( eventDeclaration, symbol ) );
                     }
+                }
+
+                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
+                    && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                {
+                    members.Add( GetEmptyImplEvent( eventDeclaration, symbol ) );
                 }
 
                 return members;
@@ -147,20 +153,30 @@ namespace Caravela.Framework.Impl.Linking
 
         private static MemberDeclarationSyntax GetOriginalImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )
         {
+            return GetSpecialImplEvent( @event.Type, @event.AccessorList.AssertNotNull(), symbol, GetOriginalImplMemberName( symbol ) );
+        }
+
+        private static MemberDeclarationSyntax GetEmptyImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )
+        {
+            return GetSpecialImplEvent( @event.Type, @event.AccessorList.AssertNotNull(), symbol, GetEmptyImplMemberName( symbol ) );
+        }
+
+        private static MemberDeclarationSyntax GetSpecialImplEvent( TypeSyntax eventType, AccessorListSyntax accessorList, IEventSymbol symbol, string name )
+        {
             return
                 EventDeclaration(
                         List<AttributeListSyntax>(),
                         symbol.IsStatic
                             ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
                             : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                        @event.Type,
+                        eventType,
                         null,
-                        Identifier( GetOriginalImplMemberName( symbol ) ),
+                        Identifier( name ),
                         null )
                     .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
-                    .WithAccessorList( @event.AccessorList )
+                    .WithAccessorList( accessorList )
                     .AddGeneratedCodeAnnotation();
         }
     }

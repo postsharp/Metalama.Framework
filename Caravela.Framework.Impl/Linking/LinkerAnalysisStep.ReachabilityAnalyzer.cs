@@ -85,6 +85,9 @@ namespace Caravela.Framework.Impl.Linking
                             DFS( new IntermediateSymbolSemantic( @event.RemoveMethod.AssertNotNull(), current.Kind ) );
                             break;
 
+                        case IFieldSymbol field:
+                            break;
+
                         default:
                             throw new AssertionFailedException();
                     }

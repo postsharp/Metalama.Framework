@@ -89,8 +89,7 @@ namespace Caravela.Framework.Impl.Linking
                     case MethodKind.Ordinary:
                     case MethodKind.ExplicitInterfaceImplementation:
                         if ( semantic.Symbol.GetDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotInlineable )
-                            || semantic.Kind == IntermediateSymbolSemanticKind.Final
-                            || semantic.Kind == IntermediateSymbolSemanticKind.Base )
+                            || semantic.Kind == IntermediateSymbolSemanticKind.Final )
                         {
                             inliningSpecification = null;
                             return false;
@@ -139,8 +138,7 @@ namespace Caravela.Framework.Impl.Linking
             private bool TryInlineProperty( IntermediateSymbolSemantic<IPropertySymbol> semantic, [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )
             {
                 if ( semantic.Symbol.GetDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotInlineable )
-                    || semantic.Kind == IntermediateSymbolSemanticKind.Final
-                    || semantic.Kind == IntermediateSymbolSemanticKind.Base )
+                    || semantic.Kind == IntermediateSymbolSemanticKind.Final )
                 {
                     inliningSpecification = null;
                     return false;
@@ -173,10 +171,10 @@ namespace Caravela.Framework.Impl.Linking
 
                 Inliner? getterInliner = null;
                 Inliner? setterInliner = null;
-                if ( (semantic.Symbol.GetMethod == null || (getAspectReferences.Count != 0 && this.TryGetInliner( getAspectReferences[0], out getterInliner )))
-                    && (semantic.Symbol.SetMethod == null || (setAspectReferences.Count != 0 && this.TryGetInliner( setAspectReferences[0], out setterInliner ))) )
+                if ( (semantic.Symbol.GetMethod == null || getAspectReferences.Count == 0 || this.TryGetInliner( getAspectReferences[0], out getterInliner ))
+                    && (semantic.Symbol.SetMethod == null || setAspectReferences.Count == 0 || this.TryGetInliner( setAspectReferences[0], out setterInliner )) )
                 {
-                    if (getterInliner == null)
+                    if ( getterInliner == null )
                     {
                         inliningSpecification = new SymbolInliningSpecification(
                             semantic,
@@ -206,8 +204,7 @@ namespace Caravela.Framework.Impl.Linking
             private bool TryInlineEvent( IntermediateSymbolSemantic<IEventSymbol> semantic, [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )
             {
                 if ( semantic.Symbol.GetDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotInlineable )
-                    || semantic.Kind == IntermediateSymbolSemanticKind.Final
-                    || semantic.Kind == IntermediateSymbolSemanticKind.Base )
+                    || semantic.Kind == IntermediateSymbolSemanticKind.Final )
                 {
                     inliningSpecification = null;
                     return false;
@@ -243,13 +240,25 @@ namespace Caravela.Framework.Impl.Linking
                     return false;
                 }
 
-                if ( addAspectReferences.Count == 0 && this.TryGetInliner( addAspectReferences[0], out var adderInliner )
-                    && removeAspectReferences.Count == 0 && this.TryGetInliner( removeAspectReferences[0], out var removerInliner ) )
+                Inliner? adderInliner = null;
+                Inliner? removerInliner = null;
+
+                if ( ( addAspectReferences.Count == 0 || this.TryGetInliner( addAspectReferences[0], out adderInliner ) )
+                    && ( removeAspectReferences.Count == 0 || this.TryGetInliner( removeAspectReferences[0], out removerInliner ) ) )
                 {
-                    inliningSpecification = new SymbolInliningSpecification(
-                        semantic,
-                        new KeyValuePair<ResolvedAspectReference, Inliner>( addAspectReferences[0], adderInliner ),
-                        new KeyValuePair<ResolvedAspectReference, Inliner>( removeAspectReferences[0], removerInliner ) );
+                    var selectedInliners = new List<KeyValuePair<ResolvedAspectReference, Inliner>>();
+
+                    if (adderInliner != null)
+                    {
+                        selectedInliners.Add( new(addAspectReferences[0], adderInliner ) );
+                    }
+
+                    if ( removerInliner != null )
+                    {
+                        selectedInliners.Add( new( removeAspectReferences[0], removerInliner ) );
+                    }
+
+                    inliningSpecification = new SymbolInliningSpecification( semantic, selectedInliners.ToArray() );
 
                     return true;
                 }

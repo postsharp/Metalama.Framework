@@ -45,6 +45,12 @@ namespace Caravela.Framework.Impl.Linking
                     members.Add( GetOriginalImplProperty( propertyDeclaration, symbol ) );
                 }
 
+                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
+                    && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                {
+                    members.Add( GetEmptyImplProperty( propertyDeclaration, symbol ) );
+                }
+
                 return members;
             }
             else if ( this._introductionRegistry.IsOverride( symbol ) )
@@ -192,20 +198,53 @@ namespace Caravela.Framework.Impl.Linking
                                     }.Where( a => a != null )
                                     .AssertNoneNull() ) )
                         .NormalizeWhitespace()
-                    : property.AccessorList;
+                    : property.AccessorList.AssertNotNull();
 
             var initializer =
                 property.Initializer;
 
+            return GetSpecialImplProperty( property.Type, accessorList, initializer, symbol, GetOriginalImplMemberName( symbol ) );
+        }
+
+        private static MemberDeclarationSyntax GetEmptyImplProperty( PropertyDeclarationSyntax property, IPropertySymbol symbol )
+        {
+            var accessorList =
+                IsAutoPropertyDeclaration( property )
+                    ? AccessorList(
+                            List(
+                                new[]
+                                    {
+                                        symbol.GetMethod != null
+                                            ? AccessorDeclaration(
+                                                SyntaxKind.GetAccessorDeclaration,
+                                                List<AttributeListSyntax>(),
+                                                TokenList(),
+                                                ArrowExpressionClause( DefaultExpression( property.Type ) ) )
+                                            : null,
+                                        symbol.SetMethod != null
+                                            ? AccessorDeclaration(
+                                                SyntaxKind.SetAccessorDeclaration,
+                                                Block() )
+                                            : null
+                                    }.Where( a => a != null )
+                                    .AssertNoneNull() ) )
+                        .NormalizeWhitespace()
+                    : property.AccessorList.AssertNotNull();
+
+            return GetSpecialImplProperty( property.Type, accessorList, null, symbol, GetEmptyImplMemberName( symbol ) );
+        }
+
+        private static MemberDeclarationSyntax GetSpecialImplProperty( TypeSyntax propertyType, AccessorListSyntax accessorList, EqualsValueClauseSyntax? initializer, IPropertySymbol symbol, string name )
+        {
             return
                 PropertyDeclaration(
                         List<AttributeListSyntax>(),
                         symbol.IsStatic
                             ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
                             : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                        property.Type,
+                        propertyType,
                         null,
-                        Identifier( GetOriginalImplMemberName( symbol ) ),
+                        Identifier( name ),
                         null,
                         null,
                         null )

@@ -72,7 +72,7 @@ namespace Caravela.Framework.Impl.Linking
             ISymbol referencedSymbol,
             ExpressionSyntax expression,
             AspectReferenceSpecification referenceSpecification )
-        {            
+        {
             // Check whether we are referencing explicit interface implementation.
             if ( (!SymbolEqualityComparer.Default.Equals( containingSymbol.ContainingType, referencedSymbol.ContainingType )
                   && referencedSymbol.ContainingType.TypeKind == TypeKind.Interface)
@@ -165,8 +165,30 @@ namespace Caravela.Framework.Impl.Linking
                     throw new AssertionFailedException();
             }
 
+            if ( referencedSymbol is IFieldSymbol field )
+            {
+                // Field symbols are resolved to themselves (this may be temporary).
+                var fieldSemantic =
+                    targetMemberIntroduction == null
+                    ? IntermediateSymbolSemanticKind.Default
+                    : resolvedIndex < targetMemberIntroductionIndex
+                        ? IntermediateSymbolSemanticKind.Base
+                        : IntermediateSymbolSemanticKind.Default;
+
+                return new ResolvedAspectReference(
+                    containingSymbol,
+                    referencedSymbol,
+                    new IntermediateSymbolSemantic<IFieldSymbol>( field, fieldSemantic ),
+                    expression,
+                    referenceSpecification );
+            }
+
             // At this point resolvedIndex should be 0, this._orderedLayers.Count - 1 or be equal to index of one of the overrides.
-            Invariant.Assert( resolvedIndex == 0 || resolvedIndex == this._orderedLayers.Count - 1 || overrideIndices.Any( x => x.Index == resolvedIndex ) );
+            Invariant.Assert( 
+                resolvedIndex == 0 
+                || resolvedIndex == this._orderedLayers.Count - 1 
+                || overrideIndices.Any( x => x.Index == resolvedIndex ) 
+                || ( targetMemberIntroductionIndex.HasValue && resolvedIndex == targetMemberIntroductionIndex.Value ) );
 
             if ( resolvedIndex == 0)
             {

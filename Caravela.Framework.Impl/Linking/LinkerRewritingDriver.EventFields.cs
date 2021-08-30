@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 members.Add( GetLinkedDeclaration() );
 
-                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     members.Add( GetTrampolineEvent( eventFieldDeclaration, symbol ) );
                 }
@@ -38,6 +38,12 @@ namespace Caravela.Framework.Impl.Linking
                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     members.Add( GetOriginalImplEventField( eventFieldDeclaration.Declaration.Type, symbol ) );
+                }
+
+                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
+                    && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                {
+                    members.Add( GetEmptyImplEventField( eventFieldDeclaration.Declaration.Type, symbol ) );
                 }
 
                 return members;
@@ -93,28 +99,32 @@ namespace Caravela.Framework.Impl.Linking
 
         private static MemberDeclarationSyntax GetOriginalImplEventField( TypeSyntax eventType, IEventSymbol symbol )
         {
-            return
-                EventDeclaration(
-                        List<AttributeListSyntax>(),
-                        symbol.IsStatic
-                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                        eventType,
-                        null,
-                        Identifier( GetOriginalImplMemberName( symbol ) ),
-                        AccessorList(
-                            List(
-                                new[]
-                                {
-                                    AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull() ) ),
-                                    AccessorDeclaration(
-                                        SyntaxKind.RemoveAccessorDeclaration,
-                                        GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) )
-                                } ) ) )
-                    .NormalizeWhitespace()
-                    .WithLeadingTrivia( ElasticLineFeed )
-                    .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
-                    .AddGeneratedCodeAnnotation();
+            var accessorList =
+                AccessorList(
+                    List(
+                        new[]
+                        {
+                            AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull() ) ),
+                            AccessorDeclaration(
+                                SyntaxKind.RemoveAccessorDeclaration,
+                                GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) )
+                        } ) );
+
+            return GetSpecialImplEvent( eventType, accessorList, symbol, GetOriginalImplMemberName( symbol ) );
+        }
+
+        private static MemberDeclarationSyntax GetEmptyImplEventField( TypeSyntax eventType, IEventSymbol symbol )
+        {
+            var accessorList =
+                AccessorList(
+                    List(
+                        new[]
+                        {
+                            AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, Block() ),
+                            AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, Block() )
+                        } ) );
+
+            return GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ) );
         }
     }
 }

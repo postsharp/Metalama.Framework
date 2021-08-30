@@ -480,7 +480,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 // If something is resolved to the last override, we will point to the target declaration instead.
                 targetSymbol = aspectReference.OriginalSymbol;
-                targetSemanticKind = IntermediateSymbolSemanticKind.Default;
+                targetSemanticKind = IntermediateSymbolSemanticKind.Final;
             }
 
             // Determine the target name. Specifically, handle case when the resolved symbol points to the original implementation.
@@ -527,10 +527,13 @@ namespace Caravela.Framework.Impl.Linking
                         if ( targetSymbol.IsStatic )
                         {
                             // Static member access where the target is a different type.
-                            return MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
-                                IdentifierName( targetMemberName ) );
+                            return 
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
+                                    IdentifierName( targetMemberName ) )
+                                .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
+                                .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
                         }
                         else
                         {
@@ -546,10 +549,13 @@ namespace Caravela.Framework.Impl.Linking
                                     case IdentifierNameSyntax:
                                     case BaseExpressionSyntax:
                                     case ThisExpressionSyntax:
-                                        return MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
-                                            BaseExpression(),
-                                            IdentifierName( targetMemberName ) );
+                                        return 
+                                            MemberAccessExpression(
+                                                SyntaxKind.SimpleMemberAccessExpression,
+                                                BaseExpression(),
+                                                IdentifierName( targetMemberName ) )
+                                            .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
+                                            .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
 
                                     default:
                                         var aspectInstance = this.ResolveAspectInstance( aspectReference );

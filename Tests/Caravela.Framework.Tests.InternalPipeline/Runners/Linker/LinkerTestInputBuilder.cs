@@ -73,13 +73,16 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
 
             FinalizeTransformationFakes( this._rewriter, (CSharpCompilation) inputCompilation.Compilation, initialCompilationModel );
 
-            var inputCompilationModel = initialCompilationModel.WithTransformations( this._rewriter.ObservableTransformations );
+            var orderedLayers = this._rewriter.OrderedAspectLayers.Select( ( al, i ) => new OrderedAspectLayer( i, al.AspectName.AssertNotNull(), al.LayerName ) ).ToArray();
+            var layerOrderLookup = orderedLayers.ToDictionary( x => x.AspectLayerId, x => x.Order );
+
+            var inputCompilationModel = initialCompilationModel.WithTransformations( this._rewriter.ObservableTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList() );
 
             var linkerInput = new AspectLinkerInput(
                 inputCompilation,
                 inputCompilationModel,
-                this._rewriter.NonObservableTransformations,
-                this._rewriter.OrderedAspectLayers.Select( ( al, i ) => new OrderedAspectLayer( i, al.AspectName, al.LayerName ) ).ToArray(),
+                this._rewriter.NonObservableTransformations.OrderBy(x => layerOrderLookup[x.Advice.AspectLayerId]).ToList(),
+                orderedLayers,
                 ArraySegment<ScopedSuppression>.Empty,
                 null! );
 
