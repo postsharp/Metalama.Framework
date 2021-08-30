@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.Pseudo;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -16,16 +17,16 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class FieldBuilder : MemberBuilder, IFieldBuilder
+    internal class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldInternal
     {
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
         public IType Type { get; set; }
 
         [Memo]
-        public IMethod? Getter => new PseudoGetter( this );
+        public IMethod? GetMethod => new PseudoGetter( this );
 
-        public IMethod? Setter => new PseudoSetter( this );
+        public IMethod? SetMethod => new PseudoSetter( this );
 
         public override bool IsExplicitInterfaceImplementation => false;
 

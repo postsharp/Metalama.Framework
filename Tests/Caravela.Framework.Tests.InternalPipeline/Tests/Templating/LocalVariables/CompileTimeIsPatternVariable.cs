@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.Compile
         [TestTemplate]
         dynamic? Template()
         {
-            if ( meta.Parameters is IEnumerable disposable )
+            if ( meta.Target.Parameters is IEnumerable disposable )
             {
                 disposable.GetEnumerator();
             }

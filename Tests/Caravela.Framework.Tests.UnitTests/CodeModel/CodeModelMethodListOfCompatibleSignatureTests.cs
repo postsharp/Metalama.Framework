@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using System;
+using System.Linq;
 using Xunit;
 
 // ReSharper disable StringLiteralTypo
@@ -134,19 +135,19 @@ class C
 
             var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: Array.Empty<IType>() );
             Assert.Equal( new[] { type.Methods[0] }, matchedMethods1 );
-            var matchedMethods2 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: new[] { intType } );
+            var matchedMethods2 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: new[] { intType } ).ToArray();
             Assert.Equal( new[] { type.Methods[1], type.Methods[2] }, matchedMethods2 );
-            var matchedMethods3 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: new[] { objectType } );
+            var matchedMethods3 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: new[] { objectType } ).ToArray();
             Assert.Equal( new[] { type.Methods[2] }, matchedMethods3 );
-            var matchedMethods4 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: new[] { intType, intType } );
+            var matchedMethods4 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: new[] { intType, intType } ).ToArray();
             Assert.Equal( new[] { type.Methods[3], type.Methods[4] }, matchedMethods4 );
-            var matchedMethods5 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: new[] { objectType, objectType } );
+            var matchedMethods5 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: new[] { objectType, objectType } ).ToArray();
             Assert.Equal( new[] { type.Methods[4] }, matchedMethods5 );
-            var matchedMethods6 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: new[] { intType, objectType } );
+            var matchedMethods6 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: new[] { intType, objectType } ).ToArray();
             Assert.Equal( new[] { type.Methods[4] }, matchedMethods6 );
-            var matchedMethods7 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: new[] { objectType, intType } );
+            var matchedMethods7 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: new[] { objectType, intType } ).ToArray();
             Assert.Equal( new[] { type.Methods[4] }, matchedMethods7 );
-            var matchedMethods8 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: new[] { objectType, objectType, objectType } );
+            var matchedMethods8 = type.Methods.OfCompatibleSignature( "Foo", argumentTypes: new[] { objectType, objectType, objectType } ).ToArray();
             Assert.Equal( Array.Empty<IMethod>(), matchedMethods8 );
         }
 
@@ -242,15 +243,15 @@ class C
             var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes[0];
 
-            var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", 0, Array.Empty<IType>() );
+            var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", 0, Array.Empty<IType>() ).ToArray();
             Assert.Equal( new[] { type.Methods[0] }, matchedMethods1 );
-            var matchedMethods2 = type.Methods.OfCompatibleSignature( "Foo", 0, new[] { typeof(int) } );
+            var matchedMethods2 = type.Methods.OfCompatibleSignature( "Foo", 0, new[] { typeof(int) } ).ToArray();
             Assert.Equal( new[] { type.Methods[1], type.Methods[2] }, matchedMethods2 );
-            var matchedMethods3 = type.Methods.OfCompatibleSignature( "Foo", 0, new[] { typeof(object) } );
+            var matchedMethods3 = type.Methods.OfCompatibleSignature( "Foo", 0, new[] { typeof(object) } ).ToArray();
             Assert.Equal( new[] { type.Methods[2] }, matchedMethods3 );
-            var matchedMethods4 = type.Methods.OfCompatibleSignature( "Foo", 0, new[] { typeof(int), typeof(int) } );
+            var matchedMethods4 = type.Methods.OfCompatibleSignature( "Foo", 0, new[] { typeof(int), typeof(int) } ).ToArray();
             Assert.Equal( new[] { type.Methods[3], type.Methods[4] }, matchedMethods4 );
-            var matchedMethods5 = type.Methods.OfCompatibleSignature( "Foo", 0, new[] { typeof(object), typeof(object) } );
+            var matchedMethods5 = type.Methods.OfCompatibleSignature( "Foo", 0, new[] { typeof(object), typeof(object) } ).ToArray();
             Assert.Equal( new[] { type.Methods[4] }, matchedMethods5 );
         }
 
@@ -340,25 +341,25 @@ class C
 
             var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", null, Array.Empty<IType>() );
             Assert.Equal( new[] { type.Methods[0], type.Methods[5], type.Methods[6] }, matchedMethods1 );
-            var matchedMethods2 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { intType } );
+            var matchedMethods2 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { intType } ).ToArray();
             Assert.Equal( new[] { type.Methods[1], type.Methods[3], type.Methods[5], type.Methods[6], type.Methods[7], type.Methods[8] }, matchedMethods2 );
-            var matchedMethods3 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { intType, intType } );
+            var matchedMethods3 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { intType, intType } ).ToArray();
             Assert.Equal( new[] { type.Methods[2], type.Methods[4], type.Methods[5], type.Methods[6], type.Methods[7], type.Methods[8] }, matchedMethods3 );
-            var matchedMethods4 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { intType, intType, intType } );
+            var matchedMethods4 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { intType, intType, intType } ).ToArray();
             Assert.Equal( new[] { type.Methods[5], type.Methods[6], type.Methods[7], type.Methods[8] }, matchedMethods4 );
-            var matchedMethods5 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { objectType } );
+            var matchedMethods5 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { objectType } ).ToArray();
             Assert.Equal( new[] { type.Methods[3], type.Methods[6], type.Methods[8] }, matchedMethods5 );
-            var matchedMethods6 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { objectType, objectType } );
+            var matchedMethods6 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { objectType, objectType } ).ToArray();
             Assert.Equal( new[] { type.Methods[4], type.Methods[6] }, matchedMethods6 );
-            var matchedMethods7 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { objectType, objectType, objectType } );
+            var matchedMethods7 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { objectType, objectType, objectType } ).ToArray();
             Assert.Equal( new[] { type.Methods[6] }, matchedMethods7 );
-            var matchedMethods8 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { intArrayType } );
+            var matchedMethods8 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { intArrayType } ).ToArray();
             Assert.Equal( new[] { type.Methods[3], type.Methods[5], type.Methods[6], type.Methods[8] }, matchedMethods8 );
-            var matchedMethods9 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { objectArrayType } );
+            var matchedMethods9 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { objectArrayType } ).ToArray();
             Assert.Equal( new[] { type.Methods[3], type.Methods[6], type.Methods[8] }, matchedMethods9 );
-            var matchedMethods10 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { intType, objectArrayType } );
+            var matchedMethods10 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { intType, objectArrayType } ).ToArray();
             Assert.Equal( new[] { type.Methods[4], type.Methods[6], type.Methods[7] }, matchedMethods10 );
-            var matchedMethods11 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { objectType, intArrayType } );
+            var matchedMethods11 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { objectType, intArrayType } ).ToArray();
             Assert.Equal( new[] { type.Methods[4], type.Methods[6], type.Methods[8] }, matchedMethods11 );
         }
 

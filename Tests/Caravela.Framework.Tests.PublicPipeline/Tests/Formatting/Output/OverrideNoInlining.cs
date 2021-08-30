@@ -1,5 +1,8 @@
 using System;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Tests.Integration.Tests.Formatting.OverrideNoInlining;
+
+[assembly: AspectOrder(typeof(MyOverrideMethod), typeof(MyOverrideProperty))]
 
 namespace Caravela.Framework.Tests.Integration.Tests.Formatting.OverrideNoInlining
 {

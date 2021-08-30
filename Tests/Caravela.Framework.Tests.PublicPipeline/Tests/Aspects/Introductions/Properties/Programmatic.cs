@@ -10,17 +10,17 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             {
-                var propertyBuilder = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, nameof(AutoProperty));
+                var propertyBuilder = builder.AdviceFactory.IntroduceProperty(builder.Target, nameof(AutoProperty));
                 propertyBuilder.Accessibility = Accessibility.Public;
             }
 
             {
-                var propertyBuilder = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, nameof(Property));
+                var propertyBuilder = builder.AdviceFactory.IntroduceProperty(builder.Target, nameof(Property));
                 propertyBuilder.Accessibility = Accessibility.Public;
             }
 
             {
-                var propertyBuilder = builder.AdviceFactory.IntroduceProperty(builder.TargetDeclaration, "PropertyFromAccessors", nameof(GetPropertyTemplate), nameof(SetPropertyTemplate) );
+                var propertyBuilder = builder.AdviceFactory.IntroduceProperty(builder.Target, "PropertyFromAccessors", nameof(GetPropertyTemplate), nameof(SetPropertyTemplate) );
                 propertyBuilder.Accessibility = Accessibility.Public;
             }
 

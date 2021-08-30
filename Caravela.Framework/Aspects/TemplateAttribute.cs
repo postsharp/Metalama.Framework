@@ -9,7 +9,7 @@ namespace Caravela.Framework.Aspects
     /// <summary>
     /// The base class for all custom attributes that mark a declaration as a template.
     /// </summary>
-    [AttributeUsage( AttributeTargets.All )]
+    [AttributeUsage( AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event )]
     public class TemplateAttribute : CompileTimeOnlyAttribute
     {
         private Accessibility? _accessibility;

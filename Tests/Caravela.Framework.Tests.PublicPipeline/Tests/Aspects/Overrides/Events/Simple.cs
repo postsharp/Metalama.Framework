@@ -9,13 +9,13 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
 {
     public class OverrideAttribute : OverrideEventAspect
     {
-        public override void OverrideAdd(dynamic handler)
+        public override void OverrideAdd(dynamic value)
         {
             Console.WriteLine("This is the add template.");
             meta.Proceed();
         }
 
-        public override void OverrideRemove(dynamic handler)
+        public override void OverrideRemove(dynamic value)
         {
             Console.WriteLine("This is the remove template.");
             meta.Proceed();

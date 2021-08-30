@@ -88,7 +88,7 @@ namespace Caravela.Framework.Impl.Templating
             return node;
         }
 
-        protected virtual ExpressionSyntax TransformExpression( ExpressionSyntax expression ) => expression;
+        protected virtual ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression ) => expression;
 
         /// <summary>
         /// Transforms an put <see cref="SyntaxNode"/> into an output <see cref="ExpressionSyntax"/> instantiating the input <see cref="SyntaxNode"/>,
@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.Templating
                 switch ( node )
                 {
                     case ExpressionSyntax expression:
-                        return this.TransformExpression( (ExpressionSyntax) this.Visit( expression ) );
+                        return this.TransformExpression( (ExpressionSyntax) this.Visit( expression ), expression );
 
                     case ArgumentSyntax argument:
                         return this.TransformArgument( argument );

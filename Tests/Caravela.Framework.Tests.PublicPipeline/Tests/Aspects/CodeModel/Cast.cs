@@ -7,9 +7,9 @@ namespace Caravela.Framework.IntegrationTests.Aspects.CodeModel.Cast
     {
         public override dynamic? OverrideMethod()
         {
-            var castNull = meta.Cast( meta.Method.ReturnType, null );
-            var castParam = meta.Cast( meta.Method.ReturnType, (object?) meta.Parameters[0].Value );
-            var castLiteral = meta.Cast( meta.Method.Parameters[1].ParameterType, 1 );
+            var castNull = meta.Cast( meta.Target.Method.ReturnType, null );
+            var castParam = meta.Cast( meta.Target.Method.ReturnType, (object?) meta.Target.Parameters[0].Value );
+            var castLiteral = meta.Cast( meta.Target.Method.Parameters[1].ParameterType, 1 );
             
             return default;
         }

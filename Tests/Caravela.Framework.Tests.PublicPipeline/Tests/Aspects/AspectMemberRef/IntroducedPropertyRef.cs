@@ -15,7 +15,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.Introduced
         }
         
         [Introduce]
-        string IntroducedProperty { get { return meta.Property.DeclaringType.Name; } set {} }
+        string IntroducedProperty { get { return meta.Target.Property.DeclaringType.Name; } set {} }
         
     }
     

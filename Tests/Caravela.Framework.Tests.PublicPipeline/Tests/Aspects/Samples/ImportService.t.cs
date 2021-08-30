@@ -4,7 +4,7 @@ class TargetClass
 
         [ImportServiceAspect]
         private IFormatProvider? FormatProvider {get    {
-        return (System.IFormatProvider? )this._serviceProvider.GetService(typeof(global::System.IFormatProvider));
+        return (global::System.IFormatProvider? )(this._serviceProvider.GetService(typeof(global::System.IFormatProvider)));
     }
 }
 

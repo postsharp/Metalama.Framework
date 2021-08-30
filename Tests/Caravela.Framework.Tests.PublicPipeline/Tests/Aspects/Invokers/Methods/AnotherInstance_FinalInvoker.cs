@@ -12,16 +12,16 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
     {
         public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
         {
-            var overrideBuilder = aspectBuilder.AdviceFactory.IntroduceMethod(aspectBuilder.TargetDeclaration, nameof(OverrideMethod), whenExists: OverrideStrategy.Override);
+            var overrideBuilder = aspectBuilder.AdviceFactory.IntroduceMethod(aspectBuilder.Target, nameof(OverrideMethod), whenExists: OverrideStrategy.Override);
             overrideBuilder.Name = "Foo";
-            overrideBuilder.ReturnType = aspectBuilder.TargetDeclaration.Compilation.TypeFactory.GetSpecialType(SpecialType.Void);
+            overrideBuilder.ReturnType = aspectBuilder.Target.Compilation.TypeFactory.GetSpecialType(SpecialType.Void);
         }
 
         [Template]
         public dynamic? OverrideMethod()
         {
             var x = meta.This;
-            return meta.Method.Invokers.Final.Invoke(x);
+            return meta.Target.Method.Invokers.Final.Invoke(x);
         }
     }
 

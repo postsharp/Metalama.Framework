@@ -20,9 +20,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
             }
 
-            public TemplatingScope? GetTemplatingScope( AttributeData attribute ) => throw new NotSupportedException();
-
-            public TemplateMemberKind GetTemplateMemberKind( ISymbol symbol ) => TemplateMemberKind.None;
+            public TemplateInfo GetTemplateInfo( ISymbol symbol ) => TemplateInfo.None;
 
             public TemplatingScope GetTemplatingScope( ISymbol symbol )
             {

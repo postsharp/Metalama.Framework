@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.RunTime
         [TestTemplate]
         dynamic? Template()
         {
-            if ( meta.Parameters[0].Value is IEnumerable a )
+            if ( meta.Target.Parameters[0].Value is IEnumerable a )
             {
                 a.GetEnumerator();
             }

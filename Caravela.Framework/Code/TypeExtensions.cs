@@ -37,7 +37,7 @@ namespace Caravela.Framework.Code
         /// given as an <see cref="IType"/>.
         /// </summary>
         /// <returns></returns>
-        public static bool Is( this IType left, IType right ) => left.Compilation.InvariantComparer.Is( left, right );
+        public static bool Is( this IType left, IType right, ConversionKind kind = default ) => left.Compilation.InvariantComparer.Is( left, right, kind );
 
         /// <summary>
         /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,
@@ -46,14 +46,18 @@ namespace Caravela.Framework.Code
         /// <param name="left"></param>
         /// <param name="right">Another type.</param>
         /// <returns></returns>
-        public static bool Is( this IType left, Type right ) => left.Compilation.InvariantComparer.Is( left, right );
+        public static bool Is( this IType left, Type right, ConversionKind kind = default ) => left.Compilation.InvariantComparer.Is( left, right, kind );
 
-        public static bool Is( this IType left, SpecialType right )
-            => left.Compilation.InvariantComparer.Is( left, left.Compilation.TypeFactory.GetSpecialType( right ) );
+        /// <summary>
+        /// Determines whether a type equals one of the well-known special types.
+        /// </summary>
+        public static bool Equals( this IType left, SpecialType right ) => left.SpecialType == right;
 
         /// <summary>
         /// Generates the <c>default(T)</c> syntax for the type.
         /// </summary>
         public static dynamic? DefaultValue( this IType type ) => type.Compilation.TypeFactory.DefaultValue( type );
+
+        public static AsyncInfo GetAsyncInfo( this IType type ) => ((ICompilationInternal) type.Compilation).Helpers.GetAsyncInfo( type );
     }
 }

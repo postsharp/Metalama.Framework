@@ -6,6 +6,9 @@
 
     <PropertyGroup>
         <IsPackable>False</IsPackable>
+        <!-- If the build is deterministic, we can have the error : SourceRoot items must include at least one top-level (not nested) 
+             item when DeterministicSourcePaths is true -->
+        <Deterministic>False</Deterministic>
     </PropertyGroup>
     
 </Project>

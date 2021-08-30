@@ -18,7 +18,7 @@ using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Method : MethodBase, IMethod
+    internal class Method : MethodBase, IMethodInternal
     {
         public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IGenericParameterList GenericParameters
             => new GenericParameterList(
                 this,
-                this.MethodSymbol.TypeParameters.Select( tp => DeclarationRef.FromSymbol<IGenericParameter>( tp ) ) );
+                this.MethodSymbol.TypeParameters.Select( DeclarationRef.FromSymbol<IGenericParameter> ) );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 

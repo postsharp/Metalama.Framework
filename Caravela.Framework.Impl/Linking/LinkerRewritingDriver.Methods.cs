@@ -1,13 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Linking.Inlining;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
@@ -23,7 +26,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    members.Add( GetLinkedDeclaration() );
+                    members.Add( GetLinkedDeclaration( lastOverride.IsAsync ) );
                 }
                 else
                 {
@@ -33,7 +36,7 @@ namespace Caravela.Framework.Impl.Linking
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    members.Add( GetOriginalImplMethod( methodDeclaration, symbol ) );
+                    members.Add( this.GetOriginalImplMethod( methodDeclaration, symbol ) );
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
@@ -52,50 +55,67 @@ namespace Caravela.Framework.Impl.Linking
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
 
-                return new[] { GetLinkedDeclaration() };
+                return new[] { GetLinkedDeclaration( symbol.IsAsync ) };
             }
             else
             {
                 throw new AssertionFailedException();
             }
 
-            MethodDeclarationSyntax GetLinkedDeclaration()
+            MethodDeclarationSyntax GetLinkedDeclaration( bool isAsync )
             {
+                var linkedBody = this.GetLinkedBody(
+                    this.GetBodySource( symbol ),
+                    InliningContext.Create( this, symbol ) );
+
+                var modifiers = methodDeclaration.Modifiers;
+
+                if ( isAsync && !symbol.IsAsync )
+                {
+                    modifiers = modifiers.Add( Token( TriviaList( ElasticSpace ), SyntaxKind.AsyncKeyword, TriviaList( ElasticSpace ) ) );
+                }
+                else if ( !isAsync && symbol.IsAsync )
+                {
+                    modifiers = TokenList( modifiers.Where( m => m.Kind() != SyntaxKind.AsyncKeyword ) );
+                }
+
                 return methodDeclaration
                     .WithExpressionBody( null )
-                    .WithBody(
-                        this.GetLinkedBody(
-                            this.GetBodySource( symbol ),
-                            InliningContext.Create( this, symbol ) ) )
+                    .WithModifiers( modifiers )
+                    .WithBody( linkedBody )
                     .WithLeadingTrivia( methodDeclaration.GetLeadingTrivia() )
                     .WithTrailingTrivia( methodDeclaration.GetTrailingTrivia() );
             }
         }
 
-        private static MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
+        private MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
         {
-            return GetSpecialImplMethod( method, method.Body, method.ExpressionBody, symbol, GetOriginalImplMemberName( symbol ) );
+            return this.GetSpecialImplMethod( method, method.Body.AddSourceCodeAnnotation(), method.ExpressionBody.AddSourceCodeAnnotation(), symbol, GetOriginalImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetEmptyImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
+        private MemberDeclarationSyntax GetEmptyImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
         {
             var emptyBody =
                 symbol.ReturnsVoid
                 ? Block()
                 : Block( ReturnStatement( DefaultExpression( method.ReturnType ) ) );
 
-            return GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
+            return this.GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetSpecialImplMethod( MethodDeclarationSyntax method, BlockSyntax? body, ArrowExpressionClauseSyntax? expressionBody, IMethodSymbol symbol, string name )
+        private MemberDeclarationSyntax GetSpecialImplMethod( MethodDeclarationSyntax method, BlockSyntax? body, ArrowExpressionClauseSyntax? expressionBody, IMethodSymbol symbol, string name )
         {
+            var returnType = AsyncHelper.GetIntermediateMethodReturnType( this.IntermediateCompilation, symbol, method.ReturnType );
+
+            var modifiers = symbol
+                .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
+                .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
+
             return
                 MethodDeclaration(
                         List<AttributeListSyntax>(),
-                        symbol.IsStatic
-                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                        method.ReturnType,
+                        modifiers,
+                        returnType,
                         null,
                         Identifier( name ),
                         method.TypeParameterList,

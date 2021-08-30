@@ -6,7 +6,6 @@ using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;

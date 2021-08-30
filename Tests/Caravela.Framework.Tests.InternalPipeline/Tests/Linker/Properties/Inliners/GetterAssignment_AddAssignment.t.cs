@@ -4,13 +4,13 @@ class Target
 {get    {
         Console.WriteLine("Before");
         int x = 0;
-        x += this.__Foo__OriginalImpl;
+        x += this.Foo_Source;
         Console.WriteLine("After");
         return x;
     }
 }
 
-private int __Foo__OriginalImpl
+private int Foo_Source
         {
             get
             {

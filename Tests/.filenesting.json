@@ -5,6 +5,7 @@
             "extensionToExtension": {
                 "add": {
                     ".t.cs": [ ".cs" ],
+                    ".t.txt": [ ".cs" ],
                     ".cs.html": [ ".cs" ]
                 }
             }

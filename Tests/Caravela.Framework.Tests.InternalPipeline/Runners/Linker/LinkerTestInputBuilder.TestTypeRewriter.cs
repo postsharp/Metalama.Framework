@@ -8,6 +8,7 @@ using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
@@ -24,7 +25,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 // ReSharper disable SuspiciousTypeConversion.Global
 
-namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
+namespace Caravela.Framework.Tests.Integration.Runners.Linker
 {
     internal partial class LinkerTestInputBuilder
     {
@@ -590,6 +591,8 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
             {
                 var fakeAspectSymbol = A.Fake<INamedTypeSymbol>();
                 var fakeGlobalNamespaceSymbol = A.Fake<INamespaceSymbol>();
+                var fakeDiagnosticAdder = A.Fake<IDiagnosticAdder>();
+                var fakeCompilation = A.Fake<Compilation>();
 
                 A.CallTo( () => fakeAspectSymbol.MetadataName ).Returns( aspectLayer.AspectName.AssertNotNull() );
                 A.CallTo( () => fakeAspectSymbol.ContainingSymbol ).Returns( fakeGlobalNamespaceSymbol );
@@ -602,9 +605,11 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                             fakeAspectSymbol,
                             null,
                             null,
-                            this._owner.CompileTimeProject,
                             typeof( object ),
-                            null );
+                            null,
+                            fakeDiagnosticAdder,
+                            null!,
+                            new AspectDriverFactory( this._owner.ServiceProvider, fakeCompilation, ImmutableArray<object>.Empty ) );
 
                 var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), A.Fake<IDeclaration>(), aspectClass );
                 return A.Fake<Advice>( i => i.WithArgumentsForConstructor( new object?[] { fakeAspectInstance, aspectLayer, null } ) );

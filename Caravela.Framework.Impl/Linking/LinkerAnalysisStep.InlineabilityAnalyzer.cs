@@ -110,7 +110,12 @@ namespace Caravela.Framework.Impl.Linking
                             return false;
                         }
 
-                        if ( aspectReferences.Count != 0 && this.TryGetInliner( aspectReferences[0], out var inliner ) )
+                        var methodKind = semantic.Symbol.MethodKind;
+
+                        if ( aspectReferences.Count != 0
+                            && IsAsync( GetMethod( aspectReferences[0].ContainingSymbol, methodKind ) ) == IsAsync( GetMethod( aspectReferences[0].ResolvedSemantic.Symbol, methodKind ) )
+                            && IsIterator( GetMethod( aspectReferences[0].ContainingSymbol, methodKind ) ) == IsIterator( GetMethod( aspectReferences[0].ResolvedSemantic.Symbol, methodKind ) )
+                            && this.TryGetInliner( aspectReferences[0], out var inliner ) )
                         {
                             inliningSpecification = new SymbolInliningSpecification(
                                 semantic,
@@ -133,6 +138,29 @@ namespace Caravela.Framework.Impl.Linking
                     default:
                         throw new AssertionFailedException();
                 }
+
+                static IMethodSymbol? GetMethod( ISymbol symbol, MethodKind kind )
+                    => symbol switch
+                    {
+                        IMethodSymbol method => method,
+                        IPropertySymbol property => kind switch
+                        {
+                            MethodKind.PropertyGet => property.GetMethod,
+                            MethodKind.PropertySet => property.SetMethod,
+                            _ => throw new AssertionFailedException()
+                        },
+                        IEventSymbol @event => kind switch
+                        {
+                            MethodKind.EventAdd => @event.AddMethod,
+                            MethodKind.EventRemove => @event.RemoveMethod,
+                            _ => throw new AssertionFailedException()
+                        },
+                        _ => throw new AssertionFailedException()
+                    };
+
+                static bool IsAsync( IMethodSymbol? symbol ) => symbol is { IsAsync: true };
+
+                static bool IsIterator( IMethodSymbol? symbol ) => symbol != null && IteratorHelper.IsIterator( symbol );
             }
 
             private bool TryInlineProperty( IntermediateSymbolSemantic<IPropertySymbol> semantic, [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )

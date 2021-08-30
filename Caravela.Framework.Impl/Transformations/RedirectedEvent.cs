@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -35,7 +36,7 @@ namespace Caravela.Framework.Impl.Transformations
                     EventDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        this.OverriddenDeclaration.GetSyntaxReturnType(),
+                        SyntaxHelpers.CreateSyntaxForEventType( this.OverriddenDeclaration ),
                         null,
                         Identifier(
                             context.IntroductionNameProvider.GetOverrideName(
@@ -55,13 +56,13 @@ namespace Caravela.Framework.Impl.Transformations
                         AccessorDeclaration(
                             SyntaxKind.AddAccessorDeclaration,
                             List<AttributeListSyntax>(),
-                            this.OverriddenDeclaration.Adder.GetSyntaxModifierList(),
+                            this.OverriddenDeclaration.AddMethod.GetSyntaxModifierList(),
                             CreateAccessorBody( SyntaxKind.AddAssignmentExpression ),
                             null ),
                         AccessorDeclaration(
                             SyntaxKind.RemoveAccessorDeclaration,
                             List<AttributeListSyntax>(),
-                            this.OverriddenDeclaration.Remover.GetSyntaxModifierList(),
+                            this.OverriddenDeclaration.RemoveMethod.GetSyntaxModifierList(),
                             CreateAccessorBody( SyntaxKind.SubtractAssignmentExpression ),
                             null )
                     }.Where( a => a != null )

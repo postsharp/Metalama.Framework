@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
+using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
@@ -80,10 +81,11 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// Runs the template test with name and source provided in the <paramref name="testInput"/>.
         /// </summary>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
+        /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
-        public override async Task<TestResult> RunTestAsync( TestInput testInput )
+        private protected override async Task<TestResult> RunAsync( TestInput testInput, Dictionary<string, object?> state )
         {
-            var testResult = await base.RunTestAsync( testInput );
+            var testResult = await base.RunAsync( testInput, state );
 
             if ( !testResult.Success )
             {
@@ -110,7 +112,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     (CSharpCompilationOptions) testResult.InputProject!.CompilationOptions! )
                 .AddReferences( MetadataReference.CreateFromFile( typeof(TestTemplateAttribute).Assembly.Location ) );
 
-            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult, this.ServiceProvider );
+            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult.PipelineDiagnostics, this.ServiceProvider );
 
             var templateCompilerSuccess = templateCompiler.TryCompile(
                 compileTimeCompilation,
@@ -130,7 +132,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             // Write the transformed code to disk.
             var transformedTemplatePath = Path.Combine( GeneratedDirectoryPath, Path.ChangeExtension( testInput.TestName, ".cs" ) );
             var transformedTemplateText = await transformedTemplateSyntax!.SyntaxTree.GetTextAsync();
-            Directory.CreateDirectory( Path.GetDirectoryName( transformedTemplatePath ) );
+            Directory.CreateDirectory( Path.GetDirectoryName( transformedTemplatePath )! );
 
             await using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
             {
@@ -175,7 +177,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             if ( !emitResult.Success )
             {
-                testResult.Report( emitResult.Diagnostics );
+                testResult.PipelineDiagnostics.Report( emitResult.Diagnostics );
                 testResult.SetFailed( "The final template compilation failed." );
 
                 return testResult;
@@ -198,23 +200,28 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             try
             {
-                var compiledAspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
-                var compiledTemplateMethod = compiledAspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
-
                 var templateMethod = testResult.InputCompilation!.Assembly.GetTypes()
                     .Single( t => string.Equals( t.Name, "Aspect", StringComparison.Ordinal ) )
                     .GetMembers( "Template" )
+                    .OfType<IMethodSymbol>()
                     .Single();
+
+                var compiledAspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
+
+                var compiledTemplateMethodName = TemplateNameHelper.GetCompiledTemplateName( templateMethod );
+                var compiledTemplateMethod = compiledAspectType.GetMethod( compiledTemplateMethodName, BindingFlags.Instance | BindingFlags.Public );
 
                 Invariant.Assert( compiledTemplateMethod != null );
                 var driver = new TemplateDriver( this.ServiceProvider, null!, templateMethod, compiledTemplateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InputCompilation );
-                var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( this.ServiceProvider, assembly, compilationModel, templateMethod );
+                var template = Template.Create<IMemberOrNamedType>( compilationModel.Factory.GetMethod( templateMethod ), TemplateInfo.None );
 
-                var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult, out var output );
+                var (expansionContext, targetMethod) = this.CreateTemplateExpansionContext( this.ServiceProvider, assembly, compilationModel, template );
 
-                testResult.Report( expansionContext.DiagnosticSink.ToImmutable().ReportedDiagnostics );
+                var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult.PipelineDiagnostics, out var output );
+
+                testResult.PipelineDiagnostics.Report( expansionContext.DiagnosticSink.ToImmutable().ReportedDiagnostics );
 
                 if ( !expandSuccessful )
                 {
@@ -282,7 +289,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             IServiceProvider serviceProvider,
             Assembly assembly,
             CompilationModel compilation,
-            ISymbol templateMethod )
+            Template<IMemberOrNamedType> template )
         {
             var roslynCompilation = compilation.RoslynCompilation;
 
@@ -317,8 +324,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var proceedExpression =
                 new DynamicExpression(
                     GetProceedInvocation( targetMethod ),
-                    targetMethod.ReturnType,
-                    false );
+                    targetMethod.ReturnType );
 
             var additionalServices = new ServiceProvider();
             additionalServices.AddService( new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ) );
@@ -328,10 +334,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 targetMethod,
                 new MetaApiProperties(
                     diagnostics,
-                    templateMethod,
+                    template,
                     ImmutableDictionary.Create<string, object?>().Add( "TestKey", "TestValue" ),
                     default,
-                    proceedExpression,
                     augmentedServiceProvider ) );
 
             return (new TemplateExpansionContext(
@@ -340,7 +345,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
                         compilation,
                         lexicalScope,
                         this._syntaxSerializationService,
-                        compilation.Factory ), roslynTargetMethod);
+                        compilation.Factory,
+                        default,
+                        proceedExpression ), roslynTargetMethod);
 
             static ExpressionSyntax GetProceedInvocation( IMethod targetMethod )
             {
@@ -379,7 +386,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 this._children = children;
             }
 
-            public object GetService( Type serviceType ) => this._children.Select( c => c.GetService( serviceType ) ).First( s => s != null );
+            public object? GetService( Type serviceType ) => this._children.Select( c => c.GetService( serviceType ) ).FirstOrDefault( s => s != null );
         }
     }
 }

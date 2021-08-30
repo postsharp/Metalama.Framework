@@ -18,7 +18,7 @@ using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltAccessor : BuiltDeclaration, IMethod, IMemberRef<IMethod>
+    internal class BuiltAccessor : BuiltDeclaration, IMethodInternal, IMemberRef<IMethod>
     {
         private readonly BuiltMember _builtMember;
 
@@ -91,7 +91,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IMethod IDeclarationRef<IMethod>.Resolve( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
 
-        ISymbol IDeclarationRef<IMethod>.GetSymbol( Compilation compilation ) => this.GetSymbol();
+        ISymbol? IDeclarationRef<IMethod>.GetSymbol( Compilation compilation ) => this.GetSymbol();
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.AccessorBuilder.ExplicitInterfaceImplementations;
 

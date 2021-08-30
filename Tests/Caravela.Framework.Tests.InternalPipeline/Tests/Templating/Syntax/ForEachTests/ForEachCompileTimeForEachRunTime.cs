@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.Fo
         {
             IEnumerable<int> array = Enumerable.Range(1, 2);
 
-            foreach (var p in meta.Parameters)
+            foreach (var p in meta.Target.Parameters)
             {
                 foreach (int n in array)
                 {

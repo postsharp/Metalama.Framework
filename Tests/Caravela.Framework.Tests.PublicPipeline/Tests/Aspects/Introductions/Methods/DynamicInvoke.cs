@@ -11,7 +11,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Dyna
         public void IntroduceVoid()
         {
             Console.WriteLine("Introduced");
-            meta.Method.Invoke();
+            meta.Target.Method.Invoke();
         }
         
         [Introduce]
@@ -19,7 +19,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Dyna
         {
             Console.WriteLine("Introduced");
                         
-            return meta.Method.Invoke();
+            return meta.Target.Method.Invoke();
         }
         
          [Introduce(WhenExists = OverrideStrategy.Override)]
@@ -28,7 +28,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Dyna
             Console.WriteLine("Introduced");
             
             // TODO: This produces an incorrect result.
-            return meta.Method.Invoke();
+            return meta.Target.Method.Invoke();
         }
         
           [Introduce(WhenExists = OverrideStrategy.Override)]
@@ -37,7 +37,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Dyna
             Console.WriteLine("Introduced");
             
             // TODO: This produces an incorrect result.
-            meta.Method.Invoke();
+            meta.Target.Method.Invoke();
         }
     }
 

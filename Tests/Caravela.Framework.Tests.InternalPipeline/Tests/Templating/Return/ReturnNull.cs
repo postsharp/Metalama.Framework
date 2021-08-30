@@ -10,8 +10,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.ReturnStatements.Retur
         [TestTemplate]
         dynamic Template()
         {
-            var a = meta.Parameters[0];
-            var b = meta.Parameters[1];
+            var a = meta.Target.Parameters[0];
+            var b = meta.Target.Parameters[1];
             if (a.Value == null || b.Value == null)
             {
                 return null;

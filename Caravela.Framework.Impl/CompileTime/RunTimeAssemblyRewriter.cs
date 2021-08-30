@@ -1,7 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Sdk;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -84,9 +85,31 @@ namespace Caravela.Compiler
         {
             var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 
-            return this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
-                   this.SymbolClassifier.GetTemplateMemberKind( symbol ) != TemplateMemberKind.None;
+            if ( this.MustReplaceByThrow( symbol ) )
+            {
+                return true;
+            }
+            else if ( symbol is IPropertySymbol property )
+            {
+                // In properties, the template attribute can be put on the accessors. 
+
+                if ( property.GetMethod != null && this.MustReplaceByThrow( property.GetMethod ) )
+                {
+                    return true;
+                }
+
+                if ( property.SetMethod != null && this.MustReplaceByThrow( property.SetMethod ) )
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
+
+        private bool MustReplaceByThrow( ISymbol symbol )
+            => this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
+               !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
 
         public override SyntaxNode? VisitIndexerDeclaration( IndexerDeclarationSyntax node )
         {

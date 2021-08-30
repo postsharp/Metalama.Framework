@@ -23,11 +23,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Over
         [PseudoNotDiscardable]
         public void Foo_Override0()
         {
-            // Should invoke original code.
+            // Should invoke source code.
             link(_this.Bar, original)();
-            // Should invoke original code.
+            // Should invoke source code.
             link(_this.Bar, @base)();
-            // Should invoke original code.
+            // Should invoke source code.
             link(_this.Bar, self)();
             // Should invoke the final declaration.
             link(_this.Bar, final)();
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Over
         [PseudoNotDiscardable]
         public void Foo_Override2()
         {
-            // Should invoke original code.
+            // Should invoke source code.
             link(_this.Bar, original)();
             // Should invoke override 1.
             link(_this.Bar, @base)();
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Over
         [PseudoNotDiscardable]
         public void Foo_Override4()
         {
-            // Should invoke original code.
+            // Should invoke source code.
             link(_this.Bar, original)();
             // Should invoke override 3.
             link(_this.Bar, @base)();
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Over
         [PseudoNotDiscardable]
         public void Foo_Override6()
         {
-            // Should invoke original code.
+            // Should invoke source code.
             link(_this.Bar, original)();
             // Should invoke the final declaration.
             link(_this.Bar, @base)();
@@ -86,10 +86,10 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Over
         [PseudoOverride(nameof(Bar), "TestAspect1")]
         [PseudoNotInlineable]
         void Bar_Override1()
-        {   
-            // Should invoke original code.
+        {
+            // Should invoke source code.
             link(_this.Bar, original)();
-            // Should invoke original code.
+            // Should invoke source code.
             link(_this.Bar, @base)();
             // Should invoke override 1.
             link(_this.Bar, self)();
@@ -101,7 +101,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Over
         [PseudoNotInlineable]
         void Bar_Override2()
         {
-            // Should invoke original code.
+            // Should invoke source code.
             link(_this.Bar, original)();
             // Should invoke override 1.
             link(_this.Bar, @base)();
@@ -115,7 +115,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Over
         [PseudoNotInlineable]
         void Bar_Override3()
         {
-            // Should invoke original code.
+            // Should invoke source code.
             link(_this.Bar, original)();
             // Should invoke override 3.
             link(_this.Bar, @base)();

@@ -101,6 +101,12 @@ namespace Caravela.Framework.Impl.Templating
                 return null;
             }
 
+            if ( this._aspectClass.Project == null )
+            {
+                // We should not get here because a null project is only for the abstract classes of the framework.
+                throw new AssertionFailedException();
+            }
+
             // TODO: This method needs to be rewritten. Ideally, the PDB would be mapped to the source file, it would not be necessary
             // to perform the mapping here.
 

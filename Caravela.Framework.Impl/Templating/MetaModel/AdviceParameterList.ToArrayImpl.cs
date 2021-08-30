@@ -39,6 +39,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) ) );
             }
 
+            public bool IsAssignable => false;
+
             public IType ExpressionType => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );
         }
     }

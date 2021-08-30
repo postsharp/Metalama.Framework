@@ -8,20 +8,20 @@ class Target
     
 public void Foo_Override0()
 {
-    // Should invoke original code.
-    this.__Bar__OriginalImpl();
-    // Should invoke original code.
-    this.__Bar__OriginalImpl();
-    // Should invoke original code.
-    this.__Bar__OriginalImpl();
+    // Should invoke source code.
+    this.Bar_Source();
+    // Should invoke source code.
+    this.Bar_Source();
+    // Should invoke source code.
+    this.Bar_Source();
     // Should invoke the final declaration.
     this.Bar();
 }
     
 public void Foo_Override2()
 {
-    // Should invoke original code.
-    this.__Bar__OriginalImpl();
+    // Should invoke source code.
+    this.Bar_Source();
     // Should invoke override 1.
     this.Bar_Override1();
     // Should invoke override 1.
@@ -32,8 +32,8 @@ public void Foo_Override2()
     
 public void Foo_Override4()
 {
-    // Should invoke original code.
-    this.__Bar__OriginalImpl();
+    // Should invoke source code.
+    this.Bar_Source();
     // Should invoke override 3.
     this.Bar_Override2();
     // Should invoke override 3.
@@ -44,8 +44,8 @@ public void Foo_Override4()
     
 public void Foo_Override6()
 {
-    // Should invoke original code.
-    this.__Bar__OriginalImpl();
+    // Should invoke source code.
+    this.Bar_Source();
     // Should invoke the final declaration.
     this.Bar();
     // Should invoke the final declaration.
@@ -58,7 +58,7 @@ public void Foo_Override6()
     this.Bar_Override3();
 }
     
-private void __Bar__OriginalImpl()
+private void Bar_Source()
         {
             Console.WriteLine("This is original code.");
         }
@@ -66,10 +66,10 @@ private void __Bar__OriginalImpl()
     
 void Bar_Override1()
 {
-    // Should invoke original code.
-    this.__Bar__OriginalImpl();
-    // Should invoke original code.
-    this.__Bar__OriginalImpl();
+    // Should invoke source code.
+    this.Bar_Source();
+    // Should invoke source code.
+    this.Bar_Source();
     // Should invoke override 1.
     this.Bar_Override1();
     // Should invoke the final declaration.
@@ -78,8 +78,8 @@ void Bar_Override1()
     
 void Bar_Override2()
 {
-    // Should invoke original code.
-    this.__Bar__OriginalImpl();
+    // Should invoke source code.
+    this.Bar_Source();
     // Should invoke override 1.
     this.Bar_Override1();
     // Should invoke override 3.
@@ -90,8 +90,8 @@ void Bar_Override2()
     
 void Bar_Override3()
 {
-    // Should invoke original code.
-    this.__Bar__OriginalImpl();
+    // Should invoke source code.
+    this.Bar_Source();
     // Should invoke override 3.
     this.Bar_Override2();
     // Should invoke the final declaration.

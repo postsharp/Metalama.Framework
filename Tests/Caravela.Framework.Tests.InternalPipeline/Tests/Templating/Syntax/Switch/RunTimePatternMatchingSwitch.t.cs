@@ -11,5 +11,5 @@ int Method(int a)
             break;
     }
 
-    return (int)this.Method(a);
+    return this.Method(a);
 }

@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -37,7 +38,7 @@ namespace Caravela.Framework.Impl.Transformations
                     PropertyDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        this.OverriddenDeclaration.GetSyntaxReturnType(),
+                        SyntaxHelpers.CreateSyntaxForPropertyType( this.OverriddenDeclaration ),
                         null,
                         Identifier(
                             context.IntroductionNameProvider.GetOverrideName(
@@ -56,21 +57,21 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 return new[]
                     {
-                        this.OverriddenDeclaration.Getter != null
+                        this.OverriddenDeclaration.GetMethod != null
                             ? AccessorDeclaration(
                                 SyntaxKind.GetAccessorDeclaration,
                                 List<AttributeListSyntax>(),
-                                this.OverriddenDeclaration.Getter.GetSyntaxModifierList(),
+                                this.OverriddenDeclaration.GetMethod.GetSyntaxModifierList(),
                                 CreateGetterBody(),
                                 null )
                             : null,
-                        this.OverriddenDeclaration.Setter != null
+                        this.OverriddenDeclaration.SetMethod != null
                             ? AccessorDeclaration(
                                 this.OverriddenDeclaration.Writeability != Writeability.InitOnly
                                     ? SyntaxKind.SetAccessorDeclaration
                                     : SyntaxKind.InitAccessorDeclaration,
                                 List<AttributeListSyntax>(),
-                                this.OverriddenDeclaration.Setter.GetSyntaxModifierList(),
+                                this.OverriddenDeclaration.SetMethod.GetSyntaxModifierList(),
                                 CreateSetterBody(),
                                 null )
                             : null

@@ -27,26 +27,29 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public override int Compare( PipelineStepId x, PipelineStepId y )
         {
-            var xOrderedPart = this._orderedAspectLayers[x.AspectLayerId];
-            var yOrderedPart = this._orderedAspectLayers[y.AspectLayerId];
-
-            // First order by topological distance.
-            if ( xOrderedPart.Order < yOrderedPart.Order )
+            if ( x.AspectLayerId != y.AspectLayerId )
             {
-                return -1;
-            }
+                var xOrderedPart = this._orderedAspectLayers[x.AspectLayerId];
+                var yOrderedPart = this._orderedAspectLayers[y.AspectLayerId];
 
-            if ( xOrderedPart.Order > yOrderedPart.Order )
-            {
-                return 1;
-            }
+                // First order by topological distance.
+                if ( xOrderedPart.Order < yOrderedPart.Order )
+                {
+                    return -1;
+                }
 
-            // If topological distance is identical, order by name.
-            var nameOrder = string.Compare( xOrderedPart.AspectName, yOrderedPart.AspectName, StringComparison.Ordinal );
+                if ( xOrderedPart.Order > yOrderedPart.Order )
+                {
+                    return 1;
+                }
 
-            if ( nameOrder != 0 )
-            {
-                return nameOrder;
+                // If topological distance is identical, order by name.
+                var nameOrder = string.Compare( xOrderedPart.AspectName, yOrderedPart.AspectName, StringComparison.Ordinal );
+
+                if ( nameOrder != 0 )
+                {
+                    return nameOrder;
+                }
             }
 
             // Finally, order by depth in the code mode.
@@ -57,7 +60,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             if ( x.Depth > y.Depth )
             {
-                return -1;
+                return 1;
             }
 
             if ( !x.Equals( y ) )

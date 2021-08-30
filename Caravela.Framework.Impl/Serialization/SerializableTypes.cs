@@ -84,6 +84,11 @@ namespace Caravela.Framework.Impl.Serialization
                         return namedType.TypeArguments.All( arg => this.IsSerializable( arg, diagnosticLocation, diagnosticAdder ) );
                     }
                 }
+
+                if ( namedType.AllInterfaces.Any( i => this.IsSerializable( i ) ) )
+                {
+                    return true;
+                }
             }
 
             if ( diagnosticAdder != null )

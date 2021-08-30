@@ -112,7 +112,7 @@ namespace Caravela.Framework.Impl.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol Advice, string Expression, IDeclaration TargetDeclaration, DeclarationKind TargetKind)>
+        internal static readonly DiagnosticDefinition<(IDeclaration Advice, string Expression, IDeclaration TargetDeclaration, DeclarationKind TargetKind)>
             CannotUseThisInStaticContext
                 = new(
                     "CR0114",
@@ -121,7 +121,7 @@ namespace Caravela.Framework.Impl.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol Advice, string Expression, IDeclaration TargetDeclaration, DeclarationKind TargetKind,
+        internal static readonly DiagnosticDefinition<(IDeclaration Advice, string Expression, IDeclaration TargetDeclaration, DeclarationKind TargetKind,
                 string MissingKind)>
             MemberMemberNotAvailable
                 = new(
@@ -191,6 +191,33 @@ namespace Caravela.Framework.Impl.Templating
                     "using the other reported errors. If, however, you believe this is due to a bug in Caravela, please report the issue and include diagnostic "
                     +
                     "information available in '{0}'.",
+                    _category,
+                    Error );
+
+        internal static readonly DiagnosticDefinition<(string MethodName, IDeclaration TargetDeclaration)>
+            CannotUseSpecificProceedInThisContext
+                = new(
+                    "CR0223",
+                    "Cannot use a specific Proceed variant in the current context.",
+                    "Cannot use the {0} method in '{1}' because the return type of the method is compatible with the {0} method.",
+                    _category,
+                    Error );
+
+        internal static readonly DiagnosticDefinition<string>
+            CannotUseDynamicInUninitializedLocal
+                = new(
+                    "CR0224",
+                    "Cannot declare local variable with the dynamic type if the variable is not initialized.",
+                    "The 'dynamic' keyword cannot be used in the local variable '{0}' because it is not initialized. Use 'var'.",
+                    _category,
+                    Error );
+
+        internal static readonly DiagnosticDefinition<string>
+            CallToExpressionMustHaveExplicitCast
+                = new(
+                    "CR0225",
+                    "Calls to meta.Expression must be explicitly cast to IExpression.",
+                    "The call to '{0}' must be explicitly cast to IExpression.",
                     _category,
                     Error );
     }

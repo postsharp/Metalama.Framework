@@ -198,12 +198,11 @@ namespace Caravela.Framework.Impl.Linking
                                     }.Where( a => a != null )
                                     .AssertNoneNull() ) )
                         .NormalizeWhitespace()
-                    : property.AccessorList.AssertNotNull();
+                    : property.AccessorList.AssertNotNull().AddSourceCodeAnnotation();
 
-            var initializer =
-                property.Initializer;
+            var initializer = property.Initializer;
 
-            return GetSpecialImplProperty( property.Type, accessorList, initializer, symbol, GetOriginalImplMemberName( symbol ) );
+            return GetSpecialImplProperty( property.Type, accessorList, initializer.AddSourceCodeAnnotation(), symbol, GetOriginalImplMemberName( symbol ) );
         }
 
         private static MemberDeclarationSyntax GetEmptyImplProperty( PropertyDeclarationSyntax property, IPropertySymbol symbol )
@@ -250,7 +249,7 @@ namespace Caravela.Framework.Impl.Linking
                         null )
                     .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
-                    .WithInitializer( initializer )
+                    .WithInitializer( initializer.AddSourceCodeAnnotation() )
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithAccessorList( accessorList )
                     .AddGeneratedCodeAnnotation();

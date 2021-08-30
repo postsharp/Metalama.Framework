@@ -3,8 +3,8 @@ string Method(object a)
     var result = this.Method(a);
     if (result == null)
     {
-        return (string)"";
+        return (global::System.String)("");
     }
 
-    return (string)result;
+    return (global::System.String)(result);
 }

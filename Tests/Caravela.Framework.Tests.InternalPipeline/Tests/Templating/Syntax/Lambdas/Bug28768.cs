@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.Bug2876
         [TestTemplate]
         dynamic? Template()
         {
-            var parameterNamesTypes=  meta.RunTime( meta.Parameters.Select(p => p.ParameterType.ToType()).ToArray() );
+            var parameterNamesTypes=  meta.RunTime( meta.Target.Parameters.Select(p => p.ParameterType.ToType()).ToArray() );
             return meta.Proceed();
         }
     }

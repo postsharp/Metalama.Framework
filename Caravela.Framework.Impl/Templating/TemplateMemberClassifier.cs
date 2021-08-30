@@ -50,9 +50,21 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="originalNode"></param>
         /// <returns></returns>
-        public bool IsDynamicType( SyntaxNode originalNode )
+        public bool IsDynamicType( SyntaxNode originalNode, bool strict = false )
         {
             var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( originalNode );
+
+            if ( expressionType is IDynamicTypeSymbol )
+            {
+                // Roslyn returns a dynamic type even for methods returning a non-dynamic type, as long as they have at least
+                // one dynamic argument. We don't want to fix the Roslyn type resolution, but in the specific case of void methods,
+                // we can do it without a chance of being ever wrong. It allows meta.DefineExpression to work.
+                if ( originalNode is InvocationExpressionSyntax &&
+                     this._syntaxTreeAnnotationMap.GetSymbol( originalNode ) is IMethodSymbol { ReturnsVoid: true } )
+                {
+                    return false;
+                }
+            }
 
             if ( expressionType.IsDynamic() )
             {
@@ -61,8 +73,8 @@ namespace Caravela.Framework.Impl.Templating
 
             var nodeSymbol = this._syntaxTreeAnnotationMap.GetSymbol( originalNode );
 
-            return (nodeSymbol is IMethodSymbol method && method.ReturnType.IsDynamic()) ||
-                   (nodeSymbol is IPropertySymbol property && property.Type.IsDynamic());
+            return (nodeSymbol is IMethodSymbol method && method.ReturnType.IsDynamic( strict )) ||
+                   (nodeSymbol is IPropertySymbol property && property.Type.IsDynamic( strict ));
         }
 
 #pragma warning disable CA1822 // Static anyway.
@@ -84,23 +96,45 @@ namespace Caravela.Framework.Impl.Templating
 
         public MetaMemberKind GetMetaMemberKind( ISymbol? symbol )
         {
-            if ( symbol == null || !SymbolEqualityComparer.Default.Equals( symbol.ContainingType, this._metaType ) )
+            if ( symbol == null )
             {
                 return MetaMemberKind.None;
             }
-            else
+            else if ( SymbolEqualityComparer.Default.Equals( symbol.ContainingType, this._metaType ) )
             {
                 switch ( symbol.Name )
                 {
+                    case nameof(meta.This):
+                        return MetaMemberKind.This;
+
                     case nameof(meta.Comment):
                         return MetaMemberKind.Comment;
 
-                    case nameof(meta.This):
-                        return MetaMemberKind.This;
+                    case nameof(meta.Proceed):
+                        return MetaMemberKind.Proceed;
+
+                    case nameof(meta.ProceedAsync):
+                        return MetaMemberKind.ProceedAsync;
+
+                    case nameof(meta.ProceedEnumerable):
+                        return MetaMemberKind.ProceedEnumerable;
+
+                    case nameof(meta.ProceedEnumerator):
+                        return MetaMemberKind.ProceedEnumerator;
+
+                    case "ProceedAsyncEnumerable":
+                        return MetaMemberKind.ProceedAsyncEnumerable;
+
+                    case "ProceedAsyncEnumerator":
+                        return MetaMemberKind.ProceedAsyncEnumerator;
 
                     default:
                         return MetaMemberKind.Default;
                 }
+            }
+            else
+            {
+                return MetaMemberKind.None;
             }
         }
     }

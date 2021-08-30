@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -19,7 +18,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class CompilationModel : ICompilation, IDeclarationInternal
+    internal class CompilationModel : ICompilationInternal, IDeclarationInternal
     {
         public PartialCompilation PartialCompilation { get; }
 
@@ -281,5 +280,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         public override string ToString() => $"{this.RoslynCompilation.AssemblyName}, rev={this.Revision}";
+
+        public ICompilationHelpers Helpers { get; } = new CompilationHelpers();
     }
 }

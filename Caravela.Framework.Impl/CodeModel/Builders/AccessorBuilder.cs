@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder
+    internal partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder, IMethodInternal
     {
         private readonly MemberBuilder _containingDeclaration;
 
@@ -62,10 +62,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethod? OverriddenMethod
             => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
-                (PropertyBuilder propertyBuilder, MethodKind.PropertyGet) => propertyBuilder.OverriddenProperty?.Getter.AssertNotNull(),
-                (PropertyBuilder propertyBuilder, MethodKind.PropertySet) => propertyBuilder.OverriddenProperty?.Setter.AssertNotNull(),
-                (EventBuilder eventBuilder, MethodKind.EventAdd) => eventBuilder.OverriddenEvent?.Adder.AssertNotNull(),
-                (EventBuilder eventBuilder, MethodKind.EventRemove) => eventBuilder.OverriddenEvent?.Remover.AssertNotNull(),
+                (PropertyBuilder propertyBuilder, MethodKind.PropertyGet) => propertyBuilder.OverriddenProperty?.GetMethod.AssertNotNull(),
+                (PropertyBuilder propertyBuilder, MethodKind.PropertySet) => propertyBuilder.OverriddenProperty?.SetMethod.AssertNotNull(),
+                (EventBuilder eventBuilder, MethodKind.EventAdd) => eventBuilder.OverriddenEvent?.AddMethod.AssertNotNull(),
+                (EventBuilder eventBuilder, MethodKind.EventRemove) => eventBuilder.OverriddenEvent?.RemoveMethod.AssertNotNull(),
                 _ => throw new AssertionFailedException()
             };
 
@@ -107,8 +107,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
                 var otherAccessor = this.MethodKind switch
                 {
-                    MethodKind.PropertyGet => propertyBuilder.Setter,
-                    MethodKind.PropertySet => propertyBuilder.Getter,
+                    MethodKind.PropertyGet => propertyBuilder.SetMethod,
+                    MethodKind.PropertySet => propertyBuilder.GetMethod,
                     _ => throw new AssertionFailedException()
                 };
 
@@ -204,13 +204,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
                 (PropertyBuilder propertyBuilder, MethodKind.PropertyGet)
-                    => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.Getter ).AssertNoneNull().ToArray(),
+                    => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.GetMethod ).AssertNoneNull().ToArray(),
                 (PropertyBuilder propertyBuilder, MethodKind.PropertySet)
-                    => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.Setter ).AssertNoneNull().ToArray(),
+                    => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.SetMethod ).AssertNoneNull().ToArray(),
                 (EventBuilder eventBuilder, MethodKind.EventAdd)
-                    => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.Adder ).AssertNoneNull().ToArray(),
+                    => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.AddMethod ).AssertNoneNull().ToArray(),
                 (EventBuilder eventBuilder, MethodKind.EventRemove)
-                    => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.Remover ).AssertNoneNull().ToArray(),
+                    => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.RemoveMethod ).AssertNoneNull().ToArray(),
                 _ => throw new AssertionFailedException()
             };
 

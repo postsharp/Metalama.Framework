@@ -2,13 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
+using Caravela.Framework.Impl.Observers;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.Mapping;
 using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Sdk;
 using K4os.Hash.xxHash;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -33,7 +34,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
         private readonly IPathOptions _pathOptions;
         private readonly IProjectOptions? _projectOptions;
-        private readonly ICompileTimeCompilationBuilderSpy? _spy;
+        private readonly ICompileTimeCompilationBuilderObserver? _observer;
         private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
 
         private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
@@ -45,7 +46,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this._pathOptions = serviceProvider.GetService<IPathOptions>();
             this._serviceProvider = serviceProvider;
             this._domain = domain;
-            this._spy = serviceProvider.GetOptionalService<ICompileTimeCompilationBuilderSpy>();
+            this._observer = serviceProvider.GetOptionalService<ICompileTimeCompilationBuilderObserver>();
             this._rewriter = serviceProvider.GetOptionalService<ICompileTimeAssemblyBinaryRewriter>();
             this._projectOptions = serviceProvider.GetOptionalService<IProjectOptions>();
         }
@@ -174,7 +175,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 compileTimeCompilation = OutputCodeFormatter.FormatAll( compileTimeCompilation );
             }
 
-            this._spy?.ReportCompileTimeCompilation( compileTimeCompilation );
+            this._observer?.OnCompileTimeCompilation( compileTimeCompilation );
 
             return true;
         }
@@ -304,6 +305,8 @@ namespace Caravela.Framework.Impl.CompileTime
                         emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
                     }
                 }
+
+                this._observer?.OnCompileTimeCompilationEmit( compileTimeCompilation, emitResult.Diagnostics );
 
                 // Reports a diagnostic in the original syntax tree.
                 void ReportDiagnostics( IEnumerable<Diagnostic> diagnostics )

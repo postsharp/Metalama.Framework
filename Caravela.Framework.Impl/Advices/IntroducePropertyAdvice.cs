@@ -13,14 +13,10 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class IntroducePropertyAdvice : IntroduceMemberAdvice<PropertyBuilder>
+    internal class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, PropertyBuilder>
     {
-        private readonly IMethod? _getTemplateMethod;
-        private readonly IMethod? _setTemplateMethod;
-
-        public new IProperty? TemplateMember => (IProperty?) base.TemplateMember;
-
-        public new INamedType TargetDeclaration => base.TargetDeclaration!;
+        private readonly Template<IMethod> _getTemplate;
+        private readonly Template<IMethod> _setTemplate;
 
         public IPropertyBuilder Builder => this.MemberBuilder;
 
@@ -28,21 +24,22 @@ namespace Caravela.Framework.Impl.Advices
             AspectInstance aspect,
             INamedType targetDeclaration,
             string? explicitName,
-            IProperty? templateProperty,
-            IMethod? getTemplateMethod,
-            IMethod? setTemplateMethod,
+            Template<IProperty> templateProperty,
+            Template<IMethod> getTemplate,
+            Template<IMethod> setTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
             Dictionary<string, object?>? tags )
             : base( aspect, targetDeclaration, templateProperty, scope, overrideStrategy, layerName, tags )
         {
-            this._getTemplateMethod = getTemplateMethod;
-            this._setTemplateMethod = setTemplateMethod;
+            this._getTemplate = getTemplate;
+            this._setTemplate = setTemplate;
 
-            var name = templateProperty?.Name ?? explicitName ?? throw new AssertionFailedException();
-            var hasGet = templateProperty != null ? templateProperty.Getter != null : getTemplateMethod != null;
-            var hasSet = templateProperty != null ? templateProperty.Setter != null : setTemplateMethod != null;
+            var templatePropertyDeclaration = templateProperty.Declaration;
+            var name = templatePropertyDeclaration?.Name ?? explicitName ?? throw new AssertionFailedException();
+            var hasGet = templatePropertyDeclaration != null ? templatePropertyDeclaration.GetMethod != null : getTemplate.IsNotNull;
+            var hasSet = templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : setTemplate.IsNotNull;
 
             this.MemberBuilder = new PropertyBuilder(
                 this,
@@ -52,6 +49,11 @@ namespace Caravela.Framework.Impl.Advices
                 hasSet,
                 this.TemplateMember != null && this.TemplateMember.IsAutoPropertyOrField,
                 this.TemplateMember != null && this.TemplateMember.Writeability == Writeability.InitOnly );
+
+            if ( templateProperty.IsNotNull )
+            {
+                this.MemberBuilder.ApplyTemplateAttribute( templateProperty.TemplateInfo.Attribute );
+            }
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )
@@ -60,8 +62,8 @@ namespace Caravela.Framework.Impl.Advices
 
             // TODO: Indexers.
 
-            this.MemberBuilder.Type = (this.TemplateMember?.Type ?? this._getTemplateMethod?.ReturnType).AssertNotNull();
-            this.MemberBuilder.Accessibility = (this.TemplateMember?.Accessibility ?? this._getTemplateMethod?.Accessibility).AssertNotNull();
+            this.MemberBuilder.Type = (this.TemplateMember?.Type ?? this._getTemplate.Declaration?.ReturnType).AssertNotNull();
+            this.MemberBuilder.Accessibility = (this.TemplateMember?.Accessibility ?? this._getTemplate.Declaration?.Accessibility).AssertNotNull();
 
             if ( this.TemplateMember != null )
             {
@@ -82,9 +84,9 @@ namespace Caravela.Framework.Impl.Advices
                 var overriddenMethod = new OverriddenProperty(
                     this,
                     this.MemberBuilder,
-                    this.TemplateMember,
-                    this._getTemplateMethod,
-                    this._setTemplateMethod );
+                    this.Template,
+                    this._getTemplate,
+                    this._setTemplate );
 
                 return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
             }
@@ -120,9 +122,9 @@ namespace Caravela.Framework.Impl.Advices
                             var overriddenMethod = new OverriddenProperty(
                                 this,
                                 existingDeclaration,
-                                this.TemplateMember,
-                                this._getTemplateMethod,
-                                this._setTemplateMethod );
+                                this.Template,
+                                this._getTemplate,
+                                this._setTemplate );
 
                             return AdviceResult.Create( overriddenMethod );
                         }
@@ -134,9 +136,9 @@ namespace Caravela.Framework.Impl.Advices
                             var overriddenMethod = new OverriddenProperty(
                                 this,
                                 this.MemberBuilder,
-                                this.TemplateMember,
-                                this._getTemplateMethod,
-                                this._setTemplateMethod );
+                                this.Template,
+                                this._getTemplate,
+                                this._setTemplate );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                         }
@@ -147,9 +149,9 @@ namespace Caravela.Framework.Impl.Advices
                             var overriddenMethod = new OverriddenProperty(
                                 this,
                                 existingDeclaration,
-                                this.TemplateMember,
-                                this._getTemplateMethod,
-                                this._setTemplateMethod );
+                                this.Template,
+                                this._getTemplate,
+                                this._setTemplate );
 
                             return AdviceResult.Create( overriddenMethod );
                         }
@@ -179,9 +181,9 @@ namespace Caravela.Framework.Impl.Advices
                             var overriddenMethod = new OverriddenProperty(
                                 this,
                                 this.MemberBuilder,
-                                this.TemplateMember,
-                                this._getTemplateMethod,
-                                this._setTemplateMethod );
+                                this.Template,
+                                this._getTemplate,
+                                this._setTemplate );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                         }

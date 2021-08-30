@@ -3,12 +3,12 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.ReflectionMocks;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using SpecialType = Caravela.Framework.Code.SpecialType;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -25,6 +25,8 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         public TypeKind TypeKind => TypeKind.GenericParameter;
+
+        public SpecialType SpecialType => SpecialType.None;
 
         public Type ToType() => CompileTimeType.Create( this );
 

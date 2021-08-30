@@ -47,20 +47,20 @@ class TargetCode
             // Test normal case.
             AssertEx.DynamicEquals(
                 toString.Invokers.Final.Invoke(
-                    new RuntimeExpression( generator.ThisExpression() ),
-                    new RuntimeExpression( generator.LiteralExpression( "x" ) ) ),
+                    new RuntimeExpression( generator.ThisExpression(), compilation ),
+                    new RuntimeExpression( generator.LiteralExpression( "x" ), compilation ) ),
                 @"((global::TargetCode)(this)).ToString((global::System.String)(""x""))" );
 
             AssertEx.DynamicEquals(
                 toString.Invokers.FinalConditional.Invoke(
-                    new RuntimeExpression( generator.IdentifierName( "a" ) ),
-                    new RuntimeExpression( generator.LiteralExpression( "x" ) ) ),
+                    new RuntimeExpression( generator.IdentifierName( "a" ), compilation ),
+                    new RuntimeExpression( generator.LiteralExpression( "x" ), compilation ) ),
                 @"((global::TargetCode)(a))?.ToString((global::System.String)(""x""))" );
 
             AssertEx.DynamicEquals(
                 toString.Invokers.Final.Invoke(
-                    new RuntimeExpression( generator.LiteralExpression( 42 ) ),
-                    new RuntimeExpression( generator.LiteralExpression( 43 ) ) ),
+                    new RuntimeExpression( generator.LiteralExpression( 42 ), compilation ),
+                    new RuntimeExpression( generator.LiteralExpression( 43 ), compilation ) ),
                 @"((global::TargetCode)(42)).ToString((global::System.String)(43))" );
 
             // Test static call.
@@ -70,14 +70,14 @@ class TargetCode
 
             // Test exception related to the 'instance' parameter.
             AssertEx.DynamicEquals(
-                fooMethod.Invokers.Final.Invoke( new RuntimeExpression( SyntaxFactoryEx.Null ) ),
+                fooMethod.Invokers.Final.Invoke( new RuntimeExpression( SyntaxFactoryEx.Null, compilation ) ),
                 @"global::TargetCode.Foo()" );
 
             AssertEx.ThrowsWithDiagnostic(
                 GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember,
                 () => toString.Invokers.Final.Invoke(
                     null,
-                    new RuntimeExpression( generator.LiteralExpression( "x" ) ) ) );
+                    new RuntimeExpression( generator.LiteralExpression( "x" ), compilation ) ) );
 
             // Test in/out.
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
@@ -93,8 +93,8 @@ class TargetCode
                 GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter,
                 () => byRefMethod.Invokers.Final.Invoke(
                     null,
-                    new RuntimeExpression( generator.IdentifierName( "x" ) ),
-                    new RuntimeExpression( generator.IdentifierName( "y" ) ) ) );
+                    new RuntimeExpression( generator.IdentifierName( "x" ), compilation ),
+                    new RuntimeExpression( generator.IdentifierName( "y" ), compilation ) ) );
         }
 
         [Fact]
@@ -144,7 +144,7 @@ class TargetCode
 
             AssertEx.ThrowsWithDiagnostic(
                 GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction,
-                () => localFunction.Invokers.Final.Invoke( new RuntimeExpression( SyntaxFactory.ThisExpression() ) ) );
+                () => localFunction.Invokers.Final.Invoke( new RuntimeExpression( SyntaxFactory.ThisExpression(), compilation ) ) );
         }
 
         [Fact]
@@ -189,7 +189,7 @@ class TargetCode
 
             var type = compilation.DeclaredTypes.Single();
             var property = type.Properties.OfName( "P" ).Single();
-            RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression() );
+            RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation );
 
             AssertEx.DynamicEquals( property.Invokers.Final.GetValue( thisExpression ), @"((global::TargetCode)(this)).P" );
 
@@ -220,16 +220,16 @@ class TargetCode
 
             var type = compilation.DeclaredTypes.Single();
             var property = type.Properties.OfName( "P" ).Single();
-            RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression() );
+            RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation );
 
             AssertEx.DynamicEquals( property.Invokers.Final.GetValue( thisExpression ), @"((global::TargetCode)(this)).P" );
 
             AssertEx.DynamicEquals(
-                property.Getter!.Invokers.FinalConditional.Invoke( SyntaxFactory.IdentifierName( "a" ) ),
+                property.GetMethod!.Invokers.FinalConditional.Invoke( SyntaxFactory.IdentifierName( "a" ) ),
                 @"((global::TargetCode)(a))?.P" );
 
             AssertEx.DynamicEquals(
-                property.Getter!.Invokers.Final.Invoke( property.Invokers.Final.GetValue( thisExpression ) ),
+                property.GetMethod!.Invokers.Final.Invoke( property.Invokers.Final.GetValue( thisExpression ) ),
                 @"((global::TargetCode)(this)).P.P" );
         }
 
@@ -247,8 +247,8 @@ class TargetCode
             var type = compilation.DeclaredTypes.Single();
             var @event = type.Events.Single();
 
-            RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression() );
-            RuntimeExpression parameterExpression = new( SyntaxFactory.IdentifierName( "value" ) );
+            RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation );
+            RuntimeExpression parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), compilation );
 
             AssertEx.DynamicEquals( @event.Invokers.Final.Add( thisExpression, parameterExpression ), @"((global::TargetCode)(this)).MyEvent += value" );
             AssertEx.DynamicEquals( @event.Invokers.Final.Remove( thisExpression, parameterExpression ), @"((global::TargetCode)(this)).MyEvent -= value" );
@@ -272,19 +272,19 @@ class TargetCode
             var type = compilation.DeclaredTypes.Single();
             var @event = type.Events.Single();
 
-            RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression() );
-            RuntimeExpression parameterExpression = new( SyntaxFactory.IdentifierName( "value" ) );
+            RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation );
+            RuntimeExpression parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), compilation );
 
             AssertEx.DynamicEquals(
-                @event.Adder.Invokers.Final.Invoke( thisExpression, parameterExpression ),
+                @event.AddMethod.Invokers.Final.Invoke( thisExpression, parameterExpression ),
                 @"((global::TargetCode)(this)).MyEvent += value" );
 
             AssertEx.DynamicEquals(
-                @event.Remover.Invokers.Final.Invoke( thisExpression, parameterExpression ),
+                @event.RemoveMethod.Invokers.Final.Invoke( thisExpression, parameterExpression ),
                 @"((global::TargetCode)(this)).MyEvent -= value" );
 
             AssertEx.DynamicEquals(
-                @event.Raiser?.Invokers.Final.Invoke( thisExpression, parameterExpression, parameterExpression ),
+                @event.RaiseMethod?.Invokers.Final.Invoke( thisExpression, parameterExpression, parameterExpression ),
                 @"((global::TargetCode)(this)).MyEvent?.Invoke((global::System.Object? )(value), (global::System.EventArgs)(value))" );
         }
 

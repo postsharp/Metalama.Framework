@@ -5,7 +5,7 @@ using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
-using Caravela.Framework.Tests.InternalPipeline.Runners.Linker;
+using Caravela.Framework.Tests.Integration.Runners.Linker;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using System;
@@ -36,12 +36,15 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// Runs the template test with name and source provided in the <paramref name="testInput"/>.
         /// </summary>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
+        /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
-        public override async Task<TestResult> RunTestAsync( TestInput testInput )
+        private protected override async Task<TestResult> RunAsync( TestInput testInput, Dictionary<string, object?> state )
         {
             var builder = new LinkerTestInputBuilder();
-            testInput.SetExtension( builder );
-            var testResult = await base.RunTestAsync( testInput );
+
+            state["builder"] = builder;
+
+            var testResult = await base.RunAsync( testInput, state );
 
             if ( !testResult.Success )
             {
@@ -67,7 +70,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             // Attempt to Emit the result.
             var emitResult = cleanCompilation.Emit( Stream.Null );
 
-            testResult.Report( emitResult.Diagnostics );
+            testResult.PipelineDiagnostics.Report( emitResult.Diagnostics );
 
             if ( !emitResult.Success )
             {
@@ -77,9 +80,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
             return testResult;
         }
 
-        protected override SyntaxNode TransformSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot )
+        private protected override SyntaxNode PreprocessSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot, Dictionary<string, object?> state )
         {
-            var builder = testInput.GetExtension<LinkerTestInputBuilder>().AssertNotNull();
+            var builder = (LinkerTestInputBuilder) state["builder"]!;
 
             return builder.ProcessSyntaxRoot( syntaxRoot );
         }

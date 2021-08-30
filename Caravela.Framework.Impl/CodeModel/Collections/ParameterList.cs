@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -23,6 +24,21 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public static ParameterList Empty { get; } = new();
 
-        public IParameter this[ string name ] => this.Single( p => p.Name == name );
+        public IParameter this[ string name ]
+        {
+            get
+            {
+                var parameter = this.SingleOrDefault( p => p.Name == name );
+
+                if ( parameter == null )
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(name),
+                        $"The method '{this.ContainingDeclaration}' does not contain a parameter named '{name}'" );
+                }
+
+                return parameter;
+            }
+        }
     }
 }

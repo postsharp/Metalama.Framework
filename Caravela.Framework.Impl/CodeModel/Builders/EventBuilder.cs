@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -18,7 +19,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class EventBuilder : MemberBuilder, IEventBuilder
+    internal class EventBuilder : MemberBuilder, IEventBuilder, IEventInternal
     {
         private readonly bool _isEventField;
 
@@ -38,12 +39,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethod Signature => this.EventType.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
-        public IMethodBuilder Adder => new AccessorBuilder( this, MethodKind.EventAdd );
+        public IMethodBuilder AddMethod => new AccessorBuilder( this, MethodKind.EventAdd );
 
         [Memo]
-        public IMethodBuilder Remover => new AccessorBuilder( this, MethodKind.EventRemove );
+        public IMethodBuilder RemoveMethod => new AccessorBuilder( this, MethodKind.EventRemove );
 
-        public IMethodBuilder? Raiser => null;
+        public IMethodBuilder? RaiseMethod => null;
 
         [Memo]
         public IInvokerFactory<IEventInvoker> Invokers
@@ -62,11 +63,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         INamedType IEvent.EventType => this.EventType;
 
-        IMethod IEvent.Adder => this.Adder;
+        IMethod IEvent.AddMethod => this.AddMethod;
 
-        IMethod IEvent.Remover => this.Remover;
+        IMethod IEvent.RemoveMethod => this.RemoveMethod;
 
-        IMethod? IEvent.Raiser => this.Raiser;
+        IMethod? IEvent.RaiseMethod => this.RaiseMethod;
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
         public IReadOnlyList<IEvent> ExplicitInterfaceImplementations { get; set; } = Array.Empty<IEvent>();
@@ -108,7 +109,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             AccessorListSyntax GenerateAccessorList()
             {
-                switch (this.Adder, this.Remover)
+                switch (Adder: this.AddMethod, Remover: this.RemoveMethod)
                 {
                     case (not null, not null):
                         return AccessorList(
@@ -146,9 +147,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethod? GetAccessor( MethodKind methodKind )
             => methodKind switch
             {
-                MethodKind.EventAdd => this.Adder,
-                MethodKind.EventRaise => this.Raiser,
-                MethodKind.EventRemove => this.Remover,
+                MethodKind.EventAdd => this.AddMethod,
+                MethodKind.EventRaise => this.RaiseMethod,
+                MethodKind.EventRemove => this.RemoveMethod,
                 _ => null
             };
     }

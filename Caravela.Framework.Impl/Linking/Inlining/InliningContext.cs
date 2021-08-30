@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -70,6 +71,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                                                     LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ReturnType ),
                                                     SingletonSeparatedList( VariableDeclarator( this.ReturnVariableName.AssertNotNull() ) ) ) )
                                             .WithLeadingTrivia( ElasticLineFeed )
+                                            .AddGeneratedCodeAnnotation()
                                         : null,
                                     linkedBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                                     this._labelUsed
@@ -77,6 +79,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                                                 Identifier( this.ReturnLabelName.AssertNotNull() ),
                                                 EmptyStatement() )
                                             .WithLeadingTrivia( ElasticLineFeed )
+                                            .AddGeneratedCodeAnnotation()
                                             .AddLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyLabeledStatement )
                                         : null
                                 }.Where( x => x != null )
@@ -90,28 +93,15 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         }
 
         public static InliningContext Create( LinkerRewritingDriver rewritingDriver, IMethodSymbol targetDeclaration )
-        {
-            return new( rewritingDriver, targetDeclaration );
-        }
+            => new( rewritingDriver, targetDeclaration );
 
         public InliningContext WithDeclaredReturnLocal( IMethodSymbol currentDeclaration )
-        {
-            return new( this, currentDeclaration, $"__aspect_return_{this._depth}", true );
-        }
+            => new( this, currentDeclaration, $"__aspect_return_{this._depth}", true );
 
-        public InliningContext WithReturnLocal( IMethodSymbol currentDeclaration, string valueText )
-        {
-            return new( this, currentDeclaration, valueText );
-        }
+        public InliningContext WithReturnLocal( IMethodSymbol currentDeclaration, string valueText ) => new( this, currentDeclaration, valueText );
 
-        internal InliningContext WithDiscard( IMethodSymbol currentDeclaration )
-        {
-            return new( this, currentDeclaration, null );
-        }
+        internal InliningContext WithDiscard( IMethodSymbol currentDeclaration ) => new( this, currentDeclaration, null );
 
-        public void UseLabel()
-        {
-            this._labelUsed = true;
-        }
+        public void UseLabel() => this._labelUsed = true;
     }
 }

@@ -11,13 +11,13 @@ namespace Caravela.Framework.IntegrationTests.Aspects.AspectMemberRef.Introduced
         [Introduce]
         void IntroducedMethod1( string name ) 
         {
-            this.IntroducedMethod2( meta.Method.Name);
+            this.IntroducedMethod2( meta.Target.Method.Name);
         }
         
         [Introduce]
         void IntroducedMethod2( string name ) 
         {
-            this.IntroducedMethod1( meta.Method.Name);
+            this.IntroducedMethod1( meta.Target.Method.Name);
         }
         
     }

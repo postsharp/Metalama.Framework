@@ -3,9 +3,11 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Tests.Integration.Tests.Linker;
+using FakeItEasy;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -18,7 +20,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 #pragma warning disable CA1305 // Specify IFormatProvider
 
-namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
+namespace Caravela.Framework.Tests.Integration.Runners.Linker
 {
     internal partial class LinkerTestInputBuilder
     {
@@ -76,8 +78,6 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
 
             public ServiceProvider ServiceProvider { get; }
 
-            public CompileTimeProject CompileTimeProject { get; }
-
             public TestRewriter()
             {
                 this._orderedAspectLayers = new List<AspectLayerId>();
@@ -87,13 +87,6 @@ namespace Caravela.Framework.Tests.InternalPipeline.Runners.Linker
                 this.ServiceProvider = new ServiceProvider();
 
                 this.ServiceProvider.AddService( new Impl.Utilities.UserCodeInvoker( this.ServiceProvider ) );
-
-                this.CompileTimeProject = CompileTimeProject.CreateEmpty(
-                    this.ServiceProvider,
-                    new CompileTimeDomain(),
-                    AssemblyIdentity.FromAssemblyDefinition( Assembly.GetExecutingAssembly() ),
-                    AssemblyIdentity.FromAssemblyDefinition( Assembly.GetExecutingAssembly() ),
-                    null );
             }
 
             public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )

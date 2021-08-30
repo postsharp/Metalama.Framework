@@ -22,7 +22,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
         {
             aspectBuilder.AdviceFactory.ImplementInterface(
-                aspectBuilder.TargetDeclaration,
+                aspectBuilder.Target,
                 typeof(IInterface),
                 whenExists: OverrideStrategy.Ignore);
         }

@@ -80,7 +80,8 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             finalStatements.Add(
                                 LabeledStatement(
-                                    labeledStatement.Identifier,
+                                    labeledStatement.Identifier.AddGeneratedCodeAnnotation(),
+                                    Token( SyntaxKind.ColonToken ).AddGeneratedCodeAnnotation(),
                                     newStatements[i + 1] ) );
 
                             i++;

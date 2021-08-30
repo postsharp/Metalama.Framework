@@ -13,13 +13,13 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Samples.CompileTime
     {
         public override dynamic? OverrideMethod()
         {
-            if (meta.Method.IsStatic)
+            if (meta.Target.Method.IsStatic)
             {
-                Console.WriteLine($"Invoking {meta.Method.ToDisplayString()}");
+                Console.WriteLine($"Invoking {meta.Target.Method.ToDisplayString()}");
             }
             else
             {
-                Console.WriteLine($"Invoking {meta.Method.ToDisplayString()} on instance {meta.This.ToString()}.");
+                Console.WriteLine($"Invoking {meta.Target.Method.ToDisplayString()} on instance {meta.This.ToString()}.");
             }
 
             return meta.Proceed();

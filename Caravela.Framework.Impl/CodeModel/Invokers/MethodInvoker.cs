@@ -79,13 +79,13 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                     this._method.GenericArguments.Select( a => a.GetSymbol() ) )
                 : SyntaxFactory.IdentifierName( this._method.Name );
 
-            var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromValue( args ) );
+            var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromValue( args, this.Compilation ) );
 
             if ( this._method.MethodKind == MethodKind.LocalFunction )
             {
-                var instanceExpression = RuntimeExpression.FromValue( instance );
+                var instanceExpression = RuntimeExpression.FromValue( instance, this.Compilation );
 
-                if ( instanceExpression != null )
+                if ( instanceExpression.Syntax.Kind() != SyntaxKind.NullLiteralExpression )
                 {
                     throw GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction.CreateException( this._method );
                 }
@@ -95,11 +95,10 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                             name
                                 .WithAspectReferenceAnnotation( this.AspectReference ) )
                         .AddArgumentListArguments( arguments ),
-                    this._method.ReturnType,
-                    false );
+                    this._method.ReturnType );
             }
 
-            var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromValue( instance! ) );
+            var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromValue( instance!, this.Compilation ) );
 
             if ( this._invokerOperator == InvokerOperator.Default )
             {
@@ -108,7 +107,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                             .WithAspectReferenceAnnotation( this.AspectReference ) )
                     .AddArgumentListArguments( arguments );
 
-                return new DynamicExpression( invocationExpression, this._method.ReturnType, false );
+                return new DynamicExpression( invocationExpression, this._method.ReturnType );
             }
             else
             {
@@ -118,7 +117,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                             .AddArgumentListArguments( arguments ) )
                     .WithAspectReferenceAnnotation( this.AspectReference );
 
-                return new DynamicExpression( invocationExpression, this._method.ReturnType.MakeNullable(), false );
+                return new DynamicExpression( invocationExpression, this._method.ReturnType.MakeNullable() );
             }
         }
     }

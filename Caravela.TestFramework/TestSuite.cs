@@ -64,8 +64,7 @@ namespace Caravela.TestFramework
             var testInput = TestInput.FromFile( directoryOptionsReader, projectRelativePath );
             testInput.Options.References.AddRange( TestAssemblyReferenceReader.GetAssemblyReferences( new ReflectionAssemblyInfo( this.GetType().Assembly ) ) );
             var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, this.Logger );
-            var testResult = await testRunner.RunTestAsync( testInput );
-            testRunner.ExecuteAssertions( testInput, testResult );
+            await testRunner.RunAndAssertAsync( testInput );
         }
     }
 }

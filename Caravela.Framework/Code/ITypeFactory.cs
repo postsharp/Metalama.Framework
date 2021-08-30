@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code.Types;
 using System;
 
@@ -9,6 +10,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Allows to get instances of the <see cref="IType"/> interface or to test for type equality or inheritance.
     /// </summary>
+    [CompileTimeOnly]
     public interface ITypeFactory
     {
         /// <summary>
@@ -52,7 +54,10 @@ namespace Caravela.Framework.Code
         T MakeNullable<T>( T type )
             where T : IType;
 
-        IType GetSpecialType( SpecialType specialType );
+        /// <summary>
+        /// Gets a <see cref="INamedType"/> representing a given <see cref="SpecialType"/>.
+        /// </summary>
+        INamedType GetSpecialType( SpecialType specialType );
 
         /// <summary>
         /// Gets a run-time value that corresponds to the default value of a specified type.
@@ -61,6 +66,12 @@ namespace Caravela.Framework.Code
         /// <returns></returns>
         dynamic? DefaultValue( IType type );
 
+        /// <summary>
+        /// Get a run-time value cast to a given type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         dynamic? Cast( IType type, object? value );
     }
 }

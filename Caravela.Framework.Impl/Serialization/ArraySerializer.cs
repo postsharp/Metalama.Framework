@@ -47,6 +47,6 @@ namespace Caravela.Framework.Impl.Serialization
 
         public override Type InputType => typeof(Array);
 
-        public override Type OutputType => throw new NotSupportedException();
+        public override Type? OutputType => throw new NotSupportedException();
     }
 }

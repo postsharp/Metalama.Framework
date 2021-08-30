@@ -10,29 +10,29 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal class OverrideEventAdvice : OverrideMemberAdvice<IEvent>
     {
-        public IEvent? TemplateEvent { get; }
+        public Template<IEvent> EventTemplate { get; }
 
-        public IMethod? AddTemplateMethod { get; }
+        public Template<IMethod> AddTemplate { get; }
 
-        public IMethod? RemoveTemplateMethod { get; }
+        public Template<IMethod> RemoveTemplate { get; }
 
         public OverrideEventAdvice(
             AspectInstance aspect,
             IEvent targetDeclaration,
-            IEvent? templateEvent,
-            IMethod? addTemplateMethod,
-            IMethod? removeTemplateMethod,
-            string layerName,
+            Template<IEvent> eventTemplate,
+            Template<IMethod> addTemplate,
+            Template<IMethod> removeTemplate,
+            string? layerName,
             Dictionary<string, object?>? tags )
             : base( aspect, targetDeclaration, layerName, tags )
         {
             // We need either property template or both accessor templates, but never both.
-            Invariant.Assert( templateEvent != null || (addTemplateMethod != null && removeTemplateMethod != null) );
-            Invariant.Assert( !(templateEvent != null && (addTemplateMethod != null || removeTemplateMethod != null)) );
+            Invariant.Assert( eventTemplate.IsNotNull || (addTemplate.IsNotNull && removeTemplate.IsNotNull) );
+            Invariant.Assert( !(eventTemplate.IsNotNull && (addTemplate.IsNotNull || removeTemplate.IsNotNull)) );
 
-            this.TemplateEvent = templateEvent;
-            this.AddTemplateMethod = addTemplateMethod;
-            this.RemoveTemplateMethod = removeTemplateMethod;
+            this.EventTemplate = eventTemplate;
+            this.AddTemplate = addTemplate;
+            this.RemoveTemplate = removeTemplate;
         }
 
         public override void Initialize( IReadOnlyList<Advice>? declarativeAdvices, IDiagnosticAdder diagnosticAdder ) { }
@@ -43,9 +43,9 @@ namespace Caravela.Framework.Impl.Advices
                 new OverriddenEvent(
                     this,
                     this.TargetDeclaration,
-                    this.TemplateEvent,
-                    this.AddTemplateMethod,
-                    this.RemoveTemplateMethod ) );
+                    this.EventTemplate,
+                    this.AddTemplate,
+                    this.RemoveTemplate ) );
         }
     }
 }

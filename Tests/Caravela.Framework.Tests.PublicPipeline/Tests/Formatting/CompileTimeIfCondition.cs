@@ -33,13 +33,13 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
             {
                 runTimeObject.RunTimeMethod();
                 compileTimeObject.CompileTimeMethod();
-                meta.Method.ToString();
+                meta.Target.Method.ToString();
             }
             else
             {
                 runTimeObject.RunTimeMethod();
                 compileTimeObject.CompileTimeMethod();
-                meta.Method.ToString();
+                meta.Target.Method.ToString();
             }
 
             return meta.Proceed();

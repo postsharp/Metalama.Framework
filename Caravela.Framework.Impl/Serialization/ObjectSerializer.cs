@@ -47,11 +47,28 @@ namespace Caravela.Framework.Impl.Serialization
 
         public abstract Type InputType { get; }
 
-        public abstract Type OutputType { get; }
+        /// <summary>
+        /// Gets the run-time type, or <c>null</c> if the type is unknown by the serializer, then it is assumed to be
+        /// the same as the input type.
+        /// </summary>
+        public abstract Type? OutputType { get; }
 
         public virtual ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray<Type>.Empty;
 
-        public ImmutableArray<Type> AllSupportedTypes => this.AdditionalSupportedTypes.Add( this.InputType ).Add( this.OutputType );
+        public ImmutableArray<Type> AllSupportedTypes
+        {
+            get
+            {
+                var types = this.AdditionalSupportedTypes.Add( this.InputType );
+
+                if ( this.OutputType != null )
+                {
+                    types = types.Add( this.OutputType );
+                }
+
+                return types;
+            }
+        }
 
         public virtual int Priority => 0;
     }

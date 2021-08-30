@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Sdk;
+using Caravela.Framework.Impl.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl
                 .ToLookup( weaver => weaver.GetType().GetCustomAttribute<AspectWeaverAttribute>().AspectType.FullName );
         }
 
-        public IAspectDriver GetAspectDriver( INamedTypeSymbol type )
+        public IAspectDriver GetAspectDriver( AspectClass aspectClass, INamedTypeSymbol type )
         {
             var weavers = this._weaverTypes[type.GetReflectionNameSafe()].ToList();
 
@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl
                 return weavers.Single();
             }
 
-            return new AspectDriver( this._serviceProvider, type, this._compilation );
+            return new AspectDriver( this._serviceProvider, aspectClass, this._compilation );
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.Integration.PatternMatching.PropertyPattern
             meta.Comment("a1 = " + a1 );  
           
             // Run-time
-            var a2 = meta.Parameters[0].Value is >= 0 and < 5;
+            var a2 = meta.Target.Parameters[0].Value is >= 0 and < 5;
                     
             return meta.Proceed();
         }

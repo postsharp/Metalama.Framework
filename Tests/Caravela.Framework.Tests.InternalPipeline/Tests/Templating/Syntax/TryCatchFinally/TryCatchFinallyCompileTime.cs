@@ -17,12 +17,12 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
             }
             catch
             {
-                Console.WriteLine(meta.Parameters.Count);
+                Console.WriteLine(meta.Target.Parameters.Count);
                 
             }
             finally
             {
-                Console.WriteLine(meta.Parameters.Count);
+                Console.WriteLine(meta.Target.Parameters.Count);
             }
 
             return meta.Proceed();

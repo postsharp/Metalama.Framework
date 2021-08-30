@@ -3,13 +3,17 @@
     <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.props" />
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <LangVersion>9.0</LangVersion>
     <IsPackable>false</IsPackable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
      <CaravelaTestAutoExclude>False</CaravelaTestAutoExclude>
      <CaravelaTestGenerateDefaultRunner>False</CaravelaTestGenerateDefaultRunner>
      <RootNamespace>Caravela.Framework.Tests.Integration</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1591,1572,1573,CS8892</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,6 +39,10 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Tests\Aspects\AsyncIterators\NormalTemplate.t.cs" />
   </ItemGroup>
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />

@@ -7,7 +7,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

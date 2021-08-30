@@ -210,11 +210,12 @@ namespace Caravela.Framework.Impl.Linking
             {
                 return
                     GotoStatement(
-                        SyntaxKind.GotoStatement,
-                        Token( SyntaxKind.GotoKeyword ).WithLeadingTrivia( ElasticLineFeed ).WithTrailingTrivia( ElasticSpace ),
-                        default,
-                        IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                        Token( SyntaxKind.SemicolonToken ) );
+                            SyntaxKind.GotoStatement,
+                            Token( SyntaxKind.GotoKeyword ).WithLeadingTrivia( ElasticLineFeed ).WithTrailingTrivia( ElasticSpace ),
+                            default,
+                            IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
+                            Token( SyntaxKind.SemicolonToken ) )
+                        .AddGeneratedCodeAnnotation();
             }
         }
 
@@ -588,13 +589,13 @@ namespace Caravela.Framework.Impl.Linking
             return introducedMember.AssertNotNull().Introduction.Advice.Aspect;
         }
 
-        internal static string GetOriginalImplMemberName( ISymbol symbol )
-            => GetSpecialMemberName( symbol, "OriginalImpl" );
+        private static string GetOriginalImplMemberName( ISymbol symbol )
+            => GetSpecialMemberName( symbol, "Source" );
 
-        internal static string GetEmptyImplMemberName( ISymbol symbol )
-            => GetSpecialMemberName( symbol, "EmptyImpl" );
+        private static string GetEmptyImplMemberName( ISymbol symbol )
+            => GetSpecialMemberName( symbol, "Empty" );
 
-        internal static string GetSpecialMemberName( ISymbol symbol, string suffix )
+        private static string GetSpecialMemberName( ISymbol symbol, string suffix )
         {
             switch ( symbol )
             {
@@ -632,7 +633,17 @@ namespace Caravela.Framework.Impl.Linking
                     throw new AssertionFailedException();
             }
 
-            static string CreateName( string name, string suffix ) => $"__{name}__{suffix}";
+            string CreateName( string name, string suffix)
+            {
+                var hint = $"{name}_{suffix}";
+
+                for ( var i = 2; symbol.ContainingType.GetMembers( hint ).Any(); i++ )
+                {
+                    hint = $"{name}_{suffix}{i}";
+                }
+
+                return hint;
+            }
         }
 
         private static string GetBackingFieldName( ISymbol symbol )

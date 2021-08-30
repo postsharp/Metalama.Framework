@@ -102,6 +102,11 @@ namespace Caravela.TestFramework
         internal bool? AllowCompileTimeDynamicCode { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the `Program.Main` method should be executed if it exists. The default value is <c>true</c>.
+        /// </summary>
+        public bool? ExecuteProgram { get; set; }
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
@@ -133,6 +138,8 @@ namespace Caravela.TestFramework
 
             this.AllowCompileTimeDynamicCode ??= baseOptions.AllowCompileTimeDynamicCode;
 
+            this.ExecuteProgram ??= baseOptions.ExecuteProgram;
+
             if ( !this.ClearIgnoredDiagnostics.GetValueOrDefault() )
             {
                 this.IgnoredDiagnostics.AddRange( baseOptions.IgnoredDiagnostics );
@@ -154,7 +161,7 @@ namespace Caravela.TestFramework
                 }
 
                 var optionName = option.Groups["name"].Value;
-                var optionArg = (option.Groups["arg"]?.Value ?? "").Trim();
+                var optionArg = option.Groups["arg"].Value;
 
                 switch ( optionName )
                 {

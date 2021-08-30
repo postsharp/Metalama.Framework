@@ -1,32 +1,31 @@
 internal class TargetClass
-    {
-        private HashSet<EventHandler> handlers = new HashSet<EventHandler>();
-    
-        [Override]
-        public event EventHandler Event
-{add    {
-        global::System.Console.WriteLine("This is the add template.");
-                Console.WriteLine("This is the original add.");
-                this.handlers.Add(value);
+{
+    private HashSet<EventHandler> handlers = new HashSet<EventHandler>();
+
+    [Override]
+    public event EventHandler Event
+    {add    {
+            global::System.Console.WriteLine("This is the add template.");
+            Console.WriteLine("This is the original add.");
+            this.handlers.Add(value);
+        }
+
+        remove    {
+            global::System.Console.WriteLine("This is the remove template.");
+            Console.WriteLine("This is the original remove.");
+            this.handlers.Remove(value);
+        }
     }
-    
-remove    {
-        global::System.Console.WriteLine("This is the remove template.");
-                Console.WriteLine("This is the original remove.");
-                this.handlers.Remove(value);
-    }
-}
-    
+
 private EventHandler? _eventField;
-    
-    
-        public event EventHandler? EventField{add    {
-        global::System.Console.WriteLine("This is the add template.");
+
+
+    public event EventHandler? EventField{add    {
+            global::System.Console.WriteLine("This is the add template.");
 this._eventField += value;    }
-    
-remove    {
-        global::System.Console.WriteLine("This is the remove template.");
+
+        remove    {
+            global::System.Console.WriteLine("This is the remove template.");
 this._eventField -= value;    }
-}
-    
+    }
 }

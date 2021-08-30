@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-    internal class DiagnosticList : IDiagnosticAdder, IReadOnlyList<Diagnostic>
+    public class DiagnosticList : IDiagnosticAdder, IReadOnlyList<Diagnostic>
     {
         private List<Diagnostic>? _list;
 

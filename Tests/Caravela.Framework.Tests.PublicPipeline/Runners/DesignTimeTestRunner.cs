@@ -25,9 +25,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
             ITestOutputHelper? logger )
             : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
-        public override async Task<TestResult> RunTestAsync( TestInput testInput )
+        private protected override async Task<TestResult> RunAsync( TestInput testInput, Dictionary<string, object?> state )
         {
-            var testResult = await base.RunTestAsync( testInput );
+            var testResult = await base.RunAsync( testInput, state );
 
             using var buildOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var pipeline = new DesignTimeAspectPipeline( buildOptions, domain, true );
             var pipelineResult = pipeline.Execute( PartialCompilation.CreateComplete( testResult.InputCompilation! ), CancellationToken.None );
 
-            testResult.Report( pipelineResult.Diagnostics.ReportedDiagnostics );
+            testResult.PipelineDiagnostics.Report( pipelineResult.Diagnostics.ReportedDiagnostics );
 
             if ( pipelineResult.Success )
             {

@@ -10,12 +10,12 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Initialize.HasAspec
     {
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            if (!builder.TargetDeclaration.Aspects<Aspect>().Any())
+            if (!builder.Target.Aspects<Aspect>().Any())
             {
                 throw new Exception();
             }
             
-            if (builder.TargetDeclaration.DeclaringType.Methods.OfName( "NoAspect" ).Single().Aspects<Aspect>().Any() )
+            if (builder.Target.DeclaringType.Methods.OfName( "NoAspect" ).Single().Aspects<Aspect>().Any() )
             {
                 throw new Exception();
             }

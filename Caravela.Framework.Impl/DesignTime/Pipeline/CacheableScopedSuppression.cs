@@ -2,8 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.DesignTime.Pipeline

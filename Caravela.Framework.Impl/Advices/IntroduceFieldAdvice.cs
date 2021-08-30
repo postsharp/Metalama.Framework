@@ -14,25 +14,23 @@ namespace Caravela.Framework.Impl.Advices
     // ReSharper disable once UnusedType.Global
     // TODO: Use this type and remove the warning waiver.
 
-    internal class IntroduceFieldAdvice : IntroduceMemberAdvice<FieldBuilder>
+    internal class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, FieldBuilder>
     {
         public IFieldBuilder Builder => this.MemberBuilder;
 
         public new INamedType TargetDeclaration => base.TargetDeclaration!;
 
-        public new IField? TemplateMember => (IField?) base.TemplateMember;
-
         public IntroduceFieldAdvice(
             AspectInstance aspect,
             INamedType targetDeclaration,
             string? explicitName,
-            IField? fieldTemplate,
+            Template<IField> fieldTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName )
             : base( aspect, targetDeclaration, fieldTemplate, scope, overrideStrategy, layerName, null )
         {
-            this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, (explicitName ?? fieldTemplate?.Name).AssertNotNull() );
+            this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, (explicitName ?? fieldTemplate.Declaration?.Name).AssertNotNull() );
         }
 
         public override void Initialize( IReadOnlyList<Advice> declarativeAdvices, IDiagnosticAdder diagnosticAdder )

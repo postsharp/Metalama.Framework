@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.NameCla
         [TestTemplate]
         dynamic? Template()
         {
-            foreach (var p in meta.Parameters)
+            foreach (var p in meta.Target.Parameters)
             {
                 string text = p.Name + " = " + p.Value;
                 Console.WriteLine(text);
