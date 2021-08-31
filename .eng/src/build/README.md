@@ -59,7 +59,7 @@ This section describes centralized NuGet packages metadata management.
 
 ### Installation and configuration
 
-1. Create `.engineering-local\Packaging.props` file. The content should look like this:
+1. Create `.eng\Packaging.props` file. The content should look like this:
 
 ```
 <Project>
@@ -89,10 +89,10 @@ This section describes centralized NuGet packages metadata management.
 3. Import the file from the first step in `Directory.Build.props`:
 
 ```
-  <Import Project=".engineering-local\Packaging.props" />
+  <Import Project=".eng\Packaging.props" />
 ```
 
-Now all the packages creted from the repository will contain the metadata configured in the `.engineering-local\Packaging.props` file.
+Now all the packages creted from the repository will contain the metadata configured in the `.eng\Packaging.props` file.
 
 ## Versioning
 
@@ -100,11 +100,11 @@ This section describes centralized version management.
 
 ### Installation and configuration
 
-In this how-to, we use the name `[Product]` as a placeholder for the name of the product contained in a specific repository containing the `.engineering` subtree.
+In this how-to, we use the name `[Product]` as a placeholder for the name of the product contained in a specific repository containing the `.eng\src` subtree.
 
-1. Add `.engineering-local\[Product]Version.props` to `.gitignore`.
+1. Add `.eng\[Product]Version.props` to `.gitignore`.
 
-2. Create `.engineering-local\MainVersion.props` file. The content should look like:
+2. Create `.eng\MainVersion.props` file. The content should look like:
 
 ```
 <Project>
@@ -116,7 +116,7 @@ In this how-to, we use the name `[Product]` as a placeholder for the name of the
 </Project>
 ```
 
-3. Create `.engineering-local\Versions.props` file. The content should look like:
+3. Create `.eng\Versions.props` file. The content should look like:
 
 ```
 <Project>
@@ -150,18 +150,18 @@ In this how-to, we use the name `[Product]` as a placeholder for the name of the
 4. Add the following import to `Directory.Build.props`:
 
 ```
-  <Import Project=".engineering-local\Versions.props" />
+  <Import Project=".eng\Versions.props" />
 ```
 
 ### Usage
 
 #### Product package version and package version suffix configuration
 
-The product package version and package version suffix configuration is centralized in the `.engineering-local\MainVersion.props` script via the `MainVersion` and `PackageVersionSuffix` properties, respectively. For RTM products, leave the `PackageVersionSuffix` property value empty.
+The product package version and package version suffix configuration is centralized in the `.eng\MainVersion.props` script via the `MainVersion` and `PackageVersionSuffix` properties, respectively. For RTM products, leave the `PackageVersionSuffix` property value empty.
 
 #### Package dependencies versions configuration
 
-Package dependecies vesrions configuration is centralized in the `.engineering-local\Versions.props` script. Each dependency version is configured in a property named `<[DependencyName]Version>`, eg. `<SystemCollectionsImmutableVersion>`.
+Package dependecies vesrions configuration is centralized in the `.eng\Versions.props` script. Each dependency version is configured in a property named `<[DependencyName]Version>`, eg. `<SystemCollectionsImmutableVersion>`.
 
 This property value is then available in all MSBuild project files in the repository and can be used in the `PackageReference` items. For example:
 
@@ -173,11 +173,11 @@ This property value is then available in all MSBuild project files in the reposi
 
 #### Local build and testing
 
-See the initial comments in the `.engineering\build\Build.ps1` script for details.
+See the initial comments in the `.eng\src\build\Build.ps1` script for details.
 
 #### Local package referencing
 
-Local NuGet packages creating using the `.engineering\build\Build.ps1` script can be referenced in other repositories using the following steps:
+Local NuGet packages creating using the `.eng\src\build\Build.ps1` script can be referenced in other repositories using the following steps:
 
 1. Add the following import to `Directory.Build.props`.
 

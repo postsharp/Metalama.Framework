@@ -14,7 +14,7 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
 
 $CurrentDir = $(get-location).Path
 
-& ./tools/SignClient Sign --baseDirectory $CurrentDir\publish\ --input *.nupkg --config $CurrentDir\.engineering\deploy\signclient-appsettings.json --name $ProjectName --user sign-caravela@postsharp.net --secret $Env:SIGNSERVER_SECRET
+& ./tools/SignClient Sign --baseDirectory $CurrentDir\publish\ --input *.nupkg --config $CurrentDir\.eng\src\deploy\signclient-appsettings.json --name $ProjectName --user sign-caravela@postsharp.net --secret $Env:SIGNSERVER_SECRET
 
 if (!$?) {
 	throw "Signing failed."

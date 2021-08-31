@@ -9,7 +9,7 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
 }
 
 # Update/initialize the engineering subtree.
-$EngineeringDirectory = ".engineering"
+$EngineeringDirectory = ".eng\src"
 
 $EditorConfigFile = ".\.editorconfig"
 

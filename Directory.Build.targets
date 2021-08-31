@@ -1,5 +1,5 @@
 <Project>
 
-    <Import Project=".engineering\build\AssemblyMetadata.targets" />
+    <Import Project=".eng\src\build\AssemblyMetadata.targets" />
 
 </Project>

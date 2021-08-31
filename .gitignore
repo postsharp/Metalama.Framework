@@ -42,4 +42,4 @@ _ReSharper*/
 /tools/
 **/inspectcode.xml
 /.local
-/.engineering-local/CaravelaVersion.props
+/.eng/CaravelaVersion.props

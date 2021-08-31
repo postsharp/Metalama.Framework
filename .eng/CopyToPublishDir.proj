@@ -19,6 +19,6 @@
     </PropertyGroup>
 
     <Import Project="Directory.Build.props" />
-    <Import Project=".engineering\deploy\CopyToPublishDir.targets" />
+    <Import Project="$(MSBuildThisFileDirectory)\src\deploy\CopyToPublishDir.targets" />
 
 </Project>

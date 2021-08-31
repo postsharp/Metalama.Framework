@@ -24,7 +24,7 @@
                           Version="1.2.0-beta.333"
                           Condition="'$(EnforceCodeStyleInBuild)'=='True'"
                           PrivateAssets="All" />
-        <Content Include="$(MSBuildThisFileDirectory)\.engineering\referenced\stylecop.json"
+        <Content Include="$(MSBuildThisFileDirectory)\stylecop.json"
                  Condition="'$(EnforceCodeStyleInBuild)'=='True'"
                  Pack="false" />
     </ItemGroup>

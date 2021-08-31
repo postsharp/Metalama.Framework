@@ -10,7 +10,7 @@ Make sure you have read and understood [PostSharp Engineering](../README.md) bef
 
 1. Set up continuos integration as described at [PostSharp Engineering: Build Features](../build/README.md#continuous-integration).
 
-2. Create `.engineering-local\CopyToPublishDir.proj` file. The content should look like this:
+2. Create `.eng\CopyToPublishDir.proj` file. The content should look like this:
 
 ```
 <Project>
@@ -30,7 +30,7 @@ Make sure you have read and understood [PostSharp Engineering](../README.md) bef
     </PropertyGroup>
 
     <Import Project="..\Directory.Build.props" />
-    <Import Project="..\.engineering\deploy\CopyToPublishDir.targets" />
+    <Import Project="..\.eng\src\deploy\CopyToPublishDir.targets" />
 
 </Project>
 ```
@@ -43,8 +43,8 @@ Build steps:
 | - | ---- | ---- | ------------- |
 | 1 | Restore | .NET | Command: restore |
 | 2 | Build and Pack | .NET | Command: pack; Configuration: Release |
-| 3 | Copy to 'publish' directory | .NET | Command: msbuild; Projects: .engineering-local/CopyToPublishDir.proj; MSBuild version: Cross-platform MSBuild |
-| 4 | Sign and Verify | PowerShell | Format stderr output as: error; Script: File; Script file: .engineering/deploy/SignAndVerify.ps1; Script arguments: %env.TEAMCITY_PROJECT_NAME% |
+| 3 | Copy to 'publish' directory | .NET | Command: msbuild; Projects: .eng/CopyToPublishDir.proj; MSBuild version: Cross-platform MSBuild |
+| 4 | Sign and Verify | PowerShell | Format stderr output as: error; Script: File; Script file: .eng\src/deploy/SignAndVerify.ps1; Script arguments: %env.TEAMCITY_PROJECT_NAME% |
 
 Artifact paths:
 

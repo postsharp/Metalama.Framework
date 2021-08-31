@@ -1,13 +1,13 @@
 <Project>
 
-    <Import Project=".engineering-local\Versions.props" />
-    <Import Project=".engineering-local\Packaging.props" />
+    <Import Project=".eng\Versions.props" />
+    <Import Project=".eng\Packaging.props" />
 
     <!-- Imports a script that exports a few MSBuild properties to the compiler. We try to import and not to copy to avoid duplication. -->
     <Import Project="Caravela.Framework.Package\Caravela.CompilerVisibleProperties.props" />
 
-    <Import Project=".engineering\build\BuildOptions.props" />
-    <Import Project=".engineering\style\CodeQuality.props" />
-    <Import Project=".engineering\build\SourceLink.props" />
+    <Import Project=".eng\src\build\BuildOptions.props" />
+    <Import Project=".eng\src\style\CodeQuality.props" />
+    <Import Project=".eng\src\build\SourceLink.props" />
 
 </Project>
