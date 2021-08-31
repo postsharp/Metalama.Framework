@@ -29,8 +29,8 @@ Make sure you have read and understood [PostSharp Engineering](../README.md) bef
         <Configuration>Release</Configuration>
     </PropertyGroup>
 
-    <Import Project="..\Directory.Build.props" />
-    <Import Project="..\.eng\src\deploy\CopyToPublishDir.targets" />
+    <Import Project="$(MSBuildThisFileDirectory)\..\Directory.Build.props" />
+    <Import Project="$(MSBuildThisFileDirectory)\src\deploy\CopyToPublishDir.targets" />
 
 </Project>
 ```
