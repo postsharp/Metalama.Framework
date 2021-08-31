@@ -1,19 +1,21 @@
 ﻿# This is the main build script. It is not required to run it before loading the projects in the IDE.
 # Main use cases:
 #  1. Create development NuGet packages:
-#         Build.ps1 -Local
+#         Build.ps1 $(ProductName) -Local
 #  2. Run the complete test suite in a development environment:
-#         Build.ps1 -Local -Test
+#         Build.ps1 $(ProductName) -Local -Test
 #  3. TeamCity: build debug packages and run tests:
-#         Build.ps1 -Numbered <NUMBER> -Test
+#         Build.ps1 $(ProductName) -Numbered <NUMBER> -Test
 #  4. TeamCity: build release packages and run tests:
-#         Build.ps1 -Public -Release -Test
+#         Build.ps1 $(ProductName) -Public -Release -Test
 
 
 param ( 
 
+[string] $ProductName,
+
 # Creates a release build instead of a debug one
-[switch] $Release = $false, 
+[switch] $Release = $false,
 
 # Creates a local build with a version number based on a timestamp (typically a development build)
 [switch] $Local = $false, 
@@ -39,7 +41,10 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
     throw "This script has to run in a GIT repository root!"
 }
 
-$ProductName = $(Select-Xml '/Project/PropertyGroup/ProductName/text()' .\.eng\MainVersion.props).Node.Value
+If ( [string]::IsNullOrEmpty( $ProductName ) ) {
+    throw "Product name is not set."
+}
+
 $PropsFilePath = ".eng\$($ProductName)Version.props"
 
 if ( $Release ) {

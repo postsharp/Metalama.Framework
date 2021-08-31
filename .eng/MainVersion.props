@@ -1,6 +1,5 @@
 <Project>
     <PropertyGroup>
-        <ProductName>Caravela</ProductName>
         <MainVersion>0.3.6</MainVersion>
         <PackageVersionSuffix>-preview</PackageVersionSuffix>
     </PropertyGroup>

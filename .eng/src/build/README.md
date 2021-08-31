@@ -109,7 +109,6 @@ In this how-to, we use the name `[Product]` as a placeholder for the name of the
 ```
 <Project>
     <PropertyGroup>
-        <ProductName>[Product]</ProductName>
         <MainVersion>0.3.6</MainVersion>
         <PackageVersionSuffix>-preview</PackageVersionSuffix>
     </PropertyGroup>
@@ -153,6 +152,12 @@ In this how-to, we use the name `[Product]` as a placeholder for the name of the
   <Import Project=".eng\Versions.props" />
 ```
 
+5. Create `.eng\Build.ps1` file. The content should look like:
+
+```
+Invoke-Expression "& .eng/src/build/Build.ps1 [Product] $args"
+```
+
 ### Usage
 
 #### Product package version and package version suffix configuration
@@ -173,7 +178,7 @@ This property value is then available in all MSBuild project files in the reposi
 
 #### Local build and testing
 
-See the initial comments in the `.eng\src\build\Build.ps1` script for details.
+See the initial comments in the `.eng\src\build\Build.ps1` script for details. Use the `.eng\Build.ps1` instead and ommit the `$ProductName` parameter as this is provided by the facade.
 
 #### Local package referencing
 
@@ -185,19 +190,21 @@ Local NuGet packages creating using the `.eng\src\build\Build.ps1` script can be
 <Import Project="[PathToReferencedRepo]\[ReferencedProduct]Version.props" Condition="Exists('.local')"/>
 ```
 
-> TODO: Should we generate the `.local` file?
-
 2. In the dependencies version, set the default version of the referenced package:
 
 ```
 <[ReferencedProduct]Version Condition="'$([ReferencedProduct]Version)'==''">0.3.6-preview</[ReferencedProduct]Version>
 ```
 
+This version will be used instead of the local build by default.
+
 3. Add a package reference to projects where required:
 
 ```
 <PackageReference Include="[ReferencedPackage]" Version="$([ReferencedProduct]Version)" />
 ```
+
+1. To use the local build instead of the published one, create an empty file `.local`.
 
 ## Continuous integration
 
