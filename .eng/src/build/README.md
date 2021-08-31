@@ -15,7 +15,7 @@ Make sure you have read and understood [PostSharp Engineering](../README.md) bef
     - [SourceLink.props](#sourcelinkprops)
   - [NuGet packages metadata](#nuget-packages-metadata)
     - [Installation and configuration](#installation-and-configuration)
-  - [Versioning](#versioning)
+  - [Versioning, building and packaging](#versioning-building-and-packaging)
     - [Installation and configuration](#installation-and-configuration-1)
     - [Usage](#usage)
       - [Product package version and package version suffix configuration](#product-package-version-and-package-version-suffix-configuration)
@@ -94,9 +94,9 @@ This section describes centralized NuGet packages metadata management.
 
 Now all the packages creted from the repository will contain the metadata configured in the `.eng\Packaging.props` file.
 
-## Versioning
+## Versioning, building and packaging
 
-This section describes centralized version management.
+This section describes centralized main version and dependencies version management, cross-repo dependencies, building and packaging.
 
 ### Installation and configuration
 
