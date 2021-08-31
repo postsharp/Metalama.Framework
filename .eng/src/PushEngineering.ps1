@@ -7,4 +7,6 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
 }
 
 # Push the engineering subtree
-& git subtree push --prefix .eng\src https://postsharp@dev.azure.com/postsharp/Caravela/_git/Caravela.Engineering master --squash
+$EngineeringDirectory = ".eng/src"
+
+& git subtree push --prefix $EngineeringDirectory https://postsharp@dev.azure.com/postsharp/Caravela/_git/Caravela.Engineering master --squash
