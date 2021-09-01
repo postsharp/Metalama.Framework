@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 2021-09-01
+### Added
+- `.eng\build\TeamCity.targets` added. Import this file in `Directory.Build.targets` for proper TeamCity integration.
+
+### Changed
+- TeamCity build now uses `.eng\Build.ps1`. Update the TeamCity configuration as [as described](build/README.md).
+
 ## 2021-08-31
 ### Changed
 - `.engineering` and `.engineering-local` moved to `.eng\src` and `.eng`, respectively. Make this change and update references in all affected files.

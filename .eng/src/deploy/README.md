@@ -15,15 +15,6 @@ Make sure you have read and understood [PostSharp Engineering](../README.md) bef
 ```
 <Project>
 
-    <ItemGroup>
-        <!-- This is the list of files that can be published to the public nuget.org -->
-        <!-- To avoid unintended publishing of artefacts, all items must be explicitly specified without wildcard -->
-
-        <ShippedFile Include="$(PackagesDir)\Caravela.Framework.$(Version).nupkg" />
-        <ShippedFile Include="$(PackagesDir)\Caravela.Framework.Redist.$(Version).nupkg" />
-        <ShippedFile Include="$(PackagesDir)\Caravela.Framework.Sdk.$(Version).nupkg" />
-    </ItemGroup>
-
     <PropertyGroup>
         <!-- We only publish release builds -->
         <Configuration>Release</Configuration>
@@ -35,29 +26,7 @@ Make sure you have read and understood [PostSharp Engineering](../README.md) bef
 </Project>
 ```
 
-3. Create "Release Build" build configuration using manual build steps configuration.
-
-Build steps:
-
-| # | Name | Type | Configuration |
-| - | ---- | ---- | ------------- |
-| 1 | Restore | .NET | Command: restore |
-| 2 | Build and Pack | .NET | Command: pack; Configuration: Release |
-| 3 | Copy to 'publish' directory | .NET | Command: msbuild; Projects: .eng/CopyToPublishDir.proj; MSBuild version: Cross-platform MSBuild |
-| 4 | Sign and Verify | PowerShell | Format stderr output as: error; Script: File; Script file: .eng\src/deploy/SignAndVerify.ps1; Script arguments: %env.TEAMCITY_PROJECT_NAME% |
-
-Artifact paths:
-
-```
-publish/*.nupkg => publish
-artifacts/bin/Release/*.nupkg => artifacts/bin/Release
-```
-
-Snapshot dependencies:
-
-- Debug Build and Test
-
-4. Create "Publish Debug to Internal Feed" deployment configuration using manual build steps configuration.
+3. Create "Publish Debug to Internal Feed" deployment configuration using manual build steps configuration.
 
 Build steps:
 
@@ -77,25 +46,25 @@ Artifact dependencies:
 +:artifacts/bin/Debug/*.nupkg => artifacts/bin/Debug
 ```
 
-5. Create "Publish Release to NuGet.Org and Internal Feed" deployment configuration using manual build steps configuration.
+4. Create "Publish Release to NuGet.Org and Internal Feed" deployment configuration using manual build steps configuration.
 
 Build steps:
 
 | # | Name | Type | Configuration |
 | - | ---- | ---- | ------------- |
-| 1 | Push to nuget.org | .NET | Command: NuGet Push; NuGet Packages: publish\*.nupkg; NuGet Server: %env.NUGET_ORG_PUSH_URL%; API key: %env.NUGET_ORG_API_KEY%; Command line parameters: --skip-duplicate |
+| 1 | Push to nuget.org | .NET | Command: NuGet Push; NuGet Packages: artifacts\publish\*.nupkg; NuGet Server: %env.NUGET_ORG_PUSH_URL%; API key: %env.NUGET_ORG_API_KEY%; Command line parameters: --skip-duplicate |
 | 2 | Push to internal feed | .NET | Command: NuGet Push; NuGet Packages: artifacts\bin\Release\*.nupkg; NuGet Server: %env.INTERNAL_NUGET_PUSH_URL%; API key: %env.INTERNAL_NUGET_API_KEY%; Command line parameters: --skip-duplicate |
 
 Snapshot dependencies:
 
 - Debug Build and Test
-- Release build
+- Release Build and Test
 
 Artifact dependencies:
 
-- Release build
+- Release Build and Test
 
 ```
-+:publish/*.nupkg => publish/
++:artifacts/publish/public/*.nupkg => artifacts\publish\public
 +:artifacts/bin/Release/*.nupkg => artifacts\bin\Release
 ```

@@ -1,7 +1,8 @@
 <Project>
 
-    <PropertyGroup>
-        <ContinuousIntegrationBuild Condition="'$(TEAMCITY_VERSION)'!=''">true</ContinuousIntegrationBuild>
+    <PropertyGroup Condition=" '$(ContinuousIntegrationBuild)' == '' ">
+        <!-- Copied from TeamCity.VSTest.TestAdapter package. -->
+        <ContinuousIntegrationBuild Condition=" '$(TEAMCITY_PROJECT_NAME)' != '' or '$(TEAMCITY_VERSION)' != '' ">True</ContinuousIntegrationBuild>
     </PropertyGroup>
 
     <!-- Code quality and documentation -->

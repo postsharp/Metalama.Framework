@@ -1,18 +1,18 @@
 ﻿# This is the main build script. It is not required to run it before loading the projects in the IDE.
 # Main use cases:
 #  1. Create development NuGet packages:
-#         Build.ps1 $(ProductName) -Local
+#         Build.ps1 -ProductName <NAME> -Local
 #  2. Run the complete test suite in a development environment:
-#         Build.ps1 $(ProductName) -Local -Test
+#         Build.ps1 -ProductName <NAME> -Local -Test
 #  3. TeamCity: build debug packages and run tests:
-#         Build.ps1 $(ProductName) -Numbered <NUMBER> -Test
+#         Build.ps1 -ProductName <NAME> -Numbered <NUMBER> -Test
 #  4. TeamCity: build release packages and run tests:
-#         Build.ps1 $(ProductName) -Public -Release -Test
+#         Build.ps1 -ProductName <NAME> -Public -Release -Sign -Test
 
 
 param ( 
 
-[string] $ProductName,
+[Parameter(Mandatory=$true)] [string] $ProductName,
 
 # Creates a release build instead of a debug one
 [switch] $Release = $false,
@@ -26,6 +26,9 @@ param (
 # Creates a public build
 [switch] $Public = $false,
 
+# Sings the public packages (doesn't work without -Public -Release)
+[switch] $Sign = $false,
+
 # Creates $(ProductName)Version.props but does not build the project
 [switch] $Prepare = $false,
 
@@ -35,6 +38,12 @@ param (
 )
 
 $ErrorActionPreference = "Stop"
+
+trap
+{
+    Write-Error $PSItem.ToString()
+    exit 1
+}
 
 # Check that we are in the root of a GIT repository.
 If ( -Not ( Test-Path -Path ".\.git" ) ) {
@@ -73,7 +82,7 @@ function CreateVersionFile() {
         $assemblyVersion = "`$(MainVersion)$timestamp"
     } elseif ( $Numbered -ge 0 ) {
         # Build server build with a build number given by the build server
-        $packageVersion = "`$(MainVersion)-build-$Numbered-$configuration"
+        $packageVersion = "`$(MainVersion)-build-$configuration.$Numbered"
         $assemblyVersion = "`$(MainVersion).$Numbered"
     } elseif ( $Public ) {
         # Public build
@@ -110,19 +119,34 @@ function CreateVersionFile() {
 
 function Restore() {
     & dotnet restore -p:Configuration=$configuration 
-    if ($LASTEXITCODE -ne 0 ) { exit }
+    if ($LASTEXITCODE -ne 0 ) { throw "Restore failed." }
 }
 
 function Pack() {
     & dotnet pack -p:Configuration=$configuration --nologo --no-restore
-    if ($LASTEXITCODE -ne 0 ) { exit }
+    if ($LASTEXITCODE -ne 0 ) { throw "Build failed." }
 
     Write-Host "Build successful" -ForegroundColor Green
 }
 
+function CopyToPublishDir() {
+    & dotnet build .eng\CopyToPublishDir.proj --nologo --no-restore
+    if ($LASTEXITCODE -ne 0 ) { throw "Copying to publish directory failed." }
+
+    Write-Host "Copying to publish directory successful" -ForegroundColor Green
+}
+
+function Sign() {
+    & .\.eng\src\deploy\SignAndVerify.ps1 '$ProductName'
+
+    if ($LASTEXITCODE -ne 0 ) { throw "Package signing and verification failed." }
+
+    Write-Host "Package signing and verification successful" -ForegroundColor Green
+}
+
 function Test() {
     & dotnet test -p:Configuration=$configuration --nologo --no-restore
-    if ($LASTEXITCODE -ne 0 ) { exit }
+    if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
 
     Write-Host "Tests successful" -ForegroundColor Green
 }
@@ -135,6 +159,14 @@ Restore
 
 if ( -not( $Prepare ) ) {
     Pack
+
+    if ( $Public -and $Release ) {
+        CopyToPublishDir
+
+        if ( $Sign ) {
+            Sign
+        }
+    }
 }
 
 if ( $Test ) {

@@ -12,6 +12,7 @@ Make sure you have read and understood [PostSharp Engineering](../README.md) bef
   - [Imported scripts](#imported-scripts)
     - [AssemblyMetadata.targets](#assemblymetadatatargets)
     - [BuildOptions.props](#buildoptionsprops)
+    - [TeamCity.targets](#teamcitytargets)
     - [SourceLink.props](#sourcelinkprops)
   - [NuGet packages metadata](#nuget-packages-metadata)
     - [Installation and configuration](#installation-and-configuration)
@@ -49,6 +50,10 @@ Adds package versions to assembly metadata.
 
 Sets the compiler options like language version, nullability and other build options like output path.
 
+### TeamCity.targets
+
+Enables build and tests reporting to TeamCity.
+
 ### SourceLink.props
 
 Enables SourceLink support.
@@ -79,6 +84,13 @@ This section describes centralized NuGet packages metadata management.
         <None Include="$(MSBuildThisFileDirectory)..\PostSharpIcon.png" Visible="false" Pack="true" PackagePath="" />
         <None Include="$(MSBuildThisFileDirectory)..\LICENSE.md" Visible="false" Pack="true" PackagePath="" />
         <None Include="$(MSBuildThisFileDirectory)..\THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
+    </ItemGroup>
+
+    <!-- This is the list of files that can be published to the public nuget.org -->
+    <!-- To avoid unintended publishing of artefacts, all items must be explicitly specified without wildcard -->    
+    <ItemGroup>
+        <ShippedFile Include="$(PackagesDir)\PostSharp.Backstage.Settings.$(Version).nupkg" />
+        <ShippedFile Include="$(PackagesDir)\PostSharp.Cli.$(Version).nupkg" />
     </ItemGroup>
 
 </Project>
@@ -146,16 +158,23 @@ In this how-to, we use the name `[Product]` as a placeholder for the name of the
 </Project>
 ```
 
-4. Add the following import to `Directory.Build.props`:
+4. Add the following imports to `Directory.Build.props`:
 
 ```
   <Import Project=".eng\Versions.props" />
+  <Import Project=".eng\src\build\BuildOptions.props" />
 ```
 
-5. Create `.eng\Build.ps1` file. The content should look like:
+5. Add the following imports to `Directory.Build.targets`:
 
 ```
-Invoke-Expression "& .eng/src/build/Build.ps1 [Product] $args"
+  <Import Project=".eng\src\build\TeamCity.targets" />
+```
+
+6. Create `.eng\Build.ps1` file. The content should look like:
+
+```
+Invoke-Expression "& .eng/src/build/Build.ps1 -ProductName [Product] $args"
 ```
 
 ### Usage
@@ -178,7 +197,7 @@ This property value is then available in all MSBuild project files in the reposi
 
 #### Local build and testing
 
-See the initial comments in the `.eng\src\build\Build.ps1` script for details. Use the `.eng\Build.ps1` instead and ommit the `$ProductName` parameter as this is provided by the facade.
+See the initial comments in the `.eng\src\build\Build.ps1` script for details. Use the `.eng\Build.ps1` instead and ommit the `ProductName` parameter as this is provided by the facade.
 
 #### Local package referencing
 
@@ -204,7 +223,7 @@ This version will be used instead of the local build by default.
 <PackageReference Include="[ReferencedPackage]" Version="$([ReferencedProduct]Version)" />
 ```
 
-1. To use the local build instead of the published one, create an empty file `.local`.
+4. To use the local build instead of the published one, create an empty file `.local`.
 
 ## Continuous integration
 
@@ -226,10 +245,7 @@ Build steps:
 
 | # | Name | Type | Configuration |
 | - | ---- | ---- | ------------- |
-| 1 | Restore | .NET | Command: restore |
-| 2 | Build | .NET | Command: build; Projects: [projects]; Configuration: Debug; Version suffix: %build.number% |
-| 3 | Test | .NET | Command: test; Projects: [projects]; Options: Do not build the projects; Command line parameters: --no-restore |
-| 4 | Pack | .NET | Command: pack; Projects: [projects]; Version suffix: %build.number% |
+| 1 | Debug Build and Test | PoerShell | Format stderr output as: error; Script: file; Script file: .eng/Build.ps1; Script arguments: -Numbered %build.number% -Test |
 
 Artifact paths:
 
@@ -237,4 +253,23 @@ Artifact paths:
 artifacts\bin\Debug\*.nupkg => artifacts/bin/Debug
 ```
 
-> TODO: Should we switch to the build.ps1 script?
+   2. Create "Release Build and Test" build configuration using manual build steps configuration.
+
+Build steps:
+
+| # | Name | Type | Configuration |
+| - | ---- | ---- | ------------- |
+| 1 | Release Build and Test | PoerShell | Format stderr output as: error; Script: file; Script file: .eng/Build.ps1; Script arguments: -Public -Release -Sign -Test |
+
+Artifact paths:
+
+```
+artifacts/publish/*.nupkg => artifacts/publish
+artifacts/bin/Release/*.nupkg => artifacts/bin/Release
+```
+
+Snapshot dependencies:
+- Debug Build and Test
+
+Parameters:
+- SIGNSERVER_SECRET
