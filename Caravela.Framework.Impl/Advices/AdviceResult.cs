@@ -83,8 +83,7 @@ namespace Caravela.Framework.Impl.Advices
             return new(
                 this.Diagnostics,
                 this.ObservableTransformations.AddRange( transformations.OfType<IObservableTransformation>() ),
-                this.NonObservableTransformations.AddRange( transformations.OfType<INonObservableTransformation>() )
-            );
+                this.NonObservableTransformations.AddRange( transformations.OfType<INonObservableTransformation>() ) );
         }
 
         public AdviceResult WithDiagnostics( params Diagnostic[] diagnostics )

@@ -159,7 +159,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 var genericDefinition = this.GetNamedTypeSymbolByMetadataName( type.GetGenericTypeDefinition().FullName );
                 var genericArgumentSymbols = genericArguments.Select( this.GetTypeSymbol ).ToArray();
 
-                return genericDefinition.Construct( genericArgumentSymbols! );
+                return genericDefinition.Construct( genericArgumentSymbols );
             }
             else
             {

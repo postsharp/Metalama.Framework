@@ -19,16 +19,14 @@ namespace Caravela.Framework.Impl.Utilities
                 StructuralSymbolComparerOptions.Name |
                 StructuralSymbolComparerOptions.GenericParameterCount |
                 StructuralSymbolComparerOptions.ParameterTypes |
-                StructuralSymbolComparerOptions.ParameterModifiers
-            );
+                StructuralSymbolComparerOptions.ParameterModifiers );
 
         public static readonly StructuralSymbolComparer Signature =
             new(
                 StructuralSymbolComparerOptions.Name |
                 StructuralSymbolComparerOptions.GenericParameterCount |
                 StructuralSymbolComparerOptions.ParameterTypes |
-                StructuralSymbolComparerOptions.ParameterModifiers
-            );
+                StructuralSymbolComparerOptions.ParameterModifiers );
 
         private readonly StructuralSymbolComparerOptions _options;
 

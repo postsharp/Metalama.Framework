@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl.Templating
                 return LiteralExpression( SyntaxKind.NullLiteralExpression );
             }
 
-            if ( this.GetTransformationKind( node! ) != TransformationKind.Transform )
+            if ( this.GetTransformationKind( node ) != TransformationKind.Transform )
             {
                 // GetTransformationKind would not transform the node, so we have to call the transform method manually.
                 // We must call Visit on the node. Visit will not transform the node itself, but will apply transformations

@@ -69,55 +69,55 @@ namespace Caravela.Framework.Impl.CodeModel
         internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )
             => (INamespace) this._cache.GetOrAdd(
                 namespaceSymbol.ToRef(),
-                l => new Namespace( (INamespaceSymbol) l.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+                l => new Namespace( (INamespaceSymbol) l.GetSymbol( this.Compilation ), this.CompilationModel ) );
 
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
             => (IAssembly) this._cache.GetOrAdd(
                 assemblySymbol.ToRef(),
                 l => !SymbolEqualityComparer.Default.Equals( l.GetSymbol( this.Compilation ), this.CompilationModel.RoslynCompilation.Assembly )
-                    ? new ReferencedAssembly( (IAssemblySymbol) l.GetSymbol( this.Compilation )!, this.CompilationModel )
+                    ? new ReferencedAssembly( (IAssemblySymbol) l.GetSymbol( this.Compilation ), this.CompilationModel )
                     : this.CompilationModel );
 
         public IType GetIType( ITypeSymbol typeSymbol )
             => (IType) this._cache.GetOrAdd(
                 typeSymbol.ToRef(),
-                l => CodeModelFactory.CreateIType( (ITypeSymbol) l.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+                l => CodeModelFactory.CreateIType( (ITypeSymbol) l.GetSymbol( this.Compilation ), this.CompilationModel ) );
 
         public INamedType GetNamedType( INamedTypeSymbol typeSymbol )
             => (NamedType) this._cache.GetOrAdd(
                 typeSymbol.ToRef(),
-                s => new NamedType( (INamedTypeSymbol) s.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+                s => new NamedType( (INamedTypeSymbol) s.GetSymbol( this.Compilation ), this.CompilationModel ) );
 
         public IGenericParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
             => (GenericParameter) this._cache.GetOrAdd(
                 typeParameterSymbol.ToRef(),
-                tp => new GenericParameter( (ITypeParameterSymbol) tp.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+                tp => new GenericParameter( (ITypeParameterSymbol) tp.GetSymbol( this.Compilation ), this.CompilationModel ) );
 
         public IMethod GetMethod( IMethodSymbol methodSymbol )
             => (IMethod) this._cache.GetOrAdd(
                 methodSymbol.ToRef(),
-                ms => new Method( (IMethodSymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+                ms => new Method( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this.CompilationModel ) );
 
         public IProperty GetProperty( IPropertySymbol propertySymbol )
             => (IProperty) this._cache.GetOrAdd(
                 propertySymbol.ToRef(),
-                ms => new Property( (IPropertySymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+                ms => new Property( (IPropertySymbol) ms.GetSymbol( this.Compilation ), this.CompilationModel ) );
 
         public IField GetField( IFieldSymbol fieldSymbol )
-            => (IField) this._cache.GetOrAdd( fieldSymbol.ToRef(), ms => new Field( (IFieldSymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+            => (IField) this._cache.GetOrAdd( fieldSymbol.ToRef(), ms => new Field( (IFieldSymbol) ms.GetSymbol( this.Compilation ), this.CompilationModel ) );
 
         public IConstructor GetConstructor( IMethodSymbol methodSymbol )
             => (IConstructor) this._cache.GetOrAdd(
                 methodSymbol.ToRef(),
-                ms => new Constructor( (IMethodSymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+                ms => new Constructor( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this.CompilationModel ) );
 
         public IParameter GetParameter( IParameterSymbol parameterSymbol )
             => (IParameter) this._cache.GetOrAdd(
                 parameterSymbol.ToRef(),
-                ms => new Parameter( (IParameterSymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+                ms => new Parameter( (IParameterSymbol) ms.GetSymbol( this.Compilation ), this.CompilationModel ) );
 
         public IEvent GetEvent( IEventSymbol @event )
-            => (IEvent) this._cache.GetOrAdd( @event.ToRef(), ms => new Event( (IEventSymbol) ms.GetSymbol( this.Compilation )!, this.CompilationModel ) );
+            => (IEvent) this._cache.GetOrAdd( @event.ToRef(), ms => new Event( (IEventSymbol) ms.GetSymbol( this.Compilation ), this.CompilationModel ) );
 
         internal IDeclaration GetDeclaration( ISymbol? symbol, DeclarationSpecialKind kind = DeclarationSpecialKind.Default )
             => symbol switch

@@ -251,7 +251,7 @@ namespace Caravela.Framework.Impl.CompileTime
             switch ( reference )
             {
                 case PortableExecutableReference { FilePath: { } filePath }:
-                    return this.TryGetCompileTimeProject( filePath!, diagnosticSink, cancellationToken, out referencedProject );
+                    return this.TryGetCompileTimeProject( filePath, diagnosticSink, cancellationToken, out referencedProject );
 
                 case CompilationReference compilationReference:
                     return this.TryGetCompileTimeProject(

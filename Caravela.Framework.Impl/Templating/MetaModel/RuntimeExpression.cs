@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 return node.WithAdditionalAnnotations(
                     new SyntaxAnnotation(
                         _typeIdAnnotationName,
-                        SymbolIdGenerator.GetInstance( compilation! ).GetId( type ).ToString( CultureInfo.InvariantCulture ) ) );
+                        SymbolIdGenerator.GetInstance( compilation ).GetId( type ).ToString( CultureInfo.InvariantCulture ) ) );
             }
             else
             {

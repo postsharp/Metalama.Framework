@@ -115,8 +115,8 @@ class TargetCode
             var compilation = CreateCompilationModel( code );
 
             var type = compilation.DeclaredTypes.OfName( "TargetCode" ).Single();
-            var nestedType = type.NestedTypes.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof(string) )! );
-            var method = nestedType.Methods.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof(int) )! );
+            var nestedType = type.NestedTypes.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof(string) ) );
+            var method = nestedType.Methods.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof(int) ) );
 
             AssertEx.DynamicEquals(
                 method.Invokers.Final.Invoke( null ),

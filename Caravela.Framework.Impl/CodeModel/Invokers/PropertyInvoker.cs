@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         private ExpressionSyntax CreateIndexerAccess( RuntimeExpression instance, RuntimeExpression[]? args )
         {
-            if ( this.Member.DeclaringType!.IsOpenGeneric )
+            if ( this.Member.DeclaringType.IsOpenGeneric )
             {
                 throw GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember.CreateException( this.Member );
             }
