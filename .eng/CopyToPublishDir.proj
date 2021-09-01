@@ -1,18 +1,5 @@
 ﻿<Project>
 
-    <ItemGroup>
-        <!-- This is the list of files that can be published to the public nuget.org -->
-        <!-- To avoid unintended publishing of artefacts, all items must be explicitly specified without wildcard -->
-
-        <ShippedFile Include="$(PackagesDir)\Caravela.Framework.$(Version).nupkg" />
-        <ShippedFile Include="$(PackagesDir)\Caravela.TestFramework.$(Version).nupkg" />
-        <ShippedFile Include="$(PackagesDir)\Caravela.Framework.Redist.$(Version).nupkg" />
-        <ShippedFile Include="$(PackagesDir)\Caravela.Framework.Sdk.$(Version).nupkg" />
-        <ShippedFile Include="$(PackagesDir)\Caravela.Framework.Impl.$(Version).nupkg" />
-        <ShippedFile Include="$(PackagesDir)\Caravela.Framework.DesignTime.Contracts.$(Version).nupkg" />
-
-    </ItemGroup>
-
     <PropertyGroup>
         <!-- We only publish release builds -->
         <Configuration>Release</Configuration>

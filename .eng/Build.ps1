@@ -1,1 +1,1 @@
-Invoke-Expression "& .eng/src/build/Build.ps1 'Caravela' $args"
+Invoke-Expression "& .eng/src/build/Build.ps1 -ProductName 'Caravela' $args"
