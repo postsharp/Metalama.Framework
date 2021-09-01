@@ -3,13 +3,19 @@
 # Stop after first error.
 $ErrorActionPreference = "Stop"
 
+trap
+{
+    Write-Error $PSItem.ToString()
+    exit 1
+}
+
 # Check that we are in the root of a GIT repository.
 If ( -Not ( Test-Path -Path ".\.git" ) ) {
     throw "This script has to run in a GIT repository root! Usage: Copy this file to the root of the repository and execute. The file deletes itself upon success."
 }
 
 # Update/initialize the engineering subtree.
-$EngineeringDirectory = ".engineering"
+$EngineeringDirectory = ".eng\src"
 
 $EditorConfigFile = ".\.editorconfig"
 

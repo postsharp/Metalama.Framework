@@ -30,17 +30,17 @@ This repository contains common development, build and publishig scripts and con
 ## Installation
 
 1. Enable symlinks in .git/config.
-2. Add the `.engineering` subtree:
+2. Add the `.eng\src` subtree:
 
-`git subtree add --prefix .engineering https://postsharp@dev.azure.com/postsharp/Caravela/_git/Caravela.Engineering master --squash`
+`git subtree add --prefix .eng\src https://postsharp@dev.azure.com/postsharp/Caravela/_git/Caravela.Engineering master --squash`
 
-3. Check `README.md` in each directory in the `.engineering` subtree for futher installation steps.
+3. Check `README.md` in each directory in the `.eng\src` subtree for futher installation steps.
 
 ## Updating
 
-1. From the repository root containing the `.engineering` subtree, execute `& .engineering\PullEngineering.ps1`.
+1. From the repository root containing the `.eng\src` subtree, execute `& .eng\src\PullEngineering.ps1`.
 2. Follow the steps described in [the changelog](CHANGELOG.md).
-3. Commit & push. (Even if there are no changes ouside the `.engineering` subtree.)
+3. Commit & push. (Even if there are no changes ouside the `.eng\src` subtree.)
 
 ## Features
 
@@ -52,17 +52,17 @@ The features provided by this repository are grouped by categories in the top-le
 
 ## Modifying
 
-To share modifications in the `.engineering` GIT subtree:
+To share modifications in the `.eng\src` GIT subtree:
 
 - Make sure that all documentation reflects your changes.
-- Add an entry to [the changelog](CHANGELOG.md) to let others know which changes have been introduced and which actions are required when updating the `.engineering` GIT subtree in other repositories.
+- Add an entry to [the changelog](CHANGELOG.md) to let others know which changes have been introduced and which actions are required when updating the `.eng\src` GIT subtree in other repositories.
 - Commit your changes.
-- From the repository root containing the `.engineering` subtree, execute `& .engineering\PushEngineering.ps1`.
-- Follow the [Updating](#updating) section in the other repositories containing the `.engineering` GIT subtree.
+- From the repository root containing the `.eng\src` subtree, execute `& .eng\src\PushEngineering.ps1`.
+- Follow the [Updating](#updating) section in the other repositories containing the `.eng\src` GIT subtree.
 
 ## Cloning
 
-To clone a repository containing `.engineering` GIT subtree, use the following command:
+To clone a repository containing `.eng\src` GIT subtree, use the following command:
 
 `git clone -c core.symlinks=true <URL>`
 

@@ -1,4 +1,4 @@
-﻿<!-- Copies public nupkg files to the $/shipping directory so that they can later be published.
+﻿<!-- Copies public nupkg files to the /artifacts/publish directory so that they can later be published.
      Don't include private packages in this directory -->
 <Project DefaultTargets="Build">
 
@@ -9,7 +9,7 @@
 
     <PropertyGroup>
         <PackagesDir>$(OutputPath)</PackagesDir>
-        <ShippingDir>..\publish</ShippingDir>
+        <ShippingDir>$(MSBuildThisFileDirectory)..\..\..\artifacts\publish</ShippingDir>
     </PropertyGroup>
 
     <Target Name="Build">
