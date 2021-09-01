@@ -174,6 +174,7 @@ In this how-to, we use the name `[Product]` as a placeholder for the name of the
 6. Create `.eng\Build.ps1` file. The content should look like:
 
 ```
+# .FORWARDHELPTARGETNAME .eng/src/build/Build.ps1
 Invoke-Expression "& .eng/src/build/Build.ps1 -ProductName [Product] $args"
 ```
 

@@ -1,38 +1,43 @@
-﻿# This is the main build script. It is not required to run it before loading the projects in the IDE.
-# Main use cases:
-#  1. Create development NuGet packages:
-#         Build.ps1 -ProductName <NAME> -Local
-#  2. Run the complete test suite in a development environment:
-#         Build.ps1 -ProductName <NAME> -Local -Test
-#  3. TeamCity: build debug packages and run tests:
-#         Build.ps1 -ProductName <NAME> -Numbered <NUMBER> -Test
-#  4. TeamCity: build release packages and run tests:
-#         Build.ps1 -ProductName <NAME> -Public -Release -Sign -Test
+﻿<#
+.SYNOPSIS
+    This is the main build script. It is not required to run it before loading the projects in the IDE.
+.DESCRIPTION
+    Main use cases:
+        1. Create development NuGet packages:
+            Build.ps1 -Local
+        2. Run the complete test suite in a development environment:
+            Build.ps1 -Local -Test
+        3. TeamCity: build debug packages and run tests:
+            Build.ps1 -Numbered <NUMBER> -Test
+        4. TeamCity: build release packages and run tests:
+            Build.ps1 -Public -Release -Sign -Test
 
+#>
 
 param ( 
 
+# Defines the name of the product contained in the repository. This parameter should be provided by a facade Build.ps1 script.
 [Parameter(Mandatory=$true)] [string] $ProductName,
 
-# Creates a release build instead of a debug one
+# Creates a release build instead of a debug one.
 [switch] $Release = $false,
 
-# Creates a local build with a version number based on a timestamp (typically a development build)
+# Creates a local build with a version number based on a timestamp (typically a development build).
 [switch] $Local = $false, 
 
-# Creates a numbered build (typically internal builds on a build server)
+# Creates a numbered build (typically internal builds on a build server).
 [int] $Numbered = -1, 
 
-# Creates a public build
+# Creates a public build.
 [switch] $Public = $false,
 
-# Sings the public packages (doesn't work without -Public -Release)
+# Sings the public packages (doesn't work without -Public -Release).
 [switch] $Sign = $false,
 
-# Creates $(ProductName)Version.props but does not build the project
+# Creates $(ProductName)Version.props but does not build the project.
 [switch] $Prepare = $false,
 
-# Runs the test suite,
+# Runs the test suite.
 [switch] $Test = $false
 
 )
