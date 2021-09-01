@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.Collections
 
             public ImmutableMultiValueDictionary<TKey, TValue> ToImmutable()
             {
-                return new( this._dictionaryBuilder.ToImmutable() );
+                return new ImmutableMultiValueDictionary<TKey, TValue>( this._dictionaryBuilder.ToImmutable() );
             }
         }
     }

@@ -88,9 +88,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         // This overload must be used only in tests or when the expression type is really unknown.
         public RuntimeExpression( ExpressionSyntax syntax, ICompilation compilation )
             : this( syntax, compilation.GetCompilationModel().RoslynCompilation, null, false ) { }
-        
-        public static ExpressionSyntax GetSyntaxFromValue( object? value, ICompilation compilation )
-            => FromValue( value, compilation ).Syntax;
+
+        public static ExpressionSyntax GetSyntaxFromValue( object? value, ICompilation compilation ) => FromValue( value, compilation ).Syntax;
 
         public static RuntimeExpression FromValue( object? value, ICompilation compilation )
         {

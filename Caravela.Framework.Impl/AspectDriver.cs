@@ -19,7 +19,7 @@ using System.Threading;
 namespace Caravela.Framework.Impl
 {
     // TODO: AspectDriver should not store a reference to a Compilation we should not store references to a Roslyn compilation.
-    
+
     /// <summary>
     /// Executes aspects.
     /// </summary>
