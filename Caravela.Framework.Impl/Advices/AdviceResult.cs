@@ -29,7 +29,10 @@ namespace Caravela.Framework.Impl.Advices
 
         public static AdviceResult Create()
         {
-            return new AdviceResult( ImmutableArray<Diagnostic>.Empty, ImmutableArray<IObservableTransformation>.Empty, ImmutableArray<INonObservableTransformation>.Empty );
+            return new AdviceResult(
+                ImmutableArray<Diagnostic>.Empty,
+                ImmutableArray<IObservableTransformation>.Empty,
+                ImmutableArray<INonObservableTransformation>.Empty );
         }
 
         public static AdviceResult Create( params ITransformation[] transformations )
