@@ -3,7 +3,6 @@
 
 // ReSharper disable RedundantUsingDirective
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;

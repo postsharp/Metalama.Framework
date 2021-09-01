@@ -72,7 +72,7 @@ namespace Caravela.Framework.Impl
         {
             static AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
             {
-                return new(
+                return new AspectInstanceResult(
                     false,
                     new ImmutableUserDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<Advice>.Empty,

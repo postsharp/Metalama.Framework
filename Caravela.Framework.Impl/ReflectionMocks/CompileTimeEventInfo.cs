@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public static CompileTimeEventInfo Create( IEvent @event )
         {
-            return new( @event );
+            return new CompileTimeEventInfo( @event );
         }
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
