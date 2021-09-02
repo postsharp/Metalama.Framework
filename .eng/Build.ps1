@@ -1,2 +1,2 @@
-# .FORWARDHELPTARGETNAME .eng/src/build/Build.ps1
-Invoke-Expression "& .eng/src/build/Build.ps1 -ProductName 'Caravela' $args"
+# .FORWARDHELPTARGETNAME .eng/shared/build/Build.ps1
+Invoke-Expression "& .eng/shared/build/Build.ps1 -ProductName 'Caravela' $args"

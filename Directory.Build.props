@@ -6,8 +6,8 @@
     <!-- Imports a script that exports a few MSBuild properties to the compiler. We try to import and not to copy to avoid duplication. -->
     <Import Project="Caravela.Framework.Package\Caravela.CompilerVisibleProperties.props" />
 
-    <Import Project=".eng\src\build\BuildOptions.props" />
-    <Import Project=".eng\src\style\CodeQuality.props" />
-    <Import Project=".eng\src\build\SourceLink.props" />
+    <Import Project=".eng\shared\build\BuildOptions.props" />
+    <Import Project=".eng\shared\style\CodeQuality.props" />
+    <Import Project=".eng\shared\build\SourceLink.props" />
 
 </Project>
