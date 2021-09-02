@@ -213,7 +213,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                                 : Block(
                                     ReturnStatement(
                                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
-                                        DefaultExpression( syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ),
+                                        DefaultExpression( syntaxGenerator.TypeExpression( this.Type.GetSymbol() ) ),
                                         Token( SyntaxKind.SemicolonToken ) ) ),
                             null,
                             this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default )

@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Advices
     {
         public IFieldBuilder Builder => this.MemberBuilder;
 
-        public new INamedType TargetDeclaration => base.TargetDeclaration!;
+        public new INamedType TargetDeclaration => base.TargetDeclaration;
 
         public IntroduceFieldAdvice(
             AspectInstance aspect,

@@ -3,7 +3,6 @@
 
 // ReSharper disable RedundantUsingDirective
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
@@ -413,7 +412,7 @@ namespace Caravela.Framework.Impl.Templating
             // The base implementation is very verbose, so we use this one:
             if ( node.RefKindKeyword.Kind() == SyntaxKind.None )
             {
-                var transformedExpression = this.Transform( node.Expression )!;
+                var transformedExpression = this.Transform( node.Expression );
                 var transformedArgument = this.MetaSyntaxFactory.Argument( transformedExpression );
 
                 if ( node.NameColon != null )
@@ -631,7 +630,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     return node.Update(
                         this.VisitList( node.AttributeLists ),
-                        (ExpressionSyntax) transformedExpression!,
+                        (ExpressionSyntax) transformedExpression,
                         this.VisitToken( node.SemicolonToken ) );
                 }
             }
@@ -1380,7 +1379,7 @@ namespace Caravela.Framework.Impl.Templating
 
                     if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                     {
-                        return this.Transform( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( namespaceOrType ) )!;
+                        return this.Transform( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( namespaceOrType ) );
                     }
                     else if ( symbol is { IsStatic: true } && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
                     {
@@ -1393,7 +1392,7 @@ namespace Caravela.Framework.Impl.Templating
                                 // We have an access to a field or method with a "using static", or a non-qualified static member access.
                                 return this.MetaSyntaxFactory.MemberAccessExpression(
                                     this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
-                                    this.Transform( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( symbol.ContainingType ) )!,
+                                    this.Transform( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( symbol.ContainingType ) ),
                                     this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
                         }
                     }

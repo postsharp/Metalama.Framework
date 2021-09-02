@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-
 #if !DEBUG
 using System.Runtime.CompilerServices;
 #endif
@@ -16,6 +15,7 @@ namespace Caravela.Framework.Impl
     /// <summary>
     /// A utility class that checks runtime invariant and throws <see cref="AssertionFailedException"/> in case of failure.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     internal static class Invariant
     {
         /// <summary>
@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl
             }
 #endif
 
-            return obj!;
+            return obj;
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace Caravela.Framework.Impl
             }
 #endif
 
-            return obj!.Value;
+            return obj.Value;
         }
 
 #if !DEBUG

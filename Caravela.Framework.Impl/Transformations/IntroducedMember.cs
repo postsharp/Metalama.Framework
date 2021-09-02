@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.Transformations
         /// <returns>A new instance with specified syntax.</returns>
         public IntroducedMember WithSyntax( MemberDeclarationSyntax syntax )
         {
-            return new( this.Introduction, syntax, this.AspectLayerId, this.Semantic, this.Declaration );
+            return new IntroducedMember( this.Introduction, syntax, this.AspectLayerId, this.Semantic, this.Declaration );
         }
     }
 }

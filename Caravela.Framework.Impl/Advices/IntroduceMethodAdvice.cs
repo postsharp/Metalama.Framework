@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, MethodBuilder>
     {
-        public new INamedType TargetDeclaration => base.TargetDeclaration!;
+        public new INamedType TargetDeclaration => base.TargetDeclaration;
 
         public IMethodBuilder Builder => this.MemberBuilder;
 

@@ -297,7 +297,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var templateInstance = Activator.CreateInstance( templateType )!;
 
             var targetType = assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
-            var targetCaravelaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! )!;
+            var targetCaravelaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! );
             var targetMethod = targetCaravelaType.Methods.Single( m => string.Equals( m.Name, "Method", StringComparison.Ordinal ) );
 
             var diagnostics = new UserDiagnosticSink( targetMethod );

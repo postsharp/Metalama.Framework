@@ -473,7 +473,7 @@ namespace Caravela.Framework.Impl.Templating
 
             // Anonymous objects are currently run-time-only unless they are in a compile-time-only scope -- until we implement more complex rules.
             var transformedMembers =
-                node.Initializers.Select( i => this.Visit( i )!.AddScopeAnnotation( scope ) );
+                node.Initializers.Select( i => this.Visit( i ).AddScopeAnnotation( scope ) );
 
             return node.Update(
                     node.NewKeyword,
@@ -612,7 +612,7 @@ namespace Caravela.Framework.Impl.Templating
             out SyntaxToken transformedOperator,
             out TemplatingScope scope )
         {
-            transformedRight = this.Visit( right )!;
+            transformedRight = this.Visit( right );
 
             var nameScope = this.GetNodeScope( transformedRight );
             ScopeContext? context = null;
@@ -651,7 +651,7 @@ namespace Caravela.Framework.Impl.Templating
 
             using ( this.WithScopeContext( context ) )
             {
-                transformedLeft = this.Visit( left )!;
+                transformedLeft = this.Visit( left );
 
                 if ( scope == TemplatingScope.Both )
                 {
@@ -741,7 +741,7 @@ namespace Caravela.Framework.Impl.Templating
 
             using ( this.WithScopeContext( expressionContext ) )
             {
-                transformedExpression = this.Visit( node.Expression )!;
+                transformedExpression = this.Visit( node.Expression );
             }
 
             var expressionScope = this.GetNodeScope( transformedExpression );
@@ -799,7 +799,7 @@ namespace Caravela.Framework.Impl.Templating
                                 this._currentScopeContext,
                                 $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString( CultureInfo.InvariantCulture )}'" ) ) )
                         {
-                            transformedArgumentValue = this.Visit( argument.Expression )!;
+                            transformedArgumentValue = this.Visit( argument.Expression );
                         }
                     }
                     else if ( expressionScope.IsRunTime() )
@@ -809,7 +809,7 @@ namespace Caravela.Framework.Impl.Templating
                                 this._currentScopeContext,
                                 $"argument of the run-time method '{node.Expression}'" ) ) )
                         {
-                            transformedArgumentValue = this.Visit( argument.Expression )!;
+                            transformedArgumentValue = this.Visit( argument.Expression );
                         }
                     }
                     else
@@ -817,7 +817,7 @@ namespace Caravela.Framework.Impl.Templating
                         using ( this.WithScopeContext(
                             ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a compile-time expression '{node.Expression}'" ) ) )
                         {
-                            transformedArgumentValue = this.Visit( argument.Expression )!;
+                            transformedArgumentValue = this.Visit( argument.Expression );
                         }
                     }
 
@@ -868,14 +868,14 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitArgument( ArgumentSyntax node )
         {
             // We don't add an annotation to the argument because it needs to be inherited from the parent.
-            var transformedExpression = this.Visit( node.Expression )!;
+            var transformedExpression = this.Visit( node.Expression );
 
             return node.WithExpression( transformedExpression );
         }
 
         public override SyntaxNode? VisitIfStatement( IfStatementSyntax node )
         {
-            var annotatedCondition = this.Visit( node.Condition )!;
+            var annotatedCondition = this.Visit( node.Condition );
             var conditionScope = this.GetNodeScope( annotatedCondition );
 
             TemplatingScope ifScope;
@@ -929,7 +929,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             var local = (ILocalSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node )!;
 
-            var annotatedExpression = this.Visit( node.Expression )!;
+            var annotatedExpression = this.Visit( node.Expression );
 
             TemplatingScope forEachScope;
             string reason;
@@ -955,7 +955,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // Statements of a compile-time control block must have an explicitly-set scope otherwise the template compiler
                 // will look at the scope in the parent node, which is here incorrect.
-                annotatedStatement = this.Visit( node.Statement )!.AddRunTimeOnlyAnnotationIfUndetermined();
+                annotatedStatement = this.Visit( node.Statement ).AddRunTimeOnlyAnnotationIfUndetermined();
             }
 
             var identifierClassification = forEachScope == TemplatingScope.CompileTimeOnly ? TextSpanClassification.CompileTimeVariable : default;
@@ -994,7 +994,7 @@ namespace Caravela.Framework.Impl.Templating
 
             using ( this.WithScopeContext( context ) )
             {
-                transformedDesignation = this.Visit( node.Designation )!;
+                transformedDesignation = this.Visit( node.Designation );
             }
 
             return node.Update( transformedType, transformedDesignation ).AddScopeAnnotation( scope );
@@ -1003,7 +1003,7 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitIsPatternExpression( IsPatternExpressionSyntax node )
         {
             // The scope of a pattern expression is given by the expression (left part).
-            var transformedExpression = this.Visit( node.Expression )!;
+            var transformedExpression = this.Visit( node.Expression );
             var scope = this.GetNodeScope( transformedExpression ).GetExpressionValueScope();
 
             var context = scope == TemplatingScope.CompileTimeOnly
@@ -1014,7 +1014,7 @@ namespace Caravela.Framework.Impl.Templating
 
             using ( this.WithScopeContext( context ) )
             {
-                transformedPattern = this.Visit( node.Pattern )!;
+                transformedPattern = this.Visit( node.Pattern );
             }
 
             if ( scope == TemplatingScope.RunTimeOnly )
@@ -1145,7 +1145,7 @@ namespace Caravela.Framework.Impl.Templating
                         ? ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, "creation of a compile-time object" )
                         : ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, "creation of a run-time object" ) ) )
                 {
-                    transformedArguments = node.ArgumentList.Arguments.Select( a => this.Visit( a )! ).ToArray();
+                    transformedArguments = node.ArgumentList.Arguments.Select( a => this.Visit( a ) ).ToArray();
                 }
             }
 
@@ -1161,7 +1161,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitVariableDeclaration( VariableDeclarationSyntax node )
         {
-            var transformedType = this.Visit( node.Type )!;
+            var transformedType = this.Visit( node.Type );
 
             if ( this._templateMemberClassifier.IsDynamicType( transformedType )
                  && !(node.Type is IdentifierNameSyntax { Identifier: { Text: "var" } }) )
@@ -1281,7 +1281,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private ExpressionSyntax VisitUnaryExpressionOperand( ExpressionSyntax operand, SyntaxToken @operator )
         {
-            var transformedOperand = this.Visit( operand )!;
+            var transformedOperand = this.Visit( operand );
 
             var scope = this.GetNodeScope( transformedOperand );
 
@@ -1303,7 +1303,7 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitAssignmentExpression( AssignmentExpressionSyntax node )
         {
             // The scope of an assignment is determined by the left side.
-            var transformedLeft = this.Visit( node.Left )!;
+            var transformedLeft = this.Visit( node.Left );
 
             var scope = this.GetNodeScope( transformedLeft ).GetExpressionValueScope();
             ExpressionSyntax? transformedRight;
@@ -1327,7 +1327,7 @@ namespace Caravela.Framework.Impl.Templating
 
             using ( this.WithScopeContext( context ) )
             {
-                transformedRight = this.Visit( node.Right )!;
+                transformedRight = this.Visit( node.Right );
             }
 
             return node.Update( transformedLeft, node.OperatorToken, transformedRight ).AddScopeAnnotation( scope );
@@ -1335,7 +1335,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitExpressionStatement( ExpressionStatementSyntax node )
         {
-            var transformedExpression = this.Visit( node.Expression )!;
+            var transformedExpression = this.Visit( node.Expression );
             var expressionScope = this.GetNodeScope( transformedExpression );
             var statementScope = expressionScope.GetExpressionExecutionScope();
 
@@ -1345,7 +1345,7 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitCastExpression( CastExpressionSyntax node )
         {
             TypeSyntax annotatedType;
-            var annotatedExpression = this.Visit( node.Expression )!;
+            var annotatedExpression = this.Visit( node.Expression );
             var expressionScope = this.GetNodeScope( annotatedExpression );
             TemplatingScope castScope;
 
@@ -1378,11 +1378,11 @@ namespace Caravela.Framework.Impl.Templating
             {
                 case SyntaxKind.IsExpression:
                 case SyntaxKind.AsExpression:
-                    var annotatedType = (TypeSyntax) this.Visit( node.Right )!;
-                    var annotatedExpression = this.Visit( node.Left )!;
+                    var annotatedType = (TypeSyntax) this.Visit( node.Right );
+                    var annotatedExpression = this.Visit( node.Left );
                     var transformedNode = node.WithLeft( annotatedExpression ).WithRight( annotatedType );
 
-                    return this.AnnotateCastExpression( transformedNode, annotatedType!, annotatedExpression! );
+                    return this.AnnotateCastExpression( transformedNode, annotatedType, annotatedExpression );
 
                 case SyntaxKind.CoalesceExpression:
                     return this.VisitCoalesceExpression( node );
@@ -1452,9 +1452,9 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             var transformedVariableDeclaration = this.Visit( node.Declaration )!;
-            var transformedInitializers = node.Initializers.Select( i => this.Visit( i )! );
+            var transformedInitializers = node.Initializers.Select( i => this.Visit( i ) );
             var transformedCondition = this.Visit( node.Condition )!;
-            var transformedIncrementors = node.Incrementors.Select( syntax => this.Visit( syntax )! );
+            var transformedIncrementors = node.Incrementors.Select( syntax => this.Visit( syntax ) );
 
             StatementSyntax transformedStatement;
 
@@ -1464,7 +1464,7 @@ namespace Caravela.Framework.Impl.Templating
                     TemplatingScope.RunTimeOnly,
                     $"for ( {node.Initializers}; ... )" ) ) )
             {
-                transformedStatement = this.Visit( node.Statement )!;
+                transformedStatement = this.Visit( node.Statement );
             }
 
             return ForStatement(
@@ -1484,7 +1484,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             // The scope of a `while` statement is determined by its condition only.
 
-            var annotatedCondition = this.Visit( node.Condition )!;
+            var annotatedCondition = this.Visit( node.Condition );
             var conditionScope = this.GetNodeScope( annotatedCondition );
 
             this.RequireLoopScope( node.Condition, conditionScope, "while" );
@@ -1494,7 +1494,7 @@ namespace Caravela.Framework.Impl.Templating
             using ( this.WithScopeContext(
                 ScopeContext.CreateBreakOrContinueScope( this._currentScopeContext, conditionScope, $"while ( {node.Condition} )" ) ) )
             {
-                annotatedStatement = this.Visit( node.Statement )!.ReplaceScopeAnnotation( conditionScope );
+                annotatedStatement = this.Visit( node.Statement ).ReplaceScopeAnnotation( conditionScope );
             }
 
             return node.Update(
@@ -1593,7 +1593,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( node.ExpressionBody != null )
             {
-                var annotatedExpression = this.Visit( node.ExpressionBody )!;
+                var annotatedExpression = this.Visit( node.ExpressionBody );
 
                 return node.WithExpressionBody( annotatedExpression ).AddScopeAnnotation( TemplatingScope.Unknown );
             }
@@ -1610,7 +1610,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( node.ExpressionBody != null )
             {
-                var annotatedExpression = this.Visit( node.ExpressionBody )!;
+                var annotatedExpression = this.Visit( node.ExpressionBody );
 
                 return node.WithExpressionBody( annotatedExpression ).AddScopeAnnotation( TemplatingScope.Unknown );
             }
@@ -1629,11 +1629,11 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitSwitchExpressionArm( SwitchExpressionArmSyntax node )
         {
-            var transformedPattern = this.Visit( node.Pattern )!;
+            var transformedPattern = this.Visit( node.Pattern );
             var patternScope = this.GetNodeScope( transformedPattern );
 
             var transformedWhen = this.Visit( node.WhenClause );
-            var transformedExpression = this.Visit( node.Expression )!;
+            var transformedExpression = this.Visit( node.Expression );
 
             TemplatingScope combinedScope;
 
@@ -1657,7 +1657,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitSwitchExpression( SwitchExpressionSyntax node )
         {
-            var transformedGoverningExpression = this.Visit( node.GoverningExpression )!;
+            var transformedGoverningExpression = this.Visit( node.GoverningExpression );
             var governingExpressionScope = transformedGoverningExpression.GetScopeFromAnnotation().GetValueOrDefault();
 
             if ( (governingExpressionScope == TemplatingScope.CompileTimeOnly
@@ -1691,7 +1691,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitSwitchStatement( SwitchStatementSyntax node )
         {
-            var annotatedExpression = this.Visit( node.Expression )!;
+            var annotatedExpression = this.Visit( node.Expression );
             var expressionScope = annotatedExpression.GetScopeFromAnnotation().GetValueOrDefault();
 
             TemplatingScope switchScope;
@@ -1724,7 +1724,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 using ( this.WithScopeContext( labelContext ) )
                 {
-                    transformedLabels = section.Labels.Select( l => this.Visit( l )! ).ToArray();
+                    transformedLabels = section.Labels.Select( l => this.Visit( l ) ).ToArray();
 
                     if ( this.RequireScope( transformedLabels, switchScope, scopeReason ) )
                     {
@@ -1740,7 +1740,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     // Statements of a compile-time control block must have an explicitly-set scope otherwise the template compiler
                     // will look at the scope in the parent node, which is here incorrect.
-                    transformedStatements = section.Statements.Select( s => this.Visit( s )!.AddRunTimeOnlyAnnotationIfUndetermined() ).ToArray();
+                    transformedStatements = section.Statements.Select( s => this.Visit( s ).AddRunTimeOnlyAnnotationIfUndetermined() ).ToArray();
                 }
 
                 transformedSections[i] = section.Update( List( transformedLabels ), List( transformedStatements ) ).AddScopeAnnotation( switchScope );
@@ -1839,7 +1839,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitLockStatement( LockStatementSyntax node )
         {
-            var annotatedExpression = this.Visit( node.Expression )!;
+            var annotatedExpression = this.Visit( node.Expression );
             var annotatedStatement = this.Visit( node.Statement );
 
             this.RequireScope( annotatedExpression, TemplatingScope.RunTimeOnly, "a 'lock' statement" );
@@ -1919,7 +1919,7 @@ namespace Caravela.Framework.Impl.Templating
 
             using ( this.WithScopeContext( context ) )
             {
-                var transformedArguments = node.ArgumentList?.Arguments.Select( a => this.Visit( a )! ).ToArray();
+                var transformedArguments = node.ArgumentList?.Arguments.Select( a => this.Visit( a ) ).ToArray();
                 var argumentsScope = this.GetExpressionScope( transformedArguments, node );
                 var transformedInitializer = this.Visit( node.Initializer );
                 var initializerScope = this.GetNodeScope( transformedInitializer );
@@ -1951,7 +1951,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             using ( this.WithScopeContext( ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, "an expression of a 'throw' expression" ) ) )
             {
-                var transformedExpression = this.Visit( node.Expression )!;
+                var transformedExpression = this.Visit( node.Expression );
 
                 this.RequireScope( transformedExpression, TemplatingScope.RunTimeOnly, "a 'throw' expression" );
 
@@ -1973,7 +1973,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitTryStatement( TryStatementSyntax node )
         {
-            var annotatedBlock = this.Visit( node.Block )!;
+            var annotatedBlock = this.Visit( node.Block );
 
             var annotatedCatches = new CatchClauseSyntax[node.Catches.Count];
 
@@ -1983,7 +1983,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalScope( this._currentScopeContext, "catch" ) ) )
                 {
-                    var annotatedCatch = this.Visit( @catch )!;
+                    var annotatedCatch = this.Visit( @catch );
                     annotatedCatches[i] = annotatedCatch;
                 }
             }
@@ -1994,7 +1994,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalScope( this._currentScopeContext, "finally" ) ) )
                 {
-                    annotatedFinally = this.Visit( node.Finally )!;
+                    annotatedFinally = this.Visit( node.Finally );
                 }
             }
 
@@ -2023,7 +2023,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitArrayRankSpecifier( ArrayRankSpecifierSyntax node )
         {
-            var transformedSizes = node.Sizes.Select( syntax => this.Visit( syntax )! ).ToList();
+            var transformedSizes = node.Sizes.Select( syntax => this.Visit( syntax ) ).ToList();
             var sizeScope = this.GetExpressionScope( transformedSizes, node );
 
             var arrayRankScope = sizeScope.GetExpressionValueScope() switch
