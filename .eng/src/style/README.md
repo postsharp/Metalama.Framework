@@ -12,7 +12,7 @@ This directory contains centralized code-style configuration and scripts.
 
 To install the common code style configuration:
 
-1. Execute the `& .eng\src\style\LinkConfiguration.ps1` in PowerShell from the repository root. This script will link the `.editorconfig` file to the repository root and the `sln.DotSettings` next to each `.sln` solution file in the repository with a name corresponding to the solution name.
+1. Execute `& .eng\src\style\LinkConfiguration.ps1 -Create -Check` in PowerShell from the repository root. This script will link the `.editorconfig` file to the repository root and the `sln.DotSettings` next to each `.sln` solution file in the repository with a name corresponding to the solution name.
 
 > Note: `LinkConfiguration.ps1` script needs to be executed every time a solution file name is created or its name changes.
 

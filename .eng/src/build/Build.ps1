@@ -61,12 +61,26 @@ If ( [string]::IsNullOrEmpty( $ProductName ) ) {
 
 $PropsFilePath = ".eng\$($ProductName)Version.props"
 
+# Copied from TeamCity.VSTest.TestAdapter NuGet package
+$IsUnderTeamCity = $Env:TEAMCITY_PROJECT_NAME -or $Env:TEAMCITY_VERSION
+
 if ( $Release ) {
     $configuration = "release"
 } else {
     $configuration = "debug"
 }
 
+function CheckPrerequisities() {
+    # TeamCity doesn't support git+symlinks, so we create the links on agents manually.
+    # https://youtrack.jetbrains.com/issue/TW-12648
+    if ( $IsUnderTeamCity ) {
+        & .\.eng\src\style\LinkConfiguration.ps1 -Remove -Create -Check
+    } else {
+        & .\.eng\src\style\LinkConfiguration.ps1 -Check
+    }
+
+    if ($LASTEXITCODE -ne 0 ) { throw "Symbolic links verification failed." }
+}
 
 function Clean() {
     if (Test-Path "artifacts\bin\Debug" -PathType Container ) {
@@ -156,8 +170,7 @@ function Test() {
     Write-Host "Tests successful" -ForegroundColor Green
 }
 
-
-
+CheckPrerequisities
 Clean
 CreateVersionFile
 Restore
