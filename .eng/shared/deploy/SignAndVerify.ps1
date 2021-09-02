@@ -15,8 +15,7 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
     throw "This script has to run in a GIT repository root!"
 }
 
-& dotnet tool install --tool-path tools PostSharp.Engineering.BuildTools --version 1.0.1 --add-source $InternalNuGetUrl
-& dotnet tool install --tool-path tools SignClient --version 1.3.155
+& $PSScriptRoot/../RestoreTools.ps1
 
 $CurrentDir = $(get-location).Path
 

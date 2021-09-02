@@ -13,7 +13,7 @@ namespace Caravela.Framework.TestApp
         public override dynamic OverrideMethod()
         {
             
-             var parameter = meta.Parameters.LastOrDefault( p => p.ParameterType.Is( typeof( CancellationToken ) ) );
+             var parameter = meta.Target.Parameters.LastOrDefault( p => p.ParameterType.Is( typeof( CancellationToken ) ) );
 
             if ( parameter != null )
             {
