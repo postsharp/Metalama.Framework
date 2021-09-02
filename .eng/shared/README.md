@@ -11,6 +11,7 @@
   - [Features](#features)
   - [Modifying](#modifying)
   - [Cloning](#cloning)
+  - [Repositories with disabled symbolic links](#repositories-with-disabled-symbolic-links)
 
 ## Introduction
 
@@ -66,3 +67,10 @@ To clone a repository containing `.eng\shared` GIT subtree, use the following co
 
 `git clone -c core.symlinks=true <URL>`
 
+## Repositories with disabled symbolic links
+
+When you have an existing repository where the symbolic links are disabled and you want to check-out changes cotaining symbolic links, you need to change the `symlinks` setting to `true` in `.git\config` configuration file.
+
+Checking files out after that will properly create all symbolic links.
+
+Changing this setting after the check-out will make the repositry dirty. Reverting the "changes" will fix the links.
