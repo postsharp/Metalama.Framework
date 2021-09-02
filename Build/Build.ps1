@@ -27,8 +27,11 @@ param (
 # Creates CaravelaVersion.props but does not build the project
 [switch] $Prepare = $false,
 
-# Runs the test suite,
-[switch] $Test = $false
+# Runs the test suite
+[switch] $Test = $false,
+
+# With the -Test switch, enable test coverage
+[switch] $Coverage = $false
 
 )
 
@@ -114,8 +117,21 @@ function Pack() {
 }
 
 function Test() {
-    & dotnet test -p:Configuration=$configuration --nologo --no-restore
-    if ($LASTEXITCODE -ne 0 ) { exit }
+    $testResultsDir = $(Get-Location).Path + "\TestResults"
+
+    if ( Test-Path $testResultsDir ) {
+        Remove-Item $testResultsDir -Recurse -Force
+    }
+
+    if ( $Coverage ) {
+        & dotnet test -p:CollectCoverage=True -p:CaravelaTestReplaceFramework=False -m:1 -p:CoverletOutput="$testResultsDir\" -p:MergeWith="$testResultsDir\coverage.json"  -p:CoverletOutputFormat="opencover%2cjson" -p:ExcludeByAttribute="Obsolete%2cGeneratedCode%2cCompilerGenerated" -p:Exclude="[*.Tests.*]*" -p:SkipAutoProps=true  --nologo --no-restore
+        if ($LASTEXITCODE -ne 0 ) { exit }
+    }
+    else  {
+        & dotnet test -p:Configuration=$configuration --nologo --no-restore
+        if ($LASTEXITCODE -ne 0 ) { exit }
+    }
+
     & dotnet build .\Tests\Caravela.Framework.TestApp\Caravela.Framework.TestApp\Caravela.Framework.TestApp.csproj --nologo
     if ($LASTEXITCODE -ne 0 ) { exit }
 

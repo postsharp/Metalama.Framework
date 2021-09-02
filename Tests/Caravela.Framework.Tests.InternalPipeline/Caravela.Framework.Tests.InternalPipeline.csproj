@@ -22,7 +22,8 @@
     <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" /><PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageReference Include="xunit" Version="$(xUnitVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
-    <PackageReference Include="coverlet.collector" Version="1.2.0" />
+    <PackageReference Include="coverlet.collector" Version="$(CoverletVersion)" />
+    <PackageReference Include="coverlet.msbuild" Version="$(CoverletVersion)" />
      <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
      
      <!-- This is used for a test -->
