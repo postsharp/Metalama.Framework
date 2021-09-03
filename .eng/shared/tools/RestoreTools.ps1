@@ -33,7 +33,6 @@ function Restore( $Package, $Version ) {
     }
 }
 
-Restore PostSharp.Engineering.BuildTools 1.0.2
 Restore SignClient 1.3.155
 Restore JetBrains.Resharper.GlobalTools 2021.2.1
 

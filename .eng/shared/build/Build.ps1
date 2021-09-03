@@ -162,15 +162,15 @@ function Test() {
             Remove-Item $testResultsDir -Recurse -Force
         }
     
-        # Restoring the required dotnet tools.
-        & $PSScriptRoot/../RestoreTools.ps1 PostSharp.Engineering.BuildTools
+        # Building dotnet tools.
+        & ./.eng/shared/tools/BuildTools.ps1
     
         # Executing tests with code coverage enabled.
         & dotnet test -p:CollectCoverage=True -p:CoverletOutput="$testResultsDir\" -m:1 --nologo --no-restore
         if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
     
         # Detect gaps in code coverage.
-        & tools/postsharp-eng.exe coverage warn "$testResultsDir\coverage.opencover.xml"
+        & ./.eng/shared/tools/bin/postsharp-eng.exe coverage warn "$testResultsDir\coverage.opencover.xml"
         if ($LASTEXITCODE -ne 0 ) { throw "Test coverage has gaps." }
     } else {
         # Executing tests without test coverage

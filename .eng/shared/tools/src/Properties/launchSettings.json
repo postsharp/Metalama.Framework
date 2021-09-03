@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "PostSharp.Engineering.BuildTools": {
+      "commandName": "Project",
+      "commandLineArgs": "msbuild apr Microsoft.CodeAnalysis.CSharp.csproj src\\Caravela\\Caravela.Compiler.Interface.TypeForwards\\Caravela.Compiler.Interface.TypeForwards.csproj Test",
+      "workingDirectory": "C:\\src\\Caravela.Compiler\\"
+    }
+  }
+}

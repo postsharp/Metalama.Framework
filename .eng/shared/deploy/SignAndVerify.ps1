@@ -15,7 +15,8 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
     throw "This script has to run in a GIT repository root!"
 }
 
-& $PSScriptRoot/../RestoreTools.ps1 PostSharp.Engineering.BuildTools,SignClient 
+& ./.eng/shared/tools/BuildTools.ps1
+& ./.eng/shared/tools/RestoreTools.ps1 SignClient 
 
 $CurrentDir = $(get-location).Path
 
@@ -25,7 +26,7 @@ if (!$?) {
 	throw "Signing failed."
 }
 
-& ./tools/postsharp-eng nuget verify -d artifacts\publish
+& ./.eng/shared/tools/bin/postsharp-eng nuget verify -d artifacts\publish
 
 if (!$?) {
 	throw "Verification failed."
