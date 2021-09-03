@@ -19,12 +19,12 @@ namespace Caravela.Framework.RunTime
         /// <summary>
         /// Gets the <see cref="FieldInfo"/> if this represents a field, otherwise returns null.
         /// </summary>
-        public FieldInfo? AsFieldInfo => (FieldInfo?) this.UnderlyingMemberInfo;
+        public FieldInfo? AsField => (FieldInfo?) this.UnderlyingMemberInfo;
 
         /// <summary>
         /// Gets the <see cref="PropertyInfo"/> if this represents a property, otherwise returns null.
         /// </summary>
-        public PropertyInfo? AsPropertyInfo => (PropertyInfo?) this.UnderlyingMemberInfo;
+        public PropertyInfo? AsProperty => (PropertyInfo?) this.UnderlyingMemberInfo;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FieldOrPropertyInfo"/> class that represents a field.
@@ -63,20 +63,21 @@ namespace Caravela.Framework.RunTime
 
         public override Type ReflectedType => this.UnderlyingMemberInfo.ReflectedType!;
 
-        public object? GetValue( object? obj )
-        {
-            switch ( this.UnderlyingMemberInfo )
+        public Type ValueType
+            => this.UnderlyingMemberInfo switch
             {
-                case FieldInfo fieldInfo:
-                    return fieldInfo.GetValue( obj );
+                FieldInfo field => field.FieldType,
+                PropertyInfo property => property.PropertyType,
+                _ => throw new InvalidOperationException()
+            };
 
-                case PropertyInfo propertyInfo:
-                    return propertyInfo.GetValue( obj );
-
-                default:
-                    throw new InvalidOperationException();
-            }
-        }
+        public object? GetValue( object? obj ) 
+            => this.UnderlyingMemberInfo switch
+        {
+            FieldInfo fieldInfo => fieldInfo.GetValue( obj ),
+            PropertyInfo propertyInfo => propertyInfo.GetValue( obj ),
+            _ => throw new InvalidOperationException()
+        };
 
         public void SetValue( object? obj, object? value )
         {

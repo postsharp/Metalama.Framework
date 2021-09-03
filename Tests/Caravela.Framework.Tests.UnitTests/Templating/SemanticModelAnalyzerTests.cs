@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests
+namespace Caravela.Framework.Tests.UnitTests.Templating
 {
     public class SemanticModelAnalyzerTests : TestBase
     {

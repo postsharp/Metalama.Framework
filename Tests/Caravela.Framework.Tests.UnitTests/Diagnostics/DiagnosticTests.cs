@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 using System.Linq;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.CodeModel
+namespace Caravela.Framework.Tests.UnitTests.Diagnostics
 {
     public class DiagnosticTests : TestBase
     {
