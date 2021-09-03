@@ -1,8 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 
-using System.CommandLine;
+using PostSharp.Engineering.BuildTools.Coverage;
 using PostSharp.Engineering.BuildTools.MsBuild;
 using PostSharp.Engineering.BuildTools.Nuget;
+using System.CommandLine;
 
 namespace PostSharp.Engineering.BuildTools
 {
@@ -14,6 +15,7 @@ namespace PostSharp.Engineering.BuildTools
 
             rootCommand.AddCommand( new MsBuildCommand() );
             rootCommand.AddCommand( new NuGetCommand() );
+            rootCommand.AddCommand( new CoverageCommand() );
 
             // Parse the incoming args and invoke the handler
             return rootCommand.InvokeAsync( args ).Result;
