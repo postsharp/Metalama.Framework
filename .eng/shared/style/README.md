@@ -4,6 +4,15 @@ Make sure you have read and understood [PostSharp Engineering](../README.md) bef
 
 ## Table of contents
 
+- [PostSharp Engineering: Code Style Features](#postsharp-engineering-code-style-features)
+  - [Table of contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+  - [Code style cleanup](#code-style-cleanup)
+    - [Installation](#installation-1)
+    - [Usage](#usage)
+
 ## Introduction
 
 This directory contains centralized code-style configuration and scripts.

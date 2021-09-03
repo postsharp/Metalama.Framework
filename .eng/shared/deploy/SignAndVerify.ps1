@@ -26,7 +26,7 @@ if (!$?) {
 	throw "Signing failed."
 }
 
-& ./.eng/shared/tools/bin/postsharp-eng nuget verify -d artifacts\publish
+& ./tools/postsharp-eng nuget verify -d artifacts\publish
 
 if (!$?) {
 	throw "Verification failed."

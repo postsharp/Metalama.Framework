@@ -50,6 +50,7 @@ The features provided by this repository are grouped by categories in the top-le
 - [Build and Test](build/README.md)
 - [Deploy](deploy/README.md)
 - [Style and Formatting](style/README.md)
+- [Engineering Tools](tools/README.md)
 
 ## Modifying
 

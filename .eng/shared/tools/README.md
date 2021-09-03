@@ -1,30 +1,27 @@
-# Introduction 
+# PostSharp Engineering: Build Tools
 
-This repo contains custom build tools shared by multiple repos at PostSharp Technologies. They are packages for `dotnet tool`.
+Make sure you have read and understood [PostSharp Engineering](../README.md) before reading this doc.
 
-# Commands
+## Table of contents
 
-The tools implement the following commands:
+- [PostSharp Engineering: Build Tools](#postsharp-engineering-build-tools)
+	- [Table of contents](#table-of-contents)
+	- [Introduction](#introduction)
+	- [Building](#building)
+	- [Using the tools](#using-the-tools)
 
-* `nuget rename`: Renames the packages in a directory, including the dependency, from the prefix `Microsoft` to the prefix `Caravela.Roslyn`.
-* `nuget verify`: Verify the dependencies of all packages in a directory: the dependency must be either public or must be present in the directory itself.
+## Introduction
 
-# Using the tools
+This directory contains custom build tools.
 
-1. Install the tool locally
+## Building
 
-	```dotnet tool install --add-source . PostSharp.Engineering.BuildTools  --tool-path tools```
+Use the `BuildTools.ps1` script.
+
+## Using the tools
+
+1. Build the toools. (See above.)
 
 2. Run the tool. See the help.
 
-	```tools\postsharp-eng.exe```
-
-# Build
-
-1. Update the version number in PostSharp.Engineering.BuildTools
-
-2. Use `dotnet pack` 
-
-3. Upload manually to https://nuget.postsharp.net
-
-4. Update the version number in TeamCity (project-level parameter BUILD_TOOLS_VERSION).
+	```tools\postsharp-eng```

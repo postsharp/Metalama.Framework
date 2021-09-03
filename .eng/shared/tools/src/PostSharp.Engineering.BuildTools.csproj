@@ -5,9 +5,11 @@
 		<Version>1.0.1</Version>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>netcoreapp3.1</TargetFramework>
-		<OutDir>$(MSBuildThisFileDirectory)..\bin\</OutDir>
 		<AssemblyName>postsharp-eng</AssemblyName>
 		<GenerateDocumentationFile>false</GenerateDocumentationFile>
+		<PublishSingleFile>true</PublishSingleFile>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<PublishDir>$(MSBuildThisFileDirectory)..\..\..\..\tools\</PublishDir>
 	</PropertyGroup>
 
 	<ItemGroup>
