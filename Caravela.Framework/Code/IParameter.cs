@@ -47,7 +47,7 @@ namespace Caravela.Framework.Code
         /// </summary>
         /// <returns>A <see cref="ParameterInfo"/> that can be used only in run-time code.</returns>
         ParameterInfo ToParameterInfo();
-        
+
         bool IsReturnParameter { get; }
     }
 }

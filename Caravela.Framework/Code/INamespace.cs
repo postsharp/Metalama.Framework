@@ -11,7 +11,6 @@ namespace Caravela.Framework.Code
     /// </summary>
     public interface INamespace : INamedDeclaration
     {
-
         /// <summary>
         /// Gets the full name of the namespace, or <c>null</c> if this is the global namespace.
         /// </summary>

@@ -148,7 +148,7 @@ class Expression
             this.ServiceProvider.Dispose();
         }
 
-        public void Dispose() => this.Dispose(true);
+        public void Dispose() => this.Dispose( true );
 
         protected IsolatedTest WithIsolatedTest() => new( this );
 

@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using NuGet.Versioning;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -10,23 +12,20 @@ using System.Net.Http;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
-using NuGet.Versioning;
 
 namespace PostSharp.Engineering.BuildTools.Nuget
 {
     internal class VerifyPackageCommand : Command
     {
-        private static readonly Dictionary<string, bool> _cache = new Dictionary<string, bool>();
+        private static readonly Dictionary<string, bool> _cache = new();
 
         public VerifyPackageCommand() : base( "verify", "Verifies all packages in a directory." )
         {
             this.AddOption(
-              new Option( "-d", "Directory containing the packages" )
-              {
-                  Name = "directory",
-                  IsRequired = true,
-                  Argument = new Argument<DirectoryInfo>()
-              } );
+                new Option( "-d", "Directory containing the packages" )
+                {
+                    Name = "directory", IsRequired = true, Argument = new Argument<DirectoryInfo>()
+                } );
 
             this.Handler = CommandHandler.Create<InvocationContext, DirectoryInfo>( Execute );
         }
@@ -56,7 +55,7 @@ namespace PostSharp.Engineering.BuildTools.Nuget
             var inputShortPath = Path.GetFileName( inputPath );
 
             var success = true;
-         
+
             using var archive = ZipFile.Open( inputPath, ZipArchiveMode.Read );
 
             var nuspecEntry = archive.Entries.Single( entry => entry.FullName.EndsWith( ".nuspec" ) );
@@ -89,19 +88,21 @@ namespace PostSharp.Engineering.BuildTools.Nuget
                 var versionRangeString = dependency.Attribute( "version" ).Value;
                 if ( !VersionRange.TryParse( versionRangeString, out var versionRange ) )
                 {
-                    console.Error.WriteLine( $"{inputShortPath}: cannot parse the version range '{versionRangeString}'." );
+                    console.Error.WriteLine(
+                        $"{inputShortPath}: cannot parse the version range '{versionRangeString}'." );
                     success = false;
                     continue;
                 }
 
                 // Check if it's present in the directory.
-                var localFile = Path.Combine( directory, dependentId + "." + versionRange.MinVersion.ToNormalizedString() + ".nupkg" );
+                var localFile = Path.Combine( directory,
+                    dependentId + "." + versionRange.MinVersion.ToNormalizedString() + ".nupkg" );
 
                 if ( !File.Exists( localFile ) )
                 {
-
                     // Check if the dependency is present on nuget.org.
-                    var uri = $"https://www.nuget.org/packages/{dependentId}/{versionRange.MinVersion.ToNormalizedString()}";
+                    var uri =
+                        $"https://www.nuget.org/packages/{dependentId}/{versionRange.MinVersion.ToNormalizedString()}";
 
                     if ( !_cache.TryGetValue( uri, out var packageFound ) )
                     {
@@ -112,7 +113,8 @@ namespace PostSharp.Engineering.BuildTools.Nuget
 
                     if ( !packageFound )
                     {
-                        console.Error.WriteLine( $"{inputShortPath}: {dependentId} {versionRangeString} is not public." );
+                        console.Error.WriteLine(
+                            $"{inputShortPath}: {dependentId} {versionRangeString} is not public." );
                         success = false;
                         continue;
                     }

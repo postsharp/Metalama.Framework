@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Aspects;
 using System;
-using System.Collections.Immutable;
 
 namespace Caravela.Framework.Code
 {
@@ -44,6 +43,7 @@ namespace Caravela.Framework.Code
             get
             {
                 this.CheckAssigned();
+
                 return this._type!;
             }
         }
@@ -56,6 +56,7 @@ namespace Caravela.Framework.Code
             get
             {
                 this.CheckAssigned();
+
                 return this.Value == null;
             }
         }
@@ -68,6 +69,7 @@ namespace Caravela.Framework.Code
             get
             {
                 this.CheckAssigned();
+
                 return this._value;
             }
         }

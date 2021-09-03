@@ -18,7 +18,7 @@ namespace Caravela.Framework.Code
         /// <see cref="MethodKind.EventAdd"/>, <see cref="MethodKind.EventRemove"/> or <see cref="MethodKind.EventRaise"/>.</param>
         /// <returns></returns>
         IMethod? GetAccessor( MethodKind methodKind );
-        
+
         /// <summary>
         /// Gets the list of accessors defined by the current event or property.
         /// </summary>

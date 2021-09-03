@@ -3,9 +3,13 @@
     
       <PropertyGroup Condition="'$(CollectCoverage)'=='True'">
             <!-- Exclude non-implemented namespaces from test coverage analysis -->
-         <Exclude>$(Exclude),[*]Caravela.Framework.Eligibility.*</Exclude>
-         <Exclude>$(Exclude),[*]Caravela.Framework.Policies.*</Exclude>
-         <Exclude>$(Exclude),[*]Caravela.Framework.Validation.*</Exclude>
+         <Exclude>$(Exclude),[Caravela.Framework]Caravela.Framework.Eligibility.*</Exclude>
+         <Exclude>$(Exclude),[Caravela.Framework]Caravela.Framework.Policies.*</Exclude>
+         <Exclude>$(Exclude),[Caravela.Framework]Caravela.Framework.Validation.*</Exclude>
+         <Exclude>$(Exclude),[Caravela.TestFramework]Caravela.TestFramework.XunitFramework.*</Exclude>
+         
+         <!-- Builders have a lot of obvious gaps. We don't want to spend effort on this now. -->
+         <Exclude>$(Exclude),[Caravela.Framework.Impl]Caravela.Framework.Impl.CodeModel.Builders.*</Exclude>
       </PropertyGroup>  
             
 </Project>

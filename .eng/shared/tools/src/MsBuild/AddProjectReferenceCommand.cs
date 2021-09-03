@@ -1,4 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
 using System.CommandLine;
@@ -10,7 +11,8 @@ namespace PostSharp.Engineering.BuildTools.MsBuild
 {
     internal class AddProjectReferenceCommand : Command
     {
-        public AddProjectReferenceCommand() : base( "apr", "Adds a project reference next to another project reference in all projects matching a filter." )
+        public AddProjectReferenceCommand() : base( "apr",
+            "Adds a project reference next to another project reference in all projects matching a filter." )
         {
             this.AddArgument( new Argument<string>( "existing", "Existing reference file name" ) );
             this.AddArgument( new Argument<string>( "new", "Added reference path" ) );
@@ -21,7 +23,8 @@ namespace PostSharp.Engineering.BuildTools.MsBuild
 
         private static int Execute( InvocationContext context, string existing, string @new, string filter )
         {
-            foreach ( var project in Directory.EnumerateFiles( Directory.GetCurrentDirectory(), $"*{filter}*.csproj", SearchOption.AllDirectories ) )
+            foreach ( var project in Directory.EnumerateFiles( Directory.GetCurrentDirectory(), $"*{filter}*.csproj",
+                SearchOption.AllDirectories ) )
             {
                 AddReference( context, project, existing, @new );
             }
@@ -29,7 +32,8 @@ namespace PostSharp.Engineering.BuildTools.MsBuild
             return 0;
         }
 
-        private static void AddReference( InvocationContext context, string project, string existingReference, string newReference )
+        private static void AddReference( InvocationContext context, string project, string existingReference,
+            string newReference )
         {
             context.Console.Out.Write( Path.GetFileName( project ) );
             context.Console.Out.Write( ": " );
@@ -39,7 +43,8 @@ namespace PostSharp.Engineering.BuildTools.MsBuild
 
             var newReferenceFileName = Path.GetFileName( newReference );
 
-            var newReferenceItem = xml.SelectSingleNode( $"//ProjectReference[contains(@Include,'{newReferenceFileName}')]" );
+            var newReferenceItem =
+                xml.SelectSingleNode( $"//ProjectReference[contains(@Include,'{newReferenceFileName}')]" );
 
             if ( newReferenceItem != null )
             {
@@ -47,7 +52,8 @@ namespace PostSharp.Engineering.BuildTools.MsBuild
                 return;
             }
 
-            var existingReferenceItem = xml.SelectSingleNode( $"//ProjectReference[contains(@Include,'{existingReference}')]" );
+            var existingReferenceItem =
+                xml.SelectSingleNode( $"//ProjectReference[contains(@Include,'{existingReference}')]" );
 
             if ( existingReferenceItem == null )
             {
@@ -60,7 +66,8 @@ namespace PostSharp.Engineering.BuildTools.MsBuild
             var newReferenceFullPath = Path.GetFullPath( newReference );
             var newReferenceUri = new Uri( newReferenceFullPath );
             var newReferenceRelativeUri = projectUri.MakeRelativeUri( newReferenceUri );
-            var newReferenceRelativePath = Uri.UnescapeDataString( newReferenceRelativeUri.OriginalString ).Replace( "/", "\\" );
+            var newReferenceRelativePath =
+                Uri.UnescapeDataString( newReferenceRelativeUri.OriginalString ).Replace( "/", "\\" );
 
             newReferenceItem = xml.CreateElement( "ProjectReference" );
             var newReferenceAttribute = xml.CreateAttribute( "Include" );

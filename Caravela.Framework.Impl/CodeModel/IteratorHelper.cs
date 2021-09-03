@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     AccessorDeclarationSyntax { Body: { } body } => FindYieldVisitor.Instance.VisitBlock( body ),
                     _ => false
                 } );
-            
+
             // If we don't have the source code (i.e. if we have a symbol for a compiled assembly), it is safe to return that
             // the method is not a yield-based iterator, because if we are in an external assembly, so this must be considered
             // an implementation detail.
@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 return default;
             }
 
-            return symbol.GetIteratorInfoImpl(method);
+            return symbol.GetIteratorInfoImpl( method );
         }
     }
 }

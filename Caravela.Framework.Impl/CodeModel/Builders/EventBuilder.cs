@@ -166,6 +166,5 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 }
             }
         }
-        
     }
 }

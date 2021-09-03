@@ -9,7 +9,6 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
 {
     public class IteratorInfoTests : TestBase
     {
-           
         [Fact]
         public void GenericEnumerableYield()
         {
@@ -23,14 +22,12 @@ class C
 
             var compilation = CreateCompilationModel( code );
             var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
-            
+
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IEnumerable, iteratorInfo.EnumerableKind );
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
-
         }
-        
-                   
+
         [Fact]
         public void GenericEnumeratorYield()
         {
@@ -44,13 +41,12 @@ class C
 
             var compilation = CreateCompilationModel( code );
             var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
-            
+
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IEnumerator, iteratorInfo.EnumerableKind );
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
-
         }
-        
+
         [Fact]
         public void AsyncEnumerableYield()
         {
@@ -64,13 +60,12 @@ class C
 
             var compilation = CreateCompilationModel( code );
             var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
-            
+
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IAsyncEnumerable, iteratorInfo.EnumerableKind );
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
-
         }
-        
+
         [Fact]
         public void AsyncEnumeratorYield()
         {
@@ -84,17 +79,12 @@ class C
 
             var compilation = CreateCompilationModel( code );
             var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
-            
+
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IAsyncEnumerator, iteratorInfo.EnumerableKind );
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
-
         }
 
-        
-                   
-        
-                           
         [Fact]
         public void NonGenericEnumeratorYield()
         {
@@ -108,13 +98,12 @@ class C
 
             var compilation = CreateCompilationModel( code );
             var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
-            
+
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.UntypedIEnumerator, iteratorInfo.EnumerableKind );
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(object) ), iteratorInfo.ItemType );
-
         }
-        
+
         [Fact]
         public void NonGenericEnumerableYield()
         {
@@ -128,14 +117,12 @@ class C
 
             var compilation = CreateCompilationModel( code );
             var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
-            
+
             Assert.True( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.UntypedIEnumerable, iteratorInfo.EnumerableKind );
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(object) ), iteratorInfo.ItemType );
-
         }
-        
-             
+
         [Fact]
         public void GenericEnumerableNonYield()
         {
@@ -149,14 +136,12 @@ class C
 
             var compilation = CreateCompilationModel( code );
             var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
-            
+
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IEnumerable, iteratorInfo.EnumerableKind );
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
-
         }
-        
-                   
+
         [Fact]
         public void GenericEnumeratorNonYield()
         {
@@ -170,13 +155,12 @@ class C
 
             var compilation = CreateCompilationModel( code );
             var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
-            
+
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IEnumerator, iteratorInfo.EnumerableKind );
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
-
         }
-        
+
         [Fact]
         public void AsyncEnumerableNonYield()
         {
@@ -190,13 +174,12 @@ class C
 
             var compilation = CreateCompilationModel( code );
             var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
-            
+
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IAsyncEnumerable, iteratorInfo.EnumerableKind );
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
-
         }
-        
+
         [Fact]
         public void AsyncEnumeratorNonYield()
         {
@@ -210,15 +193,12 @@ class C
 
             var compilation = CreateCompilationModel( code );
             var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
-            
+
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.IAsyncEnumerator, iteratorInfo.EnumerableKind );
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
-
         }
-                   
-        
-                           
+
         [Fact]
         public void NonGenericEnumeratorNonYield()
         {
@@ -232,13 +212,12 @@ class C
 
             var compilation = CreateCompilationModel( code );
             var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
-            
+
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.UntypedIEnumerator, iteratorInfo.EnumerableKind );
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(object) ), iteratorInfo.ItemType );
-
         }
-        
+
         [Fact]
         public void NonGenericEnumerableNonYield()
         {
@@ -252,12 +231,10 @@ class C
 
             var compilation = CreateCompilationModel( code );
             var iteratorInfo = compilation.DeclaredTypes.Single().Methods.Single().GetIteratorInfo();
-            
+
             Assert.False( iteratorInfo.IsIterator );
             Assert.Equal( EnumerableKind.UntypedIEnumerable, iteratorInfo.EnumerableKind );
             Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(object) ), iteratorInfo.ItemType );
-
         }
-        
     }
 }

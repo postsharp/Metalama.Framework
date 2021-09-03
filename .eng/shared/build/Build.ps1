@@ -170,7 +170,7 @@ function Test() {
         if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
     
         # Detect gaps in code coverage.
-        & ./tools/postsharp-eng coverage warn "$testResultsDir\coverage.opencover.xml"
+        & ./tools/postsharp-eng coverage warn "$testResultsDir\coverage.json"
         if ($LASTEXITCODE -ne 0 ) { throw "Test coverage has gaps." }
     } else {
         # Executing tests without test coverage
