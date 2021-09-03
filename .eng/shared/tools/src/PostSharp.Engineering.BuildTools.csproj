@@ -8,6 +8,8 @@
 		<PublishSingleFile>true</PublishSingleFile>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 		<PublishDir>$(MSBuildThisFileDirectory)..\..\..\..\tools\</PublishDir>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
