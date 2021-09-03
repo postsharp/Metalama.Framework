@@ -1,5 +1,7 @@
 <Project>
 
+    <!-- For configuration options, see https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/MSBuildIntegration.md -->
+
     <PropertyGroup Condition="'$(CollectCoverage)'=='True'">
     
         <!-- Our custom test framework is not compatible with coverlet, so we have to disable it. -->
@@ -14,7 +16,7 @@
         <CoverletOutputFormat>opencover,json</CoverletOutputFormat>
         <ExcludeByAttribute>Obsolete,GeneratedCode,CompilerGenerated</ExcludeByAttribute>
         
-        <!-- Set up shared exclusions -->
+        <!-- Exclude all classes from all assemblies whose name match `*.Tests.*` -->
         <Exclude>[*.Tests.*]*</Exclude>
         <SkipAutoProps>True</SkipAutoProps>
         
