@@ -22,10 +22,5 @@ namespace Caravela.Framework.Impl.Linking
         /// Final version of the symbol. Relevant only for override targets.
         /// </summary>
         Final,
-
-        /// <summary>
-        /// Empty semantics. Returns default value or nothing.
-        /// </summary>
-        Empty,
     }
 }

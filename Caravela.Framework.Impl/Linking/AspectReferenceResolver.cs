@@ -240,7 +240,12 @@ namespace Caravela.Framework.Impl.Linking
                 || overrideIndices.Any( x => x.Index == resolvedIndex )
                 || resolvedIndex == targetMemberIntroductionIndex );
 
-            if ( resolvedIndex.LayerIndex == 0)
+            if ( resolvedIndex == targetMemberIntroductionIndex )
+            {
+                resolvedIndex = default;
+            }
+
+            if ( resolvedIndex == default )
             {
                 if ( targetMemberIntroduction == null )
                 {
@@ -283,18 +288,18 @@ namespace Caravela.Framework.Impl.Linking
                     }
                 }
             }
-            else if ( resolvedIndex == targetMemberIntroductionIndex )
-            {
-                // Override on the same layer as introduced member.
-                return new ResolvedAspectReference(
-                    containingSymbol,
-                    referencedSymbol,
-                    new IntermediateSymbolSemantic(
-                        this.GetSymbolFromIntroducedMember( referencedSymbol, targetMemberIntroduction.AssertNotNull() ),
-                        IntermediateSymbolSemanticKind.Default ),
-                    expression,
-                    referenceSpecification );
-            }
+            //else if ( resolvedIndex == targetMemberIntroductionIndex )
+            //{
+            //    // Resolved to introduced member.
+            //    return new ResolvedAspectReference(
+            //        containingSymbol,
+            //        referencedSymbol,
+            //        new IntermediateSymbolSemantic(
+            //            this.GetSymbolFromIntroducedMember( referencedSymbol, targetMemberIntroduction.AssertNotNull() ),
+            //            IntermediateSymbolSemanticKind.Base ),
+            //        expression,
+            //        referenceSpecification );
+            //}
             else if ( resolvedIndex.LayerIndex < this._orderedLayers.Count - 1)
             {
                 // One of the overrides or the introduced member.
