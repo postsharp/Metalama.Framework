@@ -81,7 +81,7 @@ class User {
         public void TestGenericInstances()
         {
             // Generic instances
-            var user = this._topLevelTypes.Single( t => t.Name == "User" )!;
+            var user = this._topLevelTypes.Single( t => t.Name == "User" );
             var instantiatedDescendant = (INamedType) user.Fields.Single().Type;
             var instantiatedNested = instantiatedDescendant.BaseType!;
             var instantiatedBaseOrigin = instantiatedNested.BaseType!;

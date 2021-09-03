@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private static TemplateAttribute Parse( TemplateAttributeType attributeType, AttributeData attributeData )
         {
-            TemplateAttribute attribute = attributeType switch
+            var attribute = attributeType switch
             {
                 TemplateAttributeType.Introduction => new IntroduceAttribute(),
                 TemplateAttributeType.Template => new TemplateAttribute(),

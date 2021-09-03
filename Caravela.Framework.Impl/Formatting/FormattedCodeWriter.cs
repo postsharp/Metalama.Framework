@@ -88,7 +88,7 @@ namespace Caravela.Framework.Impl.Formatting
             foreach ( var csharpSpan in Classifier.GetClassifiedSpans(
                     semanticModel,
                     syntaxTree.GetRoot().Span,
-                    document.Project!.Solution.Workspace )
+                    document.Project.Solution.Workspace )
                 .OrderBy( c => c.TextSpan.Start )
                 .ThenBy( c => c.ClassificationType ) )
             {

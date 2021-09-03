@@ -38,7 +38,10 @@ param (
 [switch] $Prepare = $false,
 
 # Runs the test suite.
-[switch] $Test = $false
+[switch] $Test = $false,
+
+# Verifies the test coverage (requires -Test).
+[switch] $Coverage = $false
 
 )
 
@@ -112,13 +115,9 @@ function CreateVersionFile() {
     </PropertyGroup>
     <PropertyGroup>
         <!-- Adds the local output directories as nuget sources for referencing projects. -->
-        <RestoreAdditionalProjectSources Condition="Exists('`$(MSBuildThisFileDirectory)artifacts\bin\Release')">
+        <RestoreAdditionalProjectSources Condition="Exists('`$(MSBuildThisFileDirectory)..\artifacts\bin\$configuration')">
             `$(RestoreAdditionalProjectSources);
-            `$(MSBuildThisFileDirectory)artifacts\bin\Release
-        </RestoreAdditionalProjectSources>
-        <RestoreAdditionalProjectSources Condition="Exists('`$(MSBuildThisFileDirectory)artifacts\bin\Debug')">
-            `$(RestoreAdditionalProjectSources);
-            `$(MSBuildThisFileDirectory)artifacts\bin\Debug
+            `$(MSBuildThisFileDirectory)..\artifacts\bin\$configuration
         </RestoreAdditionalProjectSources>
     </PropertyGroup>
 </Project>
@@ -155,8 +154,30 @@ function Sign() {
 }
 
 function Test() {
-    & dotnet test -p:Configuration=$configuration --nologo --no-restore
-    if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
+     $testResultsDir = $(Get-Location).Path + "\TestResults"
+
+    if ( $Coverage ) {
+         # Removing the TestResults directory so that we reset the code coverage information.
+        if ( Test-Path $testResultsDir ) {
+            Remove-Item $testResultsDir -Recurse -Force
+        }
+    
+        # Restoring the required dotnet tools.
+        & $PSScriptRoot/../RestoreTools.ps1 PostSharp.Engineering.BuildTools
+    
+        # Executing tests with code coverage enabled.
+        & dotnet test -p:CollectCoverage=True -p:CoverletOutput="$testResultsDir\" -m:1 --nologo --no-restore
+        if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
+    
+        # Detect gaps in code coverage.
+        & tools/postsharp-eng.exe coverage warn "$testResultsDir\coverage.opencover.xml"
+        if ($LASTEXITCODE -ne 0 ) { throw "Test coverage has gaps." }
+    } else {
+        # Executing tests without test coverage
+        & dotnet test --nologo --no-restore
+        if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
+    }
+
 
     Write-Host "Tests successful" -ForegroundColor Green
 }

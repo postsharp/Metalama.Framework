@@ -52,12 +52,20 @@ namespace Caravela.Framework.Impl.Templating
             /// </summary>
             /// <returns>A cookie to dispose at the end.</returns>
             public static ScopeContext CreateForcedCompileTimeScope( ScopeContext parentScope, string reason )
-                => new( parentScope.CurrentBreakOrContinueScope, parentScope.IsRuntimeConditionalBlock, parentScope.IsRuntimeConditionalBlockReason,
-                        TemplatingScope.CompileTimeOnly, reason );
+                => new(
+                    parentScope.CurrentBreakOrContinueScope,
+                    parentScope.IsRuntimeConditionalBlock,
+                    parentScope.IsRuntimeConditionalBlockReason,
+                    TemplatingScope.CompileTimeOnly,
+                    reason );
 
             public static ScopeContext CreatePreferredRunTimeScope( ScopeContext parentScope, string reason )
-                => new( parentScope.CurrentBreakOrContinueScope, parentScope.IsRuntimeConditionalBlock, parentScope.IsRuntimeConditionalBlockReason,
-                        TemplatingScope.RunTimeOnly, reason );
+                => new(
+                    parentScope.CurrentBreakOrContinueScope,
+                    parentScope.IsRuntimeConditionalBlock,
+                    parentScope.IsRuntimeConditionalBlockReason,
+                    TemplatingScope.RunTimeOnly,
+                    reason );
 
             /// <summary>
             /// Enters a branch of the syntax tree whose execution depends on a runtime-only condition.
@@ -73,11 +81,12 @@ namespace Caravela.Framework.Impl.Templating
                     parentScope.PreferredScopeReason );
 
             public static ScopeContext CreateBreakOrContinueScope( ScopeContext parentScope, TemplatingScope scope, string reason )
-                => new( scope,
-                        scope == TemplatingScope.RunTimeOnly || parentScope.IsRuntimeConditionalBlock,
-                        reason,
-                        parentScope._preferredScope,
-                        parentScope.PreferredScopeReason );
+                => new(
+                    scope,
+                    scope == TemplatingScope.RunTimeOnly || parentScope.IsRuntimeConditionalBlock,
+                    reason,
+                    parentScope._preferredScope,
+                    parentScope.PreferredScopeReason );
         }
     }
 }

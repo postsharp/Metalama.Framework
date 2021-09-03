@@ -33,9 +33,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{19660464-978E-4457-846E-B399BB6A3884}"
-	ProjectSection(SolutionItems) = preProject
-		Build\CopyToPublishDir.proj = Build\CopyToPublishDir.proj
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Obfuscator", "Build\Caravela.Obfuscator\Caravela.Obfuscator.csproj", "{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}"
 EndProject

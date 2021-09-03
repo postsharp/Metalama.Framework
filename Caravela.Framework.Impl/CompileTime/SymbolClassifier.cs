@@ -109,11 +109,11 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 case IMethodSymbol { OverriddenMethod: { } overriddenMethod }:
                     // Look at the overriden method.
-                    return this.GetTemplateInfo( overriddenMethod!, true );
+                    return this.GetTemplateInfo( overriddenMethod, true );
 
                 case IPropertySymbol { OverriddenProperty: { } overriddenProperty }:
                     // Look at the overridden property.
-                    return this.GetTemplateInfo( overriddenProperty!, true );
+                    return this.GetTemplateInfo( overriddenProperty, true );
 
                 default:
                     return TemplateInfo.None;
@@ -349,7 +349,7 @@ namespace Caravela.Framework.Impl.CompileTime
             // From overridden method.
             if ( symbol is IMethodSymbol { OverriddenMethod: { } overriddenMethod } )
             {
-                var scopeFromOverriddenMethod = this.GetScopeFromAttributes( overriddenMethod! );
+                var scopeFromOverriddenMethod = this.GetScopeFromAttributes( overriddenMethod );
 
                 if ( scopeFromOverriddenMethod != null )
                 {

@@ -10,7 +10,7 @@
     
     <!-- We have to embed the netstandard2.0 build of Caravela.Framework so we can reference it to create
          the compile-time assembly. See ReferenceAssemblyLocator                                           -->
-    <EmbeddedResource Include="$(OutputPath)..\netstandard2.0\Caravela.Framework.dll">
+    <EmbeddedResource Include="..\Caravela.Framework\bin\$(Configuration)\netstandard2.0\Caravela.Framework.dll">
         <LogicalName>Caravela.Framework.dll</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
@@ -64,20 +64,5 @@
   <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">
     <Error Condition="'$(Configuration)' == 'Release' AND '$(Obfuscate)' != 'True'" Text="Not allowed to create Release package without obfuscation, use '-p:Obfuscate=True'." />
   </Target>
-  
- <PropertyGroup>
-   <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);CustomContentTarget</TargetsForTfmSpecificContentInPackage>
- </PropertyGroup>
- 
- <Target Name="CustomContentTarget">
-   <ItemGroup>
-<!--     <TfmSpecificPackageFile Remove="abc.txt">-->
-<!--       <PackagePath>mycontent/$(TargetFramework)</PackagePath>-->
-<!--     </TfmSpecificPackageFile>-->
-<!--     <TfmSpecificPackageFile Include="Extensions/ext.txt" Condition="'$(TargetFramework)' == 'net46'">-->
-<!--       <PackagePath>net46content</PackagePath>-->
-<!--     </TfmSpecificPackageFile>  -->
-   </ItemGroup>
- </Target>  
 
 </Project>

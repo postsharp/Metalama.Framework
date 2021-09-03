@@ -76,7 +76,7 @@ namespace Caravela.Framework.Aspects
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="OverrideEnumerableMethod"/>, <see cref="OverrideEnumeratorMethod"/>,
-        /// <see cref="OverrideAsyncEnumerableMethod"/> or  <see cref="OverrideAsyncEnumeratorMethod"/> template must be applied to all methods returning
+        /// <c>OverrideAsyncEnumerableMethod"</c> or  <c>OverrideAsyncEnumeratorMethod"</c> template must be applied to all methods returning
         /// a compatible return type, instead of only to methods using the <c>yield</c> statement.
         /// </summary>
         protected bool UseAsyncTemplateForAnyAwaitable

@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,6 +19,7 @@ namespace Caravela.Framework.Impl.DesignTime
 {
     // ReSharper disable UnusedType.Global
 
+    [ExcludeFromCodeCoverage]
     public class CentralCodeFixProvider : CodeFixProvider
     {
         private const string _makePartialKey = "Caravela.MakePartial";
