@@ -15,7 +15,7 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
     throw "This script has to run in a GIT repository root!"
 }
 
-& $PSScriptRoot/../RestoreTools.ps1
+& $PSScriptRoot/../RestoreTools.ps1 PostSharp.Engineering.BuildTools,SignClient 
 
 $CurrentDir = $(get-location).Path
 
