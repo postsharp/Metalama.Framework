@@ -16,6 +16,6 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
 
 "Cleaning ${Solution} ${Params}"
 
-& ./.eng/shared/tools/RestoreTools.ps1 JetBrains.Resharper.GlobalTools
+& ./.eng/shared/tools/Restore.ps1 JetBrains.Resharper.GlobalTools
 
 & ./tools/jb cleanupcode -p=Custom $Solution $Params --toolset=16.0 --disable-settings-layers:"GlobalAll;GlobalPerProduct;SolutionPersonal;ProjectPersonal"

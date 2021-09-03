@@ -15,8 +15,8 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
     throw "This script has to run in a GIT repository root!"
 }
 
-& ./.eng/shared/tools/BuildTools.ps1
-& ./.eng/shared/tools/RestoreTools.ps1 SignClient 
+& ./.eng/shared/tools/Build.ps1
+& ./.eng/shared/tools/Restore.ps1 SignClient 
 
 $CurrentDir = $(get-location).Path
 

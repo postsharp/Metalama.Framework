@@ -1,8 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<!-- This version number must be increased for each package upload even with just a trivial change. -->
-		<Version>1.0.1</Version>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<AssemblyName>postsharp-eng</AssemblyName>

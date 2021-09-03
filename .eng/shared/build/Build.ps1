@@ -163,7 +163,7 @@ function Test() {
         }
     
         # Building dotnet tools.
-        & ./.eng/shared/tools/BuildTools.ps1
+        & ./.eng/shared/tools/Build.ps1
     
         # Executing tests with code coverage enabled.
         & dotnet test -p:CollectCoverage=True -p:CoverletOutput="$testResultsDir\" -m:1 --nologo --no-restore

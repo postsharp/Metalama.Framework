@@ -1,3 +1,8 @@
+<#
+.SYNOPSIS
+    Restores third-party .NET tools.
+#>
+
 Param ( 
 
     # List of packages to be restored, or empty to restore all.    
