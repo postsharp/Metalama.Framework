@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 
@@ -26,6 +27,7 @@ namespace Caravela.Framework.Impl.DesignTime
     /// <summary>
     /// Our implementation of <see cref="DiagnosticSuppressor"/>.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class DesignTimeDiagnosticSuppressor : DiagnosticSuppressor
     {
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();

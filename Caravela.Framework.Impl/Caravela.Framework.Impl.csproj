@@ -64,20 +64,5 @@
   <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">
     <Error Condition="'$(Configuration)' == 'Release' AND '$(Obfuscate)' != 'True'" Text="Not allowed to create Release package without obfuscation, use '-p:Obfuscate=True'." />
   </Target>
-  
- <PropertyGroup>
-   <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);CustomContentTarget</TargetsForTfmSpecificContentInPackage>
- </PropertyGroup>
- 
- <Target Name="CustomContentTarget">
-   <ItemGroup>
-<!--     <TfmSpecificPackageFile Remove="abc.txt">-->
-<!--       <PackagePath>mycontent/$(TargetFramework)</PackagePath>-->
-<!--     </TfmSpecificPackageFile>-->
-<!--     <TfmSpecificPackageFile Include="Extensions/ext.txt" Condition="'$(TargetFramework)' == 'net46'">-->
-<!--       <PackagePath>net46content</PackagePath>-->
-<!--     </TfmSpecificPackageFile>  -->
-   </ItemGroup>
- </Target>  
 
 </Project>

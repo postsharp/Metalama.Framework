@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.CodeRefactorings;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace Caravela.Framework.Impl.DesignTime
 {
     // ReSharper disable UnusedType.Global
 
+    [ExcludeFromCodeCoverage]
     public class CentralCodeRefactoringProvider : CodeRefactoringProvider
     {
         public override async Task ComputeRefactoringsAsync( CodeRefactoringContext context )

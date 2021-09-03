@@ -1,5 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="..\..\.eng\Coverage.props" />
+
+
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -16,8 +19,6 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageReference Include="xunit" Version="$(xUnitVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
-    <PackageReference Include="coverlet.collector" Version="$(CoverletVersion)" />
-    <PackageReference Include="coverlet.msbuild" Version="$(CoverletVersion)" />
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
     <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     <ProjectReference Include="..\..\Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj" />

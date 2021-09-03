@@ -21,14 +21,19 @@ namespace Caravela.Framework.Validation
     {
         public void BuildEligibility( IEligibilityBuilder<INamedType> builder )
         {
+            // Coverage: Ignore
             builder.MustHaveAccessibility( Accessibility.Public );
         }
 
         public void BuildAspect( IAspectBuilder<INamedType> builder )
         {
+            /*
             builder.AddReferenceValidator<INamedType, Validator>( builder.Target, new[] { DeclarationReferenceKind.ImplementsInterface } );
+            */
         }
 
+        
+        /*
         private class Validator : IDeclarationReferenceValidator<INamedType>
         {
             public void Initialize( IReadOnlyDictionary<string, string> properties ) { }
@@ -41,7 +46,10 @@ namespace Caravela.Framework.Validation
                 }
             }
         }
+        
+        */
 
         public void BuildAspectClass( IAspectClassBuilder builder ) { }
+        
     }
 }

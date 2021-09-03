@@ -38,10 +38,7 @@ param (
 [switch] $Prepare = $false,
 
 # Runs the test suite.
-[switch] $Test = $false,
-
-# With the -Test switch, enable test coverage
-[switch] $Coverage = $false
+[switch] $Test = $false
 
 )
 
@@ -161,22 +158,16 @@ function Test() {
         Remove-Item $testResultsDir -Recurse -Force
     }
 
-    if ( $Coverage ) {
-        # Restoring the required dotnet tools.
-        & $PSScriptRoot/../RestoreTools.ps1 PostSharp.Engineering.BuildTools
+    # Restoring the required dotnet tools.
+    & $PSScriptRoot/../RestoreTools.ps1 PostSharp.Engineering.BuildTools
 
-        # Executing tests with code coverage.
-        & dotnet test -p:CollectCoverage=True -p:CaravelaTestReplaceFramework=False -m:1 -p:CoverletOutput="$testResultsDir\" -p:MergeWith="$testResultsDir\coverage.json"  -p:CoverletOutputFormat="opencover%2cjson" -p:ExcludeByAttribute="Obsolete%2cGeneratedCode%2cCompilerGenerated" -p:Exclude="[*.Tests.*]*" -p:SkipAutoProps=true  --nologo --no-restore
-        if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
+    # Executing tests with code coverage enabled.
+    & dotnet test -p:CollectCoverage=True -p:CoverletOutput="$testResultsDir\" -m:1 --nologo --no-restore
+    if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
 
-        & tools/postsharp-eng.exe coverage warn "$testResultsDir\coverage.opencover.xml"
-        if ($LASTEXITCODE -ne 0 ) { throw "Test coverage has gaps." }
-
-    }
-    else  {
-        & dotnet test -p:Configuration=$configuration --nologo --no-restore
-        if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
-    }
+    # Detect gaps in code coverage.
+    & tools/postsharp-eng.exe coverage warn "$testResultsDir\coverage.opencover.xml"
+    if ($LASTEXITCODE -ne 0 ) { throw "Test coverage has gaps." }
 
 
     Write-Host "Tests successful" -ForegroundColor Green
