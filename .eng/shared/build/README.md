@@ -36,7 +36,7 @@ This is the main build script providing support for build, packaging and testing
 
 Kills all processes which might hold any files from the repository.
 
-## Imported scripts
+## Importable scripts
 
 The scripts listed below are meant to be imported in
 - `Directory.Build.props` (*.props)
@@ -57,6 +57,10 @@ Enables build and tests reporting to TeamCity.
 ### SourceLink.props
 
 Enables SourceLink support.
+
+### Coverage.props
+
+Enabled code coverage. This script should be imported in test projects only (not in projects being tested). This script adds a package to _coverlet_ so there is no need to have in in test projects (and these references should be removed).
 
 ## NuGet packages metadata
 
@@ -196,13 +200,19 @@ This property value is then available in all MSBuild project files in the reposi
 </ItemGroup>
 ```
 
-#### Local build and testing
+#### Build and testing locally
 
-See the initial comments in the `.eng\shared\build\Build.ps1` script for details. Use the `.eng\Build.ps1` instead and ommit the `ProductName` parameter as this is provided by the facade.
+For details, do `help .eng\Build.ps1` in PowerShell or see the initial comments in the `.eng\shared\build\Build.ps1` script for details. 
 
-#### Local package referencing
+For a local build, the `-Local` switch must be used.
 
-Local NuGet packages creating using the `.eng\shared\build\Build.ps1` script can be referenced in other repositories using the following steps:
+#### Referencing a package in another repository
+
+Local NuGet packages creating using the `.eng\shared\build\Build.ps1` script can be referenced in other repositories in such a way that it is easy to switch between published packages and locally-built packages. 
+
+By convention, a file named `.local`, if present, indicates that local package should be used. Otherwise, the network package will be used. The `.local` file should not be commited in the source control.
+
+Follow these steps:
 
 1. Add the following import to `Directory.Build.props`.
 
@@ -210,7 +220,7 @@ Local NuGet packages creating using the `.eng\shared\build\Build.ps1` script can
 <Import Project="[PathToReferencedRepo]\[ReferencedProduct]Version.props" Condition="Exists('.local')"/>
 ```
 
-2. In the dependencies version, set the default version of the referenced package:
+2. In the dependencies version, set the default version of the referenced package (that is, the one to be used when the local build is _not_ used):
 
 ```
 <[ReferencedProduct]Version Condition="'$([ReferencedProduct]Version)'==''">0.3.6-preview</[ReferencedProduct]Version>
@@ -224,7 +234,10 @@ This version will be used instead of the local build by default.
 <PackageReference Include="[ReferencedPackage]" Version="$([ReferencedProduct]Version)" />
 ```
 
-4. To use the local build instead of the published one, create an empty file `.local`.
+To build:
+
+* To use the __local build__, create an empty file `.local`. Add this file to `.gitignore`.
+* To use the __published build__, remove the `.local` file.
 
 ## Continuous integration
 

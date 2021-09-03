@@ -47,9 +47,9 @@ This repository contains common development, build and publishig scripts and con
 
 The features provided by this repository are grouped by categories in the top-level directories. Each directory contains a `README.md` file describing the features in that category.
 
-- [build](build/README.md)
-- [deploy](deploy/README.md)
-- [style](style/README.md)
+- [Build and Test](build/README.md)
+- [Deploy](deploy/README.md)
+- [Style and Formatting](style/README.md)
 
 ## Modifying
 
