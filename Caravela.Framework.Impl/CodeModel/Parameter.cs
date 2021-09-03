@@ -20,6 +20,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public ParameterInfo ToParameterInfo() => CompileTimeParameterInfo.Create( this );
 
+        public bool IsReturnParameter => false;
+
         IMemberOrNamedType IParameter.DeclaringMember => this.DeclaringMember;
 
         public Parameter( IParameterSymbol symbol, CompilationModel compilation ) : base( compilation )

@@ -31,5 +31,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IProperty? OverriddenProperty => this.Underlying.OverriddenProperty;
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
+
+        public IEnumerable<IMethod> Accessors => this.Underlying.Accessors;
     }
 }

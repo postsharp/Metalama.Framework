@@ -100,7 +100,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
         {
             var nodeIdToCodeElement = new Dictionary<string, IDeclaration>();
 
-            var symbolToCodeElement = initialCompilationModel.GetContainedElements()
+            var symbolToCodeElement = initialCompilationModel.GetContainedDeclarations()
                 .Where( x => x is Declaration )
                 .ToDictionary( x => ((Declaration) x).Symbol, x => x );
 

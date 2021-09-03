@@ -9,12 +9,8 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a namespace.
     /// </summary>
-    public interface INamespace : IDeclaration
+    public interface INamespace : INamedDeclaration
     {
-        /// <summary>
-        /// Gets the short name of the namespace, or <c>null</c> if this is the global namespace.
-        /// </summary>
-        string? Name { get; }
 
         /// <summary>
         /// Gets the full name of the namespace, or <c>null</c> if this is the global namespace.

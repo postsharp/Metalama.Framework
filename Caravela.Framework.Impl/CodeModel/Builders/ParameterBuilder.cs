@@ -48,6 +48,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
 
+        public bool IsReturnParameter => this.Index < 0;
+
         public ParameterBuilder( MemberOrNamedTypeBuilder declaringMember, int index, string? name, IType type, RefKind refKind ) : base(
             declaringMember.ParentAdvice )
         {

@@ -76,6 +76,20 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
+        public IEnumerable<IMethod> Accessors
+        {
+            get
+            {
+                yield return this.AddMethod;
+                yield return this.RemoveMethod;
+
+                if ( this.RaiseMethod != null )
+                {
+                    yield return this.RaiseMethod;
+                }
+            }
+        }
+
         public override bool IsAsync => false;
 
         public override MemberInfo ToMemberInfo() => this.ToEventInfo();

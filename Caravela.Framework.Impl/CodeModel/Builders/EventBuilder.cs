@@ -152,5 +152,20 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 MethodKind.EventRemove => this.RemoveMethod,
                 _ => null
             };
+
+        public IEnumerable<IMethod> Accessors
+        {
+            get
+            {
+                yield return this.AddMethod;
+                yield return this.RemoveMethod;
+
+                if ( this.RaiseMethod != null )
+                {
+                    yield return this.RaiseMethod;
+                }
+            }
+        }
+        
     }
 }

@@ -142,11 +142,13 @@ class Expression
 #pragma warning restore CS0162 // Unreachable code detected
         }
 
-        public void Dispose()
+        protected virtual void Dispose( bool disposing )
         {
             this._projectOptions.Dispose();
             this.ServiceProvider.Dispose();
         }
+
+        public void Dispose() => this.Dispose(true);
 
         protected IsolatedTest WithIsolatedTest() => new( this );
 
