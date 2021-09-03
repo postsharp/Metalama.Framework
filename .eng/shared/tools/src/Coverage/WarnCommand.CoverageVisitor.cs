@@ -3,9 +3,11 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace PostSharp.Engineering.BuildTools.Coverage
 {
@@ -13,6 +15,8 @@ namespace PostSharp.Engineering.BuildTools.Coverage
     {
         private class CoverageVisitor : CSharpSyntaxWalker
         {
+            private static Regex ignoreCommentRegex = new Regex( @"//\s*Coverage:\s*Ignore", RegexOptions.IgnoreCase );
+            
             private readonly HashSet<SyntaxNode> _nonCoveredNodes;
             private readonly IConsole _contextConsole;
             private readonly HashSet<SyntaxNode> _nonCoveredDeclarations = new();
@@ -52,27 +56,29 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                     base.DefaultVisit( node );
                 }
 
+                static bool ContainsIgnoreComment( string text ) => ignoreCommentRegex.IsMatch( text );
+
                 static bool IsIgnoredSyntaxNode( SyntaxNode node )
                     => node switch
                     {
                         ThrowStatementSyntax => true,
                         MemberDeclarationSyntax member => IsIgnoredMember( member ),
-                        _ => node.ToFullString().Contains( "// Coverage: Ignore" )
+                        _ => ContainsIgnoreComment( node.ToFullString() )
                     };
 
                 static bool IsIgnoredMember( MemberDeclarationSyntax member ) => member switch
                 {
                     MethodDeclarationSyntax { Identifier: { Text: "ToString" } } => true,
-                    PropertyDeclarationSyntax { AccessorList: { } accessorList } when accessorList.Accessors.All(
+                    PropertyDeclarationSyntax { ExpressionBody: null, AccessorList: { } accessorList } when accessorList.Accessors.All(
                         a => a.Body == null && a.ExpressionBody == null ) => true,
-                    _ => false
+                    _ => member.GetLeadingTrivia().Any(t=> ContainsIgnoreComment( t.ToFullString() ) )
                 };
 
 
                 static string GetNodeName( SyntaxNode node )
                     => node switch
                     {
-                        MethodDeclarationSyntax m => m.Identifier.Text,
+                        MethodDeclarationSyntax m => m.Identifier.Text + "(" + string.Join( ",", m.ParameterList.Parameters.Select( p=>p.Type?.ToString() ) ) + ")",
                         ClassDeclarationSyntax c => c.Identifier.Text,
                         StructDeclarationSyntax s => s.Identifier.Text,
                         RecordDeclarationSyntax r => r.Identifier.Text,
