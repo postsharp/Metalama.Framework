@@ -29,7 +29,10 @@ namespace Caravela.Framework.Impl.Advices
 
         public static AdviceResult Create()
         {
-            return new( ImmutableArray<Diagnostic>.Empty, ImmutableArray<IObservableTransformation>.Empty, ImmutableArray<INonObservableTransformation>.Empty );
+            return new AdviceResult(
+                ImmutableArray<Diagnostic>.Empty,
+                ImmutableArray<IObservableTransformation>.Empty,
+                ImmutableArray<INonObservableTransformation>.Empty );
         }
 
         public static AdviceResult Create( params ITransformation[] transformations )
@@ -67,7 +70,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public static AdviceResult Create( params Diagnostic[] diagnostics )
         {
-            return new(
+            return new AdviceResult(
                 ImmutableArray.Create( diagnostics ),
                 ImmutableArray<IObservableTransformation>.Empty,
                 ImmutableArray<INonObservableTransformation>.Empty );
@@ -80,16 +83,15 @@ namespace Caravela.Framework.Impl.Advices
 
         public AdviceResult WithTransformations( IReadOnlyList<ITransformation> transformations )
         {
-            return new(
+            return new AdviceResult(
                 this.Diagnostics,
                 this.ObservableTransformations.AddRange( transformations.OfType<IObservableTransformation>() ),
-                this.NonObservableTransformations.AddRange( transformations.OfType<INonObservableTransformation>() )
-            );
+                this.NonObservableTransformations.AddRange( transformations.OfType<INonObservableTransformation>() ) );
         }
 
         public AdviceResult WithDiagnostics( params Diagnostic[] diagnostics )
         {
-            return new( this.Diagnostics.AddRange( diagnostics ), this.ObservableTransformations, this.NonObservableTransformations );
+            return new AdviceResult( this.Diagnostics.AddRange( diagnostics ), this.ObservableTransformations, this.NonObservableTransformations );
         }
     }
 }

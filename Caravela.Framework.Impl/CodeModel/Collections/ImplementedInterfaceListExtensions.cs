@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
     {
         public static ImplementedInterfaceList ToImplementedInterfaceList( this IEnumerable<INamedType> interfaces )
         {
-            return new( interfaces );
+            return new ImplementedInterfaceList( interfaces );
         }
     }
 }

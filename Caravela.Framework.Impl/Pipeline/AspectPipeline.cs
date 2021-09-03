@@ -185,7 +185,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             foreach ( var stage in pipelineConfiguration.Stages )
             {
-                if ( !stage.TryExecute( pipelineStageResult!, diagnosticAdder, cancellationToken, out var newStageResult ) )
+                if ( !stage.TryExecute( pipelineStageResult, diagnosticAdder, cancellationToken, out var newStageResult ) )
                 {
                     return false;
                 }

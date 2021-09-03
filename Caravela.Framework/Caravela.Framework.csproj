@@ -38,5 +38,5 @@
       <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->'%(rootdir)%(directory)%(filename).xml')" Condition="%(ReferenceSourceTarget) == 'ProjectReference'" />
     </ItemGroup>
   </Target>
-
+  
 </Project>

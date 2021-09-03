@@ -70,7 +70,7 @@ namespace Caravela.Framework.Impl.Templating
             /// <returns></returns>
             public static MetaContext CreateHelperContext( MetaContext parentContext )
             {
-                return new(
+                return new MetaContext(
                     parentContext.StatementListVariableName,
                     parentContext._generatedCodeSymbolNameLocals,
                     parentContext._templateCodeSymbolNameLocals,

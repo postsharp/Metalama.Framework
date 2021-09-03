@@ -19,7 +19,7 @@ using System.Threading;
 namespace Caravela.Framework.Impl
 {
     // TODO: AspectDriver should not store a reference to a Compilation we should not store references to a Roslyn compilation.
-    
+
     /// <summary>
     /// Executes aspects.
     /// </summary>
@@ -72,7 +72,7 @@ namespace Caravela.Framework.Impl
         {
             static AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
             {
-                return new(
+                return new AspectInstanceResult(
                     false,
                     new ImmutableUserDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<Advice>.Empty,

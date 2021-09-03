@@ -173,7 +173,6 @@ namespace Caravela.Framework.Impl.Templating
             return node.WithoutAnnotations( _scopeAnnotationKind ).AddScopeAnnotation( scope );
         }
 
-        [return: NotNullIfNotNull( "node" )]
         public static StatementSyntax AddRunTimeOnlyAnnotationIfUndetermined( this StatementSyntax statement )
         {
             if ( statement.GetScopeFromAnnotation().GetValueOrDefault().IsUndetermined() )

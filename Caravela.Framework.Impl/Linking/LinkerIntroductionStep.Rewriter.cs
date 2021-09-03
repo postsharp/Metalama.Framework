@@ -101,7 +101,7 @@ namespace Caravela.Framework.Impl.Linking
                     // TODO: We are probably processing classes incorrectly.
 
                     // Since we're adding suppressions, we need to visit each `#pragma warning` of the added node to update them.
-                    transformedNode = (T) this.Visit( transformedNode )!;
+                    transformedNode = (T) this.Visit( transformedNode );
                 }
 
                 if ( suppressionsOnThisElement.Any() )

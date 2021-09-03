@@ -16,7 +16,7 @@ namespace Caravela.Framework.TestApp
         {
             base.BuildAspect( aspectBuilder );
 
-            aspectBuilder.Diagnostics.Report( myWarning, aspectBuilder.TargetDeclaration );
+            aspectBuilder.Diagnostics.Report( myWarning, aspectBuilder.Target );
         }
         public override dynamic OverrideMethod()
         {

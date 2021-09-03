@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.Advices
                     // we want a proper error message.
 
                     throw GeneralDiagnosticDescriptors.MemberDoesNotHaveTemplateAttribute.CreateException(
-                        (template.AspectClass.FullName, templateName!,
+                        (template.AspectClass.FullName, templateName,
                          templateKind == TemplateKind.Introduction ? nameof(IntroduceAttribute) : nameof(TemplateAttribute)) );
                 }
 
@@ -99,7 +99,7 @@ namespace Caravela.Framework.Impl.Advices
                         : nameof(TemplateAttribute);
 
                     throw GeneralDiagnosticDescriptors.TemplateIsOfTheWrongType.CreateException(
-                        (template.AspectClass.FullName, templateName!, expectedAttribute, actualAttribute) );
+                        (template.AspectClass.FullName, templateName, expectedAttribute, actualAttribute) );
                 }
 
                 return new TemplateRef( template, templateKind );
@@ -107,13 +107,13 @@ namespace Caravela.Framework.Impl.Advices
             else
             {
                 throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException(
-                    (this._aspect.AspectClass.DisplayName, templateName!) );
+                    (this._aspect.AspectClass.DisplayName, templateName) );
             }
         }
 
         private TemplateRef SelectTemplate( IMethod targetMethod, in MethodTemplateSelector templateSelector )
         {
-            var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, true )!;
+            var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, true );
             var asyncTemplate = this.ValidateTemplateName( templateSelector.AsyncTemplate, TemplateKind.Async );
 
             var enumerableTemplate = this.ValidateTemplateName( templateSelector.EnumerableTemplate, TemplateKind.IEnumerable );
@@ -223,7 +223,7 @@ namespace Caravela.Framework.Impl.Advices
                 return default;
             }
 
-            var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, required )!;
+            var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, required );
             var enumerableTemplate = this.ValidateTemplateName( templateSelector.EnumerableTemplate, TemplateKind.IEnumerable );
             var enumeratorTemplate = this.ValidateTemplateName( templateSelector.EnumeratorTemplate, TemplateKind.IEnumerator );
 
@@ -252,7 +252,7 @@ namespace Caravela.Framework.Impl.Advices
             var diagnosticList = new DiagnosticList();
 
             var template = this.SelectTemplate( targetMethod, templateSelector )
-                .GetTemplate<IMethod>( this._compilation, this._serviceProvider )!;
+                .GetTemplate<IMethod>( this._compilation, this._serviceProvider );
 
             var advice = new OverrideMethodAdvice( this._aspect, targetMethod, template, _layerName, tags );
             advice.Initialize( this._declarativeAdvices, diagnosticList );
@@ -301,7 +301,7 @@ namespace Caravela.Framework.Impl.Advices
             var diagnosticList = new DiagnosticList();
 
             var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
-                .GetTemplate<IProperty>( this._compilation, this._serviceProvider )!;
+                .GetTemplate<IProperty>( this._compilation, this._serviceProvider );
 
             var advice = new OverrideFieldOrPropertyAdvice(
                 this._aspect,

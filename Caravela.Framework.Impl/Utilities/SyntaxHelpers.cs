@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.Utilities
                             SyntaxFactory.List<AttributeListSyntax>(),
                             p.GetSyntaxModifierList(),
                             LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( p.ParameterType.GetSymbol() ),
-                            SyntaxFactory.Identifier( p.Name! ),
+                            SyntaxFactory.Identifier( p.Name ),
                             null ) ) ) );
         }
 

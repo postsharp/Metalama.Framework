@@ -535,7 +535,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 where T : SyntaxNode
                 => originalNode == null || transformedNode == null
                     ? null
-                    : (T?) this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( originalNode, transformedNode! );
+                    : (T?) this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( originalNode, transformedNode );
 
             // The default implementation of Visit(SyntaxNode) and Visit(SyntaxToken) adds the location annotations.
 

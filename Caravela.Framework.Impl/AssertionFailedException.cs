@@ -4,11 +4,13 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
 namespace Caravela.Framework.Impl
 {
+    [ExcludeFromCodeCoverage]
     internal class AssertionFailedException : Exception
     {
         public IReadOnlyList<Diagnostic> Diagnostics { get; }

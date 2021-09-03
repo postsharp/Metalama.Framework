@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 // ReSharper disable CommentTypo
@@ -33,6 +34,7 @@ using System.Linq;
 // ReSharper disable once CheckNamespace
 namespace MoreLinq
 {
+    [ExcludeFromCodeCoverage]
     internal static class MoreEnumerable
     {
         /// <summary>

@@ -131,7 +131,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             var expectedHighlightedSource = NormalizeEndOfLines( File.ReadAllText( expectedHtmlPath ) );
 
-            var htmlPath = actualHtmlPath!;
+            var htmlPath = actualHtmlPath;
             var htmlContent = NormalizeEndOfLines( File.ReadAllText( htmlPath ) );
 
             Assert.Equal( expectedHighlightedSource, htmlContent );

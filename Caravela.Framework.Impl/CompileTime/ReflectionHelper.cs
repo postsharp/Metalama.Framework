@@ -88,7 +88,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                             break;
 
-                        case ITypeSymbol type when type.IsAnonymousType:
+                        case ITypeSymbol { IsAnonymousType: true }:
                             return false;
 
                         default:

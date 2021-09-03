@@ -120,6 +120,6 @@ namespace Caravela.Framework.Impl.CodeModel
                 ? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( ReflectionMapper.GetInstance( compilation ).GetTypeSymbol( typeof(ValueTask) ) )
                 : returnTypeSyntax ?? LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( method.ReturnType );
 
-        private record AsyncInfoSymbol ( ITypeSymbol ResultType, bool HasMethodBuilder );
+        private record AsyncInfoSymbol( ITypeSymbol ResultType, bool HasMethodBuilder );
     }
 }

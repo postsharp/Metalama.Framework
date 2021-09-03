@@ -30,8 +30,7 @@ namespace Caravela.Framework.Impl.Formatting
             {
                 var documentationDocument = XDocument.Load( documentationPath );
 
-                this._members = documentationDocument
-                    !.Root
+                this._members = documentationDocument.Root
                     !.Element( "members" )
                     !.Elements( "member" )
                     .ToDictionary( m => m.Attribute( "name" )!.Value, m => m );
