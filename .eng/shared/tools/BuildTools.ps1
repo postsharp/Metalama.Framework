@@ -11,4 +11,4 @@ trap
     exit 1
 }
 
-& dotnet build $PSScriptRoot/src/PostSharp.Engineering.BuildTools.sln
+& dotnet publish $PSScriptRoot/src/PostSharp.Engineering.BuildTools.sln
