@@ -21,11 +21,11 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
             Assert.Equal( typeof(int), fieldOrPropertyInfo.ValueType );
             Assert.Equal( field, fieldOrPropertyInfo.AsField );
             Assert.Equal( field, fieldOrPropertyInfo.UnderlyingMemberInfo );
-            
+
             fieldOrPropertyInfo.SetValue( this, 5 );
             Assert.Equal( 5, fieldOrPropertyInfo.GetValue( this ) );
         }
-        
+
         [Fact]
         public void WithProperty()
         {
@@ -38,13 +38,13 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
             Assert.Equal( nameof(this.MyProperty), fieldOrPropertyInfo.Name );
             Assert.Equal( property, fieldOrPropertyInfo.AsProperty );
             Assert.Equal( property, fieldOrPropertyInfo.UnderlyingMemberInfo );
-            
+
             fieldOrPropertyInfo.SetValue( this, 5 );
             Assert.Equal( 5, fieldOrPropertyInfo.GetValue( this ) );
         }
 
         public int MyField;
-        
+
         public int MyProperty { get; set; }
     }
 }

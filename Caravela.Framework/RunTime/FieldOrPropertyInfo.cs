@@ -71,13 +71,13 @@ namespace Caravela.Framework.RunTime
                 _ => throw new InvalidOperationException()
             };
 
-        public object? GetValue( object? obj ) 
+        public object? GetValue( object? obj )
             => this.UnderlyingMemberInfo switch
-        {
-            FieldInfo fieldInfo => fieldInfo.GetValue( obj ),
-            PropertyInfo propertyInfo => propertyInfo.GetValue( obj ),
-            _ => throw new InvalidOperationException()
-        };
+            {
+                FieldInfo fieldInfo => fieldInfo.GetValue( obj ),
+                PropertyInfo propertyInfo => propertyInfo.GetValue( obj ),
+                _ => throw new InvalidOperationException()
+            };
 
         public void SetValue( object? obj, object? value )
         {

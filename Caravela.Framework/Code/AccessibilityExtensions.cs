@@ -33,8 +33,7 @@ namespace Caravela.Framework.Code
         public static bool IsSupersetOf( this Accessibility left, Accessibility right )
             => left.ToAccessibilityFlags().IsSupersetOf( right.ToAccessibilityFlags() );
 
-        public static bool IsSubsetOf( this Accessibility left, Accessibility right )
-            => left.ToAccessibilityFlags().IsSubsetOf( right.ToAccessibilityFlags() );
+        public static bool IsSubsetOf( this Accessibility left, Accessibility right ) => left.ToAccessibilityFlags().IsSubsetOf( right.ToAccessibilityFlags() );
 
         public static bool IsSupersetOrEqual( this Accessibility left, Accessibility right )
             => left.ToAccessibilityFlags().IsSupersetOrEqual( right.ToAccessibilityFlags() );
