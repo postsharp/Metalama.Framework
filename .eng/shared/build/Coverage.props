@@ -18,6 +18,9 @@
         <Exclude>[*.Tests.*]*</Exclude>
         <SkipAutoProps>True</SkipAutoProps>
         
+        <!-- We cannot use a shared output path with coverlet because it creates a conflict in parallel builds -->
+        <OutputPath>bin\$(Configuration)\$(TargetFramework)</OutputPath>
+        
     </PropertyGroup>
     
     <ItemGroup>
