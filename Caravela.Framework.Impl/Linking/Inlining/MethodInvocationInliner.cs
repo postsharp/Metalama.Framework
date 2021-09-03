@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var discardingContext = context.WithDiscard( targetSymbol );
 
             // Get the final body (after inlining) of the target.
-            var inlinedTargetBody = discardingContext.GetLinkedBody( targetSymbol );
+            var inlinedTargetBody = discardingContext.GetLinkedBody( targetSymbol.ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
 
             // Mark the block as flattenable.
             inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );

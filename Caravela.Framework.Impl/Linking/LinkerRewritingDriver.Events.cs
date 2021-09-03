@@ -22,8 +22,8 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var members =
                     eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField )
-                        ? new List<MemberDeclarationSyntax> { GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration() }
-                        : new List<MemberDeclarationSyntax> { GetLinkedDeclaration() };
+                        ? new List<MemberDeclarationSyntax> { GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) }
+                        : new List<MemberDeclarationSyntax> { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) };
 
                 var lastOverride = (IEventSymbol) this._introductionRegistry.GetLastOverride( symbol );
 
@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     // Event field indicates explicit interface implementation with event field template.
 
-                    return new MemberDeclarationSyntax[] { GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration().NormalizeWhitespace() };
+                    return new MemberDeclarationSyntax[] { GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ).NormalizeWhitespace() };
                 }
 
                 if ( !this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
@@ -68,10 +68,10 @@ namespace Caravela.Framework.Impl.Linking
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
 
-                return new[] { GetLinkedDeclaration() };
+                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
             }
 
-            EventDeclarationSyntax GetLinkedDeclaration()
+            EventDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
             {
                 var addDeclaration = (AccessorDeclarationSyntax) symbol.AddMethod.AssertNotNull().GetPrimaryDeclaration().AssertNotNull();
 
@@ -81,7 +81,7 @@ namespace Caravela.Framework.Impl.Linking
                         addDeclaration.AttributeLists,
                         TokenList(),
                         this.GetLinkedBody(
-                            this.GetBodySource( symbol.AddMethod.AssertNotNull() ),
+                            symbol.AddMethod.AssertNotNull().ToSemantic( semanticKind ),
                             InliningContext.Create( this, symbol.AddMethod.AssertNotNull() ) ) );
 
                 var removeDeclaration = (AccessorDeclarationSyntax) symbol.RemoveMethod.AssertNotNull().GetPrimaryDeclaration().AssertNotNull();
@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.Linking
                         removeDeclaration.AttributeLists,
                         TokenList(),
                         this.GetLinkedBody(
-                            this.GetBodySource( symbol.RemoveMethod.AssertNotNull() ),
+                            symbol.RemoveMethod.AssertNotNull().ToSemantic( semanticKind ),
                             InliningContext.Create( this, symbol.RemoveMethod.AssertNotNull() ) ) );
 
                 return eventDeclaration

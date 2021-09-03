@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Linking
         public override LinkerAnalysisStepOutput Execute( LinkerIntroductionStepOutput input )
         {
             var inlinerProvider = new InlinerProvider();
-            var referenceResolver = new AspectReferenceResolver( input.IntroductionRegistry, input.OrderedAspectLayers );
+            var referenceResolver = new AspectReferenceResolver( input.IntroductionRegistry, input.OrderedAspectLayers, input.FinalCompilationModel );
 
             // Analyze method bodies (aspect references & flow).
             var methodBodyAnalyzer = new MethodBodyAnalyzer(

@@ -13,5 +13,10 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 symbol is IEventSymbol
                 || symbol is IMethodSymbol { AssociatedSymbol: IEventSymbol };
         }
+
+        public override bool IsValidForContainingSymbol( ISymbol symbol )
+        {
+            return true;
+        }
     }
 }

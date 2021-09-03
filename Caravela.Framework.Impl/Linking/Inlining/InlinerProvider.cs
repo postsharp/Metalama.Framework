@@ -31,7 +31,10 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         public bool TryGetInliner(ResolvedAspectReference aspectReference, SemanticModel semanticModel, out Inliner? inliner)
         {
             // TODO: Optimize.
-            inliner = this._inliners.Where( i => i.CanInline( aspectReference, semanticModel ) ).SingleOrDefault();
+            inliner = this._inliners
+                .Where( i => i.IsValidForTargetSymbol( aspectReference.ResolvedSemantic.Symbol ) )
+                .Where( i => i.IsValidForContainingSymbol( aspectReference.ResolvedSemantic.Symbol ) )
+                .Where( i => i.CanInline( aspectReference, semanticModel ) ).SingleOrDefault();
 
             return inliner != null;
         }

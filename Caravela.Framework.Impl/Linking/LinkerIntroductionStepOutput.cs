@@ -12,11 +12,13 @@ namespace Caravela.Framework.Impl.Linking
     {
         public LinkerIntroductionStepOutput(
             UserDiagnosticSink diagnosticSink,
+            CompilationModel finalCompilationModel,
             PartialCompilation intermediateCompilation,
             LinkerIntroductionRegistry introductionRegistry,
-            IReadOnlyList<OrderedAspectLayer> orderedAspectLayers )
+            IReadOnlyList<OrderedAspectLayer> orderedAspectLayers)
         {
             this.DiagnosticSink = diagnosticSink;
+            this.FinalCompilationModel = finalCompilationModel;
             this.IntermediateCompilation = intermediateCompilation;
             this.IntroductionRegistry = introductionRegistry;
             this.OrderedAspectLayers = orderedAspectLayers;
@@ -26,6 +28,11 @@ namespace Caravela.Framework.Impl.Linking
         /// Gets the diagnostic sink.
         /// </summary>
         public UserDiagnosticSink DiagnosticSink { get; }
+
+        /// <summary>
+        /// Gets the final compilation model.
+        /// </summary>
+        public CompilationModel FinalCompilationModel { get; }
 
         /// <summary>
         /// Gets the intermediate compilation.

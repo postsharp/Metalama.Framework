@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    members.Add( GetLinkedDeclaration( lastOverride.IsAsync ) );
+                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final, lastOverride.IsAsync ) );
                 }
                 else
                 {
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Linking
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
                 {
-                    members.Add( GetEmptyImplMethod( methodDeclaration, symbol ) );
+                    members.Add( this.GetEmptyImplMethod( methodDeclaration, symbol ) );
                 }
 
                 return members;
@@ -55,17 +55,17 @@ namespace Caravela.Framework.Impl.Linking
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
 
-                return new[] { GetLinkedDeclaration( symbol.IsAsync ) };
+                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync ) };
             }
             else
             {
                 throw new AssertionFailedException();
             }
 
-            MethodDeclarationSyntax GetLinkedDeclaration( bool isAsync )
+            MethodDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
             {
                 var linkedBody = this.GetLinkedBody(
-                    this.GetBodySource( symbol ),
+                    symbol.ToSemantic( semanticKind ),
                     InliningContext.Create( this, symbol ) );
 
                 var modifiers = methodDeclaration.Modifiers;

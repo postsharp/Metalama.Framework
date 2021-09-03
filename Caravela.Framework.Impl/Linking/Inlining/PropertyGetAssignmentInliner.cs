@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking.Inlining
 {
-    internal class PropertyGetAssignmentInliner : PropertyInliner
+    internal class PropertyGetAssignmentInliner : PropertyGetInliner
     {
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var contextWithLocal = context.WithReturnLocal( targetSymbol.GetMethod.AssertNotNull(), localVariable.Identifier.ValueText );
 
             // Get the final inlined body of the target property getter. 
-            var inlinedTargetBody = contextWithLocal.GetLinkedBody( targetSymbol.GetMethod.AssertNotNull() );
+            var inlinedTargetBody = contextWithLocal.GetLinkedBody( targetSymbol.GetMethod.AssertNotNull().ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
 
             // Mark the block as flattenable.
             inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );

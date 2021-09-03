@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.Linking
                     members.Add( GetEventBackingField( eventFieldDeclaration, symbol ) );
                 }
 
-                members.Add( GetLinkedDeclaration() );
+                members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
 
                 if ( !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
@@ -56,10 +56,10 @@ namespace Caravela.Framework.Impl.Linking
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
 
-                return new[] { GetLinkedDeclaration() };
+                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
             }
 
-            MemberDeclarationSyntax GetLinkedDeclaration()
+            MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
             {
                 var transformedAdd =
                     AccessorDeclaration(
@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.Linking
                         List<AttributeListSyntax>(),
                         TokenList(),
                         this.GetLinkedBody(
-                            this.GetBodySource( symbol.AddMethod.AssertNotNull() ),
+                            symbol.AddMethod.AssertNotNull().ToSemantic( semanticKind ),
                             InliningContext.Create( this, symbol.AddMethod.AssertNotNull() ) ) );
 
                 var transformedRemove =
@@ -76,7 +76,7 @@ namespace Caravela.Framework.Impl.Linking
                         List<AttributeListSyntax>(),
                         TokenList(),
                         this.GetLinkedBody(
-                            this.GetBodySource( symbol.RemoveMethod.AssertNotNull() ),
+                            symbol.RemoveMethod.AssertNotNull().ToSemantic( semanticKind ),
                             InliningContext.Create( this, symbol.RemoveMethod.AssertNotNull() ) ) );
 
                 return

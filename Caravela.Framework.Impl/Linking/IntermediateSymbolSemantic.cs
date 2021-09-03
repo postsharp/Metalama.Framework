@@ -36,6 +36,11 @@ namespace Caravela.Framework.Impl.Linking
         {
             return new IntermediateSymbolSemantic<TSymbol>( (TSymbol) this.Symbol, this.Kind );
         }
+
+        public override string ToString()
+        {
+            return $"({this.Kind}, {this.Symbol})";
+        }
     }
 
     internal struct IntermediateSymbolSemantic<TSymbol>
@@ -67,6 +72,11 @@ namespace Caravela.Framework.Impl.Linking
         public static implicit operator IntermediateSymbolSemantic(IntermediateSymbolSemantic<TSymbol> value)
         {
             return new IntermediateSymbolSemantic( value.Symbol, value.Kind );
+        }
+
+        public override string ToString()
+        {
+            return $"({this.Kind}, {this.Symbol})";
         }
     }
 }

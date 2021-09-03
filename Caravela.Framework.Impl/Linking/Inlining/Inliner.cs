@@ -20,6 +20,13 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         public abstract bool IsValidForTargetSymbol( ISymbol symbol );
 
         /// <summary>
+        /// Determines whether the inliner can be used for the specified containing symbol.
+        /// </summary>
+        /// <param name="symbol">Containing symbol.</param>
+        /// <returns></returns>
+        public abstract bool IsValidForContainingSymbol( ISymbol symbol );
+
+        /// <summary>
         /// Determines whether an aspect reference can be inlined.
         /// </summary>
         /// <param name="aspectReference">Resolved aspect reference.</param>

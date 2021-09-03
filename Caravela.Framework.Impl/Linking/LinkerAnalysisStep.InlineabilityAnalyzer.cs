@@ -110,12 +110,7 @@ namespace Caravela.Framework.Impl.Linking
                             return false;
                         }
 
-                        var methodKind = semantic.Symbol.MethodKind;
-
-                        if ( aspectReferences.Count != 0
-                            && IsAsync( GetMethod( aspectReferences[0].ContainingSymbol, methodKind ) ) == IsAsync( GetMethod( aspectReferences[0].ResolvedSemantic.Symbol, methodKind ) )
-                            && IsIterator( GetMethod( aspectReferences[0].ContainingSymbol, methodKind ) ) == IsIterator( GetMethod( aspectReferences[0].ResolvedSemantic.Symbol, methodKind ) )
-                            && this.TryGetInliner( aspectReferences[0], out var inliner ) )
+                        if ( aspectReferences.Count != 0 && this.TryGetInliner( aspectReferences[0], out var inliner ) )
                         {
                             inliningSpecification = new SymbolInliningSpecification(
                                 semantic,
@@ -157,10 +152,6 @@ namespace Caravela.Framework.Impl.Linking
                         },
                         _ => throw new AssertionFailedException()
                     };
-
-                static bool IsAsync( IMethodSymbol? symbol ) => symbol is { IsAsync: true };
-
-                static bool IsIterator( IMethodSymbol? symbol ) => symbol != null && IteratorHelper.IsIterator( symbol );
             }
 
             private bool TryInlineProperty( IntermediateSymbolSemantic<IPropertySymbol> semantic, [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )

@@ -41,6 +41,7 @@ namespace Caravela.Framework.Impl.Advices
         public override AdviceResult ToResult( ICompilation compilation )
         {
             // TODO: Translate templates to this compilation.
+            // TODO: order should be self if the target is introduced on the same layer.
             if ( this.TargetDeclaration is IField field )
             {
                 var promotedField = new PromotedField( this, field );

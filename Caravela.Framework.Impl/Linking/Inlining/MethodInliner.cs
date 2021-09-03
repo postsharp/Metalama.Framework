@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -26,7 +27,12 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 
         public override bool IsValidForTargetSymbol( ISymbol symbol )
         {
-            return symbol is IMethodSymbol { AssociatedSymbol: null };
+            return symbol is IMethodSymbol { AssociatedSymbol: null, IsAsync: false } methodSymbol && !IteratorHelper.IsIterator( methodSymbol );
+        }
+
+        public override bool IsValidForContainingSymbol( ISymbol symbol )
+        {
+            return true;
         }
     }
 }

@@ -12,6 +12,14 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
+// Properties with overrides have the following structure:
+//  * Final semantic. 
+//  * Override n
+//  * ...
+//  * Override 1
+//  * Default semantic.
+//  * Base semantic (if the property was introduced).
+
 namespace Caravela.Framework.Impl.Linking
 {
     internal partial class LinkerRewritingDriver
@@ -32,7 +40,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    members.Add( GetLinkedDeclaration() );
+                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
                 }
                 else
                 {
@@ -61,14 +69,14 @@ namespace Caravela.Framework.Impl.Linking
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
 
-                return new[] { GetLinkedDeclaration() };
+                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
             }
             else
             {
                 throw new AssertionFailedException();
             }
 
-            MemberDeclarationSyntax GetLinkedDeclaration()
+            MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
             {
                 var transformedAccessors = new List<AccessorDeclarationSyntax>();
 
@@ -83,7 +91,7 @@ namespace Caravela.Framework.Impl.Linking
                                     getAccessorDeclaration.AttributeLists,
                                     getAccessorDeclaration.Modifiers,
                                     this.GetLinkedBody(
-                                        this.GetBodySource( symbol.GetMethod ),
+                                        symbol.GetMethod.ToSemantic( semanticKind ),
                                         InliningContext.Create( this, symbol.GetMethod ) ) ) );
 
                             break;
@@ -95,7 +103,7 @@ namespace Caravela.Framework.Impl.Linking
                                     List<AttributeListSyntax>(),
                                     TokenList(),
                                     this.GetLinkedBody(
-                                        this.GetBodySource( symbol.GetMethod ),
+                                        symbol.GetMethod.ToSemantic( semanticKind ),
                                         InliningContext.Create( this, symbol.GetMethod ) ) ) );
 
                             break;
@@ -112,7 +120,7 @@ namespace Caravela.Framework.Impl.Linking
                             setDeclaration.AttributeLists,
                             setDeclaration.Modifiers,
                             this.GetLinkedBody(
-                                this.GetBodySource( symbol.SetMethod ),
+                                symbol.SetMethod.ToSemantic( semanticKind ),
                                 InliningContext.Create( this, symbol.SetMethod ) ) ) );
                 }
 

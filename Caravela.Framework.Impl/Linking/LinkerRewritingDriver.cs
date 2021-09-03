@@ -55,9 +55,10 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         /// <param name="symbol">Method or accessor symbol.</param>
         /// <returns>Block representing the linked body.</returns>
-        public BlockSyntax GetLinkedBody( IMethodSymbol symbol, InliningContext inliningContext )
+        public BlockSyntax GetLinkedBody( IntermediateSymbolSemantic<IMethodSymbol> semantic, InliningContext inliningContext )
         {
             var replacements = new Dictionary<SyntaxNode, SyntaxNode?>();
+            var symbol = this.ResolveBodySource( semantic );
             var bodyRootNode = this.GetBodyRootNode( symbol, out var isImplicitlyLinked );
 
             if ( !isImplicitlyLinked )
@@ -448,26 +449,44 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        private IMethodSymbol GetBodySource( IMethodSymbol symbol )
+        private IMethodSymbol ResolveBodySource( IntermediateSymbolSemantic<IMethodSymbol> semantic )
         {
-            if ( this._introductionRegistry.IsOverride( symbol ) )
+            if ( this._introductionRegistry.IsOverride( semantic.Symbol ) )
             {
-                return symbol;
+                Invariant.Assert( semantic.Kind == IntermediateSymbolSemanticKind.Default );
+
+                return semantic.Symbol;
             }
 
-            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this._introductionRegistry.IsOverrideTarget( semantic.Symbol ) )
             {
-                return (IMethodSymbol) this._introductionRegistry.GetLastOverride( symbol ).AssertNotNull();
+                switch ( semantic.Kind )
+                {
+                    case IntermediateSymbolSemanticKind.Base:
+                    case IntermediateSymbolSemanticKind.Default:
+                        return semantic.Symbol;
+
+                    case IntermediateSymbolSemanticKind.Final:
+                        return (IMethodSymbol) this._introductionRegistry.GetLastOverride( semantic.Symbol );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
 
-            if ( symbol.AssociatedSymbol != null && symbol.AssociatedSymbol.IsExplicitInterfaceEventField() )
+            if ( semantic.Symbol.AssociatedSymbol != null && semantic.Symbol.AssociatedSymbol.IsExplicitInterfaceEventField() )
             {
-                return symbol;
+                return semantic.Symbol;
             }
 
             throw new AssertionFailedException();
         }
 
+        /// <summary>
+        /// Gets an expression that replaces the expression represented by the aspect reference. This for cases where the reference is not inlined.
+        /// </summary>
+        /// <param name="aspectReference"></param>
+        /// <returns></returns>
         private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference )
         {
             if ( !SymbolEqualityComparer.Default.Equals( aspectReference.ResolvedSemantic.Symbol.ContainingType, aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
@@ -488,8 +507,13 @@ namespace Caravela.Framework.Impl.Linking
             var targetMemberName =
                 targetSemanticKind switch
                 {
-                    IntermediateSymbolSemanticKind.Default when this._introductionRegistry.IsOverrideTarget( targetSymbol ) => GetOriginalImplMemberName( targetSymbol ),
-                    IntermediateSymbolSemanticKind.Base => GetEmptyImplMemberName( targetSymbol ),
+                    IntermediateSymbolSemanticKind.Default
+                        when SymbolEqualityComparer.Default.Equals( aspectReference.ResolvedSemantic.Symbol.ContainingType, aspectReference.ContainingSymbol.ContainingType )
+                        && this._introductionRegistry.IsOverrideTarget( targetSymbol ) 
+                        => GetOriginalImplMemberName( targetSymbol ),
+                    IntermediateSymbolSemanticKind.Base
+                        when SymbolEqualityComparer.Default.Equals( aspectReference.ResolvedSemantic.Symbol.ContainingType, aspectReference.ContainingSymbol.ContainingType )
+                        => GetEmptyImplMemberName( targetSymbol ),
                     _ => targetSymbol.Name
                 };
 

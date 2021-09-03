@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 ?? (IEventSymbol) ((aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
 
             // Get the final inlined body of the target property setter. 
-            var inlinedTargetBody = context.GetLinkedBody( targetSymbol.RemoveMethod.AssertNotNull() );
+            var inlinedTargetBody = context.GetLinkedBody( targetSymbol.RemoveMethod.AssertNotNull().ToSemantic(aspectReference.ResolvedSemantic.Kind) );
 
             // Mark the block as flattenable.
             inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );

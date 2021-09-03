@@ -99,7 +99,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Over
 
         [PseudoOverride(nameof(Bar), "TestAspect3")]
         [PseudoNotInlineable]
-        void Bar_Override2()
+        void Bar_Override3()
         {
             // Should invoke source code.
             link(_this.Bar, original)();
@@ -113,7 +113,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Over
 
         [PseudoOverride(nameof(Bar), "TestAspect5")]
         [PseudoNotInlineable]
-        void Bar_Override3()
+        void Bar_Override5()
         {
             // Should invoke source code.
             link(_this.Bar, original)();

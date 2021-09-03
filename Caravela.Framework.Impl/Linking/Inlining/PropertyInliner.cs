@@ -13,5 +13,10 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 symbol is IPropertySymbol
                 || symbol is IMethodSymbol { AssociatedSymbol: IPropertySymbol };
         }
+
+        public override bool IsValidForContainingSymbol( ISymbol symbol )
+        {
+            return true;
+        }
     }
 }

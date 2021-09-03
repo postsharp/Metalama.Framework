@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var contextWithLocal = context.WithReturnLocal( targetSymbol, variableDeclarator.Identifier.ValueText );
 
             // Get the final inlined body of the target method. 
-            var inlinedTargetBody = contextWithLocal.GetLinkedBody( targetSymbol );
+            var inlinedTargetBody = contextWithLocal.GetLinkedBody( targetSymbol.ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
 
             // Mark the block as flattenable.
             inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
