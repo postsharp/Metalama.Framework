@@ -45,3 +45,4 @@ _ReSharper*/
 /.eng/CaravelaVersion.props
 CaravelaVersion.props
 TestResults
+launchSettings.json
