@@ -10,7 +10,7 @@
     
     <!-- We have to embed the netstandard2.0 build of Caravela.Framework so we can reference it to create
          the compile-time assembly. See ReferenceAssemblyLocator                                           -->
-    <EmbeddedResource Include="$(OutputPath)..\netstandard2.0\Caravela.Framework.dll">
+    <EmbeddedResource Include="..\Caravela.Framework\bin\$(Configuration)\netstandard2.0\Caravela.Framework.dll">
         <LogicalName>Caravela.Framework.dll</LogicalName>
     </EmbeddedResource>
   </ItemGroup>

@@ -8,7 +8,7 @@
 
     <!-- Output path -->
     <PropertyGroup>
-        <OutputPath>$(MSBuildThisFileDirectory)..\..\..\artifacts\bin\$(Configuration)</OutputPath>
+        <PackageOutputPath>$(MSBuildThisFileDirectory)..\..\..\artifacts\bin\$(Configuration)</PackageOutputPath>
     </PropertyGroup>
 
     <!-- Obfuscation -->
