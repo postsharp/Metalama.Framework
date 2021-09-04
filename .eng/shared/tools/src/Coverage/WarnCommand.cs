@@ -10,6 +10,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -52,15 +53,15 @@ namespace PostSharp.Engineering.BuildTools.Coverage
 
             HashSet<SyntaxNode> nonCoveredNodes = new();
 
-            foreach ( var fileNode in packageNode.Value.EnumerateObject() )
+            foreach ( var fileNode in packageNode.Value.EnumerateObject().OrderBy( n=> n.Name ) )
             {
                 SyntaxTree? syntaxTree = null;
 
-                foreach ( var classNode in fileNode.Value.EnumerateObject() )
+                foreach ( var classNode in fileNode.Value.EnumerateObject().OrderBy( n=> n.Name ) )
                 {
                     var className = classNode.Name;
 
-                    foreach ( var methodNode in classNode.Value.EnumerateObject() )
+                    foreach ( var methodNode in classNode.Value.EnumerateObject().OrderBy( n=> n.Name ) )
                     {
                         // Getting the method name is convenient to set a conditional breakpoint.
                         var methodName = methodNode.Name;
@@ -190,8 +191,10 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                 SwitchExpressionArmSyntax arm => ShouldIgnore( declaringMember,arm.Expression ),
                 ArrowExpressionClauseSyntax arrow => ShouldIgnore( declaringMember, arrow.Expression ),
                 ExpressionStatementSyntax statement => ShouldIgnore(declaringMember, statement.Expression ),
-                InvocationExpressionSyntax invocation => IsSameMemberName( declaringMember, invocation.Expression ),
-                MemberAccessExpressionSyntax => true,
+                InvocationExpressionSyntax invocation => IsSameMemberName( declaringMember, invocation.Expression ) || invocation.ArgumentList.Arguments.Count == 0,
+                MemberAccessExpressionSyntax memberAccess => ShouldIgnore( declaringMember, memberAccess.Expression ),
+                QualifiedNameSyntax => true,
+                IdentifierNameSyntax => true,
                 LiteralExpressionSyntax => true,
                 DefaultExpressionSyntax => true,
                 ReturnStatementSyntax r => ShouldIgnore( declaringMember, r.Expression ),
