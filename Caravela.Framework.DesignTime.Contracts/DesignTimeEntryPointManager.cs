@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,13 +22,14 @@ namespace Caravela.Framework.DesignTime.Contracts
     {
         private const string _appDomainDataName = "Caravela.Framework.DesignTime.Contracts.DesignTimeEntryPointManager";
 
-        private static readonly ConcurrentDictionary<Version, Task<ICompilerServiceProvider>> _getProviderTasks =
-            new();
+        private readonly ConcurrentDictionary<Version, Task<ICompilerServiceProvider>> _getProviderTasks = new();
 
         public static Version MatchAllVersion { get; } = new( 9999, 99 );
 
+        [ExcludeFromCodeCoverage]
         public static IDesignTimeEntryPointManager Instance { get; }
 
+        [ExcludeFromCodeCoverage]
         static DesignTimeEntryPointManager()
         {
             // Note that there maybe many instances of this class in the AppDomain, so it needs to make sure it uses a shared point of contact.
@@ -56,7 +58,8 @@ namespace Caravela.Framework.DesignTime.Contracts
             }
         }
 
-        private DesignTimeEntryPointManager() { }
+        // The constructor is internal because it is used for tests, so we don't base tests on the singleton instance.
+        internal DesignTimeEntryPointManager() { }
 
         private readonly object _sync = new();
         private volatile TaskCompletionSource<ICompilerServiceProvider> _registrationTask = new();
@@ -64,7 +67,7 @@ namespace Caravela.Framework.DesignTime.Contracts
 
         async ValueTask<ICompilerServiceProvider?> IDesignTimeEntryPointManager.GetServiceProviderAsync( Version version, CancellationToken cancellationToken )
         {
-            var task = _getProviderTasks.GetOrAdd( version, this.GetProviderForVersion );
+            var task = this._getProviderTasks.GetOrAdd( version, this.GetProviderForVersion );
 
             if ( !task.IsCompleted )
             {
@@ -73,6 +76,11 @@ namespace Caravela.Framework.DesignTime.Contracts
                 using ( cancellationToken.Register( () => taskCancelled.SetCanceled() ) )
                 {
                     await Task.WhenAny( task, taskCancelled.Task );
+
+                    if ( taskCancelled.Task.IsCanceled )
+                    {
+                        throw new TaskCanceledException();
+                    }
                 }
             }
 
@@ -102,7 +110,7 @@ namespace Caravela.Framework.DesignTime.Contracts
         {
             lock ( this._sync )
             {
-                entryPoint.Unloaded += this.OnUnloaded;
+                entryPoint.Unloaded += () => this.OnUnloaded( entryPoint );
                 this._entryPoints = this._entryPoints.Add( entryPoint );
 
                 // The order here is important.
@@ -119,6 +127,10 @@ namespace Caravela.Framework.DesignTime.Contracts
             lock ( this._sync )
             {
                 this._entryPoints = this._entryPoints.Remove( entryPoint );
+
+                this._getProviderTasks.TryRemove( entryPoint.Version, out _ );
+                this._getProviderTasks.TryRemove( MatchAllVersion, out _ );
+
             }
         }
     }

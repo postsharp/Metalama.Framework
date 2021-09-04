@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.DesignTime
             where T : class, ICompilerService
             => typeof(T) == typeof(IClassificationService) ? (T) (object) new ClassificationService( ServiceProviderFactory.GlobalProvider ) : null;
 
-        event Action<ICompilerServiceProvider>? ICompilerServiceProvider.Unloaded
+        event Action? ICompilerServiceProvider.Unloaded
         {
             add { }
             remove { }
