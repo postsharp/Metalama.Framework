@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl
             }
 #endif
 
-            return obj;
+            return obj!;
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace Caravela.Framework.Impl
             }
 #endif
 
-            return obj.Value;
+            return obj == null ? default : obj.Value;
         }
 
 #if !DEBUG

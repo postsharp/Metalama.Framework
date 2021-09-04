@@ -3,9 +3,9 @@
 
   <Property Name="WriteWeavingSymbols" Value="false" Overwrite="false"/>
 
-  <SearchPath Path="{$SearchPath}" PathKind="Directory" />
+  <SearchPath Path="{$PostSharpSearchPath}" PathKind="Directory" />
 
-  <Using File="Obfuscator.psplugin" />
+  <Using File="..\Build\Caravela.Obfuscator\Obfuscator.psplugin" />
   
   <Tasks>
 

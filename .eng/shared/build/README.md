@@ -259,7 +259,7 @@ Build steps:
 
 | # | Name | Type | Configuration |
 | - | ---- | ---- | ------------- |
-| 1 | Debug Build and Test | PoerShell | Format stderr output as: error; Script: file; Script file: .eng/Build.ps1; Script arguments: -Numbered %build.number% -Test |
+| 1 | Debug Build and Test | PowerShell | Format stderr output as: error; Script: file; Script file: .eng/Build.ps1; Script arguments: -Numbered %build.number% -Test |
 
 Artifact paths:
 
@@ -273,7 +273,7 @@ Build steps:
 
 | # | Name | Type | Configuration |
 | - | ---- | ---- | ------------- |
-| 1 | Release Build and Test | PoerShell | Format stderr output as: error; Script: file; Script file: .eng/Build.ps1; Script arguments: -Public -Release -Sign -Test |
+| 1 | Release Build and Test | PowerShell | Format stderr output as: error; Script: file; Script file: .eng/Build.ps1; Script arguments: -Public -Release -Sign -Test |
 
 Artifact paths:
 
