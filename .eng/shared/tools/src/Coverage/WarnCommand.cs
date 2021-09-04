@@ -139,12 +139,12 @@ namespace PostSharp.Engineering.BuildTools.Coverage
 
                             var member = declarations.OfType<MemberDeclarationSyntax>().Last();
                             
-                            if ( ShouldIgnore( member ) )
+                            if ( ShouldIgnoreMember( member ) )
                             {
                                 break;
                             }
                             
-                            if ( ShouldIgnore( member, node ) )
+                            if ( ShouldIgnoreNodeOrAncestor( member, node ) )
                             {
                                 continue;
                             }
@@ -153,6 +153,7 @@ namespace PostSharp.Engineering.BuildTools.Coverage
 
 
                             var memberName = string.Join( '.', declarations.Select( GetNodeSignature ) );
+                            
                             context.Console.Error.WriteLine(
                                 $"{node.SyntaxTree.FilePath}({lineNumber + 1}): warning COVER01: '{memberName}' has gaps in test coverage." );
                             totalInvalidDeclarations++;
@@ -176,48 +177,57 @@ namespace PostSharp.Engineering.BuildTools.Coverage
         private static bool IsSameMemberName( MemberDeclarationSyntax declaringMember, ExpressionSyntax expression )
             => expression switch
             {
-                MemberAccessExpressionSyntax name => GetNodeName( declaringMember ) == name.Name.Identifier.Text,
+                MemberAccessExpressionSyntax name => NormalizeName( GetNodeName( declaringMember ) ) == NormalizeName( name.Name.Identifier.Text ),
                 _ => false
             };
 
-        private static bool ShouldIgnore( MemberDeclarationSyntax declaringMember, SyntaxNode? node )
+        private static string NormalizeName( string s ) => s.Trim( '_' ).ToLowerInvariant();
+
+        private static bool ShouldIgnoreNodeOrAncestor( MemberDeclarationSyntax declaringMember, SyntaxNode? node )
+            => ShouldIgnoreNode( declaringMember, node ) ||
+               (node is not StatementSyntax && ShouldIgnoreNodeOrAncestor( declaringMember, node.Parent )); 
+        private static bool ShouldIgnoreNode( MemberDeclarationSyntax declaringMember, SyntaxNode? node )
             => node switch
             {
                 null => true,
-                BlockSyntax block => block.Statements.All( b => ShouldIgnore( declaringMember, b ) ),
+                BlockSyntax block => block.Statements.All( b => ShouldIgnoreNode( declaringMember, b ) ),
                 ThrowExpressionSyntax => true,
                 ThrowStatementSyntax => true,
-                MemberDeclarationSyntax member => ShouldIgnore( member ),
-                SwitchExpressionArmSyntax arm => ShouldIgnore( declaringMember,arm.Expression ),
-                ArrowExpressionClauseSyntax arrow => ShouldIgnore( declaringMember, arrow.Expression ),
-                ExpressionStatementSyntax statement => ShouldIgnore(declaringMember, statement.Expression ),
+                MemberDeclarationSyntax member => ShouldIgnoreMember( member ),
+                SwitchExpressionArmSyntax arm => ShouldIgnoreNode( declaringMember,arm.Expression ),
+                ArrowExpressionClauseSyntax arrow => ShouldIgnoreNode( declaringMember, arrow.Expression ),
+                ExpressionStatementSyntax statement => ShouldIgnoreNode(declaringMember, statement.Expression ),
                 InvocationExpressionSyntax invocation => IsSameMemberName( declaringMember, invocation.Expression ) || invocation.ArgumentList.Arguments.Count == 0,
-                MemberAccessExpressionSyntax memberAccess => ShouldIgnore( declaringMember, memberAccess.Expression ),
+                MemberAccessExpressionSyntax memberAccess => ShouldIgnoreNode( declaringMember, memberAccess.Expression ),
                 QualifiedNameSyntax => true,
                 IdentifierNameSyntax => true,
                 LiteralExpressionSyntax => true,
                 DefaultExpressionSyntax => true,
-                ReturnStatementSyntax r => ShouldIgnore( declaringMember, r.Expression ),
-                AccessorDeclarationSyntax accessor => ShouldIgnore( declaringMember, accessor.Body ) && ShouldIgnore( declaringMember, accessor.ExpressionBody ),
+                TypeOfExpressionSyntax => true,
+                ThisExpressionSyntax => true,
+                BaseExpressionSyntax => true,
+                CastExpressionSyntax cast => ShouldIgnoreNode( declaringMember, cast.Expression ),
+                ReturnStatementSyntax r => ShouldIgnoreNode( declaringMember, r.Expression ),
+                AccessorDeclarationSyntax accessor => ShouldIgnoreNode( declaringMember, accessor.Body ) && ShouldIgnoreNode( declaringMember, accessor.ExpressionBody ),
                 _ => ContainsIgnoreComment( node.ToFullString() )
             };
 
-        private static bool ShouldIgnore( MemberDeclarationSyntax member ) => member switch
+        private static bool ShouldIgnoreMember( MemberDeclarationSyntax member ) => member switch
         {
-            // Ignore ToString()
-            MethodDeclarationSyntax { Identifier: { Text: "ToString" } } => true,
+            // Ignore a few methods that generally have a trivial implementation, or an implementation that is not used in real code. 
+            MethodDeclarationSyntax { Identifier: { Text: "ToString" or "GetHashCode" or "Equals" } } => true,
 
             // Process properties with accessors.
             PropertyDeclarationSyntax { ExpressionBody: null, AccessorList: { } accessorList }
-                when accessorList.Accessors.All( a => ShouldIgnore( member, a.Body ) && ShouldIgnore(member, a.ExpressionBody ) )
+                when accessorList.Accessors.All( a => ShouldIgnoreNode( member, a.Body ) && ShouldIgnoreNode(member, a.ExpressionBody ) )
                 => true,
 
             // Process properties without accessors.
-            PropertyDeclarationSyntax { ExpressionBody: { Expression: { } expression } } when ShouldIgnore( member, expression )
+            PropertyDeclarationSyntax { ExpressionBody: { Expression: { } expression } } when ShouldIgnoreNode( member, expression )
                 => true,
 
             // Process methods.
-            MethodDeclarationSyntax method when ShouldIgnore( member, method.ExpressionBody ) && ShouldIgnore( member, method.Body )
+            MethodDeclarationSyntax method when ShouldIgnoreNode( member, method.ExpressionBody ) && ShouldIgnoreNode( member, method.Body )
                 => true,
 
             _ => member.GetLeadingTrivia().Any( t => ContainsIgnoreComment( t.ToFullString() ) )

@@ -8,8 +8,11 @@
          <Exclude>$(Exclude),[Caravela.Framework]Caravela.Framework.Validation.*</Exclude>
          <Exclude>$(Exclude),[Caravela.TestFramework]Caravela.TestFramework.XunitFramework.*</Exclude>
          
-         <!-- Builders have a lot of obvious gaps. We don't want to spend effort on this now. -->
+         
+         <!-- The following classes have a lot of gaps but these are in general trivial methods. We don't want to spend effort on this now. -->
          <Exclude>$(Exclude),[Caravela.Framework.Impl]Caravela.Framework.Impl.CodeModel.Builders.*</Exclude>
+         <Exclude>$(Exclude),[Caravela.TestFramework.Impl]Caravela.Framework.Impl.Templating.MetaModel.Advised*</Exclude>
+
       </PropertyGroup>  
             
 </Project>

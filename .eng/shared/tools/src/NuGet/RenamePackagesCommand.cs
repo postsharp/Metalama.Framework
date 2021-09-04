@@ -49,7 +49,7 @@ namespace PostSharp.Engineering.BuildTools.Nuget
             console.Out.WriteLine( "Processing " + inputPath );
 
             var outputPath = Path.Combine(
-                Path.GetDirectoryName( inputPath ),
+                Path.GetDirectoryName( inputPath )!,
                 Path.GetFileName( inputPath ).Replace( "Microsoft", "Caravela.Roslyn" ) );
 
             File.Copy( inputPath, outputPath, true );

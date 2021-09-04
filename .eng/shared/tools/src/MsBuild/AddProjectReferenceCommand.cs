@@ -16,7 +16,7 @@ namespace PostSharp.Engineering.BuildTools.MsBuild
         {
             this.AddArgument( new Argument<string>( "existing", "Existing reference file name" ) );
             this.AddArgument( new Argument<string>( "new", "Added reference path" ) );
-            this.AddArgument( new Argument<string>( "filter", () => null, "Project name filter" ) );
+            this.AddArgument( new Argument<string?>( "filter", () => null, "Project name filter" ) );
 
             this.Handler = CommandHandler.Create<InvocationContext, string, string, string>( Execute );
         }
