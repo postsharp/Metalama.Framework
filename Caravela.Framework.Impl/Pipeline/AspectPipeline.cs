@@ -68,6 +68,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
             else
             {
+                // Coverage: Ignore (tests always provide a domain).
                 this._domain = this.ServiceProvider.GetService<ICompileTimeDomainFactory>().CreateDomain();
                 this._ownsDomain = true;
             }

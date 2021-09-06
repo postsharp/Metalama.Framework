@@ -20,6 +20,14 @@ namespace Caravela.Framework.Impl.Advices
 
         public ImmutableDictionary<string, object?> ReadOnlyTags => this.Tags?.ToImmutableDictionary() ?? ImmutableDictionary<string, object?>.Empty;
 
+        protected Advice( AspectInstance aspect, AspectLayerId aspectLayerId, Dictionary<string, object?>? tags )
+        {
+            this.Tags = tags;
+            this.Aspect = aspect;
+            this.TargetDeclaration = aspect.TargetDeclaration;
+            this.AspectLayerId = aspectLayerId;
+        }
+
         protected Advice( AspectInstance aspect, IDeclaration targetDeclaration, string? layerName, Dictionary<string, object?>? tags )
         {
             this.Tags = tags;

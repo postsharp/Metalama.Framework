@@ -18,6 +18,6 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
                     .Single()
                     .Parameters.Select( p => new PseudoParameter( this, p.Index, p.ParameterType, p.Name ) ) );
 
-        public override string Name => "add_" + this.DeclaringMember.Name;
+        public override string Name => "raise_" + this.DeclaringMember.Name;
     }
 }

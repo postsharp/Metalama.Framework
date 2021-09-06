@@ -96,10 +96,11 @@ namespace Caravela.Framework.Impl.CodeModel
                 t => t.ContainingDeclaration.ToRef(),
                 t => t );
 
+            // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
             var allNewDeclarations =
                 observableTransformations
                     .OfType<IDeclaration>()
-                    .SelectManyRecursive( declaration => declaration.GetContainedElements() );
+                    .SelectMany( declaration => declaration.GetContainedDeclarations() );
 
             var allAttributes =
                 allNewDeclarations.SelectMany( c => c.Attributes )

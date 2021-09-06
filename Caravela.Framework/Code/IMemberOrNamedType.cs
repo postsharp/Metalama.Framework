@@ -8,20 +8,13 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Base interface for <see cref="IMethod"/>, <see cref="IFieldOrProperty"/>, <see cref="IEvent"/>, and <see cref="INamedType"/>.
     /// </summary>
-    public interface IMemberOrNamedType : IDeclaration
+    public interface IMemberOrNamedType : INamedDeclaration
     {
         /// <summary>
         /// Gets the member accessibility (or visibility), i.e. <see cref="Code.Accessibility.Private"/>, <see cref="Code.Accessibility.Protected"/>
         /// and so on.
         /// </summary>
         Accessibility Accessibility { get; }
-
-        /// <summary>
-        /// Gets the member name. If the member is a <see cref="INamedType"/>, the <see cref="Name"/>
-        /// property gets the short name of the type, without the namespace. See also <see cref="INamedType.Namespace"/>
-        /// and <see cref="INamedType.FullName"/>.
-        /// </summary>
-        string Name { get; }
 
         bool IsAbstract { get; }
 

@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl.Formatting
             }
             else
             {
-                classifiedTextSpans = new ClassifiedTextSpanCollection();
+                classifiedTextSpans = new ClassifiedTextSpanCollection( sourceText.Length );
             }
 
             // Process the annotations by the aspect linker (on the output document).

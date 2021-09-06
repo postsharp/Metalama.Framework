@@ -19,14 +19,9 @@ namespace Caravela.Framework.Impl.Linking
         public ISymbol OriginalSymbol { get; }
 
         /// <summary>
-        /// Gets the symbol that is the target of the reference.
+        /// Gets the symbol semantic that is the target of the reference.
         /// </summary>
-        public ISymbol ResolvedSymbol { get; }
-
-        /// <summary>
-        /// Gets the semantic of the referenced symbol.
-        /// </summary>
-        public ResolvedAspectReferenceSemantic Semantic { get; }
+        public IntermediateSymbolSemantic ResolvedSemantic { get; }
 
         /// <summary>
         /// Gets the annotated expression.
@@ -41,15 +36,13 @@ namespace Caravela.Framework.Impl.Linking
         public ResolvedAspectReference(
             ISymbol containingSymbol,
             ISymbol originalSymbol,
-            ISymbol referencedSymbol,
-            ResolvedAspectReferenceSemantic semantic,
+            IntermediateSymbolSemantic resolvedSemantic,
             ExpressionSyntax expression,
             AspectReferenceSpecification specification )
         {
             this.ContainingSymbol = containingSymbol;
             this.OriginalSymbol = originalSymbol;
-            this.ResolvedSymbol = referencedSymbol;
-            this.Semantic = semantic;
+            this.ResolvedSemantic = resolvedSemantic;
             this.Expression = expression;
             this.Specification = specification;
         }

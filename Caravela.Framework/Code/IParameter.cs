@@ -8,7 +8,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a parameter of a method or property.
     /// </summary>
-    public interface IParameter : IDeclaration
+    public interface IParameter : INamedDeclaration
     {
         /// <summary>
         /// Gets the <c>in</c>, <c>out</c>, <c>ref</c> parameter type modifier.
@@ -19,11 +19,6 @@ namespace Caravela.Framework.Code
         /// Gets the parameter type.
         /// </summary>
         IType ParameterType { get; }
-
-        /// <summary>
-        /// Gets the parameter type, or <c>null</c> for <see cref="IMethod.ReturnParameter"/>.
-        /// </summary>
-        string Name { get; }
 
         /// <summary>
         /// Gets the parameter position, or <c>-1</c> for <see cref="IMethod.ReturnParameter"/>.
@@ -52,5 +47,7 @@ namespace Caravela.Framework.Code
         /// </summary>
         /// <returns>A <see cref="ParameterInfo"/> that can be used only in run-time code.</returns>
         ParameterInfo ToParameterInfo();
+
+        bool IsReturnParameter { get; }
     }
 }

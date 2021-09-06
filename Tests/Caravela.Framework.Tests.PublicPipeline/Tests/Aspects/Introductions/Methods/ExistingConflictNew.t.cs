@@ -5,98 +5,98 @@
 {
             return 27;
 }
-
+    
         public static int ExistingMethod_Static()
 {
             return 27;
 }
-
+    
         public virtual int ExistingVirtualMethod()
 {
             return 27;
 }
-
-
+    
+    
 public new global::System.Int32 BaseClassMethod()
 {
-    return base.BaseClassMethod();
+    return default(global::System.Int32);
 }
-
+    
 public static new global::System.Int32 BaseClassMethod_Static()
 {
-    return global::Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictNew.BaseClass.BaseClassMethod_Static();
+    return default(global::System.Int32);
 }
-
+    
 public new global::System.Int32 HiddenBaseClassMethod()
 {
-    return base.HiddenBaseClassMethod();
+    return default(global::System.Int32);
 }
-
+    
 public static new global::System.Int32 HiddenBaseClassMethod_Static()
 {
-    return global::Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictNew.DerivedClass.HiddenBaseClassMethod_Static();
+    return default(global::System.Int32);
 }
-
+    
 public new global::System.Int32 HiddenBaseClassVirtualMethod()
 {
-    return base.HiddenBaseClassVirtualMethod();
+    return default(global::System.Int32);
 }
-
+    
 public new global::System.Int32 HiddenVirtualBaseClassVirtualMethod()
 {
-    return base.HiddenVirtualBaseClassVirtualMethod();
+    return default(global::System.Int32);
 }
-
+    
 public new global::System.Int32 BaseClassVirtualMethod()
 {
-    return base.BaseClassVirtualMethod();
+    return default(global::System.Int32);
 }
-
+    
 public new global::System.Int32 BaseClassVirtualSealedMethod()
 {
-    return base.BaseClassVirtualSealedMethod();
+    return default(global::System.Int32);
 }
-
+    
 public new global::System.Int32 BaseClassVirtualOverridenMethod()
 {
-    return base.BaseClassVirtualOverridenMethod();
+    return default(global::System.Int32);
 }
-
+    
 public new global::System.Int32 BaseClassAbstractMethod()
 {
-    return base.BaseClassAbstractMethod();
+    return default(global::System.Int32);
 }
-
+    
 public new global::System.Int32 BaseClassAbstractSealedMethod()
 {
-    return base.BaseClassAbstractSealedMethod();
+    return default(global::System.Int32);
 }
-
+    
 public new global::System.Int32 DerivedClassMethod()
 {
-    return base.DerivedClassMethod();
+    return default(global::System.Int32);
 }
-
+    
 public static new global::System.Int32 DerivedClassMethod_Static()
 {
-    return global::Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictNew.DerivedClass.DerivedClassMethod_Static();
+    return default(global::System.Int32);
 }
-
+    
 public new global::System.Int32 DerivedClassVirtualMethod()
 {
-    return base.DerivedClassVirtualMethod();
+    return default(global::System.Int32);
 }
-
+    
 public new global::System.Int32 DerivedClassVirtualSealedMethod()
 {
-    return base.DerivedClassVirtualSealedMethod();
+    return default(global::System.Int32);
 }
-
+    
 public global::System.Int32 NonExistentMethod()
 {
     return default(global::System.Int32);
 }
-
+    
 public static global::System.Int32 NonExistentMethod_Static()
 {
     return default(global::System.Int32);

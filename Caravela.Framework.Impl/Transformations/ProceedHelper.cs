@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Transformations
 
                         ExpressionSyntax expression;
 
-                        if ( !iteratorInfo.IsAsyncIterator )
+                        if ( !(iteratorInfo.EnumerableKind is EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator) )
                         {
                             // The target method is a non-async iterator.
                             // Generate:  `RuntimeAspectHelper.Buffer( BASE(ARGS) )`

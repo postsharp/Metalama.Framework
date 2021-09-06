@@ -47,13 +47,6 @@ namespace Caravela.Framework.Code
         /// </summary>
         public EnumerableKind EnumerableKind { get; }
 
-        /// <summary>
-        /// Gets a value indicating whether the iterator is an async iterator, i.e. its <see cref="EnumerableKind"/> is
-        /// <see cref="Code.EnumerableKind.IAsyncEnumerable"/> or <see cref="Code.EnumerableKind.IAsyncEnumerator"/>.
-        /// This property evaluates to <c>false</c> if the method is not an iterator.
-        /// </summary>
-        public bool IsAsyncIterator => this.IsIterator && this.EnumerableKind is EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator;
-
         internal IteratorInfo( bool isIterator, EnumerableKind enumerableKind, IMethod? method )
         {
             this._method = method;

@@ -21,6 +21,14 @@ namespace Caravela.Framework.Code
         private readonly object? _value;
         private readonly IType? _type;
 
+        private void CheckAssigned()
+        {
+            if ( this._type == null )
+            {
+                throw new ArgumentNullException( $"The {nameof(TypedConstant)} is unassigned." );
+            }
+        }
+
         /// <summary>
         /// Gets a value indicating whether the <see cref="Value"/> has been specified (including when it is set to <c>null</c>).
         /// </summary>
@@ -30,17 +38,41 @@ namespace Caravela.Framework.Code
         /// Gets the type of the value. This is important if the type is an enum, because in this case, if the enum type is not compile-time,
         /// <see cref="Value"/> is set to the underlying integer value.
         /// </summary>
-        public IType Type => this._type ?? throw new ArgumentNullException( $"The {nameof(TypedConstant)} is unassigned." );
+        public IType Type
+        {
+            get
+            {
+                this.CheckAssigned();
+
+                return this._type!;
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether the value is <c>null</c>. Not to be confused with <see cref="IsAssigned"/>.
         /// </summary>
-        public bool IsNull => this.Value == null;
+        public bool IsNull
+        {
+            get
+            {
+                this.CheckAssigned();
+
+                return this.Value == null;
+            }
+        }
 
         /// <summary>
         /// Gets the default value.
         /// </summary>
-        public object? Value => this.IsAssigned ? this._value : throw new InvalidOperationException();
+        public object? Value
+        {
+            get
+            {
+                this.CheckAssigned();
+
+                return this._value;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TypedConstant"/> struct that represents the fact that the value

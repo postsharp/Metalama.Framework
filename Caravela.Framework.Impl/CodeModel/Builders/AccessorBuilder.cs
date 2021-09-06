@@ -74,6 +74,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IParameterList IHasParameters.Parameters => this.Parameters;
 
+        [Memo]
         public ParameterBuilderList Parameters
             => (this._containingDeclaration, this.MethodKind) switch
             {
@@ -181,7 +182,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         Accessibility IMemberOrNamedType.Accessibility => this.Accessibility;
 
-        string IMemberOrNamedType.Name => this.Name;
+        string INamedDeclaration.Name => this.Name;
 
         bool IMemberOrNamedType.IsStatic => this.IsStatic;
 

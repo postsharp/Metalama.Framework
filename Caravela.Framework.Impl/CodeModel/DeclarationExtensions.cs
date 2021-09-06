@@ -55,19 +55,24 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         /// <param name="declaration"></param>
         /// <returns></returns>
-        public static IEnumerable<IDeclaration> GetContainedElements( this IDeclaration declaration )
+        public static IEnumerable<IDeclaration> GetContainedDeclarations( this IDeclaration declaration )
             => declaration.SelectManyRecursive(
                 child => child switch
                 {
                     ICompilation compilation => compilation.DeclaredTypes,
                     INamedType namedType => namedType.NestedTypes
                         .Concat<IDeclaration>( namedType.Methods )
+                        .Concat( namedType.Constructors )
+                        .Concat( namedType.Fields )
                         .Concat( namedType.Properties )
-                        .Concat( namedType.Events ),
+                        .Concat( namedType.Events )
+                        .Concat( namedType.GenericParameters )
+                        .ConcatNotNull( namedType.StaticConstructor ),
                     IMethod method => method.LocalFunctions
                         .Concat<IDeclaration>( method.Parameters )
                         .Concat( method.GenericParameters )
                         .ConcatNotNull( method.ReturnParameter ),
+                    IMemberWithAccessors member => member.Accessors,
                     _ => null
                 } );
 
@@ -328,6 +333,10 @@ namespace Caravela.Framework.Impl.CodeModel
                        sr.GetSyntax() is BasePropertyDeclarationSyntax propertyDecl
                        && propertyDecl.AccessorList != null
                        && propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) );
+
+        internal static bool IsEventField( this IEventSymbol symbol )
+            => !symbol.IsAbstract
+               && symbol.DeclaringSyntaxReferences.All( sr => sr.GetSyntax() is VariableDeclaratorSyntax );
 
         internal static IMember GetExplicitInterfaceImplementation( this IMember member )
         {

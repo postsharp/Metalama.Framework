@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Xunit.Abstractions;
 using Xunit.Sdk;
@@ -12,6 +13,7 @@ namespace Caravela.TestFramework
     /// <summary>
     /// Implementation of a Xunit test framework for Caravela. Fall backs to the default XUnit framework in Resharper or Rider.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class AspectTestFramework : ITestFramework
     {
         private readonly ITestFramework _implementation;

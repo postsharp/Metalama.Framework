@@ -66,6 +66,8 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
 
+        public bool IsReturnParameter => this.Index < 0;
+
         ISymbol? ISdkDeclaration.Symbol => null;
 
         DeclarationRef<IDeclaration> IDeclarationInternal.ToRef() => throw new NotImplementedException();
