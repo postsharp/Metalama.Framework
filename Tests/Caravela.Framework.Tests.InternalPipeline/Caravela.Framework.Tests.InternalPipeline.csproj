@@ -18,11 +18,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Tests\Linker\Methods\Linking\BaseMember_ThisExpression - Copy.t.cs" />
-    <Compile Remove="Tests\Linker\Methods\Linking\LocalMember_ThisExpression - Copy.t.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="FakeItEasy" Version="6.2.1" />
     <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" /><PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageReference Include="xunit" Version="$(xUnitVersion)" />
@@ -75,13 +70,6 @@
 
   <ItemGroup Condition="'$(Obfuscate)'=='True'">
     <Compile Remove="**\*" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Tests\Linker\Methods\Linking\LocalMember_ThisExpression - Copy.t.cs">
-      <DependentUpon>OverriddenLocalMethod.t.cs</DependentUpon>
-    </None>
-    <None Include="Tests\Linker\Methods\Linking\OverriddenLocalMethod.t.cs" />
   </ItemGroup>
   
 </Project>

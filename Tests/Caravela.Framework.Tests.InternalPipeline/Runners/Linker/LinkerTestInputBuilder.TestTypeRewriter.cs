@@ -7,11 +7,9 @@ using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Impl.Utilities;
 using FakeItEasy;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -20,7 +18,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 // ReSharper disable SuspiciousTypeConversion.Global
@@ -35,7 +32,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             private readonly List<INonObservableTransformation> _nonObservableTransformations;
 
             private readonly TestRewriter _owner;
-            private Stack<TypeDeclarationSyntax> _currentTypeStack;
+            private readonly Stack<TypeDeclarationSyntax> _currentTypeStack;
             private InsertPosition? _currentInsertPosition;
 
             public IReadOnlyList<IObservableTransformation> ObservableTransformations => this._observableTransformations;
@@ -269,15 +266,34 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     introductionSyntax = introductionSyntax.WithLinkerDeclarationFlags( flags );
                 }
 
+                var declarationKind = node switch
+                {
+                    MethodDeclarationSyntax => DeclarationKind.Method,
+                    PropertyDeclarationSyntax => DeclarationKind.Property,
+                    EventDeclarationSyntax => DeclarationKind.Event,
+                    EventFieldDeclarationSyntax => DeclarationKind.Event,
+                    _ => throw new AssertionFailedException(),
+                };
+
                 // Create transformation fake.
                 var transformation = (IMemberIntroduction) A.Fake<object>(
-                    o => o
-                        .Implements<IObservableTransformation>()
-                        .Implements<IMemberIntroduction>()
-                        .Implements<IDeclarationBuilder>()
-                        .Implements<IDeclarationInternal>()
-                        .Implements<ITestTransformation>()
-                        .Implements<IMethod>() );
+                    o =>
+                    {
+                        o = o
+                            .Implements<IObservableTransformation>()
+                            .Implements<IMemberIntroduction>()
+                            .Implements<IDeclarationBuilder>()
+                            .Implements<IDeclarationInternal>()
+                            .Implements<ITestTransformation>();
+
+                        o = declarationKind switch
+                        {
+                            DeclarationKind.Method => o.Implements<IMethod>(),
+                            DeclarationKind.Property => o.Implements<IProperty>(),
+                            DeclarationKind.Event => o.Implements<IEvent>(),
+                            _ => throw new AssertionFailedException(),
+                        };
+                    } );
 
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Introduced" );
@@ -511,7 +527,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             {
                 return method
                     .WithAttributeLists( List<AttributeListSyntax>() )
-                    .WithModifiers( TokenList( method.Modifiers.Where( m => m.Kind() !=  SyntaxKind.OverrideKeyword ) ) )
+                    .WithModifiers( TokenList( method.Modifiers.Where( m => m.Kind() != SyntaxKind.OverrideKeyword ) ) )
                     .WithIdentifier( Identifier( method.Identifier.ValueText + "__SymbolHelper" ) )
                     .WithExpressionBody( null )
                     .WithBody(

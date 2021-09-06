@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl
 
         public bool IsNull => this.AspectName == null;
 
-        public string? AspectName { get; }
+        public string AspectName { get; }
 
         public string AspectShortName { get; }
 

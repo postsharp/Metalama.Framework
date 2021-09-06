@@ -21,6 +21,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
         [Template]
         public virtual dynamic? CloneImpl()
         {
+            // This method does not do anything.
             var baseMethod = meta.Target.Type.Methods.OfExactSignature("Clone", 0, Array.Empty<IType>());
             return null;
         }
@@ -28,6 +29,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
         [InterfaceMember( IsExplicit = true)]
         object Clone()
         {
+            // This should call final version of introduced Clone method.
             return meta.This.Clone();
         }
     }
@@ -39,7 +41,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
         {
             public object Clone()
             {
-                return  new NaturallyCloneable();
+                return new NaturallyCloneable();
             }
         }
     

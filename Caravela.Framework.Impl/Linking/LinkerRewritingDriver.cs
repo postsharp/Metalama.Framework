@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -26,7 +25,6 @@ namespace Caravela.Framework.Impl.Linking
     {
         private readonly LinkerIntroductionRegistry _introductionRegistry;
         private readonly LinkerAnalysisRegistry _analysisRegistry;
-        private readonly IReadOnlyList<Inliner> _inliners;
 
         public AspectReferenceResolver ReferenceResolver { get; }
 
@@ -39,13 +37,11 @@ namespace Caravela.Framework.Impl.Linking
             LinkerIntroductionRegistry introductionRegistry,
             LinkerAnalysisRegistry analysisRegistry,
             AspectReferenceResolver referenceResolver,
-            UserDiagnosticSink diagnosticSink,
-            IReadOnlyList<Inliner> inliners )
+            UserDiagnosticSink diagnosticSink )
         {
             this._introductionRegistry = introductionRegistry;
             this._analysisRegistry = analysisRegistry;
             this.IntermediateCompilation = intermediateCompilation;
-            this._inliners = inliners;
             this.DiagnosticSink = diagnosticSink;
             this.ReferenceResolver = referenceResolver;
         }
@@ -53,7 +49,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Assembles a linked body of the method/accessor, where aspect reference annotations are replaced by target symbols and inlineable references are inlined.
         /// </summary>
-        /// <param name="symbol">Method or accessor symbol.</param>
+        /// <param name="semantic">Method or accessor symbol.</param>
         /// <returns>Block representing the linked body.</returns>
         public BlockSyntax GetLinkedBody( IntermediateSymbolSemantic<IMethodSymbol> semantic, InliningContext inliningContext )
         {
@@ -447,7 +443,7 @@ namespace Caravela.Framework.Impl.Linking
         /// Gets a method symbol that will be the source for the body of the specified declaration. For example, source for the overridden declaration is the last override and source
         /// for the first override is the original declaration.
         /// </summary>
-        /// <param name="symbol"></param>
+        /// <param name="semantic"></param>
         /// <returns></returns>
         private IMethodSymbol ResolveBodySource( IntermediateSymbolSemantic<IMethodSymbol> semantic )
         {

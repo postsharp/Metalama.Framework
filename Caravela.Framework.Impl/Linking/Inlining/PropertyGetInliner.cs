@@ -3,9 +3,6 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Caravela.Framework.Impl.Linking.Inlining
 {

@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code.Builders;
-using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Transformations;
 
 namespace Caravela.Framework.Tests.Integration.Runners.Linker

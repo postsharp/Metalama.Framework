@@ -10,14 +10,17 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 // Ordered declaration versions (intermediate compilation):
 //  * Overridden declaration (base class declaration)
 //  * Target declaration, base semantic (if from source code)
 //  * Target declaration, default semantic (if introduced, no overridden declaration)
-//  * Override 1
+//  * Override 1-1
+//  ...
+//  * Override z-1
+//  ...
+//  * Override z-k (there are multiple overrides of the same declaration on one layer).
 //  ...
 //  * Override n
 //  * Target declaration,final semantic)
@@ -30,16 +33,16 @@ using System.Linq;
 // * Layer (0, 0):   Target declaration, default semantic (if from source code).
 // * Layer (0, 0):   Target declaration, base semantic (if introduced, no overridden declaration).
 // ...
-// * Layer (k, 0):   Target declaration, default semantic (if introduced)
-// * Layer (k, 1):   After override 0-1 (same layer as introduction).
+// * Layer (k, 0):   Target declaration, default semantic (if introduced).
+// * Layer (k, 1):   After override 1-1 (same layer as introduction).
 // ...
-// * Layer (l_1, 1): After override 1-1 (layer with multiple overrides).
+// * Layer (l_1, 1): After override 2-1 (layer with multiple overrides).
 // ...
-// * Layer (l_1, k): After override 1-k.
+// * Layer (l_1, k): After override 2-k.
 // ...
-// * Layer (l_n, 1): After override n-1.
+// * Layer (l_n, 1): After override n.
 // ...
-// * Layer m:        Target declaration, final semantic.
+// * Layer (m, 0):        Target declaration, final semantic.
 
 // AspectReferenceOrder resolution:
 //  * Original - resolves to the first in the order.
@@ -48,7 +51,7 @@ using System.Linq;
 //  * Final - resolved to the last in the order.
 
 // Special cases:
-//  * Promoted fields do not count as introduction. The origin of the promoted declaration applies.
+//  * Promoted fields do not count as introductions. The layer of the promotion target applies.
 //    Source promoted fields are treated as source declarations. Introduced and then promoted fields
 //    are treated as being introduced at the point of field introduction.
 
@@ -86,6 +89,8 @@ namespace Caravela.Framework.Impl.Linking
             ExpressionSyntax expression,
             AspectReferenceSpecification referenceSpecification )
         {
+            // TODO: Split this method.
+
             // Check whether we are referencing explicit interface implementation.
             if ( (!SymbolEqualityComparer.Default.Equals( containingSymbol.ContainingType, referencedSymbol.ContainingType )
                   && referencedSymbol.ContainingType.TypeKind == TypeKind.Interface)
@@ -104,16 +109,38 @@ namespace Caravela.Framework.Impl.Linking
                 referencedSymbol = containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
             }
 
+            var referencedDeclarationOverrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
+
+            var containedInTargetOverride =
+                this._introductionRegistry.IsOverrideTarget( referencedSymbol )
+                && referencedDeclarationOverrides.Any( x => SymbolEqualityComparer.Default.Equals( this._introductionRegistry.GetSymbolForIntroducedMember( x ), containingSymbol ) );
+
             // TODO: Optimize (most of this can be precomputed).
             // TODO: Support multiple overrides in the same layer (the memberIndex has to be determined).
-            var annotationLayerIndex = new MemberLayerIndex( this._layerIndex[referenceSpecification.AspectLayerId], 1);
+            // Determine the layer from which this reference originates.
+            //  * If the reference is coming from and override of the same declaration it's referencing, we need to select the correct override index.
+            //  * Otherwise, treat the reference as coming from the last override of the declaration.
+            var annotationLayerIndex =
+                containedInTargetOverride
+                ? new MemberLayerIndex( 
+                    this._layerIndex[referenceSpecification.AspectLayerId],
+                    referencedDeclarationOverrides
+                        .Where( x => x.AspectLayerId == referenceSpecification.AspectLayerId )
+                        .Select( (x, i) => (Symbol: x, Index: i+1))
+                        .Single( x => 
+                            SymbolEqualityComparer.Default.Equals( 
+                                this._introductionRegistry.GetSymbolForIntroducedMember( x.Symbol ), containingSymbol) ).Index )
+                : new MemberLayerIndex( 
+                    this._layerIndex[referenceSpecification.AspectLayerId],
+                    referencedDeclarationOverrides.Count( x => x.AspectLayerId == referenceSpecification.AspectLayerId ));
 
+            // If the override target was introduced, determine the index.
             var targetMemberIntroduction = this._introductionRegistry.GetIntroducedMemberForSymbol( referencedSymbol );
             var targetMemberIntroductionIndex = GetIntroductionLogicalIndex( targetMemberIntroduction );
 
             MemberLayerIndex? GetIntroductionLogicalIndex( LinkerIntroducedMember? introducedMember)
             {
-                // TODO: This supports only field promotions.
+                // This supports only field promotions.
                 if ( introducedMember == null )
                 {
                     return null;
@@ -136,9 +163,9 @@ namespace Caravela.Framework.Impl.Linking
                 return new MemberLayerIndex( this._layerIndex[introducedMember.AspectLayerId], 0);
             }
 
-            var overrideIntroductions = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
+            // Compute indices of overrides of the referenced declaration.
             var overrideIndices =
-                (from overrideIntroduction in overrideIntroductions
+                (from overrideIntroduction in referencedDeclarationOverrides
                  group overrideIntroduction by overrideIntroduction.AspectLayerId into g
                  select g.Select( ( o, i ) => (Index: new MemberLayerIndex( this._layerIndex[o.AspectLayerId], i+1 ), Override: o) )
                  ).SelectMany( g => g ).ToReadOnlyList();
@@ -184,7 +211,7 @@ namespace Caravela.Framework.Impl.Linking
                         resolvedIndex = lowerOrEqualOverride.Index;
                         resolvedIntroducedMember = lowerOrEqualOverride.Override;
                     }
-                    else if ( targetMemberIntroductionIndex != null )
+                    else if ( targetMemberIntroductionIndex != null && targetMemberIntroductionIndex.Value <= annotationLayerIndex )
                     {
                         resolvedIndex = targetMemberIntroductionIndex.Value;
                         resolvedIntroducedMember = targetMemberIntroduction;
@@ -198,7 +225,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 case AspectReferenceOrder.Final:
                     var lastOverride = overrideIndices.LastOrDefault();
-                    resolvedIndex = new MemberLayerIndex(this._orderedLayers.Count - 1, 0);
+                    resolvedIndex = new MemberLayerIndex(this._orderedLayers.Count, 0);
                     break;
 
                 default:
@@ -233,17 +260,12 @@ namespace Caravela.Framework.Impl.Linking
                    referenceSpecification );
             }
 
-            // At this point resolvedIndex should be 0, this._orderedLayers.Count - 1 or be equal to index of one of the overrides.
+            // At this point resolvedIndex should be 0, equal to target introduction index, this._orderedLayers.Count or be equal to index of one of the overrides.
             Invariant.Assert( 
                 resolvedIndex == default
-                || resolvedIndex.LayerIndex == this._orderedLayers.Count - 1 
+                || resolvedIndex == new MemberLayerIndex(this._orderedLayers.Count, 0) 
                 || overrideIndices.Any( x => x.Index == resolvedIndex )
                 || resolvedIndex == targetMemberIntroductionIndex );
-
-            if ( resolvedIndex == targetMemberIntroductionIndex )
-            {
-                resolvedIndex = default;
-            }
 
             if ( resolvedIndex == default )
             {
@@ -288,29 +310,75 @@ namespace Caravela.Framework.Impl.Linking
                     }
                 }
             }
-            //else if ( resolvedIndex == targetMemberIntroductionIndex )
-            //{
-            //    // Resolved to introduced member.
-            //    return new ResolvedAspectReference(
-            //        containingSymbol,
-            //        referencedSymbol,
-            //        new IntermediateSymbolSemantic(
-            //            this.GetSymbolFromIntroducedMember( referencedSymbol, targetMemberIntroduction.AssertNotNull() ),
-            //            IntermediateSymbolSemanticKind.Base ),
-            //        expression,
-            //        referenceSpecification );
-            //}
-            else if ( resolvedIndex.LayerIndex < this._orderedLayers.Count - 1)
+            else if ( resolvedIndex == targetMemberIntroductionIndex)
             {
-                // One of the overrides or the introduced member.
-                return new ResolvedAspectReference(
+                // We have resolved to the target member introduction.
+                // The only way to get here is using "Base" order in the first override.
+                if ( HasImplicitImplementation( referencedSymbol ) )
+                {
+                    return new ResolvedAspectReference(
                     containingSymbol,
                     referencedSymbol,
                     new IntermediateSymbolSemantic(
-                        this.GetSymbolFromIntroducedMember( referencedSymbol, resolvedIntroducedMember.AssertNotNull()),
+                        referencedSymbol,
                         IntermediateSymbolSemanticKind.Default ),
                     expression,
                     referenceSpecification );
+                }
+                else
+                {
+                    if ( referencedSymbol.IsOverride )
+                    {
+                        // Introduction is an override, resolve to symbol in the base class.
+                        return new ResolvedAspectReference(
+                            containingSymbol,
+                            referencedSymbol,
+                            new IntermediateSymbolSemantic(
+                                GetOverriddenSymbol( referencedSymbol ).AssertNotNull(),
+                                IntermediateSymbolSemanticKind.Default ),
+                            expression,
+                            referenceSpecification );
+                    }
+                    else
+                    {
+                        // Introduction is a new member, resolve to base semantics, i.e. empty method.
+                        return new ResolvedAspectReference(
+                            containingSymbol,
+                            referencedSymbol,
+                            new IntermediateSymbolSemantic(
+                                referencedSymbol,
+                                IntermediateSymbolSemanticKind.Base ),
+                            expression,
+                            referenceSpecification );
+                    }
+                }
+            }
+            else if ( resolvedIndex.LayerIndex < this._orderedLayers.Count)
+            {
+                // One of the overrides or the introduced member.
+                if ( targetMemberIntroduction != null && resolvedIndex.MemberIndex == 0 )
+                {
+                    // There is no introduction, i.e. this is a user source symbol.
+                    return new ResolvedAspectReference(
+                        containingSymbol,
+                        referencedSymbol,
+                        new IntermediateSymbolSemantic(
+                            this.GetSymbolFromIntroducedMember( referencedSymbol, targetMemberIntroduction.AssertNotNull() ),
+                            IntermediateSymbolSemanticKind.Default ),
+                        expression,
+                        referenceSpecification );
+                }
+                else
+                {
+                    return new ResolvedAspectReference(
+                        containingSymbol,
+                        referencedSymbol,
+                        new IntermediateSymbolSemantic(
+                            this.GetSymbolFromIntroducedMember( referencedSymbol, resolvedIntroducedMember.AssertNotNull() ),
+                            IntermediateSymbolSemanticKind.Default ),
+                        expression,
+                        referenceSpecification );
+                }
             }
             else
             {
@@ -325,6 +393,24 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
+        private static bool HasImplicitImplementation(ISymbol symbol)
+        {
+            switch ( symbol )
+            {
+                case IPropertySymbol property when property.IsAutoProperty():
+                case IEventSymbol @event when @event.IsExplicitInterfaceEventField() || @event.IsEventField():
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Translates the resolved introduction to the same kind of symbol as the referenced symbol.
+        /// </summary>
+        /// <param name="referencedSymbol"></param>
+        /// <param name="resolvedIntroduction"></param>
+        /// <returns></returns>
         private ISymbol GetSymbolFromIntroducedMember( ISymbol referencedSymbol, LinkerIntroducedMember resolvedIntroduction )
         {
             var symbol = this._introductionRegistry.GetSymbolForIntroducedMember( resolvedIntroduction );

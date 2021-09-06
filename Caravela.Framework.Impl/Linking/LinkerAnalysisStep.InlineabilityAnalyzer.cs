@@ -6,9 +6,7 @@ using Caravela.Framework.Impl.Linking.Inlining;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -133,25 +131,6 @@ namespace Caravela.Framework.Impl.Linking
                     default:
                         throw new AssertionFailedException();
                 }
-
-                static IMethodSymbol? GetMethod( ISymbol symbol, MethodKind kind )
-                    => symbol switch
-                    {
-                        IMethodSymbol method => method,
-                        IPropertySymbol property => kind switch
-                        {
-                            MethodKind.PropertyGet => property.GetMethod,
-                            MethodKind.PropertySet => property.SetMethod,
-                            _ => throw new AssertionFailedException()
-                        },
-                        IEventSymbol @event => kind switch
-                        {
-                            MethodKind.EventAdd => @event.AddMethod,
-                            MethodKind.EventRemove => @event.RemoveMethod,
-                            _ => throw new AssertionFailedException()
-                        },
-                        _ => throw new AssertionFailedException()
-                    };
             }
 
             private bool TryInlineProperty( IntermediateSymbolSemantic<IPropertySymbol> semantic, [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )

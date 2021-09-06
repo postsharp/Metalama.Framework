@@ -2,8 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking.Inlining
 {

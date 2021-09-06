@@ -2,19 +2,15 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Tests.Integration.Tests.Linker;
-using FakeItEasy;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
@@ -182,7 +183,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                             .SingleOrDefault();
 
                         // Find the transformation for this symbol helper.
-                        var overriddenMemberSymbolHelperNodeId = GetNodeId( overriddenMemberSymbolHelper.GetPrimaryDeclaration().AssertNotNull() );
+                        var overriddenMemberSymbolHelperNodeId = GetNodeId( overriddenMemberSymbolHelper.AssertNotNull().GetPrimaryDeclaration().AssertNotNull() );
 
                         overridenMember = (IDeclaration)rewriter.ObservableTransformations
                             .Where( t => ((ITestTransformation) t).SymbolHelperNodeId == overriddenMemberSymbolHelperNodeId )
@@ -205,7 +206,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 }
                 else if ( transformation is IObservableTransformation observableTransformation )
                 {
-                    var introducedElementName = ((ITestTransformation) transformation).IntroducedElementName;
+                    var introducedElementName = ((ITestTransformation) transformation).IntroducedElementName.AssertNotNull();
 
                     var symbolHelperNode = nodeIdToSyntaxNode[symbolHelperNodeId];
                     var insertPositionNode =
@@ -214,50 +215,168 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         : null;
 
                     var containingDeclaration = nodeIdToCodeElement[containingNodeId];
-                    var symbolHelperElement = (IMethod) nodeIdToCodeElement[symbolHelperNodeId];
 
-                    A.CallTo( () => observableTransformation.ContainingDeclaration ).Returns( containingDeclaration );
-
-                    if ( insertPositionNode != null )
+                    switch ( nodeIdToCodeElement[symbolHelperNodeId] )
                     {
-                        A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPosition )
-                            .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
+                        case IMethod symbolHelperMethod:
+                            FinalizeTransformationMethod(
+                                observableTransformation, 
+                                symbolHelperNode, 
+                                symbolHelperMethod, 
+                                containingDeclaration,
+                                insertPositionRelation, 
+                                insertPositionNode, 
+                                insertPositionBuilder, 
+                                introducedElementName );
+                            break;
+
+                        case IProperty symbolHelperProperty:
+                            FinalizeTransformationProperty(
+                                observableTransformation, 
+                                symbolHelperNode, 
+                                symbolHelperProperty, 
+                                containingDeclaration,
+                                insertPositionRelation, 
+                                insertPositionNode, 
+                                insertPositionBuilder, 
+                                introducedElementName );
+                            break;
+
+                        case IEvent symbolHelperEvent:
+                            FinalizeTransformationEvent(
+                                observableTransformation, 
+                                symbolHelperNode, 
+                                symbolHelperEvent, 
+                                containingDeclaration,
+                                insertPositionRelation, 
+                                insertPositionNode, 
+                                insertPositionBuilder, 
+                                introducedElementName );
+                            break;
                     }
-                    else
-                    {
-                        A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPosition )
-                            .Returns( new InsertPosition( insertPositionRelation, insertPositionBuilder.AssertNotNull() ) );
-                    }
-
-                    A.CallTo( () => ((IMemberIntroduction) observableTransformation).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
-
-                    // ReSharper disable SuspiciousTypeConversion.Global
-
-                    // TODO: This should be a deep copy of declarations to have a correct parent.
-                    A.CallTo( () => ((IMethod) observableTransformation).LocalFunctions ).Returns( symbolHelperElement.LocalFunctions );
-                    A.CallTo( () => ((IMethod) observableTransformation).Parameters ).Returns( symbolHelperElement.Parameters );
-                    A.CallTo( () => ((IMethod) observableTransformation).GenericParameters ).Returns( symbolHelperElement.GenericParameters );
-                    A.CallTo( () => ((IMethod) observableTransformation).GenericArguments ).Returns( symbolHelperElement.GenericArguments );
-                    A.CallTo( () => ((IMethod) observableTransformation).ReturnParameter ).Returns( symbolHelperElement.ReturnParameter );
-                    A.CallTo( () => ((IMethod) observableTransformation).ReturnType ).Returns( symbolHelperElement.ReturnType );
-                    A.CallTo( () => ((IMethod) observableTransformation).Attributes ).Returns( symbolHelperElement.Attributes );
-                    A.CallTo( () => ((IMethod) observableTransformation).Accessibility ).Returns( symbolHelperElement.Accessibility );
-                    A.CallTo( () => ((IMethod) observableTransformation).Compilation ).Returns( symbolHelperElement.Compilation );
-                    A.CallTo( () => ((IMethod) observableTransformation).DeclaringType ).Returns( symbolHelperElement.DeclaringType );
-                    A.CallTo( () => ((IMethod) observableTransformation).DeclarationKind ).Returns( symbolHelperElement.DeclarationKind );
-                    A.CallTo( () => ((IMethod) observableTransformation).IsAbstract ).Returns( symbolHelperElement.IsAbstract );
-                    A.CallTo( () => ((IMethod) observableTransformation).IsAsync ).Returns( symbolHelperElement.IsAsync );
-                    A.CallTo( () => ((IMethod) observableTransformation).IsNew ).Returns( symbolHelperElement.IsNew );
-                    A.CallTo( () => ((IMethod) observableTransformation).IsOpenGeneric ).Returns( symbolHelperElement.IsOpenGeneric );
-                    A.CallTo( () => ((IMethod) observableTransformation).IsOverride ).Returns( symbolHelperElement.IsOverride );
-                    A.CallTo( () => ((IMethod) observableTransformation).IsReadOnly ).Returns( symbolHelperElement.IsReadOnly );
-                    A.CallTo( () => ((IMethod) observableTransformation).IsSealed ).Returns( symbolHelperElement.IsSealed );
-                    A.CallTo( () => ((IMethod) observableTransformation).IsStatic ).Returns( symbolHelperElement.IsStatic );
-                    A.CallTo( () => ((IMethod) observableTransformation).IsVirtual ).Returns( symbolHelperElement.IsVirtual );
-                    A.CallTo( () => ((IMethod) observableTransformation).MethodKind ).Returns( symbolHelperElement.MethodKind );
-                    A.CallTo( () => ((IMethod) observableTransformation).Name ).Returns( introducedElementName.AssertNotNull() );
                 }
             }
+        }
+
+        private static void FinalizeTransformationMethod(
+            IObservableTransformation observableTransformation,
+            SyntaxNode symbolHelperNode,
+            IMethod symbolHelperElement,
+            IDeclaration containingDeclaration,
+            InsertPositionRelation insertPositionRelation,
+            SyntaxNode? insertPositionNode,
+            IDeclarationBuilder? insertPositionBuilder,
+            string introducedElementName )
+        {
+            FinalizeTransformation(
+                observableTransformation, 
+                symbolHelperNode, 
+                symbolHelperElement, 
+                containingDeclaration,
+                insertPositionRelation, 
+                insertPositionNode, 
+                insertPositionBuilder, 
+                introducedElementName );
+
+            A.CallTo( () => ((IMethod) observableTransformation).LocalFunctions ).Returns( symbolHelperElement.LocalFunctions );
+            A.CallTo( () => ((IMethod) observableTransformation).Parameters ).Returns( symbolHelperElement.Parameters );
+            A.CallTo( () => ((IMethod) observableTransformation).GenericParameters ).Returns( symbolHelperElement.GenericParameters );
+            A.CallTo( () => ((IMethod) observableTransformation).GenericArguments ).Returns( symbolHelperElement.GenericArguments );
+            A.CallTo( () => ((IMethod) observableTransformation).ReturnParameter ).Returns( symbolHelperElement.ReturnParameter );
+            A.CallTo( () => ((IMethod) observableTransformation).ReturnType ).Returns( symbolHelperElement.ReturnType );
+            A.CallTo( () => ((IMethod) observableTransformation).IsOpenGeneric ).Returns( symbolHelperElement.IsOpenGeneric );
+            A.CallTo( () => ((IMethod) observableTransformation).IsReadOnly ).Returns( symbolHelperElement.IsReadOnly );
+            A.CallTo( () => ((IMethod) observableTransformation).MethodKind ).Returns( symbolHelperElement.MethodKind );
+        }
+
+        private static void FinalizeTransformationProperty(
+            IObservableTransformation observableTransformation,
+            SyntaxNode symbolHelperNode,
+            IProperty symbolHelperElement,
+            IDeclaration containingDeclaration,
+            InsertPositionRelation insertPositionRelation,
+            SyntaxNode? insertPositionNode,
+            IDeclarationBuilder? insertPositionBuilder,
+            string introducedElementName )
+        {
+            FinalizeTransformation(
+                observableTransformation, 
+                symbolHelperNode, 
+                symbolHelperElement, 
+                containingDeclaration,
+                insertPositionRelation, 
+                insertPositionNode, 
+                insertPositionBuilder, 
+                introducedElementName );
+
+            A.CallTo( () => ((IProperty) observableTransformation).Parameters ).Returns( symbolHelperElement.Parameters );
+            A.CallTo( () => ((IProperty) observableTransformation).Type ).Returns( symbolHelperElement.Type );
+        }
+
+        private static void FinalizeTransformationEvent( 
+            IObservableTransformation observableTransformation,
+            SyntaxNode symbolHelperNode,
+            IEvent symbolHelperElement,
+            IDeclaration containingDeclaration,
+            InsertPositionRelation insertPositionRelation, 
+            SyntaxNode? insertPositionNode, 
+            IDeclarationBuilder? insertPositionBuilder,
+            string introducedElementName )
+        {
+            FinalizeTransformation( 
+                observableTransformation, 
+                symbolHelperNode, 
+                symbolHelperElement, 
+                containingDeclaration, 
+                insertPositionRelation, 
+                insertPositionNode, 
+                insertPositionBuilder, 
+                introducedElementName );
+
+            A.CallTo( () => ((IEvent) observableTransformation).EventType ).Returns( symbolHelperElement.EventType );
+        }
+
+        private static void FinalizeTransformation(
+            IObservableTransformation observableTransformation,
+            SyntaxNode symbolHelperNode,
+            IMember symbolHelperElement,
+            IDeclaration containingDeclaration,
+            InsertPositionRelation insertPositionRelation,
+            SyntaxNode? insertPositionNode,
+            IDeclarationBuilder? insertPositionBuilder,
+            string introducedElementName )
+        {
+            A.CallTo( () => observableTransformation.ContainingDeclaration ).Returns( containingDeclaration );
+
+            if ( insertPositionNode != null )
+            {
+                A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPosition )
+                    .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
+            }
+            else
+            {
+                A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPosition )
+                    .Returns( new InsertPosition( insertPositionRelation, insertPositionBuilder.AssertNotNull() ) );
+            }
+
+            A.CallTo( () => ((IMemberIntroduction) observableTransformation).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
+
+            // ReSharper disable SuspiciousTypeConversion.Global
+
+            // TODO: This should be a deep copy of declarations to have a correct parent.
+            A.CallTo( () => ((IMember) observableTransformation).Attributes ).Returns( symbolHelperElement.Attributes );
+            A.CallTo( () => ((IMember) observableTransformation).Accessibility ).Returns( symbolHelperElement.Accessibility );
+            A.CallTo( () => ((IMember) observableTransformation).Compilation ).Returns( symbolHelperElement.Compilation );
+            A.CallTo( () => ((IMember) observableTransformation).DeclaringType ).Returns( symbolHelperElement.DeclaringType );
+            A.CallTo( () => ((IMember) observableTransformation).DeclarationKind ).Returns( symbolHelperElement.DeclarationKind );
+            A.CallTo( () => ((IMember) observableTransformation).IsAbstract ).Returns( symbolHelperElement.IsAbstract );
+            A.CallTo( () => ((IMember) observableTransformation).IsAsync ).Returns( symbolHelperElement.IsAsync );
+            A.CallTo( () => ((IMember) observableTransformation).IsNew ).Returns( symbolHelperElement.IsNew );
+            A.CallTo( () => ((IMember) observableTransformation).IsOverride ).Returns( symbolHelperElement.IsOverride );
+            A.CallTo( () => ((IMember) observableTransformation).IsSealed ).Returns( symbolHelperElement.IsSealed );
+            A.CallTo( () => ((IMember) observableTransformation).IsStatic ).Returns( symbolHelperElement.IsStatic );
+            A.CallTo( () => ((IMember) observableTransformation).IsVirtual ).Returns( symbolHelperElement.IsVirtual );
+            A.CallTo( () => ((IMember) observableTransformation).Name ).Returns( introducedElementName.AssertNotNull() );
         }
     }
 }

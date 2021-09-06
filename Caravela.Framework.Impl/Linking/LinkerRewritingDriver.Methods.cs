@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.Linking
             var emptyBody =
                 symbol.ReturnsVoid
                 ? Block()
-                : Block( ReturnStatement( DefaultExpression( method.ReturnType ) ) );
+                : Block( ReturnStatement( DefaultExpression( method.ReturnType ) ) ).NormalizeWhitespace();
 
             return this.GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
