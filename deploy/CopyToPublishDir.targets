@@ -1,0 +1,20 @@
+﻿<!-- Copies public nupkg files to the /artifacts/publish directory so that they can later be published.
+     Don't include private packages in this directory -->
+<Project DefaultTargets="Build">
+
+    <PropertyGroup>
+        <!-- We only publish release builds -->
+        <Configuration>Release</Configuration>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <ShippingDir>$(MSBuildThisFileDirectory)..\..\..\artifacts\publish</ShippingDir>
+    </PropertyGroup>
+
+    <Target Name="Build">
+        <Error Text="The Version property has not been properly set." Condition="'$(Version)'==''" />
+        <MakeDir Directories="$(ShippingDir)" />
+        <Copy SourceFiles="@(ShippedFile)" DestinationFolder="$(ShippingDir)" />
+    </Target>
+
+</Project>
