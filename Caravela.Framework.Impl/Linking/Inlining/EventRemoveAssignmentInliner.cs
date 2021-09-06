@@ -5,18 +5,16 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking.Inlining
 {
-    internal class EventRemoveAssignmentInliner : PropertyInliner
+    internal class EventRemoveAssignmentInliner : EventInliner
     {
-        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[] { SyntaxKind.ReturnStatement };
-
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax needs to be in form: <annotated_property_expression> -= value;
-            if ( aspectReference.ResolvedSymbol is not IEventSymbol && (aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol is not IEventSymbol )
+            if ( aspectReference.ResolvedSemantic.Symbol is not IEventSymbol
+                 && (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol is not IEventSymbol )
             {
                 return false;
             }
@@ -60,11 +58,11 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var expressionStatement = (ExpressionStatementSyntax) assignmentExpression.Parent.AssertNotNull();
 
             var targetSymbol =
-                aspectReference.ResolvedSymbol as IEventSymbol
-                ?? (IEventSymbol) ((aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
+                aspectReference.ResolvedSemantic.Symbol as IEventSymbol
+                ?? (IEventSymbol) ((aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
 
             // Get the final inlined body of the target property setter. 
-            var inlinedTargetBody = context.GetLinkedBody( targetSymbol.RemoveMethod.AssertNotNull() );
+            var inlinedTargetBody = context.GetLinkedBody( targetSymbol.RemoveMethod.AssertNotNull().ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
 
             // Mark the block as flattenable.
             inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );

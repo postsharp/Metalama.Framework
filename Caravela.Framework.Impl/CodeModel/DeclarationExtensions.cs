@@ -329,6 +329,10 @@ namespace Caravela.Framework.Impl.CodeModel
                        && propertyDecl.AccessorList != null
                        && propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) );
 
+        internal static bool IsEventField( this IEventSymbol symbol )
+            => !symbol.IsAbstract
+               && symbol.DeclaringSyntaxReferences.All( sr => sr.GetSyntax() is VariableDeclaratorSyntax );
+
         internal static IMember GetExplicitInterfaceImplementation( this IMember member )
         {
             switch ( member )
