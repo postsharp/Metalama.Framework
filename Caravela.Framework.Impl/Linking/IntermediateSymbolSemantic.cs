@@ -6,7 +6,7 @@ using System;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    internal struct IntermediateSymbolSemantic : IEquatable<IntermediateSymbolSemantic>
+    internal readonly struct IntermediateSymbolSemantic : IEquatable<IntermediateSymbolSemantic>
     {
         public ISymbol Symbol { get; }
 
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Linking
         public bool Equals( IntermediateSymbolSemantic other )
         {
             return SymbolEqualityComparer.Default.Equals( this.Symbol, other.Symbol )
-                && other.Kind == this.Kind;
+                   && other.Kind == this.Kind;
         }
 
         public override int GetHashCode()
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.Linking
         }
     }
 
-    internal struct IntermediateSymbolSemantic<TSymbol>
+    internal readonly struct IntermediateSymbolSemantic<TSymbol>
         where TSymbol : ISymbol
     {
         public TSymbol Symbol { get; }
@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.Linking
         public bool Equals( IntermediateSymbolSemantic other )
         {
             return SymbolEqualityComparer.Default.Equals( this.Symbol, other.Symbol )
-                && other.Kind == this.Kind;
+                   && other.Kind == this.Kind;
         }
 
         public override int GetHashCode()
@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.Linking
                 this.Kind );
         }
 
-        public static implicit operator IntermediateSymbolSemantic(IntermediateSymbolSemantic<TSymbol> value)
+        public static implicit operator IntermediateSymbolSemantic( IntermediateSymbolSemantic<TSymbol> value )
         {
             return new IntermediateSymbolSemantic( value.Symbol, value.Kind );
         }

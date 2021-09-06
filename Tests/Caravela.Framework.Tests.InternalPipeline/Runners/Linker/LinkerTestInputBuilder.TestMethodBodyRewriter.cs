@@ -37,15 +37,19 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
             public override SyntaxNode? VisitElementAccessExpression( ElementAccessExpressionSyntax node )
             {
-                if (this.TransformInvocationOrElementAccess( node, node.Expression, node.ArgumentList.Arguments, out var transformedNode))
+                if ( this.TransformInvocationOrElementAccess( node, node.Expression, node.ArgumentList.Arguments, out var transformedNode ) )
                 {
                     return transformedNode;
                 }
 
                 return base.VisitElementAccessExpression( node );
             }
-                        
-            public bool TransformInvocationOrElementAccess(SyntaxNode originalNode, ExpressionSyntax expression, SeparatedSyntaxList<ArgumentSyntax> arguments, [NotNullWhen( true )] out SyntaxNode? transformedNode)
+
+            public bool TransformInvocationOrElementAccess(
+                SyntaxNode originalNode,
+                ExpressionSyntax expression,
+                SeparatedSyntaxList<ArgumentSyntax> arguments,
+                [NotNullWhen( true )] out SyntaxNode? transformedNode )
             {
                 if ( expression is IdentifierNameSyntax identifier && identifier.Identifier.ValueText == "link" )
                 {
@@ -130,11 +134,12 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         }
                     }
 
-                    transformedNode = 
+                    transformedNode =
                         this.Visit( annotatedExpression )
-                        .WithAspectReferenceAnnotation( new AspectLayerId( this._aspectName, this._layerName ), order, target, flags )
-                        .WithLeadingTrivia( originalNode.GetLeadingTrivia() )
-                        .WithTrailingTrivia( originalNode.GetTrailingTrivia() );
+                            .WithAspectReferenceAnnotation( new AspectLayerId( this._aspectName, this._layerName ), order, target, flags )
+                            .WithLeadingTrivia( originalNode.GetLeadingTrivia() )
+                            .WithTrailingTrivia( originalNode.GetTrailingTrivia() );
+
                     return true;
                 }
 

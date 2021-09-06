@@ -73,15 +73,19 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
             FinalizeTransformationFakes( this._rewriter, (CSharpCompilation) inputCompilation.Compilation, initialCompilationModel );
 
-            var orderedLayers = this._rewriter.OrderedAspectLayers.Select( ( al, i ) => new OrderedAspectLayer( i, al.AspectName.AssertNotNull(), al.LayerName ) ).ToArray();
+            var orderedLayers = this._rewriter.OrderedAspectLayers
+                .Select( ( al, i ) => new OrderedAspectLayer( i, al.AspectName.AssertNotNull(), al.LayerName ) )
+                .ToArray();
+
             var layerOrderLookup = orderedLayers.ToDictionary( x => x.AspectLayerId, x => x.Order );
 
-            var inputCompilationModel = initialCompilationModel.WithTransformations( this._rewriter.ObservableTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList() );
+            var inputCompilationModel = initialCompilationModel.WithTransformations(
+                this._rewriter.ObservableTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList() );
 
             var linkerInput = new AspectLinkerInput(
                 inputCompilation,
                 inputCompilationModel,
-                this._rewriter.NonObservableTransformations.OrderBy(x => layerOrderLookup[x.Advice.AspectLayerId]).ToList(),
+                this._rewriter.NonObservableTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList(),
                 orderedLayers,
                 ArraySegment<ScopedSuppression>.Empty,
                 null! );
@@ -155,10 +159,12 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     var overriddenDeclarationName = ((ITestTransformation) transformation).OverriddenDeclarationName;
 
                     var containingNode = nodeIdToSyntaxNode[containingNodeId];
+
                     var insertPositionNode =
                         insertPositionNodeId != null
-                        ? nodeIdToSyntaxNode[insertPositionNodeId]
-                        : null;
+                            ? nodeIdToSyntaxNode[insertPositionNodeId]
+                            : null;
+
                     var symbolHelperNode = nodeIdToSyntaxNode[symbolHelperNodeId];
 
                     var containingSymbol = (ITypeSymbol) syntaxNodeToSymbol[containingNode];
@@ -170,6 +176,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         .SingleOrDefault();
 
                     IDeclaration? overridenMember;
+
                     if ( overriddenMemberSymbol != null )
                     {
                         overridenMember = symbolToCodeElement[overriddenMemberSymbol];
@@ -183,9 +190,10 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                             .SingleOrDefault();
 
                         // Find the transformation for this symbol helper.
-                        var overriddenMemberSymbolHelperNodeId = GetNodeId( overriddenMemberSymbolHelper.AssertNotNull().GetPrimaryDeclaration().AssertNotNull() );
+                        var overriddenMemberSymbolHelperNodeId =
+                            GetNodeId( overriddenMemberSymbolHelper.AssertNotNull().GetPrimaryDeclaration().AssertNotNull() );
 
-                        overridenMember = (IDeclaration)rewriter.ObservableTransformations
+                        overridenMember = (IDeclaration) rewriter.ObservableTransformations
                             .Where( t => ((ITestTransformation) t).SymbolHelperNodeId == overriddenMemberSymbolHelperNodeId )
                             .Single();
                     }
@@ -209,10 +217,11 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     var introducedElementName = ((ITestTransformation) transformation).IntroducedElementName.AssertNotNull();
 
                     var symbolHelperNode = nodeIdToSyntaxNode[symbolHelperNodeId];
+
                     var insertPositionNode =
-                        insertPositionNodeId != null 
-                        ? nodeIdToSyntaxNode[insertPositionNodeId]
-                        : null;
+                        insertPositionNodeId != null
+                            ? nodeIdToSyntaxNode[insertPositionNodeId]
+                            : null;
 
                     var containingDeclaration = nodeIdToCodeElement[containingNodeId];
 
@@ -220,38 +229,41 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     {
                         case IMethod symbolHelperMethod:
                             FinalizeTransformationMethod(
-                                observableTransformation, 
-                                symbolHelperNode, 
-                                symbolHelperMethod, 
+                                observableTransformation,
+                                symbolHelperNode,
+                                symbolHelperMethod,
                                 containingDeclaration,
-                                insertPositionRelation, 
-                                insertPositionNode, 
-                                insertPositionBuilder, 
+                                insertPositionRelation,
+                                insertPositionNode,
+                                insertPositionBuilder,
                                 introducedElementName );
+
                             break;
 
                         case IProperty symbolHelperProperty:
                             FinalizeTransformationProperty(
-                                observableTransformation, 
-                                symbolHelperNode, 
-                                symbolHelperProperty, 
+                                observableTransformation,
+                                symbolHelperNode,
+                                symbolHelperProperty,
                                 containingDeclaration,
-                                insertPositionRelation, 
-                                insertPositionNode, 
-                                insertPositionBuilder, 
+                                insertPositionRelation,
+                                insertPositionNode,
+                                insertPositionBuilder,
                                 introducedElementName );
+
                             break;
 
                         case IEvent symbolHelperEvent:
                             FinalizeTransformationEvent(
-                                observableTransformation, 
-                                symbolHelperNode, 
-                                symbolHelperEvent, 
+                                observableTransformation,
+                                symbolHelperNode,
+                                symbolHelperEvent,
                                 containingDeclaration,
-                                insertPositionRelation, 
-                                insertPositionNode, 
-                                insertPositionBuilder, 
+                                insertPositionRelation,
+                                insertPositionNode,
+                                insertPositionBuilder,
                                 introducedElementName );
+
                             break;
                     }
                 }
@@ -269,13 +281,13 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             string introducedElementName )
         {
             FinalizeTransformation(
-                observableTransformation, 
-                symbolHelperNode, 
-                symbolHelperElement, 
+                observableTransformation,
+                symbolHelperNode,
+                symbolHelperElement,
                 containingDeclaration,
-                insertPositionRelation, 
-                insertPositionNode, 
-                insertPositionBuilder, 
+                insertPositionRelation,
+                insertPositionNode,
+                insertPositionBuilder,
                 introducedElementName );
 
             A.CallTo( () => ((IMethod) observableTransformation).LocalFunctions ).Returns( symbolHelperElement.LocalFunctions );
@@ -300,37 +312,37 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             string introducedElementName )
         {
             FinalizeTransformation(
-                observableTransformation, 
-                symbolHelperNode, 
-                symbolHelperElement, 
+                observableTransformation,
+                symbolHelperNode,
+                symbolHelperElement,
                 containingDeclaration,
-                insertPositionRelation, 
-                insertPositionNode, 
-                insertPositionBuilder, 
+                insertPositionRelation,
+                insertPositionNode,
+                insertPositionBuilder,
                 introducedElementName );
 
             A.CallTo( () => ((IProperty) observableTransformation).Parameters ).Returns( symbolHelperElement.Parameters );
             A.CallTo( () => ((IProperty) observableTransformation).Type ).Returns( symbolHelperElement.Type );
         }
 
-        private static void FinalizeTransformationEvent( 
+        private static void FinalizeTransformationEvent(
             IObservableTransformation observableTransformation,
             SyntaxNode symbolHelperNode,
             IEvent symbolHelperElement,
             IDeclaration containingDeclaration,
-            InsertPositionRelation insertPositionRelation, 
-            SyntaxNode? insertPositionNode, 
+            InsertPositionRelation insertPositionRelation,
+            SyntaxNode? insertPositionNode,
             IDeclarationBuilder? insertPositionBuilder,
             string introducedElementName )
         {
-            FinalizeTransformation( 
-                observableTransformation, 
-                symbolHelperNode, 
-                symbolHelperElement, 
-                containingDeclaration, 
-                insertPositionRelation, 
-                insertPositionNode, 
-                insertPositionBuilder, 
+            FinalizeTransformation(
+                observableTransformation,
+                symbolHelperNode,
+                symbolHelperElement,
+                containingDeclaration,
+                insertPositionRelation,
+                insertPositionNode,
+                insertPositionBuilder,
                 introducedElementName );
 
             A.CallTo( () => ((IEvent) observableTransformation).EventType ).Returns( symbolHelperElement.EventType );

@@ -103,8 +103,8 @@ namespace Caravela.Framework.Impl.Linking
                 // Collect syntax node replacements from inliners and redirect the rest to correct targets.
                 foreach ( var aspectReference in containedAspectReferences )
                 {
-                    if ( aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable ) 
-                        && SymbolEqualityComparer.Default.Equals( aspectReference.ContainingSymbol, aspectReference.ResolvedSemantic.Symbol) )
+                    if ( aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable )
+                         && SymbolEqualityComparer.Default.Equals( aspectReference.ContainingSymbol, aspectReference.ResolvedSemantic.Symbol ) )
                     {
                         // Inlineable self-reference would cause a stack overflow.
                         throw new AssertionFailedException();
@@ -112,7 +112,9 @@ namespace Caravela.Framework.Impl.Linking
 
                     if ( this._analysisRegistry.IsInlineable( aspectReference.ResolvedSemantic, out var inliningSpecification ) )
                     {
-                        inliningSpecification.SelectedInliners[aspectReference].Inline( inliningContext, aspectReference, out var replacedNode, out var newNode );
+                        inliningSpecification.SelectedInliners[aspectReference]
+                            .Inline( inliningContext, aspectReference, out var replacedNode, out var newNode );
+
                         replacements.Add( replacedNode, newNode );
                     }
                     else
@@ -485,13 +487,16 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns></returns>
         private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference )
         {
-            if ( !SymbolEqualityComparer.Default.Equals( aspectReference.ResolvedSemantic.Symbol.ContainingType, aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
+            if ( !SymbolEqualityComparer.Default.Equals(
+                aspectReference.ResolvedSemantic.Symbol.ContainingType,
+                aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
             {
                 throw new AssertionFailedException();
             }
 
             var targetSymbol = aspectReference.ResolvedSemantic.Symbol;
             var targetSemanticKind = aspectReference.ResolvedSemantic.Kind;
+
             if ( this._introductionRegistry.IsLastOverride( targetSymbol ) )
             {
                 // If something is resolved to the last override, we will point to the target declaration instead.
@@ -504,11 +509,15 @@ namespace Caravela.Framework.Impl.Linking
                 targetSemanticKind switch
                 {
                     IntermediateSymbolSemanticKind.Default
-                        when SymbolEqualityComparer.Default.Equals( aspectReference.ResolvedSemantic.Symbol.ContainingType, aspectReference.ContainingSymbol.ContainingType )
-                        && this._introductionRegistry.IsOverrideTarget( targetSymbol ) 
+                        when SymbolEqualityComparer.Default.Equals(
+                                 aspectReference.ResolvedSemantic.Symbol.ContainingType,
+                                 aspectReference.ContainingSymbol.ContainingType )
+                             && this._introductionRegistry.IsOverrideTarget( targetSymbol )
                         => GetOriginalImplMemberName( targetSymbol ),
                     IntermediateSymbolSemanticKind.Base
-                        when SymbolEqualityComparer.Default.Equals( aspectReference.ResolvedSemantic.Symbol.ContainingType, aspectReference.ContainingSymbol.ContainingType )
+                        when SymbolEqualityComparer.Default.Equals(
+                            aspectReference.ResolvedSemantic.Symbol.ContainingType,
+                            aspectReference.ContainingSymbol.ContainingType )
                         => GetEmptyImplMemberName( targetSymbol ),
                     _ => targetSymbol.Name
                 };
@@ -548,13 +557,13 @@ namespace Caravela.Framework.Impl.Linking
                         if ( targetSymbol.IsStatic )
                         {
                             // Static member access where the target is a different type.
-                            return 
+                            return
                                 MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
-                                    IdentifierName( targetMemberName ) )
-                                .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
-                                .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
+                                        IdentifierName( targetMemberName ) )
+                                    .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
+                                    .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
                         }
                         else
                         {
@@ -570,13 +579,13 @@ namespace Caravela.Framework.Impl.Linking
                                     case IdentifierNameSyntax:
                                     case BaseExpressionSyntax:
                                     case ThisExpressionSyntax:
-                                        return 
+                                        return
                                             MemberAccessExpression(
-                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                BaseExpression(),
-                                                IdentifierName( targetMemberName ) )
-                                            .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
-                                            .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
+                                                    SyntaxKind.SimpleMemberAccessExpression,
+                                                    BaseExpression(),
+                                                    IdentifierName( targetMemberName ) )
+                                                .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
+                                                .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
 
                                     default:
                                         var aspectInstance = this.ResolveAspectInstance( aspectReference );
@@ -609,11 +618,9 @@ namespace Caravela.Framework.Impl.Linking
             return introducedMember.AssertNotNull().Introduction.Advice.Aspect;
         }
 
-        private static string GetOriginalImplMemberName( ISymbol symbol )
-            => GetSpecialMemberName( symbol, "Source" );
+        private static string GetOriginalImplMemberName( ISymbol symbol ) => GetSpecialMemberName( symbol, "Source" );
 
-        private static string GetEmptyImplMemberName( ISymbol symbol )
-            => GetSpecialMemberName( symbol, "Empty" );
+        private static string GetEmptyImplMemberName( ISymbol symbol ) => GetSpecialMemberName( symbol, "Empty" );
 
         private static string GetSpecialMemberName( ISymbol symbol, string suffix )
         {
@@ -622,38 +629,38 @@ namespace Caravela.Framework.Impl.Linking
                 case IMethodSymbol methodSymbol:
                     if ( methodSymbol.ExplicitInterfaceImplementations.Any() )
                     {
-                        return CreateName( methodSymbol.ExplicitInterfaceImplementations[0].Name, suffix );
+                        return CreateName( symbol, methodSymbol.ExplicitInterfaceImplementations[0].Name, suffix );
                     }
                     else
                     {
-                        return CreateName( methodSymbol.Name, suffix );
+                        return CreateName( symbol, methodSymbol.Name, suffix );
                     }
 
                 case IPropertySymbol propertySymbol:
                     if ( propertySymbol.ExplicitInterfaceImplementations.Any() )
                     {
-                        return CreateName( propertySymbol.ExplicitInterfaceImplementations[0].Name, suffix );
+                        return CreateName( symbol, propertySymbol.ExplicitInterfaceImplementations[0].Name, suffix );
                     }
                     else
                     {
-                        return CreateName( propertySymbol.Name, suffix );
+                        return CreateName( symbol, propertySymbol.Name, suffix );
                     }
 
                 case IEventSymbol eventSymbol:
                     if ( eventSymbol.ExplicitInterfaceImplementations.Any() )
                     {
-                        return CreateName( eventSymbol.ExplicitInterfaceImplementations[0].Name, suffix );
+                        return CreateName( symbol, eventSymbol.ExplicitInterfaceImplementations[0].Name, suffix );
                     }
                     else
                     {
-                        return CreateName( eventSymbol.Name, suffix );
+                        return CreateName( symbol, eventSymbol.Name, suffix );
                     }
 
                 default:
                     throw new AssertionFailedException();
             }
 
-            string CreateName( string name, string suffix)
+            static string CreateName( ISymbol symbol, string name, string suffix )
             {
                 var hint = $"{name}_{suffix}";
 

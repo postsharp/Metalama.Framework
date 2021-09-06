@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Linking.Inlining
 {
-    internal abstract class PropertyInliner : Inliner 
+    internal abstract class PropertyInliner : Inliner
     {
         public override bool IsValidForTargetSymbol( ISymbol symbol )
         {

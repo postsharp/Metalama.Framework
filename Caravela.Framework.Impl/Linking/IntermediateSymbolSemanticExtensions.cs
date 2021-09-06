@@ -7,10 +7,10 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal static class IntermediateSymbolSemanticExtensions
     {
-        public static IntermediateSymbolSemantic<T> ToSemantic<T>(this T symbol, IntermediateSymbolSemanticKind kind)
+        public static IntermediateSymbolSemantic<T> ToSemantic<T>( this T symbol, IntermediateSymbolSemanticKind kind )
             where T : ISymbol
         {
-            return ((ISymbol) symbol).ToSemantic(kind).ToTyped<T>();
+            return ((ISymbol) symbol).ToSemantic( kind ).ToTyped<T>();
         }
 
         public static IntermediateSymbolSemantic ToSemantic( this ISymbol symbol, IntermediateSymbolSemanticKind kind )

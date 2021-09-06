@@ -57,7 +57,8 @@ namespace Caravela.Framework.Impl
             => StringComparer.Ordinal.Equals( this.AspectName, other.AspectName ) && StringComparer.Ordinal.Equals( this.LayerName, other.LayerName );
 
         public override int GetHashCode()
-            => (this.AspectName == null ? 0 : StringComparer.Ordinal.GetHashCode( this.AspectName )) ^ (this.LayerName == null ? 0 : StringComparer.Ordinal.GetHashCode( this.LayerName ));
+            => (this.AspectName == null ? 0 : StringComparer.Ordinal.GetHashCode( this.AspectName ))
+               ^ (this.LayerName == null ? 0 : StringComparer.Ordinal.GetHashCode( this.LayerName ));
 
         public bool Equals( AspectLayer other ) => this.Equals( other.AspectLayerId );
 

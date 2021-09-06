@@ -34,13 +34,13 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                    && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     members.Add( this.GetOriginalImplMethod( methodDeclaration, symbol ) );
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
-                    && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
                 {
                     members.Add( this.GetEmptyImplMethod( methodDeclaration, symbol ) );
                 }
@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.Linking
             else if ( this._introductionRegistry.IsOverride( symbol ) )
             {
                 if ( !this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                    || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                     || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
@@ -90,20 +90,30 @@ namespace Caravela.Framework.Impl.Linking
 
         private MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
         {
-            return this.GetSpecialImplMethod( method, method.Body.AddSourceCodeAnnotation(), method.ExpressionBody.AddSourceCodeAnnotation(), symbol, GetOriginalImplMemberName( symbol ) );
+            return this.GetSpecialImplMethod(
+                method,
+                method.Body.AddSourceCodeAnnotation(),
+                method.ExpressionBody.AddSourceCodeAnnotation(),
+                symbol,
+                GetOriginalImplMemberName( symbol ) );
         }
 
         private MemberDeclarationSyntax GetEmptyImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
         {
             var emptyBody =
                 symbol.ReturnsVoid
-                ? Block()
-                : Block( ReturnStatement( DefaultExpression( method.ReturnType ) ) ).NormalizeWhitespace();
+                    ? Block()
+                    : Block( ReturnStatement( DefaultExpression( method.ReturnType ) ) ).NormalizeWhitespace();
 
             return this.GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
-        private MemberDeclarationSyntax GetSpecialImplMethod( MethodDeclarationSyntax method, BlockSyntax? body, ArrowExpressionClauseSyntax? expressionBody, IMethodSymbol symbol, string name )
+        private MemberDeclarationSyntax GetSpecialImplMethod(
+            MethodDeclarationSyntax method,
+            BlockSyntax? body,
+            ArrowExpressionClauseSyntax? expressionBody,
+            IMethodSymbol symbol,
+            string name )
         {
             var returnType = AsyncHelper.GetIntermediateMethodReturnType( this.IntermediateCompilation, symbol, method.ReturnType );
 

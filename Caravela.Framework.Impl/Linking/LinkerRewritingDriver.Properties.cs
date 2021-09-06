@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Linking
                 var lastOverride = (IPropertySymbol) this._introductionRegistry.GetLastOverride( symbol );
 
                 if ( IsAutoPropertyDeclaration( propertyDeclaration )
-                     && this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic(symbol, IntermediateSymbolSemanticKind.Default ) ) )
+                     && this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     // Backing field for auto property.
                     members.Add( GetPropertyBackingField( propertyDeclaration, symbol ) );
@@ -48,13 +48,13 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                    && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ))
+                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     members.Add( GetOriginalImplProperty( propertyDeclaration, symbol ) );
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
-                    && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
                 {
                     members.Add( GetEmptyImplProperty( propertyDeclaration, symbol ) );
                 }
@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.Linking
             else if ( this._introductionRegistry.IsOverride( symbol ) )
             {
                 if ( !this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                    || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                     || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
@@ -241,7 +241,12 @@ namespace Caravela.Framework.Impl.Linking
             return GetSpecialImplProperty( property.Type, accessorList, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetSpecialImplProperty( TypeSyntax propertyType, AccessorListSyntax accessorList, EqualsValueClauseSyntax? initializer, IPropertySymbol symbol, string name )
+        private static MemberDeclarationSyntax GetSpecialImplProperty(
+            TypeSyntax propertyType,
+            AccessorListSyntax accessorList,
+            EqualsValueClauseSyntax? initializer,
+            IPropertySymbol symbol,
+            string name )
         {
             return
                 PropertyDeclaration(

@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Linking
             CompilationModel finalCompilationModel,
             PartialCompilation intermediateCompilation,
             LinkerIntroductionRegistry introductionRegistry,
-            IReadOnlyList<OrderedAspectLayer> orderedAspectLayers)
+            IReadOnlyList<OrderedAspectLayer> orderedAspectLayers )
         {
             this.DiagnosticSink = diagnosticSink;
             this.FinalCompilationModel = finalCompilationModel;

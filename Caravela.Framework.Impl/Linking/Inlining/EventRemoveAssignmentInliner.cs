@@ -13,7 +13,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax needs to be in form: <annotated_property_expression> -= value;
-            if ( aspectReference.ResolvedSemantic.Symbol is not IEventSymbol && (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol is not IEventSymbol )
+            if ( aspectReference.ResolvedSemantic.Symbol is not IEventSymbol
+                 && (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol is not IEventSymbol )
             {
                 return false;
             }
@@ -61,7 +62,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 ?? (IEventSymbol) ((aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
 
             // Get the final inlined body of the target property setter. 
-            var inlinedTargetBody = context.GetLinkedBody( targetSymbol.RemoveMethod.AssertNotNull().ToSemantic(aspectReference.ResolvedSemantic.Kind) );
+            var inlinedTargetBody = context.GetLinkedBody( targetSymbol.RemoveMethod.AssertNotNull().ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
 
             // Mark the block as flattenable.
             inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );

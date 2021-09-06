@@ -21,7 +21,10 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var members =
                     eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField )
-                        ? new List<MemberDeclarationSyntax> { GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) }
+                        ? new List<MemberDeclarationSyntax>
+                        {
+                            GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final )
+                        }
                         : new List<MemberDeclarationSyntax> { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) };
 
                 var lastOverride = (IEventSymbol) this._introductionRegistry.GetLastOverride( symbol );
@@ -32,7 +35,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                    && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField ) )
                     {
@@ -45,7 +48,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
-                    && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
                 {
                     members.Add( GetEmptyImplEvent( eventDeclaration, symbol ) );
                 }
@@ -58,11 +61,15 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     // Event field indicates explicit interface implementation with event field template.
 
-                    return new MemberDeclarationSyntax[] { GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ).NormalizeWhitespace() };
+                    return new MemberDeclarationSyntax[]
+                    {
+                        GetEventBackingField( eventDeclaration, symbol ),
+                        GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ).NormalizeWhitespace()
+                    };
                 }
 
                 if ( !this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                    || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) ) 
+                     || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
@@ -146,8 +153,11 @@ namespace Caravela.Framework.Impl.Linking
 
         private static MemberDeclarationSyntax GetOriginalImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )
         {
-
-            return GetSpecialImplEvent( @event.Type, @event.AccessorList.AssertNotNull().AddSourceCodeAnnotation(), symbol, GetOriginalImplMemberName( symbol ) );
+            return GetSpecialImplEvent(
+                @event.Type,
+                @event.AccessorList.AssertNotNull().AddSourceCodeAnnotation(),
+                symbol,
+                GetOriginalImplMemberName( symbol ) );
         }
 
         private static MemberDeclarationSyntax GetEmptyImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )

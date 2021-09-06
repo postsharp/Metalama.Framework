@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Linking
             private readonly InlinerProvider _inlinerProvider;
             private readonly IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> _aspectReferenceIndex;
 
-            public InlineabilityAnalyzer( 
+            public InlineabilityAnalyzer(
                 PartialCompilation intermediateCompilation,
                 LinkerIntroductionRegistry introductionRegistry,
                 IReadOnlyList<IntermediateSymbolSemantic> reachableSymbolSemantics,
@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Linking
                 // Go through reachable symbols and try to determine whether they are inlineable.
                 foreach ( var reachableSymbolSemantic in this._reachableSymbolSemantics )
                 {
-                    if (this.TryInline(reachableSymbolSemantic, out var inliningSpecification))
+                    if ( this.TryInline( reachableSymbolSemantic, out var inliningSpecification ) )
                     {
                         yield return inliningSpecification;
                     }
@@ -50,7 +50,9 @@ namespace Caravela.Framework.Impl.Linking
                 IntermediateSymbolSemantic semantic,
                 AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self )
             {
-                if ( !this._aspectReferenceIndex.TryGetValue( new AspectReferenceTarget( semantic.Symbol, semantic.Kind, targetKind ), out var containedReferences ) )
+                if ( !this._aspectReferenceIndex.TryGetValue(
+                    new AspectReferenceTarget( semantic.Symbol, semantic.Kind, targetKind ),
+                    out var containedReferences ) )
                 {
                     return Array.Empty<ResolvedAspectReference>();
                 }
@@ -58,7 +60,7 @@ namespace Caravela.Framework.Impl.Linking
                 return containedReferences;
             }
 
-            private bool TryInline( IntermediateSymbolSemantic semantic, [NotNullWhen(true)] out SymbolInliningSpecification? inliningSpecification )
+            private bool TryInline( IntermediateSymbolSemantic semantic, [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )
             {
                 switch ( semantic.Symbol )
                 {
@@ -73,6 +75,7 @@ namespace Caravela.Framework.Impl.Linking
 
                     case IFieldSymbol:
                         inliningSpecification = null;
+
                         return false;
 
                     default:
@@ -80,16 +83,19 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private bool TryInlineMethod( IntermediateSymbolSemantic<IMethodSymbol> semantic, [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )
+            private bool TryInlineMethod(
+                IntermediateSymbolSemantic<IMethodSymbol> semantic,
+                [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )
             {
                 switch ( semantic.Symbol.MethodKind )
                 {
                     case MethodKind.Ordinary:
                     case MethodKind.ExplicitInterfaceImplementation:
                         if ( semantic.Symbol.GetDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotInlineable )
-                            || semantic.Kind == IntermediateSymbolSemanticKind.Final )
+                             || semantic.Kind == IntermediateSymbolSemanticKind.Final )
                         {
                             inliningSpecification = null;
+
                             return false;
                         }
 
@@ -97,6 +103,7 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             // Last overrides should be inlined if not marked as not-inlineable.
                             inliningSpecification = new SymbolInliningSpecification( semantic );
+
                             return true;
                         }
 
@@ -105,6 +112,7 @@ namespace Caravela.Framework.Impl.Linking
                         if ( aspectReferences.Count != 1 )
                         {
                             inliningSpecification = null;
+
                             return false;
                         }
 
@@ -118,6 +126,7 @@ namespace Caravela.Framework.Impl.Linking
                         }
 
                         inliningSpecification = null;
+
                         return false;
 
                     case MethodKind.EventAdd:
@@ -126,6 +135,7 @@ namespace Caravela.Framework.Impl.Linking
                     case MethodKind.PropertySet:
                         // Accessor methods are not inlineable by themselves, but always through the containing event/property.
                         inliningSpecification = null;
+
                         return false;
 
                     default:
@@ -133,12 +143,15 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private bool TryInlineProperty( IntermediateSymbolSemantic<IPropertySymbol> semantic, [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )
+            private bool TryInlineProperty(
+                IntermediateSymbolSemantic<IPropertySymbol> semantic,
+                [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )
             {
                 if ( semantic.Symbol.GetDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotInlineable )
-                    || semantic.Kind == IntermediateSymbolSemanticKind.Final )
+                     || semantic.Kind == IntermediateSymbolSemanticKind.Final )
                 {
                     inliningSpecification = null;
+
                     return false;
                 }
 
@@ -146,6 +159,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     // Last overrides should be inlined if not marked as not-inlineable.
                     inliningSpecification = new SymbolInliningSpecification( semantic );
+
                     return true;
                 }
 
@@ -157,6 +171,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     // TODO: We may need to deal with this case.
                     inliningSpecification = null;
+
                     return false;
                 }
 
@@ -164,13 +179,16 @@ namespace Caravela.Framework.Impl.Linking
                                                    || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0) )
                 {
                     inliningSpecification = null;
+
                     return false;
                 }
 
                 Inliner? getterInliner = null;
                 Inliner? setterInliner = null;
+
                 if ( (semantic.Symbol.GetMethod == null || getAspectReferences.Count == 0 || this.TryGetInliner( getAspectReferences[0], out getterInliner ))
-                    && (semantic.Symbol.SetMethod == null || setAspectReferences.Count == 0 || this.TryGetInliner( setAspectReferences[0], out setterInliner )) )
+                     && (semantic.Symbol.SetMethod == null || setAspectReferences.Count == 0
+                                                           || this.TryGetInliner( setAspectReferences[0], out setterInliner )) )
                 {
                     if ( getterInliner == null )
                     {
@@ -196,15 +214,19 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 inliningSpecification = null;
+
                 return false;
             }
 
-            private bool TryInlineEvent( IntermediateSymbolSemantic<IEventSymbol> semantic, [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )
+            private bool TryInlineEvent(
+                IntermediateSymbolSemantic<IEventSymbol> semantic,
+                [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )
             {
                 if ( semantic.Symbol.GetDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotInlineable )
-                    || semantic.Kind == IntermediateSymbolSemanticKind.Final )
+                     || semantic.Kind == IntermediateSymbolSemanticKind.Final )
                 {
                     inliningSpecification = null;
+
                     return false;
                 }
 
@@ -212,6 +234,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     // Last overrides should be inlined if not marked as not-inlineable.
                     inliningSpecification = new SymbolInliningSpecification( semantic );
+
                     return true;
                 }
 
@@ -223,37 +246,40 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     // TODO: We may need to deal with this case.
                     inliningSpecification = null;
+
                     return false;
                 }
 
                 if ( addAspectReferences.Count > 1 || removeAspectReferences.Count > 1 )
                 {
                     inliningSpecification = null;
+
                     return false;
                 }
 
                 if ( addAspectReferences.Count == 0 && removeAspectReferences.Count == 0 )
                 {
                     inliningSpecification = null;
+
                     return false;
                 }
 
                 Inliner? adderInliner = null;
                 Inliner? removerInliner = null;
 
-                if ( ( addAspectReferences.Count == 0 || this.TryGetInliner( addAspectReferences[0], out adderInliner ) )
-                    && ( removeAspectReferences.Count == 0 || this.TryGetInliner( removeAspectReferences[0], out removerInliner ) ) )
+                if ( (addAspectReferences.Count == 0 || this.TryGetInliner( addAspectReferences[0], out adderInliner ))
+                     && (removeAspectReferences.Count == 0 || this.TryGetInliner( removeAspectReferences[0], out removerInliner )) )
                 {
                     var selectedInliners = new List<KeyValuePair<ResolvedAspectReference, Inliner>>();
 
-                    if (adderInliner != null)
+                    if ( adderInliner != null )
                     {
-                        selectedInliners.Add( new(addAspectReferences[0], adderInliner ) );
+                        selectedInliners.Add( new KeyValuePair<ResolvedAspectReference, Inliner>( addAspectReferences[0], adderInliner ) );
                     }
 
                     if ( removerInliner != null )
                     {
-                        selectedInliners.Add( new( removeAspectReferences[0], removerInliner ) );
+                        selectedInliners.Add( new KeyValuePair<ResolvedAspectReference, Inliner>( removeAspectReferences[0], removerInliner ) );
                     }
 
                     inliningSpecification = new SymbolInliningSpecification( semantic, selectedInliners.ToArray() );
@@ -262,16 +288,18 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 inliningSpecification = null;
+
                 return false;
             }
 
-            private bool TryGetInliner( ResolvedAspectReference aspectReference, [NotNullWhen(true)]out Inliner? inliner )
+            private bool TryGetInliner( ResolvedAspectReference aspectReference, [NotNullWhen( true )] out Inliner? inliner )
             {
                 var semanticModel = this._intermediateCompilation.Compilation.GetSemanticModel( aspectReference.Expression.SyntaxTree );
 
-                if (!aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable ))
+                if ( !aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable ) )
                 {
                     inliner = null;
+
                     return false;
                 }
 

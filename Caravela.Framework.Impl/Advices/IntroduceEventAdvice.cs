@@ -141,11 +141,11 @@ namespace Caravela.Framework.Impl.Advices
                             else
                             {
                                 var overriddenMethod = new OverriddenEvent(
-                                this,
-                                this.MemberBuilder,
-                                this.Template,
-                                this._addTemplate,
-                                this._removeTemplate );
+                                    this,
+                                    this.MemberBuilder,
+                                    this.Template,
+                                    this._addTemplate,
+                                    this._removeTemplate );
 
                                 return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                             }
@@ -161,11 +161,11 @@ namespace Caravela.Framework.Impl.Advices
                             else
                             {
                                 var overriddenMethod = new OverriddenEvent(
-                                this,
-                                existingDeclaration,
-                                this.Template,
-                                this._addTemplate,
-                                this._removeTemplate );
+                                    this,
+                                    existingDeclaration,
+                                    this.Template,
+                                    this._addTemplate,
+                                    this._removeTemplate );
 
                                 return AdviceResult.Create( overriddenMethod );
                             }
@@ -200,11 +200,11 @@ namespace Caravela.Framework.Impl.Advices
                             else
                             {
                                 var overriddenMethod = new OverriddenEvent(
-                                this,
-                                this.MemberBuilder,
-                                this.Template,
-                                this._addTemplate,
-                                this._removeTemplate );
+                                    this,
+                                    this.MemberBuilder,
+                                    this.Template,
+                                    this._addTemplate,
+                                    this._removeTemplate );
 
                                 return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                             }

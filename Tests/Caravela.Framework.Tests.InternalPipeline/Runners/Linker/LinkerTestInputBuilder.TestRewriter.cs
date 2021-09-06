@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Tests.Integration.Tests.Linker;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -82,7 +83,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
                 this.ServiceProvider = new ServiceProvider();
 
-                this.ServiceProvider.AddService( new Impl.Utilities.UserCodeInvoker( this.ServiceProvider ) );
+                this.ServiceProvider.AddService( new UserCodeInvoker( this.ServiceProvider ) );
             }
 
             public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )
@@ -157,6 +158,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 {
                     var newLayer = new AspectLayerId( aspectName, layerName );
                     this._orderedAspectLayers.Add( newLayer );
+
                     return newLayer;
                 }
                 else

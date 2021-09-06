@@ -5,7 +5,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -16,8 +15,8 @@ namespace Caravela.Framework.Impl.Linking
             private readonly PartialCompilation _intermediateCompilation;
             private readonly LinkerIntroductionRegistry _introductionRegistry;
             private readonly AspectReferenceResolver _referenceResolver;
-                
-            public MethodBodyAnalyzer( 
+
+            public MethodBodyAnalyzer(
                 PartialCompilation intermediateCompilation,
                 LinkerIntroductionRegistry introductionRegistry,
                 AspectReferenceResolver referenceResolver )
@@ -70,8 +69,8 @@ namespace Caravela.Framework.Impl.Linking
                         default:
                             throw new NotSupportedException();
 
-                            // var declarationSyntax = (MethodDeclarationSyntax) symbol.DeclaringSyntaxReferences.Single().GetSyntax();
-                            // ControlFlowGraph cfg = ControlFlowGraph.Create( declarationSyntax, this._intermediateCompilation.GetSemanticModel( declarationSyntax.SyntaxTree ) );
+                        // var declarationSyntax = (MethodDeclarationSyntax) symbol.DeclaringSyntaxReferences.Single().GetSyntax();
+                        // ControlFlowGraph cfg = ControlFlowGraph.Create( declarationSyntax, this._intermediateCompilation.GetSemanticModel( declarationSyntax.SyntaxTree ) );
                     }
                 }
 

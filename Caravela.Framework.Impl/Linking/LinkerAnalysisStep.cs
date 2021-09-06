@@ -35,7 +35,11 @@ namespace Caravela.Framework.Impl.Linking
             {
                 foreach ( var aspectReference in methodBodyAnalysisResult.Value.AspectReferences )
                 {
-                    var key = new AspectReferenceTarget( aspectReference.ResolvedSemantic.Symbol, aspectReference.ResolvedSemantic.Kind, aspectReference.Specification.TargetKind );
+                    var key = new AspectReferenceTarget(
+                        aspectReference.ResolvedSemantic.Symbol,
+                        aspectReference.ResolvedSemantic.Kind,
+                        aspectReference.Specification.TargetKind );
+
                     if ( !aspectReferenceIndexBuilder.TryGetValue( key, out var list ) )
                     {
                         aspectReferenceIndexBuilder[key] = list = new List<ResolvedAspectReference>();
@@ -45,7 +49,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            var aspectReferenceIndex = aspectReferenceIndexBuilder.ToDictionary( x => x.Key, x => (IReadOnlyList<ResolvedAspectReference>)x.Value );
+            var aspectReferenceIndex = aspectReferenceIndexBuilder.ToDictionary( x => x.Key, x => (IReadOnlyList<ResolvedAspectReference>) x.Value );
 
             var reachabilityAnalyzer = new ReachabilityAnalyzer(
                 input.IntroductionRegistry,

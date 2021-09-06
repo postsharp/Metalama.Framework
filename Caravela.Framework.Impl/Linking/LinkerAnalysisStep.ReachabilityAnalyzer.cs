@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Linking
             private readonly LinkerIntroductionRegistry _introductionRegistry;
             private readonly IReadOnlyDictionary<ISymbol, MethodBodyAnalysisResult> _methodBodyAnalysisResults;
 
-            public ReachabilityAnalyzer( 
+            public ReachabilityAnalyzer(
                 LinkerIntroductionRegistry introductionRegistry,
                 IReadOnlyDictionary<ISymbol, MethodBodyAnalysisResult> methodBodyAnalysisResults )
             {
@@ -38,11 +38,14 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 // Run DFS from any non-discardable declaration
-                foreach (var introducedMember in this._introductionRegistry.GetIntroducedMembers())
+                foreach ( var introducedMember in this._introductionRegistry.GetIntroducedMembers() )
                 {
-                    if ( introducedMember.Syntax.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotDiscardable ))
+                    if ( introducedMember.Syntax.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotDiscardable ) )
                     {
-                        DFS( new IntermediateSymbolSemantic( this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember ), IntermediateSymbolSemanticKind.Default ) );
+                        DFS(
+                            new IntermediateSymbolSemantic(
+                                this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember ),
+                                IntermediateSymbolSemanticKind.Default ) );
                     }
                 }
 
@@ -60,7 +63,7 @@ namespace Caravela.Framework.Impl.Linking
                     switch ( current.Symbol )
                     {
                         case IMethodSymbol method:
-                            if (method.AssociatedSymbol != null)
+                            if ( method.AssociatedSymbol != null )
                             {
                                 DFS( new IntermediateSymbolSemantic( method.AssociatedSymbol, current.Kind ) );
                             }
@@ -83,6 +86,7 @@ namespace Caravela.Framework.Impl.Linking
                         case IEventSymbol @event:
                             DFS( new IntermediateSymbolSemantic( @event.AddMethod.AssertNotNull(), current.Kind ) );
                             DFS( new IntermediateSymbolSemantic( @event.RemoveMethod.AssertNotNull(), current.Kind ) );
+
                             break;
 
                         case IFieldSymbol field:
@@ -97,7 +101,10 @@ namespace Caravela.Framework.Impl.Linking
                         if ( current.Kind == IntermediateSymbolSemanticKind.Final )
                         {
                             // Edge representing the implicit reference from final semantic to last override symbol.
-                            DFS( new IntermediateSymbolSemantic( this._introductionRegistry.GetLastOverride( current.Symbol ), IntermediateSymbolSemanticKind.Default ) );
+                            DFS(
+                                new IntermediateSymbolSemantic(
+                                    this._introductionRegistry.GetLastOverride( current.Symbol ),
+                                    IntermediateSymbolSemanticKind.Default ) );
                         }
 
                         // If the semantic is not final (original or base), there is nothing to do.
@@ -105,8 +112,8 @@ namespace Caravela.Framework.Impl.Linking
                     else
                     {
                         // Only method symbols with analysis results are taken into account.
-                        if ( current.Symbol is IMethodSymbol 
-                            && this._methodBodyAnalysisResults.TryGetValue(current.Symbol, out var analysisResult) )
+                        if ( current.Symbol is IMethodSymbol
+                             && this._methodBodyAnalysisResults.TryGetValue( current.Symbol, out var analysisResult ) )
                         {
                             // Edges representing resolved aspect references.
                             foreach ( var aspectReference in analysisResult.AspectReferences )

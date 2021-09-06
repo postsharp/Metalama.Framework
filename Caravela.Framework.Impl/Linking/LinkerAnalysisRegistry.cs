@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Linking
             IntermediateSymbolSemanticKind semantic,
             AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self )
         {
-            if ( !this._aspectReferences.TryGetValue( new AspectReferenceTarget( symbol, semantic, targetKind), out var containedReferences ) )
+            if ( !this._aspectReferences.TryGetValue( new AspectReferenceTarget( symbol, semantic, targetKind ), out var containedReferences ) )
             {
                 return Array.Empty<ResolvedAspectReference>();
             }

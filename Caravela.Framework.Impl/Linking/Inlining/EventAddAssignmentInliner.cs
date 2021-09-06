@@ -13,8 +13,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax needs to be in form: <annotated_property_expression> += value;
-            if ( aspectReference.ResolvedSemantic.Symbol is not IEventSymbol 
-                && (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol is not IEventSymbol )
+            if ( aspectReference.ResolvedSemantic.Symbol is not IEventSymbol
+                 && (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol is not IEventSymbol )
             {
                 return false;
             }

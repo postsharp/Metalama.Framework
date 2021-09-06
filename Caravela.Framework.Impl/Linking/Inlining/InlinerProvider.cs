@@ -10,28 +10,29 @@ namespace Caravela.Framework.Impl.Linking.Inlining
     {
         private readonly Inliner[] _inliners = new Inliner[]
         {
-                new MethodAssignmentInliner(),
-                new MethodLocalDeclarationInliner(),
-                new MethodReturnStatementInliner(),
-                new MethodCastReturnStatementInliner(),
-                new MethodInvocationInliner(),
-                new MethodDiscardInliner(),
-                new PropertyGetAssignmentInliner(),
-                new PropertyGetReturnInliner(),
-                new PropertyGetCastReturnInliner(),
-                new PropertyGetLocalDeclarationInliner(),
-                new PropertySetValueAssignmentInliner(),
-                new EventAddAssignmentInliner(),
-                new EventRemoveAssignmentInliner()
+            new MethodAssignmentInliner(),
+            new MethodLocalDeclarationInliner(),
+            new MethodReturnStatementInliner(),
+            new MethodCastReturnStatementInliner(),
+            new MethodInvocationInliner(),
+            new MethodDiscardInliner(),
+            new PropertyGetAssignmentInliner(),
+            new PropertyGetReturnInliner(),
+            new PropertyGetCastReturnInliner(),
+            new PropertyGetLocalDeclarationInliner(),
+            new PropertySetValueAssignmentInliner(),
+            new EventAddAssignmentInliner(),
+            new EventRemoveAssignmentInliner()
         };
 
-        public bool TryGetInliner(ResolvedAspectReference aspectReference, SemanticModel semanticModel, out Inliner? inliner)
+        public bool TryGetInliner( ResolvedAspectReference aspectReference, SemanticModel semanticModel, out Inliner? inliner )
         {
             // TODO: Optimize.
             inliner = this._inliners
                 .Where( i => i.IsValidForTargetSymbol( aspectReference.ResolvedSemantic.Symbol ) )
                 .Where( i => i.IsValidForContainingSymbol( aspectReference.ResolvedSemantic.Symbol ) )
-                .Where( i => i.CanInline( aspectReference, semanticModel ) ).SingleOrDefault();
+                .Where( i => i.CanInline( aspectReference, semanticModel ) )
+                .SingleOrDefault();
 
             return inliner != null;
         }

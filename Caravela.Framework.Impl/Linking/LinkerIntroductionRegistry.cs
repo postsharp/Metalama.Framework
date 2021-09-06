@@ -253,7 +253,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var symbol = this.GetSymbolForIntroducedMember( introducedMember );
 
-                if (this.IsOverride( symbol ) )
+                if ( this.IsOverride( symbol ) )
                 {
                     if ( returned.Add( symbol ) )
                     {

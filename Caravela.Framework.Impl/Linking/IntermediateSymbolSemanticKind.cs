@@ -21,6 +21,6 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Final version of the symbol. Relevant only for override targets.
         /// </summary>
-        Final,
+        Final
     }
 }

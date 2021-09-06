@@ -6,7 +6,7 @@ using System;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    internal struct AspectReferenceTarget : IEquatable<AspectReferenceTarget>
+    internal readonly struct AspectReferenceTarget : IEquatable<AspectReferenceTarget>
     {
         public ISymbol Symbol { get; }
 
@@ -24,8 +24,8 @@ namespace Caravela.Framework.Impl.Linking
         public bool Equals( AspectReferenceTarget other )
         {
             return SymbolEqualityComparer.Default.Equals( this.Symbol, other.Symbol )
-                && other.Semantic == this.Semantic
-                && other.TargetKind == this.TargetKind;
+                   && other.Semantic == this.Semantic
+                   && other.TargetKind == this.TargetKind;
         }
 
         public override int GetHashCode()

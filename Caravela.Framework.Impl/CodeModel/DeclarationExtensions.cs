@@ -331,8 +331,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal static bool IsEventField( this IEventSymbol symbol )
             => !symbol.IsAbstract
-               && symbol.DeclaringSyntaxReferences.All(
-                   sr => sr.GetSyntax() is VariableDeclaratorSyntax declarator );
+               && symbol.DeclaringSyntaxReferences.All( sr => sr.GetSyntax() is VariableDeclaratorSyntax );
 
         internal static IMember GetExplicitInterfaceImplementation( this IMember member )
         {

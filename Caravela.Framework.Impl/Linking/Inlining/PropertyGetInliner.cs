@@ -11,15 +11,15 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         public override bool IsValidForTargetSymbol( ISymbol symbol )
         {
             var property =
-               symbol is IPropertySymbol propertySymbol
-               ? propertySymbol
-               : symbol is IMethodSymbol { AssociatedSymbol: IPropertySymbol associatedProperty }
-                   ? associatedProperty
-                   : null;
+                symbol is IPropertySymbol propertySymbol
+                    ? propertySymbol
+                    : symbol is IMethodSymbol { AssociatedSymbol: IPropertySymbol associatedProperty }
+                        ? associatedProperty
+                        : null;
 
             return property != null
-                && property.GetMethod != null
-                && !IteratorHelper.IsIterator( property.GetMethod );
+                   && property.GetMethod != null
+                   && !IteratorHelper.IsIterator( property.GetMethod );
         }
     }
 }

@@ -67,7 +67,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             {
                 var nodeWithId = AssignNodeId( node );
 
-                this._currentTypeStack.Push(nodeWithId);
+                this._currentTypeStack.Push( nodeWithId );
                 this._currentInsertPosition = new InsertPosition( InsertPositionRelation.Within, nodeWithId );
 
                 var rewrittenNode = rewriteFunc( nodeWithId );
@@ -150,13 +150,17 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     {
                         var name = attribute.Name.ToString();
 
-                        if ( name == "PseudoNotInlineable" )
+                        switch (name)
                         {
-                            notInlineable = true;
-                        }
-                        else if ( name == "PseudoNotDiscardable" )
-                        {
-                            notDiscardable = true;
+                            case "PseudoNotInlineable":
+                                notInlineable = true;
+                                
+                                break;
+
+                            case "PseudoNotDiscardable":
+                                notDiscardable = true;
+                                
+                                break;
                         }
                     }
 
@@ -204,8 +208,8 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     if ( notInlineable || notDiscardable )
                     {
                         var flags = LinkerDeclarationFlags.None;
-                        
-                        if (notInlineable)
+
+                        if ( notInlineable )
                         {
                             flags |= LinkerDeclarationFlags.NotInlineable;
                         }
@@ -272,7 +276,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     PropertyDeclarationSyntax => DeclarationKind.Property,
                     EventDeclarationSyntax => DeclarationKind.Event,
                     EventFieldDeclarationSyntax => DeclarationKind.Event,
-                    _ => throw new AssertionFailedException(),
+                    _ => throw new AssertionFailedException()
                 };
 
                 // Create transformation fake.
@@ -286,12 +290,12 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                             .Implements<IDeclarationInternal>()
                             .Implements<ITestTransformation>();
 
-                        o = declarationKind switch
+                        _ = declarationKind switch
                         {
                             DeclarationKind.Method => o.Implements<IMethod>(),
                             DeclarationKind.Property => o.Implements<IProperty>(),
                             DeclarationKind.Event => o.Implements<IEvent>(),
-                            _ => throw new AssertionFailedException(),
+                            _ => throw new AssertionFailedException()
                         };
                     } );
 
@@ -318,6 +322,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
                     .Returns( this._currentInsertPosition!.Value.SyntaxNode != null ? GetNodeId( this._currentInsertPosition.Value.SyntaxNode ) : null );
+
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionBuilder )
                     .Returns( this._currentInsertPosition!.Value.Builder );
 
@@ -335,7 +340,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => ((ITestTransformation) transformation).IntroducedElementName ).Returns( introducedElementName );
 
                 var symbolHelperId = GetNodeId( symbolHelperDeclaration );
-                this._currentInsertPosition = new InsertPosition(InsertPositionRelation.After, (IDeclarationBuilder)transformation);
+                this._currentInsertPosition = new InsertPosition( InsertPositionRelation.After, (IDeclarationBuilder) transformation );
                 A.CallTo( () => ((ITestTransformation) transformation).SymbolHelperNodeId ).Returns( symbolHelperId );
 
                 this._observableTransformations.Add( (IObservableTransformation) transformation );
@@ -459,7 +464,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Override" );
 
-                var advice = this.CreateFakeAdvice(aspectLayer);
+                var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.Advice ).Returns( advice );
 
                 A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) )
@@ -485,6 +490,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
                     .Returns( this._currentInsertPosition!.Value.SyntaxNode != null ? GetNodeId( this._currentInsertPosition.Value.SyntaxNode ) : null );
+
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionBuilder )
                     .Returns( this._currentInsertPosition!.Value.Builder );
 
@@ -603,7 +609,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                                     v => v.WithIdentifier( Identifier( v.Identifier.ValueText + "__SymbolHelper" ) ) ) ) ) );
             }
 
-            private Advice CreateFakeAdvice(AspectLayerId aspectLayer)
+            private Advice CreateFakeAdvice( AspectLayerId aspectLayer )
             {
                 var fakeAspectSymbol = A.Fake<INamedTypeSymbol>();
                 var fakeGlobalNamespaceSymbol = A.Fake<INamespaceSymbol>();
@@ -617,19 +623,20 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
                 var aspectClass =
                     new AspectClass(
-                            this._owner.ServiceProvider,
-                            fakeAspectSymbol,
-                            null,
-                            null,
-                            typeof( object ),
-                            null,
-                            fakeDiagnosticAdder,
-                            null!,
-                            new AspectDriverFactory( this._owner.ServiceProvider, fakeCompilation, ImmutableArray<object>.Empty ) );
+                        this._owner.ServiceProvider,
+                        fakeAspectSymbol,
+                        null,
+                        null,
+                        typeof(object),
+                        null,
+                        fakeDiagnosticAdder,
+                        null!,
+                        new AspectDriverFactory( this._owner.ServiceProvider, fakeCompilation, ImmutableArray<object>.Empty ) );
 
                 var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), A.Fake<IDeclaration>(), aspectClass );
+
                 return A.Fake<Advice>( i => i.WithArgumentsForConstructor( new object?[] { fakeAspectInstance, aspectLayer, null } ) );
             }
-        }        
+        }
     }
 }

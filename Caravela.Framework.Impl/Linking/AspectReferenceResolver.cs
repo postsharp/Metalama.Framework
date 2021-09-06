@@ -5,7 +5,6 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -70,13 +69,18 @@ namespace Caravela.Framework.Impl.Linking
         private readonly IReadOnlyDictionary<AspectLayerId, int> _layerIndex;
         private readonly CompilationModel _finalCompilationModel;
 
-        public AspectReferenceResolver( LinkerIntroductionRegistry introductionRegistry, IReadOnlyList<OrderedAspectLayer> orderedAspectLayers, CompilationModel finalCompilationModel )
+        public AspectReferenceResolver(
+            LinkerIntroductionRegistry introductionRegistry,
+            IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
+            CompilationModel finalCompilationModel )
         {
             this._introductionRegistry = introductionRegistry;
-            var indexedLayers = 
-                ((IEnumerable<AspectLayerId>)new[] { AspectLayerId.Null })
-                .Concat( orderedAspectLayers.Select(x => x.AspectLayerId) )
-                .Select( ( al, i ) => (AspectLayerId: al, Index: i) );
+
+            var indexedLayers =
+                new[] { AspectLayerId.Null }
+                    .Concat( orderedAspectLayers.Select( x => x.AspectLayerId ) )
+                    .Select( ( al, i ) => (AspectLayerId: al, Index: i) )
+                    .ToList();
 
             this._orderedLayers = indexedLayers.Select( x => x.AspectLayerId ).ToReadOnlyList();
             this._layerIndex = indexedLayers.ToDictionary( x => x.AspectLayerId, x => x.Index );
@@ -113,7 +117,8 @@ namespace Caravela.Framework.Impl.Linking
 
             var containedInTargetOverride =
                 this._introductionRegistry.IsOverrideTarget( referencedSymbol )
-                && referencedDeclarationOverrides.Any( x => SymbolEqualityComparer.Default.Equals( this._introductionRegistry.GetSymbolForIntroducedMember( x ), containingSymbol ) );
+                && referencedDeclarationOverrides.Any(
+                    x => SymbolEqualityComparer.Default.Equals( this._introductionRegistry.GetSymbolForIntroducedMember( x ), containingSymbol ) );
 
             // TODO: Optimize (most of this can be precomputed).
             // TODO: Support multiple overrides in the same layer (the memberIndex has to be determined).
@@ -122,23 +127,26 @@ namespace Caravela.Framework.Impl.Linking
             //  * Otherwise, treat the reference as coming from the last override of the declaration.
             var annotationLayerIndex =
                 containedInTargetOverride
-                ? new MemberLayerIndex( 
-                    this._layerIndex[referenceSpecification.AspectLayerId],
-                    referencedDeclarationOverrides
-                        .Where( x => x.AspectLayerId == referenceSpecification.AspectLayerId )
-                        .Select( (x, i) => (Symbol: x, Index: i+1))
-                        .Single( x => 
-                            SymbolEqualityComparer.Default.Equals( 
-                                this._introductionRegistry.GetSymbolForIntroducedMember( x.Symbol ), containingSymbol) ).Index )
-                : new MemberLayerIndex( 
-                    this._layerIndex[referenceSpecification.AspectLayerId],
-                    referencedDeclarationOverrides.Count( x => x.AspectLayerId == referenceSpecification.AspectLayerId ));
+                    ? new MemberLayerIndex(
+                        this._layerIndex[referenceSpecification.AspectLayerId],
+                        referencedDeclarationOverrides
+                            .Where( x => x.AspectLayerId == referenceSpecification.AspectLayerId )
+                            .Select( ( x, i ) => (Symbol: x, Index: i + 1) )
+                            .Single(
+                                x =>
+                                    SymbolEqualityComparer.Default.Equals(
+                                        this._introductionRegistry.GetSymbolForIntroducedMember( x.Symbol ),
+                                        containingSymbol ) )
+                            .Index )
+                    : new MemberLayerIndex(
+                        this._layerIndex[referenceSpecification.AspectLayerId],
+                        referencedDeclarationOverrides.Count( x => x.AspectLayerId == referenceSpecification.AspectLayerId ) );
 
             // If the override target was introduced, determine the index.
             var targetMemberIntroduction = this._introductionRegistry.GetIntroducedMemberForSymbol( referencedSymbol );
             var targetMemberIntroductionIndex = GetIntroductionLogicalIndex( targetMemberIntroduction );
 
-            MemberLayerIndex? GetIntroductionLogicalIndex( LinkerIntroducedMember? introducedMember)
+            MemberLayerIndex? GetIntroductionLogicalIndex( LinkerIntroducedMember? introducedMember )
             {
                 // This supports only field promotions.
                 if ( introducedMember == null )
@@ -151,24 +159,26 @@ namespace Caravela.Framework.Impl.Linking
                     if ( replaceMember.ReplacedMember.Resolve( this._finalCompilationModel ) is ITransformation replacedTransformation )
                     {
                         // This is introduced field, which is then promoted. Semantics of the field and of the property are the same.
-                        return new MemberLayerIndex(this._layerIndex[replacedTransformation.Advice.AspectLayerId], 0);
+                        return new MemberLayerIndex( this._layerIndex[replacedTransformation.Advice.AspectLayerId], 0 );
                     }
                     else
                     {
                         // This is promoted source declaration we treat it as being present from the beginning.
-                        return new MemberLayerIndex(0, 0);
+                        return new MemberLayerIndex( 0, 0 );
                     }
                 }
 
-                return new MemberLayerIndex( this._layerIndex[introducedMember.AspectLayerId], 0);
+                return new MemberLayerIndex( this._layerIndex[introducedMember.AspectLayerId], 0 );
             }
 
             // Compute indices of overrides of the referenced declaration.
             var overrideIndices =
                 (from overrideIntroduction in referencedDeclarationOverrides
-                 group overrideIntroduction by overrideIntroduction.AspectLayerId into g
-                 select g.Select( ( o, i ) => (Index: new MemberLayerIndex( this._layerIndex[o.AspectLayerId], i+1 ), Override: o) )
-                 ).SelectMany( g => g ).ToReadOnlyList();
+                 group overrideIntroduction by overrideIntroduction.AspectLayerId
+                 into g
+                 select g.Select( ( o, i ) => (Index: new MemberLayerIndex( this._layerIndex[o.AspectLayerId], i + 1 ), Override: o) )
+                ).SelectMany( g => g )
+                .ToReadOnlyList();
 
             MemberLayerIndex resolvedIndex;
             LinkerIntroducedMember? resolvedIntroducedMember = null;
@@ -177,19 +187,20 @@ namespace Caravela.Framework.Impl.Linking
             {
                 case AspectReferenceOrder.Original:
                     resolvedIndex = default;
+
                     break;
 
                 case AspectReferenceOrder.Base:
                     // TODO: optimize.
 
-                    var lowerOverride = overrideIndices.Where( x => x.Index < annotationLayerIndex ).LastOrDefault();
+                    var lowerOverride = overrideIndices.LastOrDefault( x => x.Index < annotationLayerIndex );
 
-                    if (lowerOverride.Override != null)
+                    if ( lowerOverride.Override != null )
                     {
                         resolvedIndex = lowerOverride.Index;
                         resolvedIntroducedMember = lowerOverride.Override;
                     }
-                    else if ( targetMemberIntroductionIndex != null && targetMemberIntroductionIndex.Value < annotationLayerIndex)
+                    else if ( targetMemberIntroductionIndex != null && targetMemberIntroductionIndex.Value < annotationLayerIndex )
                     {
                         resolvedIndex = targetMemberIntroductionIndex.Value;
                         resolvedIntroducedMember = targetMemberIntroduction;
@@ -204,7 +215,7 @@ namespace Caravela.Framework.Impl.Linking
                 case AspectReferenceOrder.Self:
                     // TODO: optimize.
 
-                    var lowerOrEqualOverride = overrideIndices.Where( x => x.Index <= annotationLayerIndex ).LastOrDefault();
+                    var lowerOrEqualOverride = overrideIndices.LastOrDefault( x => x.Index <= annotationLayerIndex );
 
                     if ( lowerOrEqualOverride.Override != null )
                     {
@@ -224,8 +235,8 @@ namespace Caravela.Framework.Impl.Linking
                     break;
 
                 case AspectReferenceOrder.Final:
-                    var lastOverride = overrideIndices.LastOrDefault();
-                    resolvedIndex = new MemberLayerIndex(this._orderedLayers.Count, 0);
+                    resolvedIndex = new MemberLayerIndex( this._orderedLayers.Count, 0 );
+
                     break;
 
                 default:
@@ -237,10 +248,10 @@ namespace Caravela.Framework.Impl.Linking
                 // Field symbols are resolved to themselves (this may be temporary).
                 var fieldSemantic =
                     targetMemberIntroduction == null
-                    ? IntermediateSymbolSemanticKind.Default
-                    : resolvedIndex < targetMemberIntroductionIndex
-                        ? IntermediateSymbolSemanticKind.Base
-                        : IntermediateSymbolSemanticKind.Default;
+                        ? IntermediateSymbolSemanticKind.Default
+                        : resolvedIndex < targetMemberIntroductionIndex
+                            ? IntermediateSymbolSemanticKind.Base
+                            : IntermediateSymbolSemanticKind.Default;
 
                 return new ResolvedAspectReference(
                     containingSymbol,
@@ -250,20 +261,20 @@ namespace Caravela.Framework.Impl.Linking
                     referenceSpecification );
             }
 
-            if ( targetMemberIntroduction?.Introduction is IReplaceMember replaceMember )
+            if ( targetMemberIntroduction?.Introduction is IReplaceMember )
             {
                 return new ResolvedAspectReference(
-                   containingSymbol,
-                   referencedSymbol,
-                   new IntermediateSymbolSemantic( referencedSymbol, IntermediateSymbolSemanticKind.Default ),
-                   expression,
-                   referenceSpecification );
+                    containingSymbol,
+                    referencedSymbol,
+                    new IntermediateSymbolSemantic( referencedSymbol, IntermediateSymbolSemanticKind.Default ),
+                    expression,
+                    referenceSpecification );
             }
 
             // At this point resolvedIndex should be 0, equal to target introduction index, this._orderedLayers.Count or be equal to index of one of the overrides.
-            Invariant.Assert( 
+            Invariant.Assert(
                 resolvedIndex == default
-                || resolvedIndex == new MemberLayerIndex(this._orderedLayers.Count, 0) 
+                || resolvedIndex == new MemberLayerIndex( this._orderedLayers.Count, 0 )
                 || overrideIndices.Any( x => x.Index == resolvedIndex )
                 || resolvedIndex == targetMemberIntroductionIndex );
 
@@ -275,8 +286,8 @@ namespace Caravela.Framework.Impl.Linking
                     return new ResolvedAspectReference(
                         containingSymbol,
                         referencedSymbol,
-                        new IntermediateSymbolSemantic( 
-                            referencedSymbol, 
+                        new IntermediateSymbolSemantic(
+                            referencedSymbol,
                             IntermediateSymbolSemanticKind.Default ),
                         expression,
                         referenceSpecification );
@@ -291,7 +302,7 @@ namespace Caravela.Framework.Impl.Linking
                             containingSymbol,
                             referencedSymbol,
                             new IntermediateSymbolSemantic(
-                                GetOverriddenSymbol(referencedSymbol).AssertNotNull(),
+                                GetOverriddenSymbol( referencedSymbol ).AssertNotNull(),
                                 IntermediateSymbolSemanticKind.Default ),
                             expression,
                             referenceSpecification );
@@ -310,20 +321,20 @@ namespace Caravela.Framework.Impl.Linking
                     }
                 }
             }
-            else if ( resolvedIndex == targetMemberIntroductionIndex)
+            else if ( resolvedIndex == targetMemberIntroductionIndex )
             {
                 // We have resolved to the target member introduction.
                 // The only way to get here is using "Base" order in the first override.
                 if ( HasImplicitImplementation( referencedSymbol ) )
                 {
                     return new ResolvedAspectReference(
-                    containingSymbol,
-                    referencedSymbol,
-                    new IntermediateSymbolSemantic(
+                        containingSymbol,
                         referencedSymbol,
-                        IntermediateSymbolSemanticKind.Default ),
-                    expression,
-                    referenceSpecification );
+                        new IntermediateSymbolSemantic(
+                            referencedSymbol,
+                            IntermediateSymbolSemanticKind.Default ),
+                        expression,
+                        referenceSpecification );
                 }
                 else
                 {
@@ -353,7 +364,7 @@ namespace Caravela.Framework.Impl.Linking
                     }
                 }
             }
-            else if ( resolvedIndex.LayerIndex < this._orderedLayers.Count)
+            else if ( resolvedIndex.LayerIndex < this._orderedLayers.Count )
             {
                 // One of the overrides or the introduced member.
                 if ( targetMemberIntroduction != null && resolvedIndex.MemberIndex == 0 )
@@ -383,23 +394,24 @@ namespace Caravela.Framework.Impl.Linking
             else
             {
                 return new ResolvedAspectReference(
-                containingSymbol,
-                referencedSymbol,
-                new IntermediateSymbolSemantic(
+                    containingSymbol,
                     referencedSymbol,
-                    IntermediateSymbolSemanticKind.Final ),
-                expression,
-                referenceSpecification );
+                    new IntermediateSymbolSemantic(
+                        referencedSymbol,
+                        IntermediateSymbolSemanticKind.Final ),
+                    expression,
+                    referenceSpecification );
             }
         }
 
-        private static bool HasImplicitImplementation(ISymbol symbol)
+        private static bool HasImplicitImplementation( ISymbol symbol )
         {
             switch ( symbol )
             {
                 case IPropertySymbol property when property.IsAutoProperty():
                 case IEventSymbol @event when @event.IsExplicitInterfaceEventField() || @event.IsEventField():
                     return true;
+
                 default:
                     return false;
             }
@@ -415,16 +427,17 @@ namespace Caravela.Framework.Impl.Linking
         {
             var symbol = this._introductionRegistry.GetSymbolForIntroducedMember( resolvedIntroduction );
 
-            return GetCorrespodingSymbolForResolvedSymbol( referencedSymbol, symbol );
+            return GetCorrespondingSymbolForResolvedSymbol( referencedSymbol, symbol );
         }
 
-        private static ISymbol? GetOverriddenSymbol( ISymbol symbol ) => symbol switch
-        {
-            IMethodSymbol methodSymbol => methodSymbol.OverriddenMethod,
-            IPropertySymbol propertySymbol => propertySymbol.OverriddenProperty,
-            IEventSymbol eventSymbol => eventSymbol.OverriddenEvent,
-            _ => throw new AssertionFailedException(),
-        };
+        private static ISymbol? GetOverriddenSymbol( ISymbol symbol )
+            => symbol switch
+            {
+                IMethodSymbol methodSymbol => methodSymbol.OverriddenMethod,
+                IPropertySymbol propertySymbol => propertySymbol.OverriddenProperty,
+                IEventSymbol eventSymbol => eventSymbol.OverriddenEvent,
+                _ => throw new AssertionFailedException()
+            };
 
         /// <summary>
         /// Gets a symbol that corresponds to the referenced symbol for the resolved symbol. 
@@ -433,7 +446,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <param name="referencedSymbol"></param>
         /// <param name="resolvedSymbol"></param>
         /// <returns></returns>
-        private static ISymbol GetCorrespodingSymbolForResolvedSymbol( ISymbol referencedSymbol, ISymbol resolvedSymbol )
+        private static ISymbol GetCorrespondingSymbolForResolvedSymbol( ISymbol referencedSymbol, ISymbol resolvedSymbol )
         {
             switch (referencedSymbol, resolvedSymbol)
             {
@@ -463,13 +476,13 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private struct MemberLayerIndex : IComparable<MemberLayerIndex>, IEquatable<MemberLayerIndex>
+        private readonly struct MemberLayerIndex : IComparable<MemberLayerIndex>, IEquatable<MemberLayerIndex>
         {
             public int LayerIndex { get; }
 
             public int MemberIndex { get; }
 
-            public MemberLayerIndex(int layerIndex, int memberIndex)
+            public MemberLayerIndex( int layerIndex, int memberIndex )
             {
                 this.LayerIndex = layerIndex;
                 this.MemberIndex = memberIndex;
