@@ -149,11 +149,14 @@ namespace Caravela.Framework.Impl
                     if ( members.TryGetValue( memberName, out var existingMember ) && !memberSymbol.IsOverride &&
                          !existingMember.TemplateInfo.IsNone )
                     {
+                        // Note we cannot get here when the member is defined in the same type because the compile-time assembly creation
+                        // would have failed. The
+                        
                         // The template is already defined and we are not overwriting a template of the base class.
                         diagnosticAdder.Report(
-                            GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefined.CreateDiagnostic(
+                            GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefinedInBaseClass.CreateDiagnostic(
                                 memberSymbol.GetDiagnosticLocation(),
-                                (memberSymbol, existingMember.AspectClass.FullName) ) );
+                                (memberName, type.Name, existingMember.AspectClass.AspectType.Name) ) );
 
                         continue;
                     }

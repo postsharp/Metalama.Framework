@@ -13,6 +13,7 @@ using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using PostSharp.Aspects.Advices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,6 +40,8 @@ namespace Caravela.Framework.Impl.CompileTime
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
             private Context _currentContext;
+            private HashSet<string>? _currentTypeTemplateNames;
+            private string? _currentTypeName;
 
             public bool Success { get; private set; } = true;
 
@@ -105,6 +108,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
+            
             private T? VisitTypeDeclaration<T>( T node )
                 where T : TypeDeclarationSyntax
             {
@@ -121,6 +125,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 else
                 {
                     this.FoundCompileTimeCode = true;
+
+                    this._currentTypeTemplateNames = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
+                    this._currentTypeName = symbol.Name;
 
                     // Add type members.
 
@@ -213,6 +220,26 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
+            private bool CheckTemplateName( ISymbol symbol )
+            {
+                if ( this._currentTypeTemplateNames!.Add( symbol.Name ) )
+                {
+                    // It's the first time we're seeing this name.
+                    return true;
+                }
+                else
+                {
+                    this.Success = false;
+                    
+                    this._diagnosticAdder.Report(
+                        GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefined.CreateDiagnostic(
+                            symbol.GetDiagnosticLocation(),
+                            (symbol.Name, this._currentTypeName!) ) );
+
+                    return false;
+                }
+            }
+
             private new IEnumerable<MethodDeclarationSyntax> VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
                 var methodSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
@@ -221,6 +248,11 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     yield return (MethodDeclarationSyntax) base.VisitMethodDeclaration( node ).AssertNotNull();
 
+                    yield break;
+                }
+
+                if ( !this.CheckTemplateName( methodSymbol ) )
+                {
                     yield break;
                 }
 
@@ -384,12 +416,18 @@ namespace Caravela.Framework.Impl.CompileTime
 
             private new IEnumerable<MemberDeclarationSyntax> VisitEventDeclaration( EventDeclarationSyntax node )
             {
+                
                 var eventSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
                 if ( this.SymbolClassifier.GetTemplateInfo( eventSymbol ).IsNone )
                 {
                     yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
 
+                    yield break;
+                }
+                
+                if ( !this.CheckTemplateName( eventSymbol ) )
+                {
                     yield break;
                 }
 
