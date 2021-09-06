@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl
             }
 #endif
 
-            return obj;
+            return obj!;
         }
 
         /// <summary>
