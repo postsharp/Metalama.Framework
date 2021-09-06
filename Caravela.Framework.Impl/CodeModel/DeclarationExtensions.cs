@@ -174,7 +174,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
                 else
                 {
-                    if ( parameter.IsOut() || parameter.IsRef() )
+                    if ( parameter.RefKind is RefKind.Out or RefKind.Ref )
                     {
                         // With out and ref parameters, we unconditionally add the out or ref modifier, and "hope" the code will later compile.
                         // We also intentionally omit to cast the value since it would be illegal.
@@ -187,7 +187,7 @@ namespace Caravela.Framework.Impl.CodeModel
                                     (arg.Syntax.ToString(), parameter.Name, parameter.DeclaringMember) ) );
                         }
 
-                        var syntax = parameter.IsRef() ? SyntaxKind.RefKeyword : SyntaxKind.OutKeyword;
+                        var syntax = parameter.RefKind is RefKind.Ref ? SyntaxKind.RefKeyword : SyntaxKind.OutKeyword;
 
                         argument = SyntaxFactory.Argument( null, SyntaxFactory.Token( syntax ), arg.Syntax );
                     }
