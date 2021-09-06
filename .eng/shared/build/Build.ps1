@@ -77,6 +77,10 @@ function CheckPrerequisities() {
 }
 
 function Clean() {
+
+    & dotnet clean -p:Configuration=$configuration 
+    if ($LASTEXITCODE -ne 0 ) { throw "Clean failed." }
+
     if (Test-Path "artifacts\bin\Debug" -PathType Container ) {
         Remove-Item "artifacts\bin\Debug\*.nupkg"
     }
@@ -166,7 +170,7 @@ function Test() {
         & ./.eng/shared/tools/Build.ps1
     
         # Executing tests with code coverage enabled.
-        & dotnet test -p:CollectCoverage=True -p:CoverletOutput="$testResultsDir\" -m:1 --nologo --no-restore
+        & dotnet test -p:CollectCoverage=True -p:CoverletOutput="$testResultsDir\" -p:Configuration=$configuration -m:1 --nologo --no-restore
         if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
     
         # Detect gaps in code coverage.
@@ -174,7 +178,7 @@ function Test() {
         if ($LASTEXITCODE -ne 0 ) { throw "Test coverage has gaps." }
     } else {
         # Executing tests without test coverage
-        & dotnet test --nologo --no-restore
+        & dotnet test  -p:Configuration=$configuration --nologo --no-restore
         if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
     }
 
