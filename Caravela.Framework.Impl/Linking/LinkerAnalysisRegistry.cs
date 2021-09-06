@@ -14,20 +14,17 @@ namespace Caravela.Framework.Impl.Linking
     /// </summary>
     internal class LinkerAnalysisRegistry
     {
-        private readonly LinkerIntroductionRegistry _introductionRegistry;
         private readonly IReadOnlyDictionary<ISymbol, MethodBodyAnalysisResult> _methodBodyInfos;
         private readonly IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> _aspectReferences;
         private readonly HashSet<IntermediateSymbolSemantic> _reachableSymbolSemantics;
         private readonly IDictionary<IntermediateSymbolSemantic, SymbolInliningSpecification> _inliningSpecifications;
 
         public LinkerAnalysisRegistry(
-            LinkerIntroductionRegistry introductionRegistry,
             IReadOnlyDictionary<ISymbol, MethodBodyAnalysisResult> methodBodyInfos,
             IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> aspectReferenceIndex,
             IReadOnlyList<IntermediateSymbolSemantic> reachableSymbolSemantics,
             IReadOnlyList<SymbolInliningSpecification> inliningSpecifications )
         {
-            this._introductionRegistry = introductionRegistry;
             this._methodBodyInfos = methodBodyInfos;
             this._aspectReferences = aspectReferenceIndex;
             this._reachableSymbolSemantics = new HashSet<IntermediateSymbolSemantic>( reachableSymbolSemantics );

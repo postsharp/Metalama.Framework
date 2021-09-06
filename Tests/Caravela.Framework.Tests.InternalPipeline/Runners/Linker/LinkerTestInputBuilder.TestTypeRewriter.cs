@@ -150,7 +150,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     {
                         var name = attribute.Name.ToString();
 
-                        switch (name)
+                        switch ( name )
                         {
                             case "PseudoNotInlineable":
                                 notInlineable = true;

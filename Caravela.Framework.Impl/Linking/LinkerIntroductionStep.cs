@@ -232,7 +232,7 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         yield return current;
 
-                        if ( !currentEnumerator!.Value.MoveNext() )
+                        if ( !currentEnumerator.Value.MoveNext() )
                         {
                             var toRemove = currentEnumerator;
                             currentEnumerator = currentEnumerator.Next;
@@ -244,7 +244,7 @@ namespace Caravela.Framework.Impl.Linking
                         current = currentEnumerator.Value.Current;
                     }
 
-                    currentEnumerator = currentEnumerator!.Next;
+                    currentEnumerator = currentEnumerator.Next;
                 }
                 while ( currentEnumerator != null );
             }

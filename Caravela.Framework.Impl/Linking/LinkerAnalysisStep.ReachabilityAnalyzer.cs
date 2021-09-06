@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.Linking
                 // Run DFS from each overridden member's final semantic.
                 foreach ( var overriddenMember in this._introductionRegistry.GetOverriddenMembers() )
                 {
-                    DFS( new IntermediateSymbolSemantic( overriddenMember, IntermediateSymbolSemanticKind.Final ) );
+                    DepthFirstSearch( new IntermediateSymbolSemantic( overriddenMember, IntermediateSymbolSemanticKind.Final ) );
                 }
 
                 // Run DFS from any non-discardable declaration
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     if ( introducedMember.Syntax.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotDiscardable ) )
                     {
-                        DFS(
+                        DepthFirstSearch(
                             new IntermediateSymbolSemantic(
                                 this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember ),
                                 IntermediateSymbolSemanticKind.Default ) );
@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 return visited.ToList();
 
-                void DFS( IntermediateSymbolSemantic current )
+                void DepthFirstSearch( IntermediateSymbolSemantic current )
                 {
                     // TODO: Some edges we are walking
                     if ( !visited.Add( current ) )
@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.Linking
                         case IMethodSymbol method:
                             if ( method.AssociatedSymbol != null )
                             {
-                                DFS( new IntermediateSymbolSemantic( method.AssociatedSymbol, current.Kind ) );
+                                DepthFirstSearch( new IntermediateSymbolSemantic( method.AssociatedSymbol, current.Kind ) );
                             }
 
                             break;
@@ -73,23 +73,23 @@ namespace Caravela.Framework.Impl.Linking
                         case IPropertySymbol property:
                             if ( property.GetMethod != null )
                             {
-                                DFS( new IntermediateSymbolSemantic( property.GetMethod, current.Kind ) );
+                                DepthFirstSearch( new IntermediateSymbolSemantic( property.GetMethod, current.Kind ) );
                             }
 
                             if ( property.SetMethod != null )
                             {
-                                DFS( new IntermediateSymbolSemantic( property.SetMethod, current.Kind ) );
+                                DepthFirstSearch( new IntermediateSymbolSemantic( property.SetMethod, current.Kind ) );
                             }
 
                             break;
 
                         case IEventSymbol @event:
-                            DFS( new IntermediateSymbolSemantic( @event.AddMethod.AssertNotNull(), current.Kind ) );
-                            DFS( new IntermediateSymbolSemantic( @event.RemoveMethod.AssertNotNull(), current.Kind ) );
+                            DepthFirstSearch( new IntermediateSymbolSemantic( @event.AddMethod.AssertNotNull(), current.Kind ) );
+                            DepthFirstSearch( new IntermediateSymbolSemantic( @event.RemoveMethod.AssertNotNull(), current.Kind ) );
 
                             break;
 
-                        case IFieldSymbol field:
+                        case IFieldSymbol:
                             break;
 
                         default:
@@ -101,7 +101,7 @@ namespace Caravela.Framework.Impl.Linking
                         if ( current.Kind == IntermediateSymbolSemanticKind.Final )
                         {
                             // Edge representing the implicit reference from final semantic to last override symbol.
-                            DFS(
+                            DepthFirstSearch(
                                 new IntermediateSymbolSemantic(
                                     this._introductionRegistry.GetLastOverride( current.Symbol ),
                                     IntermediateSymbolSemanticKind.Default ) );
@@ -118,7 +118,7 @@ namespace Caravela.Framework.Impl.Linking
                             // Edges representing resolved aspect references.
                             foreach ( var aspectReference in analysisResult.AspectReferences )
                             {
-                                DFS( aspectReference.ResolvedSemantic );
+                                DepthFirstSearch( aspectReference.ResolvedSemantic );
                             }
                         }
                     }

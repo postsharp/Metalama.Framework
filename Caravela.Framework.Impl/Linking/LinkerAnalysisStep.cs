@@ -67,7 +67,6 @@ namespace Caravela.Framework.Impl.Linking
             var inliningSpecifications = inlineabilityAnalyzer.GetInlineableSymbols().ToList();
 
             var analysisRegistry = new LinkerAnalysisRegistry(
-                input.IntroductionRegistry,
                 methodBodyAnalysisResults,
                 aspectReferenceIndex,
                 reachableSemantics,
