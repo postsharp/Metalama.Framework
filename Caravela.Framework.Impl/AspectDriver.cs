@@ -59,6 +59,8 @@ namespace Caravela.Framework.Impl
                 IField field => this.EvaluateAspect( field, aspectInstance, compilationModelRevision, cancellationToken ),
                 IProperty property => this.EvaluateAspect( property, aspectInstance, compilationModelRevision, cancellationToken ),
                 IConstructor constructor => this.EvaluateAspect( constructor, aspectInstance, compilationModelRevision, cancellationToken ),
+                IParameter parameter => this.EvaluateAspect( parameter, aspectInstance, compilationModelRevision, cancellationToken ),
+                IGenericParameter genericParameter => this.EvaluateAspect( genericParameter, aspectInstance, compilationModelRevision, cancellationToken ),
                 IEvent @event => this.EvaluateAspect( @event, aspectInstance, compilationModelRevision, cancellationToken ),
                 _ => throw new NotImplementedException()
             };
