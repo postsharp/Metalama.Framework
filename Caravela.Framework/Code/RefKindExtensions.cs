@@ -1,3 +1,4 @@
+using Caravela.Framework.Aspects;
 using System;
 
 namespace Caravela.Framework.Code
@@ -6,6 +7,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Extension methods for <see cref="RefKind"/>.
     /// </summary>
+    [CompileTimeOnly]
     public static class RefKindExtensions
     {
         // Coverage: ignore

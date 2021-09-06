@@ -19,13 +19,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         {
             this._arrayBuilder = arrayBuilder;
 
-            this._itemType = this._arrayBuilder.ItemType switch
-            {
-                IType ourType => ourType,
-                Type reflectionType => compilation.TypeFactory.GetTypeByReflectionType( reflectionType ),
-                _ => throw new AssertionFailedException()
-            };
-
+            this._itemType = this._arrayBuilder.ItemType;
             this.ExpressionType = this._itemType.MakeArrayType();
         }
 

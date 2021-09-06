@@ -61,13 +61,13 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogA
             {
                 string comma = i > 0 ? ", " : "";
 
-                if (p.IsOut())
+                if (p.RefKind.IsReadable())
                 {
-                    stringBuilder.Append($"{comma}{p.Name} = <out> ");
+                    stringBuilder.Append( $"{comma}{{{i}}}" );
                 }
                 else
                 {
-                    stringBuilder.Append($"{comma}{{{i}}}");
+                    stringBuilder.Append( $"{comma}{p.Name} = <out> " );
                 }
 
                 i++;

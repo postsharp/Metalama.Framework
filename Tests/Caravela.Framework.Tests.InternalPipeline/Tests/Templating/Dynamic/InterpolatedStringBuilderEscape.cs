@@ -6,7 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Syntax;
 using Caravela.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.InterpolatedStringBuilderT
+namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.InterpolatedStringBuilderEscape
 {
     [CompileTime]
     class Aspect
@@ -14,19 +14,19 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.InterpolatedSt
         [TestTemplate]
         dynamic? Template()
         {
-            var s = new InterpolatedStringBuilder();
-            s.AddText( meta.Target.Method.Name + "(" );
+        
+            // Normal literals.
+            Console.WriteLine("\\\n{}\"");
+            Console.WriteLine( meta.CompileTime( "\\" + "\n{}\"" ));
             
-            foreach ( var p in meta.Target.Parameters )
-            {
-                if ( p.Index > 0 )
-                {
-                    s.AddText(", ");
-                }
-                s.AddText( $"{p.Name}=" );
-                s.AddExpression(p.Value);
-            }
-            s.AddText(")");
+        
+            // Interpolated string.
+            var s = new InterpolatedStringBuilder();
+            s.AddText( "{" );
+            s.AddText( "$" );
+            s.AddText( "\\" );
+            s.AddText( "\n" );
+            s.AddText("}");
             
             var a = s.ToInterpolatedString();
             return default;

@@ -6,6 +6,7 @@ using Caravela.Framework.Code.Syntax;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -77,7 +78,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             // Make sure all necessary assemblies are loaded in the current AppDomain.
             _ = new AspectWeaverAttribute( null! );
-            _ = ArrayBuilder.Create();
+            _ = new[]{ 1, 2,3 }.Buffer();
 
             // Get our public API assembly in its .NET Standard 2.0 build.
             var frameworkAssemblyReference = (MetadataReference)
