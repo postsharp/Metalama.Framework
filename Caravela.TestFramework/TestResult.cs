@@ -204,7 +204,7 @@ namespace Caravela.TestFramework
 
         private string? GetTextUnderDiagnostic( Diagnostic diagnostic )
         {
-            var syntaxTree = diagnostic.Location!.SourceTree;
+            var syntaxTree = diagnostic.Location.SourceTree;
 
             if ( syntaxTree == null )
             {

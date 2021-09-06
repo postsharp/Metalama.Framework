@@ -12,7 +12,7 @@ using Xunit;
 
 #pragma warning disable CA1018 // Mark attributes with AttributeUsageAttribute
 
-namespace Caravela.Framework.Tests.UnitTests
+namespace Caravela.Framework.Tests.UnitTests.CompileTime
 {
     public class AttributeDeserializerTests : TestBase
     {
@@ -25,7 +25,7 @@ namespace Caravela.Framework.Tests.UnitTests
 
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null )
         {
-            var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestAttribute( {property} = {value} )]";
+            var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( {property} = {value} )]";
             var compilation = CreateCompilationModel( code, dependentCode );
 
             using UnloadableCompileTimeDomain domain = new();
@@ -65,19 +65,19 @@ namespace Caravela.Framework.Tests.UnitTests
                 TestEnum.A,
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.EnumProperty),
-                    "Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum.A" ) );
+                    "Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum.A" ) );
 
             Assert.Equal(
                 TestEnum.A,
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.ObjectProperty),
-                    "Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum.A" ) );
+                    "Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum.A" ) );
 
             Assert.Equal(
                 new[] { TestEnum.A },
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.EnumArrayProperty),
-                    "new[]{Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum.A}" ) );
+                    "new[]{Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum.A}" ) );
         }
 
         [Fact]
@@ -89,19 +89,19 @@ namespace Caravela.Framework.Tests.UnitTests
                 typeof(TestEnum),
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.TypeProperty),
-                    "typeof(Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum)" ) );
+                    "typeof(Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum)" ) );
 
             Assert.Equal(
                 new[] { typeof(TestEnum), typeof(int) },
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.TypeArrayProperty),
-                    "new[]{typeof(Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum),typeof(int)}" ) );
+                    "new[]{typeof(Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum),typeof(int)}" ) );
 
             Assert.Equal(
                 new[] { typeof(TestEnum), typeof(int) },
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.ObjectArrayProperty),
-                    "new[]{typeof(Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestEnum),typeof(int)}" ) );
+                    "new[]{typeof(Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum),typeof(int)}" ) );
         }
 
         [Fact]
@@ -120,7 +120,7 @@ namespace Caravela.Framework.Tests.UnitTests
         {
             object Deserialize( string args )
             {
-                var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestParamsAttribute( {args} )]";
+                var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestParamsAttribute( {args} )]";
                 var compilation = CreateCompilationModel( code );
 
                 using UnloadableCompileTimeDomain domain = new();

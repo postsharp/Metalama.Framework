@@ -8,7 +8,7 @@ using Caravela.Framework.Impl.CompileTime;
 using System.Linq;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests
+namespace Caravela.Framework.Tests.UnitTests.Templating
 {
     public class SymbolClassifierTests : TestBase
     {

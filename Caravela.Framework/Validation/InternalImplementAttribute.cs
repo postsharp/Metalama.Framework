@@ -5,7 +5,6 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Eligibility;
 using System;
-using System.Collections.Generic;
 
 #pragma warning disable 618 // Not implemented
 
@@ -20,15 +19,19 @@ namespace Caravela.Framework.Validation
     public class InternalImplementAttribute : Attribute, IAspect<INamedType>
     {
         public void BuildEligibility( IEligibilityBuilder<INamedType> builder )
-        {
-            builder.MustHaveAccessibility( Accessibility.Public );
-        }
+            =>
+
+                // Coverage: Ignore
+                builder.MustHaveAccessibility( Accessibility.Public );
 
         public void BuildAspect( IAspectBuilder<INamedType> builder )
         {
+            /*
             builder.AddReferenceValidator<INamedType, Validator>( builder.Target, new[] { DeclarationReferenceKind.ImplementsInterface } );
+            */
         }
 
+        /*
         private class Validator : IDeclarationReferenceValidator<INamedType>
         {
             public void Initialize( IReadOnlyDictionary<string, string> properties ) { }
@@ -41,6 +44,8 @@ namespace Caravela.Framework.Validation
                 }
             }
         }
+        
+        */
 
         public void BuildAspectClass( IAspectClassBuilder builder ) { }
     }

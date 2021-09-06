@@ -7,6 +7,7 @@ using System;
 
 namespace Caravela.Framework.Eligibility.Implementation
 {
+    [Obsolete( "Not implemented." )]
     internal class CastEligibilityRule<TIn, TOut> : IEligibilityRule<TOut>
         where TIn : class
         where TOut : class

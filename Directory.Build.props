@@ -1,86 +1,13 @@
 <Project>
 
-    <Import Project="Versions.props" />
-    <Import Project="Directories.props" />
-
-    <PropertyGroup>
-        <ContinuousIntegrationBuild Condition="'$(TEAMCITY_VERSION)'!=''">true</ContinuousIntegrationBuild>
-        <Obfuscate Condition="'$(Obfuscate)'=='' AND '$(Configuration)'=='Release'">True</Obfuscate>
-    </PropertyGroup>
-
-    <!-- Properties of NuGet packages-->
-    <PropertyGroup>
-        <Authors>PostSharp Technologies</Authors>
-        <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
-        <PackageTags>PostSharp Caravela AOP</PackageTags>
-        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-        <PackageIcon>PostSharpIcon.png</PackageIcon>
-        <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-    </PropertyGroup>
-
-    <!-- Additional content of NuGet packages -->
-    <ItemGroup>
-        <None Include="$(MSBuildThisFileDirectory)PostSharpIcon.png" Visible="false" Pack="true" PackagePath="" />
-        <None Include="$(MSBuildThisFileDirectory)LICENSE.md" Visible="false" Pack="true" PackagePath="" />
-        <None Include="$(MSBuildThisFileDirectory)THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
-    </ItemGroup>
-
-    <!-- C# Compiler options-->
-    <PropertyGroup>
-        <LangVersion>latest</LangVersion>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
-
-    <!-- Code quality and documentation -->
-    <PropertyGroup Condition="'$(DisableCodeQuality)'!='True'">
-        <EnableNETAnalyzers>true</EnableNETAnalyzers>
-        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
-        <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
-        <!-- Disable XML doc warnings for now -->
-        <NoWarn>1591,1572,1573</NoWarn>
-        <WarningLevel>4</WarningLevel>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(DisableCodeQuality)'!='True' AND '$(ContinuousIntegrationBuild)'=='True'">
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    </PropertyGroup>
-    <ItemGroup Condition="'$(DisableCodeQuality)'!='True'">
-        <!-- Beta version fixes issue with record parameter names -->
-        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354"
-                          Condition="'$(EnforceCodeStyleInBuild)'=='True'" PrivateAssets="All" />
-        <Content Include="$(MSBuildThisFileDirectory)\stylecop.json" Condition="'$(EnforceCodeStyleInBuild)'=='True'"
-                 Pack="false" />
-    </ItemGroup>
-
-
-    <!-- Assembly metadata -->
-    <ItemGroup>
-        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-            <_Parameter1>PackageVersion</_Parameter1>
-            <_Parameter2>$(Version)</_Parameter2>
-        </AssemblyAttribute>
-    </ItemGroup>
-
-    <!-- Source Link  -->
-    <PropertyGroup>
-        <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
-
-        <!-- Embed source files that are not tracked by the source control manager in the PDB -->
-        <EmbedUntrackedSources>true</EmbedUntrackedSources>
-
-        <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
-        <DebugType Condition="'$(Configuration)'=='Debug'">embedded</DebugType>
-
-    </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All" />
-    </ItemGroup>
-
+    <Import Project=".eng\Versions.props" />
+    <Import Project=".eng\Packaging.props" />
 
     <!-- Imports a script that exports a few MSBuild properties to the compiler. We try to import and not to copy to avoid duplication. -->
-    <Import Project="Caravela.Framework.Package\Caravela.CompilerVisibleProperties.targets" />
+    <Import Project="Caravela.Framework.Package\Caravela.CompilerVisibleProperties.props" />
+
+    <Import Project=".eng\shared\build\BuildOptions.props" />
+    <Import Project=".eng\shared\style\CodeQuality.props" />
+    <Import Project=".eng\shared\build\SourceLink.props" />
 
 </Project>

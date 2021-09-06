@@ -193,7 +193,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         private string SerializeReturnParameter( string code )
         {
             var compilation = CreateCompilationModel( code );
-            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" ).ReturnParameter!;
+            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" ).ReturnParameter;
             var p = (MethodReturnParameter) single;
 
             var actual = this.Serialize( CompileTimeReturnParameterInfo.Create( p ) )
@@ -205,7 +205,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         private string SerializeReturnParameterOfProperty( string code )
         {
             var compilation = CreateCompilationModel( code );
-            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( m => m.Name == "Property" ).GetMethod!.ReturnParameter!;
+            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( m => m.Name == "Property" ).GetMethod!.ReturnParameter;
             var p = (MethodReturnParameter) single;
 
             var actual = this.Serialize( CompileTimeReturnParameterInfo.Create( p ) )

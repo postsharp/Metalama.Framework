@@ -13,6 +13,7 @@ namespace Caravela.Framework.Impl
             => items.Where( i => i != null )!;
 
         public static IReadOnlyList<T> ConcatNotNull<T>( this IReadOnlyList<T> a, T? b )
+            where T : class
         {
             if ( b == null )
             {
@@ -22,7 +23,7 @@ namespace Caravela.Framework.Impl
             if ( a.Count == 0 )
             {
                 // ReSharper disable once RedundantExplicitArrayCreation
-                return new T[] { b! };
+                return new T[] { b };
             }
 
             var l = new List<T>( a.Count + 1 );

@@ -439,8 +439,8 @@ namespace Caravela.Framework.Impl.Linking
             {
                 case (IMethodSymbol { MethodKind: MethodKind.Ordinary }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
                 case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
-                case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol
-                    { MethodKind: MethodKind.ExplicitInterfaceImplementation }):
+                case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation },
+                    IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }):
                 case (IPropertySymbol, IPropertySymbol):
                 case (IEventSymbol, IEventSymbol):
                 case (IFieldSymbol, IFieldSymbol):

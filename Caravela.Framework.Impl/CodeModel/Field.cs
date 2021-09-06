@@ -38,8 +38,6 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IMethod? SetMethod => this.Writeability != Writeability.None ? new PseudoSetter( this ) : null;
 
-        // TODO: Memo does not work here.
-        // [Memo]
         public Writeability Writeability
             => this._symbol switch
             {

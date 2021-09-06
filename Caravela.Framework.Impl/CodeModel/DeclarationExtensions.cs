@@ -203,7 +203,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             if ( declaration.IsStatic )
             {
-                return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( declaration.DeclaringType!.GetSymbol() );
+                return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( declaration.DeclaringType.GetSymbol() );
             }
 
             if ( instance.Syntax.Kind() == SyntaxKind.NullLiteralExpression )

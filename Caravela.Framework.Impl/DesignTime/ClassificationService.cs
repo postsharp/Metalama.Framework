@@ -18,6 +18,7 @@ namespace Caravela.Framework.Impl.DesignTime
     /// <remarks>
     /// This class is public because it is used by Try.Caravela.
     /// </remarks>
+    [ExcludeFromCodeCoverage]
     public class ClassificationService : IClassificationService
     {
         private readonly IServiceProvider _serviceProvider;

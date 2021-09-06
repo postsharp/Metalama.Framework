@@ -335,7 +335,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     return
                         Block(
-                                ExpressionStatement( returnExpression.CreateExpression( expressionText, location )! ),
+                                ExpressionStatement( returnExpression.CreateExpression( expressionText, location ) ),
                                 ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
                             .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }

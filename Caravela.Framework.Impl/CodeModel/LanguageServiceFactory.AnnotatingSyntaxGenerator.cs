@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public TypeOfExpressionSyntax TypeOfExpression( ITypeSymbol type )
             {
-                TypeSyntax typeSyntax = this.TypeExpression( type.WithNullableAnnotation( NullableAnnotation.NotAnnotated ) );
+                var typeSyntax = this.TypeExpression( type.WithNullableAnnotation( NullableAnnotation.NotAnnotated ) );
 
                 if ( type is INamedTypeSymbol { IsGenericType: true } genericType )
                 {

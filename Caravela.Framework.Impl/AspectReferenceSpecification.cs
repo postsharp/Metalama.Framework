@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl
 
         internal AspectReferenceSpecification WithTargetKind( AspectReferenceTargetKind targetKind )
         {
-            return new(
+            return new AspectReferenceSpecification(
                 this.AspectLayerId,
                 this.Order,
                 targetKind,

@@ -69,7 +69,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
         {
             string? GetTextUnderDiagnostic( Diagnostic diagnostic )
             {
-                var syntaxTree = diagnostic.Location!.SourceTree ?? syntaxTreeResult.SyntaxTree;
+                var syntaxTree = diagnostic.Location.SourceTree ?? syntaxTreeResult.SyntaxTree;
 
                 return syntaxTree.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
             }

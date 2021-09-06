@@ -1,0 +1,19 @@
+<Project>
+
+    <!-- C# Compiler options-->
+    <PropertyGroup>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <!-- Output path -->
+    <PropertyGroup>
+        <PackageOutputPath>$(MSBuildThisFileDirectory)..\..\..\artifacts\bin\$(Configuration)</PackageOutputPath>
+    </PropertyGroup>
+
+    <!-- Obfuscation -->
+    <PropertyGroup>
+        <Obfuscate Condition="'$(Obfuscate)'=='' AND '$(Configuration)'=='Release'">True</Obfuscate>
+    </PropertyGroup>
+
+</Project>

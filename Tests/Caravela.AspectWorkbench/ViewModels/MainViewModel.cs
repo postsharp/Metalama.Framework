@@ -108,7 +108,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 {
                     // Display the annotated syntax tree.
                     this.ColoredSourceCodeDocument = SyntaxColorizer.WriteSyntaxColoring(
-                        testResult.SyntaxTrees.First().InputDocument!,
+                        testResult.SyntaxTrees.First().InputDocument,
                         testResult.Diagnostics,
                         annotatedTemplateSyntax );
                 }
@@ -144,7 +144,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 if ( project != null )
                 {
-                    var consolidatedOutputDocument = project!.AddDocument( "ConsolidatedOutput.cs", consolidatedOutputSyntax );
+                    var consolidatedOutputDocument = project.AddDocument( "ConsolidatedOutput.cs", consolidatedOutputSyntax );
 
                     // Display the transformed code.
                     this.TransformedCodeDocument = SyntaxColorizer.WriteSyntaxColoring( consolidatedOutputDocument );

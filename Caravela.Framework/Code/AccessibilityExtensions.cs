@@ -5,17 +5,17 @@ using System;
 
 namespace Caravela.Framework.Code
 {
-    internal static class AccessibilityExtensions
+    public static class AccessibilityExtensions
     {
-        public static bool IsSupersetOf( this AccessibilityFlags left, AccessibilityFlags right ) => (right & left) == right && left != right;
+        private static bool IsSupersetOf( this AccessibilityFlags left, AccessibilityFlags right ) => (right & left) == right && left != right;
 
-        public static bool IsSubsetOf( this AccessibilityFlags left, AccessibilityFlags right ) => (right & left) == left && left != right;
+        private static bool IsSubsetOf( this AccessibilityFlags left, AccessibilityFlags right ) => (right & left) == left && left != right;
 
-        public static bool IsSupersetOrEqual( this AccessibilityFlags left, AccessibilityFlags right ) => (right & left) == right;
+        private static bool IsSupersetOrEqual( this AccessibilityFlags left, AccessibilityFlags right ) => (right & left) == right;
 
-        public static bool IsSubsetOrEqual( this AccessibilityFlags left, AccessibilityFlags right ) => (right & left) == left;
+        private static bool IsSubsetOrEqual( this AccessibilityFlags left, AccessibilityFlags right ) => (right & left) == left;
 
-        public static AccessibilityFlags ToAccessibilityFlags( this Accessibility accessibility )
+        private static AccessibilityFlags ToAccessibilityFlags( this Accessibility accessibility )
             => accessibility switch
             {
                 Accessibility.Private => AccessibilityFlags.SameType,
@@ -29,5 +29,16 @@ namespace Caravela.Framework.Code
                 Accessibility.Public => AccessibilityFlags.Public,
                 _ => throw new ArgumentOutOfRangeException( nameof(accessibility) )
             };
+
+        public static bool IsSupersetOf( this Accessibility left, Accessibility right )
+            => left.ToAccessibilityFlags().IsSupersetOf( right.ToAccessibilityFlags() );
+
+        public static bool IsSubsetOf( this Accessibility left, Accessibility right ) => left.ToAccessibilityFlags().IsSubsetOf( right.ToAccessibilityFlags() );
+
+        public static bool IsSupersetOrEqual( this Accessibility left, Accessibility right )
+            => left.ToAccessibilityFlags().IsSupersetOrEqual( right.ToAccessibilityFlags() );
+
+        public static bool IsSubsetOrEqual( this Accessibility left, Accessibility right )
+            => left.ToAccessibilityFlags().IsSubsetOrEqual( right.ToAccessibilityFlags() );
     }
 }

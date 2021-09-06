@@ -33,6 +33,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
             writer.WriteLine( "using System;" );
             writer.WriteLine( "using System.Linq;" );
             writer.WriteLine( "using System.Collections.Generic;" );
+            writer.WriteLine( "using System.Diagnostics.CodeAnalysis;" );
             writer.WriteLine( "using Microsoft.CodeAnalysis;" );
             writer.WriteLine( "using Microsoft.CodeAnalysis.CSharp;" );
             writer.WriteLine( "using Microsoft.CodeAnalysis.CSharp.Syntax;" );
@@ -111,6 +112,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                 }
 
                 // Generate the Visit method.
+                writer.WriteLine( $"\t\t[ExcludeFromCodeCoverage]" );
                 writer.WriteLine( $"\t\tpublic override SyntaxNode {method.Name}( {nodeTypeName} node )" );
                 writer.WriteLine( "\t\t{" );
                 writer.WriteLine( "\t\t\tswitch ( this.GetTransformationKind( node ) ) " );
@@ -128,6 +130,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                 writer.WriteLine( "\t\t}" );
 
                 // Generate the Transform* method.
+                writer.WriteLine( $"\t\t[ExcludeFromCodeCoverage]" );
                 writer.WriteLine( $"\t\tprotected virtual ExpressionSyntax Transform{factoryMethodName}( {nodeTypeName} node)" );
                 writer.WriteLine( "\t\t{" );
                 writer.WriteLine( "\t\t\tthis.Indent();" );
@@ -206,6 +209,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                     {
                         ParameterInfo? paramsParameter = null;
 
+                        writer.WriteLine( $"\t\t[ExcludeFromCodeCoverage]" );
                         writer.Write( $"\t\tpublic InvocationExpressionSyntax {method.Name}{suffix}" );
 
                         if ( method.IsGenericMethodDefinition )

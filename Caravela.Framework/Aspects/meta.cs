@@ -89,6 +89,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <seealso href="@debugging-aspects"/>
         [TemplateKeyword]
+        [ExcludeFromCodeCoverage]
         public static void DebugBreak() => CurrentContext.DebugBreak();
 
         /// <summary>

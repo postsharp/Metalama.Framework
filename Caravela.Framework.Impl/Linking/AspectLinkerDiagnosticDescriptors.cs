@@ -21,6 +21,7 @@ namespace Caravela.Framework.Impl.Linking
                 "Cannot use Base invoker with non-this instance expression.",
                 "The aspect '{0}' on '{1}' uses Base invoker with an instance expression different than 'this'."
                 + " Use 'meta.This' as the first argument or use Final invoker.",
-                _category, Error );
+                _category,
+                Error );
     }
 }
