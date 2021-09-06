@@ -120,7 +120,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    if ( aspectClass.IsEligible( symbol ) )
+                    if ( aspectClass.IsEligibleFast( symbol ) )
                     {
                         yield return aspectClass;
                     }

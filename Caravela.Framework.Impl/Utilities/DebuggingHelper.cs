@@ -5,12 +5,14 @@ using Caravela.Compiler;
 using Caravela.Framework.Impl.Options;
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Utilities
 {
     /// <summary>
     /// Exposes the <see cref="AttachDebugger"/> method.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     internal static class DebuggingHelper
     {
         private static readonly object _sync = new();

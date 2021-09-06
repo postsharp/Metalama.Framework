@@ -1,4 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -18,9 +19,7 @@ namespace PostSharp.Engineering.BuildTools.Nuget
             this.AddOption(
                 new Option( "-d", "Directory containing the packages" )
                 {
-                    Name = "directory",
-                    IsRequired = true,
-                    Argument = new Argument<DirectoryInfo>()
+                    Name = "directory", IsRequired = true, Argument = new Argument<DirectoryInfo>()
                 } );
 
             this.Handler = CommandHandler.Create<InvocationContext, DirectoryInfo>( Execute );
@@ -50,7 +49,7 @@ namespace PostSharp.Engineering.BuildTools.Nuget
             console.Out.WriteLine( "Processing " + inputPath );
 
             var outputPath = Path.Combine(
-                Path.GetDirectoryName( inputPath ),
+                Path.GetDirectoryName( inputPath )!,
                 Path.GetFileName( inputPath ).Replace( "Microsoft", "Caravela.Roslyn" ) );
 
             File.Copy( inputPath, outputPath, true );
@@ -76,10 +75,12 @@ namespace PostSharp.Engineering.BuildTools.Nuget
             var ns = nuspecXml.Root.Name.Namespace.NamespaceName;
 
             // Rename the packageId.
-            var packageIdElement = nuspecXml.Root.Element( XName.Get( "metadata", ns ) ).Element( XName.Get( "id", ns ) );
+            var packageIdElement =
+                nuspecXml.Root.Element( XName.Get( "metadata", ns ) ).Element( XName.Get( "id", ns ) );
             var oldPackageId = packageIdElement.Value;
             var newPackageId = oldPackageId.Replace( "Microsoft", "Caravela.Roslyn" );
-            var packageVersion = nuspecXml.Root.Element( XName.Get( "metadata", ns ) ).Element( XName.Get( "version", ns ) ).Value;
+            var packageVersion = nuspecXml.Root.Element( XName.Get( "metadata", ns ) )
+                .Element( XName.Get( "version", ns ) ).Value;
             packageIdElement.Value = newPackageId;
 
             // Rename the dependencies.

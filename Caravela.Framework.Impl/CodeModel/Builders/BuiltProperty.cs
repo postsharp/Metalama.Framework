@@ -74,5 +74,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         ISymbol IDeclarationRef<IProperty>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
+
+        public IEnumerable<IMethod> Accessors => this.PropertyBuilder.Accessors;
     }
 }

@@ -11,7 +11,7 @@ namespace Caravela.Framework.Code
     public interface IHasParameters : ICompilationElement, IDisplayable
     {
         /// <summary>
-        /// Gets the list of parameters of the current method.
+        /// Gets the list of parameters of the current method (but not the return parameter).
         /// </summary>
         IParameterList Parameters { get; }
     }

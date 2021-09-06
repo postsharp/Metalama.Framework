@@ -88,16 +88,17 @@ namespace Caravela.Framework.Impl.Collections
         {
             var recursionCheck = 0;
 
-            HashSet<T> hashSet = new( ReferenceEqualityComparer<T>.Instance );
+            // Create a dictionary for the results. The key is the item, the value is the order of insertion.
+            Dictionary<T, int> results = new( ReferenceEqualityComparer<T>.Instance );
 
             if ( includeThis )
             {
-                _ = hashSet.Add( item );
+                results.Add( item, 0 );
             }
 
-            VisitMany( getItems( item ), getItems, hashSet, throwOnDuplicate, ref recursionCheck );
+            VisitMany( getItems( item ), getItems, results, throwOnDuplicate, ref recursionCheck );
 
-            return hashSet;
+            return results.Keys;
         }
 
         /// <summary>
@@ -118,27 +119,28 @@ namespace Caravela.Framework.Impl.Collections
         {
             var recursionCheck = 0;
 
-            HashSet<T> hashSet = new( ReferenceEqualityComparer<T>.Instance );
+            // Create a dictionary for the results. The key is the item, the value is the order of insertion.
+            Dictionary<T, int> results = new( ReferenceEqualityComparer<T>.Instance );
 
             if ( includeFirstLevel )
             {
-                VisitMany( collection, getItems, hashSet, throwOnDuplicate, ref recursionCheck );
+                VisitMany( collection, getItems, results, throwOnDuplicate, ref recursionCheck );
             }
             else
             {
                 foreach ( var item in collection )
                 {
-                    VisitMany( getItems( item ), getItems, hashSet, throwOnDuplicate, ref recursionCheck );
+                    VisitMany( getItems( item ), getItems, results, throwOnDuplicate, ref recursionCheck );
                 }
             }
 
-            return hashSet;
+            return results.Keys;
         }
 
         private static void VisitMany<T>(
             IEnumerable<T>? collection,
             Func<T, IEnumerable<T>?> getItems,
-            HashSet<T> hashSet,
+            Dictionary<T, int> results,
             bool throwOnDuplicate,
             ref int recursionCheck )
             where T : class
@@ -157,7 +159,7 @@ namespace Caravela.Framework.Impl.Collections
 
             foreach ( var item in collection )
             {
-                if ( !hashSet.Add( item ) )
+                if ( results.ContainsKey( item ) )
                 {
                     // We are in a cycle.
 
@@ -170,8 +172,12 @@ namespace Caravela.Framework.Impl.Collections
                         continue;
                     }
                 }
+                else
+                {
+                    results.Add( item, results.Count );
+                }
 
-                VisitMany( getItems( item ), getItems, hashSet, throwOnDuplicate, ref recursionCheck );
+                VisitMany( getItems( item ), getItems, results, throwOnDuplicate, ref recursionCheck );
             }
 
             recursionCheck--;

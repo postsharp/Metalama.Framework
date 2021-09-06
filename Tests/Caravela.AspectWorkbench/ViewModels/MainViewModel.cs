@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis;
 using PostSharp.Patterns.Model;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -216,7 +217,10 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public void NewTest( string path )
         {
-            this.SourceCode = NewTestDefaults.TemplateSource;
+            var projectDirectory = TestInput.FromSource( "", path ).ProjectDirectory!;
+            var pathParts = Path.GetRelativePath( projectDirectory, path ).Split( "\\" ).Select( p => Path.GetFileNameWithoutExtension( p ) ).Skip( 1 );
+            var ns = Path.GetFileName( projectDirectory ) + "." + string.Join( ".", pathParts );
+            this.SourceCode = NewTestDefaults.TemplateSource.Replace( "$ns", ns, StringComparison.OrdinalIgnoreCase );
             this.ExpectedTransformedCode = null;
             this.CompiledTemplateDocument = null;
             this.TransformedCodeDocument = null;

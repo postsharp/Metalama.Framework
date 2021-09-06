@@ -12,8 +12,7 @@ using Caravela.Framework;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 
-// TODO: Change the namespace
-namespace Caravela.Framework.Tests.Integration.Templating.ChangeMe
+namespace $ns
 {
     class Aspect : Attribute
     {
