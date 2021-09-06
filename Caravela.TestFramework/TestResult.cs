@@ -119,10 +119,18 @@ namespace Caravela.TestFramework
 
             for ( var i = 1; i < lines.Length; i++ )
             {
-                lines[i] = "// " + lines[i].Trim( '\r' );
+                if ( lines[i].TrimStart().StartsWith( "at ", StringComparison.Ordinal ) ) 
+                {
+                    // Remove exception stacks because they are different in debug and release builds.
+                    lines[i] = "<>";
+                }
+                else
+                {
+                    lines[i] = "// " + lines[i].Trim( '\r' );
+                }
             }
 
-            return string.Join( Environment.NewLine, lines );
+            return string.Join( Environment.NewLine, lines.Where( l => l != "<>" ) );
         }
 
         internal async Task SetCompileTimeCompilationAsync( Compilation compilation )
