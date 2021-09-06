@@ -11,6 +11,7 @@ using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -185,12 +186,12 @@ namespace PostSharp.Engineering.BuildTools.Coverage
 
         private static bool ShouldIgnoreNodeOrAncestor( MemberDeclarationSyntax declaringMember, SyntaxNode? node )
             => ShouldIgnoreNode( declaringMember, node ) ||
-               (node is not StatementSyntax && ShouldIgnoreNodeOrAncestor( declaringMember, node.Parent )); 
+               (node != null && node is not MemberDeclarationSyntax && ShouldIgnoreNodeOrAncestor( declaringMember, node.Parent )); 
         private static bool ShouldIgnoreNode( MemberDeclarationSyntax declaringMember, SyntaxNode? node )
             => node switch
             {
                 null => true,
-                BlockSyntax block => block.Statements.All( b => ShouldIgnoreNode( declaringMember, b ) ),
+                BlockSyntax block => block.Statements.Count == 0 || block.Statements.Count == 1 && ShouldIgnoreNode( declaringMember, block.Statements[0] ),
                 ThrowExpressionSyntax => true,
                 ThrowStatementSyntax => true,
                 MemberDeclarationSyntax member => ShouldIgnoreMember( member ),
@@ -199,6 +200,7 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                 ExpressionStatementSyntax statement => ShouldIgnoreNode(declaringMember, statement.Expression ),
                 InvocationExpressionSyntax invocation => IsSameMemberName( declaringMember, invocation.Expression ) || invocation.ArgumentList.Arguments.Count == 0,
                 MemberAccessExpressionSyntax memberAccess => ShouldIgnoreNode( declaringMember, memberAccess.Expression ),
+                ConditionalAccessExpressionSyntax conditionalAccess => ShouldIgnoreNode( declaringMember, conditionalAccess.Expression ) && ShouldIgnoreNode( declaringMember, conditionalAccess.WhenNotNull ), 
                 QualifiedNameSyntax => true,
                 IdentifierNameSyntax => true,
                 LiteralExpressionSyntax => true,
@@ -206,8 +208,9 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                 TypeOfExpressionSyntax => true,
                 ThisExpressionSyntax => true,
                 BaseExpressionSyntax => true,
+                AssignmentExpressionSyntax assignment => ShouldIgnoreNode( declaringMember, assignment.Left ) && ShouldIgnoreNode( declaringMember, assignment.Right ),
                 CastExpressionSyntax cast => ShouldIgnoreNode( declaringMember, cast.Expression ),
-                ReturnStatementSyntax r => ShouldIgnoreNode( declaringMember, r.Expression ),
+                CatchDeclarationSyntax => true,
                 AccessorDeclarationSyntax accessor => ShouldIgnoreNode( declaringMember, accessor.Body ) && ShouldIgnoreNode( declaringMember, accessor.ExpressionBody ),
                 _ => ContainsIgnoreComment( node.ToFullString() )
             };
@@ -244,16 +247,20 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                                                   string.Join( ",",
                                                       c.ParameterList.Parameters.Select( p => p.Type?.ToString() ) ) +
                                                   ")",
+                IndexerDeclarationSyntax i => "this[" + string.Join( ",", i.ParameterList.Parameters.Select( p => p.Type?.ToString() ) ) + "]",
+                OperatorDeclarationSyntax o => o.OperatorToken.Text + "(" + string.Join( ",", o.ParameterList.Parameters.Select( p => p.Type?.ToString() ) ) + ")",
+                ConversionOperatorDeclarationSyntax c => "convert(" + string.Join( ",",
+                    c.ParameterList.Parameters.Select( p => p.Type?.ToString() ) ) + ")" + "):" + c.Type,
                 _ => GetNodeName( node )
             };
         private static string GetNodeName( SyntaxNode node )
             => node switch
             {
+                IndexerDeclarationSyntax i => "this[]",
+                OperatorDeclarationSyntax o => o.OperatorToken.Text,
                 AccessorDeclarationSyntax a => a.Keyword.Text,
                 MethodDeclarationSyntax m => m.Identifier.Text,
-                ClassDeclarationSyntax c => c.Identifier.Text,
-                StructDeclarationSyntax s => s.Identifier.Text,
-                RecordDeclarationSyntax r => r.Identifier.Text,
+                BaseTypeDeclarationSyntax c => c.Identifier.Text,
                 FieldDeclarationSyntax f => string.Join( ",", f.Declaration.Variables.Select( v => v.Identifier.Text ) ),
                 EventDeclarationSyntax e => e.Identifier.Text, EventFieldDeclarationSyntax e => string.Join( ",",
                     e.Declaration.Variables.Select( v => v.Identifier.Text ) ),
