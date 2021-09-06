@@ -12,9 +12,11 @@ namespace Caravela.Framework.Code
     public interface INamespace : INamedDeclaration
     {
         /// <summary>
-        /// Gets the full name of the namespace, or <c>null</c> if this is the global namespace.
+        /// Gets the full name of the namespace, or an empty string if this is the global namespace.
         /// </summary>
-        string? FullName { get; }
+        string FullName { get; }
+        
+        bool IsGlobalNamespace { get; }
 
         /// <exclude/>
         [Obsolete( "Not implemented." )]
