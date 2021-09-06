@@ -473,7 +473,7 @@ class C
             foreach ( var parameter in parametersWithoutDefaults )
             {
                 Assert.False( parameter.DefaultValue.IsAssigned );
-                _ = Assert.Throws<InvalidOperationException>( () => parameter.DefaultValue.Value );
+                _ = Assert.Throws<ArgumentNullException>( () => parameter.DefaultValue.Value );
             }
 
             var parametersWithDefaults = method.Parameters.Skip( 1 ).ToList();

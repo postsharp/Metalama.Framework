@@ -3,11 +3,13 @@
 
 using Caravela.TestFramework.XunitFramework;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Xunit.Abstractions;
 
 namespace Caravela.TestFramework
 {
+    [ExcludeFromCodeCoverage]
     internal class AspectTestFrameworkVsImpl : ITestFramework, ISourceInformationProvider
     {
         private readonly IMessageSink _messageSink;

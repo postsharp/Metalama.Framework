@@ -18,6 +18,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Serialization;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Caravela.Framework.Impl
 {
@@ -76,7 +77,7 @@ namespace Caravela.Framework.Impl
         /// </summary>
         /// <param name="aspectTypeSymbol"></param>
         /// <param name="aspectDriver">Can be null for testing.</param>
-        private AspectClass(
+        protected internal AspectClass(
             IServiceProvider serviceProvider,
             INamedTypeSymbol aspectTypeSymbol,
             AspectClass? baseClass,
@@ -271,42 +272,36 @@ namespace Caravela.Framework.Impl
                 _ => false
             };
 
-        public bool IsEligible( ISymbol symbol )
-            => symbol switch
+        /// <summary>
+        /// Determines the eligibility of a Roslyn symbol for the current aspect without constructing a <see cref="CompilationModel"/>
+        /// for the symbol.
+        /// </summary>
+        public bool IsEligibleFast( ISymbol symbol )
+        {
+            var ourDeclarationInterface = symbol switch
             {
-                // TODO: Map the symbol to a code model declaration (which requires a CompilationModel), then simply
-                // call our aggregate eligibility rule here.
-
-                IMethodSymbol method =>
-                    this._prototypeAspectInstance is IAspect<IDeclaration> ||
-                    this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
-                    this._prototypeAspectInstance is IAspect<IMethodBase> ||
-                    (this._prototypeAspectInstance is IAspect<IMethod> && IsMethod( method.MethodKind )) ||
-                    (this._prototypeAspectInstance is IAspect<IConstructor> && IsConstructor( method.MethodKind )),
-
-                IPropertySymbol => this._prototypeAspectInstance is IAspect<IDeclaration> ||
-                                   this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
-                                   this._prototypeAspectInstance is IAspect<IFieldOrProperty> ||
-                                   this._prototypeAspectInstance is IAspect<IProperty>,
-
-                IFieldSymbol => this._prototypeAspectInstance is IAspect<IDeclaration> ||
-                                this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
-                                this._prototypeAspectInstance is IAspect<IFieldOrProperty> ||
-                                this._prototypeAspectInstance is IAspect<IField>,
-
-                IEventSymbol => this._prototypeAspectInstance is IAspect<IDeclaration> ||
-                                this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
-                                this._prototypeAspectInstance is IAspect<IEvent>,
-
-                INamedTypeSymbol => this._prototypeAspectInstance is IAspect<IDeclaration> ||
-                                    this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
-                                    this._prototypeAspectInstance is IAspect<INamedType>,
-
-                _ => false
-
-                // TODO: parameters (using markers)
-                // TODO: call IsEligible on the prototype
+                IMethodSymbol method when IsMethod( method.MethodKind ) => typeof(IMethod),
+                IMethodSymbol method when IsConstructor( method.MethodKind ) => typeof(IConstructor),
+                IPropertySymbol => typeof(IProperty),
+                IEventSymbol => typeof(IEvent),
+                IFieldSymbol => typeof(IField),
+                ITypeSymbol { TypeKind: TypeKind.TypeParameter } => typeof(IGenericParameter),
+                INamedTypeSymbol => typeof(INamedType),
+                IParameterSymbol => typeof(IParameter),
+                _ => null
             };
+
+            if ( ourDeclarationInterface == null )
+            {
+                return false;
+            }
+
+            var aspectInterface = typeof(IAspect<>).MakeGenericType( ourDeclarationInterface );
+
+            return aspectInterface.IsAssignableFrom( this.AspectType );
+
+            // TODO: call IsEligible on the prototype
+        }
 
         public override string ToString() => this.FullName;
     }

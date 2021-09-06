@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         public PseudoParameterList( IEnumerable<PseudoParameter> collection ) : base( collection ) { }
 
-        IEnumerator<IParameter> IEnumerable<IParameter>.GetEnumerator() => this.Cast<IParameter>().GetEnumerator();
+        IEnumerator<IParameter> IEnumerable<IParameter>.GetEnumerator() => this.GetEnumerator();
 
         IParameter IReadOnlyList<IParameter>.this[ int index ] => this[index];
 

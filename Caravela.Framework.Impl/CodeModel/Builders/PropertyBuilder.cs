@@ -251,6 +251,22 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 _ => null
             };
 
+        public IEnumerable<IMethod> Accessors
+        {
+            get
+            {
+                if ( this.GetMethod != null )
+                {
+                    yield return this.GetMethod;
+                }
+
+                if ( this.SetMethod != null )
+                {
+                    yield return this.SetMethod;
+                }
+            }
+        }
+
         public PropertyInfo ToPropertyInfo() => throw new NotImplementedException();
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();

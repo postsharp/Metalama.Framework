@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
@@ -15,6 +16,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// <summary>
     /// The main compile-time entry point of Caravela. An implementation of Caravela.Compiler's <see cref="ISourceTransformer"/>.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public sealed class SourceTransformer : ISourceTransformer
     {
         public Compilation Execute( TransformerContext context )

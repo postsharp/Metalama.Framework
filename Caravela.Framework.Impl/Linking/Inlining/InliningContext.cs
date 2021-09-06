@@ -55,9 +55,9 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             this.CurrentDeclaration = currentDeclaration;
         }
 
-        public BlockSyntax GetLinkedBody( IMethodSymbol targetSymbol )
+        public BlockSyntax GetLinkedBody( IntermediateSymbolSemantic<IMethodSymbol> semantic )
         {
-            var linkedBody = this._rewritingDriver.GetLinkedBody( targetSymbol, this );
+            var linkedBody = this._rewritingDriver.GetLinkedBody( semantic, this );
 
             if ( this.HasIndirectReturn )
             {
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                                     this.DeclaresReturnVariable
                                         ? LocalDeclarationStatement(
                                                 VariableDeclaration(
-                                                    LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ReturnType ),
+                                                    LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( semantic.Symbol.ReturnType ),
                                                     SingletonSeparatedList( VariableDeclarator( this.ReturnVariableName.AssertNotNull() ) ) ) )
                                             .WithLeadingTrivia( ElasticLineFeed )
                                             .AddGeneratedCodeAnnotation()

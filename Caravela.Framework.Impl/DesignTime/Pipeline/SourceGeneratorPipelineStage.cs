@@ -106,7 +106,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 // Add the class to a namespace.
                 SyntaxNode topDeclaration = classDeclaration;
 
-                if ( declaringType.Namespace.FullName != null )
+                if ( !declaringType.Namespace.IsGlobalNamespace )
                 {
                     topDeclaration = SyntaxFactory.NamespaceDeclaration(
                         SyntaxFactory.ParseName( declaringType.Namespace.FullName ),

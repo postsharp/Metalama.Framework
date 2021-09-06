@@ -13,7 +13,7 @@
         <!-- Set up merging of reports.  -->
                 
         <MergeWith>$(CoverletOutput)\coverage.json</MergeWith>
-        <CoverletOutputFormat>opencover,json</CoverletOutputFormat>
+        <CoverletOutputFormat>json</CoverletOutputFormat>
         <ExcludeByAttribute>Obsolete,GeneratedCode,CompilerGenerated</ExcludeByAttribute>
         
         <!-- Exclude all classes from all assemblies whose name match `*.Tests.*` -->

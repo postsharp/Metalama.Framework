@@ -54,6 +54,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 throw new NotImplementedException();
             }
+
+            public bool IsReturnParameter => this.Index < 0;
         }
     }
 }
