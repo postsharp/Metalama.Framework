@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.DesignTime.Contracts;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.Text;
@@ -75,7 +76,7 @@ namespace Caravela.Framework.Impl.Formatting
             }
             else
             {
-                classifiedTextSpans = new ClassifiedTextSpanCollection();
+                classifiedTextSpans = new ClassifiedTextSpanCollection( sourceText.Length );
             }
 
             // Process the annotations by the aspect linker (on the output document).

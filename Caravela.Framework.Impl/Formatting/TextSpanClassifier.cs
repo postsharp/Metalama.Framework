@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Formatting
         private readonly string _sourceString;
         private readonly MarkAllChildrenWalker _markAllChildrenWalker;
         private readonly bool _detectRegion;
-        private readonly ClassifiedTextSpanCollection _classifiedTextSpans = new();
+        private readonly ClassifiedTextSpanCollection _classifiedTextSpans;
         private bool _isInTemplate;
         private bool _isInCompileTimeType;
         private int _excludedRegionStart;
@@ -47,6 +47,7 @@ namespace Caravela.Framework.Impl.Formatting
             this._processAllTypes = processAllTypes;
             this._sourceString = sourceText.ToString();
             this._markAllChildrenWalker = new MarkAllChildrenWalker( this );
+            this._classifiedTextSpans = new ClassifiedTextSpanCollection( sourceText.Length );
         }
 
         public IReadOnlyClassifiedTextSpanCollection ClassifiedTextSpans => this._classifiedTextSpans;

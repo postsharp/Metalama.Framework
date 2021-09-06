@@ -4,6 +4,7 @@
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Collections;
 using Microsoft.CodeAnalysis.Text;
+using PostSharp.Aspects.Advices;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,10 +19,14 @@ namespace Caravela.Framework.Impl.Formatting
     {
         private readonly SkipListIndexedDictionary<int, MarkedTextSpan> _spans = new();
 
-        public ClassifiedTextSpanCollection()
+        // For test only.
+        internal ClassifiedTextSpanCollection() : this( int.MaxValue ) { }
+        
+
+        public ClassifiedTextSpanCollection(int length)
         {
             // Start with a single default span. This avoid gaps in the partition later.
-            this._spans.Add( 0, new MarkedTextSpan( new TextSpan( 0, int.MaxValue ), TextSpanClassification.Default, null ) );
+            this._spans.Add( 0, new MarkedTextSpan( new TextSpan( 0, length ), TextSpanClassification.Default, null ) );
         }
 
         /// <summary>
@@ -204,16 +209,17 @@ namespace Caravela.Framework.Impl.Formatting
                     previousSpan = new ClassifiedTextSpan( pair.Value.Span, pair.Value.Classification, pair.Value.Tags );
                 }
 
+                // Break if we are getting further than the last span.
                 if ( classifiedSpan.Span.End >= textSpan.End )
                 {
-                    // Emit the last span if any.
-                    if ( previousSpan.Span.Length > 0 && previousSpan.HasTagOrClassification )
-                    {
-                        yield return previousSpan;
-                    }
-
-                    yield break;
+                    break;
                 }
+            }
+            
+            // Emit the last span if any.
+            if ( previousSpan.Span.Length > 0 )
+            {
+                yield return previousSpan;
             }
         }
 
