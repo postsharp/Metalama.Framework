@@ -130,7 +130,6 @@ namespace Caravela.Framework.DesignTime.Contracts
 
                 this._getProviderTasks.TryRemove( entryPoint.Version, out _ );
                 this._getProviderTasks.TryRemove( MatchAllVersion, out _ );
-
             }
         }
     }

@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.DesignTime.Contracts;
-using PostSharp.Aspects.Advices;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,7 +50,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
         public void Version()
         {
             IDesignTimeEntryPointManager instance = new DesignTimeEntryPointManager();
-            Assert.NotNull(  instance.Version );
+            Assert.NotNull( instance.Version );
         }
 
         [Fact]

@@ -31,10 +31,9 @@
   </ItemGroup>
 
 
-    <!-- Disable this project when obfuscation is enabled -->
-    <ItemGroup Condition="'$(Obfuscate)'=='True'">
-        <Compile Remove="**\*" />
-    </ItemGroup>
-  
+  <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
+  <ItemGroup Condition="'$(Obfuscate)'=='True'">
+    <Compile Remove="**\*" />
+  </ItemGroup>
 
 </Project>

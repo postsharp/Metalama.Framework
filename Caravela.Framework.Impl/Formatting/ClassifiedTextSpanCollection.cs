@@ -4,7 +4,6 @@
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Collections;
 using Microsoft.CodeAnalysis.Text;
-using PostSharp.Aspects.Advices;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,9 +20,8 @@ namespace Caravela.Framework.Impl.Formatting
 
         // For test only.
         internal ClassifiedTextSpanCollection() : this( int.MaxValue ) { }
-        
 
-        public ClassifiedTextSpanCollection(int length)
+        public ClassifiedTextSpanCollection( int length )
         {
             // Start with a single default span. This avoid gaps in the partition later.
             this._spans.Add( 0, new MarkedTextSpan( new TextSpan( 0, length ), TextSpanClassification.Default, null ) );
@@ -215,7 +213,7 @@ namespace Caravela.Framework.Impl.Formatting
                     break;
                 }
             }
-            
+
             // Emit the last span if any.
             if ( previousSpan.Span.Length > 0 )
             {
