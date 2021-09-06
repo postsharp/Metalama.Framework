@@ -16,6 +16,7 @@ namespace Caravela.Framework.Impl
 {
     internal static class SymbolExtensions
     {
+        // Coverage: ignore
         public static SpecialType ToOurSpecialType( this RoslynSpecialType type )
             => type switch
             {
@@ -119,9 +120,9 @@ namespace Caravela.Framework.Impl
                 return true;
             }
 
-            if ( type.BaseType != null && member.IsMemberOf( type.BaseType ) )
+            if ( type.BaseType != null )
             {
-                return true;
+                return member.IsMemberOf( type.BaseType );
             }
 
             return false;

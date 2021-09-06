@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code.Syntax;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.Utilities;
@@ -76,7 +77,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             // Make sure all necessary assemblies are loaded in the current AppDomain.
             _ = new AspectWeaverAttribute( null! );
-            _ = meta.CompileTime<object>( null );
+            _ = ArrayBuilder.Create();
 
             // Get our public API assembly in its .NET Standard 2.0 build.
             var frameworkAssemblyReference = (MetadataReference)

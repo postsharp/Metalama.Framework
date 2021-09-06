@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl
 {
     public static class SyntaxExtensions
     {
-        public static MemberDeclarationSyntax? GetMemberDeclarationSyntax( this SyntaxNode? node )
+        public static MemberDeclarationSyntax FindMemberDeclaration( this SyntaxNode? node )
         {
             var current = node;
 
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl
                 current = current.Parent;
             }
 
-            return null;
+            throw new AssertionFailedException();
         }
     }
 }
