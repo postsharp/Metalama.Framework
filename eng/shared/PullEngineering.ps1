@@ -13,6 +13,6 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
 }
 
 # Update/initialize the engineering subtree.
-$EngineeringDirectory = ".eng/shared"
+$EngineeringDirectory = "eng/shared"
 
 & git subtree pull --prefix $EngineeringDirectory https://postsharp@dev.azure.com/postsharp/Caravela/_git/Caravela.Engineering master --squash

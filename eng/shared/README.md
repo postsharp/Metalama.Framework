@@ -31,17 +31,17 @@ This repository contains common development, build and publishig scripts and con
 ## Installation
 
 1. Enable symlinks in .git/config.
-2. Add the `.eng\shared` subtree:
+2. Add the `eng\shared` subtree:
 
-`git subtree add --prefix .eng/shared https://postsharp@dev.azure.com/postsharp/Caravela/_git/Caravela.Engineering master --squash`
+`git subtree add --prefix eng/shared https://postsharp@dev.azure.com/postsharp/Caravela/_git/Caravela.Engineering master --squash`
 
-3. Check `README.md` in each directory in the `.eng\shared` subtree for futher installation steps.
+3. Check `README.md` in each directory in the `eng\shared` subtree for futher installation steps.
 
 ## Updating
 
-1. From the repository root containing the `.eng\shared` subtree, execute `& .eng\shared\PullEngineering.ps1`.
+1. From the repository root containing the `eng\shared` subtree, execute `& eng\shared\PullEngineering.ps1`.
 2. Follow the steps described in [the changelog](CHANGELOG.md).
-3. Commit & push. (Even if there are no changes ouside the `.eng\shared` subtree.)
+3. Commit & push. (Even if there are no changes ouside the `eng\shared` subtree.)
 
 ## Features
 
@@ -53,17 +53,17 @@ The features provided by this repository are grouped by categories in the top-le
 
 ## Modifying
 
-To share modifications in the `.eng\shared` GIT subtree:
+To share modifications in the `eng\shared` GIT subtree:
 
 - Make sure that all documentation reflects your changes.
-- Add an entry to [the changelog](CHANGELOG.md) to let others know which changes have been introduced and which actions are required when updating the `.eng\shared` GIT subtree in other repositories.
+- Add an entry to [the changelog](CHANGELOG.md) to let others know which changes have been introduced and which actions are required when updating the `eng\shared` GIT subtree in other repositories.
 - Commit your changes.
-- From the repository root containing the `.eng\shared` subtree, execute `& .eng\shared\PushEngineering.ps1`.
-- Follow the [Updating](#updating) section in the other repositories containing the `.eng\shared` GIT subtree.
+- From the repository root containing the `eng\shared` subtree, execute `& eng\shared\PushEngineering.ps1`.
+- Follow the [Updating](#updating) section in the other repositories containing the `eng\shared` GIT subtree.
 
 ## Cloning
 
-To clone a repository containing `.eng\shared` GIT subtree, use the following command:
+To clone a repository containing `eng\shared` GIT subtree, use the following command:
 
 `git clone -c core.symlinks=true <URL>`
 

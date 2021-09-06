@@ -68,7 +68,7 @@ This section describes centralized NuGet packages metadata management.
 
 ### Installation and configuration
 
-1. Create `.eng\Packaging.props` file. The content should look like this:
+1. Create `eng\Packaging.props` file. The content should look like this:
 
 ```
 <Project>
@@ -105,10 +105,10 @@ This section describes centralized NuGet packages metadata management.
 3. Import the file from the first step in `Directory.Build.props`:
 
 ```
-  <Import Project=".eng\Packaging.props" />
+  <Import Project="eng\Packaging.props" />
 ```
 
-Now all the packages creted from the repository will contain the metadata configured in the `.eng\Packaging.props` file.
+Now all the packages creted from the repository will contain the metadata configured in the `eng\Packaging.props` file.
 
 ## Versioning, building and packaging
 
@@ -116,11 +116,11 @@ This section describes centralized main version and dependencies version managem
 
 ### Installation and configuration
 
-In this how-to, we use the name `[Product]` as a placeholder for the name of the product contained in a specific repository containing the `.eng\shared` subtree.
+In this how-to, we use the name `[Product]` as a placeholder for the name of the product contained in a specific repository containing the `eng\shared` subtree.
 
-1. Add `.eng\[Product]Version.props` to `.gitignore`.
+1. Add `eng\[Product]Version.props` to `.gitignore`.
 
-2. Create `.eng\MainVersion.props` file. The content should look like:
+2. Create `eng\MainVersion.props` file. The content should look like:
 
 ```
 <Project>
@@ -131,7 +131,7 @@ In this how-to, we use the name `[Product]` as a placeholder for the name of the
 </Project>
 ```
 
-3. Create `.eng\Versions.props` file. The content should look like:
+3. Create `eng\Versions.props` file. The content should look like:
 
 ```
 <Project>
@@ -165,32 +165,32 @@ In this how-to, we use the name `[Product]` as a placeholder for the name of the
 4. Add the following imports to `Directory.Build.props`:
 
 ```
-  <Import Project=".eng\Versions.props" />
-  <Import Project=".eng\shared\build\BuildOptions.props" />
+  <Import Project="eng\Versions.props" />
+  <Import Project="eng\shared\build\BuildOptions.props" />
 ```
 
 5. Add the following imports to `Directory.Build.targets`:
 
 ```
-  <Import Project=".eng\shared\build\TeamCity.targets" />
+  <Import Project="eng\shared\build\TeamCity.targets" />
 ```
 
-6. Create `.eng\Build.ps1` file. The content should look like:
+6. Create `eng\Build.ps1` file. The content should look like:
 
 ```
-# .FORWARDHELPTARGETNAME .eng/shared/build/Build.ps1
-Invoke-Expression "& .eng/shared/build/Build.ps1 -ProductName [Product] $args"
+# .FORWARDHELPTARGETNAME eng/shared/build/Build.ps1
+Invoke-Expression "& eng/shared/build/Build.ps1 -ProductName [Product] $args"
 ```
 
 ### Usage
 
 #### Product package version and package version suffix configuration
 
-The product package version and package version suffix configuration is centralized in the `.eng\MainVersion.props` script via the `MainVersion` and `PackageVersionSuffix` properties, respectively. For RTM products, leave the `PackageVersionSuffix` property value empty.
+The product package version and package version suffix configuration is centralized in the `eng\MainVersion.props` script via the `MainVersion` and `PackageVersionSuffix` properties, respectively. For RTM products, leave the `PackageVersionSuffix` property value empty.
 
 #### Package dependencies versions configuration
 
-Package dependecies vesrions configuration is centralized in the `.eng\Versions.props` script. Each dependency version is configured in a property named `<[DependencyName]Version>`, eg. `<SystemCollectionsImmutableVersion>`.
+Package dependecies vesrions configuration is centralized in the `eng\Versions.props` script. Each dependency version is configured in a property named `<[DependencyName]Version>`, eg. `<SystemCollectionsImmutableVersion>`.
 
 This property value is then available in all MSBuild project files in the repository and can be used in the `PackageReference` items. For example:
 
@@ -202,13 +202,13 @@ This property value is then available in all MSBuild project files in the reposi
 
 #### Build and testing locally
 
-For details, do `help .eng\Build.ps1` in PowerShell or see the initial comments in the `.eng\shared\build\Build.ps1` script for details. 
+For details, do `help eng\Build.ps1` in PowerShell or see the initial comments in the `eng\shared\build\Build.ps1` script for details. 
 
 For a local build, the `-Local` switch must be used.
 
 #### Referencing a package in another repository
 
-Local NuGet packages creating using the `.eng\shared\build\Build.ps1` script can be referenced in other repositories in such a way that it is easy to switch between published packages and locally-built packages. 
+Local NuGet packages creating using the `eng\shared\build\Build.ps1` script can be referenced in other repositories in such a way that it is easy to switch between published packages and locally-built packages. 
 
 By convention, a file named `.local`, if present, indicates that local package should be used. Otherwise, the network package will be used. The `.local` file should not be commited in the source control.
 
@@ -259,7 +259,7 @@ Build steps:
 
 | # | Name | Type | Configuration |
 | - | ---- | ---- | ------------- |
-| 1 | Debug Build and Test | PoerShell | Format stderr output as: error; Script: file; Script file: .eng/Build.ps1; Script arguments: -Numbered %build.number% -Test |
+| 1 | Debug Build and Test | PoerShell | Format stderr output as: error; Script: file; Script file: eng/Build.ps1; Script arguments: -Numbered %build.number% -Test |
 
 Artifact paths:
 
@@ -273,7 +273,7 @@ Build steps:
 
 | # | Name | Type | Configuration |
 | - | ---- | ---- | ------------- |
-| 1 | Release Build and Test | PoerShell | Format stderr output as: error; Script: file; Script file: .eng/Build.ps1; Script arguments: -Public -Release -Sign -Test |
+| 1 | Release Build and Test | PoerShell | Format stderr output as: error; Script: file; Script file: eng/Build.ps1; Script arguments: -Public -Release -Sign -Test |
 
 Artifact paths:
 
