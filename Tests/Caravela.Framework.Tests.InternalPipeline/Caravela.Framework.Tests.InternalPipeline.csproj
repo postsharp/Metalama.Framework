@@ -19,6 +19,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Tests\Linker\EventFields\Linking\IntroducedEvent.t.cs" />
+    <Compile Remove="Tests\Linker\EventFields\Linking\OverriddenLocalEvent.t.cs" />
+    <Compile Remove="Tests\Linker\EventFields\Linking\OverridenBaseEvent.t.cs" />
+    <Compile Remove="Tests\Linker\Properties\Linking\IntroducedEvent.t.cs" />
+    <Compile Remove="Tests\Linker\Properties\Linking\OverriddenLocalEvent.t.cs" />
+    <Compile Remove="Tests\Linker\Properties\Linking\OverridenBaseEvent.t.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FakeItEasy" Version="6.2.1" />
     <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
@@ -72,6 +81,14 @@
   <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
   <ItemGroup Condition="'$(Obfuscate)'=='True'">
     <Compile Remove="**\*" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Tests\Linker\EventFields\Linking\IntroducedEvent.t.cs" />
+    <None Include="Tests\Linker\EventFields\Linking\OverriddenLocalEvent.t.cs" />
+    <None Include="Tests\Linker\EventFields\Linking\OverridenBaseEvent.t.cs" />
+    <None Include="Tests\Linker\Properties\Linking\IntroducedProperty.t.cs" />
+    <None Include="Tests\Linker\Properties\Linking\OverriddenLocalProperty.t.cs" />
+    <None Include="Tests\Linker\Properties\Linking\OverridenBaseProperty.t.cs" />
   </ItemGroup>
   
 </Project>

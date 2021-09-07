@@ -1,200 +1,208 @@
 class Target
     {
-        public event EventHandler Foo
-{add
+        public int Foo
+{get
 {
-    this.Foo += value;
-}remove
+    return this.Foo_Override6;
+}set
 {
-    this.Foo -= value;
+    this.Foo_Override6 = value;
 }}
     
     
-public event EventHandler Foo_Override0
-{add    {
+public int Foo_Override0
+{get    {
         // Should invoke empty code.
-        this.Bar_Empty+= value;
+        _ = this.Bar_Empty;
         // Should invoke empty code.
-        this.Bar_Empty+= value;
+        _ = this.Bar_Empty;
         // Should invoke empty code.
-        this.Bar_Empty+= value;
+        _ = this.Bar_Empty;
         // Should invoke the final declaration.
-        this.Bar+= value;
+        _ = this.Bar;
+        return 42;
     }
     
-remove    {
+set    {
         // Should invoke empty code.
-        this.Bar_Empty-= value;
+        this.Bar_Empty= value;
         // Should invoke empty code.
-        this.Bar_Empty-= value;
+        this.Bar_Empty= value;
         // Should invoke empty code.
-        this.Bar_Empty-= value;
+        this.Bar_Empty= value;
         // Should invoke the final declaration.
-        this.Bar-= value;
+        this.Bar= value;
     }
 }
     
-public event EventHandler Bar
-{add
+public int Bar
+{get
 {
-    this.Bar += value;
-}remove
+    return this.Bar_Override5;
+}set
 {
-    this.Bar -= value;
+    this.Bar_Override5 = value;
 }}
-private event EventHandler Bar_Empty
+private int Bar_Empty
 {
-    add
+    get
+    {
+        Console.WriteLine("This is introduced code (discarded).");
+        return 0;
+    }
+    
+    set
     {
         Console.WriteLine("This is introduced code (discarded).");
     }
+}
     
-    remove
-    {
-        Console.WriteLine("This is introduced code (discarded).");
+private int Bar_Override1
+{get    {
+        // Should invoke empty code.
+        _ = this.Bar_Empty;
+        // Should invoke empty code.
+        _ = this.Bar_Empty;
+        // Should invoke override 1.
+        _ = this.Bar_Override1;
+        // Should invoke the final declaration.
+        _ = this.Bar;
+        return 42;
+    }
+    
+set    {
+        // Should invoke empty code.
+        this.Bar_Empty= value;
+        // Should invoke empty code.
+        this.Bar_Empty= value;
+        // Should invoke override 1.
+        this.Bar_Override1= value;
+        // Should invoke the final declaration.
+        this.Bar= value;
     }
 }
     
-private event EventHandler Bar_Override1
-{add    {
+private int Bar_Override3
+{get    {
         // Should invoke empty code.
-        this.Bar_Empty+= value;
-        // Should invoke empty code.
-        this.Bar_Empty+= value;
+        _ = this.Bar_Empty;
         // Should invoke override 1.
-        this.Bar_Override1+= value;
+        _ = this.Bar_Override1;
+        // Should invoke override 3.
+        _ = this.Bar_Override3;
         // Should invoke the final declaration.
-        this.Bar+= value;
+        _ = this.Bar;
+        return 42;
     }
     
-remove    {
+set    {
         // Should invoke empty code.
-        this.Bar_Empty-= value;
-        // Should invoke empty code.
-        this.Bar_Empty-= value;
+        this.Bar_Empty= value;
         // Should invoke override 1.
-        this.Bar_Override1-= value;
+        this.Bar_Override1= value;
+        // Should invoke override 3.
+        this.Bar_Override3= value;
         // Should invoke the final declaration.
-        this.Bar-= value;
+        this.Bar= value;
     }
 }
     
-private event EventHandler Bar_Override3
-{add    {
+private int Bar_Override5
+{get    {
         // Should invoke empty code.
-        this.Bar_Empty+= value;
-        // Should invoke override 1.
-        this.Bar_Override1+= value;
+        _ = this.Bar_Empty;
         // Should invoke override 3.
-        this.Bar_Override3+= value;
+        _ = this.Bar_Override3;
         // Should invoke the final declaration.
-        this.Bar+= value;
+        _ = this.Bar;
+        // Should invoke the final declaration.
+        _ = this.Bar;
+        return 42;
     }
     
-remove    {
+set    {
         // Should invoke empty code.
-        this.Bar_Empty-= value;
-        // Should invoke override 1.
-        this.Bar_Override1-= value;
+        this.Bar_Empty= value;
         // Should invoke override 3.
-        this.Bar_Override3-= value;
+        this.Bar_Override3= value;
         // Should invoke the final declaration.
-        this.Bar-= value;
+        this.Bar= value;
+        // Should invoke the final declaration.
+        this.Bar= value;
     }
 }
     
-private event EventHandler Bar_Override5
-{add    {
+public int Foo_Override2
+{get    {
         // Should invoke empty code.
-        this.Bar_Empty+= value;
-        // Should invoke override 3.
-        this.Bar_Override3+= value;
+        _ = this.Bar_Empty;
+        // Should invoke override 1.
+        _ = this.Bar_Override1;
+        // Should invoke override 1.
+        _ = this.Bar_Override1;
         // Should invoke the final declaration.
-        this.Bar+= value;
-        // Should invoke the final declaration.
-        this.Bar+= value;
+        _ = this.Bar;
+        return 42;
     }
     
-remove    {
+set    {
         // Should invoke empty code.
-        this.Bar_Empty-= value;
-        // Should invoke override 3.
-        this.Bar_Override3-= value;
+        this.Bar_Empty= value;
+        // Should invoke override 1.
+        this.Bar_Override1= value;
+        // Should invoke override 1.
+        this.Bar_Override1= value;
         // Should invoke the final declaration.
-        this.Bar-= value;
-        // Should invoke the final declaration.
-        this.Bar-= value;
+        this.Bar= value;
     }
 }
     
-public event EventHandler Foo_Override2
-{add    {
+public int Foo_Override4
+{get    {
         // Should invoke empty code.
-        this.Bar_Empty+= value;
-        // Should invoke override 1.
-        this.Bar_Override1+= value;
-        // Should invoke override 1.
-        this.Bar_Override1+= value;
+        _ = this.Bar_Empty;
+        // Should invoke override 3.
+        _ = this.Bar_Override3;
+        // Should invoke override 3.
+        _ = this.Bar_Override3;
         // Should invoke the final declaration.
-        this.Bar+= value;
+        _ = this.Bar;
+        return 42;
     }
     
-remove    {
+set    {
         // Should invoke empty code.
-        this.Bar_Empty-= value;
-        // Should invoke override 1.
-        this.Bar_Override1-= value;
-        // Should invoke override 1.
-        this.Bar_Override1-= value;
+        this.Bar_Empty= value;
+        // Should invoke override 3.
+        this.Bar_Override3= value;
+        // Should invoke override 3.
+        this.Bar_Override3= value;
         // Should invoke the final declaration.
-        this.Bar-= value;
+        this.Bar= value;
     }
 }
     
-public event EventHandler Foo_Override4
-{add    {
+public int Foo_Override6
+{get    {
         // Should invoke empty code.
-        this.Bar_Empty+= value;
-        // Should invoke override 3.
-        this.Bar_Override3+= value;
-        // Should invoke override 3.
-        this.Bar_Override3+= value;
+        _ = this.Bar_Empty;
         // Should invoke the final declaration.
-        this.Bar+= value;
+        _ = this.Bar;
+        // Should invoke the final declaration.
+        _ = this.Bar;
+        // Should invoke the final declaration.
+        _ = this.Bar;
+        return 42;
     }
     
-remove    {
+set    {
         // Should invoke empty code.
-        this.Bar_Empty-= value;
-        // Should invoke override 3.
-        this.Bar_Override3-= value;
-        // Should invoke override 3.
-        this.Bar_Override3-= value;
+        this.Bar_Empty= value;
         // Should invoke the final declaration.
-        this.Bar-= value;
-    }
-}
-    
-public event EventHandler Foo_Override6
-{add    {
-        // Should invoke empty code.
-        this.Bar_Empty+= value;
+        this.Bar= value;
         // Should invoke the final declaration.
-        this.Bar+= value;
+        this.Bar= value;
         // Should invoke the final declaration.
-        this.Bar+= value;
-        // Should invoke the final declaration.
-        this.Bar+= value;
-    }
-    
-remove    {
-        // Should invoke empty code.
-        this.Bar_Empty-= value;
-        // Should invoke the final declaration.
-        this.Bar-= value;
-        // Should invoke the final declaration.
-        this.Bar-= value;
-        // Should invoke the final declaration.
-        this.Bar-= value;
+        this.Bar= value;
     }
 }    }

@@ -1,7 +1,7 @@
 ﻿using System;
 using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.IntroducedEvent
+namespace Caravela.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.OverriddenLocalEvent
 {
     [PseudoLayerOrder("TestAspect0")]
     [PseudoLayerOrder("TestAspect1")]
@@ -9,14 +9,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Intro
     [PseudoLayerOrder("TestAspect3")]
     [PseudoLayerOrder("TestAspect4")]
     [PseudoLayerOrder("TestAspect5")]
+    [PseudoLayerOrder("TestAspect6")]
     // <target>
     class Target
     {
-        public event EventHandler Foo
-        {
-            add => Console.WriteLine("This is original code.");
-            remove => Console.WriteLine("This is original code.");
-        }
+        public event EventHandler? Foo;
 
         [PseudoOverride(nameof(Foo), "TestAspect0")]
         [PseudoNotInlineable]
@@ -25,11 +22,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Intro
         {
             add
             {
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, original] += value;
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, @base] += value;
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, self] += value;
                 // Should invoke the final declaration.
                 link[_this.Bar, final] += value;
@@ -37,11 +34,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Intro
 
             remove
             {
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, original] -= value;
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, @base] -= value;
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, self] -= value;
                 // Should invoke the final declaration.
                 link[_this.Bar, final] -= value;
@@ -55,7 +52,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Intro
         {
             add
             {
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, original] += value;
                 // Should invoke override 1.
                 link[_this.Bar, @base] += value;
@@ -67,7 +64,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Intro
 
             remove
             {
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, original] -= value;
                 // Should invoke override 1.
                 link[_this.Bar, @base] -= value;
@@ -85,7 +82,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Intro
         {
             add
             {
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, original] += value;
                 // Should invoke override 3.
                 link[_this.Bar, @base] += value;
@@ -97,7 +94,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Intro
 
             remove
             {
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, original] -= value;
                 // Should invoke override 3.
                 link[_this.Bar, @base] -= value;
@@ -115,7 +112,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Intro
         {
             add
             {
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, original] += value;
                 // Should invoke the final declaration.
                 link[_this.Bar, @base] += value;
@@ -127,7 +124,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Intro
 
             remove
             {
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, original] -= value;
                 // Should invoke the final declaration.
                 link[_this.Bar, @base] -= value;
@@ -138,30 +135,17 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Intro
             }
         }
 
-        [PseudoIntroduction("TestAspect1")]
-        [PseudoNotInlineable]
-        public event EventHandler Bar
-        {
-            add
-            {
-                Console.WriteLine("This is introduced code (discarded).");
-            }
-
-            remove
-            {
-                Console.WriteLine("This is introduced code (discarded).");
-            }
-        }
+        public event EventHandler? Bar;
 
         [PseudoOverride(nameof(Bar), "TestAspect1")]
         [PseudoNotInlineable]
-        private event EventHandler Bar_Override1
+        public event EventHandler Bar_Override1
         {
             add
             {
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, original] += value;
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, @base] += value;
                 // Should invoke override 1.
                 link[_this.Bar, self] += value;
@@ -171,9 +155,9 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Intro
 
             remove
             {
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, original] -= value;
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, @base] -= value;
                 // Should invoke override 1.
                 link[_this.Bar, self] -= value;
@@ -184,11 +168,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Intro
 
         [PseudoOverride(nameof(Bar), "TestAspect3")]
         [PseudoNotInlineable]
-        private event EventHandler Bar_Override3
+        public event EventHandler Bar_Override3
         {
             add
             {
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, original] += value;
                 // Should invoke override 1.
                 link[_this.Bar, @base] += value;
@@ -200,7 +184,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Intro
 
             remove
             {
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, original] -= value;
                 // Should invoke override 1.
                 link[_this.Bar, @base] -= value;
@@ -213,11 +197,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Intro
 
         [PseudoOverride(nameof(Bar), "TestAspect5")]
         [PseudoNotInlineable]
-        private event EventHandler Bar_Override5
+        public event EventHandler Bar_Override5
         {
             add
             {
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, original] += value;
                 // Should invoke override 3.
                 link[_this.Bar, @base] += value;
@@ -229,7 +213,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Intro
 
             remove
             {
-                // Should invoke empty code.
+                // Should invoke source code.
                 link[_this.Bar, original] -= value;
                 // Should invoke override 3.
                 link[_this.Bar, @base] -= value;

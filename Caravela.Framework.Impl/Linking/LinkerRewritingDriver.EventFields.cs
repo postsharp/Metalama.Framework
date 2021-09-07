@@ -25,9 +25,11 @@ namespace Caravela.Framework.Impl.Linking
                     members.Add( GetEventBackingField( eventFieldDeclaration, symbol ) );
                 }
 
-                members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
-
-                if ( !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                {
+                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
+                }
+                else
                 {
                     members.Add( GetTrampolineEvent( eventFieldDeclaration, symbol ) );
                 }

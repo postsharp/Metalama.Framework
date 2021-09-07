@@ -19,17 +19,21 @@ namespace Caravela.Framework.Impl.Linking
         {
             if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
-                var members =
-                    eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField )
-                        ? new List<MemberDeclarationSyntax>
-                        {
-                            GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final )
-                        }
-                        : new List<MemberDeclarationSyntax> { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) };
-
+                var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = (IEventSymbol) this._introductionRegistry.GetLastOverride( symbol );
 
-                if ( !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField )
+                     && this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) ) )
+                {
+                    // Backing field for auto property.
+                    members.Add( GetEventBackingField( eventDeclaration, symbol ) );
+                }
+
+                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                {
+                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
+                }
+                else
                 {
                     members.Add( GetTrampolineEvent( eventDeclaration, symbol ) );
                 }

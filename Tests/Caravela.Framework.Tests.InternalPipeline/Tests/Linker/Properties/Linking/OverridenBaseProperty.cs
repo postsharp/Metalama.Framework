@@ -1,14 +1,17 @@
 ﻿using System;
 using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.OverridenBaseEvent
+namespace Caravela.Framework.Tests.Integration.Tests.Linker.Properties.Linking.OverridenBaseEvent
 {
     class Base
     {
-        public virtual event EventHandler Bar
+        public virtual int Bar
         {
-            add { }
-            remove { }
+            get 
+            {
+                return 0;
+            }
+            set { }
         }
     }
 
@@ -22,14 +25,15 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Overr
     // <target>
     class Target : Base
     {
-        public event EventHandler Foo
+        public int Foo
         {
-            add
+            get
             {
                 Console.WriteLine("This is original code.");
+                return 0;
             }
 
-            remove
+            set
             {
                 Console.WriteLine("This is original code.");
             }
@@ -39,220 +43,235 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Overr
         [PseudoOverride(nameof(Foo), "TestAspect0")]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
-        public event EventHandler Foo_Override0
+        public int Foo_Override0
         {
-            add
+            get
             {
                 // Should invoke base declaration.
-                link[_this.Bar, original] += value;
+                _ = link[_this.Bar, original];
                 // Should invoke base declaration.
-                link[_this.Bar, @base] += value;
+                _ = link[_this.Bar, @base];
                 // Should invoke base declaration.
-                link[_this.Bar, self] += value;
+                _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
-                link[_this.Bar, final] += value;
+                _ = link[_this.Bar, final];
+
+                return 42;
             }
 
-            remove
+            set
             {
                 // Should invoke base declaration.
-                link[_this.Bar, original] -= value;
+                link[_this.Bar, original] = value;
                 // Should invoke base declaration.
-                link[_this.Bar, @base] -= value;
+                link[_this.Bar, @base] = value;
                 // Should invoke base declaration.
-                link[_this.Bar, self] -= value;
+                link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, final] -= value;
+                link[_this.Bar, final] = value;
             }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect2")]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
-        public event EventHandler Foo_Override2
+        public int Foo_Override2
         {
-            add
+            get
             {
                 // Should invoke base declaration.
-                link[_this.Bar, original] += value;
+                _ = link[_this.Bar, original];
                 // Should invoke override 1.
-                link[_this.Bar, @base] += value;
+                _ = link[_this.Bar, @base];
                 // Should invoke override 1.
-                link[_this.Bar, self] += value;
+                _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
-                link[_this.Bar, final] += value;
+                _ = link[_this.Bar, final];
+
+                return 42;
             }
 
-            remove
+            set
             {
                 // Should invoke base declaration.
-                link[_this.Bar, original] -= value;
+                link[_this.Bar, original] = value;
                 // Should invoke override 1.
-                link[_this.Bar, @base] -= value;
+                link[_this.Bar, @base] = value;
                 // Should invoke override 1.
-                link[_this.Bar, self] -= value;
+                link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, final] -= value;
+                link[_this.Bar, final] = value;
             }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect4")]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
-        public event EventHandler Foo_Override4
+        public int Foo_Override4
         {
-            add
+            get
             {
                 // Should invoke base declaration.
-                link[_this.Bar, original] += value;
+                _ = link[_this.Bar, original];
                 // Should invoke override 3.
-                link[_this.Bar, @base] += value;
+                _ = link[_this.Bar, @base];
                 // Should invoke override 3.
-                link[_this.Bar, self] += value;
+                _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
-                link[_this.Bar, final] += value;
+                _ = link[_this.Bar, final];
+
+                return 42;
             }
 
-            remove
+            set
             {
                 // Should invoke base declaration.
-                link[_this.Bar, original] -= value;
+                link[_this.Bar, original] = value;
                 // Should invoke override 3.
-                link[_this.Bar, @base] -= value;
+                link[_this.Bar, @base] = value;
                 // Should invoke override 3.
-                link[_this.Bar, self] -= value;
+                link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, final] -= value;
+                link[_this.Bar, final] = value;
             }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect6")]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
-        public event EventHandler Foo_Override6
+        public int Foo_Override6
         {
-            add
+            get
             {
                 // Should invoke base declaration.
-                link[_this.Bar, original] += value;
+                _ = link[_this.Bar, original];
                 // Should invoke the final declaration.
-                link[_this.Bar, @base] += value;
+                _ = link[_this.Bar, @base];
                 // Should invoke the final declaration.
-                link[_this.Bar, self] += value;
+                _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
-                link[_this.Bar, final] += value;
+                _ = link[_this.Bar, final];
+
+                return 42;
             }
 
-            remove
+            set
             {
                 // Should invoke base declaration.
-                link[_this.Bar, original] -= value;
+                link[_this.Bar, original] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, @base] -= value;
+                link[_this.Bar, @base] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, self] -= value;
+                link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, final] -= value;
+                link[_this.Bar, final] = value;
             }
         }
 
         [PseudoIntroduction("TestAspect1")]
         [PseudoNotInlineable]
-        public override event EventHandler Bar
+        public override int Bar
         {
-            add
+            get
             {
+                return 0;
             }
 
-            remove
+            set
             {
             }
         }
 
         [PseudoOverride(nameof(Bar), "TestAspect1")]
         [PseudoNotInlineable]
-        private event EventHandler Bar_Override1
+        private int Bar_Override1
         {
-            add
+            get
             {
                 // Should invoke base declaration.
-                link[_this.Bar, original] += value;
+                _ = link[_this.Bar, original];
                 // Should invoke base declaration.
-                link[_this.Bar, @base] += value;
+                _ = link[_this.Bar, @base];
                 // Should invoke override 1.
-                link[_this.Bar, self] += value;
+                _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
-                link[_this.Bar, final] += value;
+                _ = link[_this.Bar, final];
+
+                return 42;
             }
 
-            remove
+            set
             {
                 // Should invoke base declaration.
-                link[_this.Bar, original] -= value;
+                link[_this.Bar, original] = value;
                 // Should invoke base declaration.
-                link[_this.Bar, @base] -= value;
+                link[_this.Bar, @base] = value;
                 // Should invoke override 1.
-                link[_this.Bar, self] -= value;
+                link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, final] -= value;
+                link[_this.Bar, final] = value;
             }
         }
 
         [PseudoOverride(nameof(Bar), "TestAspect3")]
         [PseudoNotInlineable]
-        private event EventHandler Bar_Override3
+        private int Bar_Override3
         {
-            add
+            get
             {
                 // Should invoke base declaration.
-                link[_this.Bar, original] += value;
+                _ = link[_this.Bar, original];
                 // Should invoke override 1.
-                link[_this.Bar, @base] += value;
+                _ = link[_this.Bar, @base];
                 // Should invoke override 3.
-                link[_this.Bar, self] += value;
+                _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
-                link[_this.Bar, final] += value;
+                _ = link[_this.Bar, final];
+
+                return 42;
             }
 
-            remove
+            set
             {
                 // Should invoke base declaration.
-                link[_this.Bar, original] -= value;
+                link[_this.Bar, original] = value;
                 // Should invoke override 1.
-                link[_this.Bar, @base] -= value;
+                link[_this.Bar, @base] = value;
                 // Should invoke override 3.
-                link[_this.Bar, self] -= value;
+                link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, final] -= value;
+                link[_this.Bar, final] = value;
             }
         }
 
         [PseudoOverride(nameof(Bar), "TestAspect5")]
         [PseudoNotInlineable]
-        private event EventHandler Bar_Override5
+        private int Bar_Override5
         {
-            add
+            get
             {
                 // Should invoke base declaration.
-                link[_this.Bar, original] += value;
+                _ = link[_this.Bar, original];
                 // Should invoke override 3.
-                link[_this.Bar, @base] += value;
+                _ = link[_this.Bar, @base];
                 // Should invoke the final declaration.
-                link[_this.Bar, self] += value;
+                _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
-                link[_this.Bar, final] += value;
+                _ = link[_this.Bar, final];
+
+                return 42;
             }
 
-            remove
+            set
             {
                 // Should invoke base declaration.
-                link[_this.Bar, original] -= value;
+                link[_this.Bar, original] = value;
                 // Should invoke override 3.
-                link[_this.Bar, @base] -= value;
+                link[_this.Bar, @base] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, self] -= value;
+                link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, final] -= value;
+                link[_this.Bar, final] = value;
             }
         }
     }
