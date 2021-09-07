@@ -10,7 +10,7 @@ Make sure you have read and understood [PostSharp Engineering](../README.md) bef
 
 1. Set up continuos integration as described at [PostSharp Engineering: Build Features](../build/README.md#continuous-integration).
 
-2. Create `.eng\CopyToPublishDir.proj` file. The content should look like this:
+2. Create `eng\CopyToPublishDir.proj` file. The content should look like this:
 
 ```
 <Project>

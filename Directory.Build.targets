@@ -1,6 +1,6 @@
 <Project>
 
-    <Import Project=".eng\shared\build\AssemblyMetadata.targets" />
-    <Import Project=".eng\shared\build\TeamCity.targets" />
+    <Import Project="eng\shared\build\AssemblyMetadata.targets" />
+    <Import Project="eng\shared\build\TeamCity.targets" />
 
 </Project>

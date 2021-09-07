@@ -73,9 +73,11 @@ namespace Caravela.Framework.Impl
             {
                 throw new AssertionFailedException( justification ?? $"The reference to {typeof(T).Name} must not be not null." );
             }
-#endif
 
             return obj;
+#else
+            return obj!;
+#endif
         }
 
         /// <summary>

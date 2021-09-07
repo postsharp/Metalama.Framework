@@ -15,12 +15,12 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
     throw "This script has to run in a GIT repository root!"
 }
 
-& ./.eng/shared/tools/Build.ps1
-& ./.eng/shared/tools/Restore.ps1 SignClient 
+& ./eng/shared/tools/Build.ps1
+& ./eng/shared/tools/Restore.ps1 SignClient 
 
 $CurrentDir = $(get-location).Path
 
-& ./tools/SignClient Sign --baseDirectory $CurrentDir\artifacts\publish\ --input *.nupkg --config $CurrentDir\.eng\shared\deploy\signclient-appsettings.json --name $ProjectName --user sign-caravela@postsharp.net --secret $Env:SIGNSERVER_SECRET
+& ./tools/SignClient Sign --baseDirectory $CurrentDir\artifacts\publish\ --input *.nupkg --config $CurrentDir\eng\shared\deploy\signclient-appsettings.json --name $ProjectName --user sign-caravela@postsharp.net --secret $Env:SIGNSERVER_SECRET
 
 if (!$?) {
 	throw "Signing failed."

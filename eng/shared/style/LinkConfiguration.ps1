@@ -23,7 +23,7 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
 }
 
 # Update/initialize the engineering subtree.
-$EngineeringDirectory = ".eng\shared"
+$EngineeringDirectory = "eng\shared"
 
 $EditorConfigFile = ".\.editorconfig"
 
