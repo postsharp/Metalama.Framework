@@ -25,7 +25,7 @@ namespace Caravela.TestFramework
     {
         private static readonly Regex _spaceRegex = new( " +", RegexOptions.Compiled );
         private static readonly Regex _newLineRegex = new( "( *[\n|\r])+", RegexOptions.Compiled );
-        private readonly MetadataReference[] _additionalAssemblies;
+        private readonly MetadataReference[] _metadataReferences;
         private static readonly AsyncLocal<bool> _isTestRunning = new();
 
         protected IServiceProvider ServiceProvider { get; }
@@ -36,7 +36,7 @@ namespace Caravela.TestFramework
             IEnumerable<MetadataReference> metadataReferences,
             ITestOutputHelper? logger )
         {
-            this._additionalAssemblies = metadataReferences
+            this._metadataReferences = metadataReferences
                 .Append( MetadataReference.CreateFromFile( typeof(BaseTestRunner).Assembly.Location ) )
                 .ToArray();
 
@@ -53,6 +53,19 @@ namespace Caravela.TestFramework
         public ITestOutputHelper? Logger { get; }
 
         public async Task RunAndAssertAsync( TestInput testInput )
+        {
+            using ( TestExecutionContext.Open() )
+            {
+                // Run in a different method to that GC can collect the reference to TestResult.
+                using ( var task = this.RunAndAssertCoreAsync( testInput ) )
+                {
+                    await task;
+                }
+            }
+        }
+        
+
+        private async Task RunAndAssertCoreAsync( TestInput testInput )
         {
             Dictionary<string, object?> state = new( StringComparer.Ordinal );
             var testResult = await this.RunAsync( testInput, state );
@@ -314,7 +327,7 @@ namespace Caravela.TestFramework
         /// <returns>A new project instance.</returns>
         internal Project CreateProject( TestOptions options )
         {
-            var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null, this._additionalAssemblies );
+            var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null, this._metadataReferences );
 
             var guid = Guid.NewGuid();
             var workspace1 = new AdhocWorkspace();

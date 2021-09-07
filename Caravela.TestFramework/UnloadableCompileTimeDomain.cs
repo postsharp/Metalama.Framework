@@ -48,6 +48,11 @@ namespace Caravela.TestFramework
             // Must call the base Dispose method to clear the base cache.
             this.Dispose( true );
 
+            this.WaitForDisposal();
+        }
+
+        public void WaitForDisposal()
+        {
             var waits = 0;
 
             while ( this._loadedAssemblies.Any( r => r.IsAlive ) )
@@ -59,7 +64,11 @@ namespace Caravela.TestFramework
 
                 if ( waits > 10 )
                 {
-                    throw new AssertionFailedException( "The domain could not be unloaded. There are probably dangling references." );
+                    var assemblies = string.Join( ",", this._loadedAssemblies.Where( r => r.IsAlive ).Select( r => ((Assembly) r.Target!).GetName().Name ) );
+
+                    throw new AssertionFailedException(
+                        "The domain could not be unloaded. There are probably dangling references." +
+                        "The following assemblies are still loaded: " + assemblies );
                 }
             }
         }
@@ -67,7 +76,13 @@ namespace Caravela.TestFramework
         public override void Dispose( bool disposing )
         {
             base.Dispose( disposing );
+
             this._assemblyLoadContext.Unload();
+            TestExecutionContext.RegisterDisposedDomain( this );
+
+            // We cannot wait for complete disposal here because the TestResult object, lower in the stack, typically contains
+            // a reference to a build-time assembly. So, we need to put the test out of the stack before the domain
+            // can be completely disposed.
         }
     }
 }
