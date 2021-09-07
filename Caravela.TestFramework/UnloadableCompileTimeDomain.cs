@@ -67,8 +67,8 @@ namespace Caravela.TestFramework
                     var assemblies = string.Join( ",", this._loadedAssemblies.Where( r => r.IsAlive ).Select( r => ((Assembly) r.Target!).GetName().Name ) );
 
                     throw new AssertionFailedException(
-                        "The domain could not be unloaded. There are probably dangling references." +
-                        "The following assemblies are still loaded: " + assemblies );
+                        "The domain could not be unloaded. There are probably dangling references. " +
+                        "The following assemblies are still loaded: " + assemblies + "." );
                 }
             }
         }

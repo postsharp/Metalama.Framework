@@ -56,19 +56,14 @@ namespace Caravela.TestFramework
         {
             using ( TestExecutionContext.Open() )
             {
-                // Run in a different method to that GC can collect the reference to TestResult.
-                using ( var task = this.RunAndAssertCoreAsync( testInput ) )
-                {
-                    await task;
-                }
+                await this.RunAndAssertCoreAsync( testInput );
             }
         }
-        
 
         private async Task RunAndAssertCoreAsync( TestInput testInput )
         {
             Dictionary<string, object?> state = new( StringComparer.Ordinal );
-            var testResult = await this.RunAsync( testInput, state );
+            using var testResult = await this.RunAsync( testInput, state );
             this.SaveResults( testInput, testResult, state );
             this.ExecuteAssertions( testInput, testResult, state );
         }
