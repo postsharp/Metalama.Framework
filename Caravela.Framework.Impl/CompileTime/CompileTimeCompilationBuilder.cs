@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Observers;
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.Mapping;
 using Caravela.Framework.Impl.Utilities;
@@ -629,13 +630,22 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName );
 
+                        var aspectTypes = compileTimeCompilation.Assembly
+                            .GetTypes()
+                            .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
+                            .Select( t => t.GetReflectionNameSafe() )
+                            .ToList();
+
+                        var compilerPlugInTypes = compileTimeCompilation.Assembly
+                            .GetTypes()
+                            .Where( t => t.GetAttributes().Any( a => a is { AttributeClass: { Name: nameof(CompilerPluginAttribute) } } ) )
+                            .Select( t => t.GetReflectionNameSafe() )
+                            .ToList();
+
                         var manifest = new CompileTimeProjectManifest(
                             compileTimeCompilation.AssemblyName!,
-                            compileTimeCompilation.Assembly
-                                .GetTypes()
-                                .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
-                                .Select( t => t.GetReflectionNameSafe() )
-                                .ToList(),
+                            aspectTypes,
+                            compilerPlugInTypes,
                             referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
                             sourceHash,
                             textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );

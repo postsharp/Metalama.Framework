@@ -2,8 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -36,5 +39,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public IPartialCompilation UpdateSyntaxTrees(
             IReadOnlyList<ModifiedSyntaxTree>? replacements = null,
             IReadOnlyList<SyntaxTree>? addedTrees = null );
+
+        public IPartialCompilation UpdateSyntaxTrees( Func<SyntaxTree, SyntaxTree> replace, CancellationToken cancellationToken = default );
+
+        public IPartialCompilation RewriteSyntaxTrees( CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default );
     }
 }

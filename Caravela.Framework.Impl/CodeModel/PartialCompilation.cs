@@ -2,10 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -140,6 +142,45 @@ namespace Caravela.Framework.Impl.CodeModel
             IReadOnlyList<ModifiedSyntaxTree>? replacedTrees,
             IReadOnlyList<SyntaxTree>? addedTrees )
             => this.UpdateSyntaxTrees( replacedTrees, addedTrees );
+
+        public IPartialCompilation UpdateSyntaxTrees( Func<SyntaxTree, SyntaxTree> replace, CancellationToken cancellationToken = default )
+        {
+            var modifiedSyntaxTrees = new List<ModifiedSyntaxTree>( this.SyntaxTrees.Count );
+            
+            foreach ( var tree in this.SyntaxTrees.Values )
+            {
+                var newTree = replace( tree );
+                
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if ( newTree != tree )
+                {
+                    modifiedSyntaxTrees.Add( new ModifiedSyntaxTree(newTree,tree) );
+                }
+            }
+
+            return this.UpdateSyntaxTrees( modifiedSyntaxTrees );
+        }
+
+        public IPartialCompilation RewriteSyntaxTrees( CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default )
+        {
+            var modifiedSyntaxTrees = new List<ModifiedSyntaxTree>( this.SyntaxTrees.Count );
+            
+            foreach ( var tree in this.SyntaxTrees.Values )
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                    
+                var oldRoot = tree.GetRoot();
+                var newRoot = rewriter.Visit( oldRoot );
+
+                if ( newRoot != oldRoot )
+                {
+                    modifiedSyntaxTrees.Add( new ModifiedSyntaxTree(tree.WithRootAndOptions( newRoot, tree.Options ), tree ) );
+                }
+            }
+
+            return this.UpdateSyntaxTrees( modifiedSyntaxTrees );
+        }
 
         /// <summary>
         ///  Adds and replaces syntax trees of the current <see cref="PartialCompilation"/> and returns a new <see cref="PartialCompilation"/>
