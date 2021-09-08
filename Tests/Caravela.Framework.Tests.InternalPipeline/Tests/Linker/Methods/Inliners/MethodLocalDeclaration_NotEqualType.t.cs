@@ -1,10 +1,11 @@
 class Target
     {
-    
         int Foo()
 {
     Console.WriteLine("Before");
-    return _ = (int)this.Foo_Source();
+    long x = this.Foo_Source();
+    Console.WriteLine("After");
+    return (int)x;
 }
     
 private int Foo_Source()

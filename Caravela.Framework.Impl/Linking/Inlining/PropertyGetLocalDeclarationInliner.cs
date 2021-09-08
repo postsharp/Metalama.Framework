@@ -20,28 +20,37 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
+            var propertySymbol =
+                aspectReference.ResolvedSemantic.Symbol as IPropertySymbol
+                ?? (IPropertySymbol) ((aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
+
+            // Should be within equals clause.
             if ( aspectReference.Expression.Parent == null || aspectReference.Expression.Parent is not EqualsValueClauseSyntax equalsClause )
             {
                 return false;
             }
 
-            if ( equalsClause.Parent == null || equalsClause.Parent is not VariableDeclaratorSyntax variableDeclarator )
+            // Should be within variable declarator.
+            if ( equalsClause.Parent is not VariableDeclaratorSyntax variableDeclarator
+                || variableDeclarator.Parent is not VariableDeclarationSyntax variableDeclaration )
             {
                 // Coverage: ignore (only incorrect code can get here).
                 return false;
             }
 
-            if ( variableDeclarator.Parent == null || variableDeclarator.Parent is not VariableDeclarationSyntax variableDeclaration )
-            {
-                // Coverage: ignore (only incorrect code can get here).
-                return false;
-            }
-
+            // Should be single-variable declaration.
             if ( variableDeclaration.Variables.Count != 1 )
             {
                 return false;
             }
 
+            // Variable and property type should be equal (i.e. no implicit conversions).
+            if ( !SymbolEqualityComparer.Default.Equals(semanticModel.GetSymbolInfo( variableDeclaration.Type ).Symbol, propertySymbol.Type ))
+            {
+                return false;
+            }
+
+            // Should be within local declaration.
             if ( variableDeclaration.Parent == null || variableDeclaration.Parent is not LocalDeclarationStatementSyntax )
             {
                 // Coverage: ignore (only incorrect code can get here).
