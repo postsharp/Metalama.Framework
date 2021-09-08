@@ -24,9 +24,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public static CompilationModel CreateInitialInstance( PartialCompilation compilation ) => new( compilation );
 
-        public static CompilationModel CreateInitialInstance( Compilation compilation, ImmutableArray<ResourceDescription> resources = default ) => new( PartialCompilation.CreateComplete( compilation, resources ) );
+        public static CompilationModel CreateInitialInstance( Compilation compilation, ImmutableArray<ResourceDescription> resources = default )
+            => new( PartialCompilation.CreateComplete( compilation, resources ) );
 
-        public static CompilationModel CreateInitialInstance( Compilation compilation, SyntaxTree syntaxTree, ImmutableArray<ResourceDescription> resources = default )
+        public static CompilationModel CreateInitialInstance(
+            Compilation compilation,
+            SyntaxTree syntaxTree,
+            ImmutableArray<ResourceDescription> resources = default )
             => new( PartialCompilation.CreatePartial( compilation, syntaxTree, resources ) );
 
         internal CompilationModel WithTransformations( IReadOnlyList<IObservableTransformation> introducedDeclarations )

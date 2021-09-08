@@ -46,6 +46,4 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         public ImmutableArray<ResourceDescription> Resources { get; }
     }
-
-  
 }

@@ -55,7 +55,6 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public IReadOnlyList<string> AspectTypes => this._manifest?.AspectTypes ?? Array.Empty<string>();
 
-
         public IReadOnlyList<string> CompilerPlugInTypes => this._manifest?.CompilerPlugIns ?? Array.Empty<string>();
 
         /// <summary>

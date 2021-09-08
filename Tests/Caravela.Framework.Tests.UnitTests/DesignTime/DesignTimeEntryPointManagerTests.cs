@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             instance.RegisterServiceProvider( provider );
             Assert.Equal( provider, await instance.GetServiceProviderAsync( version, CancellationToken.None ) );
         }
-        
+
         [Fact]
         public async Task GetBeforeRegister()
         {
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             var version = new Version( 1, 0 );
             var getTask = instance.GetServiceProviderAsync( version, CancellationToken.None );
             Assert.False( getTask.IsCompleted );
-            
+
             var provider = new FakeProvider( version );
             instance.RegisterServiceProvider( provider );
             Assert.Equal( provider, await getTask );
@@ -77,8 +77,8 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
             public Version Version { get; }
 
-            public T? GetCompilerService<T>() 
-                where T : class, ICompilerService 
+            public T? GetCompilerService<T>()
+                where T : class, ICompilerService
                 => throw new NotImplementedException();
 
             public event Action? Unloaded;

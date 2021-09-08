@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         /// <summary>
         /// Gets the compilation with respect to which the <see cref="ModifiedSyntaxTrees"/> has been constructed.
-        /// Typically, this is the argument of the <see cref="CreateComplete"/> or <see cref="CreatePartial(Microsoft.CodeAnalysis.Compilation,Microsoft.CodeAnalysis.SyntaxTree)"/>
+        /// Typically, this is the argument of the <see cref="CreateComplete"/> or <see cref="CreatePartial(Microsoft.CodeAnalysis.Compilation,Microsoft.CodeAnalysis.SyntaxTree,System.Collections.Immutable.ImmutableArray{Microsoft.CodeAnalysis.ResourceDescription})"/>
         /// method, ignoring any modification done by <see cref="Update"/>.
         /// </summary>
         public Compilation InitialCompilation { get; }
@@ -111,27 +111,34 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <summary>
         /// Creates a <see cref="PartialCompilation"/> that represents a complete compilation.
         /// </summary>
-        public static PartialCompilation CreateComplete( Compilation compilation, ImmutableArray<ResourceDescription> resources = default ) => new CompleteImpl( compilation, resources );
+        public static PartialCompilation CreateComplete( Compilation compilation, ImmutableArray<ResourceDescription> resources = default )
+            => new CompleteImpl( compilation, resources );
 
         /// <summary>
         /// Creates a <see cref="PartialCompilation"/> for a single syntax tree and its closure.
         /// </summary>
-        public static PartialCompilation CreatePartial( Compilation compilation, SyntaxTree syntaxTree, ImmutableArray<ResourceDescription> resources = default )
+        public static PartialCompilation CreatePartial(
+            Compilation compilation,
+            SyntaxTree syntaxTree,
+            ImmutableArray<ResourceDescription> resources = default )
         {
             var syntaxTrees = new[] { syntaxTree };
             var closure = GetClosure( compilation, syntaxTrees );
 
-            return new PartialImpl( 
-                compilation, 
-                closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ), 
+            return new PartialImpl(
+                compilation,
+                closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
                 closure.Types.ToImmutableArray(),
-                resources);
+                resources );
         }
 
         /// <summary>
         /// Creates a <see cref="PartialCompilation"/> for a given subset of syntax trees and its closure.
         /// </summary>
-        public static PartialCompilation CreatePartial( Compilation compilation, IReadOnlyList<SyntaxTree> syntaxTrees, ImmutableArray<ResourceDescription> resources = default )
+        public static PartialCompilation CreatePartial(
+            Compilation compilation,
+            IReadOnlyList<SyntaxTree> syntaxTrees,
+            ImmutableArray<ResourceDescription> resources = default )
         {
             if ( syntaxTrees.Count == 0 )
             {
@@ -140,11 +147,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var closure = GetClosure( compilation, syntaxTrees );
 
-            return new PartialImpl( 
-                compilation, 
-                closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ), 
+            return new PartialImpl(
+                compilation,
+                closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
                 closure.Types.ToImmutableArray(),
-                resources);
+                resources );
         }
 
         IPartialCompilation IPartialCompilation.WithSyntaxTrees(

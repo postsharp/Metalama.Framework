@@ -186,7 +186,7 @@ namespace Caravela.Framework.Impl
             "(...)] attribute to specify the order relationship between these two layers, otherwise the compilation will be non-deterministic.",
             Warning,
             "Two layers are not strongly ordered." );
-        
+
         public static readonly DiagnosticDefinition<(string TemplateName, string ClassName, string BaseClassName)>
             TemplateWithSameNameAlreadyDefinedInBaseClass = new(
                 "CR0036",

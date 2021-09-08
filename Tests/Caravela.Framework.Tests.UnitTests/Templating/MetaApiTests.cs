@@ -10,7 +10,6 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
 {
     public class MetaApiTests : TestBase
     {
-
         [Fact]
         public async Task OutOfContext()
         {
@@ -33,8 +32,6 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
             Assert.Throws<InvalidOperationException>( () => meta.Comment( "" ) );
             Assert.Throws<InvalidOperationException>( () => meta.DefineExpression( "", out _ ) );
             Assert.Throws<InvalidOperationException>( () => meta.ParseExpression( "" ) );
-
         }
-        
     }
 }

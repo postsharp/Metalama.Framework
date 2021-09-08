@@ -133,8 +133,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var aspectTypeFactory = new AspectClassMetadataFactory( this.ServiceProvider, driverFactory );
 
             var aspectTypes = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
-            
-            
+
             // Get aspect parts and sort them.
             var unsortedAspectLayers = aspectTypes
                 .Where( t => !t.IsAbstract )

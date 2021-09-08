@@ -6,7 +6,6 @@ using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -37,9 +36,7 @@ namespace Caravela.Framework.Aspects
             }
         }
 
-        private static InvalidOperationException CreateException()
-            => new( "The 'meta' API can be used only in the execution context of a template." );
-
+        private static InvalidOperationException CreateException() => new( "The 'meta' API can be used only in the execution context of a template." );
 
         /// <summary>
         /// Gets access to the declaration being overridden or introduced.
@@ -113,7 +110,7 @@ namespace Caravela.Framework.Aspects
         public static T? CompileTime<T>( T? expression )
         {
             CheckContext();
-            
+
             return expression;
         }
 
@@ -130,6 +127,7 @@ namespace Caravela.Framework.Aspects
         public static T? RunTime<T>( T? value )
         {
             CheckContext();
+
             return value;
         }
 

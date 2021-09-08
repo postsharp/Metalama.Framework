@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Sdk
             var nodes = this.AspectInstances.Values
                 .Select( a => a.TargetDeclaration.GetSymbol() )
                 .Where( s => s != null )
-                .SelectMany( s => s.DeclaringSyntaxReferences )
+                .SelectMany( s => s!.DeclaringSyntaxReferences )
                 .GroupBy( r => r.SyntaxTree );
 
             List<ModifiedSyntaxTree> modifiedSyntaxTrees = new();
@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.Sdk
                 var outerRewriter = new Rewriter( group.Select( r => r.GetSyntax() ).ToImmutableHashSet(), rewriter );
                 var oldRoot = oldTree.GetRoot();
                 var newRoot = outerRewriter.Visit( oldRoot )!;
-                
+
                 if ( oldRoot != newRoot )
                 {
                     modifiedSyntaxTrees.Add( new ModifiedSyntaxTree( oldTree.WithRootAndOptions( newRoot, oldTree.Options ), oldTree ) );

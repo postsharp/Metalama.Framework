@@ -161,15 +161,13 @@ interface I<T>
 
             var m1 = methods[0];
             Assert.Equal( "M1", m1.Name );
-            
+
             Assert.True( m1.ReturnParameter.IsReturnParameter );
             Assert.False( m1.Parameters[0].IsReturnParameter );
-            
-            Assert.Equal( 0, m1.Parameters.OfParameterType(typeof(int)).First().Index );
+
+            Assert.Equal( 0, m1.Parameters.OfParameterType( typeof(int) ).First().Index );
             Assert.Equal( 0, m1.Parameters.OfParameterType<int>().First().Index );
             Assert.Equal( 0, m1.Parameters.OfParameterType( compilation.Factory.GetSpecialType( SpecialType.Int32 ) ).First().Index );
-            
-            
 
             CheckParameterData( m1.ReturnParameter, m1, "void", null, -1 );
             Assert.Equal( 5, m1.Parameters.Count );

@@ -5,7 +5,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Syntax;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
@@ -15,7 +14,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         private readonly ArrayBuilder _arrayBuilder;
         private readonly IType _itemType;
 
-        public ArrayDynamicExpression( ArrayBuilder arrayBuilder, ICompilation compilation )
+        public ArrayDynamicExpression( ArrayBuilder arrayBuilder )
         {
             this._arrayBuilder = arrayBuilder;
 

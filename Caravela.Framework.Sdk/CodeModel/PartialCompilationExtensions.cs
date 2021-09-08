@@ -51,41 +51,46 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select( x => new ModifiedSyntaxTree( x.OldTree.WithRootAndOptions( x.NewRoot, (CSharpParseOptions) x.OldTree.Options ), x.OldTree ) )
                     .ToList(),
                 Array.Empty<SyntaxTree>() );
-        
-        
-        public static IPartialCompilation UpdateSyntaxTrees( this IPartialCompilation compilation, Func<SyntaxTree, SyntaxTree> replace, CancellationToken cancellationToken = default )
+
+        public static IPartialCompilation UpdateSyntaxTrees(
+            this IPartialCompilation compilation,
+            Func<SyntaxTree, SyntaxTree> replace,
+            CancellationToken cancellationToken = default )
         {
             var modifiedSyntaxTrees = new List<ModifiedSyntaxTree>( compilation.SyntaxTrees.Count );
-            
+
             foreach ( var tree in compilation.SyntaxTrees.Values )
             {
                 var newTree = replace( tree );
-                
+
                 cancellationToken.ThrowIfCancellationRequested();
 
                 if ( newTree != tree )
                 {
-                    modifiedSyntaxTrees.Add( new ModifiedSyntaxTree(newTree,tree) );
+                    modifiedSyntaxTrees.Add( new ModifiedSyntaxTree( newTree, tree ) );
                 }
             }
 
             return compilation.WithSyntaxTrees( modifiedSyntaxTrees );
         }
 
-        public static IPartialCompilation RewriteSyntaxTrees( this IPartialCompilation compilation, CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default )
+        public static IPartialCompilation RewriteSyntaxTrees(
+            this IPartialCompilation compilation,
+            CSharpSyntaxRewriter rewriter,
+            CancellationToken cancellationToken = default )
         {
             var modifiedSyntaxTrees = new List<ModifiedSyntaxTree>( compilation.SyntaxTrees.Count );
-            
+
             foreach ( var tree in compilation.SyntaxTrees.Values )
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                    
+
                 var oldRoot = tree.GetRoot();
                 var newRoot = rewriter.Visit( oldRoot );
 
                 if ( newRoot != oldRoot )
                 {
-                    modifiedSyntaxTrees.Add( new ModifiedSyntaxTree(tree.WithRootAndOptions( newRoot, tree.Options ), tree ) );
+                    modifiedSyntaxTrees.Add( new ModifiedSyntaxTree( tree.WithRootAndOptions( newRoot, tree.Options ), tree ) );
                 }
             }
 

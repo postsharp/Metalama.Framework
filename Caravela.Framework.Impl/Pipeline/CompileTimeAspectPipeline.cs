@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -84,8 +83,6 @@ namespace Caravela.Framework.Impl.Pipeline
                     return false;
                 }
 
-                List<ResourceDescription> additionalResourcesBuilder = new();
-
                 // Execute the pipeline.
                 if ( !this.TryExecute( partialCompilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
                 {
@@ -113,11 +110,11 @@ namespace Caravela.Framework.Impl.Pipeline
                 {
                     outputResources = ImmutableArray<ResourceDescription>.Empty;
                 }
-                
-                outputResources =  outputResources.Add( configuration.CompileTimeProject!.ToResource() );
+
+                outputResources = outputResources.Add( configuration.CompileTimeProject!.ToResource() );
 
                 outputCompilation = RunTimeAssemblyRewriter.Rewrite( resultCompilation.Compilation, this.ServiceProvider );
-                
+
                 return true;
             }
             catch ( InvalidUserCodeException exception )

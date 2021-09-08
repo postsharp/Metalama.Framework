@@ -35,7 +35,7 @@ namespace Caravela.TestFramework
         {
             // GFR: The following code does not work because there are still, sometimes, GC roots to a Task<Result>.
             // I didn't manage to solve this issue in a couple of hours.
-            
+
             /*
             foreach ( var domain in this._domains )
             {

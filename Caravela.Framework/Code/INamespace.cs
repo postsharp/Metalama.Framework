@@ -15,7 +15,7 @@ namespace Caravela.Framework.Code
         /// Gets the full name of the namespace, or an empty string if this is the global namespace.
         /// </summary>
         string FullName { get; }
-        
+
         bool IsGlobalNamespace { get; }
 
         /// <exclude/>

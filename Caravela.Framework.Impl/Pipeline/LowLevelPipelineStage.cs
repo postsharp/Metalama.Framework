@@ -41,8 +41,8 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var aspectInstances = input.AspectSources
                 .SelectMany( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
-                .ToImmutableDictionary( 
-                    i => i.TargetDeclaration.GetSymbol().AssertNotNull("The Roslyn compilation should include all introduced declarations."), 
+                .ToImmutableDictionary(
+                    i => i.TargetDeclaration.GetSymbol().AssertNotNull( "The Roslyn compilation should include all introduced declarations." ),
                     i => (IAspectInstance) i );
 
             if ( !aspectInstances.Any() )

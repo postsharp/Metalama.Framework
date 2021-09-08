@@ -108,7 +108,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IExpression Expression( object? expression )
             => new UserExpression( RuntimeExpression.FromValue( expression, this.Compilation ), this.Compilation );
 
-        public object BuildArray( ArrayBuilder arrayBuilder ) => new ArrayDynamicExpression( arrayBuilder, this.Compilation );
+        public object BuildArray( ArrayBuilder arrayBuilder ) => new ArrayDynamicExpression( arrayBuilder );
 
         public object BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder )
             => new InterpolatedStringDynamicExpression( interpolatedStringBuilder, this.Compilation );

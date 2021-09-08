@@ -13,7 +13,6 @@ using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using PostSharp.Aspects.Advices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -108,7 +107,6 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
-            
             private T? VisitTypeDeclaration<T>( T node )
                 where T : TypeDeclarationSyntax
             {
@@ -230,7 +228,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 else
                 {
                     this.Success = false;
-                    
+
                     this._diagnosticAdder.Report(
                         GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefined.CreateDiagnostic(
                             symbol.GetDiagnosticLocation(),
@@ -416,7 +414,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
             private new IEnumerable<MemberDeclarationSyntax> VisitEventDeclaration( EventDeclarationSyntax node )
             {
-                
                 var eventSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
                 if ( this.SymbolClassifier.GetTemplateInfo( eventSymbol ).IsNone )
@@ -425,7 +422,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                     yield break;
                 }
-                
+
                 if ( !this.CheckTemplateName( eventSymbol ) )
                 {
                     yield break;

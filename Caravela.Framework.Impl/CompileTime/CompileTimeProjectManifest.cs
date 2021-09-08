@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Gets the list of all aspect types (specified by fully qualified name) of the aspect library.
         /// </summary>
         public IReadOnlyList<string> AspectTypes { get; }
-        
+
         public IReadOnlyList<string> CompilerPlugIns { get; }
 
         /// <summary>
