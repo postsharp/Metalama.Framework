@@ -2,21 +2,17 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking.Inlining
 {
-    internal class PropertyGetReturnInliner : PropertyInliner
+    internal class PropertyGetReturnInliner : PropertyGetInliner
     {
-        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[] { SyntaxKind.ReturnStatement };
-
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax needs to be in form: return <annotated_property_expression>;
-            if ( aspectReference.ResolvedSymbol is not IPropertySymbol
-                 && (aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol is not IPropertySymbol )
+            if ( aspectReference.ResolvedSemantic.Symbol is not IPropertySymbol
+                 && (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol is not IPropertySymbol )
             {
                 return false;
             }
@@ -34,11 +30,11 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var expressionStatement = (ReturnStatementSyntax) aspectReference.Expression.Parent.AssertNotNull();
 
             var targetSymbol =
-                aspectReference.ResolvedSymbol as IPropertySymbol
-                ?? (IPropertySymbol) ((aspectReference.ResolvedSymbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
+                aspectReference.ResolvedSemantic.Symbol as IPropertySymbol
+                ?? (IPropertySymbol) ((aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
 
             // Get the final inlined body of the target property getter. 
-            var inlinedTargetBody = context.GetLinkedBody( targetSymbol.GetMethod.AssertNotNull() );
+            var inlinedTargetBody = context.GetLinkedBody( targetSymbol.GetMethod.AssertNotNull().ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
 
             // Mark the block as flattenable.
             inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );

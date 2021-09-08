@@ -2,8 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking.Inlining
 {
@@ -12,13 +10,24 @@ namespace Caravela.Framework.Impl.Linking.Inlining
     /// </summary>
     internal abstract class Inliner
     {
-        public abstract IReadOnlyList<SyntaxKind> AncestorSyntaxKinds { get; }
+        /// <summary>
+        /// Determines whether the inliner can be used for the specified target symbol.
+        /// </summary>
+        /// <param name="symbol">Target symbol.</param>
+        /// <returns></returns>
+        public abstract bool IsValidForTargetSymbol( ISymbol symbol );
+
+        /// <summary>
+        /// Determines whether the inliner can be used for the specified containing symbol.
+        /// </summary>
+        /// <param name="symbol">Containing symbol.</param>
+        /// <returns></returns>
+        public abstract bool IsValidForContainingSymbol( ISymbol symbol );
 
         /// <summary>
         /// Determines whether an aspect reference can be inlined.
         /// </summary>
         /// <param name="aspectReference">Resolved aspect reference.</param>
-        /// <param name="semanticModel">Semantic model for the syntax tree containing the expression.</param>
         /// <returns></returns>
         public abstract bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel );
 

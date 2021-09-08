@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Inliners.AddA
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect")]
-        event EventHandler Foo_Override
+        private event EventHandler Foo_Override
         {
             add
             {

@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
@@ -61,21 +62,157 @@ namespace Caravela.Framework.Impl.Advices
         public override AdviceResult ToResult( ICompilation compilation )
         {
             // TODO: Override transformations.
+            var existingDeclaration = this.TargetDeclaration.Events.OfName( this.MemberBuilder.Name ).SingleOrDefault();
+            var hasNoOverrideSemantics = this.TemplateMember != null && this.TemplateMember.IsEventField();
 
-            if ( this.TemplateMember != null && this.TemplateMember.IsEventField() )
+            if ( existingDeclaration == null )
             {
-                return AdviceResult.Create( this.MemberBuilder );
+                // There is no existing declaration, we will introduce and override the introduced.
+                if ( hasNoOverrideSemantics )
+                {
+                    return AdviceResult.Create( this.MemberBuilder );
+                }
+                else
+                {
+                    return AdviceResult.Create(
+                        this.MemberBuilder,
+                        new OverriddenEvent(
+                            this,
+                            this.MemberBuilder,
+                            this.Template,
+                            this._addTemplate,
+                            this._removeTemplate ) );
+                }
             }
             else
             {
-                return AdviceResult.Create(
-                    this.MemberBuilder,
-                    new OverriddenEvent(
-                        this,
-                        this.MemberBuilder,
-                        this.Template,
-                        this._addTemplate,
-                        this._removeTemplate ) );
+                if ( existingDeclaration.IsStatic != this.MemberBuilder.IsStatic )
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateDiagnostic(
+                                this.TargetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                }
+
+                switch ( this.OverrideStrategy )
+                {
+                    case OverrideStrategy.Fail:
+                        // Produce fail diagnostic.
+                        return
+                            AdviceResult.Create(
+                                AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateDiagnostic(
+                                    this.TargetDeclaration.GetDiagnosticLocation(),
+                                    (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+
+                    case OverrideStrategy.Ignore:
+                        // Do nothing.
+                        return AdviceResult.Create();
+
+                    case OverrideStrategy.New:
+                        // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
+                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
+                        {
+                            if ( hasNoOverrideSemantics )
+                            {
+                                return AdviceResult.Create();
+                            }
+                            else
+                            {
+                                var overriddenMethod = new OverriddenEvent(
+                                    this,
+                                    existingDeclaration,
+                                    this.Template,
+                                    this._addTemplate,
+                                    this._removeTemplate );
+
+                                return AdviceResult.Create( overriddenMethod );
+                            }
+                        }
+                        else
+                        {
+                            this.MemberBuilder.IsNew = true;
+                            this.MemberBuilder.OverriddenEvent = existingDeclaration;
+
+                            if ( hasNoOverrideSemantics )
+                            {
+                                return AdviceResult.Create( this.MemberBuilder );
+                            }
+                            else
+                            {
+                                var overriddenMethod = new OverriddenEvent(
+                                    this,
+                                    this.MemberBuilder,
+                                    this.Template,
+                                    this._addTemplate,
+                                    this._removeTemplate );
+
+                                return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
+                            }
+                        }
+
+                    case OverrideStrategy.Override:
+                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
+                        {
+                            if ( hasNoOverrideSemantics )
+                            {
+                                return AdviceResult.Create();
+                            }
+                            else
+                            {
+                                var overriddenMethod = new OverriddenEvent(
+                                    this,
+                                    existingDeclaration,
+                                    this.Template,
+                                    this._addTemplate,
+                                    this._removeTemplate );
+
+                                return AdviceResult.Create( overriddenMethod );
+                            }
+                        }
+                        else if ( existingDeclaration.IsSealed || !existingDeclaration.IsVirtual )
+                        {
+                            return
+                                AdviceResult.Create(
+                                    AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateDiagnostic(
+                                        this.TargetDeclaration.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration,
+                                         existingDeclaration.DeclaringType) ) );
+                        }
+                        else if ( !compilation.InvariantComparer.Equals( this.Builder.EventType, existingDeclaration.EventType ) )
+                        {
+                            return
+                                AdviceResult.Create(
+                                    AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateDiagnostic(
+                                        this.TargetDeclaration.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration,
+                                         existingDeclaration.DeclaringType, existingDeclaration.EventType) ) );
+                        }
+                        else
+                        {
+                            this.MemberBuilder.IsOverride = true;
+                            this.MemberBuilder.OverriddenEvent = existingDeclaration;
+
+                            if ( hasNoOverrideSemantics )
+                            {
+                                return AdviceResult.Create( this.MemberBuilder );
+                            }
+                            else
+                            {
+                                var overriddenMethod = new OverriddenEvent(
+                                    this,
+                                    this.MemberBuilder,
+                                    this.Template,
+                                    this._addTemplate,
+                                    this._removeTemplate );
+
+                                return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
+                            }
+                        }
+
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
         }
     }

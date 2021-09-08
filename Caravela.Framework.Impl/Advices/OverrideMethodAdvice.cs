@@ -26,6 +26,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
+            // TODO: order should be self if the target is introduced on the same layer.
             return AdviceResult.Create( new OverriddenMethod( this, this.TargetDeclaration, this.Template ) );
         }
     }

@@ -4,18 +4,15 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking.Inlining
 {
     internal class MethodAssignmentInliner : MethodInliner
     {
-        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[] { SyntaxKind.ReturnStatement };
-
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax has to be in form: <local> = <annotated_method_expression( <arguments> );
-            if ( aspectReference.ResolvedSymbol is not IMethodSymbol )
+            if ( aspectReference.ResolvedSemantic.Symbol is not IMethodSymbol )
             {
                 return false;
             }
@@ -71,13 +68,13 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var localVariable = (IdentifierNameSyntax) assignmentExpression.Left.AssertNotNull();
             var expressionStatement = (ExpressionStatementSyntax) assignmentExpression.Parent.AssertNotNull();
 
-            var targetSymbol = (aspectReference.ResolvedSymbol as IMethodSymbol).AssertNotNull();
+            var targetSymbol = (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol).AssertNotNull();
 
             // Change the target local variable.
             var contextWithLocal = context.WithReturnLocal( targetSymbol, localVariable.Identifier.ValueText );
 
             // Get the final inlined body of the target method. 
-            var inlinedTargetBody = contextWithLocal.GetLinkedBody( targetSymbol );
+            var inlinedTargetBody = contextWithLocal.GetLinkedBody( targetSymbol.ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
 
             // Mark the block as flattenable.
             inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );

@@ -77,7 +77,7 @@ namespace Caravela.Framework.Impl
         /// </summary>
         /// <param name="aspectTypeSymbol"></param>
         /// <param name="aspectDriver">Can be null for testing.</param>
-        private AspectClass(
+        protected internal AspectClass(
             IServiceProvider serviceProvider,
             INamedTypeSymbol aspectTypeSymbol,
             AspectClass? baseClass,

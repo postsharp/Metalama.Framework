@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
@@ -80,10 +81,10 @@ namespace Caravela.Framework.Impl.Linking
             // TODO: Merge observable and non-observable transformations so that the order is preserved.
             //       Maybe have all transformations already together in the input?
             var allTransformations =
-                input.CompilationModel.GetAllObservableTransformations()
-                    .SelectMany( x => x.Transformations )
-                    .OfType<ISyntaxTreeTransformation>()
-                    .Concat( input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
+                MergeOrderedTransformations(
+                        input.OrderedAspectLayers,
+                        input.CompilationModel.GetAllObservableTransformations().Select( x => x.Transformations.OfType<ISyntaxTreeTransformation>() ),
+                        input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
                     .ToList();
 
             var replacedTransformations = new HashSet<ISyntaxTreeTransformation>();
@@ -176,7 +177,79 @@ namespace Caravela.Framework.Impl.Linking
                 syntaxTreeMapping,
                 syntaxTransformationCollection.IntroducedMembers );
 
-            return new LinkerIntroductionStepOutput( diagnostics, intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
+            return new LinkerIntroductionStepOutput(
+                diagnostics,
+                input.CompilationModel,
+                intermediateCompilation,
+                introductionRegistry,
+                input.OrderedAspectLayers );
+        }
+
+        private static IEnumerable<ITransformation> MergeOrderedTransformations(
+            IReadOnlyList<OrderedAspectLayer> orderedLayers,
+            IEnumerable<IEnumerable<ITransformation>> observableTransformationLists,
+            IEnumerable<ITransformation> nonObservableTransformations )
+        {
+            var enumerators = new LinkedList<IEnumerator<ITransformation>>();
+
+            foreach ( var observableTransformations in observableTransformationLists )
+            {
+                enumerators.AddLast( observableTransformations.GetEnumerator() );
+            }
+
+            enumerators.AddLast( nonObservableTransformations.GetEnumerator() );
+
+            // Initialize enumerators and remove empty ones.
+            var currentEnumerator = enumerators.First;
+
+            while ( currentEnumerator != null )
+            {
+                if ( !currentEnumerator.Value.MoveNext() )
+                {
+                    enumerators.Remove( currentEnumerator );
+                }
+
+                currentEnumerator = currentEnumerator.Next;
+            }
+
+            // Go through ordered layers and yield all transformations for these layers.
+            // Presumes all input enumerable are ordered according to ordered layers.
+            foreach ( var orderedLayer in orderedLayers )
+            {
+                currentEnumerator = enumerators.First;
+
+                if ( currentEnumerator == null )
+                {
+                    break;
+                }
+
+                do
+                {
+                    var current = currentEnumerator!.Value.Current.AssertNotNull();
+
+                    while ( current.Advice.AspectLayerId == orderedLayer.AspectLayerId )
+                    {
+                        yield return current;
+
+                        if ( !currentEnumerator.Value.MoveNext() )
+                        {
+                            var toRemove = currentEnumerator;
+                            currentEnumerator = currentEnumerator.Next;
+                            enumerators.Remove( toRemove );
+
+                            goto next;
+                        }
+
+                        current = currentEnumerator.Value.Current;
+                    }
+
+                    currentEnumerator = currentEnumerator.Next;
+
+                next:
+                    ;
+                }
+                while ( currentEnumerator != null );
+            }
         }
     }
 }

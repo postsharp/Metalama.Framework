@@ -132,7 +132,9 @@ namespace Caravela.Framework.Impl.Templating
                             (a.Parent is ArrayTypeSyntax arrayType && arrayType.ElementType == a) ||
                             (a.Parent is ObjectCreationExpressionSyntax objectCreation && objectCreation.Type == a) ||
                             (a.Parent is DefaultExpressionSyntax defaultExpression && defaultExpression.Type == a) ||
-                            (a.Parent is CastExpressionSyntax castExpression && castExpression.Type == a) ) )
+                            (a.Parent is CastExpressionSyntax castExpression && castExpression.Type == a) ||
+                            (a.Parent is ExplicitInterfaceSpecifierSyntax explicitInterfaceSpecifier && explicitInterfaceSpecifier.Name == a) ||
+                            (a.Parent is ParameterSyntax parameter && parameter.Type == a) ) )
                 {
                     return SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
