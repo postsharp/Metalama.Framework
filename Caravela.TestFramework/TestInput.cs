@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace Caravela.TestFramework
@@ -56,25 +57,7 @@ namespace Caravela.TestFramework
             }
         }
 
-        private static string? FindProjectDirectory( string? directory )
-        {
-            if ( directory == null )
-            {
-                return null;
-            }
-
-            if ( Directory.GetFiles( directory, "*.csproj" ).Length > 0 )
-            {
-                return directory;
-            }
-            else
-            {
-                var parentDirectory = Path.GetDirectoryName( directory );
-
-                return FindProjectDirectory( parentDirectory );
-            }
-        }
-
+        [ExcludeFromCodeCoverage]
         public static TestInput FromSource( string sourceCode, string path )
         {
             var projectDirectory = FindProjectDirectory( Path.GetDirectoryName( path ) );
@@ -90,8 +73,32 @@ namespace Caravela.TestFramework
                     Path.GetRelativePath( projectDirectory, path ),
                     path );
             }
+            else
+            {
+                // Coverage: ignore
+                // The project could not be found. Continue without reading directory options.
 
-            return new TestInput( "interactive", sourceCode );
+                return new TestInput( "interactive", sourceCode );
+            }
+
+            static string? FindProjectDirectory( string? directory )
+            {
+                if ( directory == null )
+                {
+                    return null;
+                }
+
+                if ( Directory.GetFiles( directory, "*.csproj" ).Length > 0 )
+                {
+                    return directory;
+                }
+                else
+                {
+                    var parentDirectory = Path.GetDirectoryName( directory );
+
+                    return FindProjectDirectory( parentDirectory );
+                }
+            }
         }
 
         internal static TestInput FromFile( TestDirectoryOptionsReader directoryOptionsReader, string relativePath )

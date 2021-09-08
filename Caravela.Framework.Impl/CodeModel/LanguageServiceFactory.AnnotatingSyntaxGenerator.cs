@@ -47,9 +47,6 @@ namespace Caravela.Framework.Impl.CodeModel
                 => (TypeSyntax) this._syntaxGenerator.TypeExpression( symbol )
                     .WithAdditionalAnnotations( Simplifier.Annotation );
 
-            public ParameterSyntax ParameterDeclaration( string name, TypeSyntax type, ExpressionSyntax? expression, RefKind refKind )
-                => (ParameterSyntax) this._syntaxGenerator.ParameterDeclaration( name, type, expression, refKind );
-
             public SimpleNameSyntax GenericName( string methodName, IEnumerable<ITypeSymbol> @select )
                 => (SimpleNameSyntax) this._syntaxGenerator.GenericName( methodName, select )
                     .WithAdditionalAnnotations( Simplifier.Annotation );
@@ -68,9 +65,6 @@ namespace Caravela.Framework.Impl.CodeModel
             public TypeSyntax TypeExpression( SpecialType specialType )
                 => (TypeSyntax) this._syntaxGenerator.TypeExpression( specialType )
                     .WithAdditionalAnnotations( Simplifier.Annotation );
-
-            public TupleExpressionSyntax TupleExpression( IEnumerable<SyntaxNode> elements )
-                => (TupleExpressionSyntax) this._syntaxGenerator.TupleExpression( elements );
 
             public CastExpressionSyntax CastExpression( ITypeSymbol targetTypeSymbol, ExpressionSyntax expression )
             {

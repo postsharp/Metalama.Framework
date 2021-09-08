@@ -55,6 +55,8 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public IReadOnlyList<string> AspectTypes => this._manifest?.AspectTypes ?? Array.Empty<string>();
 
+        public IReadOnlyList<string> CompilerPlugInTypes => this._manifest?.CompilerPlugIns ?? Array.Empty<string>();
+
         /// <summary>
         /// Gets the list of compile-time projects referenced by the current project.
         /// </summary>

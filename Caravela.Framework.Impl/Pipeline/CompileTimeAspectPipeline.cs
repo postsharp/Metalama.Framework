@@ -10,8 +10,8 @@ using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -49,14 +49,15 @@ namespace Caravela.Framework.Impl.Pipeline
         public bool TryExecute(
             IDiagnosticAdder diagnosticAdder,
             Compilation compilation,
+            ImmutableArray<ResourceDescription> resources,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out Compilation? outputCompilation,
-            [NotNullWhen( true )] out IReadOnlyList<ResourceDescription>? additionalResources )
+            out ImmutableArray<ResourceDescription> outputResources )
         {
             if ( !this.ProjectOptions.IsFrameworkEnabled )
             {
                 outputCompilation = compilation;
-                additionalResources = Array.Empty<ResourceDescription>();
+                outputResources = resources;
 
                 return true;
             }
@@ -66,29 +67,27 @@ namespace Caravela.Framework.Impl.Pipeline
                 if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
                 {
                     outputCompilation = null;
-                    additionalResources = null;
+                    outputResources = default;
 
                     return false;
                 }
 
-                var partialCompilation = PartialCompilation.CreateComplete( compilation );
+                var partialCompilation = PartialCompilation.CreateComplete( compilation, resources );
 
                 // Initialize the pipeline and generate the compile-time project.
                 if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )
                 {
                     outputCompilation = null;
-                    additionalResources = null;
+                    outputResources = default;
 
                     return false;
                 }
-
-                List<ResourceDescription> additionalResourcesBuilder = new();
 
                 // Execute the pipeline.
                 if ( !this.TryExecute( partialCompilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
                 {
                     outputCompilation = null;
-                    additionalResources = null;
+                    outputResources = default;
 
                     return false;
                 }
@@ -104,18 +103,20 @@ namespace Caravela.Framework.Impl.Pipeline
                 }
 
                 // Add managed resources.
-                foreach ( var resource in result.Resources )
+
+                outputResources = resultCompilation.Resources;
+
+                if ( outputResources.IsDefault )
                 {
-                    additionalResourcesBuilder.Add( resource );
+                    outputResources = ImmutableArray<ResourceDescription>.Empty;
                 }
 
-                if ( configuration.CompileTimeProject is { IsEmpty: false } )
+                if ( configuration.CompileTimeProject != null )
                 {
-                    additionalResourcesBuilder.Add( configuration.CompileTimeProject!.ToResource() );
+                    outputResources = outputResources.Add( configuration.CompileTimeProject.ToResource() );
                 }
 
                 outputCompilation = RunTimeAssemblyRewriter.Rewrite( resultCompilation.Compilation, this.ServiceProvider );
-                additionalResources = additionalResourcesBuilder;
 
                 return true;
             }
@@ -127,7 +128,6 @@ namespace Caravela.Framework.Impl.Pipeline
                 }
 
                 outputCompilation = null;
-                additionalResources = null;
 
                 return false;
             }

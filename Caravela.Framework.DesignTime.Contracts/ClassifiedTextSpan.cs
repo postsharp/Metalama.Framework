@@ -23,8 +23,6 @@ namespace Caravela.Framework.DesignTime.Contracts
 
         public ImmutableDictionary<string, string> Tags { get; }
 
-        public bool HasTagOrClassification => this.Classification != TextSpanClassification.Default || !this.Tags.IsEmpty;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ClassifiedTextSpan"/> struct.
         /// </summary>

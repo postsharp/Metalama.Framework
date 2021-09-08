@@ -130,7 +130,6 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 input.PartialCompilation,
                 input.AspectLayers,
                 input.Diagnostics.Concat( pipelineStepResult.Diagnostics ).Concat( diagnostics.ToImmutable() ),
-                Array.Empty<ResourceDescription>(),
                 input.AspectSources.Concat( pipelineStepResult.ExternalAspectSources ),
                 input.AdditionalSyntaxTrees.Concat( additionalSyntaxTrees ) );
         }

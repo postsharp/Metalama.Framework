@@ -117,10 +117,10 @@ namespace Caravela.Framework.Impl
             _category,
             Error );
 
-        public static readonly DiagnosticDefinition<(string AspectType, string ExceptionType, string Exception)> ExceptionInUserCode = new(
+        public static readonly DiagnosticDefinition<(string AspectType, string MethodName, string ExceptionType, string Exception)> ExceptionInUserCode = new(
             "CR0026",
             _category,
-            "The aspect '{0}' has thrown an exception of the '{1}': {2}",
+            "The aspect method '{0}.{1}' has thrown an exception of type '{2}': {3}",
             Error,
             "The aspect has thrown an exception." );
 
@@ -155,11 +155,11 @@ namespace Caravela.Framework.Impl
                 Error,
                 "The compile-time project resource file was corrupted." );
 
-        public static readonly DiagnosticDefinition<(ISymbol TemplateMethod, string BaseClassName)>
+        public static readonly DiagnosticDefinition<(string TemplateName, string ClassName)>
             TemplateWithSameNameAlreadyDefined = new(
                 "CR0032",
                 _category,
-                "The class '{1}' already defines a template named '{0}'. Template names must be unique.",
+                "The class '{1}' defines several templates named '{0}'. Template names must be unique.",
                 Error,
                 "The class already defines a template of the same name." );
 
@@ -186,6 +186,14 @@ namespace Caravela.Framework.Impl
             "(...)] attribute to specify the order relationship between these two layers, otherwise the compilation will be non-deterministic.",
             Warning,
             "Two layers are not strongly ordered." );
+
+        public static readonly DiagnosticDefinition<(string TemplateName, string ClassName, string BaseClassName)>
+            TemplateWithSameNameAlreadyDefinedInBaseClass = new(
+                "CR0036",
+                _category,
+                "The class '{1}' defines a new template named '{0}', but the base class '{2}' already defines a template of the same name. Template names must be unique.",
+                Error,
+                "The class already defines a template of the same name." );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>

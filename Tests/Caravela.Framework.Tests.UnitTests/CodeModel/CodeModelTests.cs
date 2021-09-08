@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Types;
 using System;
 using System.Collections.Generic;
@@ -160,6 +161,13 @@ interface I<T>
 
             var m1 = methods[0];
             Assert.Equal( "M1", m1.Name );
+
+            Assert.True( m1.ReturnParameter.IsReturnParameter );
+            Assert.False( m1.Parameters[0].IsReturnParameter );
+
+            Assert.Equal( 0, m1.Parameters.OfParameterType( typeof(int) ).First().Index );
+            Assert.Equal( 0, m1.Parameters.OfParameterType<int>().First().Index );
+            Assert.Equal( 0, m1.Parameters.OfParameterType( compilation.Factory.GetSpecialType( SpecialType.Int32 ) ).First().Index );
 
             CheckParameterData( m1.ReturnParameter, m1, "void", null, -1 );
             Assert.Equal( 5, m1.Parameters.Count );

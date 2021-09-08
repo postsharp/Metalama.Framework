@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Tests.Integration.Runners;
 using Caravela.TestFramework;
@@ -37,7 +38,10 @@ namespace Caravela.AspectWorkbench.CodeEditor
                             typeof(meta).Assembly,
                             typeof(TemplateSyntaxFactory).Assembly,
                             typeof(TestTemplateAttribute).Assembly,
-                            typeof(TestTemplateCompiler).Assembly
+                            typeof(TestTemplateCompiler).Assembly,
+                            typeof(IAspectWeaver).Assembly,
+                            typeof(SyntaxTree).Assembly,
+                            typeof(CSharpSyntaxTree).Assembly
                         } ) );
 
             return host;

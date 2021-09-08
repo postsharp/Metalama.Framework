@@ -210,7 +210,7 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                 BaseExpressionSyntax => true,
                 AssignmentExpressionSyntax assignment => ShouldIgnoreNode( declaringMember, assignment.Left ) && ShouldIgnoreNode( declaringMember, assignment.Right ),
                 CastExpressionSyntax cast => ShouldIgnoreNode( declaringMember, cast.Expression ),
-                CatchDeclarationSyntax => true,
+                CatchClauseSyntax => true,
                 AccessorDeclarationSyntax accessor => ShouldIgnoreNode( declaringMember, accessor.Body ) && ShouldIgnoreNode( declaringMember, accessor.ExpressionBody ),
                 _ => ContainsIgnoreComment( node.ToFullString() )
             };

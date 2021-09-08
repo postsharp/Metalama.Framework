@@ -19,12 +19,14 @@ namespace Caravela.Framework.Impl.CompileTime
         public CompileTimeProjectManifest(
             string assemblyName,
             IReadOnlyList<string> aspectTypes,
+            IReadOnlyList<string> compilerPlugIns,
             IReadOnlyList<string>? references,
             ulong sourceHash,
             IReadOnlyList<CompileTimeFile> files )
         {
             this.AssemblyName = assemblyName;
             this.AspectTypes = aspectTypes;
+            this.CompilerPlugIns = compilerPlugIns;
             this.References = references;
             this.SourceHash = sourceHash;
             this.Files = files;
@@ -36,6 +38,8 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Gets the list of all aspect types (specified by fully qualified name) of the aspect library.
         /// </summary>
         public IReadOnlyList<string> AspectTypes { get; }
+
+        public IReadOnlyList<string> CompilerPlugIns { get; }
 
         /// <summary>
         /// Gets the name of all project references (a fully-qualified assembly identity) of the compile-time project.

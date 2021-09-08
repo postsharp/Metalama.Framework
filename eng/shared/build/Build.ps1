@@ -78,7 +78,7 @@ function CheckPrerequisities() {
 
 function Clean() {
 
-    & dotnet clean -p:Configuration=$configuration 
+    & dotnet clean -p:Configuration=$configuration -v:m
     if ($LASTEXITCODE -ne 0 ) { throw "Clean failed." }
 
     if (Test-Path "artifacts\bin\Debug" -PathType Container ) {

@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.InterpolatedSt
         [TestTemplate]
         dynamic? Template()
         {
-            var s = InterpolatedStringBuilder.Create();
+            var s = new InterpolatedStringBuilder();
             s.AddText( meta.Target.Method.Name + "(" );
             
             foreach ( var p in meta.Target.Parameters )

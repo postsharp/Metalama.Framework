@@ -7,7 +7,7 @@ using Xunit;
 
 #pragma warning disable SA1401 // Fields should be private
 
-namespace Caravela.Framework.Tests.UnitTests.CodeModel
+namespace Caravela.Framework.Tests.UnitTests.RunTime
 {
     public class FieldOrPropertyInfoTests
     {

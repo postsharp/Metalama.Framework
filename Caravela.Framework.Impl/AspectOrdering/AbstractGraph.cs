@@ -1,9 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Globalization;
-using System.Text;
-
 namespace Caravela.Framework.Impl.AspectOrdering
 {
     /// <summary>
@@ -41,30 +38,5 @@ namespace Caravela.Framework.Impl.AspectOrdering
         public abstract bool HasEdge( int predecessor, int successor );
 
         public abstract int DoBreadthFirstSearch( int initialNode, int[] distances, int[] directPredecessors );
-
-        public string Serialize()
-        {
-            StringBuilder stringBuilder = new();
-
-            stringBuilder.AppendFormat( CultureInfo.InvariantCulture, "{0};", this._size );
-
-            for ( var i = 0; i < this._size; i++ )
-            {
-                for ( var j = 0; j < this._size; j++ )
-                {
-                    if ( i == j )
-                    {
-                        continue;
-                    }
-
-                    if ( this.HasEdge( i, j ) )
-                    {
-                        stringBuilder.AppendFormat( CultureInfo.InvariantCulture, "{0},{1};", i, j );
-                    }
-                }
-            }
-
-            return stringBuilder.ToString();
-        }
     }
 }

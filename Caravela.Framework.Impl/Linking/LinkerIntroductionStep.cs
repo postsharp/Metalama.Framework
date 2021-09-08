@@ -167,7 +167,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            intermediateCompilation = intermediateCompilation.UpdateSyntaxTrees(
+            intermediateCompilation = intermediateCompilation.Update(
                 syntaxTreeMapping.Select( p => new ModifiedSyntaxTree( p.Value, p.Key ) ).ToList(),
                 Array.Empty<SyntaxTree>() );
 
@@ -225,7 +225,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 do
                 {
-                    var current = currentEnumerator!.Value.Current.AssertNotNull();
+                    var current = currentEnumerator.Value.Current.AssertNotNull();
 
                     while ( current.Advice.AspectLayerId == orderedLayer.AspectLayerId )
                     {
@@ -246,6 +246,9 @@ namespace Caravela.Framework.Impl.Linking
                     currentEnumerator = currentEnumerator.Next;
 
                 next:
+
+                    // Comment to make the formatter happy.
+
                     ;
                 }
                 while ( currentEnumerator != null );

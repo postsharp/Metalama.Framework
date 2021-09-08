@@ -27,11 +27,6 @@ namespace Caravela.Framework.Impl.Pipeline
         public ImmutableUserDiagnosticList Diagnostics { get; }
 
         /// <summary>
-        /// Gets the list of managed resources.
-        /// </summary>
-        public IReadOnlyList<ResourceDescription> Resources { get; }
-
-        /// <summary>
         /// Gets the list of aspect sources.
         /// </summary>
         public IReadOnlyList<IAspectSource> AspectSources { get; }
@@ -51,13 +46,11 @@ namespace Caravela.Framework.Impl.Pipeline
             PartialCompilation compilation,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             ImmutableUserDiagnosticList? diagnostics = null,
-            IReadOnlyList<ResourceDescription>? resources = null,
             IReadOnlyList<IAspectSource>? aspectSources = null,
             IReadOnlyList<IntroducedSyntaxTree>? additionalSyntaxTrees = null )
         {
             this.PartialCompilation = compilation;
             this.Diagnostics = diagnostics ?? ImmutableUserDiagnosticList.Empty;
-            this.Resources = resources ?? Array.Empty<ResourceDescription>();
             this.AspectSources = aspectSources ?? Array.Empty<IAspectSource>();
             this.AspectLayers = aspectLayers;
             this.AdditionalSyntaxTrees = additionalSyntaxTrees ?? ImmutableArray<IntroducedSyntaxTree>.Empty;

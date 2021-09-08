@@ -21,8 +21,9 @@ namespace Caravela.Framework.Impl.CodeModel
             public PartialImpl(
                 Compilation compilation,
                 ImmutableDictionary<string, SyntaxTree> syntaxTrees,
-                ImmutableArray<ITypeSymbol>? types )
-                : base( compilation )
+                ImmutableArray<ITypeSymbol>? types,
+                ImmutableArray<ResourceDescription> resources )
+                : base( compilation, resources )
             {
                 this._types = types;
                 this._syntaxTrees = syntaxTrees;
@@ -33,8 +34,9 @@ namespace Caravela.Framework.Impl.CodeModel
                 ImmutableArray<ITypeSymbol>? types,
                 PartialCompilation baseCompilation,
                 IReadOnlyList<ModifiedSyntaxTree>? modifiedSyntaxTrees,
-                IReadOnlyList<SyntaxTree>? addedTrees )
-                : base( baseCompilation, modifiedSyntaxTrees, addedTrees )
+                IReadOnlyList<SyntaxTree>? addedTrees,
+                ImmutableArray<ResourceDescription>? resources )
+                : base( baseCompilation, modifiedSyntaxTrees, addedTrees, resources )
             {
                 this._types = types;
                 this._syntaxTrees = syntaxTrees;
@@ -46,9 +48,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public override bool IsPartial => false;
 
-            public override PartialCompilation UpdateSyntaxTrees(
+            public override PartialCompilation Update(
                 IReadOnlyList<ModifiedSyntaxTree>? replacedTrees = null,
-                IReadOnlyList<SyntaxTree>? addedTrees = null )
+                IReadOnlyList<SyntaxTree>? addedTrees = null,
+                ImmutableArray<ResourceDescription>? resources = null )
             {
                 var syntaxTrees = this._syntaxTrees.ToBuilder();
 
@@ -73,7 +76,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     }
                 }
 
-                return new PartialImpl( syntaxTrees.ToImmutable(), null, this, replacedTrees, addedTrees );
+                return new PartialImpl( syntaxTrees.ToImmutable(), null, this, replacedTrees, addedTrees, resources );
             }
         }
     }
