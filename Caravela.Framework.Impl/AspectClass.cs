@@ -176,12 +176,26 @@ namespace Caravela.Framework.Impl
             return members.ToImmutable();
         }
 
-        private void Initialize()
+        private bool TryInitialize(IDiagnosticAdder diagnosticAdder)
         {
             if ( this._prototypeAspectInstance != null )
             {
                 var builder = new Builder( this );
-                this._userCodeInvoker.Invoke( () => this._prototypeAspectInstance.BuildAspectClass( builder ) );
+
+                try
+                {
+                    this._userCodeInvoker.Invoke( () => this._prototypeAspectInstance.BuildAspectClass( builder ) );
+                }
+                catch ( Exception e )
+                {
+                    var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
+                        null,
+                        (AspectType: this.DisplayName, MethodName: nameof(IAspect.BuildAspectClass), e.GetType().Name, e.Format( 5 )) );
+                    
+                    diagnosticAdder.Report( diagnostic );
+                    
+                    return false;
+                }
 
                 this._layers = builder.Layers.As<string?>().Prepend( null ).Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
             }
@@ -192,6 +206,8 @@ namespace Caravela.Framework.Impl
             }
 
             // TODO: get all eligibility rules from the prototype instance and combine them into a single rule.
+
+            return true;
         }
 
         /// <summary>
@@ -229,7 +245,10 @@ namespace Caravela.Framework.Impl
                 compilation,
                 aspectDriverFactory );
 
-            aspectClass.Initialize();
+            if ( !aspectClass.TryInitialize( diagnosticAdder ) )
+            {
+                return false;
+            }
 
             return true;
         }

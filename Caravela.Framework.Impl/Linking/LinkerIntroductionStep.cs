@@ -225,7 +225,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 do
                 {
-                    var current = currentEnumerator!.Value.Current.AssertNotNull();
+                    var current = currentEnumerator.Value.Current.AssertNotNull();
 
                     while ( current.Advice.AspectLayerId == orderedLayer.AspectLayerId )
                     {

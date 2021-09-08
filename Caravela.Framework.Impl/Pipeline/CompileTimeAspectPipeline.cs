@@ -111,7 +111,10 @@ namespace Caravela.Framework.Impl.Pipeline
                     outputResources = ImmutableArray<ResourceDescription>.Empty;
                 }
 
-                outputResources = outputResources.Add( configuration.CompileTimeProject!.ToResource() );
+                if ( configuration.CompileTimeProject != null )
+                {
+                    outputResources = outputResources.Add( configuration.CompileTimeProject.ToResource() );
+                }
 
                 outputCompilation = RunTimeAssemblyRewriter.Rewrite( resultCompilation.Compilation, this.ServiceProvider );
 

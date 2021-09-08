@@ -117,10 +117,10 @@ namespace Caravela.Framework.Impl
             _category,
             Error );
 
-        public static readonly DiagnosticDefinition<(string AspectType, string ExceptionType, string Exception)> ExceptionInUserCode = new(
+        public static readonly DiagnosticDefinition<(string AspectType, string MethodName, string ExceptionType, string Exception)> ExceptionInUserCode = new(
             "CR0026",
             _category,
-            "The aspect '{0}' has thrown an exception of the '{1}': {2}",
+            "The aspect method '{0}.{1}' has thrown an exception of type '{2}': {3}",
             Error,
             "The aspect has thrown an exception." );
 
