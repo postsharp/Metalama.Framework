@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
@@ -33,13 +34,15 @@ namespace Caravela.Framework.Impl.Pipeline
                 if ( pipeline.TryExecute(
                     new DiagnosticAdder( context.ReportDiagnostic ),
                     context.Compilation,
+                    context.ManifestResources.ToImmutableArray(),
                     CancellationToken.None,
-                    out var compilation,
-                    out var additionalResources ) )
+                    out var outputCompilation,
+                    out var outputResources ) )
                 {
-                    context.ManifestResources.AddRange( additionalResources );
+                    context.ManifestResources.Clear();
+                    context.ManifestResources.AddRange( outputResources );
 
-                    return compilation;
+                    return outputCompilation;
                 }
                 else
                 {

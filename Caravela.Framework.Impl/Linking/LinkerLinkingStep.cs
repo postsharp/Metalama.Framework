@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.Linking
                 replacedTrees.Add( new ModifiedSyntaxTree( newSyntaxTree, syntaxTree ) );
             }
 
-            return new AspectLinkerResult( input.IntermediateCompilation.UpdateSyntaxTrees( replacedTrees ), input.DiagnosticSink.ToImmutable() );
+            return new AspectLinkerResult( input.IntermediateCompilation.Update( replacedTrees ), input.DiagnosticSink.ToImmutable() );
         }
     }
 }

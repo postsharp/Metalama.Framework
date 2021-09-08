@@ -41,7 +41,9 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var aspectInstances = input.AspectSources
                 .SelectMany( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
-                .ToImmutableArray<IAspectInstance>();
+                .ToImmutableDictionary( 
+                    i => i.TargetDeclaration.GetSymbol().AssertNotNull("The Roslyn compilation should include all introduced declarations."), 
+                    i => (IAspectInstance) i );
 
             if ( !aspectInstances.Any() )
             {
@@ -81,7 +83,6 @@ namespace Caravela.Framework.Impl.Pipeline
                 newCompilation,
                 input.AspectLayers,
                 input.Diagnostics,
-                input.Resources.Concat( resources ).ToList(),
                 input.AspectSources );
 
             return true;

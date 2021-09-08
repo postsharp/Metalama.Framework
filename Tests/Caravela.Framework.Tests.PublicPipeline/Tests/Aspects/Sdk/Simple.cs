@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple
     {
         public void Transform( AspectWeaverContext context )
         {
-            context.Compilation = context.Compilation.RewriteSyntaxTrees( new Rewriter() );
+            context.RewriteAspectTargets( new Rewriter() );
         }
 
         class Rewriter : CSharpSyntaxRewriter
@@ -37,9 +37,8 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple
     class TargetCode
     {
         [Aspect]
-        int Method(int a)
-        {
-            return a;
-        }
+        int TransformedMethod( int a ) => 0;
+        
+        int NotTransformedMethod( int a ) => 0;
     }
 }

@@ -66,7 +66,7 @@ namespace Caravela.TestFramework
             var observer = new Observer( testResult );
             pipeline.ServiceProvider.AddService( observer );
 
-            if ( pipeline.TryExecute( testResult.PipelineDiagnostics, testResult.InputCompilation!, CancellationToken.None, out var resultCompilation, out _ ) )
+            if ( pipeline.TryExecute( testResult.PipelineDiagnostics, testResult.InputCompilation!, default, CancellationToken.None, out var resultCompilation, out _ ) )
             {
                 testResult.OutputCompilation = resultCompilation;
                 testResult.HasOutputCode = true;

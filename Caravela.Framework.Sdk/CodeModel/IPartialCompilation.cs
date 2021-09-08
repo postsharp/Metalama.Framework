@@ -2,11 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Threading;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -33,15 +30,22 @@ namespace Caravela.Framework.Impl.CodeModel
         bool IsPartial { get; }
 
         /// <summary>
-        ///  Adds and replaces syntax trees of the current <see cref="IPartialCompilation"/> and returns a new <see cref="IPartialCompilation"/>
-        /// representing the modified object.
+        /// Returns a copy of the current <see cref="IPartialCompilation"/> where the <see cref="SyntaxTrees"/> have been modified.
         /// </summary>
-        public IPartialCompilation UpdateSyntaxTrees(
+        public IPartialCompilation WithSyntaxTrees(
             IReadOnlyList<ModifiedSyntaxTree>? replacements = null,
             IReadOnlyList<SyntaxTree>? addedTrees = null );
 
-        public IPartialCompilation UpdateSyntaxTrees( Func<SyntaxTree, SyntaxTree> replace, CancellationToken cancellationToken = default );
+        /// <summary>
+        /// Returns a copy of the current <see cref="IPartialCompilation"/> where the <see cref="Resources"/> have been modified.
+        /// </summary>
+        public IPartialCompilation WithResources( ImmutableArray<ResourceDescription> resources );
 
-        public IPartialCompilation RewriteSyntaxTrees( CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default );
+        /// <summary>
+        /// Gets the list of managed resources for the current compilation. This property is not defined at the design time, only at compile time.
+        /// </summary>
+        public ImmutableArray<ResourceDescription> Resources { get; }
     }
+
+  
 }
