@@ -1,7 +1,7 @@
 ﻿using System;
 using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Inliners.MethodAssignment_NonSimple
+namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Inliners.MethodAssignment_NotSimple
 {
     // <target>
     class Target

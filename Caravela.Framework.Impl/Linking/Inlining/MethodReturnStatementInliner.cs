@@ -14,12 +14,20 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax has to be in form: return <annotated_method_expression( <arguments> );
-            if ( aspectReference.ResolvedSemantic.Symbol is not IMethodSymbol )
+            if ( aspectReference.ResolvedSemantic.Symbol is not IMethodSymbol methodSymbol )
             {
+                // Coverage: ignore (hit only when the check in base class is incorrect).
                 return false;
             }
 
             if ( aspectReference.Expression.Parent == null || aspectReference.Expression.Parent is not InvocationExpressionSyntax invocationExpression )
+            {
+                return false;
+            }
+
+            if ( !SymbolEqualityComparer.Default.Equals(
+                methodSymbol.ReturnType,
+                ((IMethodSymbol) aspectReference.ContainingSymbol).ReturnType ) )
             {
                 return false;
             }
@@ -30,7 +38,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             }
 
             // The invocation needs to be inlineable in itself.
-            if ( IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
+            if ( !IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
             {
                 return false;
             }

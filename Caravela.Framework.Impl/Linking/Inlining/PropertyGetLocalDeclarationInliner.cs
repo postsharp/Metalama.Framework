@@ -16,6 +16,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             if ( aspectReference.ResolvedSemantic.Symbol is not IPropertySymbol
                  && (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol is not IPropertySymbol )
             {
+                // Coverage: ignore (hit only when the check in base class is incorrect).
                 return false;
             }
 
@@ -26,11 +27,13 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 
             if ( equalsClause.Parent == null || equalsClause.Parent is not VariableDeclaratorSyntax variableDeclarator )
             {
+                // Coverage: ignore (only incorrect code can get here).
                 return false;
             }
 
             if ( variableDeclarator.Parent == null || variableDeclarator.Parent is not VariableDeclarationSyntax variableDeclaration )
             {
+                // Coverage: ignore (only incorrect code can get here).
                 return false;
             }
 
@@ -39,8 +42,9 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            if ( variableDeclaration.Parent == null || variableDeclaration.Parent is not LocalDeclarationStatementSyntax _ )
+            if ( variableDeclaration.Parent == null || variableDeclaration.Parent is not LocalDeclarationStatementSyntax )
             {
+                // Coverage: ignore (only incorrect code can get here).
                 return false;
             }
 

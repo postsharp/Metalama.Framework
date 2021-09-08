@@ -1,12 +1,11 @@
 class Target
     {
-        public event EventHandler Foo            
-{add
+        public event EventHandler? Foo{add
 {
-    this.Foo += value;
+    this.Foo_Override6 += value;
 }remove
 {
-    this.Foo -= value;
+    this.Foo_Override6 -= value;
 }}
     
     
@@ -105,28 +104,19 @@ remove    {
         this.Bar-= value;
     }
 }
-        public event EventHandler Bar
-{add
+private EventHandler? _bar;
+    
+    
+        public event EventHandler? Bar{add
 {
-    this.Bar += value;
+    this.Bar_Override5 += value;
 }remove
 {
-    this.Bar -= value;
+    this.Bar_Override5 -= value;
 }}
     
-private event EventHandler Bar_Source
-        {
-            add
-            {
-                Console.WriteLine("This is original code.");
-            }
-    
-            remove
-            {
-                Console.WriteLine("This is original code.");
-            }
-        }
-    
+private event EventHandler? Bar_Source
+{add{this._bar+=value;}remove{this._bar-=value;}}
     
 public event EventHandler Bar_Override1
 {add    {

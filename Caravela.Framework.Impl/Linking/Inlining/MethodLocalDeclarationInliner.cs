@@ -16,6 +16,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             // The syntax has to be in form: <type> <local> = <annotated_method_expression>( <arguments> );
             if ( aspectReference.ResolvedSemantic.Symbol is not IMethodSymbol )
             {
+                // Coverage: ignore (hit only when the check in base class is incorrect).
                 return false;
             }
 
@@ -31,11 +32,13 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 
             if ( equalsClause.Parent == null || equalsClause.Parent is not VariableDeclaratorSyntax variableDeclarator )
             {
+                // Coverage: ignore (only incorrect code can get here).
                 return false;
             }
 
             if ( variableDeclarator.Parent == null || variableDeclarator.Parent is not VariableDeclarationSyntax variableDeclaration )
             {
+                // Coverage: ignore (only incorrect code can get here).
                 return false;
             }
 
@@ -44,13 +47,14 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            if ( variableDeclaration.Parent == null || variableDeclaration.Parent is not LocalDeclarationStatementSyntax _ )
+            if ( variableDeclaration.Parent == null || variableDeclaration.Parent is not LocalDeclarationStatementSyntax )
             {
+                // Coverage: ignore (only incorrect code can get here).
                 return false;
             }
 
             // The invocation needs to be inlineable in itself.
-            if ( IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
+            if ( !IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
             {
                 return false;
             }

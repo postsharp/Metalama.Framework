@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineEvent( eventDeclaration, symbol ) );
+                    members.Add( GetTrampolineEvent( eventDeclaration, lastOverride ) );
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )

@@ -1,27 +1,30 @@
 ﻿using System;
 using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.Properties.Inliners.GetterCastReturn_DifferentType
+namespace Caravela.Framework.Tests.Integration.Tests.Linker.Properties.Inliners.SetterAssignment_NotValue
 {
     // <target>
     class Target
     {
+        int field;
+
         int Foo
         {
-            get
+            set
             {
                 Console.WriteLine( "Original");
-                return 42;
+                this.field = value;
             }
         }
 
         [PseudoOverride( nameof(Foo),"TestAspect")]
         int Foo_Override
         {
-            get
+            set
             {
                 Console.WriteLine( "Before");
-                return (short)link( _this.Foo.get, inline);
+                link[ _this.Foo.set, inline ] = 42;
+                Console.WriteLine( "After");
             }
         }
     }

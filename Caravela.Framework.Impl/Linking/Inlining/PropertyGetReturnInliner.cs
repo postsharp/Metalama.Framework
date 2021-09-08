@@ -14,6 +14,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             if ( aspectReference.ResolvedSemantic.Symbol is not IPropertySymbol
                  && (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol is not IPropertySymbol )
             {
+                // Coverage: ignore (hit only when the check in base class is incorrect).
                 return false;
             }
 
