@@ -176,7 +176,7 @@ namespace Caravela.Framework.Impl
             return members.ToImmutable();
         }
 
-        private bool TryInitialize(IDiagnosticAdder diagnosticAdder)
+        private bool TryInitialize( IDiagnosticAdder diagnosticAdder )
         {
             if ( this._prototypeAspectInstance != null )
             {
@@ -191,9 +191,9 @@ namespace Caravela.Framework.Impl
                     var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
                         null,
                         (AspectType: this.DisplayName, MethodName: nameof(IAspect.BuildAspectClass), e.GetType().Name, e.Format( 5 )) );
-                    
+
                     diagnosticAdder.Report( diagnostic );
-                    
+
                     return false;
                 }
 

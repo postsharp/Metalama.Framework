@@ -246,6 +246,9 @@ namespace Caravela.Framework.Impl.Linking
                     currentEnumerator = currentEnumerator.Next;
 
                 next:
+
+                    // Comment to make the formatter happy.
+
                     ;
                 }
                 while ( currentEnumerator != null );

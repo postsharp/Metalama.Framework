@@ -245,6 +245,8 @@ namespace Caravela.TestFramework
             // If the expectation file does not exist, create it with some placeholder content.
             if ( !File.Exists( expectedTransformedPath ) )
             {
+                // Coverage: ignore
+
                 File.WriteAllText(
                     expectedTransformedPath,
                     "// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code." );
@@ -277,6 +279,8 @@ namespace Caravela.TestFramework
             }
             else if ( storedTransformedSourceText == null || storedTransformedSourceText != actualTransformedNormalizedSourceText )
             {
+                // Coverage: ignore
+
                 File.WriteAllText( actualTransformedPath, actualTransformedNonNormalizedText );
             }
 

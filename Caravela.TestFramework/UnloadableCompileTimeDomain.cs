@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.Utilities;
 using PostSharp.Patterns;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -43,6 +44,7 @@ namespace Caravela.TestFramework
             return assembly;
         }
 
+        [ExcludeFromCodeCoverage]
         public void UnloadAndWait()
         {
             // Must call the base Dispose method to clear the base cache.
@@ -51,6 +53,7 @@ namespace Caravela.TestFramework
             this.WaitForDisposal();
         }
 
+        [ExcludeFromCodeCoverage]
         public void WaitForDisposal()
         {
             var waits = 0;
