@@ -18,7 +18,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class CompilationModel : ICompilationInternal, IDeclarationInternal
+    internal partial class CompilationModel : ICompilationInternal, IDeclarationInternal
     {
         public PartialCompilation PartialCompilation { get; }
 
@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.CodeModel
         private readonly ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IObservableTransformation> _transformations;
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
-        private readonly ImmutableMultiValueDictionary<DeclarationRef<INamedType>, AttributeRef> _allMemberAttributesByType;
+        private readonly ImmutableMultiValueDictionary<string, AttributeRef> _allMemberAttributesByTypeName;
 
         private readonly ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IAspectInstance> _aspects;
 
@@ -76,14 +76,14 @@ namespace Caravela.Framework.Impl.CodeModel
 
             this.Factory = new DeclarationFactory( this );
 
-            var allDeclarations =
-                this.PartialCompilation.Types.SelectManyRecursive<ISymbol>( s => s.GetContainedSymbols(), throwOnDuplicate: false )
-                    .Concat( new[] { (ISymbol) this.PartialCompilation.Compilation.Assembly, this.PartialCompilation.Compilation.SourceModule } );
+            AttributeDiscoveryVisitor attributeDiscoveryVisitor = new();
 
-            var allAttributes = allDeclarations.SelectMany( c => c.GetAllAttributes() );
+            foreach ( var tree in partialCompilation.SyntaxTrees )
+            {
+                attributeDiscoveryVisitor.Visit( tree.Value.GetRoot() );
+            }
 
-            this._allMemberAttributesByType = ImmutableMultiValueDictionary<DeclarationRef<INamedType>, AttributeRef>
-                .Create( allAttributes, a => a.AttributeType, DeclarationRefEqualityComparer<DeclarationRef<INamedType>>.Instance );
+            this._allMemberAttributesByTypeName = attributeDiscoveryVisitor.GetDiscoveredAttributes();
 
             this._aspects = ImmutableMultiValueDictionary<DeclarationRef<IDeclaration>, IAspectInstance>.Empty;
         }
@@ -116,7 +116,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             // TODO: this cache may need to be smartly invalidated when we have interface introductions.
 
-            this._allMemberAttributesByType = prototype._allMemberAttributesByType.AddRange( allAttributes, a => a.AttributeType );
+            this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName.AddRange( allAttributes, a => a.AttributeTypeName! );
         }
 
         private CompilationModel( CompilationModel prototype )
@@ -130,7 +130,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._transformations = prototype._transformations;
             this.Factory = new DeclarationFactory( this );
             this._depthsCache = prototype._depthsCache;
-            this._allMemberAttributesByType = prototype._allMemberAttributesByType;
+            this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName;
             this._aspects = prototype._aspects;
         }
 
@@ -160,6 +160,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this.RoslynCompilation.Assembly
                     .GetAttributes()
                     .Union( this.RoslynCompilation.SourceModule.GetAttributes() )
+                    .Where( a => a.AttributeConstructor != null )
                     .Select( a => new AttributeRef( a, this.RoslynCompilation.Assembly.ToRef() ) ) );
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
@@ -188,7 +189,10 @@ namespace Caravela.Framework.Impl.CodeModel
         ICompilation ICompilationElement.Compilation => this;
 
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
-            => this._allMemberAttributesByType[type.ToRef()].Select( a => a.Resolve( this ) );
+            => this._allMemberAttributesByTypeName[AttributeRef.GetShortName( type.Name )]
+                .Select( a => a.Resolve( this ) )
+                .WhereNotNull()
+                .Where( a => a.Type.Equals( type ) );
 
         internal ImmutableArray<IObservableTransformation> GetObservableTransformationsOnElement( IDeclaration declaration )
             => this._transformations[declaration.ToRef()];

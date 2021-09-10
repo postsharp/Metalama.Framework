@@ -86,7 +86,7 @@ namespace Caravela.Framework.Impl.Collections
 
             // Create a dictionary for the results. The key is the item, the value is the order of insertion.
             Dictionary<T, int> results = new( ReferenceEqualityComparer<T>.Instance );
-
+            
             VisitMany( collection, getItems, results, throwOnDuplicate, ref recursionCheck );
 
             return results.Keys;
@@ -149,6 +149,9 @@ namespace Caravela.Framework.Impl.Collections
             where TKey : notnull
             => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue, keyComparer );
 
+        /// <summary>
+        /// Builds an <see cref="ImmutableMultiValueDictionary{TKey,TValue}"/> from a collection, with the same value type than the input item type.
+        /// </summary>
         /// <summary>
         /// Builds an <see cref="ImmutableMultiValueDictionary{TKey,TValue}"/> from a collection.
         /// </summary>

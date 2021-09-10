@@ -24,11 +24,11 @@ namespace Caravela.Framework.Impl.CompileTime
                     "Cannot instantiate a custom attribute: invalid type conversion." );
 
         internal static readonly DiagnosticDefinition<ITypeSymbol>
-            CannotFindType
+            CannotFindAttributeType
                 = new(
                     "CR0401",
                     _category,
-                    "Cannot instantiate a custom attribute: cannot find the CLR type '{0}'.",
+                    "Cannot instantiate a custom attribute: cannot find the build-time type '{0}'. Make sure that the type exists and is annotated with [BuildTime].",
                     Error,
                     "Cannot instantiate a custom attribute: cannot find type." );
 

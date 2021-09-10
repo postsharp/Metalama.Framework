@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.DesignTime.Refactoring;
 using Caravela.Framework.Impl.DesignTime.Utilities;
@@ -107,7 +108,7 @@ namespace Caravela.Framework.Impl.DesignTime
             CancellationToken cancellationToken )
         {
             var attributeDescription = new AttributeDescription(
-                aspect.AspectType.Name.TrimEnd( "Attribute" ),
+                AttributeRef.GetShortName( aspect.AspectType.Name ),
                 imports: ImmutableList.Create( aspect.AspectType.Namespace ) );
 
             return CSharpAttributeHelper.AddAttributeAsync( targetDocument, targetSymbol, attributeDescription, cancellationToken ).AsTask();
