@@ -220,6 +220,9 @@ namespace PostSharp.Engineering.BuildTools.Coverage
             // Ignore a few methods that generally have a trivial implementation, or an implementation that is not used in real code. 
             MethodDeclarationSyntax { Identifier: { Text: "ToString" or "GetHashCode" or "Equals" } } => true,
 
+            // Ignore operators because some operators come in pairs, only one of which will be used. 
+            OperatorDeclarationSyntax => true,
+
             // Process properties with accessors.
             PropertyDeclarationSyntax { ExpressionBody: null, AccessorList: { } accessorList }
                 when accessorList.Accessors.All( a => ShouldIgnoreNode( member, a.Body ) && ShouldIgnoreNode(member, a.ExpressionBody ) )

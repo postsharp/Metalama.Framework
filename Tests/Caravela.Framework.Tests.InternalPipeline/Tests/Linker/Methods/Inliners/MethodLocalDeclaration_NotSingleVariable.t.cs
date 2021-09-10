@@ -1,4 +1,3 @@
-// Warning CS0219 on `y`: `The variable 'y' is assigned but its value is never used`
 class Target
     {
         int Foo()

@@ -1,6 +1,8 @@
 ﻿using System;
 using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
 
+#pragma warning disable CS0219
+
 namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Inliners.MethodLocalDeclaration_NotSingleVariable
 {
     // <target>

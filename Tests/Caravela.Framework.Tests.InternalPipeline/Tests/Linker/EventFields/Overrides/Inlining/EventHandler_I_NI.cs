@@ -1,6 +1,8 @@
 ﻿using System;
 using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
 
+#pragma warning disable CS0067
+
 namespace Caravela.Framework.Tests.Integration.Tests.Linker.EventFields.Overrides.Inlining.ReturnsVoid_I_NI
 {
     // <target>
