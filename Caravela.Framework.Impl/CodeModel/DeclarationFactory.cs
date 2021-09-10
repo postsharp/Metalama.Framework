@@ -253,7 +253,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
             else if ( declaration is IDeclarationRef<IDeclaration> reference )
             {
-                return (T) reference.Resolve( this.CompilationModel );
+                return (T) reference.Resolve( this.CompilationModel ).AssertNotNull();
             }
             else if ( declaration is NamedType namedType )
             {

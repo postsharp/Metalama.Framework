@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Collections
     /// </summary>
     /// <typeparam name="TKey">Type of elements contained within the SkipList.</typeparam>
     /// <typeparam name="TValue">Type of values.</typeparam>
-    internal sealed class SkipListIndexedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IList<KeyValuePair<TKey, TValue>>
+    internal sealed class SkipListDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IList<KeyValuePair<TKey, TValue>>
     {
         private const double _prob = 0.5; // the probability used in determining the heights of the SkipListNodes
         private readonly Random _random;
@@ -25,18 +25,10 @@ namespace Caravela.Framework.Impl.Collections
         private Node _head; // a reference to the head of the SkipList
         private ValueCollection? _valueCollection;
 
-        public SkipListIndexedDictionary()
-            : this( null, 0 ) { }
-
-        internal SkipListIndexedDictionary( int seed )
-            : this( null, seed ) { }
-
-        public SkipListIndexedDictionary( IComparer<TKey>? comparer ) : this( comparer, 0 ) { }
-
-        public SkipListIndexedDictionary( IComparer<TKey>? comparer, int seed )
+        public SkipListDictionary( IComparer<TKey>? comparer = null, int? seed = null )
         {
             this._head = Node.CreateHead();
-            this._random = seed == 0 ? new Random() : new Random( seed );
+            this._random = seed == null ? new Random() : new Random( seed.Value );
 
             this._comparer = comparer ?? Comparer<TKey>.Default;
         }
@@ -69,18 +61,9 @@ namespace Caravela.Framework.Impl.Collections
             this.Count = 0;
         }
 
-        bool ICollection<KeyValuePair<TKey, TValue>>.Contains( KeyValuePair<TKey, TValue> item ) => this.ContainsKey( item.Key );
+        bool ICollection<KeyValuePair<TKey, TValue>>.Contains( KeyValuePair<TKey, TValue> item ) => throw new NotImplementedException();
 
-        void ICollection<KeyValuePair<TKey, TValue>>.CopyTo( KeyValuePair<TKey, TValue>[] array, int arrayIndex )
-        {
-            var i = arrayIndex;
-
-            foreach ( var value in this )
-            {
-                array[i] = value;
-                i++;
-            }
-        }
+        void ICollection<KeyValuePair<TKey, TValue>>.CopyTo( KeyValuePair<TKey, TValue>[] array, int arrayIndex ) => throw new NotImplementedException();
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove( KeyValuePair<TKey, TValue> item ) => this.Remove( item.Key );
 
@@ -128,7 +111,7 @@ namespace Caravela.Framework.Impl.Collections
         /// <remarks>This SkipList implementation does not allow for duplicates.  Attempting to add a
         /// duplicate value will not raise an exception, it will simply exit the method without
         /// changing the SkipList.</remarks>
-        void IDictionary<TKey, TValue>.Add( TKey key, TValue value ) => this.AddOrUpdate( key, value, false );
+        void IDictionary<TKey, TValue>.Add( TKey key, TValue value ) => this.Add( key, value );
 
         public int Add( TKey key, TValue value ) => this.AddOrUpdate( key, value, false );
 
@@ -261,7 +244,7 @@ namespace Caravela.Framework.Impl.Collections
             return false;
         }
 
-        public bool TryGetClosestValue( TKey key, [NotNullWhen( true )] out TValue? value )
+        public bool TryGetGreatestSmallerOrEqualValue( TKey key, [NotNullWhen( true )] out TValue? value )
         {
             if ( this.TryFindNode( key, out var node, out _, false ) )
             {
@@ -279,10 +262,10 @@ namespace Caravela.Framework.Impl.Collections
         {
             get => this.Get( key );
 
-            set => this.Set( key, value );
+            set => this.AddOrUpdate( key, value, true );
         }
 
-        public TValue Get( TKey key )
+        private TValue Get( TKey key )
         {
             if ( this.TryFindNode( key, out var node, out _ ) )
             {
@@ -291,8 +274,6 @@ namespace Caravela.Framework.Impl.Collections
 
             throw new KeyNotFoundException();
         }
-
-        public void Set( TKey key, TValue value ) => this.AddOrUpdate( key, value, true );
 
         public ICollection<TKey> Keys => throw new NotImplementedException();
 
@@ -411,48 +392,6 @@ namespace Caravela.Framework.Impl.Collections
         }
 
         /// <summary>
-        /// Copies the contents of the SkipList to the passed-in array.
-        /// </summary>
-        public void CopyTo( TKey[] array ) => this.CopyTo( array, 0 );
-
-        /// <summary>
-        /// Copies the contents of the SkipList to the passed-in array.
-        /// </summary>
-        public void CopyTo( TKey[] array, int index )
-        {
-            // copy the values from the skip list to array
-            if ( array == null )
-            {
-                throw new ArgumentNullException( nameof(array) );
-            }
-
-            if ( index < 0 )
-            {
-                throw new ArgumentOutOfRangeException( nameof(index) );
-            }
-
-            if ( index >= array.Length )
-            {
-                throw new ArithmeticException( "index is greater than the length of array" );
-            }
-
-            if ( array.Length - index <= this.Count )
-            {
-                throw new ArgumentException( "insufficient space in array to store skip list starting at specified index" );
-            }
-
-            var current = this._head.GetNeighbor( 0 );
-            var i = 0;
-
-            while ( current != null )
-            {
-                array[i + index] = current.TargetNode.Key;
-                i++;
-                current = current.TargetNode.GetNeighbor( 0 );
-            }
-        }
-
-        /// <summary>
         /// Returns an enumerator to access the contents of the SkipList.
         /// </summary>
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
@@ -514,7 +453,7 @@ namespace Caravela.Framework.Impl.Collections
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-        public int IndexOf( TKey key )
+        public int IndexOfKey( TKey key )
         {
             if ( this.TryFindNode( key, out _, out var index ) )
             {
@@ -524,7 +463,15 @@ namespace Caravela.Framework.Impl.Collections
             return -1;
         }
 
-        public int IndexOf( KeyValuePair<TKey, TValue> item ) => this.IndexOf( item.Key );
+        public int IndexOf( KeyValuePair<TKey, TValue> item )
+        {
+            if ( this.TryFindNode( item.Key, out var node, out var index ) && Equals( node.Value, item.Value ) )
+            {
+                return index;
+            }
+
+            return -1;
+        }
 
         void IList<KeyValuePair<TKey, TValue>>.Insert( int index, KeyValuePair<TKey, TValue> item ) => throw new NotSupportedException();
 
@@ -542,7 +489,7 @@ namespace Caravela.Framework.Impl.Collections
             return new KeyValuePair<TKey, TValue>( node.Key, node.Value );
         }
 
-        public KeyValuePair<TKey, TValue> this[ int index ]
+        KeyValuePair<TKey, TValue> IList<KeyValuePair<TKey, TValue>>.this[ int index ]
         {
             get => this.GetAt( index );
             set => throw new NotSupportedException();
@@ -732,9 +679,9 @@ namespace Caravela.Framework.Impl.Collections
 
         public class ValueCollection : IReadOnlyList<TValue>
         {
-            private readonly SkipListIndexedDictionary<TKey, TValue> _parent;
+            private readonly SkipListDictionary<TKey, TValue> _parent;
 
-            public ValueCollection( SkipListIndexedDictionary<TKey, TValue> parent )
+            public ValueCollection( SkipListDictionary<TKey, TValue> parent )
             {
                 this._parent = parent;
             }
@@ -754,22 +701,11 @@ namespace Caravela.Framework.Impl.Collections
 
             IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-            public void CopyTo( TValue[] array, int arrayIndex )
-            {
-                var i = arrayIndex;
-
-                foreach ( var value in this )
-                {
-                    array[i] = value;
-                    i++;
-                }
-            }
-
             public int Count => this._parent.Count;
 
             public TValue this[ int index ]
             {
-                get => this._parent[index].Value;
+                get => this._parent.GetAt( index ).Value;
                 set => throw new NotSupportedException();
             }
         }

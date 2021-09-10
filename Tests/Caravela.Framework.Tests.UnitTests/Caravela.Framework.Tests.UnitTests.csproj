@@ -29,6 +29,11 @@
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
     <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" />
   </ItemGroup>
+  
+    <ItemGroup>
+      <Compile Include="..\..\NullableAttributes.cs" Link="NullableAttributes.cs" />
+    </ItemGroup>
+
 
 
   <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
