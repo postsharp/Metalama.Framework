@@ -30,9 +30,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     syntaxGenerator.TypeExpression( SpecialType.System_Object ),
                     this._parent._parameters.Select(
                         p =>
-                            p.IsOut()
-                                ? (SyntaxNode) syntaxGenerator.DefaultExpression( p.ParameterType.GetSymbol() )
-                                : SyntaxFactory.IdentifierName( p.Name ) ) );
+                            p.RefKind.IsReadable()
+                                ? SyntaxFactory.IdentifierName( p.Name )
+                                : (SyntaxNode) syntaxGenerator.DefaultExpression( p.ParameterType.GetSymbol() ) ) );
 
                 return new RuntimeExpression(
                     array,

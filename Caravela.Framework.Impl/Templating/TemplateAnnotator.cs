@@ -1508,7 +1508,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public override SyntaxNode? VisitReturnStatement( ReturnStatementSyntax node )
-            => base.VisitReturnStatement( node ).AddScopeAnnotation( TemplatingScope.RunTimeOnly );
+            => base.VisitReturnStatement( node )!.AddScopeAnnotation( TemplatingScope.RunTimeOnly );
 
         #region Unsupported Features
 

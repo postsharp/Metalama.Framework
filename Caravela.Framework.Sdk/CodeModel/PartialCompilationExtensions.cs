@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
@@ -26,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this IPartialCompilation compilation,
             Func<SyntaxTree, CancellationToken, SyntaxTree> getNewTree,
             CancellationToken cancellationToken = default )
-            => compilation.UpdateSyntaxTrees(
+            => compilation.WithSyntaxTrees(
                 compilation.SyntaxTrees.Values.Select( t => new ModifiedSyntaxTree( getNewTree( t, cancellationToken ), t ) )
                     .Where( t => t.NewTree != t.OldTree )
                     .ToList(),
@@ -44,11 +45,56 @@ namespace Caravela.Framework.Impl.CodeModel
             this IPartialCompilation compilation,
             Func<SyntaxNode, CancellationToken, SyntaxNode> getNewSyntaxRoot,
             CancellationToken cancellationToken = default )
-            => compilation.UpdateSyntaxTrees(
+            => compilation.WithSyntaxTrees(
                 compilation.SyntaxTrees.Values.Select( t => (OldTree: t, NewRoot: getNewSyntaxRoot( t.GetRoot( cancellationToken ), cancellationToken )) )
                     .Where( x => x.OldTree.GetRoot( cancellationToken ) != x.NewRoot )
                     .Select( x => new ModifiedSyntaxTree( x.OldTree.WithRootAndOptions( x.NewRoot, (CSharpParseOptions) x.OldTree.Options ), x.OldTree ) )
                     .ToList(),
                 Array.Empty<SyntaxTree>() );
+
+        public static IPartialCompilation UpdateSyntaxTrees(
+            this IPartialCompilation compilation,
+            Func<SyntaxTree, SyntaxTree> replace,
+            CancellationToken cancellationToken = default )
+        {
+            var modifiedSyntaxTrees = new List<ModifiedSyntaxTree>( compilation.SyntaxTrees.Count );
+
+            foreach ( var tree in compilation.SyntaxTrees.Values )
+            {
+                var newTree = replace( tree );
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if ( newTree != tree )
+                {
+                    modifiedSyntaxTrees.Add( new ModifiedSyntaxTree( newTree, tree ) );
+                }
+            }
+
+            return compilation.WithSyntaxTrees( modifiedSyntaxTrees );
+        }
+
+        public static IPartialCompilation RewriteSyntaxTrees(
+            this IPartialCompilation compilation,
+            CSharpSyntaxRewriter rewriter,
+            CancellationToken cancellationToken = default )
+        {
+            var modifiedSyntaxTrees = new List<ModifiedSyntaxTree>( compilation.SyntaxTrees.Count );
+
+            foreach ( var tree in compilation.SyntaxTrees.Values )
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var oldRoot = tree.GetRoot();
+                var newRoot = rewriter.Visit( oldRoot );
+
+                if ( newRoot != oldRoot )
+                {
+                    modifiedSyntaxTrees.Add( new ModifiedSyntaxTree( tree.WithRootAndOptions( newRoot, tree.Options ), tree ) );
+                }
+            }
+
+            return compilation.WithSyntaxTrees( modifiedSyntaxTrees );
+        }
     }
 }

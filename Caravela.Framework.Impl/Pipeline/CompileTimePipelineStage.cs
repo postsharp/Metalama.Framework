@@ -2,12 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.AspectOrdering;
-using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Linking;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
@@ -50,7 +48,6 @@ namespace Caravela.Framework.Impl.Pipeline
                 linkerResult.Compilation,
                 input.AspectLayers,
                 pipelineStepResult.Diagnostics.Concat( linkerResult.Diagnostics ),
-                pipelineStepResult.NonObservableTransformations.OfType<ManagedResourceBuilder>().Select( r => r.ToResourceDescription() ).ToList(),
                 pipelineStepResult.ExternalAspectSources );
         }
     }

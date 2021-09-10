@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.TestFramework;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -115,6 +116,13 @@ class Class<T>
             var targetSymbol = this._declarations[target].GetSymbol().AssertNotNull();
 
             Assert.Equal( isEligible, this._aspects[aspect].IsEligibleFast( targetSymbol ) );
+        }
+
+        [Fact]
+        public void NamespaceNotEligible()
+        {
+            var targetSymbol = ((INamedTypeSymbol) this._declarations["Class"].GetSymbol().AssertNotNull()).ContainingNamespace;
+            Assert.False( this._aspects["MethodAspect"].IsEligibleFast( targetSymbol ) );
         }
 
         protected override void Dispose( bool disposing )

@@ -7,7 +7,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using Attribute = Caravela.Framework.Impl.CodeModel.Attribute;
 using MethodKind = Caravela.Framework.Code.MethodKind;
@@ -59,18 +58,9 @@ namespace Caravela.Framework.Impl
                 default:
                     var symbol = declaration.GetSymbol().AssertNotNull();
 
-                    var memberDeclaration = symbol.GetPrimaryDeclaration().GetMemberDeclarationSyntax();
+                    var memberDeclaration = symbol.GetPrimaryDeclaration().FindMemberDeclaration();
 
-                    if ( memberDeclaration != null )
-                    {
-                        return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
-                    }
-                    else
-                    {
-                        return new InsertPosition(
-                            InsertPositionRelation.Within,
-                            (MemberDeclarationSyntax) declaration.DeclaringType.GetPrimaryDeclaration().AssertNotNull() );
-                    }
+                    return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
             }
         }
     }

@@ -30,11 +30,20 @@ namespace Caravela.Framework.Impl.CodeModel
         bool IsPartial { get; }
 
         /// <summary>
-        ///  Adds and replaces syntax trees of the current <see cref="IPartialCompilation"/> and returns a new <see cref="IPartialCompilation"/>
-        /// representing the modified object.
+        /// Returns a copy of the current <see cref="IPartialCompilation"/> where the <see cref="SyntaxTrees"/> have been modified.
         /// </summary>
-        public IPartialCompilation UpdateSyntaxTrees(
+        public IPartialCompilation WithSyntaxTrees(
             IReadOnlyList<ModifiedSyntaxTree>? replacements = null,
             IReadOnlyList<SyntaxTree>? addedTrees = null );
+
+        /// <summary>
+        /// Returns a copy of the current <see cref="IPartialCompilation"/> where the <see cref="Resources"/> have been modified.
+        /// </summary>
+        public IPartialCompilation WithResources( ImmutableArray<ResourceDescription> resources );
+
+        /// <summary>
+        /// Gets the list of managed resources for the current compilation. This property is not defined at the design time, only at compile time.
+        /// </summary>
+        public ImmutableArray<ResourceDescription> Resources { get; }
     }
 }

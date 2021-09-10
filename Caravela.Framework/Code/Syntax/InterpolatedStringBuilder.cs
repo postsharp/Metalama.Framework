@@ -16,17 +16,12 @@ namespace Caravela.Framework.Code.Syntax
 
         internal IReadOnlyList<object?> Items => this._items;
 
-        private InterpolatedStringBuilder() { }
+        public InterpolatedStringBuilder() { }
 
         private InterpolatedStringBuilder( InterpolatedStringBuilder prototype )
         {
             this._items.AddRange( prototype._items );
         }
-
-        /// <summary>
-        /// Creates a new <see cref="InterpolatedStringBuilder"/>.
-        /// </summary>
-        public static InterpolatedStringBuilder Create() => new();
 
         /// <summary>
         /// Adds a fixed text to the interpolated string.

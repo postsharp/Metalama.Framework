@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicArrayBu
         [TestTemplate]
         dynamic? Template()
         {
-            var array = ArrayBuilder.Create();
+            var array = new ArrayBuilder();
             
             foreach ( var p in meta.Target.Parameters )
             {

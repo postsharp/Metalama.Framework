@@ -6,7 +6,6 @@ using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,13 +26,17 @@ namespace Caravela.Framework.Aspects
     {
         private static readonly AsyncLocal<IMetaApi?> _currentContext = new();
 
-        internal static IMetaApi CurrentContext => _currentContext.Value ?? throw NewInvalidOperationException();
+        internal static IMetaApi CurrentContext => _currentContext.Value ?? throw CreateException();
 
-        private static InvalidOperationException NewInvalidOperationException()
-            => new( "The 'meta' API can be used only in the execution context of a template." );
+        private static void CheckContext()
+        {
+            if ( _currentContext.Value == null )
+            {
+                throw CreateException();
+            }
+        }
 
-        private static NotSupportedException NewMustBeTransformedException( [CallerMemberName] string? caller = null )
-            => new( $"Calls to {caller} are supposed to be transformed." );
+        private static InvalidOperationException CreateException() => new( "The 'meta' API can be used only in the execution context of a template." );
 
         /// <summary>
         /// Gets access to the declaration being overridden or introduced.
@@ -47,7 +50,7 @@ namespace Caravela.Framework.Aspects
         /// logic is invoked (as a method call or inlining) is considered an implementation detail.
         /// </summary>
         [TemplateKeyword]
-        public static dynamic? Proceed() => throw NewMustBeTransformedException();
+        public static dynamic? Proceed() => throw CreateException();
 
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>Task&lt;dynamic?&gt;</c>.
@@ -56,32 +59,32 @@ namespace Caravela.Framework.Aspects
         /// can be a void <see cref="Task"/>, a <see cref="ValueType"/>, or any other type.
         /// </summary>
         [TemplateKeyword]
-        public static Task<dynamic?> ProceedAsync() => throw NewMustBeTransformedException();
+        public static Task<dynamic?> ProceedAsync() => throw CreateException();
 
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IEnumerable&lt;dynamic?&gt;</c>.
         /// </summary>
         [TemplateKeyword]
-        public static IEnumerable<dynamic?> ProceedEnumerable() => throw NewMustBeTransformedException();
+        public static IEnumerable<dynamic?> ProceedEnumerable() => throw CreateException();
 
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IEnumerator&lt;dynamic?&gt;</c>.
         /// </summary>
         [TemplateKeyword]
-        public static IEnumerator<dynamic?> ProceedEnumerator() => throw NewMustBeTransformedException();
+        public static IEnumerator<dynamic?> ProceedEnumerator() => throw CreateException();
 
 #if NET5_0
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IAsyncEnumerable&lt;dynamic?&gt;</c>.
         /// </summary>
         [TemplateKeyword]
-        public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => throw NewMustBeTransformedException();
+        public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => throw CreateException();
 
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>IAsyncEnumerator&lt;dynamic?&gt;</c>.
         /// </summary>
         [TemplateKeyword]
-        public static IAsyncEnumerator<dynamic?> ProceedAsyncEnumerator() => throw NewMustBeTransformedException();
+        public static IAsyncEnumerator<dynamic?> ProceedAsyncEnumerator() => throw CreateException();
 #endif
 
         /// <summary>
@@ -104,7 +107,12 @@ namespace Caravela.Framework.Aspects
         [return: NotNullIfNotNull( "expression" )]
         [return: CompileTimeOnly]
         [TemplateKeyword]
-        public static T? CompileTime<T>( T? expression ) => expression;
+        public static T? CompileTime<T>( T? expression )
+        {
+            CheckContext();
+
+            return expression;
+        }
 
         /// <summary>
         /// Converts a compile-value into run-time value by serializing the compile-time value into a some syntax that will
@@ -116,7 +124,12 @@ namespace Caravela.Framework.Aspects
         /// <seealso href="@templates"/>
         [TemplateKeyword]
         [return: NotNullIfNotNull( "value" )]
-        public static T? RunTime<T>( T? value ) => value;
+        public static T? RunTime<T>( T? value )
+        {
+            CheckContext();
+
+            return value;
+        }
 
         /// <summary>
         /// Gets a <c>dynamic</c> object that represents an instance of the target type. It can be used as a value (e.g. as a method argument)
@@ -204,7 +217,7 @@ namespace Caravela.Framework.Aspects
         /// This method is not able to add a comment to an empty block. The block must contain at least one statement.
         /// </remarks>
         [TemplateKeyword]
-        public static void Comment( params string?[] lines ) => throw new NotSupportedException();
+        public static void Comment( params string?[] lines ) => throw CreateException();
 
         /// <summary>
         /// Creates a compile-time object that represents a run-time <i>expression</i>, i.e. the syntax or code, and not the result

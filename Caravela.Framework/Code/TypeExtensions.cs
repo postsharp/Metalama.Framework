@@ -48,6 +48,14 @@ namespace Caravela.Framework.Code
         /// <returns></returns>
         public static bool Is( this IType left, Type right, ConversionKind kind = default ) => left.Compilation.InvariantComparer.Is( left, right, kind );
 
+        public static bool Is( this IType left, SpecialType right, ConversionKind kind = default )
+            => kind switch
+            {
+                ConversionKind.Implicit => left.SpecialType == right,
+                ConversionKind.ImplicitReference => left.Is( left.Compilation.TypeFactory.GetSpecialType( right ), kind ),
+                _ => throw new ArgumentOutOfRangeException( nameof(kind) )
+            };
+
         /// <summary>
         /// Determines whether a type equals one of the well-known special types.
         /// </summary>

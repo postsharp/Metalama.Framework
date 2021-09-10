@@ -126,8 +126,10 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return color;
             }
-
-            return TextSpanClassification.Default;
+            else
+            {
+                throw new AssertionFailedException();
+            }
         }
 
         public static TextSpanClassification GetColorFromAnnotation( this SyntaxNode node ) => ((SyntaxNodeOrToken) node).GetColorFromAnnotation();
@@ -154,15 +156,9 @@ namespace Caravela.Framework.Impl.Templating
             return transformedNode;
         }
 
-        [return: NotNullIfNotNull( "node" )]
-        public static T? ReplaceScopeAnnotation<T>( this T? node, TemplatingScope? scope )
+        public static T ReplaceScopeAnnotation<T>( this T node, TemplatingScope scope )
             where T : SyntaxNode
         {
-            if ( node == null )
-            {
-                return null;
-            }
-
             var existingScope = node.GetScopeFromAnnotation().GetValueOrDefault();
 
             if ( !existingScope.IsUndetermined() && existingScope.GetExpressionExecutionScope() != scope )
@@ -185,17 +181,12 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        [return: NotNullIfNotNull( "node" )]
-        public static T? AddScopeAnnotation<T>( this T? node, TemplatingScope? scope )
+        public static T AddScopeAnnotation<T>( this T node, TemplatingScope? scope )
             where T : SyntaxNode
         {
-            if ( node == null )
-            {
-                return null;
-            }
-
             if ( scope == null )
             {
+                // Coverage: ignore (the API is not consistent without this case even if it is never called).
                 return node;
             }
 
@@ -234,14 +225,9 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         [return: NotNullIfNotNull( "node" )]
-        public static T? AddTargetScopeAnnotation<T>( this T? node, TemplatingScope scope )
+        public static T AddTargetScopeAnnotation<T>( this T node, TemplatingScope scope )
             where T : SyntaxNode
         {
-            if ( node == null )
-            {
-                return null;
-            }
-
             switch ( scope )
             {
                 case TemplatingScope.CompileTimeOnly:

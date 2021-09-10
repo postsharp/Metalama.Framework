@@ -13,15 +13,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Build\Build.ps1 = Build\Build.ps1
 		CaravelaVersion.props = CaravelaVersion.props
 		Build\cleanup.cmd = Build\cleanup.cmd
-		Directories.props = Directories.props
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
 		Build\kill.ps1 = Build\kill.ps1
 		LICENSE.md = LICENSE.md
-		MainVersion.props = MainVersion.props
 		nuget.config = nuget.config
 		THIRD-PARTY-NOTICES.TXT = THIRD-PARTY-NOTICES.TXT
-		Versions.props = Versions.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.MemoTransformer", "Build\Caravela.MemoTransformer\Caravela.MemoTransformer.csproj", "{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}"
