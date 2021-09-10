@@ -51,7 +51,14 @@ namespace Caravela.TestFramework
         {
             if ( Directory.Exists( this.CompileTimeProjectCacheDirectory ) )
             {
-                Directory.Delete( this.CompileTimeProjectCacheDirectory, true );
+                try
+                {
+                    Directory.Delete( this.CompileTimeProjectCacheDirectory, true );
+                }
+                catch ( UnauthorizedAccessException )
+                {
+                    // We still have issues unloading the assemblies, so deleting may fail.
+                }
             }
         }
     }

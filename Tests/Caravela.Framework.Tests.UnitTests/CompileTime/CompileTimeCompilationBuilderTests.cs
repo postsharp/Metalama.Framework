@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
     public class CompileTimeCompilationBuilderTests : TestBase
     {
         [Fact]
-        public void RemoveInvalidUsingRewriterTest()
+        public void RemoveInvalidUsingRewriter()
         {
             var compilation = CreateCSharpCompilation(
                 @"
@@ -463,7 +463,7 @@ public class CompileTimeOnlyClass
         }
 
         [Fact]
-        public void TestRewriter()
+        public void CompileTimeAssemblyBinaryRewriter()
         {
             using var isolatedTest = this.WithIsolatedTest();
             var rewriter = new Rewriter();
@@ -486,6 +486,63 @@ public class Anything
             Assert.True( loader1.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, false, CancellationToken.None, out _ ) );
 
             Assert.True( rewriter.IsInvoked );
+        }
+
+        [Fact]
+        public void NoBuildTimeCodeNoDependency()
+        {
+            using var isolatedTest = this.WithIsolatedTest();
+            
+            var code = @"
+using System;
+using Caravela.Framework.Aspects;
+
+public class SomeRunTimeClass
+{
+}
+
+";
+
+            var roslynCompilation = CreateCSharpCompilation( code );
+            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            DiagnosticList diagnosticList = new();
+            Assert.True( loader1.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, false, CancellationToken.None, out var project ) );
+
+            Assert.Null( project );
+        }
+        
+        [Fact]
+        public void FormatCompileTimeCode()
+        {
+            using var isolatedTest = this.WithIsolatedTest();
+            isolatedTest.ProjectOptions.FormatCompileTimeCode = true;
+            
+            var code = @"
+using System;
+using Caravela.Framework.Aspects;
+
+public class MyAspect : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        return default;
+    }
+}
+
+";
+
+            var roslynCompilation = CreateCSharpCompilation( code );
+            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            DiagnosticList diagnosticList = new();
+            Assert.True( loader1.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, false, CancellationToken.None, out var project ) );
+
+            Assert.NotNull( project );
+            Assert.NotNull( project!.Directory );
+
+            // Just test that the output file has gone through formatting (we don't test that the whole formatting is correct). 
+            var csFile = Directory.GetFiles( project.Directory!, "*.cs" ).Single();
+            Assert.Contains( "using Microsoft.CodeAnalysis", File.ReadAllText( csFile ), StringComparison.Ordinal );
+
         }
 
         private class Rewriter : ICompileTimeAssemblyBinaryRewriter
