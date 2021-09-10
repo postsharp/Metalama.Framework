@@ -52,7 +52,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             }
             else
             {
-                testResult.SetFailed( "CompileTimeAspectPipeline.TryExecute failed." );
+                testResult.SetFailed( "DesignTimeAspectPipeline.Execute failed." );
             }
 
             return testResult;

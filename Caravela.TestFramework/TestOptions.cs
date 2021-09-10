@@ -195,6 +195,12 @@ namespace Caravela.TestFramework
                             "Caravela.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory, Caravela.Framework.Tests.PublicPipeline";
 
                         break;
+                    
+                    case "LiveTemplate":
+                        this.TestRunnerFactoryType =
+                            "Caravela.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Caravela.Framework.Tests.PublicPipeline";
+
+                        break;
 
                     case "WriteInputHtml":
                         this.WriteInputHtml = true;
