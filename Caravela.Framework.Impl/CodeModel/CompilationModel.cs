@@ -77,7 +77,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this.Factory = new DeclarationFactory( this );
 
             var allDeclarations =
-                this.PartialCompilation.Types.SelectManyRecursive<ISymbol>( s => s.GetContainedSymbols(), includeFirstLevel: true, throwOnDuplicate: false )
+                this.PartialCompilation.Types.SelectManyRecursive<ISymbol>( s => s.GetContainedSymbols(), throwOnDuplicate: false )
                     .Concat( new[] { (ISymbol) this.PartialCompilation.Compilation.Assembly, this.PartialCompilation.Compilation.SourceModule } );
 
             var allAttributes = allDeclarations.SelectMany( c => c.GetAllAttributes() );

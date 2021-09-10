@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Collections
 {
-    internal partial class ImmutableMultiValueDictionary<TKey, TValue> : IReadOnlyMultiValueDictionary<TKey, TValue>
+    internal partial class ImmutableMultiValueDictionary<TKey, TValue> : IEnumerable<IGrouping<TKey, TValue>>
         where TKey : notnull
     {
         private readonly ImmutableDictionary<TKey, Group> _dictionary;
@@ -52,16 +52,6 @@ namespace Caravela.Framework.Impl.Collections
             return builder.ToImmutable();
         }
 
-        public ImmutableMultiValueDictionary<TKey, TValue> Merge( ImmutableMultiValueDictionary<TKey, TValue> other )
-        {
-            var builder = this.ToBuilder();
-            builder.AddRange( other.SelectMany( x => x.Select( y => (x.Key, Value: y) ) ), x => x.Key, x => x.Value );
-
-            return builder.ToImmutable();
-        }
-
-        IReadOnlyList<TValue> IReadOnlyMultiValueDictionary<TKey, TValue>.GetByKey( TKey key ) => this[key];
-
         public ImmutableArray<TValue> this[ TKey key ]
         {
             get
@@ -76,20 +66,6 @@ namespace Caravela.Framework.Impl.Collections
         }
 
         public IEnumerable<TKey> Keys => this._dictionary.Keys;
-
-        public IEnumerable<TValue> Values
-        {
-            get
-            {
-                foreach ( var group in this._dictionary.Values )
-                {
-                    foreach ( var item in group )
-                    {
-                        yield return item;
-                    }
-                }
-            }
-        }
 
         public IEnumerator<IGrouping<TKey, TValue>> GetEnumerator() => this._dictionary.Values.Cast<IGrouping<TKey, TValue>>().GetEnumerator();
 

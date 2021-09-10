@@ -7,47 +7,43 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.AspectOrdering
 {
-    internal sealed class Graph : AbstractGraph
+    internal sealed class DirectedGraph
     {
         private readonly SimpleLinkedListNode<int>?[] _successors;
         private readonly SimpleLinkedListNode<int>?[] _predecessors;
 
-        public Graph( int size ) : base( size )
+        public const int NotDiscovered = int.MaxValue;
+        public const int Cycle = int.MinValue;
+
+        private readonly int _size;
+
+        public int[] GetInitialVector()
         {
+            var n = this._size;
+            var vector = new int[n];
+
+            for ( var i = 0; i < n; i++ )
+            {
+                vector[i] = NotDiscovered;
+            }
+
+            return vector;
+        }
+
+        public DirectedGraph( int size )
+        {
+            this._size = size;
             this._successors = new SimpleLinkedListNode<int>[size];
             this._predecessors = new SimpleLinkedListNode<int>[size];
         }
 
-        public override void AddEdge( int predecessor, int successor )
+        public void AddEdge( int predecessor, int successor )
         {
             SimpleLinkedListNode<int>.Insert( ref this._successors[predecessor], successor );
             SimpleLinkedListNode<int>.Insert( ref this._predecessors[successor], predecessor );
         }
 
-        public override void RemoveEdge( int predecessor, int successor )
-        {
-            _ = SimpleLinkedListNode<int>.Remove( ref this._successors[predecessor], successor );
-            _ = SimpleLinkedListNode<int>.Remove( ref this._predecessors[successor], predecessor );
-        }
-
-        public override bool HasEdge( int predecessor, int successor )
-        {
-            var current = this._successors[predecessor];
-
-            while ( current != null )
-            {
-                if ( current.Value == successor )
-                {
-                    return true;
-                }
-
-                current = current.Next;
-            }
-
-            return false;
-        }
-
-        public override int DoBreadthFirstSearch( int initialNode, int[] distances, int[] directPredecessors )
+        public int DoBreadthFirstSearch( int initialNode, int[] distances, int[] directPredecessors )
         {
             var n = distances.Length;
 
@@ -117,6 +113,21 @@ namespace Caravela.Framework.Impl.AspectOrdering
         {
             public int Node;
             public SimpleLinkedListNode<int> NodesInPath;
+        }
+
+        private sealed class SimpleLinkedListNode<T>
+        {
+            public static void Insert( ref SimpleLinkedListNode<T>? node, T value ) => node = new SimpleLinkedListNode<T>( value, node );
+
+            public SimpleLinkedListNode( T value, SimpleLinkedListNode<T>? next )
+            {
+                this.Value = value;
+                this.Next = next;
+            }
+
+            public T? Value { get; }
+
+            public SimpleLinkedListNode<T>? Next { get; internal set; }
         }
     }
 }

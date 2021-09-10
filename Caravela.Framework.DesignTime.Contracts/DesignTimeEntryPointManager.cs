@@ -73,7 +73,11 @@ namespace Caravela.Framework.DesignTime.Contracts
             {
                 var taskCancelled = new TaskCompletionSource<bool>();
 
+#if NET5_0
+                await using ( cancellationToken.Register( () => taskCancelled.SetCanceled( cancellationToken ) ) )
+#else
                 using ( cancellationToken.Register( () => taskCancelled.SetCanceled() ) )
+#endif
                 {
                     await Task.WhenAny( task, taskCancelled.Task );
 
@@ -120,7 +124,7 @@ namespace Caravela.Framework.DesignTime.Contracts
             }
         }
 
-        Version IDesignTimeEntryPointManager.Version => this.GetType().Assembly.GetName().Version;
+        Version IDesignTimeEntryPointManager.Version => this.GetType().Assembly.GetName().Version!;
 
         private void OnUnloaded( ICompilerServiceProvider entryPoint )
         {
