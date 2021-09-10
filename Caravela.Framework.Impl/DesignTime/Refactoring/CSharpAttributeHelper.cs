@@ -186,6 +186,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             return newNode.WithLeadingTrivia( oldNode.GetLeadingTrivia() );
         }
 
+        // TODO #29087
         /*
         internal static async ValueTask<Solution> AddAssemblyAttributeAsync(
             [Required] Solution currentSolution,

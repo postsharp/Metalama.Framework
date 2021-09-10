@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,7 +45,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 var introducedSyntaxTree = pipelineResult.IntroducedSyntaxTrees.SingleOrDefault();
 
                 var introducedSyntaxRoot = introducedSyntaxTree == null
-                    ? SyntaxFactoryEx.EmptyStatement
+                    ? SyntaxFactory.GlobalStatement( SyntaxFactoryEx.EmptyStatement )
                     : await introducedSyntaxTree.GeneratedSyntaxTree.GetRootAsync();
 
                 await testResult.SyntaxTrees.Single().SetRunTimeCodeAsync( introducedSyntaxRoot );

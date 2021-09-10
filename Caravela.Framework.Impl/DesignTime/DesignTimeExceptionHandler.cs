@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.DesignTime
             => e switch
             {
                 OperationCanceledException => false,
-                AggregateException aggregate when aggregate.InnerExceptions.Count == 0 => MustHandle( e.InnerException ),
+                AggregateException aggregate when aggregate.InnerExceptions.Count == 0 && e.InnerException != null => MustHandle( e.InnerException ),
                 _ => true
             };
 

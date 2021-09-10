@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.DesignTime
                     "CR0307",
                     "The type must be made partial.",
                     "Aspects add members to '{0}' but it is not marked as 'partial'. Make the type 'partial' to make it possible to "
-                    + "referenced aspect-generated artefacts from source code.",
+                    + "reference aspect-generated artefacts from source code.",
                     _category,
                     Warning );
     }
