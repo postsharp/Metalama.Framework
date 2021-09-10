@@ -1,7 +1,9 @@
 ﻿using System;
 using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.Properties.Inliners.GetterCastReturn_DifferentType
+#pragma warning disable CS0219
+
+namespace Caravela.Framework.Tests.Integration.Tests.Linker.Properties.Inliners.GetterLocalDeclaration_NotSingleVariable
 {
     // <target>
     class Target
@@ -21,7 +23,9 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Properties.Inliners.
             get
             {
                 Console.WriteLine( "Before");
-                return (short)link( _this.Foo.get, inline);
+                int y = 0, x = link( _this.Foo.get, inline);
+                Console.WriteLine( "After");
+                return x;
             }
         }
     }

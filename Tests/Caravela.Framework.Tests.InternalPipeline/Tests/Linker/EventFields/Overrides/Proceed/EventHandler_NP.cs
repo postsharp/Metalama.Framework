@@ -3,28 +3,23 @@ using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.Single
+namespace Caravela.Framework.Tests.Integration.Tests.Linker.EventFields.Overrides.Proceed.EventHandler_NP
 {
     // <target>
     class Target
     {
-        delegate void Handler();
-        void Test(string s)
-        {
-        }
-
-        event Handler? Foo;
+        event EventHandler? Foo;
 
         [PseudoOverride(nameof(Foo), "TestAspect")]
-        event Handler? Foo_Override
+        event EventHandler Foo_Override1
         {
             add
             {
-                link[_this.Foo.add] += value;
+                Console.WriteLine("Override");
             }
             remove
             {
-                link[_this.Foo.remove] -= value;
+                Console.WriteLine("Override");
             }
         }
     }

@@ -16,6 +16,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             if ( aspectReference.ResolvedSemantic.Symbol is not IEventSymbol
                  && (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol is not IEventSymbol )
             {
+                // Coverage: ignore (hit only when the check in base class is incorrect).
                 return false;
             }
 
@@ -30,7 +31,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            // Assignment should have a "value" identifier on the right (TODO: ref returns).
+            // Assignment should have a "value" identifier on the right.
             if ( assignmentExpression.Right is not IdentifierNameSyntax rightIdentifier ||
                  !string.Equals( rightIdentifier.Identifier.ValueText, "value", StringComparison.Ordinal ) )
             {
@@ -46,6 +47,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             // The assignment should be part of expression statement.
             if ( assignmentExpression.Parent == null || assignmentExpression.Parent is not ExpressionStatementSyntax )
             {
+                // Coverage: ignore (only incorrect code can get here).
                 return false;
             }
 

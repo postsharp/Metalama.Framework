@@ -16,6 +16,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             // The syntax has to be in form: <annotated_method_expression( <arguments> );
             if ( aspectReference.ResolvedSemantic.Symbol is not IMethodSymbol )
             {
+                // Coverage: ignore (hit only when the check in base class is incorrect).
                 return false;
             }
 
@@ -30,7 +31,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             }
 
             // The invocation needs to be inlineable in itself.
-            if ( IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
+            if ( !IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
             {
                 return false;
             }
