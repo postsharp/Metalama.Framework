@@ -492,7 +492,7 @@ public class Anything
         public void NoBuildTimeCodeNoDependency()
         {
             using var isolatedTest = this.WithIsolatedTest();
-            
+
             var code = @"
 using System;
 using Caravela.Framework.Aspects;
@@ -510,13 +510,13 @@ public class SomeRunTimeClass
 
             Assert.Null( project );
         }
-        
+
         [Fact]
         public void FormatCompileTimeCode()
         {
             using var isolatedTest = this.WithIsolatedTest();
             isolatedTest.ProjectOptions.FormatCompileTimeCode = true;
-            
+
             var code = @"
 using System;
 using Caravela.Framework.Aspects;
@@ -542,7 +542,6 @@ public class MyAspect : OverrideMethodAspect
             // Just test that the output file has gone through formatting (we don't test that the whole formatting is correct). 
             var csFile = Directory.GetFiles( project.Directory!, "*.cs" ).Single();
             Assert.Contains( "using Microsoft.CodeAnalysis", File.ReadAllText( csFile ), StringComparison.Ordinal );
-
         }
 
         private class Rewriter : ICompileTimeAssemblyBinaryRewriter

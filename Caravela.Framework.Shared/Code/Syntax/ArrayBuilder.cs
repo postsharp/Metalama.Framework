@@ -54,7 +54,7 @@ namespace Caravela.Framework.Code.Syntax
         /// <returns></returns>
         public dynamic ToArray() => meta.CurrentContext.CodeBuilder.BuildArray( this );
 
-        ISyntax ISyntaxBuilder.ToSyntax() => this.ToArray();
+        ISyntax ISyntaxBuilder.ToSyntax() => (ISyntax) meta.CurrentContext.CodeBuilder.BuildArray( this );
 
         public ArrayBuilder Clone() => new( this );
     }

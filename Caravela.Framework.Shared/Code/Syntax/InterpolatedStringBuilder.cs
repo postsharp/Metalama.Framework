@@ -51,7 +51,7 @@ namespace Caravela.Framework.Code.Syntax
             }
         }
 
-        ISyntax ISyntaxBuilder.ToSyntax() => this.ToInterpolatedString();
+        ISyntax ISyntaxBuilder.ToSyntax() => (ISyntax) meta.CurrentContext.CodeBuilder.BuildInterpolatedString( this );
 
         public InterpolatedStringBuilder Clone() => new( this );
     }

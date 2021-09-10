@@ -311,7 +311,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public static StatementSyntax YieldProceed() => ExpansionContext.CreateYieldProceedStatement();
 
-        public static ValueTask<dynamic?> ProceedAsync() => meta.Proceed();
+        public static ValueTask<object?> ProceedAsync() => meta.Proceed();
 
         public static ExpressionSyntax? GetDynamicSyntax( object? expression, string? expressionText, Location? location = null )
         {

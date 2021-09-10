@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Utilities;
-using PostSharp.Patterns;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -69,7 +68,7 @@ namespace Caravela.TestFramework
                 {
                     var assemblies = string.Join( ",", this._loadedAssemblies.Where( r => r.IsAlive ).Select( r => ((Assembly) r.Target!).GetName().Name ) );
 
-                    throw new AssertionFailedException(
+                    throw new InvalidOperationException(
                         "The domain could not be unloaded. There are probably dangling references. " +
                         "The following assemblies are still loaded: " + assemblies + "." );
                 }
@@ -81,7 +80,7 @@ namespace Caravela.TestFramework
             base.Dispose( disposing );
 
             this._assemblyLoadContext.Unload();
-            TestExecutionContext.RegisterDisposedDomain( this );
+            TestExecutionContext.RegisterDisposeAction( this.WaitForDisposal );
 
             // We cannot wait for complete disposal here because the TestResult object, lower in the stack, typically contains
             // a reference to a build-time assembly. So, we need to put the test out of the stack before the domain

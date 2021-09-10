@@ -10,6 +10,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
@@ -18,27 +19,31 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public DictionarySerializer( SyntaxSerializationService serializers ) : base( serializers ) { }
 
-        // ReSharper disable once UnusedParameter.Local
-        // This method is used so that the C# compiler resolves the generic parameters from 'dynamic'.
-        private static object GetDefaultComparer<TK, TV>( Dictionary<TK, TV> dictionary ) => EqualityComparer<TK>.Default;
-
-        public override ExpressionSyntax Serialize( object obj, ICompilationElementFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( object dictionary, ICompilationElementFactory syntaxFactory )
         {
-            var dictionaryType = obj.GetType();
+            var dictionaryType = dictionary.GetType();
             var keyType = dictionaryType.GetGenericArguments()[0];
+            var valueType = dictionaryType.GetGenericArguments()[1];
 
             var creationExpression = ObjectCreationExpression( syntaxFactory.GetTypeSyntax( dictionaryType ) );
 
-            // TODO: Don't use dynamic typing here.
-            dynamic dictionary = obj;
-            object defaultComparer = GetDefaultComparer( dictionary );
-            object actualComparer = dictionary.Comparer;
+            var defaultComparer = typeof(EqualityComparer<>)
+                .MakeGenericType( keyType )
+                .GetProperty( nameof(EqualityComparer<int>.Default), BindingFlags.Public | BindingFlags.Static )
+                .AssertNotNull()
+                .GetValue( null );
+
+            var actualComparer = typeof(Dictionary<,>)
+                .MakeGenericType( keyType, valueType )
+                .GetProperty( nameof(Dictionary<int, int>.Comparer), BindingFlags.Public | BindingFlags.Instance )
+                .AssertNotNull()
+                .GetValue( dictionary );
 
             if ( keyType == typeof(string) )
             {
                 string? comparerName = null;
 
-                if ( dictionary.Comparer is StringComparer sc )
+                if ( actualComparer is StringComparer sc )
                 {
                     if ( sc == StringComparer.Ordinal )
                     {
@@ -70,7 +75,7 @@ namespace Caravela.Framework.Impl.Serialization
                         throw SerializationDiagnosticDescriptors.UnsupportedDictionaryComparer.CreateException( sc.GetType() );
                     }
                 }
-                else if ( dictionary.Comparer.Equals( EqualityComparer<string>.Default ) )
+                else if ( actualComparer.Equals( EqualityComparer<string>.Default ) )
                 {
                     // It's the default string comparer.
                 }
@@ -98,11 +103,11 @@ namespace Caravela.Framework.Impl.Serialization
             }
 
             var lt = new List<InitializerExpressionSyntax>();
-            var nonGenericDictionary = (IDictionary) obj;
+            var nonGenericDictionary = (IDictionary) dictionary;
 
             foreach ( var key in nonGenericDictionary.Keys )
             {
-                ThrowIfStackTooDeep( obj );
+                ThrowIfStackTooDeep( dictionary );
 
                 var value = nonGenericDictionary[key];
 

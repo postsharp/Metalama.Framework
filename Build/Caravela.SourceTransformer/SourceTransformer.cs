@@ -10,19 +10,24 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.MemoTransformer
+namespace Caravela.SourceTransformer
 {
     [Transformer]
-    internal class Transformer : ISourceTransformer
+    internal class SourceTransformer : ISourceTransformer
     {
         public Compilation Execute( TransformerContext context )
         {
-            var rewriter = new Rewriter();
+            var changeDynamicToObject = context.GlobalOptions.TryGetValue( "build_property.ChangeDynamicToObject", out var changeDynamicToObjectStr )
+                                        && bool.Parse( changeDynamicToObjectStr );
+
+            var rewriter = new Rewriter( changeDynamicToObject );
             var compilation = context.Compilation;
 
             foreach ( var tree in compilation.SyntaxTrees )
             {
-                compilation = compilation.ReplaceSyntaxTree( tree, tree.WithRootAndOptions( rewriter.Visit( tree.GetRoot() ), tree.Options ) );
+                var newRoot = rewriter.Visit( tree.GetRoot() );
+
+                compilation = compilation.ReplaceSyntaxTree( tree, tree.WithRootAndOptions( newRoot, tree.Options ) );
             }
 
             foreach ( var diagnostic in rewriter.Diagnostics )
@@ -35,12 +40,21 @@ namespace Caravela.MemoTransformer
 
         private class Rewriter : CSharpSyntaxRewriter
         {
+            private readonly bool _changeDynamicToObject;
             private List<FieldDeclarationSyntax>? _fieldsToAdd;
+
+            public Rewriter( bool changeDynamicToObject )
+            {
+                this._changeDynamicToObject = changeDynamicToObject;
+            }
 
             public List<Diagnostic> Diagnostics { get; } = new();
 
             public override SyntaxNode VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             {
+                // Make sure we have substituted the dynamic keyword.
+                node = (PropertyDeclarationSyntax) base.VisitPropertyDeclaration( node )!;
+
                 if ( !node.AttributeLists.SelectMany( al => al.Attributes )
                     .Any(
                         a => string.Equals( a.Name.ToString(), "Memo", StringComparison.Ordinal ) ||
@@ -175,6 +189,23 @@ namespace Caravela.MemoTransformer
 
                 return node;
             }
+
+            public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
+            {
+                if ( node.Identifier.Text == "dynamic" )
+                {
+                    if ( this._changeDynamicToObject )
+                    {
+                        return PredefinedType( Token( SyntaxKind.ObjectKeyword ) ).WithTriviaFrom( node );
+                    }
+                    else
+                    {
+                        this.Diagnostics.Add( Diagnostic.Create( _dynamicKeywordError, node.GetLocation() ) );
+                    }
+                }
+
+                return base.VisitIdentifierName( node );
+            }
         }
 
         private static readonly DiagnosticDescriptor _nonExpressionBodyError =
@@ -182,7 +213,7 @@ namespace Caravela.MemoTransformer
                 "CMT001",
                 "Only expression-bodied properties are supported.",
                 "Only expression-bodied properties are supported.",
-                "Caravela.MemoTransformer",
+                "Caravela.SourceTransformer",
                 DiagnosticSeverity.Error,
                 true );
 
@@ -191,7 +222,16 @@ namespace Caravela.MemoTransformer
                 "CMT002",
                 "Static properties are not supported.",
                 "Static properties are not supported.",
-                "Caravela.MemoTransformer",
+                "Caravela.SourceTransformer",
+                DiagnosticSeverity.Error,
+                true );
+
+        private static readonly DiagnosticDescriptor _dynamicKeywordError =
+            new(
+                "CMT004",
+                "Dynamic keyword forbidden.",
+                "The 'dynamic' keyword is forbidden in this project.",
+                "Caravela.SourceTransformer",
                 DiagnosticSeverity.Error,
                 true );
     }
