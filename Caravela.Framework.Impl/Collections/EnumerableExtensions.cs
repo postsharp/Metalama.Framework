@@ -86,7 +86,7 @@ namespace Caravela.Framework.Impl.Collections
 
             // Create a dictionary for the results. The key is the item, the value is the order of insertion.
             Dictionary<T, int> results = new( ReferenceEqualityComparer<T>.Instance );
-            
+
             VisitMany( collection, getItems, results, throwOnDuplicate, ref recursionCheck );
 
             return results.Keys;

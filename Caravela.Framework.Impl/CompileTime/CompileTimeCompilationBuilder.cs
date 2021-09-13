@@ -163,7 +163,7 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( !produceCompileTimeCodeRewriter.FoundCompileTimeCode )
             {
                 // This should not happen because we handle this condition before calling this method.
-                throw new AssertionFailedException("No compile-time code was found.");
+                throw new AssertionFailedException( "No compile-time code was found." );
             }
 
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees.Select( t => t.TransformedTree ) );
@@ -338,7 +338,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             // Coverage: ignore
                             // (this should happen only in case of incorrect generation of compile-time, but in this case a graceful fallback
                             // is better than an exception).
-                            
+
                             diagnosticSink.Report( diagnostic );
                         }
                     }
@@ -497,7 +497,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             // Deserialize the manifest.
             var manifest = CompileTimeProjectManifest.Deserialize( RetryHelper.Retry( () => File.OpenRead( outputPaths.Manifest ) ) );
-            
+
             project = CompileTimeProject.Create(
                 this._serviceProvider,
                 this._domain,
@@ -512,7 +512,6 @@ namespace Caravela.Framework.Impl.CompileTime
             this._cache.Add( projectHash, project );
 
             return true;
-        
         }
 
         private bool TryGetCompileTimeProjectImpl(

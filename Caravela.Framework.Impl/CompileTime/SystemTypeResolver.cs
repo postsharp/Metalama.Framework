@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         protected virtual bool IsStandardAssemblyName( string assemblyName ) => this._referenceAssemblyLocator.IsStandardAssemblyName( assemblyName );
 
-        protected override Type? GetCompileTimeNamedType( INamedTypeSymbol typeSymbol, CancellationToken cancellationToken )
+        protected override Type? GetCompileTimeNamedType( INamedTypeSymbol typeSymbol, CancellationToken cancellationToken = default )
         {
             var typeName = typeSymbol.GetReflectionName();
 

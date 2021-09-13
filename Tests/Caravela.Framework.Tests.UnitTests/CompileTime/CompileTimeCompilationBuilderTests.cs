@@ -463,7 +463,7 @@ public class ReferencedClass
                     diagnosticList,
                     false,
                     CancellationToken.None,
-                    out var compileTimeProject1 ) );
+                    out _ ) );
 
             // After building, getting from cache should fail because the memory cache is empty and the disk cache checks the assembly name.
             var loader2 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
@@ -475,7 +475,7 @@ public class ReferencedClass
                     diagnosticList,
                     true,
                     CancellationToken.None,
-                    out var compileTimeProject2 ) );
+                    out _ ) );
         }
 
         [Fact]

@@ -7,7 +7,6 @@ using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
 {
