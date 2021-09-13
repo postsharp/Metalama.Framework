@@ -17,7 +17,7 @@ using System.Text.RegularExpressions;
 
 namespace PostSharp.Engineering.BuildTools.Coverage
 {
-    public partial class WarnCommand : Command
+    public class WarnCommand : Command
     {
         public WarnCommand() : base( "warn", "Emit warnings based on a test coverage report" )
         {
@@ -188,32 +188,60 @@ namespace PostSharp.Engineering.BuildTools.Coverage
             => ShouldIgnoreNode( declaringMember, node ) ||
                (node != null && node is not MemberDeclarationSyntax && ShouldIgnoreNodeOrAncestor( declaringMember, node.Parent )); 
         private static bool ShouldIgnoreNode( MemberDeclarationSyntax declaringMember, SyntaxNode? node )
-            => node switch
+        {
+            switch ( node )
             {
-                null => true,
-                BlockSyntax block => block.Statements.Count == 0 || block.Statements.Count == 1 && ShouldIgnoreNode( declaringMember, block.Statements[0] ),
-                ThrowExpressionSyntax => true,
-                ThrowStatementSyntax => true,
-                MemberDeclarationSyntax member => ShouldIgnoreMember( member ),
-                SwitchExpressionArmSyntax arm => ShouldIgnoreNode( declaringMember,arm.Expression ),
-                ArrowExpressionClauseSyntax arrow => ShouldIgnoreNode( declaringMember, arrow.Expression ),
-                ExpressionStatementSyntax statement => ShouldIgnoreNode(declaringMember, statement.Expression ),
-                InvocationExpressionSyntax invocation => IsSameMemberName( declaringMember, invocation.Expression ) || invocation.ArgumentList.Arguments.Count == 0,
-                MemberAccessExpressionSyntax memberAccess => ShouldIgnoreNode( declaringMember, memberAccess.Expression ),
-                ConditionalAccessExpressionSyntax conditionalAccess => ShouldIgnoreNode( declaringMember, conditionalAccess.Expression ) && ShouldIgnoreNode( declaringMember, conditionalAccess.WhenNotNull ), 
-                QualifiedNameSyntax => true,
-                IdentifierNameSyntax => true,
-                LiteralExpressionSyntax => true,
-                DefaultExpressionSyntax => true,
-                TypeOfExpressionSyntax => true,
-                ThisExpressionSyntax => true,
-                BaseExpressionSyntax => true,
-                AssignmentExpressionSyntax assignment => ShouldIgnoreNode( declaringMember, assignment.Left ) && ShouldIgnoreNode( declaringMember, assignment.Right ),
-                CastExpressionSyntax cast => ShouldIgnoreNode( declaringMember, cast.Expression ),
-                CatchClauseSyntax => true,
-                AccessorDeclarationSyntax accessor => ShouldIgnoreNode( declaringMember, accessor.Body ) && ShouldIgnoreNode( declaringMember, accessor.ExpressionBody ),
-                _ => ContainsIgnoreComment( node.ToFullString() )
-            };
+                case null:
+                case BlockSyntax block when block.Statements.Count == 0 || (block.Statements.Count == 1 &&
+                                                                            ShouldIgnoreNode( declaringMember,
+                                                                                block.Statements[0] )):
+                case ThrowExpressionSyntax:
+                case ThrowStatementSyntax:
+                case MemberDeclarationSyntax member when ShouldIgnoreMember( member ):
+                case SwitchExpressionArmSyntax arm when ShouldIgnoreNode( declaringMember, arm.Expression ):
+                case ArrowExpressionClauseSyntax arrow when ShouldIgnoreNode( declaringMember, arrow.Expression ):
+                case ExpressionStatementSyntax statement when ShouldIgnoreNode( declaringMember, statement.Expression ):
+                case InvocationExpressionSyntax invocation
+                    when IsSameMemberName( declaringMember, invocation.Expression ) ||
+                         invocation.ArgumentList.Arguments.Count == 0:
+                case MemberAccessExpressionSyntax memberAccess
+                    when ShouldIgnoreNode( declaringMember, memberAccess.Expression ):
+                case ConditionalAccessExpressionSyntax conditionalAccess
+                    when ShouldIgnoreNode( declaringMember, conditionalAccess.Expression ) &&
+                         ShouldIgnoreNode( declaringMember, conditionalAccess.WhenNotNull ):
+                case QualifiedNameSyntax:
+                case IdentifierNameSyntax:
+                case LiteralExpressionSyntax:
+                case DefaultExpressionSyntax:
+                case TypeOfExpressionSyntax:
+                case ThisExpressionSyntax:
+                case BaseExpressionSyntax:
+                case AssignmentExpressionSyntax assignment when ShouldIgnoreNode( declaringMember, assignment.Left ) &&
+                                                                ShouldIgnoreNode( declaringMember, assignment.Right ):
+                case CastExpressionSyntax cast when ShouldIgnoreNode( declaringMember, cast.Expression ):
+                case CatchClauseSyntax:
+                case AccessorDeclarationSyntax accessor when ShouldIgnoreNode( declaringMember, accessor.Body ) &&
+                                                             ShouldIgnoreNode( declaringMember,
+                                                                 accessor.ExpressionBody ):
+                    return true;
+             
+                default:
+                    var parentStatement = GetParentStatement( node );
+                    if ( parentStatement != null && ContainsIgnoreComment( parentStatement.ToFullString() ) )
+                    {
+                        return true;
+                    }
+
+                    var parentBlock = GetParentBlock( node );
+                    
+                    if ( parentBlock != null && ContainsIgnoreComment( parentBlock.ToFullString() ) )
+                    {
+                        return true;
+                    }
+
+                    return false;
+            }
+        }
 
         private static bool ShouldIgnoreMember( MemberDeclarationSyntax member ) => member switch
         {
@@ -268,6 +296,24 @@ namespace PostSharp.Engineering.BuildTools.Coverage
                 NamespaceDeclarationSyntax n => n.Name.ToString(),
                 ConstructorDeclarationSyntax c => "ctor",
                 _ => node.Kind().ToString()
+            };
+
+        private static StatementSyntax? GetParentStatement( SyntaxNode node )
+            => node switch
+            {
+                StatementSyntax statement => statement,
+                MemberDeclarationSyntax => null,
+                { Parent: { } parent } => GetParentStatement( parent ),
+                _ => null
+            };
+        
+        private static BlockSyntax? GetParentBlock( SyntaxNode node )
+            => node switch
+            {
+                BlockSyntax block => block,
+                MemberDeclarationSyntax => null,
+                { Parent: { } parent } => GetParentBlock( parent ),
+                _ => null
             };
     }
 }

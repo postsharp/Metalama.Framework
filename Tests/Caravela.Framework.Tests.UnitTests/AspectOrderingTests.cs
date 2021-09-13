@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.UnitTests
             var loader = CompileTimeProjectLoader.Create( compileTimeDomain, isolatedTest.ServiceProvider );
 
             Assert.True(
-                loader.TryGetCompileTimeProject(
+                loader.TryGetCompileTimeProjectFromCompilation(
                     compilation.RoslynCompilation,
                     null,
                     new DiagnosticList(),
