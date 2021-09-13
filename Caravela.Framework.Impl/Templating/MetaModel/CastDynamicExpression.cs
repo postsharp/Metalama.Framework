@@ -24,10 +24,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         {
             var expression = this._value switch
             {
-                null => SyntaxFactoryEx.Null,
                 ExpressionSyntax expressionSyntax => expressionSyntax,
                 RuntimeExpression runtimeExpression => runtimeExpression.Syntax,
-                _ => SyntaxFactoryEx.LiteralExpression( this._value )
+                _ => throw new AssertionFailedException()
             };
 
             return new RuntimeExpression(

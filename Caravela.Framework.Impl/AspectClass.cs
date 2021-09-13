@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Sdk;
@@ -18,6 +19,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Serialization;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Caravela.Framework.Impl
 {
@@ -76,7 +78,7 @@ namespace Caravela.Framework.Impl
         /// </summary>
         /// <param name="aspectTypeSymbol"></param>
         /// <param name="aspectDriver">Can be null for testing.</param>
-        private AspectClass(
+        protected internal AspectClass(
             IServiceProvider serviceProvider,
             INamedTypeSymbol aspectTypeSymbol,
             AspectClass? baseClass,
@@ -88,7 +90,7 @@ namespace Caravela.Framework.Impl
             AspectDriverFactory aspectDriverFactory )
         {
             this.FullName = aspectTypeSymbol.GetReflectionNameSafe();
-            this.DisplayName = aspectTypeSymbol.Name.TrimEnd( "Attribute" );
+            this.DisplayName = AttributeRef.GetShortName( aspectTypeSymbol.Name );
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.BaseClass = baseClass;
             this.Project = project;
@@ -148,11 +150,14 @@ namespace Caravela.Framework.Impl
                     if ( members.TryGetValue( memberName, out var existingMember ) && !memberSymbol.IsOverride &&
                          !existingMember.TemplateInfo.IsNone )
                     {
+                        // Note we cannot get here when the member is defined in the same type because the compile-time assembly creation
+                        // would have failed. The
+
                         // The template is already defined and we are not overwriting a template of the base class.
                         diagnosticAdder.Report(
-                            GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefined.CreateDiagnostic(
+                            GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefinedInBaseClass.CreateDiagnostic(
                                 memberSymbol.GetDiagnosticLocation(),
-                                (memberSymbol, existingMember.AspectClass.FullName) ) );
+                                (memberName, type.Name, existingMember.AspectClass.AspectType.Name) ) );
 
                         continue;
                     }
@@ -172,12 +177,26 @@ namespace Caravela.Framework.Impl
             return members.ToImmutable();
         }
 
-        private void Initialize()
+        private bool TryInitialize( IDiagnosticAdder diagnosticAdder )
         {
             if ( this._prototypeAspectInstance != null )
             {
                 var builder = new Builder( this );
-                this._userCodeInvoker.Invoke( () => this._prototypeAspectInstance.BuildAspectClass( builder ) );
+
+                try
+                {
+                    this._userCodeInvoker.Invoke( () => this._prototypeAspectInstance.BuildAspectClass( builder ) );
+                }
+                catch ( Exception e )
+                {
+                    var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
+                        null,
+                        (AspectType: this.DisplayName, MethodName: nameof(IAspect.BuildAspectClass), e.GetType().Name, e.Format( 5 )) );
+
+                    diagnosticAdder.Report( diagnostic );
+
+                    return false;
+                }
 
                 this._layers = builder.Layers.As<string?>().Prepend( null ).Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
             }
@@ -188,6 +207,8 @@ namespace Caravela.Framework.Impl
             }
 
             // TODO: get all eligibility rules from the prototype instance and combine them into a single rule.
+
+            return true;
         }
 
         /// <summary>
@@ -225,7 +246,10 @@ namespace Caravela.Framework.Impl
                 compilation,
                 aspectDriverFactory );
 
-            aspectClass.Initialize();
+            if ( !aspectClass.TryInitialize( diagnosticAdder ) )
+            {
+                return false;
+            }
 
             return true;
         }
@@ -271,42 +295,36 @@ namespace Caravela.Framework.Impl
                 _ => false
             };
 
-        public bool IsEligible( ISymbol symbol )
-            => symbol switch
+        /// <summary>
+        /// Determines the eligibility of a Roslyn symbol for the current aspect without constructing a <see cref="CompilationModel"/>
+        /// for the symbol.
+        /// </summary>
+        public bool IsEligibleFast( ISymbol symbol )
+        {
+            var ourDeclarationInterface = symbol switch
             {
-                // TODO: Map the symbol to a code model declaration (which requires a CompilationModel), then simply
-                // call our aggregate eligibility rule here.
-
-                IMethodSymbol method =>
-                    this._prototypeAspectInstance is IAspect<IDeclaration> ||
-                    this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
-                    this._prototypeAspectInstance is IAspect<IMethodBase> ||
-                    (this._prototypeAspectInstance is IAspect<IMethod> && IsMethod( method.MethodKind )) ||
-                    (this._prototypeAspectInstance is IAspect<IConstructor> && IsConstructor( method.MethodKind )),
-
-                IPropertySymbol => this._prototypeAspectInstance is IAspect<IDeclaration> ||
-                                   this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
-                                   this._prototypeAspectInstance is IAspect<IFieldOrProperty> ||
-                                   this._prototypeAspectInstance is IAspect<IProperty>,
-
-                IFieldSymbol => this._prototypeAspectInstance is IAspect<IDeclaration> ||
-                                this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
-                                this._prototypeAspectInstance is IAspect<IFieldOrProperty> ||
-                                this._prototypeAspectInstance is IAspect<IField>,
-
-                IEventSymbol => this._prototypeAspectInstance is IAspect<IDeclaration> ||
-                                this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
-                                this._prototypeAspectInstance is IAspect<IEvent>,
-
-                INamedTypeSymbol => this._prototypeAspectInstance is IAspect<IDeclaration> ||
-                                    this._prototypeAspectInstance is IAspect<IMemberOrNamedType> ||
-                                    this._prototypeAspectInstance is IAspect<INamedType>,
-
-                _ => false
-
-                // TODO: parameters (using markers)
-                // TODO: call IsEligible on the prototype
+                IMethodSymbol method when IsMethod( method.MethodKind ) => typeof(IMethod),
+                IMethodSymbol method when IsConstructor( method.MethodKind ) => typeof(IConstructor),
+                IPropertySymbol => typeof(IProperty),
+                IEventSymbol => typeof(IEvent),
+                IFieldSymbol => typeof(IField),
+                ITypeSymbol { TypeKind: TypeKind.TypeParameter } => typeof(IGenericParameter),
+                INamedTypeSymbol => typeof(INamedType),
+                IParameterSymbol => typeof(IParameter),
+                _ => null
             };
+
+            if ( ourDeclarationInterface == null )
+            {
+                return false;
+            }
+
+            var aspectInterface = typeof(IAspect<>).MakeGenericType( ourDeclarationInterface );
+
+            return aspectInterface.IsAssignableFrom( this.AspectType );
+
+            // TODO: call IsEligible on the prototype
+        }
 
         public override string ToString() => this.FullName;
     }

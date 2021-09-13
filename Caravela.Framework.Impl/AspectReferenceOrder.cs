@@ -6,9 +6,9 @@ namespace Caravela.Framework.Impl
     internal enum AspectReferenceOrder
     {
         /// <summary>
-        /// Calls the semantic in the state it is after the current aspect has been applied.
+        /// Calls the semantic in the state it is after the current aspect layer has been applied.
         /// </summary>
-        Next,
+        Self,
 
         /// <summary>
         /// Gets the final state of the semantic with all transformations. If the semantic is virtual, this results in a virtual call.

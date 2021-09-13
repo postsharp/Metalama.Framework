@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.props" />
+    <Import Project="..\..\eng\Coverage.props" />
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -17,13 +18,14 @@
      <RootNamespace>Caravela.Framework.Tests.Integration</RootNamespace>
   </PropertyGroup>
 
+
   <ItemGroup>
     <PackageReference Include="FakeItEasy" Version="6.2.1" />
-    <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" /><PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
+    <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageReference Include="xunit" Version="$(xUnitVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
-    <PackageReference Include="coverlet.collector" Version="1.2.0" />
-     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
+    <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
      
      <!-- This is used for a test -->
      <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
@@ -68,6 +70,7 @@
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
 
+  <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
   <ItemGroup Condition="'$(Obfuscate)'=='True'">
     <Compile Remove="**\*" />
   </ItemGroup>

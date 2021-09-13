@@ -16,12 +16,15 @@ namespace Caravela.Framework.Impl.Formatting
     /// </summary>
     public sealed class ClassifiedTextSpanCollection : IReadOnlyClassifiedTextSpanCollection
     {
-        private readonly SkipListIndexedDictionary<int, MarkedTextSpan> _spans = new();
+        private readonly SkipListDictionary<int, MarkedTextSpan> _spans = new();
 
-        public ClassifiedTextSpanCollection()
+        // For test only.
+        internal ClassifiedTextSpanCollection() : this( int.MaxValue ) { }
+
+        public ClassifiedTextSpanCollection( int length )
         {
             // Start with a single default span. This avoid gaps in the partition later.
-            this._spans.Add( 0, new MarkedTextSpan( new TextSpan( 0, int.MaxValue ), TextSpanClassification.Default, null ) );
+            this._spans.Add( 0, new MarkedTextSpan( new TextSpan( 0, length ), TextSpanClassification.Default, null ) );
         }
 
         /// <summary>
@@ -52,7 +55,7 @@ namespace Caravela.Framework.Impl.Formatting
                     throw new AssertionFailedException();
                 }
 
-                if ( this._spans.TryGetClosestValue( span.Start, out var previousStartSpan ) && previousStartSpan.Span.IntersectsWith( span ) )
+                if ( this._spans.TryGetGreatestSmallerOrEqualValue( span.Start, out var previousStartSpan ) && previousStartSpan.Span.IntersectsWith( span ) )
                 {
                     // Check if we have an exact span. If not, we will partition.
                     if ( previousStartSpan.Span.Equals( span ) )
@@ -61,7 +64,7 @@ namespace Caravela.Framework.Impl.Formatting
 
                         if ( !previousStartSpan.Satisfies( classification, tagName, tagValue ) )
                         {
-                            this._spans.Set( span.Start, previousStartSpan.Update( classification, tagName, tagValue ) );
+                            this._spans[span.Start] = previousStartSpan.Update( classification, tagName, tagValue );
                         }
 
                         return;
@@ -77,13 +80,13 @@ namespace Caravela.Framework.Impl.Formatting
                     if ( span.Start == previousStartSpan.Span.Start )
                     {
                         // We have hit an existing span start. Check if we need to partition the end.
-                        if ( this._spans.TryGetClosestValue( span.End, out var previousEndSpan ) && previousEndSpan.Span.End != span.End
-                                                                                                 && previousEndSpan.Span.Start != span.End )
+                        if ( this._spans.TryGetGreatestSmallerOrEqualValue( span.End, out var previousEndSpan ) && previousEndSpan.Span.End != span.End
+                            && previousEndSpan.Span.Start != span.End )
                         {
                             // We have to split the existing span that conflicts with the end of the new span.
                             var (a, b) = Split( previousEndSpan, span.End );
-                            this._spans.Set( a.Span.Start, a );
-                            this._spans.Add( b.Span.Start, b );
+                            this._spans[a.Span.Start] = a;
+                            this._spans[b.Span.Start] = b;
                         }
                         else
                         {
@@ -100,9 +103,7 @@ namespace Caravela.Framework.Impl.Formatting
                                 if ( !pair.Value.Satisfies( classification, tagName, tagValue ) )
                                 {
                                     // Replace the category of this node.
-                                    this._spans.Set(
-                                        pair.Key,
-                                        pair.Value.Update( classification, tagName, tagValue ) );
+                                    this._spans[pair.Key] = pair.Value.Update( classification, tagName, tagValue );
                                 }
                             }
 
@@ -115,7 +116,7 @@ namespace Caravela.Framework.Impl.Formatting
                         // that we are back to a simple situation.
 
                         var (a, b) = Split( previousStartSpan, span.Start );
-                        this._spans.Set( a.Span.Start, a );
+                        this._spans[a.Span.Start] = a;
 
                         if ( b.Span.Contains( span.End ) )
                         {
@@ -129,13 +130,13 @@ namespace Caravela.Framework.Impl.Formatting
                         }
                     }
                 }
-                else if ( this._spans.TryGetClosestValue( span.End, out var previousEndSpan ) && previousEndSpan.Span.IntersectsWith( span ) )
+                else if ( this._spans.TryGetGreatestSmallerOrEqualValue( span.End, out var previousEndSpan ) && previousEndSpan.Span.IntersectsWith( span ) )
                 {
                     // An existing span intersects with the end. Split it and retry.
 
                     var (a, b) = Split( previousStartSpan, span.Start );
-                    this._spans.Set( a.Span.Start, a );
-                    this._spans.Add( b.Span.Start, b );
+                    this._spans[a.Span.Start] = a;
+                    this._spans[b.Span.Start] = b;
                 }
                 else
                 {
@@ -161,7 +162,7 @@ namespace Caravela.Framework.Impl.Formatting
 
         public TextSpanClassification GetCategory( in TextSpan textSpan )
         {
-            if ( this._spans.TryGetClosestValue( textSpan.Start, out var markedTextSpan ) )
+            if ( this._spans.TryGetGreatestSmallerOrEqualValue( textSpan.Start, out var markedTextSpan ) )
             {
                 if ( markedTextSpan.Span.Contains( textSpan ) )
                 {
@@ -204,16 +205,17 @@ namespace Caravela.Framework.Impl.Formatting
                     previousSpan = new ClassifiedTextSpan( pair.Value.Span, pair.Value.Classification, pair.Value.Tags );
                 }
 
+                // Break if we are getting further than the last span.
                 if ( classifiedSpan.Span.End >= textSpan.End )
                 {
-                    // Emit the last span if any.
-                    if ( previousSpan.Span.Length > 0 && previousSpan.HasTagOrClassification )
-                    {
-                        yield return previousSpan;
-                    }
-
-                    yield break;
+                    break;
                 }
+            }
+
+            // Emit the last span if any.
+            if ( previousSpan.Span.Length > 0 )
+            {
+                yield return previousSpan;
             }
         }
 

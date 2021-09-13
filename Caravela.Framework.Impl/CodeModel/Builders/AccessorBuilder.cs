@@ -74,6 +74,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IParameterList IHasParameters.Parameters => this.Parameters;
 
+        [Memo]
         public ParameterBuilderList Parameters
             => (this._containingDeclaration, this.MethodKind) switch
             {
@@ -99,7 +100,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     throw new InvalidOperationException( $"Cannot change event accessor accessibility." );
                 }
 
-                if ( !value.ToAccessibilityFlags().IsSubsetOrEqual( propertyBuilder.Accessibility.ToAccessibilityFlags() ) )
+                if ( !value.IsSubsetOrEqual( propertyBuilder.Accessibility ) )
                 {
                     throw new InvalidOperationException(
                         $"Cannot change accessor accessibility to {value}, which is not more restrictive than parent accessibility {propertyBuilder.Accessibility}." );
@@ -117,7 +118,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     throw new InvalidOperationException( $"Cannot change accessor accessibility, if the property has a single accessor ." );
                 }
 
-                if ( otherAccessor.Accessibility.ToAccessibilityFlags().IsSubsetOf( propertyBuilder.Accessibility.ToAccessibilityFlags() ) )
+                if ( otherAccessor.Accessibility.IsSubsetOf( propertyBuilder.Accessibility ) )
                 {
                     throw new InvalidOperationException(
                         $"Cannot change accessor accessibility to {value}, because the other accessor is already restricted to {otherAccessor.Accessibility}." );
@@ -181,7 +182,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         Accessibility IMemberOrNamedType.Accessibility => this.Accessibility;
 
-        string IMemberOrNamedType.Name => this.Name;
+        string INamedDeclaration.Name => this.Name;
 
         bool IMemberOrNamedType.IsStatic => this.IsStatic;
 

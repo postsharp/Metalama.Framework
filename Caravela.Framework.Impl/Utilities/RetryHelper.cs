@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.Utilities
@@ -18,6 +19,7 @@ namespace Caravela.Framework.Impl.Utilities
                 },
                 retryPredicate );
 
+        [ExcludeFromCodeCoverage]
         public static T Retry<T>( Func<T> action, Predicate<Exception>? retryPredicate = null )
         {
             var delay = 10.0;

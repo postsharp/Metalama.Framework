@@ -104,5 +104,21 @@ namespace Caravela.Framework.Impl.CodeModel
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
+
+        public IEnumerable<IMethod> Accessors
+        {
+            get
+            {
+                if ( this.GetMethod != null )
+                {
+                    yield return this.GetMethod;
+                }
+
+                if ( this.SetMethod != null )
+                {
+                    yield return this.SetMethod;
+                }
+            }
+        }
     }
 }

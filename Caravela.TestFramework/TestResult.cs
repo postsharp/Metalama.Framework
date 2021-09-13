@@ -20,7 +20,7 @@ namespace Caravela.TestFramework
     /// <summary>
     /// Represents the result of a test run.
     /// </summary>
-    public class TestResult
+    public class TestResult : IDisposable
     {
         private bool _frozen;
 
@@ -119,10 +119,18 @@ namespace Caravela.TestFramework
 
             for ( var i = 1; i < lines.Length; i++ )
             {
-                lines[i] = "// " + lines[i].Trim( '\r' );
+                if ( lines[i].TrimStart().StartsWith( "at ", StringComparison.Ordinal ) )
+                {
+                    // Remove exception stacks because they are different in debug and release builds.
+                    lines[i] = "<>";
+                }
+                else
+                {
+                    lines[i] = "// " + lines[i].Trim( '\r' );
+                }
             }
 
-            return string.Join( Environment.NewLine, lines );
+            return string.Join( Environment.NewLine, lines.Where( l => l != "<>" ) );
         }
 
         internal async Task SetCompileTimeCompilationAsync( Compilation compilation )
@@ -204,7 +212,7 @@ namespace Caravela.TestFramework
 
         private string? GetTextUnderDiagnostic( Diagnostic diagnostic )
         {
-            var syntaxTree = diagnostic.Location!.SourceTree;
+            var syntaxTree = diagnostic.Location.SourceTree;
 
             if ( syntaxTree == null )
             {
@@ -307,6 +315,21 @@ namespace Caravela.TestFramework
             // Individual trees should be formatted, so we don't need to format again.
 
             return consolidatedCompilationUnit;
+        }
+
+        public void Dispose()
+        {
+            // This is to make sure that we have no reference to the compile-time assembly.
+            // A Task<TestResult> may be non-collectable for some time after task completion (not sure why), so disposing
+            // the TestResult makes sure we don't have a GC reference to the assembly even if we still have a reference to the TestResult.
+
+            this._syntaxTrees.Clear();
+            this.OutputCompilation = null;
+            this.OutputCompilation = null;
+            this.InputProject = null;
+            this.OutputProject = null;
+            this.IntermediateLinkerCompilation = null;
+            this.InitialCompilationModel = null;
         }
     }
 }

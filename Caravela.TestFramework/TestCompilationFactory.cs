@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -38,6 +39,7 @@ namespace Caravela.TestFramework
                     a => !a.IsDynamic && a.FullName != null && a.FullName.StartsWith( "System", StringComparison.Ordinal )
                          && !string.IsNullOrEmpty( a.Location ) )
                 .Prepend( typeof(IAspect).Assembly )
+                .Prepend( typeof(IAspectWeaver).Assembly )
                 .Concat( additionalAssemblies ?? Enumerable.Empty<Assembly>() )
                 .Distinct()
                 .Select( a => MetadataReference.CreateFromFile( a.Location ) )

@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Sdk;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using MoreLinq;
 using System;
@@ -68,6 +69,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
             else
             {
+                // Coverage: Ignore (tests always provide a domain).
                 this._domain = this.ServiceProvider.GetService<ICompileTimeDomainFactory>().CreateDomain();
                 this._ownsDomain = true;
             }
@@ -106,8 +108,28 @@ namespace Caravela.Framework.Impl.Pipeline
                 return false;
             }
 
+            // Create compiler plug-ins found in compile-time code.
+            ImmutableArray<object> compilerPlugIns;
+
+            if ( compileTimeProject != null )
+            {
+                // The instantiation of compiler plug-ins defined in the current compilation is a bit rough here, but it is supposed to be used
+                // by our internal tests only.
+
+                var invoker = this.ServiceProvider.GetService<UserCodeInvoker>();
+
+                compilerPlugIns = compileTimeProject.ClosureProjects
+                    .SelectMany( p => p.CompilerPlugInTypes.Select( t => invoker.Invoke( () => Activator.CreateInstance( p.GetType( t ) ) ) ) )
+                    .Concat( this.ProjectOptions.PlugIns )
+                    .ToImmutableArray();
+            }
+            else
+            {
+                compilerPlugIns = this.ProjectOptions.PlugIns;
+            }
+
             // Create aspect types.
-            var driverFactory = new AspectDriverFactory( this.ServiceProvider, compilation.Compilation, this.ProjectOptions.PlugIns );
+            var driverFactory = new AspectDriverFactory( this.ServiceProvider, compilation.Compilation, compilerPlugIns );
             var aspectTypeFactory = new AspectClassMetadataFactory( this.ServiceProvider, driverFactory );
 
             var aspectTypes = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
@@ -185,7 +207,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             foreach ( var stage in pipelineConfiguration.Stages )
             {
-                if ( !stage.TryExecute( pipelineStageResult!, diagnosticAdder, cancellationToken, out var newStageResult ) )
+                if ( !stage.TryExecute( pipelineStageResult, diagnosticAdder, cancellationToken, out var newStageResult ) )
                 {
                     return false;
                 }

@@ -55,6 +55,8 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public IReadOnlyList<string> AspectTypes => this._manifest?.AspectTypes ?? Array.Empty<string>();
 
+        public IReadOnlyList<string> CompilerPlugInTypes => this._manifest?.CompilerPlugIns ?? Array.Empty<string>();
+
         /// <summary>
         /// Gets the list of compile-time projects referenced by the current project.
         /// </summary>
@@ -144,8 +146,16 @@ namespace Caravela.Framework.Impl.CompileTime
             string? compiledAssemblyPath,
             string sourceDirectory,
             Func<string, TextMapFile?> getLocationMap )
-            => new( serviceProvider, domain, runTimeIdentity, compileTimeIdentity, references, manifest, compiledAssemblyPath, getLocationMap,
-                    sourceDirectory );
+            => new(
+                serviceProvider,
+                domain,
+                runTimeIdentity,
+                compileTimeIdentity,
+                references,
+                manifest,
+                compiledAssemblyPath,
+                getLocationMap,
+                sourceDirectory );
 
         /// <summary>
         /// Creates a <see cref="CompileTimeProject"/> that does not include any source code.
@@ -169,7 +179,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 // Write syntax trees.
 
-                foreach ( var sourceFile in this.CodeFiles! )
+                foreach ( var sourceFile in this.CodeFiles )
                 {
                     var sourceText = File.ReadAllText( Path.Combine( this.Directory, sourceFile.TransformedPath ) );
 
@@ -207,7 +217,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         /// <param name="reflectionName"></param>
         /// <returns></returns>
-        public Type? GetTypeOrNull( string reflectionName ) => this.IsEmpty ? null : this.Assembly!.GetType( reflectionName, false );
+        public Type? GetTypeOrNull( string reflectionName ) => this.IsEmpty ? null : this.Assembly.GetType( reflectionName, false );
 
         public Type GetType( string reflectionName )
             => this.GetTypeOrNull( reflectionName ) ?? throw new ArgumentOutOfRangeException(

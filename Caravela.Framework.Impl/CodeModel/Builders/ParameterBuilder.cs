@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Reflection;
 
@@ -48,6 +47,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
 
+        public bool IsReturnParameter => this.Index < 0;
+
         public ParameterBuilder( MemberOrNamedTypeBuilder declaringMember, int index, string? name, IType type, RefKind refKind ) : base(
             declaringMember.ParentAdvice )
         {
@@ -59,20 +60,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         // TODO: How to implement this?
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        {
-            return this.Name;
-        }
-
-        internal ParameterSyntax ToDeclarationSyntax()
-        {
-            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
-
-            return syntaxGenerator.ParameterDeclaration(
-                this.Name,
-                syntaxGenerator.TypeExpression( this.ParameterType.GetSymbol() ),
-                this.DefaultValue.ToExpressionSyntax( this.Compilation ),
-                this.RefKind.ToRoslynRefKind() );
-        }
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.Name;
     }
 }

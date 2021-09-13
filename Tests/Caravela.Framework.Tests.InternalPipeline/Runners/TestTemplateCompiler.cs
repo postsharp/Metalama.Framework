@@ -98,7 +98,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
                     if ( transformedNode != null )
                     {
-                        var transformedTemplateText = transformedNode!.ToFullString();
+                        var transformedTemplateText = transformedNode.ToFullString();
 
                         // ReSharper disable StringLiteralTypo
                         Assert.DoesNotContain( "returnglobal", transformedTemplateText, StringComparison.Ordinal );

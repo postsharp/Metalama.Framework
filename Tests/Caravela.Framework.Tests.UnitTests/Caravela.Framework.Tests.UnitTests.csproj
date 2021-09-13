@@ -1,5 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="..\..\eng\Coverage.props" />
+
+
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -16,7 +19,6 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageReference Include="xunit" Version="$(xUnitVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
-    <PackageReference Include="coverlet.collector" Version="1.2.0" />
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
     <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     <ProjectReference Include="..\..\Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj" />
@@ -27,12 +29,16 @@
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
     <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" />
   </ItemGroup>
-
-
-    <!-- Disable this project when obfuscation is enabled -->
-    <ItemGroup Condition="'$(Obfuscate)'=='True'">
-        <Compile Remove="**\*" />
-    </ItemGroup>
   
+    <ItemGroup>
+      <Compile Include="..\..\NullableAttributes.cs" Link="NullableAttributes.cs" />
+    </ItemGroup>
+
+
+
+  <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
+  <ItemGroup Condition="'$(Obfuscate)'=='True'">
+    <Compile Remove="**\*" />
+  </ItemGroup>
 
 </Project>

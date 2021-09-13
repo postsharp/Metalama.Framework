@@ -19,7 +19,7 @@ using System.Threading;
 namespace Caravela.Framework.Impl
 {
     // TODO: AspectDriver should not store a reference to a Compilation we should not store references to a Roslyn compilation.
-    
+
     /// <summary>
     /// Executes aspects.
     /// </summary>
@@ -59,6 +59,8 @@ namespace Caravela.Framework.Impl
                 IField field => this.EvaluateAspect( field, aspectInstance, compilationModelRevision, cancellationToken ),
                 IProperty property => this.EvaluateAspect( property, aspectInstance, compilationModelRevision, cancellationToken ),
                 IConstructor constructor => this.EvaluateAspect( constructor, aspectInstance, compilationModelRevision, cancellationToken ),
+                IParameter parameter => this.EvaluateAspect( parameter, aspectInstance, compilationModelRevision, cancellationToken ),
+                IGenericParameter genericParameter => this.EvaluateAspect( genericParameter, aspectInstance, compilationModelRevision, cancellationToken ),
                 IEvent @event => this.EvaluateAspect( @event, aspectInstance, compilationModelRevision, cancellationToken ),
                 _ => throw new NotImplementedException()
             };
@@ -72,7 +74,7 @@ namespace Caravela.Framework.Impl
         {
             static AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
             {
-                return new(
+                return new AspectInstanceResult(
                     false,
                     new ImmutableUserDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<Advice>.Empty,
@@ -137,7 +139,7 @@ namespace Caravela.Framework.Impl
                 {
                     var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (AspectType: this.AspectClass.DisplayName, e.GetType().Name, e.Format( 5 )) );
+                        (AspectType: this.AspectClass.DisplayName, MethodName: nameof(IAspect<T>.BuildAspect), e.GetType().Name, e.Format( 5 )) );
 
                     return CreateResultForError( diagnostic );
                 }

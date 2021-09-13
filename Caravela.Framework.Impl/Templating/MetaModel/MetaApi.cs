@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis.Formatting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -88,6 +89,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         IDiagnosticSink IMetaApi.Diagnostics => this._common.Diagnostics;
 
+        [ExcludeFromCodeCoverage]
         public void DebugBreak()
         {
             var trustOptions = this._common.ServiceProvider.GetService<IProjectOptions>();
@@ -106,7 +108,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IExpression Expression( object? expression )
             => new UserExpression( RuntimeExpression.FromValue( expression, this.Compilation ), this.Compilation );
 
-        public object BuildArray( ArrayBuilder arrayBuilder ) => new ArrayDynamicExpression( arrayBuilder, this.Compilation );
+        public object BuildArray( ArrayBuilder arrayBuilder ) => new ArrayDynamicExpression( arrayBuilder );
 
         public object BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder )
             => new InterpolatedStringDynamicExpression( interpolatedStringBuilder, this.Compilation );

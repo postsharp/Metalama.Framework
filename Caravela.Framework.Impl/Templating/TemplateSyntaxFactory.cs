@@ -263,10 +263,15 @@ namespace Caravela.Framework.Impl.Templating
                         {
                             // If we have two adjacent text tokens, we need to merge them, otherwise reformatting will add a white space.
 
-                            var appendedText = previousText.TextToken.Text + text.TextToken.Text;
+                            var appendedText = previousText.TextToken.ValueText + text.TextToken.ValueText;
+
+                            var escapedTextWithQuotes =
+                                SyntaxFactory.Literal( appendedText ).Text.Replace( "{", "{{" ).Replace( "}", "}}" );
+
+                            var escapedText = escapedTextWithQuotes.Substring( 1, escapedTextWithQuotes.Length - 2 );
 
                             contents[previousIndex] = previousText.WithTextToken(
-                                SyntaxFactory.Token( default, SyntaxKind.InterpolatedStringTextToken, appendedText, appendedText, default ) );
+                                SyntaxFactory.Token( default, SyntaxKind.InterpolatedStringTextToken, escapedText, appendedText, default ) );
                         }
                         else
                         {

@@ -12,134 +12,71 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
+// Properties with overrides have the following structure:
+//  * Final semantic. 
+//  * Override n
+//  * ...
+//  * Override 1
+//  * Default semantic.
+//  * Base semantic (if the property was introduced).
+
 namespace Caravela.Framework.Impl.Linking
 {
     internal partial class LinkerRewritingDriver
     {
-        /// <summary>
-        /// Determines whether the property will be discarded in the final compilation (unreferenced or inlined declarations).
-        /// </summary>
-        /// <param name="referencedProperty">Override property symbol or overridden property symbol.</param>
-        /// <returns></returns>
-        private bool IsDiscarded( IPropertySymbol referencedProperty, ResolvedAspectReferenceSemantic semantic )
-        {
-            if ( this._analysisRegistry.IsOverride( referencedProperty ) )
-            {
-                var overrideTarget = this._analysisRegistry.GetOverrideTarget( referencedProperty );
-                var lastOverride = this._analysisRegistry.GetLastOverride( overrideTarget.AssertNotNull() );
-
-                var getAspectReferences = this._analysisRegistry.GetAspectReferences(
-                    referencedProperty,
-                    semantic,
-                    AspectReferenceTargetKind.PropertyGetAccessor );
-
-                var setAspectReferences = this._analysisRegistry.GetAspectReferences(
-                    referencedProperty,
-                    semantic,
-                    AspectReferenceTargetKind.PropertySetAccessor );
-
-                if ( SymbolEqualityComparer.Default.Equals( referencedProperty, lastOverride ) )
-                {
-                    return this.IsInlineable( referencedProperty, semantic );
-                }
-                else
-                {
-                    return this.IsInlineable( referencedProperty, semantic ) || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0);
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        private bool IsInlineable( IPropertySymbol symbol, ResolvedAspectReferenceSemantic semantic )
-        {
-            if ( GetDeclarationFlags( symbol ).HasFlag( LinkerDeclarationFlags.NotInlineable ) )
-            {
-                return false;
-            }
-
-            if ( this._analysisRegistry.IsLastOverride( symbol ) )
-            {
-                return true;
-            }
-
-            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
-            var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertyGetAccessor );
-            var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertySetAccessor );
-
-            if ( selfAspectReferences.Count > 0 )
-            {
-                // TODO: We may need to deal with this case.
-                return false;
-            }
-
-            if ( getAspectReferences.Count > 1 || setAspectReferences.Count > 1
-                                               || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0) )
-            {
-                return false;
-            }
-
-            return (getAspectReferences.Count == 0 || this.IsInlineableReference( getAspectReferences[0], MethodKind.PropertyGet ))
-                   && (setAspectReferences.Count == 0 || this.IsInlineableReference( setAspectReferences[0], MethodKind.PropertySet ));
-        }
-
-        private bool HasAnyAspectReferences( IPropertySymbol symbol, ResolvedAspectReferenceSemantic semantic )
-        {
-            var selfAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic );
-            var getAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertyGetAccessor );
-            var setAspectReferences = this._analysisRegistry.GetAspectReferences( symbol, semantic, AspectReferenceTargetKind.PropertySetAccessor );
-
-            return selfAspectReferences.Count > 0 || getAspectReferences.Count > 0 || setAspectReferences.Count > 0;
-        }
-
         private IReadOnlyList<MemberDeclarationSyntax> RewriteProperty( PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol )
         {
-            if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
+            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IPropertySymbol) this._analysisRegistry.GetLastOverride( symbol );
+                var lastOverride = (IPropertySymbol) this._introductionRegistry.GetLastOverride( symbol );
 
                 if ( IsAutoPropertyDeclaration( propertyDeclaration )
-                     && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
+                     && this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     // Backing field for auto property.
                     members.Add( GetPropertyBackingField( propertyDeclaration, symbol ) );
                 }
 
-                if ( this.IsInlineable( lastOverride, ResolvedAspectReferenceSemantic.Default ) )
+                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    members.Add( GetLinkedDeclaration() );
+                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
                 }
                 else
                 {
                     members.Add( GetTrampolineProperty( propertyDeclaration, lastOverride ) );
                 }
 
-                if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original )
-                     && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
+                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
+                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     members.Add( GetOriginalImplProperty( propertyDeclaration, symbol ) );
                 }
 
+                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
+                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                {
+                    members.Add( GetEmptyImplProperty( propertyDeclaration, symbol ) );
+                }
+
                 return members;
             }
-            else if ( this._analysisRegistry.IsOverride( symbol ) )
+            else if ( this._introductionRegistry.IsOverride( symbol ) )
             {
-                if ( this.IsDiscarded( (ISymbol) symbol, ResolvedAspectReferenceSemantic.Default ) )
+                if ( !this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
+                     || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
 
-                return new[] { GetLinkedDeclaration() };
+                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
             }
             else
             {
                 throw new AssertionFailedException();
             }
 
-            MemberDeclarationSyntax GetLinkedDeclaration()
+            MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
             {
                 var transformedAccessors = new List<AccessorDeclarationSyntax>();
 
@@ -154,7 +91,7 @@ namespace Caravela.Framework.Impl.Linking
                                     getAccessorDeclaration.AttributeLists,
                                     getAccessorDeclaration.Modifiers,
                                     this.GetLinkedBody(
-                                        this.GetBodySource( symbol.GetMethod ),
+                                        symbol.GetMethod.ToSemantic( semanticKind ),
                                         InliningContext.Create( this, symbol.GetMethod ) ) ) );
 
                             break;
@@ -166,7 +103,7 @@ namespace Caravela.Framework.Impl.Linking
                                     List<AttributeListSyntax>(),
                                     TokenList(),
                                     this.GetLinkedBody(
-                                        this.GetBodySource( symbol.GetMethod ),
+                                        symbol.GetMethod.ToSemantic( semanticKind ),
                                         InliningContext.Create( this, symbol.GetMethod ) ) ) );
 
                             break;
@@ -183,7 +120,7 @@ namespace Caravela.Framework.Impl.Linking
                             setDeclaration.AttributeLists,
                             setDeclaration.Modifiers,
                             this.GetLinkedBody(
-                                this.GetBodySource( symbol.SetMethod ),
+                                symbol.SetMethod.ToSemantic( semanticKind ),
                                 InliningContext.Create( this, symbol.SetMethod ) ) ) );
                 }
 
@@ -269,19 +206,57 @@ namespace Caravela.Framework.Impl.Linking
                                     }.Where( a => a != null )
                                     .AssertNoneNull() ) )
                         .NormalizeWhitespace()
-                    : property.AccessorList.AddSourceCodeAnnotation();
+                    : property.AccessorList.AssertNotNull().AddSourceCodeAnnotation();
 
             var initializer = property.Initializer;
 
+            return GetSpecialImplProperty( property.Type, accessorList, initializer.AddSourceCodeAnnotation(), symbol, GetOriginalImplMemberName( symbol ) );
+        }
+
+        private static MemberDeclarationSyntax GetEmptyImplProperty( PropertyDeclarationSyntax property, IPropertySymbol symbol )
+        {
+            var accessorList =
+                IsAutoPropertyDeclaration( property )
+                    ? AccessorList(
+                            List(
+                                new[]
+                                    {
+                                        symbol.GetMethod != null
+                                            ? AccessorDeclaration(
+                                                SyntaxKind.GetAccessorDeclaration,
+                                                List<AttributeListSyntax>(),
+                                                TokenList(),
+                                                ArrowExpressionClause( DefaultExpression( property.Type ) ) )
+                                            : null,
+                                        symbol.SetMethod != null
+                                            ? AccessorDeclaration(
+                                                SyntaxKind.SetAccessorDeclaration,
+                                                Block() )
+                                            : null
+                                    }.Where( a => a != null )
+                                    .AssertNoneNull() ) )
+                        .NormalizeWhitespace()
+                    : property.AccessorList.AssertNotNull();
+
+            return GetSpecialImplProperty( property.Type, accessorList, null, symbol, GetEmptyImplMemberName( symbol ) );
+        }
+
+        private static MemberDeclarationSyntax GetSpecialImplProperty(
+            TypeSyntax propertyType,
+            AccessorListSyntax accessorList,
+            EqualsValueClauseSyntax? initializer,
+            IPropertySymbol symbol,
+            string name )
+        {
             return
                 PropertyDeclaration(
                         List<AttributeListSyntax>(),
                         symbol.IsStatic
                             ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
                             : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                        property.Type,
+                        propertyType,
                         null,
-                        Identifier( GetOriginalImplMemberName( symbol ) ),
+                        Identifier( name ),
                         null,
                         null,
                         null )

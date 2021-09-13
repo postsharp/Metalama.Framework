@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl.Formatting
             }
             else
             {
-                classifiedTextSpans = new ClassifiedTextSpanCollection();
+                classifiedTextSpans = new ClassifiedTextSpanCollection( sourceText.Length );
             }
 
             // Process the annotations by the aspect linker (on the output document).
@@ -88,7 +88,7 @@ namespace Caravela.Framework.Impl.Formatting
             foreach ( var csharpSpan in Classifier.GetClassifiedSpans(
                     semanticModel,
                     syntaxTree.GetRoot().Span,
-                    document.Project!.Solution.Workspace )
+                    document.Project.Solution.Workspace )
                 .OrderBy( c => c.TextSpan.Start )
                 .ThenBy( c => c.ClassificationType ) )
             {

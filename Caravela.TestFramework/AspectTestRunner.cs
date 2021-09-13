@@ -66,7 +66,13 @@ namespace Caravela.TestFramework
             var observer = new Observer( testResult );
             pipeline.ServiceProvider.AddService( observer );
 
-            if ( pipeline.TryExecute( testResult.PipelineDiagnostics, testResult.InputCompilation!, CancellationToken.None, out var resultCompilation, out _ ) )
+            if ( pipeline.TryExecute(
+                testResult.PipelineDiagnostics,
+                testResult.InputCompilation!,
+                default,
+                CancellationToken.None,
+                out var resultCompilation,
+                out _ ) )
             {
                 testResult.OutputCompilation = resultCompilation;
                 testResult.HasOutputCode = true;
@@ -285,6 +291,8 @@ namespace Caravela.TestFramework
                 // If the expectation file does not exist, create it with some placeholder content.
                 if ( !File.Exists( expectedProgramOutputPath ) )
                 {
+                    // Coverage: Ignore
+
                     File.WriteAllText(
                         expectedProgramOutputPath,
                         "TODO: Replace this file with the correct program output. See the test output for the actual transformed code." );
@@ -307,11 +315,15 @@ namespace Caravela.TestFramework
 
                 if ( File.Exists( expectedProgramOutputPath ) && string.IsNullOrWhiteSpace( File.ReadAllText( expectedProgramOutputPath ) ) )
                 {
+                    // Coverage: Ignore
+
                     File.Delete( expectedProgramOutputPath );
                 }
 
                 if ( File.Exists( actualProgramOutputPath ) )
                 {
+                    // Coverage: Ignore
+
                     File.Delete( actualProgramOutputPath );
                 }
             }

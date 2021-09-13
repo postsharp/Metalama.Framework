@@ -55,19 +55,24 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         /// <param name="declaration"></param>
         /// <returns></returns>
-        public static IEnumerable<IDeclaration> GetContainedElements( this IDeclaration declaration )
+        public static IEnumerable<IDeclaration> GetContainedDeclarations( this IDeclaration declaration )
             => declaration.SelectManyRecursive(
                 child => child switch
                 {
                     ICompilation compilation => compilation.DeclaredTypes,
                     INamedType namedType => namedType.NestedTypes
                         .Concat<IDeclaration>( namedType.Methods )
+                        .Concat( namedType.Constructors )
+                        .Concat( namedType.Fields )
                         .Concat( namedType.Properties )
-                        .Concat( namedType.Events ),
+                        .Concat( namedType.Events )
+                        .Concat( namedType.GenericParameters )
+                        .ConcatNotNull( namedType.StaticConstructor ),
                     IMethod method => method.LocalFunctions
                         .Concat<IDeclaration>( method.Parameters )
                         .Concat( method.GenericParameters )
                         .ConcatNotNull( method.ReturnParameter ),
+                    IMemberWithAccessors member => member.Accessors,
                     _ => null
                 } );
 
@@ -169,7 +174,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
                 else
                 {
-                    if ( parameter.IsOut() || parameter.IsRef() )
+                    if ( parameter.RefKind is RefKind.Out or RefKind.Ref )
                     {
                         // With out and ref parameters, we unconditionally add the out or ref modifier, and "hope" the code will later compile.
                         // We also intentionally omit to cast the value since it would be illegal.
@@ -182,7 +187,7 @@ namespace Caravela.Framework.Impl.CodeModel
                                     (arg.Syntax.ToString(), parameter.Name, parameter.DeclaringMember) ) );
                         }
 
-                        var syntax = parameter.IsRef() ? SyntaxKind.RefKeyword : SyntaxKind.OutKeyword;
+                        var syntax = parameter.RefKind is RefKind.Ref ? SyntaxKind.RefKeyword : SyntaxKind.OutKeyword;
 
                         argument = SyntaxFactory.Argument( null, SyntaxFactory.Token( syntax ), arg.Syntax );
                     }
@@ -203,7 +208,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             if ( declaration.IsStatic )
             {
-                return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( declaration.DeclaringType!.GetSymbol() );
+                return LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( declaration.DeclaringType.GetSymbol() );
             }
 
             if ( instance.Syntax.Kind() == SyntaxKind.NullLiteralExpression )
@@ -328,6 +333,10 @@ namespace Caravela.Framework.Impl.CodeModel
                        sr.GetSyntax() is BasePropertyDeclarationSyntax propertyDecl
                        && propertyDecl.AccessorList != null
                        && propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) );
+
+        internal static bool IsEventField( this IEventSymbol symbol )
+            => !symbol.IsAbstract
+               && symbol.DeclaringSyntaxReferences.All( sr => sr.GetSyntax() is VariableDeclaratorSyntax );
 
         internal static IMember GetExplicitInterfaceImplementation( this IMember member )
         {

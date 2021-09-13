@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.Issue28709
         {
              foreach (var p in meta.Target.Parameters)
             {
-                Console.WriteLine( "IsOut=" + p.IsOut());
+                Console.WriteLine( "IsOut=" + (p.RefKind == RefKind.Out));
             }
             
             return default;

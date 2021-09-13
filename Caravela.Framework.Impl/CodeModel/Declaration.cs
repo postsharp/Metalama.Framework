@@ -36,7 +36,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public virtual IAttributeList Attributes
             => new AttributeList(
                 this,
-                this.Symbol!.GetAttributes()
+                this.Symbol.GetAttributes()
+                    .Where( a => a.AttributeConstructor != null )
                     .Select( a => new AttributeRef( a, DeclarationRef.FromSymbol<IDeclaration>( this.Symbol ) ) ) );
 
         public abstract DeclarationKind DeclarationKind { get; }
@@ -95,8 +96,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     ? Enumerable.Empty<ISymbol>()
                     : this.Symbol switch
                     {
-                        IMethodSymbol
-                                { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } methodSymbol =>
+                        IMethodSymbol { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } methodSymbol =>
                             methodSymbol.Parameters,
                         _ => Enumerable.Empty<ISymbol>()
                     };

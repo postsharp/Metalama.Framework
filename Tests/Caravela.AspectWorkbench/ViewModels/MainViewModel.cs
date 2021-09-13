@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis;
 using PostSharp.Patterns.Model;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -108,7 +109,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 {
                     // Display the annotated syntax tree.
                     this.ColoredSourceCodeDocument = SyntaxColorizer.WriteSyntaxColoring(
-                        testResult.SyntaxTrees.First().InputDocument!,
+                        testResult.SyntaxTrees.First().InputDocument,
                         testResult.Diagnostics,
                         annotatedTemplateSyntax );
                 }
@@ -144,7 +145,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 if ( project != null )
                 {
-                    var consolidatedOutputDocument = project!.AddDocument( "ConsolidatedOutput.cs", consolidatedOutputSyntax );
+                    var consolidatedOutputDocument = project.AddDocument( "ConsolidatedOutput.cs", consolidatedOutputSyntax );
 
                     // Display the transformed code.
                     this.TransformedCodeDocument = SyntaxColorizer.WriteSyntaxColoring( consolidatedOutputDocument );
@@ -216,7 +217,10 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public void NewTest( string path )
         {
-            this.SourceCode = NewTestDefaults.TemplateSource;
+            var projectDirectory = TestInput.FromSource( "", path ).ProjectDirectory!;
+            var pathParts = Path.GetRelativePath( projectDirectory, path ).Split( "\\" ).Select( p => Path.GetFileNameWithoutExtension( p ) ).Skip( 1 );
+            var ns = Path.GetFileName( projectDirectory ) + "." + string.Join( ".", pathParts );
+            this.SourceCode = NewTestDefaults.TemplateSource.Replace( "$ns", ns, StringComparison.OrdinalIgnoreCase );
             this.ExpectedTransformedCode = null;
             this.CompiledTemplateDocument = null;
             this.TransformedCodeDocument = null;

@@ -35,5 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMemberOrNamedType DeclaringMember => this.Compilation.Factory.GetDeclaration( this.ParameterBuilder.DeclaringMember );
 
         public ParameterInfo ToParameterInfo() => this.ParameterBuilder.ToParameterInfo();
+
+        public bool IsReturnParameter => this.ParameterBuilder.IsReturnParameter;
     }
 }

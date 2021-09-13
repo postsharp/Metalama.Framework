@@ -25,6 +25,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public ParameterInfo ToParameterInfo() => this.Underlying.ToParameterInfo();
 
+        public bool IsReturnParameter => this.Underlying.IsReturnParameter;
+
         public IType ParameterType => this.Underlying.ParameterType;
 
         public string Name => this.Underlying.Name.AssertNotNull();
@@ -43,6 +45,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             set => throw new NotSupportedException();
         }
 
-        public ISyntax ToSyntax() => new DynamicExpression( SyntaxFactory.IdentifierName( this.Underlying.Name! ), this.Underlying.ParameterType, true, true );
+        public ISyntax ToSyntax() => new DynamicExpression( SyntaxFactory.IdentifierName( this.Underlying.Name ), this.Underlying.ParameterType, true, true );
     }
 }

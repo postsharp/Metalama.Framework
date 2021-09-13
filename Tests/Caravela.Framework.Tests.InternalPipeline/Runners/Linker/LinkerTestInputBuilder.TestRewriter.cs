@@ -2,7 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Tests.Integration.Tests.Linker;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -26,19 +28,40 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
         public static T AssignNodeId<T>( T node )
             where T : SyntaxNode
         {
-            if ( node.GetAnnotations( _testNodeIdAnnotationId ).Any() )
+            if ( node is EventFieldDeclarationSyntax eventFieldDecl )
             {
-                return node;
+                var declarator = eventFieldDecl.Declaration.Variables.Single();
+                declarator = AssignNodeId( declarator );
+
+                return (T)(SyntaxNode) eventFieldDecl
+                    .WithDeclaration( eventFieldDecl.Declaration.WithVariables( SeparatedList( new[] { declarator } ) ) );
             }
+            else
+            {
 
-            var id = Interlocked.Increment( ref _nextNodeId ).ToString();
+                if ( node.GetAnnotations( _testNodeIdAnnotationId ).Any() )
+                {
+                    return node;
+                }
 
-            return node.WithAdditionalAnnotations( new SyntaxAnnotation( _testNodeIdAnnotationId, id ) );
+                var id = Interlocked.Increment( ref _nextNodeId ).ToString();
+
+                return node.WithAdditionalAnnotations( new SyntaxAnnotation( _testNodeIdAnnotationId, id ) );
+            }
         }
 
         private static string GetNodeId( SyntaxNode node )
         {
-            return node.GetAnnotations( _testNodeIdAnnotationId ).Select( x => x.Data.AssertNotNull() ).Single();
+            if ( node is EventFieldDeclarationSyntax eventFieldDecl )
+            {
+                var declarator = eventFieldDecl.Declaration.Variables.Single();
+
+                return GetNodeId( declarator );
+            }
+            else
+            {
+                return node.GetAnnotations( _testNodeIdAnnotationId ).Select( x => x.Data.AssertNotNull() ).Single();
+            }
         }
 
         private static IEnumerable<SyntaxNode> GetNodesWithId( SyntaxTree tree )
@@ -71,11 +94,17 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
             public IReadOnlyList<AspectLayerId> OrderedAspectLayers => this._orderedAspectLayers;
 
+            public ServiceProvider ServiceProvider { get; }
+
             public TestRewriter()
             {
                 this._orderedAspectLayers = new List<AspectLayerId>();
                 this._observableTransformations = new List<IObservableTransformation>();
                 this._nonObservableTransformations = new List<INonObservableTransformation>();
+
+                this.ServiceProvider = new ServiceProvider();
+
+                this.ServiceProvider.AddService( new UserCodeInvoker( this.ServiceProvider ) );
             }
 
             public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )
@@ -141,14 +170,21 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
             private static bool HasLayerOrderAttribute( TypeDeclarationSyntax node )
             {
-                return node.AttributeLists.SelectMany( x => x.Attributes ).Any( x => x.Name.ToString() == "LayerOrder" );
+                return node.AttributeLists.SelectMany( x => x.Attributes ).Any( x => x.Name.ToString() == "PseudoLayerOrder" );
             }
 
-            public void AddAspectLayer( string aspectName, string? layerName )
+            public AspectLayerId GetOrAddAspectLayer( string aspectName, string? layerName )
             {
                 if ( !this._orderedAspectLayers.Any( x => x.AspectName == aspectName && x.LayerName == layerName ) )
                 {
-                    this._orderedAspectLayers.Add( new AspectLayerId( aspectName, layerName ) );
+                    var newLayer = new AspectLayerId( aspectName, layerName );
+                    this._orderedAspectLayers.Add( newLayer );
+
+                    return newLayer;
+                }
+                else
+                {
+                    return this._orderedAspectLayers.Single( x => x.AspectName == aspectName && x.LayerName == layerName );
                 }
             }
 
@@ -162,22 +198,22 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
                     foreach ( var attribute in attributeList.Attributes )
                     {
-                        if ( attribute.Name.ToString() == "LayerOrder" )
+                        if ( attribute.Name.ToString() == "PseudoLayerOrder" )
                         {
                             if ( attribute.ArgumentList == null || attribute.ArgumentList.Arguments.Count == 0 || attribute.ArgumentList.Arguments.Count > 3 )
                             {
                                 throw new ArgumentException( "Incorrect number of arguments on LayerOrder" );
                             }
 
-                            var aspectName = attribute.ArgumentList.Arguments[0].ToString();
+                            var aspectName = attribute.ArgumentList.Arguments[0].ToString().Trim( '\"' );
                             string? layerName = null;
 
                             if ( attribute.ArgumentList.Arguments.Count == 2 )
                             {
-                                layerName = attribute.ArgumentList.Arguments[1].ToString();
+                                layerName = attribute.ArgumentList.Arguments[1].ToString().Trim( '\"' );
                             }
 
-                            this.AddAspectLayer( aspectName, layerName );
+                            this.GetOrAddAspectLayer( aspectName, layerName );
                         }
                         else
                         {
@@ -191,7 +227,10 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     }
                     else
                     {
-                        newAttributeLists.Add( attributeList.WithAttributes( SeparatedList( newAttributes ) ) );
+                        if ( newAttributes.Count > 0 )
+                        {
+                            newAttributeLists.Add( attributeList.WithAttributes( SeparatedList( newAttributes ) ) );
+                        }
                     }
                 }
 

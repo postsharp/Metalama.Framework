@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         private ExpressionSyntax CreateEventExpression( RuntimeExpression instance, AspectReferenceTargetKind targetKind )
         {
-            if ( this.Member.DeclaringType!.IsOpenGeneric )
+            if ( this.Member.DeclaringType.IsOpenGeneric )
             {
                 throw GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember.CreateException( this.Member );
             }

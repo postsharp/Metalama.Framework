@@ -8,6 +8,8 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.Pipeline
@@ -15,6 +17,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// <summary>
     /// The main compile-time entry point of Caravela. An implementation of Caravela.Compiler's <see cref="ISourceTransformer"/>.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public sealed class SourceTransformer : ISourceTransformer
     {
         public Compilation Execute( TransformerContext context )
@@ -31,13 +34,15 @@ namespace Caravela.Framework.Impl.Pipeline
                 if ( pipeline.TryExecute(
                     new DiagnosticAdder( context.ReportDiagnostic ),
                     context.Compilation,
+                    context.ManifestResources.ToImmutableArray(),
                     CancellationToken.None,
-                    out var compilation,
-                    out var additionalResources ) )
+                    out var outputCompilation,
+                    out var outputResources ) )
                 {
-                    context.ManifestResources.AddRange( additionalResources );
+                    context.ManifestResources.Clear();
+                    context.ManifestResources.AddRange( outputResources );
 
-                    return compilation;
+                    return outputCompilation;
                 }
                 else
                 {

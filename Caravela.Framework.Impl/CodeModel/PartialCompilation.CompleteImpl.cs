@@ -14,14 +14,15 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         private class CompleteImpl : PartialCompilation
         {
-            public CompleteImpl( Compilation compilation )
-                : base( compilation ) { }
+            public CompleteImpl( Compilation compilation, ImmutableArray<ResourceDescription> resources )
+                : base( compilation, resources ) { }
 
             public CompleteImpl(
                 PartialCompilation baseCompilation,
                 IReadOnlyList<ModifiedSyntaxTree>? modifiedSyntaxTrees,
-                IReadOnlyList<SyntaxTree>? addedTrees )
-                : base( baseCompilation, modifiedSyntaxTrees, addedTrees ) { }
+                IReadOnlyList<SyntaxTree>? addedTrees,
+                ImmutableArray<ResourceDescription>? resources )
+                : base( baseCompilation, modifiedSyntaxTrees, addedTrees, resources ) { }
 
             [Memo]
             public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees
@@ -31,10 +32,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public override bool IsPartial => false;
 
-            public override PartialCompilation UpdateSyntaxTrees(
+            public override PartialCompilation Update(
                 IReadOnlyList<ModifiedSyntaxTree>? replacedTrees = null,
-                IReadOnlyList<SyntaxTree>? addedTrees = null )
-                => new CompleteImpl( this, replacedTrees, addedTrees );
+                IReadOnlyList<SyntaxTree>? addedTrees = null,
+                ImmutableArray<ResourceDescription>? resources = null )
+                => new CompleteImpl( this, replacedTrees, addedTrees, resources );
         }
     }
 }

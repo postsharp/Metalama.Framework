@@ -31,11 +31,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IType ExpressionType => this._type;
 
         public RuntimeExpression CreateMemberAccessExpression( string member )
-            => new( SyntaxFactory.MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this._type.GetSymbol() ),
-                            SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
-                        .WithAspectReferenceAnnotation( this._linkerAnnotation ),
-                    this._type.Compilation );
+            => new(
+                SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this._type.GetSymbol() ),
+                        SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
+                    .WithAspectReferenceAnnotation( this._linkerAnnotation ),
+                this._type.Compilation );
     }
 }

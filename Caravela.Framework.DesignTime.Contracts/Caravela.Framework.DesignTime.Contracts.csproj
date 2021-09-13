@@ -1,13 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <!-- We need to target .NET Standard 2.0 and .NET 5.0 separately because of NullableAttributes.cs. We don't want these
+       types to be in a .NET 5 build, otherwise it would conflict with the types in System.Runtime. --> 
+    <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
   </PropertyGroup>
   
   <ItemGroup>
     <!-- The references to Roslyn here must be the lowest possible. -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" PrivateAssets="all" />
     <Compile Include="..\NullableAttributes.cs" Link="NullableAttributes.cs" />
+    <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests" />
   </ItemGroup>
   
 

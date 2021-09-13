@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Types;
 using System;
 using System.Collections.Generic;
@@ -161,7 +162,14 @@ interface I<T>
             var m1 = methods[0];
             Assert.Equal( "M1", m1.Name );
 
-            CheckParameterData( m1.ReturnParameter!, m1, "void", null, -1 );
+            Assert.True( m1.ReturnParameter.IsReturnParameter );
+            Assert.False( m1.Parameters[0].IsReturnParameter );
+
+            Assert.Equal( 0, m1.Parameters.OfParameterType( typeof(int) ).First().Index );
+            Assert.Equal( 0, m1.Parameters.OfParameterType<int>().First().Index );
+            Assert.Equal( 0, m1.Parameters.OfParameterType( compilation.Factory.GetSpecialType( SpecialType.Int32 ) ).First().Index );
+
+            CheckParameterData( m1.ReturnParameter, m1, "void", null, -1 );
             Assert.Equal( 5, m1.Parameters.Count );
             CheckParameterData( m1.Parameters[0], m1, "int", "i", 0 );
             CheckParameterData( m1.Parameters[1], m1, "T", "t", 1 );
@@ -172,7 +180,7 @@ interface I<T>
             var m2 = methods[1];
             Assert.Equal( "M2", m2.Name );
 
-            CheckParameterData( m2.ReturnParameter!, m2, "int", null, -1 );
+            CheckParameterData( m2.ReturnParameter, m2, "int", null, -1 );
             Assert.Equal( 0, m2.Parameters.Count );
 
             static void CheckParameterData( IParameter parameter, IDeclaration containingDeclaration, string typeName, string? name, int index )
@@ -206,7 +214,7 @@ class C<T1, T2>
 
             var type = compilation.DeclaredTypes.Single();
 
-            Assert.Equal( new[] { "T1", "T2" }, type.GenericArguments.Select<IType, string>( t => t!.ToString()! ) );
+            Assert.Equal( new[] { "T1", "T2" }, type.GenericArguments.Select<IType, string>( t => t.ToString()! ) );
 
             var method = type.Methods.First();
 
@@ -396,7 +404,7 @@ class C : IDisposable
                 type.Methods.Select( m => m.MethodKind ) );
 
             Assert.Equal( new[] { PropertyGet, PropertySet }, type.Properties.SelectMany( p => new[] { p.GetMethod!.MethodKind, p.SetMethod!.MethodKind } ) );
-            Assert.Equal( new[] { EventAdd, EventRemove }, type.Events.SelectMany( p => new[] { p.AddMethod!.MethodKind, p.RemoveMethod!.MethodKind } ) );
+            Assert.Equal( new[] { EventAdd, EventRemove }, type.Events.SelectMany( p => new[] { p.AddMethod.MethodKind, p.RemoveMethod.MethodKind } ) );
             Assert.Single( type.Constructors );
             Assert.NotNull( type.StaticConstructor );
 
@@ -468,12 +476,12 @@ class C
 
             var method = type.Methods.First();
 
-            var parametersWithoutDefaults = new[] { method.ReturnParameter!, method.Parameters[0] };
+            var parametersWithoutDefaults = new[] { method.ReturnParameter, method.Parameters[0] };
 
             foreach ( var parameter in parametersWithoutDefaults )
             {
                 Assert.False( parameter.DefaultValue.IsAssigned );
-                _ = Assert.Throws<InvalidOperationException>( () => parameter.DefaultValue.Value );
+                _ = Assert.Throws<ArgumentNullException>( () => parameter.DefaultValue.Value );
             }
 
             var parametersWithDefaults = method.Parameters.Skip( 1 ).ToList();
@@ -493,14 +501,14 @@ class C
 
             Assert.Equal(
                 "System.Collections.Generic.List<T>.Enumerator",
-                compilation.Factory.GetTypeByReflectionType( typeof(List<>.Enumerator) )!.ToString() );
+                compilation.Factory.GetTypeByReflectionType( typeof(List<>.Enumerator) ).ToString() );
 
             Assert.Equal(
                 "System.Collections.Generic.Dictionary<int, string>",
-                compilation.Factory.GetTypeByReflectionType( typeof(Dictionary<int, string>) )!.ToString() );
+                compilation.Factory.GetTypeByReflectionType( typeof(Dictionary<int, string>) ).ToString() );
 
-            Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof(int[][,]) )!.ToString() );
-            Assert.Equal( "void*", compilation.Factory.GetTypeByReflectionType( typeof(void*) )!.ToString() );
+            Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof(int[][,]) ).ToString() );
+            Assert.Equal( "void*", compilation.Factory.GetTypeByReflectionType( typeof(void*) ).ToString() );
 
             Assert.Throws<ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof(int).MakeByRefType() ) );
         }
@@ -569,8 +577,8 @@ class C<TC>
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) )!;
-            var stringType = compilation.Factory.GetTypeByReflectionType( typeof(string) )!;
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
+            var stringType = compilation.Factory.GetTypeByReflectionType( typeof(string) );
 
             var openTypeMethod = type.Methods.First();
             var closedTypeMethod = type.WithGenericArguments( stringType ).Methods.First();

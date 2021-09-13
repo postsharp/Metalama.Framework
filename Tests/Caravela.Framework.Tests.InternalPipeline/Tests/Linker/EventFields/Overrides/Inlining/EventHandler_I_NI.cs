@@ -1,0 +1,31 @@
+﻿using System;
+using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
+
+#pragma warning disable CS0067
+
+namespace Caravela.Framework.Tests.Integration.Tests.Linker.EventFields.Overrides.Inlining.ReturnsVoid_I_NI
+{
+    // <target>
+    class Target
+    {
+        event EventHandler? Foo;
+
+        [PseudoOverride( nameof(Foo),"TestAspect")]
+        event EventHandler? Foo_Override
+        {
+            add
+            {
+                Console.WriteLine("Before");
+                link[_this.Foo] += value;
+                Console.WriteLine("After");
+            }
+
+            remove
+            {
+                Console.WriteLine("Before");
+                link[_this.Foo] -= value;
+                Console.WriteLine("After");
+            }
+        }
+    }
+}

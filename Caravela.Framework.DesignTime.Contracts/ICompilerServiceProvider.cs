@@ -15,6 +15,6 @@ namespace Caravela.Framework.DesignTime.Contracts
         T? GetCompilerService<T>()
             where T : class, ICompilerService;
 
-        event Action<ICompilerServiceProvider> Unloaded;
+        event Action Unloaded;
     }
 }

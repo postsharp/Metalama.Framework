@@ -4,7 +4,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking.Inlining
 {
@@ -13,13 +12,12 @@ namespace Caravela.Framework.Impl.Linking.Inlining
     /// </summary>
     internal class MethodCastReturnStatementInliner : MethodInliner
     {
-        public override IReadOnlyList<SyntaxKind> AncestorSyntaxKinds => new[] { SyntaxKind.ReturnStatement };
-
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax has to be in form: return (<type>)<annotated_method_expression( <arguments> );
-            if ( aspectReference.ResolvedSymbol is not IMethodSymbol )
+            if ( aspectReference.ResolvedSemantic.Symbol is not IMethodSymbol )
             {
+                // Coverage: ignore (hit only when the check in base class is incorrect).
                 return false;
             }
 
@@ -40,13 +38,13 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            if ( castExpression.Parent == null || castExpression.Parent is not ReturnStatementSyntax )
+            if ( castExpression.Parent is not ReturnStatementSyntax )
             {
                 return false;
             }
 
             // The invocation needs to be inlineable in itself.
-            if ( IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
+            if ( !IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
             {
                 return false;
             }
@@ -60,10 +58,10 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             var castExpression = (CastExpressionSyntax) invocationExpression.Parent.AssertNotNull();
             var returnStatement = (ReturnStatementSyntax) castExpression.Parent.AssertNotNull();
 
-            var targetSymbol = (aspectReference.ResolvedSymbol as IMethodSymbol).AssertNotNull();
+            var targetSymbol = (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol).AssertNotNull();
 
             // Get the final body (after inlining) of the target.
-            var inlinedTargetBody = context.GetLinkedBody( targetSymbol );
+            var inlinedTargetBody = context.GetLinkedBody( targetSymbol.ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
 
             // Mark the block as flattenable.
             inlinedTargetBody = inlinedTargetBody.AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );

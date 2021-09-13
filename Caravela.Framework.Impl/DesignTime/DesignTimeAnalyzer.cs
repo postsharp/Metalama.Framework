@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 // ReSharper disable UnusedType.Global
@@ -25,6 +26,7 @@ namespace Caravela.Framework.Impl.DesignTime
     /// <summary>
     /// Our implementation of <see cref="DiagnosticAnalyzer"/>. It reports all diagnostics that we produce.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class DesignTimeAnalyzer : DiagnosticAnalyzer
     {
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();

@@ -15,19 +15,27 @@ namespace Caravela.Framework.Code.Syntax
     {
         private readonly List<object?> _items = new();
 
-        internal object ItemType { get; }
+        internal IType ItemType { get; }
 
         internal IReadOnlyList<object?> Items => this._items;
 
-        private ArrayBuilder( IType itemType )
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ArrayBuilder"/> class where the item type is a given <see cref="IType"/>.
+        /// </summary>
+        public ArrayBuilder( IType itemType )
         {
             this.ItemType = itemType;
         }
 
-        private ArrayBuilder( Type itemType )
-        {
-            this.ItemType = itemType;
-        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ArrayBuilder"/> class where the item type is a given <see cref="Type"/>.
+        /// </summary>
+        public ArrayBuilder( Type itemType ) : this( meta.Target.Compilation.TypeFactory.GetTypeByReflectionType( itemType ) ) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ArrayBuilder"/> class where the item type is a <see cref="object"/>.
+        /// </summary>
+        public ArrayBuilder() : this( meta.Target.Compilation.TypeFactory.GetSpecialType( SpecialType.Object ) ) { }
 
         private ArrayBuilder( ArrayBuilder prototype )
         {
@@ -47,26 +55,6 @@ namespace Caravela.Framework.Code.Syntax
         public dynamic ToArray() => meta.CurrentContext.CodeBuilder.BuildArray( this );
 
         ISyntax ISyntaxBuilder.ToSyntax() => this.ToArray();
-
-        /// <summary>
-        /// Creates an <see cref="ArrayBuilder"/> where the item type is a given <see cref="IType"/>.
-        /// </summary>
-        public static ArrayBuilder Create( IType type ) => new( type );
-
-        /// <summary>
-        /// Creates an <see cref="ArrayBuilder"/> where the item type is a given <see cref="Type"/>.
-        /// </summary>
-        public static ArrayBuilder Create( Type type ) => new( type );
-
-        /// <summary>
-        /// Creates an <see cref="ArrayBuilder"/> where the item type is a given as a generic parameter.
-        /// </summary>
-        public static ArrayBuilder Create<T>() => new( typeof(T) );
-
-        /// <summary>
-        /// Creates an <see cref="ArrayBuilder"/> where the item type is <see cref="object"/>.
-        /// </summary>
-        public static ArrayBuilder Create() => new( typeof(object) );
 
         public ArrayBuilder Clone() => new( this );
     }

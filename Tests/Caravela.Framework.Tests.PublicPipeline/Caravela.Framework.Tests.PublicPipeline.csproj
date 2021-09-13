@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.props" />
+    <Import Project="..\..\eng\Coverage.props" />
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -20,7 +21,6 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageReference Include="xunit" Version="$(xUnitVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
-    <PackageReference Include="coverlet.collector" Version="1.2.0" />
      <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
      
      <!-- This is used for a test -->
@@ -40,11 +40,6 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Tests\Aspects\AsyncIterators\NormalTemplate.t.cs" />
-  </ItemGroup>
-
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
   
 </Project>

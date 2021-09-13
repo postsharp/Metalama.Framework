@@ -17,115 +17,55 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal partial class LinkerRewritingDriver
     {
-        /// <summary>
-        /// Determines whether the method will be discarded in the final compilation (unreferenced or inlined declarations).
-        /// </summary>
-        /// <param name="referencedMethod">Override method symbol or overridden method symbol.</param>
-        /// <returns></returns>
-        private bool IsDiscarded( IMethodSymbol referencedMethod, ResolvedAspectReferenceSemantic semantic )
+        public IReadOnlyList<MemberDeclarationSyntax> RewriteMethod( MethodDeclarationSyntax methodDeclaration, IMethodSymbol symbol )
         {
-            if ( referencedMethod.MethodKind != MethodKind.Ordinary )
-            {
-                throw new AssertionFailedException();
-            }
-
-            if ( this._analysisRegistry.IsOverride( referencedMethod ) )
-            {
-                var aspectReferences = this._analysisRegistry.GetAspectReferences( referencedMethod, semantic );
-                var overrideTarget = this._analysisRegistry.GetOverrideTarget( referencedMethod );
-                var lastOverride = this._analysisRegistry.GetLastOverride( overrideTarget.AssertNotNull() );
-
-                if ( SymbolEqualityComparer.Default.Equals( referencedMethod, lastOverride ) )
-                {
-                    return this.IsInlineable( referencedMethod, semantic );
-                }
-                else
-                {
-                    return this.IsInlineable( referencedMethod, semantic ) || aspectReferences.Count == 0;
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        private bool IsInlineable( IMethodSymbol inlinedMethod, ResolvedAspectReferenceSemantic semantic )
-        {
-            switch ( inlinedMethod.MethodKind )
-            {
-                case MethodKind.Ordinary:
-                case MethodKind.ExplicitInterfaceImplementation:
-                    if ( GetDeclarationFlags( inlinedMethod ).HasFlag( LinkerDeclarationFlags.NotInlineable ) )
-                    {
-                        return false;
-                    }
-
-                    if ( this._analysisRegistry.IsLastOverride( inlinedMethod ) )
-                    {
-                        // TODO: Seems weird to return true here, what if a condition later returns false?
-                        return true;
-                    }
-
-                    var aspectReferences = this._analysisRegistry.GetAspectReferences( inlinedMethod, semantic );
-
-                    if ( aspectReferences.Count != 1 )
-                    {
-                        return false;
-                    }
-
-                    return this.IsInlineableReference( aspectReferences[0], MethodKind.Ordinary );
-
-                default:
-                    throw new AssertionFailedException();
-            }
-        }
-
-        private bool HasAnyAspectReferences( IMethodSymbol symbol, ResolvedAspectReferenceSemantic semantic )
-            => this._analysisRegistry.GetAspectReferences( symbol, semantic ).Count > 0;
-
-        private IReadOnlyList<MemberDeclarationSyntax> RewriteMethod( MethodDeclarationSyntax methodDeclaration, IMethodSymbol symbol )
-        {
-            if ( this._analysisRegistry.IsOverrideTarget( symbol ) )
+            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IMethodSymbol) this._analysisRegistry.GetLastOverride( symbol );
+                var lastOverride = (IMethodSymbol) this._introductionRegistry.GetLastOverride( symbol );
 
-                if ( this.IsInlineable( lastOverride, ResolvedAspectReferenceSemantic.Default ) )
+                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    members.Add( GetLinkedDeclaration( lastOverride.IsAsync ) );
+                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final, lastOverride.IsAsync ) );
                 }
                 else
                 {
                     members.Add( GetTrampolineMethod( methodDeclaration, lastOverride ) );
                 }
 
-                if ( !this.IsInlineable( symbol, ResolvedAspectReferenceSemantic.Original )
-                     && this.HasAnyAspectReferences( symbol, ResolvedAspectReferenceSemantic.Original ) )
+                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
+                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     members.Add( this.GetOriginalImplMethod( methodDeclaration, symbol ) );
                 }
 
+                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
+                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                {
+                    members.Add( this.GetEmptyImplMethod( methodDeclaration, symbol ) );
+                }
+
                 return members;
             }
-            else if ( this._analysisRegistry.IsOverride( symbol ) )
+            else if ( this._introductionRegistry.IsOverride( symbol ) )
             {
-                if ( this.IsDiscarded( (ISymbol) symbol, ResolvedAspectReferenceSemantic.Default ) )
+                if ( !this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
+                     || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
 
-                return new[] { GetLinkedDeclaration( symbol.IsAsync ) };
+                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync ) };
             }
             else
             {
                 throw new AssertionFailedException();
             }
 
-            MethodDeclarationSyntax GetLinkedDeclaration( bool isAsync )
+            MethodDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
             {
                 var linkedBody = this.GetLinkedBody(
-                    this.GetBodySource( symbol ),
+                    symbol.ToSemantic( semanticKind ),
                     InliningContext.Create( this, symbol ) );
 
                 var modifiers = methodDeclaration.Modifiers;
@@ -150,6 +90,31 @@ namespace Caravela.Framework.Impl.Linking
 
         private MemberDeclarationSyntax GetOriginalImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
         {
+            return this.GetSpecialImplMethod(
+                method,
+                method.Body.AddSourceCodeAnnotation(),
+                method.ExpressionBody.AddSourceCodeAnnotation(),
+                symbol,
+                GetOriginalImplMemberName( symbol ) );
+        }
+
+        private MemberDeclarationSyntax GetEmptyImplMethod( MethodDeclarationSyntax method, IMethodSymbol symbol )
+        {
+            var emptyBody =
+                symbol.ReturnsVoid
+                    ? Block()
+                    : Block( ReturnStatement( DefaultExpression( method.ReturnType ) ) ).NormalizeWhitespace();
+
+            return this.GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
+        }
+
+        private MemberDeclarationSyntax GetSpecialImplMethod(
+            MethodDeclarationSyntax method,
+            BlockSyntax? body,
+            ArrowExpressionClauseSyntax? expressionBody,
+            IMethodSymbol symbol,
+            string name )
+        {
             var returnType = AsyncHelper.GetIntermediateMethodReturnType( this.IntermediateCompilation, symbol, method.ReturnType );
 
             var modifiers = symbol
@@ -162,7 +127,7 @@ namespace Caravela.Framework.Impl.Linking
                         modifiers,
                         returnType,
                         null,
-                        Identifier( GetOriginalImplMemberName( symbol ) ),
+                        Identifier( name ),
                         method.TypeParameterList,
                         method.ParameterList,
                         method.ConstraintClauses,
@@ -171,8 +136,8 @@ namespace Caravela.Framework.Impl.Linking
                     .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
-                    .WithBody( method.Body.AddSourceCodeAnnotation() )
-                    .WithExpressionBody( method.ExpressionBody.AddSourceCodeAnnotation() )
+                    .WithBody( body )
+                    .WithExpressionBody( expressionBody )
                     .AddGeneratedCodeAnnotation();
         }
     }

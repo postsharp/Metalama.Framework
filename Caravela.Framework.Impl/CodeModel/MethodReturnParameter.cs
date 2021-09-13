@@ -40,5 +40,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this,
                 this.DeclaringMethod.MethodSymbol.GetReturnTypeAttributes()
                     .Select( a => new AttributeRef( a, this.ToRef() ) ) );
+
+        public override bool IsReturnParameter => true;
     }
 }

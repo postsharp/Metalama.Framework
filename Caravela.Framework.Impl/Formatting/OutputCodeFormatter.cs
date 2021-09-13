@@ -89,7 +89,7 @@ namespace Caravela.Framework.Impl.Formatting
                 syntaxTreeReplacements.Add( new ModifiedSyntaxTree( syntaxTree.WithRootAndOptions( formattedSyntaxRoot, syntaxTree.Options ), syntaxTree ) );
             }
 
-            return compilation.UpdateSyntaxTrees( syntaxTreeReplacements, Array.Empty<SyntaxTree>() );
+            return compilation.Update( syntaxTreeReplacements, Array.Empty<SyntaxTree>() );
         }
 
         public static Compilation FormatAll( Compilation compilation, CancellationToken cancellationToken = default )

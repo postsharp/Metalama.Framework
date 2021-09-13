@@ -12,6 +12,8 @@ namespace Caravela.Framework.Impl
     {
         private static readonly char[] _separators = { ':' };
 
+        public static AspectLayerId Null => default;
+
         public static bool operator ==( AspectLayerId left, AspectLayerId right ) => left.Equals( right );
 
         public static bool operator !=( AspectLayerId left, AspectLayerId right ) => !left.Equals( right );
@@ -34,12 +36,11 @@ namespace Caravela.Framework.Impl
                 return new AspectLayerId( parts[0] );
             }
 
+            // Coverage: ignore (TODO 28625)
             return new AspectLayerId( parts[0], parts.Length == 2 ? parts[1] : null );
         }
 
         public bool IsDefault => this.LayerName == null;
-
-        public bool IsNull => this.AspectName == null!;
 
         public string AspectName { get; }
 
@@ -47,7 +48,7 @@ namespace Caravela.Framework.Impl
 
         public string? LayerName { get; }
 
-        public string FullName => this.LayerName == null ? this.AspectName : this.AspectName + ":" + this.LayerName;
+        public string FullName => this.AspectName == null ? "(null)" : this.LayerName == null ? this.AspectName : this.AspectName + ":" + this.LayerName;
 
         public override string ToString() => this.FullName;
 
@@ -55,7 +56,8 @@ namespace Caravela.Framework.Impl
             => StringComparer.Ordinal.Equals( this.AspectName, other.AspectName ) && StringComparer.Ordinal.Equals( this.LayerName, other.LayerName );
 
         public override int GetHashCode()
-            => StringComparer.Ordinal.GetHashCode( this.AspectName ) ^ (this.LayerName == null ? 0 : StringComparer.Ordinal.GetHashCode( this.LayerName ));
+            => (this.AspectName == null! ? 0 : StringComparer.Ordinal.GetHashCode( this.AspectName ))
+               ^ (this.LayerName == null ? 0 : StringComparer.Ordinal.GetHashCode( this.LayerName ));
 
         public bool Equals( AspectLayer other ) => this.Equals( other.AspectLayerId );
 

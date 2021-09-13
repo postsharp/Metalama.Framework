@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.Transformations;
 
 namespace Caravela.Framework.Tests.Integration.Runners.Linker
@@ -18,9 +19,14 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             string ContainingNodeId { get; }
 
             /// <summary>
-            /// Gets the id of the insert position node, which will be present as an annotation in the syntax tree.
+            /// Gets the id of the insert position node, which will be present as an annotation in the syntax tree and specifies the insert position.
             /// </summary>
-            string InsertPositionNodeId { get; }
+            string? InsertPositionNodeId { get; }
+
+            /// <summary>
+            /// Gets the declaration builder, which specifies the insert position.
+            /// </summary>
+            IDeclarationBuilder? InsertPositionBuilder { get; }
 
             /// <summary>
             /// Gets the relation of the insert position to the specified insert position node.

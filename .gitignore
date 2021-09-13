@@ -42,4 +42,8 @@ _ReSharper*/
 /tools/
 **/inspectcode.xml
 /.local
-/.eng/CaravelaVersion.props
+/eng/CaravelaVersion.props
+CaravelaVersion.props
+TestResults
+launchSettings.json
+.idea/workspace.xml

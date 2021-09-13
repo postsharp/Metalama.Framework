@@ -43,5 +43,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public EventInfo ToEventInfo() => this.Underlying.ToEventInfo();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
+
+        public IEnumerable<IMethod> Accessors => this.Underlying.Accessors;
     }
 }
