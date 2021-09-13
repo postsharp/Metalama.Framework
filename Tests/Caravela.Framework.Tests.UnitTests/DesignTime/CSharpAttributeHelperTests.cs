@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 // ReSharper disable InconsistentNaming
 
@@ -19,11 +20,43 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 {
     public class CSharpAttributeHelperTests : IDisposable
     {
+        private readonly ITestOutputHelper _logger;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private readonly AdhocWorkspace _workspace = new AdhocWorkspace();
         private Document? _testFileDocument;
 
+        public CSharpAttributeHelperTests( ITestOutputHelper logger )
+        {
+            this._logger = logger;
+        }
+
         public void Dispose() => this._workspace.Dispose();
+
+        private void LogAndAssertContains<T>( IEnumerable<T> enumerable, T expectedItem, int expectedOccurrences = 1 )
+        {
+            this._logger.WriteLine( "Expected:" );
+            this._logger.WriteLine( expectedItem!.ToString() );
+            this._logger.WriteLine( "Actual:" );
+            
+            var actualOccurrences = 0;
+            
+            foreach ( var item in enumerable )
+            {
+                this._logger.WriteLine( item?.ToString() ?? "<null>" );
+
+                if ( expectedItem!.Equals( item ) )
+                {
+                    actualOccurrences++;
+                }
+            }
+            
+            Assert.Equal( expectedOccurrences, actualOccurrences );
+        }
+
+        private void LogAndAssertContains( IEnumerable<AttributeSyntax> attributes, string expectedAttributeName, int expectedOccurrences = 1 )
+        {
+            this.LogAndAssertContains( attributes.Select( a => a.Name.ToString() ), expectedAttributeName, expectedOccurrences );
+        }
 
         [Fact]
         public async Task Can_AddAttributeToMethodAsync()
@@ -47,7 +80,7 @@ public class Class
                 .AttributeLists
                 .SelectMany( list => list.Attributes );
 
-            Assert.Equal( 1, resultAttributes.Count( attr => attr.Name.ToString() == "TestAttribute" ) );
+            this.LogAndAssertContains( resultAttributes, "TestAttribute" );
         }
 
         [Fact]
@@ -67,7 +100,7 @@ public class Class
             var attributeDescription = new AttributeDescription(
                 name: "TestAttribute",
                 arguments: new[] { "ARG1", "ARG2" }.ToImmutableList(),
-                properties: new Dictionary<string, string> { { "Prop1", "111" }, { "Prop2", "222" } }.ToImmutableDictionary() );
+                properties: new List<(string Name, string Value)> { ("Prop1", "111"), ("Prop2", "222") }.ToImmutableList() );
 
             var newRoot = await this.AddAttributeAsync( originalMethodDeclaration, attributeDescription );
 
@@ -76,8 +109,8 @@ public class Class
                 .First()
                 .AttributeLists
                 .Select( list => list.ToString() );
-
-            Assert.Equal( 1, resultAttributes.Count( s => s == "[TestAttribute(ARG1, ARG2, Prop1 = 111, Prop2 = 222)]" ) );
+            
+            this.LogAndAssertContains( resultAttributes, "[TestAttribute(ARG1, ARG2, Prop1 = 111, Prop2 = 222)]" );
         }
 
         [Fact]
@@ -101,7 +134,7 @@ public class Class
                 .AttributeLists
                 .SelectMany( list => list.Attributes );
 
-            Assert.Equal( 1, resultAttributes.Count( attr => attr.Name.ToString() == "TestAttribute" ) );
+            this.LogAndAssertContains( resultAttributes, "TestAttribute" );
         }
 
         [Fact]
@@ -125,7 +158,7 @@ public interface IInterface
                 .AttributeLists
                 .SelectMany( list => list.Attributes );
 
-            Assert.Equal( 1, resultAttributes.Count( attr => attr.Name.ToString() == "TestAttribute" ) );
+            this.LogAndAssertContains( resultAttributes, "TestAttribute" );
         }
 
         [Fact]
@@ -147,7 +180,7 @@ public delegate void Delegate();
                 .AttributeLists
                 .SelectMany( list => list.Attributes );
 
-            Assert.Equal( 1, resultAttributes.Count( attr => attr.Name.ToString() == "TestAttribute" ) );
+            this.LogAndAssertContains( resultAttributes, "TestAttribute" );
         }
 
         [Fact]
@@ -171,7 +204,7 @@ public enum Enum
                 .AttributeLists
                 .SelectMany( list => list.Attributes );
 
-            Assert.Equal( 1, resultAttributes.Count( attr => attr.Name.ToString() == "TestAttribute" ) );
+            this.LogAndAssertContains( resultAttributes, "TestAttribute" );
         }
 
         [Fact]
@@ -195,7 +228,7 @@ public class Class
                 .First( x => x.Keyword.ValueText == "get" )
                 .AttributeLists.SelectMany( list => list.Attributes );
 
-            Assert.Equal( 1, resultAttributes.Count( attr => attr.Name.ToString() == "TestAttribute" ) );
+            this.LogAndAssertContains( resultAttributes, "TestAttribute" );
         }
 
         [Fact]
@@ -219,7 +252,7 @@ public class Class
                 .First()
                 .AttributeLists.SelectMany( list => list.Attributes );
 
-            Assert.Equal( 1, resultAttributes.Count( attr => attr.Name.ToString() == "TestAttribute" ) );
+            this.LogAndAssertContains( resultAttributes, "TestAttribute" );
         }
 
         [Fact]
@@ -244,7 +277,7 @@ public class Class
                 .First( x => x.Declaration.Variables.First().Identifier.ToString() == "field" )
                 .AttributeLists.SelectMany( list => list.Attributes );
 
-            Assert.Equal( 1, resultAttributes.Count( attr => attr.Name.ToString() == "TestAttribute" ) );
+            this.LogAndAssertContains( resultAttributes, "TestAttribute" );
         }
 
         [Fact]
@@ -268,7 +301,7 @@ public class Class
                 .First( x => x.Declaration.Variables.First().Identifier.ToString() == "field" )
                 .AttributeLists.SelectMany( list => list.Attributes );
 
-            Assert.Equal( 1, resultAttributes.Count( attr => attr.Name.ToString() == "TestAttribute" ) );
+            this.LogAndAssertContains( resultAttributes, "TestAttribute" );
         }
 
         [Fact]
@@ -292,7 +325,7 @@ public class Class
                 .First( x => x.Identifier.ToString() == "param2" )
                 .AttributeLists.SelectMany( list => list.Attributes );
 
-            Assert.Equal( 1, resultAttributes.Count( attr => attr.Name.ToString() == "TestAttribute" ) );
+            this.LogAndAssertContains( resultAttributes, "TestAttribute" );
         }
 
         [Fact]
