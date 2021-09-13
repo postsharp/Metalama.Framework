@@ -15,19 +15,41 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
     throw "This script has to run in a GIT repository root!"
 }
 
-& ./.eng/shared/tools/Build.ps1
-& ./.eng/shared/tools/Restore.ps1 SignClient 
+& ./eng/shared/tools/Build.ps1
+& ./eng/shared/tools/Restore.ps1 SignClient 
 
-$CurrentDir = $(get-location).Path
+$CurrentDirectory = $(get-location).Path
+$BaseDirectory = "$CurrentDirectory\artifacts\publish\"
 
-& ./tools/SignClient Sign --baseDirectory $CurrentDir\artifacts\publish\ --input *.nupkg --config $CurrentDir\.eng\shared\deploy\signclient-appsettings.json --name $ProjectName --user sign-caravela@postsharp.net --secret $Env:SIGNSERVER_SECRET
+function Sign() {
+    param (
+        [string] $InputFilter
+    )
 
-if (!$?) {
-	throw "Signing failed."
+    if ( Test-Path "$BaseDirectory\$InputFilter" ) {
+        & ./tools/SignClient Sign --baseDirectory $BaseDirectory --input $InputFilter --config $CurrentDirectory\eng\shared\deploy\signclient-appsettings.json --name $ProjectName --user sign-caravela@postsharp.net --secret $Env:SIGNSERVER_SECRET
+
+        if (!$?) {
+            throw "Signing failed."
+        }
+    }
 }
 
-& ./tools/postsharp-eng nuget verify -d artifacts\publish
+function Verify() {
+    param (
+        [string] $InputFilter
+    )
 
-if (!$?) {
-	throw "Verification failed."
+    if ( Test-Path "$BaseDirectory\$InputFilter" ) {
+        & ./tools/postsharp-eng nuget verify -d artifacts\publish
+
+        if (!$?) {
+	        throw "Verification failed."
+        }
+    }
 }
+
+Sign "*.nupkg"
+Verify "*.nupkg"
+
+Sign "*.vsix"
