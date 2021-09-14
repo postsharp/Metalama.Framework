@@ -200,11 +200,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
                     break;
 
-                case TypedConstantKind.Type when typedConstant.Value != null:
-                    value = this._compileTimeTypeResolver.GetCompileTimeType( (ITypeSymbol) typedConstant.Value, true );
-
-                    break;
-
                 default:
                     value = typedConstant.Value;
 
