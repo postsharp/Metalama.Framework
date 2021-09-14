@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -93,7 +94,7 @@ namespace Caravela.Framework.Impl.Templating
             return this.GetMetaMemberKind( symbol );
         }
 
-        public MetaMemberKind GetMetaMemberKind( ISymbol? symbol )
+        private MetaMemberKind GetMetaMemberKind( ISymbol? symbol )
         {
             if ( symbol == null )
             {
