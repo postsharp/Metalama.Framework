@@ -38,6 +38,14 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly ICompileTimeCompilationBuilderObserver? _observer;
         private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
 
+        public const string PredefinedTypesFileName = "__CaravelaPredefinedTypes.cs"; 
+        
+        private static readonly Lazy<SyntaxTree> _predefinedTypesSyntaxTree = new(
+            () =>
+                CSharpSyntaxTree.ParseText(
+                    "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}",
+                    path: PredefinedTypesFileName ) );
+
         private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
 
         public const string ResourceName = "Caravela.CompileTimeAssembly";
@@ -217,7 +225,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             return CSharpCompilation.Create(
                     assemblyName,
-                    Array.Empty<SyntaxTree>(),
+                    new[] { _predefinedTypesSyntaxTree.Value },
                     standardReferences,
                     new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, deterministic: true ) )
                 .AddReferences(

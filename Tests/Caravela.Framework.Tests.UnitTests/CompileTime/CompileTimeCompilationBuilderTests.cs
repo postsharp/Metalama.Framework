@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
     public class CompileTimeCompilationBuilderTests : TestBase
     {
         [Fact]
-        public void RemoveInvalidUsingRewriter()
+        public void RemoveInvalidNamespaceImport()
         {
             var compilation = CreateCSharpCompilation(
                 @"
@@ -805,7 +805,10 @@ public class MyAspect : OverrideMethodAspect
             Assert.NotNull( project!.Directory );
 
             // Just test that the output file has gone through formatting (we don't test that the whole formatting is correct). 
-            var csFile = Directory.GetFiles( project.Directory!, "*.cs" ).Single();
+            var csFile = Directory
+                .GetFiles( project.Directory!, "*.cs" )
+                .Single( f => !f.EndsWith( CompileTimeCompilationBuilder.PredefinedTypesFileName, StringComparison.OrdinalIgnoreCase ) );
+
             Assert.Contains( "using Microsoft.CodeAnalysis", File.ReadAllText( csFile ), StringComparison.Ordinal );
         }
 

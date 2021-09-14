@@ -31,7 +31,8 @@ namespace Caravela.Framework.Impl.CompileTime
             // Method does not have a body (e.g. because it's abstract) , so there is nothing to replace.
             if ( method.Body == null && method.ExpressionBody == null )
             {
-                return method;
+                // Should not be called with an abstract method.
+                throw new ArgumentOutOfRangeException( nameof(method) );
             }
 
             return method
@@ -48,27 +49,26 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             if ( memberDeclaration.Modifiers.Any( x => x.Kind() == SyntaxKind.AbstractKeyword ) )
             {
-                // Abstract property - we don't have to do anything with it.
-                return memberDeclaration;
+                // Should not be called with an abstract property.
+                throw new ArgumentOutOfRangeException( nameof(memberDeclaration) );
             }
-            else if ( memberDeclaration is PropertyDeclarationSyntax property )
+
+            switch ( memberDeclaration )
             {
-                if ( property.ExpressionBody != null )
-                {
+                case PropertyDeclarationSyntax { ExpressionBody: { } } property:
                     // Expression bodied property - change the expression to throw exception.
                     return property
                         .WithExpressionBody( property.ExpressionBody?.WithExpression( GetNotSupportedExceptionExpression( message ) ) )
                         .NormalizeWhitespace()
                         .WithLeadingTrivia( property.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed );
-                }
-                else if ( property.AccessorList != null )
-                {
+
+                case PropertyDeclarationSyntax { AccessorList: { } } property:
                     // Property with accessor list - change all accessors to expression bodied which do throw exception, remove initializer.
 
                     return property
                         .WithAccessorList(
-                            property.AccessorList.WithAccessors(
+                            property.AccessorList!.WithAccessors(
                                 List(
                                     property.AccessorList.Accessors.Select(
                                         x => x
@@ -79,17 +79,13 @@ namespace Caravela.Framework.Impl.CompileTime
                         .NormalizeWhitespace()
                         .WithLeadingTrivia( property.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed );
-                }
-            }
-            else if ( memberDeclaration is IndexerDeclarationSyntax indexer )
-            {
-                if ( indexer.AccessorList != null )
-                {
+
+                case IndexerDeclarationSyntax { AccessorList: { } } indexer:
                     // Property with accessor list - change all accessors to expression bodied which do throw exception, remove initializer.
 
                     return indexer
                         .WithAccessorList(
-                            indexer.AccessorList.WithAccessors(
+                            indexer.AccessorList!.WithAccessors(
                                 List(
                                     indexer.AccessorList.Accessors.Select(
                                         x => x
@@ -99,29 +95,28 @@ namespace Caravela.Framework.Impl.CompileTime
                         .NormalizeWhitespace()
                         .WithLeadingTrivia( indexer.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed );
-                }
-            }
-            else if ( memberDeclaration is EventDeclarationSyntax @event )
-            {
-                // Event with accessor list.
 
-                return @event
-                    .WithAccessorList(
-                        @event.AccessorList.AssertNotNull()
-                            .WithAccessors(
-                                List(
-                                    @event.AccessorList.AssertNotNull()
-                                        .Accessors.Select(
-                                            x => x
-                                                .WithBody( null )
-                                                .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
-                                                .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
-                    .NormalizeWhitespace()
-                    .WithLeadingTrivia( @event.GetLeadingTrivia() )
-                    .WithTrailingTrivia( LineFeed, LineFeed );
-            }
+                case EventDeclarationSyntax @event:
+                    // Event with accessor list.
 
-            throw new AssertionFailedException();
+                    return @event
+                        .WithAccessorList(
+                            @event.AccessorList.AssertNotNull()
+                                .WithAccessors(
+                                    List(
+                                        @event.AccessorList.AssertNotNull()
+                                            .Accessors.Select(
+                                                x => x
+                                                    .WithBody( null )
+                                                    .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
+                                                    .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
+                        .NormalizeWhitespace()
+                        .WithLeadingTrivia( @event.GetLeadingTrivia() )
+                        .WithTrailingTrivia( LineFeed, LineFeed );
+
+                default:
+                    throw new AssertionFailedException();
+            }
         }
 
         protected static IEnumerable<EventDeclarationSyntax> WithThrowNotSupportedExceptionBody( EventFieldDeclarationSyntax @eventField, string message )
