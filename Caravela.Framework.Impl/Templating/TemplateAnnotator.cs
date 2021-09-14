@@ -1522,6 +1522,13 @@ namespace Caravela.Framework.Impl.Templating
             return base.VisitDoStatement( node );
         }
 
+        public override SyntaxNode? VisitUnsafeStatement( UnsafeStatementSyntax node )
+        {
+            this.ReportUnsupportedLanguageFeature( node.UnsafeKeyword, "unsafe" );
+            
+            return base.VisitUnsafeStatement( node );
+        }
+
         public override SyntaxNode? VisitGotoStatement( GotoStatementSyntax node )
         {
             this.ReportUnsupportedLanguageFeature( node.GotoKeyword, "goto" );

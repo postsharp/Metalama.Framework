@@ -105,7 +105,8 @@ namespace Caravela.TestFramework
                 // Source. Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
                 // which is more difficult to test.
                 var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER", "CARAVELA" );
-                var project = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions );
+                var compilationOptions = new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true, nullableContextOptions: NullableContextOptions.Enable );
+                var project = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions ).WithCompilationOptions( compilationOptions );
 
                 Document AddDocument( string fileName, string sourceCode )
                 {

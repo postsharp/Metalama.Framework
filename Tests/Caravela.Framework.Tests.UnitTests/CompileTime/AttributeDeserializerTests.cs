@@ -26,7 +26,8 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
 
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )
         {
-            var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( {property} = {value} )] "
+            var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( {property} = {value} )]"
+                       + " enum RunTimeEnum { Value = 1}"
                        + additionalCode;
 
             var compilation = CreateCompilationModel( code, dependentCode );
@@ -102,6 +103,13 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.EnumArrayProperty),
                     "new[]{Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum.A}" ) );
+
+            // When assigning to a run-time-only enum, the enum primitive value is used. 
+            Assert.Equal(
+                1,
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.ObjectProperty),
+                    "RunTimeEnum.Value" ) );
         }
 
         [Fact]
@@ -114,6 +122,11 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.TypeProperty),
                     "typeof(Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum)" ) );
+
+            Assert.IsType<CompileTimeType>(
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(RunTimeEnum)" ) );
 
             Assert.Null( this.GetDeserializedProperty( nameof(TestAttribute.TypeProperty), "null" ) );
 
@@ -147,11 +160,32 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
                     nameof(TestAttribute.TypeProperty),
                     "typeof(int[])" ) );
 
+            Assert.IsType<CompileTimeType>(
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(RunTimeEnum[])" ) );
+
             Assert.Equal(
                 typeof(int[,]),
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.TypeProperty),
                     "typeof(int[,])" ) );
+        }
+
+        [Fact]
+        public void TestPointerType()
+        {
+            Assert.Equal(
+                typeof(int*),
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(int*)" ) );
+
+            Assert.Equal(
+                typeof(int*[]),
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(int*[])" ) );
         }
 
         [Fact]
@@ -162,6 +196,11 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.TypeProperty),
                     "typeof(System.Collections.Generic.List<int>)" ) );
+
+            Assert.IsType<CompileTimeType>(
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(System.Collections.Generic.List<RunTimeEnum>)" ) );
 
             Assert.Equal(
                 typeof(List<>),

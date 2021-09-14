@@ -18,34 +18,39 @@ namespace Caravela.Framework.Impl.Serialization
 
         public ExpressionSyntax SerializeTypeSymbolRecursive( ITypeSymbol symbol, ICompilationElementFactory syntaxFactory )
         {
-            if ( symbol is ITypeParameterSymbol typeParameterSymbol )
+            switch ( symbol )
             {
-                ExpressionSyntax declaringExpression;
+                case ITypeParameterSymbol typeParameterSymbol:
+                    {
+                        ExpressionSyntax declaringExpression;
 
-                if ( typeParameterSymbol.DeclaringMethod is { } method )
-                {
-                    declaringExpression = this.Service.CompileTimeMethodInfoSerializer.SerializeMethodBase(
-                        method.OriginalDefinition,
-                        method.ContainingType.TypeParameters.Any() ? method.ContainingType : null,
-                        syntaxFactory );
-                }
-                else
-                {
-                    var type = typeParameterSymbol.DeclaringType!.OriginalDefinition;
-                    declaringExpression = this.SerializeTypeSymbolRecursive( type, syntaxFactory );
-                }
+                        if ( typeParameterSymbol.DeclaringMethod is { } method )
+                        {
+                            declaringExpression = this.Service.CompileTimeMethodInfoSerializer.SerializeMethodBase(
+                                method.OriginalDefinition,
+                                method.ContainingType.TypeParameters.Any() ? method.ContainingType : null,
+                                syntaxFactory );
+                        }
+                        else
+                        {
+                            var type = typeParameterSymbol.DeclaringType!.OriginalDefinition;
+                            declaringExpression = this.SerializeTypeSymbolRecursive( type, syntaxFactory );
+                        }
 
-                // expr.GetGenericArguments()[ordinal]
-                return ElementAccessExpression(
-                        InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                declaringExpression,
-                                IdentifierName( "GetGenericArguments" ) ) ) )
-                    .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( typeParameterSymbol.Ordinal ) ) ) );
+                        // expr.GetGenericArguments()[ordinal]
+                        return ElementAccessExpression(
+                                InvocationExpression(
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        declaringExpression,
+                                        IdentifierName( "GetGenericArguments" ) ) ) )
+                            .AddArgumentListArguments(
+                                Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( typeParameterSymbol.Ordinal ) ) ) );
+                    }
+
+                default:
+                    return SerializeTypeFromSymbolLeaf( symbol );
             }
-
-            return SerializeTypeFromSymbolLeaf( symbol );
         }
 
         private static ExpressionSyntax SerializeTypeFromSymbolLeaf( ITypeSymbol typeSymbol )

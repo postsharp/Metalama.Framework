@@ -4,43 +4,16 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal static partial class LanguageServiceFactory
+    internal partial class AnnotatingSyntaxGenerator
     {
-        private class UnboundTypeRewriter : CSharpSyntaxRewriter
-        {
-            public static readonly UnboundTypeRewriter Instance = new();
-
-            private UnboundTypeRewriter() { }
-
-            public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
-            {
-                // We intentionally don't visit type arguments, because we don't want remove the nested type arguments.
-
-                // Remove the list of type arguments.
-                if ( node.TypeArgumentList.Arguments.Count == 1 )
-                {
-                    return SyntaxFactory.GenericName( node.Identifier );
-                }
-                else
-                {
-                    return SyntaxFactory.GenericName( node.Identifier )
-                        .WithTypeArgumentList(
-                            SyntaxFactory.TypeArgumentList(
-                                SyntaxFactory.SeparatedList<TypeSyntax>(
-                                    node.TypeArgumentList.Arguments.Select( _ => SyntaxFactory.OmittedTypeArgument() ) ) ) );
-                }
-            }
-        }
-
-        private class NullableAnnotationRewriter : CSharpSyntaxRewriter
+        private class GenericInstanceTypeOfRewriter : TypeOfRewriter
         {
             private ITypeSymbol _type;
 
-            public NullableAnnotationRewriter( ITypeSymbol type )
+            public GenericInstanceTypeOfRewriter( ITypeSymbol type )
             {
                 this._type = type;
             }

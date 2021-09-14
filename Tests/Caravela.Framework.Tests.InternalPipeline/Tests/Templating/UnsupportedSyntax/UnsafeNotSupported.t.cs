@@ -1,2 +1,2 @@
-// The initial compilation failed. 
-// Error CS0227 on `unsafe`: `Unsafe code may only appear if compiling with /unsafe`
+// TestTemplateCompiler.TryCompile failed. 
+// Error CR0101 on ``: `'unsafe' is not supported in a template.`
