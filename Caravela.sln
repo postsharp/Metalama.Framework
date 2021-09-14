@@ -57,7 +57,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Package"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Tests.InternalPipeline", "Tests\Caravela.Framework.Tests.InternalPipeline\Caravela.Framework.Tests.InternalPipeline.csproj", "{496B8623-F88E-4346-A192-DA18B19457A3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.Test", "Tests\Caravela.Framework.TestApp\Caravela.Framework.TestApp.Test.csproj", "{42985F2B-A0B7-46FA-BE51-73FE7FBB69CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.Test", "Tests\Caravela.Framework.TestApp\Caravela.Framework.TestApp.TestRunner\Caravela.Framework.TestApp.TestRunner.csproj", "{42985F2B-A0B7-46FA-BE51-73FE7FBB69CF}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Caravela.Framework.Shared", "Caravela.Framework.Shared\Caravela.Framework.Shared.shproj", "{962B525B-C29C-4016-AC8C-CF5565D5D833}"
 EndProject
