@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Pipeline
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken )
         {
-            var aspectTypeSymbol = compilation.RoslynCompilation.GetTypeByMetadataName( aspectClass.FullName );
+            var aspectTypeSymbol = compilation.RoslynCompilation.GetTypeByMetadataName( aspectClass.FullName ).AssertNotNull();
 
             return this._aspectSources
                 .Where( s => s.AspectClass.FullName.Equals( aspectTypeSymbol.GetReflectionName(), StringComparison.Ordinal ) )

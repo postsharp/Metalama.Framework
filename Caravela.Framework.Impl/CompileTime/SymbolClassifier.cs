@@ -415,6 +415,7 @@ namespace Caravela.Framework.Impl.CompileTime
             switch ( symbol )
             {
                 case IErrorTypeSymbol:
+                    // Coverage:: ignore
                     return false;
 
                 case INamedTypeSymbol namedType:

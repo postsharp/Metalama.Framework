@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal static partial class LanguageServiceFactory
+    internal static class LanguageServiceFactory
     {
         public static AnnotatingSyntaxGenerator CSharpSyntaxGenerator { get; }
 

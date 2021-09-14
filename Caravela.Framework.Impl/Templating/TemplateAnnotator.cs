@@ -1180,6 +1180,7 @@ namespace Caravela.Framework.Impl.Templating
                 using ( this.WithScopeContext(
                     ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a local variable of compile-time-only type '{node.Type}'" ) ) )
                 {
+                    // ReSharper disable once RedundantSuppressNullableWarningExpression
                     var transformedVariables = node.Variables.Select( v => this.Visit( v )! );
 
                     return node.Update( transformedType, SeparatedList( transformedVariables ) ).AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
@@ -1187,6 +1188,7 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
+                // ReSharper disable once RedundantSuppressNullableWarningExpression
                 var transformedVariables = node.Variables.Select( v => this.Visit( v )! ).ToList();
 
                 var variableScopes = transformedVariables.Select( v => v.GetScopeFromAnnotation() ).Distinct().ToList();

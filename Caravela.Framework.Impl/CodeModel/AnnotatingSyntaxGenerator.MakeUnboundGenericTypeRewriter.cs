@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private class GenericDefinitionTypeOfRewriter : TypeOfRewriter
         {
-            public static readonly GenericDefinitionTypeOfRewriter Instance = new();
+            public static new readonly GenericDefinitionTypeOfRewriter Instance = new();
 
             private GenericDefinitionTypeOfRewriter() { }
 
