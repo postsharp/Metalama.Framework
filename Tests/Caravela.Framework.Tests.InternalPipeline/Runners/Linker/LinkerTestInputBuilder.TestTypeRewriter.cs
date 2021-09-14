@@ -154,12 +154,12 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         {
                             case "PseudoNotInlineable":
                                 notInlineable = true;
-                                
+
                                 break;
 
                             case "PseudoNotDiscardable":
                                 notDiscardable = true;
-                                
+
                                 break;
                         }
                     }

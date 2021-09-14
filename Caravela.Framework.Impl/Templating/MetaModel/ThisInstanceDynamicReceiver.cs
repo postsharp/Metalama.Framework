@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
@@ -27,13 +28,15 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public bool IsAssignable => this._type.TypeKind == TypeKind.Struct;
 
-        public IType ExpressionType => this._type;
+        public IType Type => this._type;
 
         RuntimeExpression IDynamicReceiver.CreateMemberAccessExpression( string member )
             => new(
                 MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( Identifier( member ) ) )
                     .WithAspectReferenceAnnotation( this._linkerAnnotation ),
                 this._type );
+
+        object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
 
         // TODO: Add linker annotations.
     }

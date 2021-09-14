@@ -15,8 +15,8 @@
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
-  <!-- Here we override the target called by the `dotne test` command. The override has to be defined after the import of Sdk.targets. -->
+  <!-- Here we override the target called by the `dotnet test` command. The override has to be defined after the import of Sdk.targets. -->
   <Target Name="VSTest">
-    <Exec Command="dotnet build Caravela.Framework.TestApp\Caravela.Framework.TestApp.csproj --nologo" WorkingDirectory="$(MSBuildThisFileDirectory)" />
+    <Exec Command="dotnet build ..\Caravela.Framework.TestApp\Caravela.Framework.TestApp.csproj --nologo" WorkingDirectory="$(MSBuildThisFileDirectory)" />
   </Target>
 </Project>

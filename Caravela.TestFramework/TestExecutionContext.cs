@@ -14,13 +14,13 @@ namespace Caravela.TestFramework
     {
         private static readonly AsyncLocal<TestExecutionContext> _current = new();
 
-        private readonly ConcurrentQueue<UnloadableCompileTimeDomain> _domains = new();
+        private readonly ConcurrentQueue<Action> _disposeActions = new();
 
         private TestExecutionContext() { }
 
-        public static void RegisterDisposedDomain( UnloadableCompileTimeDomain domain )
+        public static void RegisterDisposeAction( Action action )
         {
-            _current.Value?._domains.Enqueue( domain );
+            _current.Value?._disposeActions.Enqueue( action );
         }
 
         public static TestExecutionContext Open()
@@ -33,15 +33,10 @@ namespace Caravela.TestFramework
 
         public void Dispose()
         {
-            // GFR: The following code does not work because there are still, sometimes, GC roots to a Task<Result>.
-            // I didn't manage to solve this issue in a couple of hours.
-
-            /*
-            foreach ( var domain in this._domains )
+            foreach ( var action in this._disposeActions )
             {
-                domain.WaitForDisposal();
+                action();
             }
-            */
         }
     }
 }

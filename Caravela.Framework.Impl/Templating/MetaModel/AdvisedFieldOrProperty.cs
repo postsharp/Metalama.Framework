@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Code.Invokers;
-using Caravela.Framework.Code.Syntax;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.RunTime;
 using System;
@@ -34,11 +33,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public object? Value
         {
-            get => this.ToSyntax();
+            get => this.ToExpression();
             set => throw new NotSupportedException();
         }
 
-        public ISyntax ToSyntax()
+        private IExpression ToExpression()
         {
             if ( this.Invokers.Base == null )
             {

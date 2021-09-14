@@ -3,7 +3,6 @@
 
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -56,33 +55,24 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public IReadOnlyList<CompileTimeFile> Files { get; }
 
-        public static bool TryDeserialize( Stream stream, [NotNullWhen( true )] out CompileTimeProjectManifest? manifest )
+        public static CompileTimeProjectManifest Deserialize( Stream stream )
         {
-            try
+            using var manifestReader = new StreamReader( stream, Encoding.UTF8 );
+            var manifestJson = manifestReader.ReadToEnd();
+            stream.Close();
+
+            var manifest = JsonConvert.DeserializeObject<CompileTimeProjectManifest>( manifestJson ).AssertNotNull();
+
+            // Assert that files are properly deserialized.
+            foreach ( var file in manifest.Files )
             {
-                using var manifestReader = new StreamReader( stream, Encoding.UTF8 );
-                var manifestJson = manifestReader.ReadToEnd();
-                stream.Close();
-
-                manifest = JsonConvert.DeserializeObject<CompileTimeProjectManifest>( manifestJson ).AssertNotNull();
-
-                // Assert that files are properly deserialized.
-                foreach ( var file in manifest.Files )
+                if ( file.SourcePath == null! || file.TransformedPath == null! )
                 {
-                    if ( file.SourcePath == null! || file.TransformedPath == null! )
-                    {
-                        throw new AssertionFailedException( "Deserialization error." );
-                    }
+                    throw new AssertionFailedException( "Deserialization error." );
                 }
-
-                return true;
             }
-            catch ( JsonReaderException )
-            {
-                manifest = null;
 
-                return false;
-            }
+            return manifest;
         }
 
         public void Serialize( Stream stream )

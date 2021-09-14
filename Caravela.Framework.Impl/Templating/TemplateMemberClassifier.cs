@@ -94,7 +94,7 @@ namespace Caravela.Framework.Impl.Templating
             return this.GetMetaMemberKind( symbol );
         }
 
-        public MetaMemberKind GetMetaMemberKind( ISymbol? symbol )
+        private MetaMemberKind GetMetaMemberKind( ISymbol? symbol )
         {
             if ( symbol == null )
             {

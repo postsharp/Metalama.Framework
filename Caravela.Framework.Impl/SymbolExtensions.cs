@@ -67,7 +67,8 @@ namespace Caravela.Framework.Impl
                 _ => RoslynSpecialType.None
             };
 
-        public static bool IsGenericTypeDefinition( this INamedTypeSymbol namedType ) => namedType.TypeArguments.Any( a => a is ITypeParameterSymbol );
+        public static bool IsGenericTypeDefinition( this INamedTypeSymbol namedType )
+            => namedType.IsUnboundGenericType || namedType.TypeArguments.Any( a => a is ITypeParameterSymbol );
 
         public static bool IsDynamic( this ITypeSymbol? type, bool strict = false )
             => type is IDynamicTypeSymbol || (!strict && (type is IArrayTypeSymbol { ElementType: IDynamicTypeSymbol }

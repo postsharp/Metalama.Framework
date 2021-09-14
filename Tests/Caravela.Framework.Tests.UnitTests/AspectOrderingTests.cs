@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.UnitTests
             var loader = CompileTimeProjectLoader.Create( compileTimeDomain, isolatedTest.ServiceProvider );
 
             Assert.True(
-                loader.TryGetCompileTimeProject(
+                loader.TryGetCompileTimeProjectFromCompilation(
                     compilation.RoslynCompilation,
                     null,
                     new DiagnosticList(),
@@ -313,13 +313,13 @@ class Aspect2 : IAspect
             Assert.False( this.TryGetOrderedAspectLayers( code, new[] { "Aspect1", "Aspect2" }, diagnostics, out _ ) );
             Assert.Single( diagnostics.Select( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
         }
-        
+
         [Fact]
         public void Cycle2()
         {
             // The difference of Cycle2 compared to Cycle1 is that Aspect3 has no predecessor (in Cycle test, all nodes have a predecessor),
             // therefore the sort algorithm goes to another branch.
-            
+
             var code = @"
 using Caravela.Framework.Aspects;
 

@@ -9,8 +9,8 @@ namespace Caravela.Framework.Code.Syntax
     /// Base interface for compile-time objects that can be converted to run-time syntax.
     /// </summary>
     [CompileTime]
-    public interface ISyntaxBuilder
+    public interface IExpressionBuilder
     {
-        ISyntax ToSyntax();
+        IExpression ToExpression();
     }
 }

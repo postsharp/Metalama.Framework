@@ -2,11 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Templating.Mapping;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
-using System;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -54,14 +51,5 @@ namespace Caravela.Framework.Impl.CompileTime
             this.SourceHash = ImmutableArray<byte>.Empty;
             this.SourceHashAlgorithm = SourceHashAlgorithm.None;
         }
-
-        /// <summary>
-        /// Determines if the current <see cref="CompileTimeFile"/> corresponds to a source <see cref="SyntaxTree"/>.
-        /// </summary>
-        public bool SourceEquals( SyntaxTree syntaxTree )
-            => syntaxTree.FilePath == this.SourcePath &&
-               (this.SourceHashAlgorithm == syntaxTree.GetText().ChecksumAlgorithm
-                   ? Enumerable.SequenceEqual( syntaxTree.GetText().GetChecksum(), this.SourceHash )
-                   : throw new NotImplementedException( "Comparing two files with different checksum algorithms is not implemented." ));
     }
 }

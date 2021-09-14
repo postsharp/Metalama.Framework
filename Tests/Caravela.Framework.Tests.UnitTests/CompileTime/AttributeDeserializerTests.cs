@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.TestFramework;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -23,9 +24,11 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
             this.ServiceProvider.AddService( new HackedSystemTypeResolver( this.ServiceProvider ) );
         }
 
-        private object? GetDeserializedProperty( string property, string value, string? dependentCode = null )
+        private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )
         {
-            var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( {property} = {value} )]";
+            var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( {property} = {value} )] "
+                       + additionalCode;
+
             var compilation = CreateCompilationModel( code, dependentCode );
 
             using UnloadableCompileTimeDomain domain = new();
@@ -133,6 +136,50 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.ObjectArrayProperty),
                     "new[]{typeof(Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestEnum),null}" ) );
+        }
+
+        [Fact]
+        public void TestArrayType()
+        {
+            Assert.Equal(
+                typeof(int[]),
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(int[])" ) );
+
+            Assert.Equal(
+                typeof(int[,]),
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(int[,])" ) );
+        }
+
+        [Fact]
+        public void TestGenericType()
+        {
+            Assert.Equal(
+                typeof(List<int>),
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(System.Collections.Generic.List<int>)" ) );
+
+            Assert.Equal(
+                typeof(List<>),
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(System.Collections.Generic.List<>)" ) );
+
+            Assert.Equal(
+                typeof(List<List<int>>),
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(System.Collections.Generic.List<System.Collections.Generic.List<int>>)" ) );
+
+            Assert.Equal(
+                typeof(List<int[]>),
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(System.Collections.Generic.List<int[]>)" ) );
         }
 
         [Fact]

@@ -19,10 +19,10 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal class AttributeDeserializer
     {
-        private readonly ICompileTimeTypeResolver _compileTimeTypeResolver;
+        private readonly CompileTimeTypeResolver _compileTimeTypeResolver;
         private readonly UserCodeInvoker _userCodeInvoker;
 
-        public AttributeDeserializer( IServiceProvider serviceProvider, ICompileTimeTypeResolver compileTimeTypeResolver )
+        public AttributeDeserializer( IServiceProvider serviceProvider, CompileTimeTypeResolver compileTimeTypeResolver )
         {
             this._compileTimeTypeResolver = compileTimeTypeResolver;
             this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
@@ -56,9 +56,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public bool TryCreateAttribute( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
         {
-            // TODO: this is insufficiently tested, especially the case with Type arguments.
-            // TODO: Exception handling and recovery should be better. Don't throw an exception but return false and emit a diagnostic.
-
             var constructorSymbol = attribute.AttributeConstructor;
 
             if ( constructorSymbol == null )

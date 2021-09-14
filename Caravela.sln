@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework", "Caravela.Framework\Caravela.Framework.csproj", "{3D5D53DA-F498-4432-A3F4-99F21DEECD69}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Impl", "Caravela.Framework.Impl\Caravela.Framework.Impl.csproj", "{FA9772A5-51D5-4374-8DD3-E7CC1B3F138B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A} = {09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{34D4F83E-9C04-4175-8DD3-9D65DDF39F69}"
 	ProjectSection(SolutionItems) = preProject
@@ -21,7 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		THIRD-PARTY-NOTICES.TXT = THIRD-PARTY-NOTICES.TXT
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.MemoTransformer", "Build\Caravela.MemoTransformer\Caravela.MemoTransformer.csproj", "{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.SourceTransformer", "Build\Caravela.SourceTransformer\Caravela.SourceTransformer.csproj", "{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Sdk", "Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj", "{CB98654B-14D3-4ED5-A194-7205A3BEAFD7}"
 EndProject
@@ -54,9 +57,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Package"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Tests.InternalPipeline", "Tests\Caravela.Framework.Tests.InternalPipeline\Caravela.Framework.Tests.InternalPipeline.csproj", "{496B8623-F88E-4346-A192-DA18B19457A3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.Test", "Tests\Caravela.Framework.TestApp\Caravela.Framework.TestApp.Test.csproj", "{42985F2B-A0B7-46FA-BE51-73FE7FBB69CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.Test", "Tests\Caravela.Framework.TestApp\Caravela.Framework.TestApp.TestRunner\Caravela.Framework.TestApp.TestRunner.csproj", "{42985F2B-A0B7-46FA-BE51-73FE7FBB69CF}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Caravela.Framework.Shared", "Caravela.Framework.Shared\Caravela.Framework.Shared.shproj", "{962B525B-C29C-4016-AC8C-CF5565D5D833}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.CompileTime", "Caravela.Framework.CompileTime\Caravela.Framework.CompileTime.csproj", "{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62} = {DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}
+	EndProjectSection
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Caravela.Framework.Shared\Caravela.Framework.Shared.projitems*{09cffba1-f2fd-4d20-bac9-14de163a894a}*SharedItemsImports = 5
+		Caravela.Framework.Shared\Caravela.Framework.Shared.projitems*{3d5d53da-f498-4432-a3f4-99f21deecd69}*SharedItemsImports = 5
+		Caravela.Framework.Shared\Caravela.Framework.Shared.projitems*{962b525b-c29c-4016-ac8c-cf5565d5d833}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -126,6 +141,10 @@ Global
 		{42985F2B-A0B7-46FA-BE51-73FE7FBB69CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42985F2B-A0B7-46FA-BE51-73FE7FBB69CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42985F2B-A0B7-46FA-BE51-73FE7FBB69CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
