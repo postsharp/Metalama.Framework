@@ -9,6 +9,7 @@ using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -794,8 +795,18 @@ public class MyAspect : OverrideMethodAspect
 
 ";
 
+            var compileTimeCode = GetCompileTimeCode( isolatedTest, code );
+
+            Assert.Contains( "using Microsoft.CodeAnalysis", compileTimeCode, StringComparison.Ordinal );
+        }
+
+        private static string GetCompileTimeCode( IsolatedTest test, string code )
+            => GetCompileTimeCode( test, new Dictionary<string, string> { { Guid.NewGuid() + ".cs", code } } ).Values.Single();
+
+        private static IReadOnlyDictionary<string, string> GetCompileTimeCode( IsolatedTest test, IReadOnlyDictionary<string, string> code )
+        {
             var roslynCompilation = CreateCSharpCompilation( code );
-            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), isolatedTest.ServiceProvider );
+            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), test.ServiceProvider );
             DiagnosticList diagnosticList = new();
 
             Assert.True(
@@ -805,11 +816,37 @@ public class MyAspect : OverrideMethodAspect
             Assert.NotNull( project!.Directory );
 
             // Just test that the output file has gone through formatting (we don't test that the whole formatting is correct). 
-            var csFile = Directory
+            var files = Directory
                 .GetFiles( project.Directory!, "*.cs" )
-                .Single( f => !f.EndsWith( CompileTimeCompilationBuilder.PredefinedTypesFileName, StringComparison.OrdinalIgnoreCase ) );
+                .Where( f => !f.EndsWith( CompileTimeCompilationBuilder.PredefinedTypesFileName, StringComparison.OrdinalIgnoreCase ) );
 
-            Assert.Contains( "using Microsoft.CodeAnalysis", File.ReadAllText( csFile ), StringComparison.Ordinal );
+            return files.ToImmutableDictionary( f => Path.GetFileName( f ), File.ReadAllText );
+        }
+
+        [Fact]
+        public void EmptyNamespacesAreRemovedFromCompileTimeAssembly()
+        {
+            using var isolatedTest = this.WithIsolatedTest();
+
+            // The namespace Ns should be removed because it does not contain any build-time code.
+            var compileTimeCode = GetCompileTimeCode(
+                isolatedTest,
+                new Dictionary<string, string>
+                {
+                    ["BuildTime.cs"] = "class Aspect : Caravela.Framework.Aspects.IAspect<Caravela.Framework.Code.IMethod> {}",
+                    ["RunTime.cs"] = @"namespace Ns { class C {} } ",
+                    ["Both.cs"] =
+                        "namespace Ns1 { class Aspect : Caravela.Framework.Aspects.IAspect<Caravela.Framework.Code.IMethod> {} } namespace Ns2 { class C {} }"
+                } );
+
+            // Test that run-time-only trees are removed from the build-time compilation.
+            Assert.DoesNotContain( compileTimeCode.Keys, k => k.StartsWith( "RunTime_", StringComparison.OrdinalIgnoreCase ) );
+
+            // Test that run-time-only namespaces are removed from the build-time compilation.
+            Assert.DoesNotContain(
+                "namespace Ns2",
+                compileTimeCode.Single( p => p.Key.StartsWith( "Both_", StringComparison.OrdinalIgnoreCase ) ).Value,
+                StringComparison.Ordinal );
         }
 
         private class Rewriter : ICompileTimeAssemblyBinaryRewriter

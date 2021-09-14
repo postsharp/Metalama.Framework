@@ -10,7 +10,7 @@ namespace Caravela.Framework.Code.Syntax
     /// Compile-time object that allows to build a run-time interpolated string.
     /// </summary>
     [CompileTimeOnly]
-    public sealed class InterpolatedStringBuilder : ISyntaxBuilder
+    public sealed class InterpolatedStringBuilder : IExpressionBuilder
     {
         private readonly List<object?> _items = new();
 
@@ -51,7 +51,7 @@ namespace Caravela.Framework.Code.Syntax
             }
         }
 
-        ISyntax ISyntaxBuilder.ToSyntax() => (ISyntax) meta.CurrentContext.CodeBuilder.BuildInterpolatedString( this );
+        IExpression IExpressionBuilder.ToExpression() => (IExpression) meta.CurrentContext.CodeBuilder.BuildInterpolatedString( this );
 
         public InterpolatedStringBuilder Clone() => new( this );
     }

@@ -6,6 +6,7 @@ using Caravela.Framework.Code.Syntax;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using SpecialType = Caravela.Framework.Code.SpecialType;
 
@@ -18,7 +19,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public InterpolatedStringDynamicExpression( InterpolatedStringBuilder builder, ICompilation compilation )
         {
             this._builder = builder;
-            this.ExpressionType = compilation.TypeFactory.GetSpecialType( SpecialType.String );
+            this.Type = compilation.TypeFactory.GetSpecialType( SpecialType.String );
         }
 
         public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null )
@@ -37,7 +38,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                         break;
 
                     case InterpolatedStringBuilder.Token token:
-                        contents.Add( SyntaxFactory.Interpolation( RuntimeExpression.FromValue( token.Expression, this.ExpressionType.Compilation ).Syntax ) );
+                        contents.Add( SyntaxFactory.Interpolation( RuntimeExpression.FromValue( token.Expression, this.Type.Compilation ).Syntax ) );
 
                         break;
 
@@ -52,11 +53,13 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     SyntaxFactory.List( contents ),
                     SyntaxFactory.Token( SyntaxKind.InterpolatedStringEndToken ) ) );
 
-            return new RuntimeExpression( expression, this.ExpressionType );
+            return new RuntimeExpression( expression, this.Type );
         }
 
         public bool IsAssignable => false;
 
-        public IType ExpressionType { get; set; }
+        public IType Type { get; set; }
+
+        object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
     }
 }

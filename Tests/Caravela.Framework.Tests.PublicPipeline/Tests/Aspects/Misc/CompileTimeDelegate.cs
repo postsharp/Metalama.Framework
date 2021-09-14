@@ -17,6 +17,8 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Misc.CompileTimeDelega
     [CompileTimeOnly]
     internal delegate void CompileTimeDelegate();
 
+    internal delegate void RunTimeOnlyDelegate();
+
     // <target>
     internal class TargetCode
     {

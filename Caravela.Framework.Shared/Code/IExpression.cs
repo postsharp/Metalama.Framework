@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code.Syntax;
 
 namespace Caravela.Framework.Code
 {
@@ -10,7 +9,7 @@ namespace Caravela.Framework.Code
     /// A compile-time representation of a run-time expression.
     /// </summary>
     [CompileTimeOnly]
-    public interface IExpression : ISyntaxBuilder
+    public interface IExpression
     {
         /// <summary>
         /// Gets the expression type.

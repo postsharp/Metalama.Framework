@@ -1,42 +1,43 @@
 using System;
-using System.Linq;
-using System.Collections.Generic;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
 using Caravela.Framework.Code.Syntax;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.InterpolatedStringBuilderT
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             var s = new InterpolatedStringBuilder();
             s.AddText( meta.Target.Method.Name + "(" );
-            
-            foreach ( var p in meta.Target.Parameters )
+
+            foreach (var p in meta.Target.Parameters)
             {
-                if ( p.Index > 0 )
+                if (p.Index > 0)
                 {
-                    s.AddText(", ");
+                    s.AddText( ", " );
                 }
+
                 s.AddText( $"{p.Name}=" );
-                s.AddExpression(p.Value);
+                s.AddExpression( p.Value );
             }
-            s.AddText(")");
-            
-            var a = s.ToInterpolatedString();
+
+            s.AddText( ")" );
+
+            var is1 = s.ToInterpolatedString();
+            var is2 = ( (IExpressionBuilder)s ).ToExpression().Value;
+
             return default;
         }
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, string c, DateTime dt)
+        private int Method( int a, string c, DateTime dt )
         {
             return a;
         }

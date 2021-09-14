@@ -11,7 +11,7 @@ namespace Caravela.Framework.Code.Syntax
     /// Compile-time object that allows to build a run-time array.
     /// </summary>
     [CompileTimeOnly]
-    public sealed class ArrayBuilder : ISyntaxBuilder
+    public sealed class ArrayBuilder : IExpressionBuilder
     {
         private readonly List<object?> _items = new();
 
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Code.Syntax
         /// <returns></returns>
         public dynamic ToArray() => meta.CurrentContext.CodeBuilder.BuildArray( this );
 
-        ISyntax ISyntaxBuilder.ToSyntax() => (ISyntax) meta.CurrentContext.CodeBuilder.BuildArray( this );
+        IExpression IExpressionBuilder.ToExpression() => (IExpression) meta.CurrentContext.CodeBuilder.BuildArray( this );
 
         public ArrayBuilder Clone() => new( this );
     }

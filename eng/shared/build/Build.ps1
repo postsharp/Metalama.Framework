@@ -121,10 +121,7 @@ function CreateVersionFile() {
     </PropertyGroup>
     <PropertyGroup>
         <!-- Adds the local output directories as nuget sources for referencing projects. -->
-        <RestoreAdditionalProjectSources Condition="Exists('$artifactsDir')">
-            `$(RestoreAdditionalProjectSources);
-            $artifactsDir
-        </RestoreAdditionalProjectSources>
+        <RestoreAdditionalProjectSources>`$(RestoreAdditionalProjectSources);$artifactsDir</RestoreAdditionalProjectSources>
     </PropertyGroup>
 </Project>
 "@

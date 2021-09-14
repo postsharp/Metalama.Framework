@@ -9,11 +9,10 @@
     <Import_RootNamespace>Caravela.Framework.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-        <Compile Include="$(MSBuildThisFileDirectory)**\*.cs" Exclude="$(MSBuildThisFileDirectory)bin\**\*.cs;$(MSBuildThisFileDirectory)obj\**\*.cs" /> 
-        <Content Include="$(MSBuildThisFileDirectory)**\*.md" />
+    <Compile Include="$(MSBuildThisFileDirectory)**\*.cs" Exclude="$(MSBuildThisFileDirectory)bin\**\*.cs;$(MSBuildThisFileDirectory)obj\**\*.cs" />
+    <Content Include="$(MSBuildThisFileDirectory)**\*.md" />
     <Compile Include="..\NullableAttributes.cs" Link="NullableAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
-
   </ItemGroup>
 </Project>

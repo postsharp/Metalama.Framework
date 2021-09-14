@@ -16,6 +16,8 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Misc.CompileTimeRecord
     [CompileTimeOnly]
     internal record CompileTimeRecord( int a, string b );
 
+    internal record RunTimeRecord( int a, string b );
+
     // <target>
     internal class TargetCode
     {

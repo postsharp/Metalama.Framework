@@ -135,7 +135,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return SyntaxFactoryEx.EmptyStatement;
             }
-            else if ( TypeExtensions.Equals( expression.ExpressionType, SpecialType.Void ) )
+            else if ( TypeExtensions.Equals( expression.Type, SpecialType.Void ) )
             {
                 return SyntaxFactory.ExpressionStatement( expression.CreateExpression( expressionText, location ) );
             }
@@ -165,7 +165,7 @@ namespace Caravela.Framework.Impl.Templating
 
             var runtimeExpression = value.CreateExpression( expressionText, location );
 
-            if ( TypeExtensions.Equals( value.ExpressionType, SpecialType.Void ) )
+            if ( TypeExtensions.Equals( value.Type, SpecialType.Void ) )
             {
                 // If the method is void, we invoke the method as a statement (so we don't loose the side effect) and we define a local that
                 // we assign to the default value. The local is necessary because it may be referenced later.
