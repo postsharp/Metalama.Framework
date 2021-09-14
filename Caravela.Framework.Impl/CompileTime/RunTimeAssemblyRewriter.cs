@@ -85,26 +85,7 @@ namespace Caravela.Compiler
         {
             var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 
-            if ( this.MustReplaceByThrow( symbol ) )
-            {
-                return true;
-            }
-            else if ( symbol is IPropertySymbol property )
-            {
-                // In properties, the template attribute can be put on the accessors. 
-
-                if ( property.GetMethod != null && this.MustReplaceByThrow( property.GetMethod ) )
-                {
-                    return true;
-                }
-
-                if ( property.SetMethod != null && this.MustReplaceByThrow( property.SetMethod ) )
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return this.MustReplaceByThrow( symbol );
         }
 
         private bool MustReplaceByThrow( ISymbol symbol )
@@ -113,12 +94,16 @@ namespace Caravela.Compiler
 
         public override SyntaxNode? VisitIndexerDeclaration( IndexerDeclarationSyntax node )
         {
+            throw new AssertionFailedException( "Indexers are not supported." );
+
+            /*
             if ( this.MustReplaceByThrow( node ) )
             {
                 return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
             }
 
             return node;
+            */
         }
 
         public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )

@@ -39,6 +39,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 // We don't allow loading new assemblies to the AppDomain.
                 if ( AppDomain.CurrentDomain.GetAssemblies().All( a => a.GetName().Name != assemblyName ) )
                 {
+                    // Coverage: ignore
                     return null;
                 }
 

@@ -43,7 +43,6 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly INamedTypeSymbol _compileTimeOnlyAttribute;
         private readonly INamedTypeSymbol _templateAttribute;
         private readonly INamedTypeSymbol _ignoreUnlessOverriddenAttribute;
-        private readonly INamedTypeSymbol _interfaceMemberAttribute;
         private readonly ConcurrentDictionary<ISymbol, TemplatingScope?> _cacheScopeFromAttributes = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
@@ -55,7 +54,6 @@ namespace Caravela.Framework.Impl.CompileTime
             this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
             this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeOnlyAttribute).FullName ).AssertNotNull();
             this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
-            this._interfaceMemberAttribute = this._compilation.GetTypeByMetadataName( typeof(InterfaceMemberAttribute).FullName ).AssertNotNull();
             this._ignoreUnlessOverriddenAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
             this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
         }
@@ -91,15 +89,6 @@ namespace Caravela.Framework.Impl.CompileTime
                         return templateInfo;
                     }
                 }
-            }
-
-            // Look for a [InterfaceMember] attribute on the symbol.
-            var interfaceMemberAttribute =
-                symbol.GetAttributes().SingleOrDefault( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._interfaceMemberAttribute ) );
-
-            if ( interfaceMemberAttribute != null )
-            {
-                return new TemplateInfo( TemplateAttributeType.InterfaceMember, interfaceMemberAttribute );
             }
 
             switch ( symbol )
@@ -230,7 +219,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return TemplatingScope.Dynamic;
 
                 case ITypeParameterSymbol:
-                    return TemplatingScope.Both;
+                    throw new AssertionFailedException( "Generic templates or aspects are not supported." );
 
                 case IErrorTypeSymbol:
                     return TemplatingScope.Unknown;
@@ -272,9 +261,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
                                 case TemplatingScope.Both:
                                     break;
-
-                                case TemplatingScope.Unknown:
-                                    return TemplatingScope.Unknown;
 
                                 default:
                                     throw new AssertionFailedException( $"Unexpected scope: {scope}." );

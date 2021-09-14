@@ -1180,28 +1180,26 @@ namespace Caravela.Framework.Impl.Templating
                 using ( this.WithScopeContext(
                     ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a local variable of compile-time-only type '{node.Type}'" ) ) )
                 {
-                    var transformedVariableDeclaration = (VariableDeclarationSyntax) base.VisitVariableDeclaration( node )!;
+                    var transformedVariables = node.Variables.Select( v => this.Visit( v )! );
 
-                    return transformedVariableDeclaration.AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
+                    return node.Update( transformedType, SeparatedList( transformedVariables ) ).AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
                 }
             }
             else
             {
-                var transformedVariableDeclaration = (VariableDeclarationSyntax) base.VisitVariableDeclaration( node )!;
+                var transformedVariables = node.Variables.Select( v => this.Visit( v )! ).ToList();
 
-                var variableScopes = transformedVariableDeclaration.Variables.Select( v => v.GetScopeFromAnnotation() ).Distinct().ToList();
+                var variableScopes = transformedVariables.Select( v => v.GetScopeFromAnnotation() ).Distinct().ToList();
 
-                if ( variableScopes.Count == 1 )
+                if ( variableScopes.Count != 1 )
                 {
-                    return transformedVariableDeclaration.AddScopeAnnotation( variableScopes.Single() );
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.SplitVariables,
+                        node,
+                        string.Join( ",", node.Variables.Select( v => "'" + v.Identifier.Text + "'" ) ) );
                 }
 
-                this.ReportDiagnostic(
-                    TemplatingDiagnosticDescriptors.SplitVariables,
-                    node,
-                    string.Join( ",", node.Variables.Select( v => "'" + v.Identifier.Text + "'" ) ) );
-
-                return transformedVariableDeclaration;
+                return node.Update( transformedType, SeparatedList( transformedVariables ) ).AddScopeAnnotation( variableScopes.Single() );
             }
         }
 
@@ -1525,7 +1523,7 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitUnsafeStatement( UnsafeStatementSyntax node )
         {
             this.ReportUnsupportedLanguageFeature( node.UnsafeKeyword, "unsafe" );
-            
+
             return base.VisitUnsafeStatement( node );
         }
 
@@ -1883,6 +1881,15 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
         {
             var scope = this.GetNodeScope( node );
+
+            if ( scope == TemplatingScope.Conflict )
+            {
+                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.ScopeConflict, node, node.ToString() );
+
+                // We continue with an unknown scope because other methods don't handle the Conflict scope.
+                scope = TemplatingScope.Unknown;
+            }
+
             var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
             var transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;

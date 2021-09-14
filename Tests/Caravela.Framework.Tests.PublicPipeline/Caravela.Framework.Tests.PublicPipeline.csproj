@@ -29,6 +29,8 @@
   
   <ItemGroup>
     <Compile Include="..\..\IsExternalInit.cs" Link="IsExternalInit.cs" />
+    <!-- Exclude files that intentionally do not compile -->
+    <Compile Remove="Tests\**\__*.cs" />
     </ItemGroup>
 
   <ItemGroup>

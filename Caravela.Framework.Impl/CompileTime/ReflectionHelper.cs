@@ -19,11 +19,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public static string GetReflectionName( this INamedTypeSymbol s )
         {
-            if ( s is IErrorTypeSymbol error )
-            {
-                throw new ArgumentOutOfRangeException( nameof(s), $"Cannot get the reflection name of the unresolved symbol '{error.Name}'." );
-            }
-
             var sb = new StringBuilder();
             Append( s );
 
