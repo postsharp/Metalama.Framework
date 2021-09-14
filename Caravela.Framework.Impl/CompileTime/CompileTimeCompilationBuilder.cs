@@ -38,8 +38,8 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly ICompileTimeCompilationBuilderObserver? _observer;
         private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
 
-        public const string PredefinedTypesFileName = "__CaravelaPredefinedTypes.cs"; 
-        
+        public const string PredefinedTypesFileName = "__CaravelaPredefinedTypes.cs";
+
         private static readonly Lazy<SyntaxTree> _predefinedTypesSyntaxTree = new(
             () =>
                 CSharpSyntaxTree.ParseText(
@@ -621,13 +621,13 @@ namespace Caravela.Framework.Impl.CompileTime
                         var aspectTypes = compileTimeCompilation.Assembly
                             .GetTypes()
                             .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
-                            .Select( t => t.GetReflectionNameSafe() )
+                            .Select( t => t.GetReflectionName() )
                             .ToList();
 
                         var compilerPlugInTypes = compileTimeCompilation.Assembly
                             .GetTypes()
                             .Where( t => t.GetAttributes().Any( a => a is { AttributeClass: { Name: nameof(CompilerPluginAttribute) } } ) )
-                            .Select( t => t.GetReflectionNameSafe() )
+                            .Select( t => t.GetReflectionName() )
                             .ToList();
 
                         var manifest = new CompileTimeProjectManifest(

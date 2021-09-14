@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 case IPointerTypeSymbol pointerType:
                     {
-                        var elementType = this.GetCompileTimeType( pointerType.PointedAtType, fallbackToMock, cancellationToken );
+                        var elementType = this.GetCompileTimeType( pointerType.PointedAtType, false, cancellationToken );
 
                         if ( elementType == null )
                         {

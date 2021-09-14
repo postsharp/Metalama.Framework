@@ -89,7 +89,7 @@ namespace Caravela.Framework.Impl
             Compilation compilation,
             AspectDriverFactory aspectDriverFactory )
         {
-            this.FullName = aspectTypeSymbol.GetReflectionNameSafe();
+            this.FullName = aspectTypeSymbol.GetReflectionName();
             this.DisplayName = AttributeRef.GetShortName( aspectTypeSymbol.Name );
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.BaseClass = baseClass;

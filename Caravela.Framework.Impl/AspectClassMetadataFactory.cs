@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl
                                 item.Project,
                                 item.TypeName,
                                 typeSymbol,
-                                compileTimeProject.AssertNotNull().GetType( typeSymbol.GetReflectionNameSafe() ) );
+                                compileTimeProject.AssertNotNull().GetType( typeSymbol.GetReflectionName() ) );
                         } )
                     .WhereNotNull()
                     .Concat( frameworkAspectClasses )
@@ -93,8 +93,8 @@ namespace Caravela.Framework.Impl
             IDiagnosticAdder diagnosticAdder )
         {
             var aspectTypesDiagnostics = aspectTypes.ToDictionary(
-                t => t.GetReflectionNameSafe(),
-                t => new AspectTypeData( compileTimeProject, t.GetReflectionNameSafe(), t, compileTimeProject.GetType( t.GetReflectionNameSafe() ) ) );
+                t => t.GetReflectionName(),
+                t => new AspectTypeData( compileTimeProject, t.GetReflectionName(), t, compileTimeProject.GetType( t.GetReflectionName() ) ) );
 
             return this.GetAspectClasses( aspectTypesDiagnostics, diagnosticAdder, null! );
         }
@@ -124,7 +124,7 @@ namespace Caravela.Framework.Impl
                 {
                     // Process the base type.
 
-                    if ( aspectTypeDataDictionary.TryGetValue( aspectTypeSymbol.BaseType.GetReflectionNameSafe(), out var baseData ) )
+                    if ( aspectTypeDataDictionary.TryGetValue( aspectTypeSymbol.BaseType.GetReflectionName(), out var baseData ) )
                     {
                         if ( !TryProcessType( aspectTypeSymbol.BaseType, aspectReflectionType.BaseType, baseData.Project, out baseAspectClass ) )
                         {

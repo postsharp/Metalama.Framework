@@ -80,21 +80,24 @@ namespace Caravela.Framework.Impl.CompileTime
                         .WithLeadingTrivia( property.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed );
 
-                case IndexerDeclarationSyntax { AccessorList: { } } indexer:
-                    // Property with accessor list - change all accessors to expression bodied which do throw exception, remove initializer.
+                case IndexerDeclarationSyntax { AccessorList: { } }:
+                    throw new AssertionFailedException( "Build-time indexers are not supported." );
+                /*
+                // Property with accessor list - change all accessors to expression bodied which do throw exception, remove initializer.
 
-                    return indexer
-                        .WithAccessorList(
-                            indexer.AccessorList!.WithAccessors(
-                                List(
-                                    indexer.AccessorList.Accessors.Select(
-                                        x => x
-                                            .WithBody( null )
-                                            .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
-                                            .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
-                        .NormalizeWhitespace()
-                        .WithLeadingTrivia( indexer.GetLeadingTrivia() )
-                        .WithTrailingTrivia( LineFeed, LineFeed );
+                return indexer
+                    .WithAccessorList(
+                        indexer.AccessorList!.WithAccessors(
+                            List(
+                                indexer.AccessorList.Accessors.Select(
+                                    x => x
+                                        .WithBody( null )
+                                        .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
+                                        .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( indexer.GetLeadingTrivia() )
+                    .WithTrailingTrivia( LineFeed, LineFeed );
+                    */
 
                 case EventDeclarationSyntax @event:
                     // Event with accessor list.
@@ -119,6 +122,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
+        /*
         protected static IEnumerable<EventDeclarationSyntax> WithThrowNotSupportedExceptionBody( EventFieldDeclarationSyntax @eventField, string message )
         {
             // Event with accessor list.
@@ -149,13 +153,14 @@ namespace Caravela.Framework.Impl.CompileTime
                                 } ) ) );
             }
         }
+        */
 
         private static ThrowExpressionSyntax GetNotSupportedExceptionExpression( string message )
-        {
-            // throw new System.NotSupportedException("message")
-            return ThrowExpression(
-                ObjectCreationExpression( ParseTypeName( "System.NotSupportedException" ) )
-                    .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( message ) ) ) ) );
-        }
+            =>
+
+                // throw new System.NotSupportedException("message")
+                ThrowExpression(
+                    ObjectCreationExpression( ParseTypeName( "System.NotSupportedException" ) )
+                        .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( message ) ) ) ) );
     }
 }

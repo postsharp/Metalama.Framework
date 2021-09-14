@@ -10,45 +10,29 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal static class ReflectionHelper
     {
-        private static bool IsRootNamespace( ISymbol symbol ) => symbol is INamespaceSymbol ns && ns.IsGlobalNamespace;
-
         public static AssemblyIdentity ToAssemblyIdentity( this AssemblyName assemblyName ) => new( assemblyName.Name, assemblyName.Version );
-
-        public static string GetReflectionNameSafe( this ISymbol? s )
-            => GetReflectionName( s ) ?? throw new ArgumentOutOfRangeException( $"Cannot get a reflection name for {s}." );
 
         public static INamedTypeSymbol GetTypeByMetadataNameSafe( this Compilation compilation, string name )
             => compilation.GetTypeByMetadataName( name ) ?? throw new ArgumentOutOfRangeException(
                 nameof(name),
                 $"Cannot find a type '{name}' in compilation '{compilation.AssemblyName}" );
 
-        public static string? GetReflectionName( this ISymbol? s )
+        public static string GetReflectionName( this INamedTypeSymbol s )
         {
-            if ( s == null || IsRootNamespace( s ) )
-            {
-                return string.Empty;
-            }
-
             if ( s is IErrorTypeSymbol error )
             {
                 throw new ArgumentOutOfRangeException( nameof(s), $"Cannot get the reflection name of the unresolved symbol '{error.Name}'." );
             }
 
             var sb = new StringBuilder();
+            Append( s );
 
-            bool TryFormat( ISymbol symbol )
+            void Append( INamespaceOrTypeSymbol symbol )
             {
                 switch ( symbol.ContainingSymbol )
                 {
-                    case null:
-                        break;
-
                     case ITypeSymbol typeSymbol:
-                        if ( !TryFormat( typeSymbol ) )
-                        {
-                            return false;
-                        }
-
+                        Append( typeSymbol );
                         sb.Append( '+' );
 
                         break;
@@ -56,17 +40,14 @@ namespace Caravela.Framework.Impl.CompileTime
                     case INamespaceSymbol namespaceSymbol:
                         if ( !namespaceSymbol.IsGlobalNamespace )
                         {
-                            if ( !TryFormat( namespaceSymbol ) )
-                            {
-                                return false;
-                            }
-
+                            Append( namespaceSymbol );
                             sb.Append( '.' );
                         }
 
                         break;
 
                     default:
+                        // A type is always contained in another type or in a namespace, possibly the global namespace.
                         throw new AssertionFailedException();
                 }
 
@@ -76,32 +57,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    switch ( symbol )
-                    {
-                        case IArrayTypeSymbol arrayTypeSymbol:
-                            if ( !TryFormat( arrayTypeSymbol.ElementType ) )
-                            {
-                                return false;
-                            }
-
-                            sb.Append( "[]" );
-
-                            break;
-
-                        case ITypeSymbol { IsAnonymousType: true }:
-                            return false;
-
-                        default:
-                            throw new NotImplementedException( $"Don't know how to get the reflection name of '{symbol}'." );
-                    }
+                    throw new AssertionFailedException( $"{symbol.ToDisplayString()} does not have a MetadataName." );
                 }
-
-                return true;
-            }
-
-            if ( !TryFormat( s ) )
-            {
-                return null;
             }
 
             return sb.ToString();

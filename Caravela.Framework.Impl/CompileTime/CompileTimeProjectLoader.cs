@@ -84,7 +84,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity, cancellationToken );
 
-            return compileTimeProject?.GetTypeOrNull( typeSymbol.GetReflectionNameSafe() );
+            return compileTimeProject?.GetTypeOrNull( typeSymbol.GetReflectionName() );
         }
 
         /// <summary>

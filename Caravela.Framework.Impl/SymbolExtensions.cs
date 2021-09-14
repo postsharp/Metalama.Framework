@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -129,42 +130,6 @@ namespace Caravela.Framework.Impl
             return false;
         }
 
-        public static bool Is( this ITypeSymbol left, Type right )
-        {
-            if ( right.IsGenericType )
-            {
-                throw new ArgumentOutOfRangeException( nameof(right), "This method does not work with generic types." );
-            }
-
-            if ( left is IErrorTypeSymbol )
-            {
-                return false;
-            }
-
-            var rightName = right.FullName;
-
-            if ( left.GetReflectionName() == rightName )
-            {
-                return true;
-            }
-            else if ( left.BaseType != null && left.BaseType.Is( right ) )
-            {
-                return true;
-            }
-            else
-            {
-                foreach ( var i in left.Interfaces )
-                {
-                    if ( i.Is( right ) )
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
-
         public static bool Is( this ITypeSymbol left, ITypeSymbol right )
         {
             if ( left is IErrorTypeSymbol )
@@ -195,8 +160,7 @@ namespace Caravela.Framework.Impl
         }
 
         public static bool IsAccessor( this IMethodSymbol method )
-        {
-            return method.MethodKind switch
+            => method.MethodKind switch
             {
                 MethodKind.PropertyGet => true,
                 MethodKind.PropertySet => true,
@@ -205,7 +169,6 @@ namespace Caravela.Framework.Impl
                 MethodKind.EventRaise => true,
                 _ => false
             };
-        }
 
         public static bool HasModifier( this ISymbol symbol, SyntaxKind kind )
         {
