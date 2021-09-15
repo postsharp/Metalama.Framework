@@ -2,10 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Code.Syntax
+namespace Caravela.Framework.Caravela.Framework.Shared.Code.ExpressionBuilders
 {
     /// <summary>
     /// Compile-time object that allows to build a run-time array.
@@ -48,13 +49,8 @@ namespace Caravela.Framework.Code.Syntax
         /// </summary>
         public void Add( dynamic? expression ) => this._items.Add( (object?) expression );
 
-        /// <summary>
-        /// Converts the current <see cref="ArrayBuilder"/> to syntax that represents the array.
-        /// </summary>
-        /// <returns></returns>
-        public dynamic ToArray() => meta.CurrentContext.CodeBuilder.BuildArray( this );
 
-        IExpression IExpressionBuilder.ToExpression() => (IExpression) meta.CurrentContext.CodeBuilder.BuildArray( this );
+        public IExpression ToExpression() => meta.CurrentContext.CodeBuilder.BuildArray( this );
 
         public ArrayBuilder Clone() => new( this );
     }

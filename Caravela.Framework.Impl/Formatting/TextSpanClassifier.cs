@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.Formatting
             this._processAllTypes = processAllTypes;
             this._sourceString = sourceText.ToString();
             this._markAllChildrenWalker = new MarkAllChildrenWalker( this );
-            this._classifiedTextSpans = new ClassifiedTextSpanCollection( sourceText.Length );
+            this._classifiedTextSpans = new ClassifiedTextSpanCollection( sourceText );
         }
 
         public IReadOnlyClassifiedTextSpanCollection ClassifiedTextSpans => this._classifiedTextSpans;

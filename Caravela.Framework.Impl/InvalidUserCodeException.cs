@@ -18,12 +18,6 @@ namespace Caravela.Framework.Impl
     {
         public ImmutableArray<Diagnostic> Diagnostics { get; }
 
-        internal InvalidUserCodeException( DiagnosticDescriptor diagnosticDescriptor, params object[] args )
-            : this( diagnosticDescriptor, null, args ) { }
-
-        internal InvalidUserCodeException( DiagnosticDescriptor diagnosticDescriptor, Location? location, params object[] args )
-            : this( Diagnostic.Create( diagnosticDescriptor, location, args ) ) { }
-
         internal InvalidUserCodeException( string message, ImmutableArray<Diagnostic> diagnostics ) : base( GetMessage( message, diagnostics ) )
         {
             this.Diagnostics = diagnostics;

@@ -1,3 +1,4 @@
+// Warning CS8601 on `(global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle("M:Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass.TargetMethod_Void(System.Int32)"))`: `Possible null reference assignment.`
 internal class TargetClass
     {
         public TargetClass( int x ) { }
@@ -19,6 +20,7 @@ internal class TargetClass
     var property = typeof(global::Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass).GetProperty("Property", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance);
     var constructor = ((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle("M:Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass.#ctor(System.Int32)")));
     var constructorParameter = global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle("M:Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass.#ctor(System.Int32)")).GetParameters()[0];
+    var array = new global::System.Reflection.MemberInfo[]{((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle("M:Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass.TargetMethod_Void(System.Int32)"))), typeof(global::Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass)};
     return;
 }
 

@@ -64,6 +64,13 @@ namespace Caravela.Framework.Impl.Formatting
             var sourceText = document.GetTextAsync().Result;
             var syntaxTree = document.GetSyntaxTreeAsync().Result!;
 
+            if ( syntaxTree.GetText() != sourceText )
+            {
+                throw new AssertionFailedException();
+            }
+            
+            var syntaxRoot = syntaxTree.GetRoot();
+
             // Process the annotations by the template compiler.
             ClassifiedTextSpanCollection classifiedTextSpans;
 
@@ -75,19 +82,19 @@ namespace Caravela.Framework.Impl.Formatting
             }
             else
             {
-                classifiedTextSpans = new ClassifiedTextSpanCollection( sourceText.Length );
+                classifiedTextSpans = new ClassifiedTextSpanCollection( sourceText );
             }
 
             // Process the annotations by the aspect linker (on the output document).
             GeneratedCodeVisitor generatedCodeVisitor = new( classifiedTextSpans );
-            generatedCodeVisitor.Visit( syntaxTree.GetRoot() );
+            generatedCodeVisitor.Visit( syntaxRoot );
 
             // Add C# classifications
             var semanticModel = document.Project.GetCompilationAsync().Result!.GetSemanticModel( syntaxTree );
 
             foreach ( var csharpSpan in Classifier.GetClassifiedSpans(
                     semanticModel,
-                    syntaxTree.GetRoot().Span,
+                    syntaxRoot.Span,
                     document.Project.Solution.Workspace )
                 .OrderBy( c => c.TextSpan.Start )
                 .ThenBy( c => c.ClassificationType ) )
@@ -105,7 +112,7 @@ namespace Caravela.Framework.Impl.Formatting
             if ( addTitles )
             {
                 var visitor = new AddTitlesVisitor( classifiedTextSpans, semanticModel );
-                visitor.Visit( syntaxTree.GetRoot() );
+                visitor.Visit( syntaxRoot );
             }
 
             if ( diagnostics != null && document.FilePath != null )

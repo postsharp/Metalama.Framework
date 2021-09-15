@@ -1,11 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Caravela.Framework.Shared.Code.ExpressionBuilders;
 using Caravela.Framework.Code;
-using Caravela.Framework.Code.Syntax;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Validation;
+using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Caravela.Framework.Aspects
 {
@@ -53,10 +55,20 @@ namespace Caravela.Framework.Aspects
     {
         IExpression Expression( object? expression );
 
-        object BuildArray( ArrayBuilder arrayBuilder );
+        IExpression BuildArray( ArrayBuilder arrayBuilder );
 
-        object BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder );
+        IExpression BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder );
 
         IExpression Parse( string code );
+        
+        void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped );
+
+        void AppendTypeName( IType type, StringBuilder stringBuilder );
+        
+        void AppendTypeName( Type type, StringBuilder stringBuilder );
+
+        void AppendExpression( IExpression expression, StringBuilder stringBuilder );
+
+        void AppendDynamic( object? expression, StringBuilder stringBuilder );
     }
 }

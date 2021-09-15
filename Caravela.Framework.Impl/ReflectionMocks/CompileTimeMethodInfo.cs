@@ -25,19 +25,6 @@ namespace Caravela.Framework.Impl.ReflectionMocks
             return new CompileTimeMethodInfo( method );
         }
 
-        public static ITypeSymbol? FindDeclaringTypeSymbol( MemberOrNamedType method )
-        {
-            var methodDeclaringType = (method.DeclaringType as ITypeInternal)!;
-            var typeSymbol = methodDeclaringType.TypeSymbol;
-
-            if ( typeSymbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.TypeParameters.Length > 0 )
-            {
-                return namedTypeSymbol;
-            }
-
-            return null;
-        }
-
         public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override object[] GetCustomAttributes( Type attributeType, bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();

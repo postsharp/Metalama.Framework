@@ -2,8 +2,8 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Caravela.Framework.Shared.Code.ExpressionBuilders;
 using Caravela.Framework.Code;
-using Caravela.Framework.Code.Syntax;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.InterpolatedStringBuilderEscape
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.InterpolatedSt
             s.AddText( "\n" );
             s.AddText("}");
             
-            var a = s.ToInterpolatedString();
+            var a = s.ToValue();
             return default;
         }
     }

@@ -2,9 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Code.Syntax
+namespace Caravela.Framework.Caravela.Framework.Shared.Code.ExpressionBuilders
 {
     /// <summary>
     /// Compile-time object that allows to build a run-time interpolated string.
@@ -35,12 +36,6 @@ namespace Caravela.Framework.Code.Syntax
         /// <param name="expression"></param>
         public void AddExpression( dynamic? expression ) => this._items.Add( new Token( expression ) );
 
-        /// <summary>
-        /// Converts the current <see cref="InterpolatedStringBuilder"/> to syntax that represents the interpolated string.
-        /// </summary>
-        /// <returns></returns>
-        public dynamic ToInterpolatedString() => meta.CurrentContext.CodeBuilder.BuildInterpolatedString( this );
-
         internal class Token
         {
             public object? Expression { get; }
@@ -51,7 +46,7 @@ namespace Caravela.Framework.Code.Syntax
             }
         }
 
-        IExpression IExpressionBuilder.ToExpression() => (IExpression) meta.CurrentContext.CodeBuilder.BuildInterpolatedString( this );
+        public IExpression ToExpression() => meta.CurrentContext.CodeBuilder.BuildInterpolatedString( this );
 
         public InterpolatedStringBuilder Clone() => new( this );
     }

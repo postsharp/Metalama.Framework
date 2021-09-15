@@ -17,12 +17,17 @@ namespace Caravela.Framework.Impl.Formatting
     public sealed class ClassifiedTextSpanCollection : IReadOnlyClassifiedTextSpanCollection
     {
         private readonly SkipListDictionary<int, MarkedTextSpan> _spans = new();
+        private readonly int _length;
 
         // For test only.
         internal ClassifiedTextSpanCollection() : this( int.MaxValue ) { }
 
-        public ClassifiedTextSpanCollection( int length )
+        public ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length ) { }
+
+        private ClassifiedTextSpanCollection( int length )
         {
+            this._length = length;
+
             // Start with a single default span. This avoid gaps in the partition later.
             this._spans.Add( 0, new MarkedTextSpan( new TextSpan( 0, length ), TextSpanClassification.Default, null ) );
         }
@@ -48,6 +53,11 @@ namespace Caravela.Framework.Impl.Formatting
 
         private void SetSpanImpl( TextSpan span, TextSpanClassification? classification, string? tagName, string? tagValue )
         {
+            if ( span.Start < 0 || span.End > this._length )
+            {
+                throw new ArgumentOutOfRangeException( nameof(span) );
+            }
+
             for ( var i = 0; /* nothing */; i++ )
             {
                 if ( i > 4 )

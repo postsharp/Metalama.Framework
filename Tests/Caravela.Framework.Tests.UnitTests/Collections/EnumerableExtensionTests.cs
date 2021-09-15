@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -44,6 +45,13 @@ namespace Caravela.Framework.Tests.UnitTests.Collections
 
             Assert.Equal( new[] { a, b, c, d }, list.SelectManyRecursive( n => n.Children, throwOnDuplicate: false ).OrderBy( o => o.Id ) );
             Assert.Throws<AssertionFailedException>( () => list.SelectManyRecursive( n => n.Children, throwOnDuplicate: true ) );
+        }
+
+        [Fact]
+        public void ConcatEmptyList()
+        {
+            var emptyArray = Array.Empty<int>();
+            Assert.Single( emptyArray.Concat( 1 ), 1 );
         }
 
         private class Node
