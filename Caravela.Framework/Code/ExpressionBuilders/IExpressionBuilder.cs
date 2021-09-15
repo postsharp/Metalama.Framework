@@ -2,9 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
 
-namespace Caravela.Framework.Caravela.Framework.Code.ExpressionBuilders
+namespace Caravela.Framework.Code.ExpressionBuilders
 {
     [CompileTime]
     public interface IExpressionBuilder

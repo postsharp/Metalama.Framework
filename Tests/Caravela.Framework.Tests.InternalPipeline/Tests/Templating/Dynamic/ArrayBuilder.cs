@@ -1,6 +1,6 @@
 using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Caravela.Framework.Code.ExpressionBuilders;
+using Caravela.Framework.Code.ExpressionBuilders;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicArrayBuilder

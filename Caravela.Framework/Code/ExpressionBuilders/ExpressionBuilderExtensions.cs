@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Aspects;
 
-namespace Caravela.Framework.Caravela.Framework.Code.ExpressionBuilders
+namespace Caravela.Framework.Code.ExpressionBuilders
 {
     [CompileTimeOnly]
     public static class ExpressionBuilderExtensions

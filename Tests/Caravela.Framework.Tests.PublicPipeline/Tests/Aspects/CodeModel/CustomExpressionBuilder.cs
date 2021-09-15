@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using Caravela.Framework;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Caravela.Framework.Code.ExpressionBuilders;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.ExpressionBuilders;
 
 namespace Caravela.Framework.Tests.PublicPipeline.Aspects.CodeModel.CustomExpressionBuilder
 {
