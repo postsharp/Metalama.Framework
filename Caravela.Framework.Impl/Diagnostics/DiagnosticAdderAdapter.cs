@@ -6,12 +6,12 @@ using System;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-    internal class DiagnosticAdder : IDiagnosticAdder
+    internal class DiagnosticAdderAdapter : IDiagnosticAdder
     {
         private readonly Action<Diagnostic> _action;
         private int _errors; // For debugging only.
 
-        public DiagnosticAdder( Action<Diagnostic> action )
+        public DiagnosticAdderAdapter( Action<Diagnostic> action )
         {
             this._action = action;
         }

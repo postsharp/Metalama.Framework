@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             {
                 if ( this._list == null )
                 {
-                    throw new InvalidOperationException();
+                    throw new ArgumentOutOfRangeException();
                 }
 
                 return this._list[index];

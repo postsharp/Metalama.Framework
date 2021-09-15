@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using System;
 using System.Linq;
 using Xunit;
 
@@ -124,6 +125,16 @@ class C
 
             var compilation = CreateCompilationModel( code );
             this.AssertScope( compilation.DeclaredTypes.OfName( "C" ).Single(), TemplatingScope.Both );
+        }
+
+        [Fact]
+        public void NoCaravelaReference()
+        {
+            var code = "class C {}";
+            var compilation = CreateCompilationModel( code, addCaravelaReferences: false );
+            this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) ), TemplatingScope.Both );
+            this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(Console) ), TemplatingScope.RunTimeOnly );
+            this.AssertScope( compilation.DeclaredTypes.Single(), TemplatingScope.RunTimeOnly );
         }
     }
 }

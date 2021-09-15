@@ -18,28 +18,32 @@ namespace Caravela.TestFramework
     /// </summary>
     internal static class TestCompilationFactory
     {
-        public static CSharpCompilation CreateEmptyCSharpCompilation( string? name, IEnumerable<Assembly> additionalAssemblies )
-            => CreateEmptyCSharpCompilation( name, GetMetadataReferences( additionalAssemblies ) );
+        public static CSharpCompilation CreateEmptyCSharpCompilation(
+            string? name,
+            IEnumerable<Assembly> additionalAssemblies,
+            bool addCaravelaReferences = true )
+            => CreateEmptyCSharpCompilation( name, GetMetadataReferences( additionalAssemblies, addCaravelaReferences ) );
 
         public static CSharpCompilation CreateEmptyCSharpCompilation( string? name, IEnumerable<MetadataReference> metadataReferences )
-        {
-            return CSharpCompilation.Create( name ?? "test_" + Guid.NewGuid() )
+            => CSharpCompilation.Create( name ?? "test_" + Guid.NewGuid() )
                 .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
                 .AddReferences( metadataReferences );
-        }
 
-        public static IEnumerable<PortableExecutableReference> GetMetadataReferences( IEnumerable<Assembly>? additionalAssemblies = null )
+        public static IEnumerable<PortableExecutableReference> GetMetadataReferences(
+            IEnumerable<Assembly>? additionalAssemblies = null,
+            bool addCaravelaReferences = true )
         {
             var standardLibraries = new[] { "netstandard" }
                 .Select( r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) )
                 .ToList();
 
+            var caravelaLibraries = addCaravelaReferences ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly } : null;
+
             var systemLibraries = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(
                     a => !a.IsDynamic && a.FullName != null && a.FullName.StartsWith( "System", StringComparison.Ordinal )
                          && !string.IsNullOrEmpty( a.Location ) )
-                .Prepend( typeof(IAspect).Assembly )
-                .Prepend( typeof(IAspectWeaver).Assembly )
+                .Concat( caravelaLibraries ?? Enumerable.Empty<Assembly>() )
                 .Concat( additionalAssemblies ?? Enumerable.Empty<Assembly>() )
                 .Distinct()
                 .Select( a => MetadataReference.CreateFromFile( a.Location ) )

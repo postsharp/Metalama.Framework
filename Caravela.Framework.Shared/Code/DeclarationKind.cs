@@ -74,9 +74,9 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// A reference assembly, implementing <see cref="IAssembly"/>. Note
         /// that the current assembly is represented by <see cref="ICompilation"/> that inherits <see cref="IAssembly"/>, but the
-        /// <see cref="DeclarationKind"/> for the current compilation is <see cref="Compilation"/> and not <see cref="ReferencedAssembly"/>. 
+        /// <see cref="DeclarationKind"/> for the current compilation is <see cref="Compilation"/> and not <see cref="AssemblyReference"/>. 
         /// </summary>
-        ReferencedAssembly,
+        AssemblyReference,
 
         /// <summary>
         /// <see cref="INamespace"/>.

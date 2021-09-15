@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     assemblyLocator: new CompilationAssemblyLocator( context.Compilation ) );
 
                 if ( pipeline.TryExecute(
-                    new DiagnosticAdder( context.ReportDiagnostic ),
+                    new DiagnosticAdderAdapter( context.ReportDiagnostic ),
                     context.Compilation,
                     context.ManifestResources.ToImmutableArray(),
                     CancellationToken.None,

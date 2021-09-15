@@ -14,6 +14,7 @@ namespace Caravela.Framework.Diagnostics
     /// <typeparam name="T">Type of arguments: a single type if there is a single argument, or a named tuple type.</typeparam>
     /// <seealso href="@diagnostics"/>
     public sealed class DiagnosticDefinition<T> : IDiagnosticDefinition
+        where T : notnull
     {
         // Constructor used by internal code.
         internal DiagnosticDefinition( string id, string category, string messageFormat, Severity severity, string title )

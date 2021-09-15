@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IAssemblySymbol AssemblySymbol { get; }
 
-        public override DeclarationKind DeclarationKind => DeclarationKind.ReferencedAssembly;
+        public override DeclarationKind DeclarationKind => DeclarationKind.AssemblyReference;
 
         public override ISymbol Symbol => this.AssemblySymbol;
 

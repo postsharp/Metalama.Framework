@@ -31,33 +31,34 @@ namespace Caravela.Framework.Tests.UnitTests
             this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this._projectOptions );
         }
 
-        public static CSharpCompilation CreateCSharpCompilation(
+        protected static CSharpCompilation CreateCSharpCompilation(
             string code,
             string? dependentCode = null,
             bool ignoreErrors = false,
             IEnumerable<MetadataReference>? additionalReferences = null,
-            string? name = null )
+            string? name = null,
+            bool addCaravelaReferences = true )
             => CreateCSharpCompilation(
                 new Dictionary<string, string> { { Guid.NewGuid() + ".cs", code } },
                 dependentCode,
                 ignoreErrors,
                 additionalReferences,
-                name );
+                name,
+                addCaravelaReferences );
 
-        public static CSharpCompilation CreateCSharpCompilation(
+        protected static CSharpCompilation CreateCSharpCompilation(
             IReadOnlyDictionary<string, string> code,
             string? dependentCode = null,
             bool ignoreErrors = false,
             IEnumerable<MetadataReference>? additionalReferences = null,
-            string? name = null )
+            string? name = null,
+            bool addCaravelaReferences = true )
         {
             var additionalAssemblies = new[] { typeof(TestBase).Assembly };
-            var mainRoslynCompilation = TestCompilationFactory.CreateEmptyCSharpCompilation( name, additionalAssemblies );
 
-            if ( code != null )
-            {
-                mainRoslynCompilation = mainRoslynCompilation.AddSyntaxTrees( code.Select( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key ) ) );
-            }
+            var mainRoslynCompilation = TestCompilationFactory
+                .CreateEmptyCSharpCompilation( name, additionalAssemblies, addCaravelaReferences )
+                .AddSyntaxTrees( code.Select( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key ) ) );
 
             if ( dependentCode != null )
             {
@@ -81,7 +82,7 @@ namespace Caravela.Framework.Tests.UnitTests
             return mainRoslynCompilation;
         }
 
-        protected static void AssertNoError( CSharpCompilation mainRoslynCompilation )
+        private static void AssertNoError( CSharpCompilation mainRoslynCompilation )
         {
             var diagnostics = mainRoslynCompilation.GetDiagnostics();
 
@@ -98,14 +99,15 @@ namespace Caravela.Framework.Tests.UnitTests
             string? dependentCode = null,
             bool ignoreErrors = false,
             IEnumerable<MetadataReference>? additionalReferences = null,
-            string? name = null )
+            string? name = null,
+            bool addCaravelaReferences = true )
         {
-            var roslynCompilation = CreateCSharpCompilation( code, dependentCode, ignoreErrors, additionalReferences, name );
+            var roslynCompilation = CreateCSharpCompilation( code, dependentCode, ignoreErrors, additionalReferences, name, addCaravelaReferences );
 
             return CompilationModel.CreateInitialInstance( roslynCompilation );
         }
 
-        public static object? ExecuteExpression( string context, string expression )
+        protected static object? ExecuteExpression( string context, string expression )
         {
             var expressionContainer = $@"
 class Expression
@@ -128,7 +130,7 @@ class Expression
         /// <param name="context">Additional C# code.</param>
         /// <param name="expression">A C# expression of type <typeparamref name="T"/>.</param>
         /// <param name="withResult">Code to run on the result of the expression.</param>
-        public static void TestExpression<T>( string context, string expression, Action<T> withResult )
+        protected static void TestExpression<T>( string context, string expression, Action<T> withResult )
         {
 #pragma warning disable CS0162 // Unreachable code detected
 

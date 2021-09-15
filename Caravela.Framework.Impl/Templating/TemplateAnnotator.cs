@@ -75,6 +75,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <param name="arguments">Arguments of the formatting string.</param>
         /// <typeparam name="T"></typeparam>
         private void ReportDiagnostic<T>( DiagnosticDefinition<T> descriptor, SyntaxNodeOrToken targetNode, T arguments )
+            where T : notnull
         {
             var location = this._syntaxTreeAnnotationMap.GetLocation( targetNode );
 
@@ -82,6 +83,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         private void ReportDiagnostic<T>( DiagnosticDefinition<T> descriptor, Location? location, T arguments )
+            where T : notnull
         {
             var diagnostic = descriptor.CreateDiagnostic( location, arguments );
             this._diagnosticAdder.Report( diagnostic );

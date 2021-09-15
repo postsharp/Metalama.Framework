@@ -4,8 +4,6 @@
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
@@ -27,13 +25,8 @@ namespace Caravela.Framework.Impl.Diagnostics
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public static Location? GetDiagnosticLocation( this ISymbol? symbol )
+        public static Location? GetDiagnosticLocation( this ISymbol symbol )
         {
-            if ( symbol == null )
-            {
-                return null;
-            }
-
             var bestDeclaration = symbol.GetPrimarySyntaxReference();
 
             var syntax = bestDeclaration?.GetSyntax();
@@ -51,8 +44,14 @@ namespace Caravela.Framework.Impl.Diagnostics
 
                 case PropertyDeclarationSyntax property:
                     return property.Identifier.GetLocation();
+                
+                case IndexerDeclarationSyntax indexer:
+                    return indexer.ThisKeyword.GetLocation();
 
                 case OperatorDeclarationSyntax @operator:
+                    return @operator.OperatorKeyword.GetLocation();
+
+                case ConversionOperatorDeclarationSyntax @operator:
                     return @operator.OperatorKeyword.GetLocation();
 
                 case BaseTypeDeclarationSyntax type:
@@ -87,17 +86,14 @@ namespace Caravela.Framework.Impl.Diagnostics
         /// </summary>
         /// <param name="attribute"></param>
         /// <returns></returns>
-        public static Location? GetDiagnosticLocation( AttributeData? attribute )
+        public static Location? GetDiagnosticLocation( AttributeData attribute )
         {
-            if ( attribute == null )
-            {
-                return null;
-            }
-
             var application = attribute.ApplicationSyntaxReference;
 
             if ( application == null )
             {
+                // Coverage: ignore
+
                 return null;
             }
 
@@ -105,28 +101,5 @@ namespace Caravela.Framework.Impl.Diagnostics
         }
 
         public static DiagnosticLocation? ToDiagnosticLocation( this Location? location ) => location == null ? null : new DiagnosticLocation( location );
-
-        public static IEnumerable<DiagnosticLocation> ToDiagnosticLocation( this IEnumerable<Location> locations )
-            => locations.Select( l => l.ToDiagnosticLocation() ).WhereNotNull();
-
-        public static IEnumerable<Location> GetLocationsForDiagnosticSuppression( ISymbol symbol )
-            => symbol.DeclaringSyntaxReferences.Select( r => r.SyntaxTree.GetLocation( r.Span ) );
-
-        public static IEnumerable<Location> GetLocationsForDiagnosticSuppression( AttributeData? attribute )
-        {
-            if ( attribute == null )
-            {
-                return Enumerable.Empty<Location>();
-            }
-
-            var application = attribute.ApplicationSyntaxReference;
-
-            if ( application == null )
-            {
-                return Enumerable.Empty<Location>();
-            }
-
-            return new[] { application.GetSyntax().GetLocation() };
-        }
     }
 }

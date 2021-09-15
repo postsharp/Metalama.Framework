@@ -80,6 +80,8 @@ namespace Caravela.Framework.Code.Collections
         /// <returns>A <see cref="IMethod"/> that matches the given signature. If <paramref name="declaredOnly" /> is set to <c>false</c>, the top-most visible method is shown.</returns>
         IMethod? OfExactSignature( IMethod signatureTemplate, bool matchIsStatic = true, bool declaredOnly = true );
 
+        IEnumerable<IMethod> OfKind( MethodKind kind );
+
         // TODO: IMethod? OfBestSignature( ... ) - but that would mean recreating C# overload resolution which is hard. Roslyn code is not reusable directly (OverloadResolution.cs works with internal Symbols, not with ISymbols).
     }
 }

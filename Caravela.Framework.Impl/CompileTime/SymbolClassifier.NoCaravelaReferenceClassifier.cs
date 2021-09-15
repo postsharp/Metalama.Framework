@@ -11,11 +11,11 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <summary>
         /// An implementation of <see cref="ISymbolClassifier"/> for projects that don't have a reference to Caravela.
         /// </summary>
-        private class VanillaClassifier : ISymbolClassifier
+        private class NoCaravelaReferenceClassifier : ISymbolClassifier
         {
             private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
-            public VanillaClassifier( IServiceProvider serviceProvider )
+            public NoCaravelaReferenceClassifier( IServiceProvider serviceProvider )
             {
                 this._referenceAssemblyLocator = serviceProvider.GetService<ReferenceAssemblyLocator>();
             }
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     var containingAssembly = symbol.ContainingAssembly;
 
-                    return containingAssembly != null && this._referenceAssemblyLocator.StandardAssemblyNames.Contains( containingAssembly.Name )
+                    return containingAssembly != null && this._referenceAssemblyLocator.IsStandardAssemblyName( containingAssembly.Name )
                         ? TemplatingScope.Both
                         : TemplatingScope.RunTimeOnly;
                 }

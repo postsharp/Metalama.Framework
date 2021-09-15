@@ -31,6 +31,7 @@ namespace Caravela.Framework.Diagnostics
         /// <param name="definition">A <see cref="DiagnosticDefinition"/>, which must be defined in a static field or property of an aspect class.</param>
         /// <param name="arguments">Arguments of the formatting string (typically a single value or a tuple).</param>
         public static void Report<T>( this IDiagnosticSink diagnosticSink, IDiagnosticScope? scope, DiagnosticDefinition<T> definition, T arguments )
+            where T : notnull
             => diagnosticSink.Report( scope?.DiagnosticLocation, definition, arguments );
 
         /// <summary>
@@ -49,6 +50,7 @@ namespace Caravela.Framework.Diagnostics
         /// <param name="definition">A <see cref="DiagnosticDefinition"/>, which must be defined in a static field or property of an aspect class.</param>
         /// <param name="arguments">Arguments of the formatting string (typically a single value or a tuple).</param>
         public static void Report<T>( this IDiagnosticSink diagnosticSink, DiagnosticDefinition<T> definition, T arguments )
+            where T : notnull
             => diagnosticSink.Report( null, definition, arguments );
 
         /// <summary>

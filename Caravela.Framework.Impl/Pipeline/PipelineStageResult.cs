@@ -55,17 +55,5 @@ namespace Caravela.Framework.Impl.Pipeline
             this.AspectLayers = aspectLayers;
             this.AdditionalSyntaxTrees = additionalSyntaxTrees ?? ImmutableArray<IntroducedSyntaxTree>.Empty;
         }
-
-        public PipelineStageResult WithAdditionalDiagnostics( IReadOnlyList<Diagnostic> diagnostics )
-        {
-            if ( diagnostics.Count == 0 )
-            {
-                return this;
-            }
-            else
-            {
-                return new PipelineStageResult( this.PartialCompilation, this.AspectLayers, this.Diagnostics.Concat( diagnostics ) );
-            }
-        }
     }
 }

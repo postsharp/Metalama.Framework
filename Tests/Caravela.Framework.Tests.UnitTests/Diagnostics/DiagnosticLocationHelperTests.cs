@@ -2,17 +2,17 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 using Xunit;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Tests.UnitTests.Diagnostics
 {
-    public class DiagnosticTests : TestBase
+    public class DiagnosticLocationHelperTests : TestBase
     {
         [Fact]
-        public void TestDiagnosticLocation()
+        public void GetLocation()
         {
             var code = @"
 using System;
@@ -25,6 +25,10 @@ class C<T> : object
     void Method<M>(int parameter) {}
     int AutomaticProperty { get; set; }
     int Property { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+    ~C() {}
+    public static C<T> operator + ( C<T> a, C<T> b )  => throw new System.NotImplementedException();
+    public static implicit operator int(C<T> a) => 0;
+    public int this[int i] => 0;
 }
 ";
 
@@ -46,12 +50,22 @@ class C<T> : object
             AssertLocation( "M", method.GenericParameters.Single().GetDiagnosticLocation() );
             AssertLocation( "parameter", method.Parameters.Single().GetDiagnosticLocation() );
             AssertLocation( "Method", method.ReturnParameter.GetDiagnosticLocation() );
+            
+            // Operators
+            AssertLocation( "operator", type.Methods.OfKind( MethodKind.UserDefinedOperator ).Single().GetDiagnosticLocation() );
+            AssertLocation( "operator", type.Methods.OfKind( MethodKind.ConversionOperator ).Single().GetDiagnosticLocation() );
+            
+            // Destructors
+            AssertLocation( "C", type.Methods.OfKind( MethodKind.Finalizer ).Single().GetDiagnosticLocation() );
 
             // Properties
             AssertLocation( "AutomaticProperty", type.Properties.OfName( "AutomaticProperty" ).Single().GetDiagnosticLocation() );
             var property = type.Properties.OfName( "Property" ).Single();
             AssertLocation( "get", property.GetMethod!.GetDiagnosticLocation() );
             AssertLocation( "set", property.SetMethod!.GetDiagnosticLocation() );
+            
+            // Indexer
+            AssertLocation( "this", type.Properties.OfName( "this[]" ).Single().GetDiagnosticLocation() );
 
             // Fields
             AssertLocation( "field1", type.Fields.OfName( "field1" ).Single().GetDiagnosticLocation() );
@@ -76,10 +90,6 @@ class C<T> : object
             Assert.Equal( expectedText, actualText );
         }
 
-        [Fact]
-        public void TestValueTupleAdapter()
-        {
-            Assert.Equal( new object[] { 1, "2" }, ValueTupleAdapter.ToArray( (1, "2") ) );
-        }
+       
     }
 }

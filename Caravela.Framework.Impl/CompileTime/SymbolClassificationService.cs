@@ -12,12 +12,12 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ConditionalWeakTable<Compilation, ISymbolClassifier> _instances = new();
-        private readonly VanillaClassifier _vanillaClassifier;
+        private readonly NoCaravelaReferenceClassifier _noCaravelaReferenceClassifier;
 
         public SymbolClassificationService( IServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
-            this._vanillaClassifier = new VanillaClassifier( serviceProvider );
+            this._noCaravelaReferenceClassifier = new NoCaravelaReferenceClassifier( serviceProvider );
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     var hasCaravelaReference = compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ) != null;
 
-                    return hasCaravelaReference ? new SymbolClassifier( c, this._serviceProvider ) : this._vanillaClassifier;
+                    return hasCaravelaReference ? new SymbolClassifier( c, this._serviceProvider ) : this._noCaravelaReferenceClassifier;
                 } );
     }
 }
