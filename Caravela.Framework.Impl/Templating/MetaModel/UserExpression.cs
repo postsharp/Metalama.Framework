@@ -9,7 +9,7 @@ using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class UserExpression : IExpression, IDynamicExpression
+    internal class UserExpression : IDynamicExpression
     {
         public IDynamicExpression Underlying { get; }
 

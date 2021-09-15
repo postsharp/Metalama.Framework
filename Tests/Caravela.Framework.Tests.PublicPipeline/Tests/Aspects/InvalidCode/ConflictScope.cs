@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.InvalidCode.ConflictSc
 {
     class Aspect : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             Dictionary<IMethod,TargetCode> conflict = new();
             
