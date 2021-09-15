@@ -15,6 +15,10 @@
     <NoWarn>$(NoWarn);SA0001</NoWarn>  
    </PropertyGroup>
 
+   <ItemGroup>
+    <Compile Include="..\NullableAttributes.cs" Link="NullableAttributes.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.Framework.Impl" />
     <InternalsVisibleTo Include="Caravela.TestFramework" />
@@ -34,6 +38,5 @@
       <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->'%(rootdir)%(directory)%(filename).xml')" Condition="%(ReferenceSourceTarget) == 'ProjectReference'" />
     </ItemGroup>
   </Target>
-  <Import Project="..\Caravela.Framework.Shared\Caravela.Framework.Shared.projitems" Label="Shared" />
   
 </Project>
