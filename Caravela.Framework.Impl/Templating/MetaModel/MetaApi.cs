@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Caravela.Framework.Shared.Code.ExpressionBuilders;
+using Caravela.Framework.Caravela.Framework.Code.ExpressionBuilders;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Diagnostics;

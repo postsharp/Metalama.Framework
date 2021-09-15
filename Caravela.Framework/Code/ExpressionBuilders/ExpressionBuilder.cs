@@ -6,7 +6,7 @@ using Caravela.Framework.Code;
 using System;
 using System.Text;
 
-namespace Caravela.Framework.Caravela.Framework.Shared.Code.ExpressionBuilders
+namespace Caravela.Framework.Caravela.Framework.Code.ExpressionBuilders
 {
     [CompileTimeOnly]
     public sealed class ExpressionBuilder : IExpressionBuilder

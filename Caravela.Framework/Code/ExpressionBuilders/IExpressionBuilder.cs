@@ -4,7 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 
-namespace Caravela.Framework.Caravela.Framework.Shared.Code.ExpressionBuilders
+namespace Caravela.Framework.Caravela.Framework.Code.ExpressionBuilders
 {
     [CompileTime]
     public interface IExpressionBuilder

@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Caravela.Framework.Shared.Code.ExpressionBuilders;
+using Caravela.Framework.Caravela.Framework.Code.ExpressionBuilders;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 
