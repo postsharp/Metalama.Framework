@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {

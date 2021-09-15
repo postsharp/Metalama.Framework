@@ -174,8 +174,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
         {
-            stringBuilder.Append(
-                ((IDynamicExpression) expression.Value!).CreateExpression().Syntax.NormalizeWhitespace().ToFullString() );
+            stringBuilder.Append( ((IDynamicExpression) expression.Value!).CreateExpression().Syntax.NormalizeWhitespace().ToFullString() );
         }
 
         public void AppendDynamic( object? expression, StringBuilder stringBuilder )

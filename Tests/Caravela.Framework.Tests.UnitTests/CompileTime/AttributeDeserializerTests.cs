@@ -163,7 +163,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.TypeProperty),
                     "typeof(GenericRunTimeType<int>)" ) );
-            
+
             Assert.IsType<CompileTimeType>(
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.TypeProperty),

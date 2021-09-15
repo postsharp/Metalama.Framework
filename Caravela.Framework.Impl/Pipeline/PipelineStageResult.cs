@@ -5,7 +5,6 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;

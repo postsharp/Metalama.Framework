@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using IAspectSource = Caravela.Framework.Impl.Aspects.IAspectSource;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -19,7 +18,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class OverflowAspectSource : IAspectSource
     {
-        private readonly List<(IAspectSource Source, Aspects.AspectClass AspectClass)> _aspectSources = new();
+        private readonly List<(IAspectSource Source, AspectClass AspectClass)> _aspectSources = new();
 
         public AspectSourcePriority Priority => AspectSourcePriority.Aggregate;
 

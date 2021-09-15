@@ -1,9 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Options;
-using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.TestFramework;
 using System.Threading.Tasks;

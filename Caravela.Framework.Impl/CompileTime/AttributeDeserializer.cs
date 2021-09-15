@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ServiceProvider;
@@ -13,7 +14,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using CodeModelExtensions = Caravela.Framework.Impl.CodeModel.CodeModelExtensions;
+using Attribute = System.Attribute;
 using TypedConstant = Microsoft.CodeAnalysis.TypedConstant;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
@@ -33,7 +34,7 @@ namespace Caravela.Framework.Impl.CompileTime
         // Coverage: ignore
         public bool TryCreateAttribute<T>( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
             where T : Attribute
-            => this.TryCreateAttribute( CodeModelExtensions.GetAttributeData( attribute ), diagnosticAdder, out attributeInstance );
+            => this.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out attributeInstance );
 
         // Coverage: ignore
         public bool TryCreateAttribute<T>( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
@@ -54,7 +55,7 @@ namespace Caravela.Framework.Impl.CompileTime
         }
 
         public bool TryCreateAttribute( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
-            => this.TryCreateAttribute( CodeModelExtensions.GetAttributeData( attribute ), diagnosticAdder, out attributeInstance );
+            => this.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out attributeInstance );
 
         public bool TryCreateAttribute( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
         {

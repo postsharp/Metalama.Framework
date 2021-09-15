@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             set => throw new NotSupportedException();
         }
 
-        RuntimeExpression IDynamicExpression.CreateExpression( string? expressionText, Location? location ) 
+        RuntimeExpression IDynamicExpression.CreateExpression( string? expressionText, Location? location )
             => this.Underlying.CreateExpression( expressionText, location );
 
         private IExpression ToExpression() => this.Underlying;

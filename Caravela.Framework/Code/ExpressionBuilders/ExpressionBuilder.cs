@@ -69,7 +69,7 @@ namespace Caravela.Framework.Caravela.Framework.Code.ExpressionBuilders
         public void AppendTypeName( Type type ) => this._impl.AppendTypeName( type, this.StringBuilder );
 
         public void AppendExpression( IExpression expression ) => this._impl.AppendExpression( expression, this.StringBuilder );
-        
+
         public void AppendExpression( IExpressionBuilder expression ) => this._impl.AppendExpression( expression.ToExpression(), this.StringBuilder );
 
         public void AppendExpression( dynamic? expression ) => this._impl.AppendDynamic( expression, this.StringBuilder );

@@ -161,7 +161,7 @@ namespace Caravela.Framework.Impl.Collections
             IEqualityComparer<TKey>? keyComparer = null )
             where TKey : notnull
             => enumerable.ToMultiValueDictionary( getKey, i => i, keyComparer );
-        
+
         public static IEnumerable<T> WhereNotNull<T>( this IEnumerable<T?> items )
             where T : class
             => items.Where( i => i != null )!;

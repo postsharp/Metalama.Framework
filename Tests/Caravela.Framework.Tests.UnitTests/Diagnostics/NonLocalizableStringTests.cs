@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.UnitTests.Diagnostics
             Assert.Equal( s1.GetHashCode(), s2.GetHashCode() );
             Assert.Equal( s1, s2 );
         }
-        
+
         [Fact]
         public void NotEqual()
         {
@@ -28,6 +28,5 @@ namespace Caravela.Framework.Tests.UnitTests.Diagnostics
             Assert.NotEqual( s1.GetHashCode(), s2.GetHashCode() );
             Assert.NotEqual( s1, s2 );
         }
-        
     }
 }

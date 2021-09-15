@@ -65,6 +65,5 @@ namespace Caravela.Framework.Impl.Diagnostics
 
             return true;
         }
-
     }
 }

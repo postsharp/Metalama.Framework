@@ -57,9 +57,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Package"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Tests.InternalPipeline", "Tests\Caravela.Framework.Tests.InternalPipeline\Caravela.Framework.Tests.InternalPipeline.csproj", "{496B8623-F88E-4346-A192-DA18B19457A3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.Test", "Tests\Caravela.Framework.TestApp\Caravela.Framework.TestApp.TestRunner\Caravela.Framework.TestApp.TestRunner.csproj", "{42985F2B-A0B7-46FA-BE51-73FE7FBB69CF}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Caravela.Framework.Shared", "Caravela.Framework.Shared\Caravela.Framework.Shared.shproj", "{962B525B-C29C-4016-AC8C-CF5565D5D833}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.TestRunner", "Tests\Caravela.Framework.TestApp\Caravela.Framework.TestApp.TestRunner\Caravela.Framework.TestApp.TestRunner.csproj", "{42985F2B-A0B7-46FA-BE51-73FE7FBB69CF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.CompileTime", "Caravela.Framework.CompileTime\Caravela.Framework.CompileTime.csproj", "{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -67,11 +65,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.CompileT
 	EndProjectSection
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Caravela.Framework.Shared\Caravela.Framework.Shared.projitems*{09cffba1-f2fd-4d20-bac9-14de163a894a}*SharedItemsImports = 5
-		Caravela.Framework.Shared\Caravela.Framework.Shared.projitems*{3d5d53da-f498-4432-a3f4-99f21deecd69}*SharedItemsImports = 5
-		Caravela.Framework.Shared\Caravela.Framework.Shared.projitems*{962b525b-c29c-4016-ac8c-cf5565d5d833}*SharedItemsImports = 13
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU

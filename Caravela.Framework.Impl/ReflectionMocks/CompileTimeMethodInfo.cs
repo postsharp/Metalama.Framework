@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
 using System.Reflection;

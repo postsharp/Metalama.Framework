@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.Formatting
             {
                 throw new AssertionFailedException();
             }
-            
+
             var syntaxRoot = syntaxTree.GetRoot();
 
             // Process the annotations by the template compiler.

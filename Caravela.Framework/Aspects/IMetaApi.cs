@@ -60,11 +60,11 @@ namespace Caravela.Framework.Aspects
         IExpression BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder );
 
         IExpression Parse( string code );
-        
+
         void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped );
 
         void AppendTypeName( IType type, StringBuilder stringBuilder );
-        
+
         void AppendTypeName( Type type, StringBuilder stringBuilder );
 
         void AppendExpression( IExpression expression, StringBuilder stringBuilder );

@@ -50,11 +50,11 @@ class C<T> : object
             AssertLocation( "M", method.GenericParameters.Single().GetDiagnosticLocation() );
             AssertLocation( "parameter", method.Parameters.Single().GetDiagnosticLocation() );
             AssertLocation( "Method", method.ReturnParameter.GetDiagnosticLocation() );
-            
+
             // Operators
             AssertLocation( "operator", type.Methods.OfKind( MethodKind.UserDefinedOperator ).Single().GetDiagnosticLocation() );
             AssertLocation( "operator", type.Methods.OfKind( MethodKind.ConversionOperator ).Single().GetDiagnosticLocation() );
-            
+
             // Destructors
             AssertLocation( "C", type.Methods.OfKind( MethodKind.Finalizer ).Single().GetDiagnosticLocation() );
 
@@ -63,7 +63,7 @@ class C<T> : object
             var property = type.Properties.OfName( "Property" ).Single();
             AssertLocation( "get", property.GetMethod!.GetDiagnosticLocation() );
             AssertLocation( "set", property.SetMethod!.GetDiagnosticLocation() );
-            
+
             // Indexer
             AssertLocation( "this", type.Properties.OfName( "this[]" ).Single().GetDiagnosticLocation() );
 
@@ -89,7 +89,5 @@ class C<T> : object
 
             Assert.Equal( expectedText, actualText );
         }
-
-       
     }
 }

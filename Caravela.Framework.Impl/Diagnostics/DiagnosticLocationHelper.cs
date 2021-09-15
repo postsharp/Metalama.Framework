@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
                 case PropertyDeclarationSyntax property:
                     return property.Identifier.GetLocation();
-                
+
                 case IndexerDeclarationSyntax indexer:
                     return indexer.ThisKeyword.GetLocation();
 

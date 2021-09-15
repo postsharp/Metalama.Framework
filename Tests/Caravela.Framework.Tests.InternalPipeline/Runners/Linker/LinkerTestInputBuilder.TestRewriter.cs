@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;

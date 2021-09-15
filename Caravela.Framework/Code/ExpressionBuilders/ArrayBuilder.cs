@@ -49,7 +49,6 @@ namespace Caravela.Framework.Caravela.Framework.Code.ExpressionBuilders
         /// </summary>
         public void Add( dynamic? expression ) => this._items.Add( (object?) expression );
 
-
         public IExpression ToExpression() => meta.CurrentContext.CodeBuilder.BuildArray( this );
 
         public ArrayBuilder Clone() => new( this );
