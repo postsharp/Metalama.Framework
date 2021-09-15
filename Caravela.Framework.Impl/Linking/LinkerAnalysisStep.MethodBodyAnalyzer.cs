@@ -112,19 +112,14 @@ namespace Caravela.Framework.Impl.Linking
                 void AnalyzeOverriddenBody( IMethodSymbol symbol )
                 {
                     var syntax = symbol.GetPrimaryDeclaration();
-                    var returnStatementCounter = new ReturnStatementCountingWalker();
-                    returnStatementCounter.Visit( syntax );
 
                     bodyAnalysisResults[symbol] = new MethodBodyAnalysisResult(
-                        Array.Empty<ResolvedAspectReference>(),
-                        symbol.ReturnsVoid ? returnStatementCounter.ReturnStatementCount == 0 : returnStatementCounter.ReturnStatementCount <= 1 );
+                        Array.Empty<ResolvedAspectReference>() );
                 }
 
                 void AnalyzeIntroducedBody( IMethodSymbol symbol )
                 {
                     var syntax = symbol.GetPrimaryDeclaration().AssertNotNull();
-                    var returnStatementCounter = new ReturnStatementCountingWalker();
-                    returnStatementCounter.Visit( syntax );
 
                     var aspectReferenceCollector = new AspectReferenceWalker(
                         this._referenceResolver,
@@ -134,8 +129,7 @@ namespace Caravela.Framework.Impl.Linking
                     aspectReferenceCollector.Visit( syntax );
 
                     bodyAnalysisResults[symbol] = new MethodBodyAnalysisResult(
-                        aspectReferenceCollector.AspectReferences,
-                        symbol.ReturnsVoid ? returnStatementCounter.ReturnStatementCount == 0 : returnStatementCounter.ReturnStatementCount <= 1 );
+                        aspectReferenceCollector.AspectReferences );
                 }
             }
         }

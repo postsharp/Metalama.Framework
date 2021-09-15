@@ -53,7 +53,9 @@ namespace Caravela.Framework.Impl.Templating
 
             public bool IsAssignable => false;
 
-            public IType ExpressionType => this._parent._proceedExpression!.ExpressionType;
+            public IType Type => this._parent._proceedExpression!.Type;
+
+            object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
         }
     }
 }

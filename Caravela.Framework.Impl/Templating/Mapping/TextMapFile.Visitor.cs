@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Templating.Mapping
 
             public string? SourcePath { get; private set; }
 
-            public SkipListIndexedDictionary<int, TextPointMapping> TextPointMappings { get; } = new();
+            public SkipListDictionary<int, TextPointMapping> TextPointMappings { get; } = new();
 
             private enum PointKind
             {

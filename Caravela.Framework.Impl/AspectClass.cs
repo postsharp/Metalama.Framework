@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Sdk;
@@ -89,7 +90,7 @@ namespace Caravela.Framework.Impl
             AspectDriverFactory aspectDriverFactory )
         {
             this.FullName = aspectTypeSymbol.GetReflectionNameSafe();
-            this.DisplayName = aspectTypeSymbol.Name.TrimEnd( "Attribute" );
+            this.DisplayName = AttributeRef.GetShortName( aspectTypeSymbol.Name );
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.BaseClass = baseClass;
             this.Project = project;

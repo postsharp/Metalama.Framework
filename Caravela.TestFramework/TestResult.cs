@@ -8,7 +8,6 @@ using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using PostSharp.Patterns;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -284,7 +283,7 @@ namespace Caravela.TestFramework
                         break;
 
                     default:
-                        throw new AssertionFailedException( $"Don't know how to add a {outputNode.Kind()} to the compilation unit." );
+                        throw new InvalidOperationException( $"Don't know how to add a {outputNode.Kind()} to the compilation unit." );
                 }
             }
 

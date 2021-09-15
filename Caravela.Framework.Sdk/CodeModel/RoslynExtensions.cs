@@ -51,8 +51,5 @@ namespace Caravela.Framework.Impl.CodeModel
                     return newRoot == null ? null : tree.WithRootAndOptions( newRoot, tree.Options );
                 },
                 trees );
-
-        public static object? GetValueSafe( this TypedConstant typedConstant )
-            => typedConstant.Kind == TypedConstantKind.Array ? typedConstant.Values : typedConstant.Value;
     }
 }

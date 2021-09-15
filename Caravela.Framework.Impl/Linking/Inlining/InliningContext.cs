@@ -16,10 +16,6 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         private readonly int _depth;
         private bool _labelUsed;
 
-        public Compilation Compilation => this._rewritingDriver.IntermediateCompilation;
-
-        public AspectReferenceResolver ReferenceResolver => this._rewritingDriver.ReferenceResolver;
-
         public bool HasIndirectReturn { get; }
 
         public string? ReturnVariableName { get; }
@@ -96,6 +92,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             => new( rewritingDriver, targetDeclaration );
 
         public InliningContext WithDeclaredReturnLocal( IMethodSymbol currentDeclaration )
+
+            // Coverage: ignore (not used yet)
             => new( this, currentDeclaration, $"__aspect_return_{this._depth}", true );
 
         public InliningContext WithReturnLocal( IMethodSymbol currentDeclaration, string valueText ) => new( this, currentDeclaration, valueText );

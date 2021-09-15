@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                 diagnosticAdder,
                 out sortedAspectLayers );
 
-        public static bool TrySort(
+        private static bool TrySort(
             ImmutableArray<AspectLayer> unsortedAspectLayers,
             IReadOnlyList<AspectOrderSpecification> relationships,
             IDiagnosticAdder diagnosticAdder,
@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
 
             var aspectLayerNameToLocationsMappingBuilder = ImmutableMultiValueDictionary<string, AspectOrderSpecification>.CreateBuilder();
 
-            Graph graph = new( n );
+            DirectedGraph directedGraph = new( n );
             var hasPredecessor = new bool[n];
 
             foreach ( var relationship in relationships )
@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
 
                 foreach ( var matchExpression in relationship.OrderedLayers )
                 {
-                    // Map the part string to a set of indices. We don't require the match to exist because it is a normal case
+                    // Map the part string to a set of indices. We require the match to exist because it is a normal case
                     // to specify ordering for aspects that exist but are not necessarily a part of the current compilation.
                     ImmutableArray<int> currentIndices;
 
@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                             {
                                 foreach ( var currentIndex in currentIndices )
                                 {
-                                    graph.AddEdge( previousIndex, currentIndex );
+                                    directedGraph.AddEdge( previousIndex, currentIndex );
                                     hasPredecessor[currentIndex] = true;
                                 }
                             }
@@ -106,8 +106,8 @@ namespace Caravela.Framework.Impl.AspectOrdering
             var aspectLayerNameToLocationsMapping = aspectLayerNameToLocationsMappingBuilder.ToImmutable();
 
             // Perform a breadth-first search on the graph.
-            var distances = graph.GetInitialVector();
-            var predecessors = graph.GetInitialVector();
+            var distances = directedGraph.GetInitialVector();
+            var predecessors = directedGraph.GetInitialVector();
 
             var cycle = -1;
 
@@ -115,7 +115,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
             {
                 if ( !hasPredecessor[i] )
                 {
-                    cycle = graph.DoBreadthFirstSearch( i, distances, predecessors );
+                    cycle = directedGraph.DoBreadthFirstSearch( i, distances, predecessors );
 
                     if ( cycle >= 0 )
                     {
@@ -124,16 +124,16 @@ namespace Caravela.Framework.Impl.AspectOrdering
                 }
             }
 
-            // If did not manage to find a cycle, we need to check that we have ordered the whole graph.
+            // If we did not find any cycle, we need to check that we have ordered the whole graph.
             if ( cycle < 0 )
             {
                 for ( var i = 0; i < n; i++ )
                 {
-                    if ( distances[i] == AbstractGraph.NotDiscovered )
+                    if ( distances[i] == DirectedGraph.NotDiscovered )
                     {
                         // There is a node that we haven't ordered, which means that there is a cycle.
                         // Force the detection on the node to find the cycle.
-                        cycle = graph.DoBreadthFirstSearch( 0, distances, predecessors );
+                        cycle = directedGraph.DoBreadthFirstSearch( 0, distances, predecessors );
 
                         break;
                     }
@@ -153,7 +153,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                     cycleStack.Push( cursor );
                     cursor = predecessors[cursor];
                 }
-                while ( cursor != cycle && /* Workaround PostSharp bug 25438 */ cursor != AbstractGraph.NotDiscovered );
+                while ( cursor != cycle && /* Workaround PostSharp bug 25438 */ cursor != DirectedGraph.NotDiscovered );
 
                 var cycleNodes = cycleStack.Select( index => unsortedAspectLayers[index].AspectLayerId.FullName ).ToList();
 

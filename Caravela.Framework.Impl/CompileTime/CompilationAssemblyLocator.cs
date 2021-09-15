@@ -10,6 +10,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// <summary>
     /// An implementation of <see cref="IAssemblyLocator"/> that looks in metadata references of a <see cref="Compilation"/>.
     /// </summary>
+    [ExcludeFromCodeCoverage] // Not used in tests.
     internal class CompilationAssemblyLocator : IAssemblyLocator
     {
         private readonly Compilation _compilation;

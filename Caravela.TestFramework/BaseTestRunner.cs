@@ -9,12 +9,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using Document = Microsoft.CodeAnalysis.Document;
 
 namespace Caravela.TestFramework
 {
@@ -410,6 +413,54 @@ namespace Caravela.TestFramework
             }
 
             // We have no use case to write the output document because all cases use the consolidated output document instead.
+        }
+
+        protected bool VerifyBinaryStream( TestInput testInput, TestResult testResult, MemoryStream stream )
+        {
+            if ( testInput.Options.AllowCompileTimeDynamicCode.GetValueOrDefault() )
+            {
+                return true;
+            }
+
+            stream.Seek( 0, SeekOrigin.Begin );
+            using var peReader = new PEReader( stream, PEStreamOptions.LeaveOpen );
+            var metadataReader = peReader.GetMetadataReader();
+
+            foreach ( var typeRefHandle in metadataReader.TypeReferences )
+            {
+                var typeRef = metadataReader.GetTypeReference( typeRefHandle );
+                var ns = metadataReader.GetString( typeRef.Namespace );
+                var typeName = metadataReader.GetString( typeRef.Name );
+
+                if ( ns.Contains( "Microsoft.CSharp.RuntimeBinder", StringComparison.Ordinal ) &&
+                     string.Equals( typeName, "CSharpArgumentInfo", StringComparison.Ordinal ) )
+                {
+                    var directory = Path.Combine( Path.GetTempPath(), "Caravela", "InvalidAssemblies" );
+
+                    if ( !Directory.Exists( directory ) )
+                    {
+                        Directory.CreateDirectory( directory );
+                    }
+
+                    var diagnosticFile = Path.Combine( directory, Guid.NewGuid().ToString() + ".dll" );
+
+                    using ( var diagnosticStream = File.Create( diagnosticFile ) )
+                    {
+                        stream.Seek( 0, SeekOrigin.Begin );
+                        stream.CopyTo( diagnosticStream );
+                    }
+
+                    this.Logger?.WriteLine( "Compiled compile-time assembly: " + diagnosticFile );
+
+                    testResult.SetFailed( "The compiled assembly contains dynamic code." );
+
+                    return false;
+                }
+            }
+
+            stream.Seek( 0, SeekOrigin.Begin );
+
+            return true;
         }
     }
 }

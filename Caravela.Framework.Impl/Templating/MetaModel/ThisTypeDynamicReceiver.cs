@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public bool IsAssignable => false;
 
-        public IType ExpressionType => this._type;
+        public IType Type => this._type;
 
         public RuntimeExpression CreateMemberAccessExpression( string member )
             => new(
@@ -38,5 +38,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                         SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
                     .WithAspectReferenceAnnotation( this._linkerAnnotation ),
                 this._type.Compilation );
+
+        object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
     }
 }

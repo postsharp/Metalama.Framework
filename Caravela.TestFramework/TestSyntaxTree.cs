@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
-using PostSharp.Patterns;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -92,7 +92,8 @@ namespace Caravela.TestFramework
                     break;
 
                 default:
-                    throw new AssertionFailedException(
+                    throw new ArgumentOutOfRangeException(
+                        nameof(syntaxNode),
                         $"The root of the document must be a CompilationUnitSyntax or a MemberDeclarationSyntax but it is a {syntaxNode.Kind()}." );
             }
 

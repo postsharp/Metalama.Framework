@@ -15,8 +15,6 @@
     
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
     
-    <PackageReference Include="PostSharp.Patterns.Common.Redist" Version="6.9.3" />
-
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
   </ItemGroup>
 

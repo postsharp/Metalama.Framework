@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Templating.Mapping;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -23,11 +22,11 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     /// <summary>
     /// This class is responsible to cache and load compile-time projects. The caller must first call
-    /// the <see cref="TryGetCompileTimeProject(Microsoft.CodeAnalysis.Compilation,System.Collections.Generic.IReadOnlyList{Microsoft.CodeAnalysis.SyntaxTree}?,Caravela.Framework.Impl.Diagnostics.IDiagnosticAdder,bool,System.Threading.CancellationToken,out Caravela.Framework.Impl.CompileTime.CompileTimeProject?)"/> for each project with which the loader will be used.
+    /// the <see cref="TryGetCompileTimeProjectFromCompilation"/> for each project with which the loader will be used.
     /// The generation of compile-time compilations itself is delegated to the <see cref="CompileTimeCompilationBuilder"/>
     /// class.
     /// </summary>
-    internal sealed class CompileTimeProjectLoader : ICompileTimeTypeResolver
+    internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver
     {
         private static readonly ConcurrentDictionary<string, (byte[]? Resource, DateTime LastFileWrite)> _resourceCache = new();
         private readonly CompileTimeDomain _domain;
@@ -63,29 +62,13 @@ namespace Caravela.Framework.Impl.CompileTime
             return loader;
         }
 
-        private static IEnumerable<ITypeSymbol> CollectTypeArguments( INamedTypeSymbol? s )
-        {
-            var typeArguments = new List<ITypeSymbol>();
-
-            while ( s != null )
-            {
-                typeArguments.InsertRange( 0, s.TypeArguments );
-
-                s = s.ContainingSymbol as INamedTypeSymbol;
-            }
-
-            return typeArguments;
-        }
-
         /// <summary>
         /// Gets a compile-time reflection <see cref="Type"/> given its Roslyn symbol.
         /// </summary>
         /// <param name="typeSymbol"></param>
-        /// <param name="fallbackToMock">Determines whether a <see cref="CompileTimeType"/> must be returned
-        ///     when a compile-time does not exist.</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock, CancellationToken cancellationToken = default )
+        protected override Type? GetCompileTimeNamedType( INamedTypeSymbol typeSymbol, CancellationToken cancellationToken = default )
         {
             // Check if the type is a .NET system one.
             var systemType = this._systemTypeResolver.GetCompileTimeType( typeSymbol, false, cancellationToken );
@@ -97,45 +80,11 @@ namespace Caravela.Framework.Impl.CompileTime
 
             // The type is not a system one. Check if it is a compile-time one.
 
-            if ( typeSymbol is IArrayTypeSymbol arrayType )
-            {
-                var elementType = this.GetCompileTimeType( arrayType.ElementType, fallbackToMock, cancellationToken );
-
-                if ( arrayType.IsSZArray )
-                {
-                    return elementType?.MakeArrayType();
-                }
-
-                return elementType?.MakeArrayType( arrayType.Rank );
-            }
-
             var assemblySymbol = typeSymbol.ContainingAssembly;
 
             var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity, cancellationToken );
 
-            var result = compileTimeProject?.GetTypeOrNull( typeSymbol.GetReflectionNameSafe() );
-
-            if ( result == null )
-            {
-                if ( fallbackToMock )
-                {
-                    result = CompileTimeType.Create( typeSymbol );
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            if ( typeSymbol is INamedTypeSymbol { IsGenericType: true, IsUnboundGenericType: false } namedTypeSymbol )
-            {
-                var typeArguments = CollectTypeArguments( namedTypeSymbol );
-
-                result = result.MakeGenericType(
-                    typeArguments.Select( typeSymbol1 => this.GetCompileTimeType( typeSymbol1, fallbackToMock, cancellationToken ) ).ToArray() );
-            }
-
-            return result;
+            return compileTimeProject?.GetTypeOrNull( typeSymbol.GetReflectionNameSafe() );
         }
 
         /// <summary>
@@ -154,7 +103,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <summary>
         /// Tries to get the <see cref="CompileTimeProject"/> given its <see cref="AssemblyIdentity"/>.
         /// </summary>
-        public bool TryGetCompileTimeProject(
+        private bool TryGetCompileTimeProject(
             AssemblyIdentity runTimeAssemblyIdentity,
             IDiagnosticAdder diagnosticAdder,
             bool cacheOnly,
@@ -190,7 +139,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Referenced projects are loaded or generated as necessary. Note that other methods of this class do not
         /// generate projects, they will only ones that have been generated or loaded by this method.
         /// </summary>
-        public bool TryGetCompileTimeProject(
+        public bool TryGetCompileTimeProjectFromCompilation(
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             IDiagnosticAdder diagnosticSink,
@@ -216,6 +165,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
+                    // Coverage: ignore
+                    // (this happens when the project reference could not be resolved.)
+
                     compileTimeProject = null;
 
                     return false;
@@ -251,10 +203,10 @@ namespace Caravela.Framework.Impl.CompileTime
             switch ( reference )
             {
                 case PortableExecutableReference { FilePath: { } filePath }:
-                    return this.TryGetCompileTimeProject( filePath, diagnosticSink, cancellationToken, out referencedProject );
+                    return this.TryGetCompileTimeProjectFromPath( filePath, diagnosticSink, cancellationToken, out referencedProject );
 
                 case CompilationReference compilationReference:
-                    return this.TryGetCompileTimeProject(
+                    return this.TryGetCompileTimeProjectFromCompilation(
                         compilationReference.Compilation,
                         null,
                         diagnosticSink,
@@ -267,7 +219,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
-        private bool TryGetCompileTimeProject(
+        private bool TryGetCompileTimeProjectFromPath(
             string assemblyPath,
             IDiagnosticAdder diagnosticSink,
             CancellationToken cancellationToken,
@@ -292,16 +244,12 @@ namespace Caravela.Framework.Impl.CompileTime
             // LoadFromAssemblyPath throws for mscorlib
             if ( Path.GetFileNameWithoutExtension( assemblyPath ) == typeof(object).Assembly.GetName().Name )
             {
-                compileTimeProject = null;
-
-                return true;
+                goto finish;
             }
 
             if ( !TryGetCompileTimeResource( assemblyPath, out var resourceStream ) )
             {
-                compileTimeProject = null;
-
-                return true;
+                goto finish;
             }
 
             var assemblyName = AssemblyName.GetAssemblyName( assemblyPath );
@@ -313,9 +261,12 @@ namespace Caravela.Framework.Impl.CompileTime
                 cancellationToken,
                 out compileTimeProject ) )
             {
+                // Coverage: ignore
+
                 return false;
             }
 
+        finish:
             this._projects.Add( assemblyIdentity, compileTimeProject );
 
             return true;
@@ -358,6 +309,10 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( !resource.Implementation.IsNil )
                 {
+                    // Coverage: ignore
+                    // (This happens in the case that the resource is stored in a different module of the assembly, but this is a very rare
+                    // case that cannot be easily tested without creating custom IL.)
+
                     continue;
                 }
 
@@ -391,15 +346,7 @@ namespace Caravela.Framework.Impl.CompileTime
             // Read manifest.
             var manifestEntry = archive.GetEntry( "manifest.json" ).AssertNotNull();
 
-            if ( !CompileTimeProjectManifest.TryDeserialize( manifestEntry.Open(), out var manifest ) )
-            {
-                diagnosticAdder.Report(
-                    GeneralDiagnosticDescriptors.InvalidCompileTimeProjectResource.CreateDiagnostic( Location.None, runTimeAssemblyIdentity.ToString() ) );
-
-                project = null;
-
-                return false;
-            }
+            var manifest = CompileTimeProjectManifest.Deserialize( manifestEntry.Open() );
 
             // Read source files.
             List<SyntaxTree> syntaxTrees = new();
@@ -423,6 +370,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
                     if ( !this.TryGetCompileTimeProject( referenceAssemblyIdentity, diagnosticAdder, false, cancellationToken, out var referenceProject ) )
                     {
+                        // Coverage: ignore
+                        // (this happens when the project reference could not be resolved.)
+
                         project = null;
 
                         return false;
@@ -446,6 +396,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 out var assemblyPath,
                 out var sourceDirectory ) )
             {
+                // Coverage: ignore
+                // (this happens when the compile-time could not be compiled into a binary assembly.)
+
                 project = null;
 
                 return false;
