@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Observers;
 using Caravela.Framework.Impl.Serialization;
+using Caravela.Framework.Impl.ServiceProvider;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;

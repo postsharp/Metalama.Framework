@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -12,6 +13,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using CodeModelExtensions = Caravela.Framework.Impl.CodeModel.CodeModelExtensions;
 using TypedConstant = Microsoft.CodeAnalysis.TypedConstant;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
@@ -31,7 +33,7 @@ namespace Caravela.Framework.Impl.CompileTime
         // Coverage: ignore
         public bool TryCreateAttribute<T>( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
             where T : Attribute
-            => this.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out attributeInstance );
+            => this.TryCreateAttribute( CodeModelExtensions.GetAttributeData( attribute ), diagnosticAdder, out attributeInstance );
 
         // Coverage: ignore
         public bool TryCreateAttribute<T>( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
@@ -52,7 +54,7 @@ namespace Caravela.Framework.Impl.CompileTime
         }
 
         public bool TryCreateAttribute( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
-            => this.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out attributeInstance );
+            => this.TryCreateAttribute( CodeModelExtensions.GetAttributeData( attribute ), diagnosticAdder, out attributeInstance );
 
         public bool TryCreateAttribute( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
         {
@@ -131,9 +133,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 return false;
             }
 
-            foreach ( var (name, value) in attribute.NamedArguments )
+            foreach ( var arg in attribute.NamedArguments )
             {
-                if ( value.Kind == TypedConstantKind.Error )
+                if ( arg.Value.Kind == TypedConstantKind.Error )
                 {
                     // Ignore a field or property assigned to a value that could not be parsed to the correct type by Roslyn.
                     continue;
@@ -142,9 +144,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 PropertyInfo? property;
                 FieldInfo? field;
 
-                if ( (property = type.GetProperty( name )) != null )
+                if ( (property = type.GetProperty( arg.Key )) != null )
                 {
-                    var translatedValue = this.TranslateAttributeArgument( attribute, value, property.PropertyType, diagnosticAdder );
+                    var translatedValue = this.TranslateAttributeArgument( attribute, arg.Value, property.PropertyType, diagnosticAdder );
 
                     try
                     {
@@ -162,16 +164,16 @@ namespace Caravela.Framework.Impl.CompileTime
                         return false;
                     }
                 }
-                else if ( (field = type.GetField( name )) != null )
+                else if ( (field = type.GetField( arg.Key )) != null )
                 {
-                    var translatedValue = this.TranslateAttributeArgument( attribute, value, field.FieldType, diagnosticAdder );
+                    var translatedValue = this.TranslateAttributeArgument( attribute, arg.Value, field.FieldType, diagnosticAdder );
 
                     this._userCodeInvoker.Invoke( () => field.SetValue( localAttributeInstance, translatedValue ) );
                 }
                 else
                 {
                     // We should never get an invalid member because Roslyn would not add it to the collection.
-                    throw new AssertionFailedException( $"Cannot find a FieldInfo or PropertyInfo named '{name}'." );
+                    throw new AssertionFailedException( $"Cannot find a FieldInfo or PropertyInfo named '{arg.Key}'." );
                 }
             }
 

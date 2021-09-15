@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System.Linq;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Aspects
 {
     /// <summary>
     /// Provides extension methods for handling of aspect reference annotations.

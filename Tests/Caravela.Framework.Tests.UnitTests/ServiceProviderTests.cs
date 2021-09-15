@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.TestFramework;
 using System.Threading.Tasks;
 using Xunit;

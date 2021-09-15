@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Observers;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Sdk;
+using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.Mapping;
 using Caravela.Framework.Impl.Utilities;

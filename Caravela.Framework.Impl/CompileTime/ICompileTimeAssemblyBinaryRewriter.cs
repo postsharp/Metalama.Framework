@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.ServiceProvider;
 using System.IO;
 
 namespace Caravela.Framework.Impl.CompileTime

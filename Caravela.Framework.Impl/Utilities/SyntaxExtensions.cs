@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Utilities
 {
     public static class SyntaxExtensions
     {

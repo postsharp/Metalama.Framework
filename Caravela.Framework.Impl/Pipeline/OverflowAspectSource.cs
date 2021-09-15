@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
@@ -9,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using IAspectSource = Caravela.Framework.Impl.Aspects.IAspectSource;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -17,7 +19,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class OverflowAspectSource : IAspectSource
     {
-        private readonly List<(IAspectSource Source, AspectClass AspectClass)> _aspectSources = new();
+        private readonly List<(IAspectSource Source, Aspects.AspectClass AspectClass)> _aspectSources = new();
 
         public AspectSourcePriority Priority => AspectSourcePriority.Aggregate;
 

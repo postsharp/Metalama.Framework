@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Aspects;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Aspects
 {
     /// <summary>
     /// Priorities of <see cref="IAspectSource"/>, which determine in which order the sources must be evaluated.

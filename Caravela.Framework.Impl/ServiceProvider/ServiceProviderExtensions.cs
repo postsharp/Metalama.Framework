@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.ServiceProvider
 {
     internal static class ServiceProviderExtensions
     {

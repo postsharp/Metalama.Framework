@@ -7,7 +7,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Aspects
 {
     internal interface IAspectSource
     {

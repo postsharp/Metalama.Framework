@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Caravela.Framework.Impl.ServiceProvider
 {
     public class ServiceProvider : IServiceProvider, IDisposable
     {

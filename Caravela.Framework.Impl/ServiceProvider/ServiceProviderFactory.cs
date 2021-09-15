@@ -3,11 +3,12 @@
 
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Utilities;
 using System.Threading;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Caravela.Framework.Impl.ServiceProvider
 {
     public static class ServiceProviderFactory
     {

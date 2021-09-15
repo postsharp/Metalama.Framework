@@ -3,15 +3,14 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
-using Attribute = Caravela.Framework.Impl.CodeModel.Attribute;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.CodeModel
 {
     internal static class CodeModelExtensions
     {

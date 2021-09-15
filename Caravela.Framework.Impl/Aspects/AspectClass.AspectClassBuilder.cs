@@ -5,7 +5,7 @@ using Caravela.Framework.Aspects;
 using System;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Aspects
 {
     internal partial class AspectClass
     {

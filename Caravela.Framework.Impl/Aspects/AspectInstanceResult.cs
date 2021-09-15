@@ -5,7 +5,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Aspects
 {
     internal class AspectInstanceResult
     {

@@ -4,7 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Aspects
 {
     /// <summary>
     /// Represents an instance of an aspect and its target declaration.

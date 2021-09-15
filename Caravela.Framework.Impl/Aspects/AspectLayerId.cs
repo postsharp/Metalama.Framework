@@ -6,7 +6,7 @@ using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Linq;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Aspects
 {
     internal readonly struct AspectLayerId : IEquatable<AspectLayerId>, IEquatable<AspectLayer>
     {

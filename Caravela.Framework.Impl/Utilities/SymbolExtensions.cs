@@ -11,7 +11,7 @@ using System.Linq;
 using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
 using SpecialType = Caravela.Framework.Code.SpecialType;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Utilities
 {
     internal static class SymbolExtensions
     {

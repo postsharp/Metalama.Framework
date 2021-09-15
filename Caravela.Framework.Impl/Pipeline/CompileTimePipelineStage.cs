@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Collections;
 using System;
 using System.Collections.Generic;
 using System.Threading;

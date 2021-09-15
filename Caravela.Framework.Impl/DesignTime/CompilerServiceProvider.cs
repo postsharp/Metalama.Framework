@@ -3,6 +3,7 @@
 
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Diagnostics;
