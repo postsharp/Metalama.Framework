@@ -499,9 +499,10 @@ namespace Caravela.Framework.Impl.Linking
 
             if ( this._introductionRegistry.IsLastOverride( targetSymbol ) )
             {
-                // If something is resolved to the last override, we will point to the target declaration instead.
-                targetSymbol = aspectReference.OriginalSymbol;
-                targetSemanticKind = IntermediateSymbolSemanticKind.Final;
+                throw new AssertionFailedException( Justifications.CoverageMissing );
+                // // If something is resolved to the last override, we will point to the target declaration instead.
+                // targetSymbol = aspectReference.OriginalSymbol;
+                // targetSemanticKind = IntermediateSymbolSemanticKind.Final;
             }
 
             // Determine the target name. Specifically, handle case when the resolved symbol points to the original implementation.

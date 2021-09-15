@@ -18,6 +18,12 @@
      <RootNamespace>Caravela.Framework.Tests.Integration</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Tests\Linker\EventFields\Linking\OverriddenLocalEvent - Copy.t.cs" />
+    <Compile Remove="Tests\Linker\Fields\Linking\OverriddenLocalProperty.t.cs" />
+    <Compile Remove="Tests\Linker\Methods\Overrides\Body\ReturnsInt_Condition - Copy.t.cs" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="FakeItEasy" Version="6.2.1" />
@@ -73,6 +79,11 @@
   <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
   <ItemGroup Condition="'$(Obfuscate)'=='True'">
     <Compile Remove="**\*" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Tests\Linker\EventFields\Linking\IntroducedEvent.t.cs" />
+    <None Include="Tests\Linker\Fields\Linking\OverriddenLocalField.t.cs" />
+    <None Include="Tests\Linker\Methods\Overrides\Body\ReturnsInt_ConditionalAccess.t.cs" />
   </ItemGroup>
   
 </Project>

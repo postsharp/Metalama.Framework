@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
             this.Target = symbol;
         }
 
-        public MemberRef( MemberOrNamedTypeBuilder builder )
+        public MemberRef( IMemberOrNamedTypeBuilder builder )
         {
             this.Target = builder;
         }

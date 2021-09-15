@@ -9,5 +9,6 @@ namespace Caravela.Framework.Impl
         public const string TemplateMembersHaveSymbol = "Template members are known to have symbols.";
         public const string TypesAlwaysHaveSymbol = "Types are known to have symbols.";
         public const string ImplementingIntroducedInterfacesNotSupported = "Implementing introduced interfaces is not supported.";
+        public const string CoverageMissing = "Coverage of this code is missing and it is unclear how to reproduce it. Should be treated as a bug.";
     }
 }

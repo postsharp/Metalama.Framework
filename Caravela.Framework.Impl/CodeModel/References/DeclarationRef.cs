@@ -156,7 +156,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
                 case ISymbol symbol:
                     return (T) compilation.Factory.GetDeclaration( symbol.AssertValidType<T>(), kind );
 
-                case DeclarationBuilder builder:
+                case IDeclarationBuilder builder:
                     return (T) compilation.Factory.GetDeclaration( builder );
 
                 case string documentationId:

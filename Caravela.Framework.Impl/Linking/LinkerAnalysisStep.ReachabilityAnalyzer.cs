@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 void DepthFirstSearch( IntermediateSymbolSemantic current )
                 {
-                    // TODO: Some edges we are walking
+                    // TODO: Some edges we are walking are not necessary and may hinder performance.
                     if ( !visited.Add( current ) )
                     {
                         return;

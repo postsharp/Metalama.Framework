@@ -150,10 +150,10 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
             public override SyntaxNode? VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
             {
-                if ( node.Kind() == SyntaxKind.SimpleMemberAccessExpression && node.Expression is IdentifierNameSyntax identifier
-                                                                            && StringComparer.Ordinal.Equals(
-                                                                                identifier.Identifier.ValueText,
-                                                                                nameof(Api._static) ) )
+                if ( node.Kind() == SyntaxKind.SimpleMemberAccessExpression
+                     && node.Expression is IdentifierNameSyntax identifier
+                     && (StringComparer.Ordinal.Equals( identifier.Identifier.ValueText, nameof( Api._static ) )
+                       || StringComparer.Ordinal.Equals( identifier.Identifier.ValueText, nameof( Api._local ) )) )
                 {
                     return node.Name;
                 }
