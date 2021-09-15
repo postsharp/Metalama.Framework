@@ -2,5 +2,14 @@
 
     <Import Project="eng\shared\build\AssemblyMetadata.targets" />
     <Import Project="eng\shared\build\TeamCity.targets" />
+    
+    <ItemGroup>
+        <!-- Specifically use the same version of Roslyn as we're using in Caravela Compiler -->
+        <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="$(RoslynVersion)" Condition="'$(UseCaravelaCompiler)'!='True'">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all"  Condition="'$(UseCaravelaCompiler)'=='True'" />
+    </ItemGroup>
 
 </Project>

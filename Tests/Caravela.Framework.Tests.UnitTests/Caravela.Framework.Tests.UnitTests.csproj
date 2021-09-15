@@ -7,6 +7,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>Caravela.Framework.Tests.UnitTests</RootNamespace>
+    <UseCaravelaCompiler>True</UseCaravelaCompiler>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,7 +28,6 @@
     <ProjectReference Include="..\..\Caravela.Framework\Caravela.Framework.csproj" />
     <ProjectReference Include="..\..\Caravela.TestFramework\Caravela.TestFramework.csproj" />
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
-    <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" />
   </ItemGroup>
   
     <ItemGroup>

@@ -12,6 +12,7 @@
         <GenerateDocumentationFile>False</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);SA0001</NoWarn>
         <IsPackable>False</IsPackable>  
+        <UseCaravelaCompiler>True</UseCaravelaCompiler>
     </PropertyGroup>
 
     <ItemGroup>
@@ -32,7 +33,6 @@
         
         <!-- The following references change 'dynamic' into 'object' -->
         <ProjectReference Include="..\Build\Caravela.SourceTransformer\Caravela.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-        <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" />
     </ItemGroup>
 
 </Project>

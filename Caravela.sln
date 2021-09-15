@@ -13,12 +13,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{34D4F83E-9C04-4175-8DD3-9D65DDF39F69}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		Build\Build.ps1 = Build\Build.ps1
-		CaravelaVersion.props = CaravelaVersion.props
-		Build\cleanup.cmd = Build\cleanup.cmd
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
-		Build\kill.ps1 = Build\kill.ps1
 		LICENSE.md = LICENSE.md
 		nuget.config = nuget.config
 		THIRD-PARTY-NOTICES.TXT = THIRD-PARTY-NOTICES.TXT
