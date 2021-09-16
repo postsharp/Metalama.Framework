@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal class ReferenceAssemblyLocator : IService
     {
-        private const string _frameworkAssemblyName = "Caravela.Framework";
+        private const string _compileTimeFrameworkAssemblyName = "Caravela.Framework";
         private readonly string _cacheDirectory;
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
             this.StandardAssemblyNames = this.CaravelaImplementationAssemblyNames
-                .Concat( _frameworkAssemblyName )
+                .Concat( _compileTimeFrameworkAssemblyName )
                 .Concat( this.SystemAssemblyPaths.Select( Path.GetFileNameWithoutExtension ) )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
@@ -80,7 +80,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             // Get our public API assembly in its .NET Standard 2.0 build.
             var frameworkAssemblyReference = (MetadataReference)
-                MetadataReference.CreateFromStream( this.GetType().Assembly.GetManifestResourceStream( _frameworkAssemblyName + ".dll" ) );
+                MetadataReference.CreateFromStream( this.GetType().Assembly.GetManifestResourceStream( _compileTimeFrameworkAssemblyName + ".dll" ) );
 
             // Get implementation assembly paths from the current AppDomain
             var caravelaImplementationPaths = AppDomain.CurrentDomain.GetAssemblies()
@@ -110,6 +110,8 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
 
+            // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
+            // dynamic code at compile time. We prefer compilation errors.
             var projectText =
                 $@"
 <Project Sdk='Microsoft.NET.Sdk'>
@@ -117,7 +119,6 @@ namespace Caravela.Framework.Impl.CompileTime
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include='Microsoft.CSharp' Version='{metadataReader.GetPackageVersion( "Microsoft.CSharp" )}' />
     <PackageReference Include='Microsoft.CodeAnalysis.CSharp' Version='{metadataReader.GetPackageVersion( "Microsoft.CodeAnalysis.CSharp" )}' />
     <PackageReference Include='System.Collections.Immutable' Version='{metadataReader.GetPackageVersion( "System.Collections.Immutable" )}' />
   </ItemGroup>

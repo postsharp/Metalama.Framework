@@ -1,35 +1,34 @@
 using System;
-using System.Linq;
-using System.Collections.Generic;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
 using Caravela.Framework.Code.Syntax;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicArrayBuilder
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             var array = new ArrayBuilder();
-            
-            foreach ( var p in meta.Target.Parameters )
+
+            foreach (var p in meta.Target.Parameters)
             {
                 array.Add( p.Value );
             }
-            
-            var a = array.ToArray();
+
+            var array1 = array.ToArray();
+            var array2 = ( (IExpressionBuilder)array ).ToExpression().Value;
+
             return default;
         }
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, string c, DateTime dt)
+        private int Method( int a, string c, DateTime dt )
         {
             return a;
         }

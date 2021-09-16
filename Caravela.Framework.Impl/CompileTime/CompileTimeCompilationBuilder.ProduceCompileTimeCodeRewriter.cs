@@ -142,10 +142,10 @@ namespace Caravela.Framework.Impl.CompileTime
 
                                     break;
 
-                                case IndexerDeclarationSyntax indexer:
-                                    members.AddRange( this.VisitBasePropertyDeclaration( indexer ).AssertNoneNull() );
+                                case IndexerDeclarationSyntax:
+                                    throw new NotImplementedException( "Indexers are not implemented." );
 
-                                    break;
+                                // members.AddRange( this.VisitBasePropertyDeclaration( indexer ).AssertNoneNull() );
 
                                 case PropertyDeclarationSyntax property:
                                     members.AddRange( this.VisitBasePropertyDeclaration( property ).AssertNoneNull() );
@@ -179,7 +179,8 @@ namespace Caravela.Framework.Impl.CompileTime
                             {
                                 if ( member is not IMethodSymbol method )
                                 {
-                                    continue;
+                                    // IAspect and IEligible have only methods.
+                                    throw new AssertionFailedException();
                                 }
 
                                 var memberImplementation = (IMethodSymbol?) symbol.FindImplementationForInterfaceMember( member );
@@ -508,7 +509,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    return null;
+                    // The rewriter should not have been invoked in a compilation unit that does not
+                    // contain any build-time code.
+                    throw new AssertionFailedException();
                 }
             }
 

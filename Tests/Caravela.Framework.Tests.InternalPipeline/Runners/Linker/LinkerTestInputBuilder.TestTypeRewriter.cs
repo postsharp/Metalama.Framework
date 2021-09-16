@@ -7,6 +7,7 @@ using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
@@ -209,12 +210,12 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         {
                             case "PseudoNotInlineable":
                                 notInlineable = true;
-                                
+
                                 break;
 
                             case "PseudoNotDiscardable":
                                 notDiscardable = true;
-                                
+
                                 break;
                         }
                     }
@@ -334,6 +335,8 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     _ => throw new NotSupportedException()
                 };
 
+                var introductionSyntax = node.WithAttributeLists( List( newAttributeLists ) );
+
                 string? memberNameOverride = null;
 
                 if ( replacementAttribute != null )
@@ -342,6 +345,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     Invariant.Assert( replacementAttribute.ArgumentList?.Arguments.Count == 1 );
 
                     memberNameOverride = ((InvocationExpressionSyntax) replacementAttribute.ArgumentList.Arguments[0].Expression).ArgumentList.Arguments[0].ToString();
+                    introductionSyntax = GetFinalIntroductionSyntax( introductionSyntax, memberNameOverride );
                 }
                 else if (replacedAttribute != null)
                 {
@@ -352,8 +356,6 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 var aspectLayer = this._owner.GetOrAddAspectLayer( aspectName.AssertNotNull(), layerName );
 
                 var symbolHelperDeclaration = GetSymbolHelperDeclaration( node, memberNameOverride );
-
-                var introductionSyntax = node.WithAttributeLists( List( newAttributeLists ) );
 
                 if ( notInlineable || notDiscardable )
                 {
@@ -395,10 +397,10 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
                         _ = declarationKind switch
                         {
-                            DeclarationKind.Method => o.Implements<IMethod>(),
-                            DeclarationKind.Property => o.Implements<IProperty>(),
-                            DeclarationKind.Event => o.Implements<IEvent>(),
-                            DeclarationKind.Field => o.Implements<IField>(),
+                            DeclarationKind.Method => o.Implements<IMethod>().Implements<IDeclarationRef<IMethod>>(),
+                            DeclarationKind.Property => o.Implements<IProperty>().Implements<IDeclarationRef<IProperty>>(),
+                            DeclarationKind.Event => o.Implements<IEvent>().Implements<IDeclarationRef<IEvent>>(),
+                            DeclarationKind.Field => o.Implements<IField>().Implements<IDeclarationRef<IField>>(),
                             _ => throw new AssertionFailedException()
                         };
 
@@ -408,6 +410,27 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         }
                     } );
 
+                switch ( declarationKind )
+                {
+                    case DeclarationKind.Method:
+                        A.CallTo( () => ((IDeclarationRef<IMethod>) transformation).Target ).Returns( transformation );
+                        A.CallTo( () => ((IDeclarationRef<IMethod>) transformation).Resolve( A<CompilationModel>.Ignored ) ).Returns( (IMethod)transformation );
+                        break;
+                    case DeclarationKind.Property:
+                        A.CallTo( () => ((IDeclarationRef<IProperty>) transformation).Target ).Returns( transformation );
+                        A.CallTo( () => ((IDeclarationRef<IProperty>) transformation).Resolve( A<CompilationModel>.Ignored ) ).Returns( (IProperty) transformation );
+                        break;
+                    case DeclarationKind.Event:
+                        A.CallTo( () => ((IDeclarationRef<IEvent>) transformation).Target ).Returns( transformation );
+                        A.CallTo( () => ((IDeclarationRef<IEvent>) transformation).Resolve( A<CompilationModel>.Ignored ) ).Returns( (IEvent) transformation );
+                        break;
+                    case DeclarationKind.Field:
+                        A.CallTo( () => ((IDeclarationRef<IField>) transformation).Target ).Returns( transformation );
+                        A.CallTo( () => ((IDeclarationRef<IField>) transformation).Resolve( A<CompilationModel>.Ignored ) ).Returns( (IField) transformation );
+                        break;
+                }
+
+                A.CallTo( () => ((ISdkDeclaration) transformation).Symbol ).Returns( null );
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Introduced" );
                 A.CallTo( () => transformation.TargetSyntaxTree ).Returns( node.SyntaxTree );
@@ -427,7 +450,10 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                                 null )
                         } );
 
-                A.CallTo( () => ((ITestTransformation) transformation).ReplacedElementName ).Returns( memberNameOverride );
+                if ( memberNameOverride != null )
+                {
+                    A.CallTo( () => ((ITestTransformation) transformation).ReplacedElementName ).Returns( memberNameOverride );
+                }
 
                 A.CallTo( () => ((ITestTransformation) transformation).ContainingNodeId ).Returns( GetNodeId( this._currentTypeStack.Peek().Type ) );
 
@@ -455,6 +481,28 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 }
 
                 return symbolHelperDeclaration;
+            }
+
+            private static MemberDeclarationSyntax GetFinalIntroductionSyntax( MemberDeclarationSyntax introductionSyntax, string? memberNameOverride )
+            {
+                if ( memberNameOverride == null )
+                {
+                    return introductionSyntax;
+                }
+
+                switch ( introductionSyntax )
+                {
+                    case PropertyDeclarationSyntax propertyDecl:
+                        return propertyDecl.WithIdentifier( Identifier( memberNameOverride ) );
+                    case FieldDeclarationSyntax fieldDecl:
+                        return
+                            fieldDecl.WithDeclaration(
+                                fieldDecl.Declaration.WithVariables(
+                                    SingletonSeparatedList(
+                                        fieldDecl.Declaration.Variables.Single().WithIdentifier( Identifier( memberNameOverride ) ) ) ) );
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
 
             private MemberDeclarationSyntax ProcessPseudoOverride(

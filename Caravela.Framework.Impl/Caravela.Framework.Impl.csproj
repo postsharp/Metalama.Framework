@@ -8,9 +8,9 @@
 
   <ItemGroup>
     
-    <!-- We have to embed the netstandard2.0 build of Caravela.Framework so we can reference it to create
+    <!-- We have to embed the compile-time build of Caravela.Framework so we can reference it to create
          the compile-time assembly. See ReferenceAssemblyLocator                                           -->
-    <EmbeddedResource Include="..\Caravela.Framework\bin\$(Configuration)\netstandard2.0\Caravela.Framework.dll">
+    <EmbeddedResource Include="..\Caravela.Framework.CompileTime\bin\$(Configuration)\netstandard2.0\Caravela.Framework.dll">
         <LogicalName>Caravela.Framework.dll</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
@@ -34,13 +34,14 @@
     <ProjectReference Include="..\Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj" />
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
     <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" />
-    <ProjectReference Include="..\Build\Caravela.MemoTransformer\Caravela.MemoTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    
     
     <!-- Reference PostSharp for obfuscation -->
     <PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" PrivateAssets="all" Condition="'$(Obfuscate)' == 'True'" />
     <ProjectReference Include="..\Build\Caravela.Obfuscator\Caravela.Obfuscator.csproj" ReferenceOutputAssembly="false" Condition="'$(Obfuscate)' == 'True'" />
     
-    <!-- Reference Caravela.Compiler for [Memo] -->
+    <!-- The following references handle [Memo] -->
+    <ProjectReference Include="..\Build\Caravela.SourceTransformer\Caravela.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" />
     
   </ItemGroup>

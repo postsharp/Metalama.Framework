@@ -38,6 +38,14 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly ICompileTimeCompilationBuilderObserver? _observer;
         private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
 
+        public const string PredefinedTypesFileName = "__CaravelaPredefinedTypes.cs"; 
+        
+        private static readonly Lazy<SyntaxTree> _predefinedTypesSyntaxTree = new(
+            () =>
+                CSharpSyntaxTree.ParseText(
+                    "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}",
+                    path: PredefinedTypesFileName ) );
+
         private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
 
         public const string ResourceName = "Caravela.CompileTimeAssembly";
@@ -162,9 +170,8 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( !produceCompileTimeCodeRewriter.FoundCompileTimeCode )
             {
-                compileTimeCompilation = null;
-
-                return true;
+                // This should not happen because we handle this condition before calling this method.
+                throw new AssertionFailedException( "No compile-time code was found." );
             }
 
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees.Select( t => t.TransformedTree ) );
@@ -218,7 +225,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             return CSharpCompilation.Create(
                     assemblyName,
-                    Array.Empty<SyntaxTree>(),
+                    new[] { _predefinedTypesSyntaxTree.Value },
                     standardReferences,
                     new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, deterministic: true ) )
                 .AddReferences(
@@ -314,10 +321,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     foreach ( var diagnostic in diagnostics )
                     {
-                        if ( textMapDirectory == null )
-                        {
-                            textMapDirectory = TextMapDirectory.Load( outputInfo.Directory );
-                        }
+                        textMapDirectory ??= TextMapDirectory.Load( outputInfo.Directory );
 
                         var transformedPath = diagnostic.Location.SourceTree?.FilePath;
 
@@ -339,6 +343,10 @@ namespace Caravela.Framework.Impl.CompileTime
                         }
                         else
                         {
+                            // Coverage: ignore
+                            // (this should happen only in case of incorrect generation of compile-time, but in this case a graceful fallback
+                            // is better than an exception).
+
                             diagnosticSink.Report( diagnostic );
                         }
                     }
@@ -360,7 +368,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         using ( var writer = File.CreateText( path ) )
                         {
-                            syntaxTree.GetText().Write( writer );
+                            syntaxTree.GetText().Write( writer, cancellationToken );
                         }
                     }
 
@@ -383,15 +391,12 @@ namespace Caravela.Framework.Impl.CompileTime
 
                     return false;
                 }
-
-                if ( textMapDirectory == null )
+                else
                 {
-                    diagnosticSink.Report( emitResult.Diagnostics );
+                    Logger.Instance?.Write( $"TryEmit( '{compileTimeCompilation.AssemblyName}' ): success." );
+
+                    return true;
                 }
-
-                Logger.Instance?.Write( $"TryEmit( '{compileTimeCompilation.AssemblyName}' ): success." );
-
-                return emitResult.Success;
             }
             catch ( Exception e )
             {
@@ -499,40 +504,22 @@ namespace Caravela.Framework.Impl.CompileTime
             Logger.Instance?.Write( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation}' ): found on disk. Deserializing." );
 
             // Deserialize the manifest.
-            if ( CompileTimeProjectManifest.TryDeserialize( RetryHelper.Retry( () => File.OpenRead( outputPaths.Manifest ) ), out var manifest ) )
-            {
-                project = CompileTimeProject.Create(
-                    this._serviceProvider,
-                    this._domain,
-                    runTimeCompilation.Assembly.Identity,
-                    new AssemblyIdentity( compileTimeAssemblyName ),
-                    referencedProjects,
-                    manifest,
-                    outputPaths.Pe,
-                    outputPaths.Directory,
-                    TextMapFile.ReadForSource );
+            var manifest = CompileTimeProjectManifest.Deserialize( RetryHelper.Retry( () => File.OpenRead( outputPaths.Manifest ) ) );
 
-                this._cache.Add( projectHash, project );
+            project = CompileTimeProject.Create(
+                this._serviceProvider,
+                this._domain,
+                runTimeCompilation.Assembly.Identity,
+                new AssemblyIdentity( compileTimeAssemblyName ),
+                referencedProjects,
+                manifest,
+                outputPaths.Pe,
+                outputPaths.Directory,
+                TextMapFile.ReadForSource );
 
-                return true;
-            }
-            else
-            {
-                Logger.Instance?.Write( $"Cannot deserialize '{outputPaths.Manifest}'." );
+            this._cache.Add( projectHash, project );
 
-                try
-                {
-                    File.Delete( outputPaths.Manifest );
-                }
-                catch ( IOException e )
-                {
-                    Logger.Instance?.Write( $"Cannot delete '{outputPaths.Manifest}': {e.Message}" );
-                }
-
-                project = null;
-
-                return false;
-            }
+            return true;
         }
 
         private bool TryGetCompileTimeProjectImpl(
@@ -575,6 +562,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         projectHash,
                         out project ) )
                     {
+                        // Coverage: ignore (this depends on a multi-threaded condition)
                         return true;
                     }
 

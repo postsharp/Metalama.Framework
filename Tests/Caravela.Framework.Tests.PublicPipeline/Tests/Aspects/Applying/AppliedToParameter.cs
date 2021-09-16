@@ -3,11 +3,11 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Applying.AppliedToGenericParameter
+namespace Caravela.Framework.IntegrationTests.Aspects.Applying.AppliedToParameter
 {
-    public class MyAspect : Attribute, IAspect<IGenericParameter> 
+    public class MyAspect : Attribute, IAspect<IParameter> 
     { 
-        public void BuildAspect( IAspectBuilder<IGenericParameter> builder )
+        public void BuildAspect( IAspectBuilder<IParameter> builder )
         {
             throw new Exception("Oops");
         }
@@ -17,6 +17,6 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Applying.AppliedToGenericP
     // <target>
     internal class TargetClass
     {
-        void M<[MyAspect] T>(int a ) {}
+        void M([MyAspect] int a ) {}
     }
 }

@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Utilities;
@@ -13,7 +12,6 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using Attribute = System.Attribute;
 using TypedConstant = Microsoft.CodeAnalysis.TypedConstant;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
@@ -21,22 +19,21 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal class AttributeDeserializer
     {
-        private readonly ICompileTimeTypeResolver _compileTimeTypeResolver;
+        private readonly CompileTimeTypeResolver _compileTimeTypeResolver;
         private readonly UserCodeInvoker _userCodeInvoker;
 
-        public AttributeDeserializer( IServiceProvider serviceProvider, ICompileTimeTypeResolver compileTimeTypeResolver )
+        public AttributeDeserializer( IServiceProvider serviceProvider, CompileTimeTypeResolver compileTimeTypeResolver )
         {
             this._compileTimeTypeResolver = compileTimeTypeResolver;
             this._userCodeInvoker = serviceProvider.GetService<UserCodeInvoker>();
         }
 
+        // Coverage: ignore
         public bool TryCreateAttribute<T>( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
             where T : Attribute
             => this.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out attributeInstance );
 
-        public bool TryCreateAttribute( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
-            => this.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out attributeInstance );
-
+        // Coverage: ignore
         public bool TryCreateAttribute<T>( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
             where T : Attribute
         {
@@ -54,19 +51,16 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
+        public bool TryCreateAttribute( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
+            => this.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out attributeInstance );
+
         public bool TryCreateAttribute( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
         {
-            // TODO: this is insufficiently tested, especially the case with Type arguments.
-            // TODO: Exception handling and recovery should be better. Don't throw an exception but return false and emit a diagnostic.
-
             var constructorSymbol = attribute.AttributeConstructor;
 
             if ( constructorSymbol == null )
             {
-                // Invalid syntax.
-                attributeInstance = null;
-
-                return false;
+                throw new ArgumentOutOfRangeException( nameof(attribute), "Cannot instantiate an invalid attribute." );
             }
 
             var type = this._compileTimeTypeResolver.GetCompileTimeType( constructorSymbol.ContainingType, false );
@@ -74,7 +68,7 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( type == null )
             {
                 diagnosticAdder.Report(
-                    AttributeDeserializerDiagnostics.CannotFindType.CreateDiagnostic( attribute.GetLocation(), constructorSymbol.ContainingType ) );
+                    AttributeDeserializerDiagnostics.CannotFindAttributeType.CreateDiagnostic( attribute.GetLocation(), constructorSymbol.ContainingType ) );
 
                 attributeInstance = null;
 
@@ -90,37 +84,17 @@ namespace Caravela.Framework.Impl.CompileTime
             IDiagnosticAdder diagnosticAdder,
             [NotNullWhen( true )] out Attribute? attributeInstance )
         {
-            var constructorSymbol = attribute.AttributeConstructor;
-
-            if ( constructorSymbol == null )
-            {
-                // Invalid syntax? No need to report a diagnostic.
-                attributeInstance = null;
-
-                return false;
-            }
+            var constructorSymbol = attribute.AttributeConstructor!;
 
             var constructors = type.GetConstructors().Where( c => this.ParametersMatch( c.GetParameters(), constructorSymbol.Parameters ) ).ToList();
 
             if ( constructors.Count == 0 )
             {
-                diagnosticAdder.Report(
-                    AttributeDeserializerDiagnostics.NoConstructor.CreateDiagnostic( attribute.GetLocation(), constructorSymbol.ContainingType ) );
-
-                attributeInstance = null;
-
-                return false;
+                throw new AssertionFailedException( $"Cannot map find the ConstructorInfo for '{constructorSymbol}'." );
             }
             else if ( constructors.Count > 1 )
             {
-                diagnosticAdder.Report(
-                    AttributeDeserializerDiagnostics.AmbiguousConstructor.CreateDiagnostic(
-                        attribute.GetLocation(),
-                        constructorSymbol.ContainingType ) );
-
-                attributeInstance = null;
-
-                return false;
+                throw new AssertionFailedException( $"Found more than one ConstructorInfo for '{constructorSymbol}'." );
             }
 
             var constructor = constructors[0];
@@ -129,135 +103,152 @@ namespace Caravela.Framework.Impl.CompileTime
 
             for ( var i = 0; i < parameters.Length; i++ )
             {
-                if ( !this.TryTranslateAttributeArgument(
+                var constructorArgument = attribute.ConstructorArguments[i];
+
+                parameters[i] = this.TranslateAttributeArgument(
                     attribute,
-                    attribute.ConstructorArguments[i],
+                    constructorArgument,
                     constructor.GetParameters()[i].ParameterType,
-                    diagnosticAdder,
-                    out var translatedArg ) )
-                {
-                    attributeInstance = null;
-
-                    return false;
-                }
-
-                parameters[i] = translatedArg;
+                    diagnosticAdder );
             }
 
-            var localAttributeInstance = attributeInstance =
-                attributeInstance = this._userCodeInvoker.Invoke( () => (Attribute) constructor.Invoke( parameters ) ).AssertNotNull();
+            Attribute localAttributeInstance;
+
+            try
+            {
+                localAttributeInstance = attributeInstance =
+                    attributeInstance = this._userCodeInvoker.Invoke( () => (Attribute) constructor.Invoke( parameters ) ).AssertNotNull();
+            }
+            catch ( Exception e )
+            {
+                diagnosticAdder.Report(
+                    GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
+                        attribute.GetLocation(),
+                        (type.Name, "new", e.GetType().Name, e.ToString()) ) );
+
+                attributeInstance = null;
+
+                return false;
+            }
 
             foreach ( var (name, value) in attribute.NamedArguments )
             {
+                if ( value.Kind == TypedConstantKind.Error )
+                {
+                    // Ignore a field or property assigned to a value that could not be parsed to the correct type by Roslyn.
+                    continue;
+                }
+
                 PropertyInfo? property;
                 FieldInfo? field;
 
                 if ( (property = type.GetProperty( name )) != null )
                 {
-                    if ( !this.TryTranslateAttributeArgument( attribute, value, property.PropertyType, diagnosticAdder, out var translatedValue ) )
+                    var translatedValue = this.TranslateAttributeArgument( attribute, value, property.PropertyType, diagnosticAdder );
+
+                    try
                     {
+                        this._userCodeInvoker.Invoke( () => property.SetValue( localAttributeInstance, translatedValue ) );
+                    }
+                    catch ( Exception e )
+                    {
+                        diagnosticAdder.Report(
+                            GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
+                                attribute.GetLocation(),
+                                (type.Name, property.Name, e.GetType().Name, e.ToString()) ) );
+
                         attributeInstance = null;
 
                         return false;
                     }
-
-                    this._userCodeInvoker.Invoke( () => property.SetValue( localAttributeInstance, translatedValue ) );
                 }
                 else if ( (field = type.GetField( name )) != null )
                 {
-                    if ( !this.TryTranslateAttributeArgument( attribute, value, field.FieldType, diagnosticAdder, out var translatedValue ) )
-                    {
-                        attributeInstance = null;
-
-                        return false;
-                    }
+                    var translatedValue = this.TranslateAttributeArgument( attribute, value, field.FieldType, diagnosticAdder );
 
                     this._userCodeInvoker.Invoke( () => field.SetValue( localAttributeInstance, translatedValue ) );
                 }
                 else
                 {
-                    diagnosticAdder.Report(
-                        AttributeDeserializerDiagnostics.CannotFindMember.CreateDiagnostic(
-                            attribute.GetLocation(),
-                            (constructorSymbol.ContainingType, name) ) );
-
-                    attributeInstance = null;
-
-                    return false;
+                    // We should never get an invalid member because Roslyn would not add it to the collection.
+                    throw new AssertionFailedException( $"Cannot find a FieldInfo or PropertyInfo named '{name}'." );
                 }
             }
 
             return true;
         }
 
-        private bool TryTranslateAttributeArgument(
+        private object? TranslateAttributeArgument(
             AttributeData attribute,
             TypedConstant typedConstant,
             Type targetType,
-            IDiagnosticAdder diagnosticAdder,
-            out object? translatedValue )
-            => this.TryTranslateAttributeArgument(
+            IDiagnosticAdder diagnosticAdder )
+        {
+            object? value;
+
+            switch ( typedConstant.Kind )
+            {
+                case TypedConstantKind.Error:
+                    // We should never get here if there is an invalid value.
+                    throw new AssertionFailedException( "Got an invalid attribute argument value. " );
+
+                case TypedConstantKind.Array when typedConstant.Values.IsDefault:
+                    return null;
+
+                case TypedConstantKind.Array:
+                    value = typedConstant.Values;
+
+                    break;
+
+                default:
+                    value = typedConstant.Value;
+
+                    break;
+            }
+
+            return this.TranslateAttributeArgument(
                 attribute,
-                typedConstant.GetValueSafe(),
+                value,
                 typedConstant.Type,
                 targetType,
-                diagnosticAdder,
-                out translatedValue );
+                diagnosticAdder );
+        }
 
-        private bool TryTranslateAttributeArgument(
+        private object? TranslateAttributeArgument(
             AttributeData attribute,
             object? value,
             ITypeSymbol? sourceType,
             Type targetType,
-            IDiagnosticAdder diagnosticAdder,
-            out object? translatedValue )
+            IDiagnosticAdder diagnosticAdder )
         {
             if ( value == null )
             {
-                translatedValue = null;
-
-                return true;
-            }
-
-            void ReportInvalidTypeDiagnostic()
-            {
-                diagnosticAdder.Report(
-                    AttributeDeserializerDiagnostics.CannotReferenceCompileTimeOnly.CreateDiagnostic(
-                        attribute.GetLocation(),
-                        (value.GetType(), targetType) ) );
+                return null;
             }
 
             switch ( value )
             {
                 case TypedConstant typedConstant:
-                    return this.TryTranslateAttributeArgument( attribute, typedConstant, targetType, diagnosticAdder, out translatedValue );
+                    return this.TranslateAttributeArgument( attribute, typedConstant, targetType, diagnosticAdder );
 
                 case ITypeSymbol type:
                     if ( !targetType.IsAssignableFrom( typeof(Type) ) )
                     {
-                        ReportInvalidTypeDiagnostic();
-                        translatedValue = null;
-
-                        return false;
+                        // This should not happen because we don't process invalid values.
+                        throw new AssertionFailedException( $"Cannot convert '{value.GetType().Name}' to '{targetType.Name}'." );
                     }
 
-                    translatedValue = this._compileTimeTypeResolver.GetCompileTimeType( type, true );
-
-                    return true;
+                    return this._compileTimeTypeResolver.GetCompileTimeType( type, true );
 
                 case string str:
                     // Make sure we don't fall under the IEnumerable case.
                     if ( !targetType.IsAssignableFrom( typeof(string) ) )
                     {
-                        ReportInvalidTypeDiagnostic();
-                        translatedValue = null;
-
-                        return false;
+                        // This should not happen because we don't process invalid values.
+                        throw new AssertionFailedException( $"Cannot convert '{value.GetType().Name}' to '{targetType.Name}'." );
                     }
 
-                    translatedValue = str;
-
-                    return true;
+                    return str;
 
                 case IEnumerable enumerable:
                     // We cannot use generic collections here because array of value types are not convertible to arrays of objects.
@@ -278,21 +269,13 @@ namespace Caravela.Framework.Impl.CompileTime
 
                     foreach ( var item in list )
                     {
-                        if ( !this.TryTranslateAttributeArgument( attribute, item, sourceType, elementType, diagnosticAdder, out var translatedItem ) )
-                        {
-                            ReportInvalidTypeDiagnostic();
-                            translatedValue = null;
-
-                            return false;
-                        }
+                        var translatedItem = this.TranslateAttributeArgument( attribute, item, sourceType, elementType, diagnosticAdder );
 
                         array.SetValue( translatedItem, index );
                         index++;
                     }
 
-                    translatedValue = array;
-
-                    return true;
+                    return array;
 
                 default:
                     if ( sourceType is INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType )
@@ -306,17 +289,13 @@ namespace Caravela.Framework.Impl.CompileTime
                         }
                     }
 
-                    if ( value != null && !targetType.IsInstanceOfType( value ) )
+                    if ( !targetType.IsInstanceOfType( value ) )
                     {
-                        ReportInvalidTypeDiagnostic();
-                        translatedValue = null;
-
-                        return false;
+                        // This should not happen because we don't process invalid values.
+                        throw new AssertionFailedException( $"Cannot convert '{value.GetType().Name}' to '{targetType.Name}'." );
                     }
 
-                    translatedValue = value;
-
-                    return true;
+                    return value;
             }
         }
 

@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Linq;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
@@ -39,9 +40,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) ) );
             }
 
-            public bool IsAssignable => false;
+            public IType Type => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );
 
-            public IType ExpressionType => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );
+            bool IExpression.IsAssignable => false;
+
+            object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
         }
     }
 }

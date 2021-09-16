@@ -19,10 +19,10 @@ namespace Caravela.Framework.Impl.Templating.Mapping
         private const ulong _signature = 0xdfdfce7c841fe388;
 
         // Map by position from the beginning of the file.
-        private readonly SkipListIndexedDictionary<int, TextPointMapping> _mapsByTargetCharacter;
+        private readonly SkipListDictionary<int, TextPointMapping> _mapsByTargetCharacter;
 
         // Map by line and column.
-        private readonly SkipListIndexedDictionary<LinePosition, TextPointMapping> _mapsByTargetLinePosition = new();
+        private readonly SkipListDictionary<LinePosition, TextPointMapping> _mapsByTargetLinePosition = new();
 
         /// <summary>
         /// Gets the path of the source file (typically the hand-written source code).
@@ -38,13 +38,13 @@ namespace Caravela.Framework.Impl.Templating.Mapping
         {
             this.SourcePath = sourcePath;
             this.TargetPath = targetPath;
-            this._mapsByTargetCharacter = new SkipListIndexedDictionary<int, TextPointMapping>();
+            this._mapsByTargetCharacter = new SkipListDictionary<int, TextPointMapping>();
         }
 
         private TextMapFile(
             string sourcePath,
             string targetPath,
-            SkipListIndexedDictionary<int, TextPointMapping> mapsByTargetCharacter )
+            SkipListDictionary<int, TextPointMapping> mapsByTargetCharacter )
         {
             this.SourcePath = sourcePath;
             this.TargetPath = targetPath;
@@ -184,8 +184,8 @@ namespace Caravela.Framework.Impl.Templating.Mapping
         /// <returns>A <see cref="Location"/> in the source file, or <c>null</c> if <paramref name="targetSpan"/> could not be mapped.</returns>
         public Location? GetSourceLocation( TextSpan targetSpan )
         {
-            if ( !this._mapsByTargetCharacter.TryGetClosestValue( targetSpan.Start, out var startMapping ) ||
-                 !this._mapsByTargetCharacter.TryGetClosestValue( targetSpan.End, out var endMapping ) )
+            if ( !this._mapsByTargetCharacter.TryGetGreatestSmallerOrEqualValue( targetSpan.Start, out var startMapping ) ||
+                 !this._mapsByTargetCharacter.TryGetGreatestSmallerOrEqualValue( targetSpan.End, out var endMapping ) )
             {
                 return null;
             }

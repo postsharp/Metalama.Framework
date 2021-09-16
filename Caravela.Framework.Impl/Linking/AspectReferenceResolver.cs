@@ -261,16 +261,6 @@ namespace Caravela.Framework.Impl.Linking
                     referenceSpecification );
             }
 
-            if ( targetMemberIntroduction?.Introduction is IReplaceMember )
-            {
-                return new ResolvedAspectReference(
-                    containingSymbol,
-                    referencedSymbol,
-                    new IntermediateSymbolSemantic( referencedSymbol, IntermediateSymbolSemanticKind.Default ),
-                    expression,
-                    referenceSpecification );
-            }
-
             // At this point resolvedIndex should be 0, equal to target introduction index, this._orderedLayers.Count or be equal to index of one of the overrides.
             Invariant.Assert(
                 resolvedIndex == default
@@ -310,6 +300,18 @@ namespace Caravela.Framework.Impl.Linking
                             new IntermediateSymbolSemantic(
                                 GetOverriddenSymbol( referencedSymbol ).AssertNotNull(),
                                 IntermediateSymbolSemanticKind.Default ),
+                            expression,
+                            referenceSpecification );
+                    }
+                    else if( targetMemberIntroduction?.Introduction is IReplaceMember replaceMember
+                            && replaceMember.ReplacedMember.Resolve( this._finalCompilationModel ).GetSymbol() != null )
+                    {
+                        // Introduction replaced existing source member, resolve to default semantics, i.e. source symbol.
+
+                        return new ResolvedAspectReference(
+                            containingSymbol,
+                            referencedSymbol,
+                            new IntermediateSymbolSemantic( referencedSymbol, IntermediateSymbolSemanticKind.Default ),
                             expression,
                             referenceSpecification );
                     }

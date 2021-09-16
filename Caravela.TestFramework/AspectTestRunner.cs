@@ -101,6 +101,11 @@ namespace Caravela.TestFramework
                     }
                     else
                     {
+                        if ( !this.VerifyBinaryStream( testInput, testResult, peStream ) )
+                        {
+                            return testResult;
+                        }
+
                         await ExecuteTestProgramAsync( testInput, testResult, peStream );
                     }
                 }

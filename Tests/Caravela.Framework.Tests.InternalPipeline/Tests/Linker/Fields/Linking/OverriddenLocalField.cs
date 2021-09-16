@@ -63,7 +63,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Overr
         [PseudoOverride(nameof(Foo), "TestAspect3")]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
-        public int Foo_Override2
+        public int Foo_Override3
         {
             get
             {

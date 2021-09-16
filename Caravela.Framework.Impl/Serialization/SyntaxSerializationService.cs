@@ -83,7 +83,8 @@ namespace Caravela.Framework.Impl.Serialization
             this.RegisterSerializer( new CompileTimeFieldOrPropertyInfoSerializer( this ) );
 
             // Dynamic syntax
-            this.RegisterSerializer( new DynamicSyntaxSerializer( this ) );
+            this.RegisterSerializer( new ExpressionBuilderSerializer( this ) );
+            this.RegisterSerializer( new ExpressionSerializer( this ) );
         }
 
         internal TypeSerializer TypeSerializer { get; }

@@ -37,11 +37,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
-                // Should invoke source code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, @base];
-                // Should invoke source code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -51,11 +51,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
-                // Should invoke source code.
+                // Should invoke empty code.
                 link[_this.Bar, @base] = value;
-                // Should invoke source code.
+                // Should invoke empty code.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
                 link[_this.Bar, final] = value;
@@ -69,7 +69,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
                 // Should invoke source code.
                 _ = link[_this.Bar, @base];
@@ -83,7 +83,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
                 // Should invoke source code.
                 link[_this.Bar, @base] = value;
@@ -101,11 +101,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
-                // Should invoke override 2.
+                // Should invoke override 4.
                 _ = link[_this.Bar, @base];
-                // Should invoke override 2.
+                // Should invoke override 4.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -115,11 +115,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
-                // Should invoke override 2.
+                // Should invoke override 4.
                 link[_this.Bar, @base] = value;
-                // Should invoke override 2.
+                // Should invoke override 4.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
                 link[_this.Bar, final] = value;
@@ -133,11 +133,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
-                // Should invoke override 3.
+                // Should invoke override 6.
                 _ = link[_this.Bar, @base];
-                // Should invoke override 3.
+                // Should invoke override 6.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -147,11 +147,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
-                // Should invoke override 4.
+                // Should invoke override 6.
                 link[_this.Bar, @base] = value;
-                // Should invoke override 4.
+                // Should invoke override 6.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
                 link[_this.Bar, final] = value;
@@ -165,7 +165,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, @base];
@@ -179,7 +179,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
                 // Should invoke the final declaration.
                 link[_this.Bar, @base] = value;
@@ -204,11 +204,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
                 // Should invoke source code.
                 _ = link[_this.Bar, @base];
-                // Should invoke override 2.
+                // Should invoke override 4.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -218,11 +218,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
                 // Should invoke source code.
                 link[_this.Bar, @base] = value;
-                // Should invoke override 2.
+                // Should invoke override 4.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
                 link[_this.Bar, final] = value;
@@ -235,11 +235,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
-                // Should invoke override 2.
-                _ = link[_this.Bar, @base];
                 // Should invoke override 4.
+                _ = link[_this.Bar, @base];
+                // Should invoke override 6.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -249,11 +249,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
-                // Should invoke override 2.
-                link[_this.Bar, @base] = value;
                 // Should invoke override 4.
+                link[_this.Bar, @base] = value;
+                // Should invoke override 6.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
                 link[_this.Bar, final] = value;
@@ -266,9 +266,9 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
-                // Should invoke override 4.
+                // Should invoke override 6.
                 _ = link[_this.Bar, @base];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, self];
@@ -280,9 +280,9 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke source code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
-                // Should invoke override 4.
+                // Should invoke override 6.
                 link[_this.Bar, @base] = value;
                 // Should invoke the final declaration.
                 link[_this.Bar, self] = value;

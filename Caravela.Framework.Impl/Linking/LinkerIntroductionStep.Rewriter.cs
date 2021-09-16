@@ -176,6 +176,11 @@ namespace Caravela.Framework.Impl.Linking
                 // TODO: Try to avoid closure allocation.
                 void AddIntroductionsOnPosition( InsertPosition position )
                 {
+                    foreach ( var removedInsertPosition in this._introducedMemberCollection.GetRemovedInsertPositionsOnPosition(position))
+                    {
+                        AddIntroductionsOnPosition( removedInsertPosition );
+                    }
+
                     foreach ( var introducedMember in this._introducedMemberCollection.GetIntroducedMembersOnPosition( position ) )
                     {
                         // Allow for tracking of the node inserted.

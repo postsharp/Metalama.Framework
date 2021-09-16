@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
         /// </summary>
         /// <param name="compilation"></param>
         /// <returns></returns>
-        T Resolve( CompilationModel compilation );
+        T? Resolve( CompilationModel compilation );
 
         // This is a temporary method to extract the symbol from the reference, when there is any.
         // In the final implementation, this method should not be necessary.

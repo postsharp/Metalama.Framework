@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
         /// </summary>
         /// <param name="builder"></param>
         /// <returns></returns>
-        public static DeclarationRef<IDeclaration> FromBuilder( DeclarationBuilder builder ) => new( builder );
+        public static DeclarationRef<IDeclaration> FromBuilder( IDeclarationBuilder builder ) => new( builder );
 
         /// <summary>
         /// Creates a <see cref="DeclarationRef{T}"/> from a Roslyn symbol.
@@ -118,6 +118,12 @@ namespace Caravela.Framework.Impl.CodeModel.References
             this._kind = DeclarationSpecialKind.Default;
         }
 
+        public DeclarationRef( SyntaxNode declaration )
+        {
+            this.Target = declaration;
+            this._kind = DeclarationSpecialKind.Default;
+        }
+
         public object? Target { get; }
 
         public T Resolve( CompilationModel compilation ) => Resolve( this.Target, compilation, this._kind );
@@ -141,9 +147,33 @@ namespace Caravela.Framework.Impl.CodeModel.References
                         return symbol;
                     }
 
+                case SyntaxNode node:
+                    {
+                        return GetSymbolOfNode( compilation, node );
+                    }
+
                 default:
                     throw new InvalidOperationException();
             }
+        }
+
+        private static ISymbol GetSymbolOfNode( Compilation compilation, SyntaxNode node )
+        {
+            var semanticModel = compilation.GetSemanticModel( node.SyntaxTree );
+
+            if ( semanticModel == null )
+            {
+                throw new AssertionFailedException( $"Cannot get a semantic model for '{node.SyntaxTree.FilePath}'." );
+            }
+
+            var symbol = semanticModel.GetDeclaredSymbol( node );
+
+            if ( symbol == null )
+            {
+                throw new AssertionFailedException( $"Cannot get a symbol for {node.GetType().Name}." );
+            }
+
+            return symbol;
         }
 
         internal static T Resolve( object? reference, CompilationModel compilation, DeclarationSpecialKind kind = DeclarationSpecialKind.Default )
@@ -155,6 +185,11 @@ namespace Caravela.Framework.Impl.CodeModel.References
 
                 case ISymbol symbol:
                     return (T) compilation.Factory.GetDeclaration( symbol.AssertValidType<T>(), kind );
+
+                case SyntaxNode node:
+                    return (T) compilation.Factory.GetDeclaration(
+                        GetSymbolOfNode( compilation.PartialCompilation.Compilation, node ).AssertValidType<T>(),
+                        kind );
 
                 case IDeclarationBuilder builder:
                     return (T) compilation.Factory.GetDeclaration( builder );

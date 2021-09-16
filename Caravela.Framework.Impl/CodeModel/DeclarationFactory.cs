@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Types;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.References;
@@ -180,45 +181,45 @@ namespace Caravela.Framework.Impl.CodeModel
 
         object? ITypeFactory.Cast( IType type, object? value ) => new CastDynamicExpression( type, value );
 
-        internal IAttribute GetAttribute( AttributeBuilder attributeBuilder )
+        internal IAttribute GetAttribute( IAttributeBuilder attributeBuilder )
             => (IAttribute) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( attributeBuilder ),
                 l => new BuiltAttribute( (AttributeBuilder) l.Target!, this.CompilationModel ) );
 
-        internal IParameter GetParameter( ParameterBuilder parameterBuilder )
+        internal IParameter GetParameter( IParameterBuilder parameterBuilder )
             => (IParameter) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( parameterBuilder ),
                 l => new BuiltParameter( (ParameterBuilder) l.Target!, this.CompilationModel ) );
 
-        internal IGenericParameter GetGenericParameter( GenericParameterBuilder genericParameterBuilder )
+        internal IGenericParameter GetGenericParameter( IGenericParameterBuilder genericParameterBuilder )
             => (IGenericParameter) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( genericParameterBuilder ),
                 l => new BuiltGenericParameter( (GenericParameterBuilder) l.Target!, this.CompilationModel ) );
 
-        internal IMethod GetMethod( MethodBuilder methodBuilder )
+        internal IMethod GetMethod( IMethodBuilder methodBuilder )
             => (IMethod) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( methodBuilder ),
                 l => new BuiltMethod( (MethodBuilder) l.Target!, this.CompilationModel ) );
 
-        internal IProperty GetProperty( PropertyBuilder propertyBuilder )
+        internal IProperty GetProperty( IPropertyBuilder propertyBuilder )
             => (IProperty) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( propertyBuilder ),
                 l => new BuiltProperty( (PropertyBuilder) l.Target!, this.CompilationModel ) );
 
-        internal IEvent GetEvent( EventBuilder propertyBuilder )
+        internal IEvent GetEvent( IEventBuilder propertyBuilder )
             => (IEvent) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( propertyBuilder ),
                 l => new BuiltEvent( (EventBuilder) l.Target!, this.CompilationModel ) );
 
-        internal IDeclaration GetDeclaration( DeclarationBuilder builder )
+        internal IDeclaration GetDeclaration( IDeclarationBuilder builder )
             => builder switch
             {
-                MethodBuilder methodBuilder => this.GetMethod( methodBuilder ),
-                PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder ),
-                EventBuilder eventBuilder => this.GetEvent( eventBuilder ),
-                ParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
-                AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
-                GenericParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
+                IMethodBuilder methodBuilder => this.GetMethod( methodBuilder ),
+                IPropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder ),
+                IEventBuilder eventBuilder => this.GetEvent( eventBuilder ),
+                IParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
+                IAttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
+                IGenericParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
                 _ => throw new AssertionFailedException()
             };
 
@@ -253,7 +254,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
             else if ( declaration is IDeclarationRef<IDeclaration> reference )
             {
-                return (T) reference.Resolve( this.CompilationModel );
+                return (T) reference.Resolve( this.CompilationModel ).AssertNotNull();
             }
             else if ( declaration is NamedType namedType )
             {

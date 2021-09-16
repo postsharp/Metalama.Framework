@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.TestFramework;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using Xunit;
@@ -17,10 +18,9 @@ namespace Caravela.Framework.Tests.UnitTests
 {
     public class AspectOrderingTests : TestBase
     {
-        private string GetOrderedAspectLayers( string code, params string[] aspectNames )
+        private bool TryGetOrderedAspectLayers( string code, string[] aspectNames, DiagnosticList diagnostics, [NotNullWhen( true )] out string? sortedAspects )
         {
             var compilation = CreateCompilationModel( code );
-            DiagnosticList diagnostics = new();
 
             using var isolatedTest = this.WithIsolatedTest();
 
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.UnitTests
             var loader = CompileTimeProjectLoader.Create( compileTimeDomain, isolatedTest.ServiceProvider );
 
             Assert.True(
-                loader.TryGetCompileTimeProject(
+                loader.TryGetCompileTimeProjectFromCompilation(
                     compilation.RoslynCompilation,
                     null,
                     new DiagnosticList(),
@@ -49,18 +49,33 @@ namespace Caravela.Framework.Tests.UnitTests
                 new AspectLayerOrderingSource( aspectTypes ), new AttributeAspectOrderingSource( compilation.RoslynCompilation, loader )
             };
 
-            Assert.True(
-                AspectLayerSorter.TrySort(
-                    allLayers,
-                    dependencies,
-                    diagnostics,
-                    out var sortedAspectLayers ) );
+            if ( AspectLayerSorter.TrySort(
+                allLayers,
+                dependencies,
+                diagnostics,
+                out var sortedAspectLayers ) )
+            {
+                sortedAspects = string.Join(
+                    ", ",
+                    sortedAspectLayers.OrderBy( l => l.Order ).ThenBy( l => l.AspectName ) );
 
+                return true;
+            }
+            else
+            {
+                sortedAspects = null;
+
+                return false;
+            }
+        }
+
+        private string GetOrderedAspectLayers( string code, params string[] aspectNames )
+        {
+            var diagnostics = new DiagnosticList();
+            Assert.True( this.TryGetOrderedAspectLayers( code, aspectNames, diagnostics, out var sortedAspects ) );
             Assert.Empty( diagnostics );
 
-            return string.Join(
-                ", ",
-                sortedAspectLayers.OrderBy( l => l.Order ).ThenBy( l => l.AspectName ) );
+            return sortedAspects!;
         }
 
         [Fact]
@@ -208,6 +223,35 @@ class Aspect2  : IAspect
         }
 
         [Fact]
+        public void TwoTotallyOrderedDoubleLayerAspects()
+        {
+            var code = @"
+using Caravela.Framework.Aspects;
+
+[assembly: AspectOrder( ""Aspect2:Layer1"", ""Aspect1:Layer1"", ""Aspect2"", ""Aspect1"" ) ]
+
+class Aspect1  : IAspect
+{
+    public void BuildAspectClass( IAspectClassBuilder builder ) 
+    {
+        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
+    }
+}
+
+class Aspect2  : IAspect
+{
+    public void BuildAspectClass( IAspectClassBuilder builder ) 
+    {
+        builder.Layers = System.Collections.Immutable.ImmutableArray.Create(""Layer1"");
+    }
+}
+";
+
+            var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
+            Assert.Equal( "Aspect1 => 0, Aspect2 => 1, Aspect1:Layer1 => 2, Aspect2:Layer1 => 3", ordered );
+        }
+
+        [Fact]
         public void InheritedAspects()
         {
             var code = @"
@@ -226,6 +270,78 @@ class Aspect2 : Aspect1 {}
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
             Assert.Equal( "Aspect1 => 0, Aspect2 => 0, Aspect1:Layer1 => 1, Aspect2:Layer1 => 1", ordered );
+        }
+
+        [Fact]
+        public void InvalidAspectName()
+        {
+            var code = @"
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Aspects;
+
+[assembly: AspectOrder( ""NonExistent1"", ""Aspect1"" ) ]
+
+class Aspect1 : IAspect
+{
+}
+
+";
+
+            var ordered = this.GetOrderedAspectLayers( code, "Aspect1" );
+            Assert.Equal( "Aspect1 => 0", ordered );
+        }
+
+        [Fact]
+        public void Cycle()
+        {
+            var code = @"
+using Caravela.Framework.Aspects;
+
+[assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) ) ]
+[assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) ) ]
+
+class Aspect1 : IAspect
+{
+}
+
+class Aspect2 : IAspect
+{
+}
+";
+
+            var diagnostics = new DiagnosticList();
+            Assert.False( this.TryGetOrderedAspectLayers( code, new[] { "Aspect1", "Aspect2" }, diagnostics, out _ ) );
+            Assert.Single( diagnostics.Select( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
+        }
+
+        [Fact]
+        public void Cycle2()
+        {
+            // The difference of Cycle2 compared to Cycle1 is that Aspect3 has no predecessor (in Cycle test, all nodes have a predecessor),
+            // therefore the sort algorithm goes to another branch.
+
+            var code = @"
+using Caravela.Framework.Aspects;
+
+[assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1), typeof(Aspect3) ) ]
+[assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) ) ]
+
+class Aspect1 : IAspect
+{
+}
+
+class Aspect2 : IAspect
+{
+}
+
+class Aspect3 : IAspect
+{
+}
+";
+
+            var diagnostics = new DiagnosticList();
+            Assert.False( this.TryGetOrderedAspectLayers( code, new[] { "Aspect1", "Aspect2", "Aspect3" }, diagnostics, out _ ) );
+            Assert.Single( diagnostics.Select( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
         }
     }
 }
