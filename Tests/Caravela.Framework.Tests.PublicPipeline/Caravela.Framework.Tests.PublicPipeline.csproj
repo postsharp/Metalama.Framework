@@ -17,10 +17,6 @@
     <NoWarn>1591,1572,1573,CS8892</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Tests\Aspects\Overrides\Methods\Simple - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Overrides\Methods\SimpleExpressionBody - Copy.t.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
@@ -46,14 +42,6 @@
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="Tests\Aspects\Overrides\Methods\Simple_Middle.t.cs" />
-    <None Include="Tests\Aspects\Overrides\Methods\SimpleExpressionBody_Middle.t.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Tests\Aspects\Overrides\Fields\" />
-  </ItemGroup>
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
   
 </Project>

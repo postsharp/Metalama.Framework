@@ -377,15 +377,19 @@ namespace Caravela.Framework.Impl.Linking
                 // One of the overrides or the introduced member.
                 if ( targetMemberIntroduction != null && resolvedIndex.MemberIndex == 0 )
                 {
-                    // There is no introduction, i.e. this is a user source symbol.
-                    return new ResolvedAspectReference(
-                        containingSymbol,
-                        referencedSymbol,
-                        new IntermediateSymbolSemantic(
-                            this.GetSymbolFromIntroducedMember( referencedSymbol, targetMemberIntroduction.AssertNotNull() ),
-                            IntermediateSymbolSemanticKind.Default ),
-                        expression,
-                        referenceSpecification );
+                    // TODO: This would happen has the introduced member contained aspect reference. Bodies of introduced members are
+                    //       currently not used.
+                    throw new AssertionFailedException( Justifications.CoverageMissing );
+                    
+                    // // There is no introduction, i.e. this is a user source symbol.
+                    // return new ResolvedAspectReference(
+                    //     containingSymbol,
+                    //     referencedSymbol,
+                    //     new IntermediateSymbolSemantic(
+                    //         this.GetSymbolFromIntroducedMember( referencedSymbol, targetMemberIntroduction.AssertNotNull() ),
+                    //         IntermediateSymbolSemanticKind.Default ),
+                    //     expression,
+                    //     referenceSpecification );
                 }
                 else
                 {

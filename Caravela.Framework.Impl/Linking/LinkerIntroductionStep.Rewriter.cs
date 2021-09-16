@@ -220,28 +220,61 @@ namespace Caravela.Framework.Impl.Linking
                 return base.VisitVariableDeclarator( node );
             }
 
+            public override SyntaxNode? VisitVariableDeclaration( VariableDeclarationSyntax node )
+            {
+                var remainingVariables = new List<VariableDeclaratorSyntax>();
+
+                foreach (var variable in node.Variables)
+                {
+                    var rewrittenVariable = (VariableDeclaratorSyntax?) this.Visit( variable );
+
+                    if (rewrittenVariable != null)
+                    {
+                        remainingVariables.Add( rewrittenVariable );
+                    }
+                }
+
+                if ( node.Variables.SequenceEqual( remainingVariables ) )
+                {
+                    return base.VisitVariableDeclaration( node );
+                }
+                else if (remainingVariables.Count > 0)
+                {
+                    return node
+                        .WithType((TypeSyntax)this.Visit(node.Type).AssertNotNull())
+                        .WithVariables( SeparatedList( remainingVariables ) )
+                        .WithLeadingTrivia( this.VisitTriviaList( node.GetLeadingTrivia() ) )
+                        .WithTrailingTrivia( this.VisitTriviaList( node.GetTrailingTrivia() ) );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
             public override SyntaxNode? VisitFieldDeclaration( FieldDeclarationSyntax node )
             {
-                var visitedNode = (FieldDeclarationSyntax?) base.VisitFieldDeclaration( node );
+                var rewrittenDeclaration = (VariableDeclarationSyntax?)this.Visit(node.Declaration);
 
-                if ( visitedNode != null && !visitedNode.Declaration.Variables.Any() )
+                if ( rewrittenDeclaration == null )
                 {
                     return null;
                 }
 
-                return visitedNode;
+                return node.WithDeclaration(rewrittenDeclaration);
             }
 
             public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
             {
-                var visitedNode = (EventFieldDeclarationSyntax?) base.VisitEventFieldDeclaration( node );
+                var rewrittenDeclaration = (VariableDeclarationSyntax?) this.Visit( node.Declaration );
 
-                if ( visitedNode != null && !visitedNode.Declaration.Variables.Any() )
+                if ( rewrittenDeclaration == null )
                 {
-                    return null;
+                    // We are not supporting removal of event fields during introduction step.
+                    throw new AssertionFailedException();
                 }
 
-                return visitedNode;
+                return node.WithDeclaration( rewrittenDeclaration );
             }
 
             public override SyntaxNode? VisitPragmaWarningDirectiveTrivia( PragmaWarningDirectiveTriviaSyntax node )

@@ -77,14 +77,17 @@ namespace Caravela.Framework.Impl.Linking
                  && symbol.ReturnsVoid
                  && !SymbolEqualityComparer.Default.Equals( symbol, inliningContext.CurrentDeclaration ) )
             {
-                // Add the implicit return for void methods.
-                inliningContext.UseLabel();
-
-                rewrittenBody =
-                    Block(
-                            rewrittenBody,
-                            CreateGotoStatement() )
-                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                // TODO: This will not be hit until we are using results of control flow analysis. 
+                throw new AssertionFailedException( Justifications.CoverageMissing );
+                
+                // // Add the implicit return for void methods.
+                // inliningContext.UseLabel();
+                //
+                // rewrittenBody =
+                //     Block(
+                //             rewrittenBody,
+                //             CreateGotoStatement() )
+                //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
 
             // Add the SourceCode annotation, if it is source code.
@@ -323,9 +326,10 @@ namespace Caravela.Framework.Impl.Linking
                         switch ( rewrittenNode )
                         {
                             case null:
-                                return
-                                    Block()
-                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                throw new AssertionFailedException( Justifications.CoverageMissing );
+                                // return
+                                //     Block()
+                                //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             case ExpressionSyntax rewrittenExpression:
                                 return
@@ -344,13 +348,14 @@ namespace Caravela.Framework.Impl.Linking
                         switch ( rewrittenNode )
                         {
                             case null:
-                                return
-                                    Block(
-                                            ReturnStatement(
-                                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
-                                                LiteralExpression( SyntaxKind.DefaultLiteralExpression ),
-                                                Token( SyntaxKind.SemicolonToken ) ) )
-                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                throw new AssertionFailedException( Justifications.CoverageMissing );
+                                // return
+                                //     Block(
+                                //             ReturnStatement(
+                                //                 Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                                //                 LiteralExpression( SyntaxKind.DefaultLiteralExpression ),
+                                //                 Token( SyntaxKind.SemicolonToken ) ) )
+                                //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             case ExpressionSyntax rewrittenExpression:
                                 return
@@ -605,6 +610,26 @@ namespace Caravela.Framework.Impl.Linking
                                 return memberAccessExpression.WithName( IdentifierName( targetMemberName ) );
                             }
                         }
+                    }
+
+                case ConditionalAccessExpressionSyntax conditionalAccessExpression:
+                    if ( SymbolEqualityComparer.Default.Equals(
+                        aspectReference.ContainingSymbol.ContainingType,
+                        targetSymbol.ContainingType ) )
+                    {
+                        if ( aspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
+                        {
+                            throw new AssertionFailedException( Justifications.CoverageMissing );
+                        }
+                        else
+                        {
+                            var rewriter = new ConditionalAccessRewriter( targetMemberName );
+                            return (ExpressionSyntax)rewriter.Visit(conditionalAccessExpression);
+                        }
+                    }
+                    else
+                    {
+                        throw new AssertionFailedException(Justifications.CoverageMissing);
                     }
 
                 default:

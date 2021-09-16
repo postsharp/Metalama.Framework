@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Events.Simple
+namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Simple
 {
     public class OverrideAttribute : OverrideEventAspect
     {
@@ -25,22 +25,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     // <target>
     internal class TargetClass
     {
-        private HashSet<EventHandler> handlers = new HashSet<EventHandler>();
-
         [Override]
-        public event EventHandler Event
-        {
-            add
-            {
-                Console.WriteLine("This is the original add.");
-                this.handlers.Add(value);
-            }
-
-            remove
-            {
-                Console.WriteLine("This is the original remove.");
-                this.handlers.Remove(value);
-            }
-        }
+        public event EventHandler? Event;
     }
 }
