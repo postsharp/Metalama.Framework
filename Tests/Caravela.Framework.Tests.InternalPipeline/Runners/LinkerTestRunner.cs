@@ -80,6 +80,18 @@ namespace Caravela.Framework.Tests.Integration.Runners
             return testResult;
         }
 
+        private protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        {
+            var assertionWalker = new LinkerInlineAssertionWalker();
+
+            foreach ( var syntaxTree in testResult.SyntaxTrees )
+            {
+                assertionWalker.Visit( syntaxTree.OutputRunTimeSyntaxRoot );
+            }
+
+            base.ExecuteAssertions( testInput, testResult, state );
+        }
+
         private protected override SyntaxNode PreprocessSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot, Dictionary<string, object?> state )
         {
             var builder = (LinkerTestInputBuilder) state["builder"]!;

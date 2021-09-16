@@ -165,6 +165,11 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                             ? nodeIdToSyntaxNode[insertPositionNodeId]
                             : null;
 
+                    if (insertPositionNode is VariableDeclaratorSyntax)
+                    {
+                        insertPositionNode = insertPositionNode.Parent?.Parent.AssertNotNull();
+                    }
+
                     var symbolHelperNode = nodeIdToSyntaxNode[symbolHelperNodeId];
 
                     var containingSymbol = (ITypeSymbol) syntaxNodeToSymbol[containingNode];
@@ -222,6 +227,11 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         insertPositionNodeId != null
                             ? nodeIdToSyntaxNode[insertPositionNodeId]
                             : null;
+
+                    if ( insertPositionNode is VariableDeclaratorSyntax )
+                    {
+                        insertPositionNode = insertPositionNode.Parent?.Parent.AssertNotNull();
+                    }
 
                     var containingDeclaration = nodeIdToCodeElement[containingNodeId];
 

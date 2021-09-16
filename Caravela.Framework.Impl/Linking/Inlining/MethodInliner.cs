@@ -19,10 +19,10 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             InvocationExpressionSyntax invocationExpression )
         {
             return
-                invocationExpression.ArgumentList.Arguments.Count != contextMethod.Parameters.Length
+                invocationExpression.ArgumentList.Arguments.Count == contextMethod.Parameters.Length
                 && invocationExpression.ArgumentList.Arguments
-                    .Select( ( x, i ) => (Argument: x, Index: i) )
-                    .Any( a => !SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( a.Argument ).Symbol, contextMethod.Parameters[a.Index] ) );
+                    .Select( ( x, i ) => (Argument: x.Expression, Index: i) )
+                    .All( a => SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( a.Argument ).Symbol, contextMethod.Parameters[a.Index] ) );
         }
 
         public override bool IsValidForTargetSymbol( ISymbol symbol )

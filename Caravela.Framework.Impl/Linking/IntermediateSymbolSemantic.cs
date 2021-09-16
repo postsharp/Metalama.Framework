@@ -39,6 +39,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public override string ToString()
         {
+            // Coverage: ignore (useful for debugging)
             return $"({this.Kind}, {this.Symbol})";
         }
     }
@@ -58,12 +59,14 @@ namespace Caravela.Framework.Impl.Linking
 
         public bool Equals( IntermediateSymbolSemantic other )
         {
+            // Coverage: ignore (no typed dictionary at the moment)
             return SymbolEqualityComparer.Default.Equals( this.Symbol, other.Symbol )
                    && other.Kind == this.Kind;
         }
 
         public override int GetHashCode()
         {
+            // Coverage: ignore (no typed dictionary at the moment)
             return HashCode.Combine(
                 SymbolEqualityComparer.Default.GetHashCode( this.Symbol ),
                 this.Kind );
@@ -76,6 +79,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public override string ToString()
         {
+            // Coverage: ignore (useful for debugging)
             return $"({this.Kind}, {this.Symbol})";
         }
     }

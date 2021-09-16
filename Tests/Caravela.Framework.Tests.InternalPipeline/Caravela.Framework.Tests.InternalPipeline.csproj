@@ -18,6 +18,7 @@
      <RootNamespace>Caravela.Framework.Tests.Integration</RootNamespace>
   </PropertyGroup>
 
+
   <ItemGroup>
     <PackageReference Include="FakeItEasy" Version="6.2.1" />
     <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" />

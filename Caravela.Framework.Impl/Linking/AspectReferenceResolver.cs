@@ -280,6 +280,12 @@ namespace Caravela.Framework.Impl.Linking
                 || overrideIndices.Any( x => x.Index == resolvedIndex )
                 || resolvedIndex == targetMemberIntroductionIndex );
 
+            if ( overrideIndices.Count > 0 && resolvedIndex == overrideIndices[overrideIndices.Count - 1].Index)
+            {
+                // If we have resolved to the last override, transition to the final declaration index.
+                resolvedIndex = new MemberLayerIndex( this._orderedLayers.Count, 0 );
+            }
+
             if ( resolvedIndex == default )
             {
                 if ( targetMemberIntroduction == null )
@@ -462,15 +468,19 @@ namespace Caravela.Framework.Impl.Linking
                     return resolvedSymbol;
 
                 case (IMethodSymbol { MethodKind: MethodKind.PropertyGet }, IPropertySymbol propertySymbol):
+                    // Coverage: ignore (this seems to happen only in invalid compilations).
                     return propertySymbol.GetMethod.AssertNotNull();
 
                 case (IMethodSymbol { MethodKind: MethodKind.PropertySet }, IPropertySymbol propertySymbol):
+                    // Coverage: ignore (this seems to happen only in invalid compilations).
                     return propertySymbol.SetMethod.AssertNotNull();
 
                 case (IMethodSymbol { MethodKind: MethodKind.EventAdd }, IEventSymbol eventSymbol):
+                    // Coverage: ignore (this seems to happen only in invalid compilations).
                     return eventSymbol.AddMethod.AssertNotNull();
 
                 case (IMethodSymbol { MethodKind: MethodKind.EventRemove }, IEventSymbol eventSymbol):
+                    // Coverage: ignore (this seems to happen only in invalid compilations).
                     return eventSymbol.RemoveMethod.AssertNotNull();
 
                 default:

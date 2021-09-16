@@ -29,19 +29,40 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
         public static T AssignNodeId<T>( T node )
             where T : SyntaxNode
         {
-            if ( node.GetAnnotations( _testNodeIdAnnotationId ).Any() )
+            if ( node is EventFieldDeclarationSyntax eventFieldDecl )
             {
-                return node;
+                var declarator = eventFieldDecl.Declaration.Variables.Single();
+                declarator = AssignNodeId( declarator );
+
+                return (T)(SyntaxNode) eventFieldDecl
+                    .WithDeclaration( eventFieldDecl.Declaration.WithVariables( SeparatedList( new[] { declarator } ) ) );
             }
+            else
+            {
 
-            var id = Interlocked.Increment( ref _nextNodeId ).ToString();
+                if ( node.GetAnnotations( _testNodeIdAnnotationId ).Any() )
+                {
+                    return node;
+                }
 
-            return node.WithAdditionalAnnotations( new SyntaxAnnotation( _testNodeIdAnnotationId, id ) );
+                var id = Interlocked.Increment( ref _nextNodeId ).ToString();
+
+                return node.WithAdditionalAnnotations( new SyntaxAnnotation( _testNodeIdAnnotationId, id ) );
+            }
         }
 
         private static string GetNodeId( SyntaxNode node )
         {
-            return node.GetAnnotations( _testNodeIdAnnotationId ).Select( x => x.Data.AssertNotNull() ).Single();
+            if ( node is EventFieldDeclarationSyntax eventFieldDecl )
+            {
+                var declarator = eventFieldDecl.Declaration.Variables.Single();
+
+                return GetNodeId( declarator );
+            }
+            else
+            {
+                return node.GetAnnotations( _testNodeIdAnnotationId ).Select( x => x.Data.AssertNotNull() ).Single();
+            }
         }
 
         private static IEnumerable<SyntaxNode> GetNodesWithId( SyntaxTree tree )

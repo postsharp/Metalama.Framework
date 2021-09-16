@@ -10,14 +10,11 @@ namespace Caravela.Framework.Impl.Linking
     /// </summary>
     internal readonly struct MethodBodyAnalysisResult
     {
-        public bool HasSimpleReturnControlFlow { get; }
-
         public IReadOnlyList<ResolvedAspectReference> AspectReferences { get; }
 
-        public MethodBodyAnalysisResult( IReadOnlyList<ResolvedAspectReference> aspectReferences, bool hasSimpleReturnControlFlow )
+        public MethodBodyAnalysisResult( IReadOnlyList<ResolvedAspectReference> aspectReferences )
         {
             this.AspectReferences = aspectReferences;
-            this.HasSimpleReturnControlFlow = hasSimpleReturnControlFlow;
         }
     }
 }

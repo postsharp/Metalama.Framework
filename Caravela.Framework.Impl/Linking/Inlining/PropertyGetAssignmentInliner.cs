@@ -15,6 +15,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             if ( aspectReference.ResolvedSemantic.Symbol is not IPropertySymbol
                  && (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol is not IPropertySymbol )
             {
+                // Coverage: ignore (hit only when the check in base class is incorrect).
                 return false;
             }
 
@@ -23,6 +24,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
+            // The assignment should be part of expression statement.
             if ( assignmentExpression.Parent == null || assignmentExpression.Parent is not ExpressionStatementSyntax )
             {
                 return false;
@@ -37,12 +39,6 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 
             // Assignment should have a local on the left (TODO: ref returns).
             if ( assignmentExpression.Left is not IdentifierNameSyntax || semanticModel.GetSymbolInfo( assignmentExpression.Left ).Symbol is not ILocalSymbol )
-            {
-                return false;
-            }
-
-            // The assignment should be part of expression statement.
-            if ( assignmentExpression.Parent == null || assignmentExpression.Parent is not ExpressionStatementSyntax )
             {
                 return false;
             }

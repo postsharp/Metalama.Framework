@@ -102,40 +102,45 @@ namespace Caravela.Framework.Impl.Collections
         {
             recursionCheck++;
 
-            if ( recursionCheck > 64 )
+            try
             {
-                throw new InvalidOperationException( "Too many levels of inheritance." );
-            }
-
-            if ( collection == null )
-            {
-                return;
-            }
-
-            foreach ( var item in collection )
-            {
-                if ( results.ContainsKey( item ) )
+                if ( recursionCheck > 64 )
                 {
-                    // We are in a cycle.
+                    throw new InvalidOperationException( "Too many levels of inheritance." );
+                }
 
-                    if ( throwOnDuplicate )
+                if ( collection == null )
+                {
+                    return;
+                }
+
+                foreach ( var item in collection )
+                {
+                    if ( results.ContainsKey( item ) )
                     {
-                        throw new AssertionFailedException( $"The item {item} of type {item.GetType().Name} has been visited twice." );
+                        // We are in a cycle.
+
+                        if ( throwOnDuplicate )
+                        {
+                            throw new AssertionFailedException( $"The item {item} of type {item.GetType().Name} has been visited twice." );
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
                     else
                     {
-                        continue;
+                        results.Add( item, results.Count );
                     }
-                }
-                else
-                {
-                    results.Add( item, results.Count );
-                }
 
-                VisitMany( getItems( item ), getItems, results, throwOnDuplicate, ref recursionCheck );
+                    VisitMany( getItems( item ), getItems, results, throwOnDuplicate, ref recursionCheck );
+                }
             }
-
-            recursionCheck--;
+            finally
+            {
+                recursionCheck--;
+            }
         }
 
         /// <summary>

@@ -1,6 +1,4 @@
-﻿// @Skipped(Broken event/property linker test preprocessing)
-
-using System;
+﻿using System;
 using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
 
 namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.OverriddenLocalEvent
@@ -15,116 +13,237 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.Overr
     // <target>
     class Target
     {
-        public void Foo()
+        public event EventHandler Foo            
         {
-            Console.WriteLine("This is original code.");
+            add
+            {
+                Console.WriteLine("This is original code.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original code.");
+            }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect0")]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
-        public void Foo_Override0()
+        public event EventHandler Foo_Override0
         {
-            // Should invoke source code.
-            link(_this.Bar, original)();
-            // Should invoke source code.
-            link(_this.Bar, @base)();
-            // Should invoke source code.
-            link(_this.Bar, self)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
+            add
+            {
+                // Should invoke source code.
+                link[_this.Bar, original] += value;
+                // Should invoke source code.
+                link[_this.Bar, @base] += value;
+                // Should invoke source code.
+                link[_this.Bar, self] += value;
+                // Should invoke the final declaration.
+                link[_this.Bar, final] += value;
+            }
+
+            remove
+            {
+                // Should invoke source code.
+                link[_this.Bar, original] -= value;
+                // Should invoke source code.
+                link[_this.Bar, @base] -= value;
+                // Should invoke source code.
+                link[_this.Bar, self] -= value;
+                // Should invoke the final declaration.
+                link[_this.Bar, final] -= value;
+            }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect2")]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
-        public void Foo_Override2()
+        public event EventHandler Foo_Override2
         {
-            // Should invoke source code.
-            link(_this.Bar, original)();
-            // Should invoke override 1.
-            link(_this.Bar, @base)();
-            // Should invoke override 1.
-            link(_this.Bar, self)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
+            add
+            {
+                // Should invoke source code.
+                link[_this.Bar, original] += value;
+                // Should invoke override 1.
+                link[_this.Bar, @base] += value;
+                // Should invoke override 1.
+                link[_this.Bar, self] += value;
+                // Should invoke the final declaration.
+                link[_this.Bar, final] += value;
+            }
+
+            remove
+            {
+                // Should invoke source code.
+                link[_this.Bar, original] -= value;
+                // Should invoke override 1.
+                link[_this.Bar, @base] -= value;
+                // Should invoke override 1.
+                link[_this.Bar, self] -= value;
+                // Should invoke the final declaration.
+                link[_this.Bar, final] -= value;
+            }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect4")]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
-        public void Foo_Override4()
+        public event EventHandler Foo_Override4
         {
-            // Should invoke source code.
-            link(_this.Bar, original)();
-            // Should invoke override 3.
-            link(_this.Bar, @base)();
-            // Should invoke override 3.
-            link(_this.Bar, self)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
+            add
+            {
+                // Should invoke source code.
+                link[_this.Bar, original] += value;
+                // Should invoke override 3.
+                link[_this.Bar, @base] += value;
+                // Should invoke override 3.
+                link[_this.Bar, self] += value;
+                // Should invoke the final declaration.
+                link[_this.Bar, final] += value;
+            }
+
+            remove
+            {
+                // Should invoke source code.
+                link[_this.Bar, original] -= value;
+                // Should invoke override 3.
+                link[_this.Bar, @base] -= value;
+                // Should invoke override 3.
+                link[_this.Bar, self] -= value;
+                // Should invoke the final declaration.
+                link[_this.Bar, final] -= value;
+            }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect6")]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
-        public void Foo_Override6()
+        public event EventHandler Foo_Override6
         {
-            // Should invoke source code.
-            link(_this.Bar, original)();
-            // Should invoke the final declaration.
-            link(_this.Bar, @base)();
-            // Should invoke the final declaration.
-            link(_this.Bar, self)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
+            add
+            {
+                // Should invoke source code.
+                link[_this.Bar, original] += value;
+                // Should invoke the final declaration.
+                link[_this.Bar, @base] += value;
+                // Should invoke the final declaration.
+                link[_this.Bar, self] += value;
+                // Should invoke the final declaration.
+                link[_this.Bar, final] += value;
+            }
+
+            remove
+            {
+                // Should invoke source code.
+                link[_this.Bar, original] -= value;
+                // Should invoke the final declaration.
+                link[_this.Bar, @base] -= value;
+                // Should invoke the final declaration.
+                link[_this.Bar, self] -= value;
+                // Should invoke the final declaration.
+                link[_this.Bar, final] -= value;
+            }
         }
 
-        void Bar()
+        public event EventHandler Bar
         {
-            Console.WriteLine("This is original code.");
+            add
+            {
+                Console.WriteLine("This is original code.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original code.");
+            }
         }
 
         [PseudoOverride(nameof(Bar), "TestAspect1")]
         [PseudoNotInlineable]
-        void Bar_Override1()
+        public event EventHandler Bar_Override1
         {
-            // Should invoke source code.
-            link(_this.Bar, original)();
-            // Should invoke source code.
-            link(_this.Bar, @base)();
-            // Should invoke override 1.
-            link(_this.Bar, self)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
+            add
+            {
+                // Should invoke source code.
+                link[_this.Bar, original] += value;
+                // Should invoke source code.
+                link[_this.Bar, @base] += value;
+                // Should invoke override 1.
+                link[_this.Bar, self] += value;
+                // Should invoke the final declaration.
+                link[_this.Bar, final] += value;
+            }
+
+            remove
+            {
+                // Should invoke source code.
+                link[_this.Bar, original] -= value;
+                // Should invoke source code.
+                link[_this.Bar, @base] -= value;
+                // Should invoke override 1.
+                link[_this.Bar, self] -= value;
+                // Should invoke the final declaration.
+                link[_this.Bar, final] -= value;
+            }
         }
 
         [PseudoOverride(nameof(Bar), "TestAspect3")]
         [PseudoNotInlineable]
-        void Bar_Override3()
+        public event EventHandler Bar_Override3
         {
-            // Should invoke source code.
-            link(_this.Bar, original)();
-            // Should invoke override 1.
-            link(_this.Bar, @base)();
-            // Should invoke override 3.
-            link(_this.Bar, self)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
+            add
+            {
+                // Should invoke source code.
+                link[_this.Bar, original] += value;
+                // Should invoke override 1.
+                link[_this.Bar, @base] += value;
+                // Should invoke override 3.
+                link[_this.Bar, self] += value;
+                // Should invoke the final declaration.
+                link[_this.Bar, final] += value;
+            }
+
+            remove
+            {
+                // Should invoke source code.
+                link[_this.Bar, original] -= value;
+                // Should invoke override 1.
+                link[_this.Bar, @base] -= value;
+                // Should invoke override 3.
+                link[_this.Bar, self] -= value;
+                // Should invoke the final declaration.
+                link[_this.Bar, final] -= value;
+            }
         }
 
         [PseudoOverride(nameof(Bar), "TestAspect5")]
         [PseudoNotInlineable]
-        void Bar_Override5()
+        public event EventHandler Bar_Override5
         {
-            // Should invoke source code.
-            link(_this.Bar, original)();
-            // Should invoke override 3.
-            link(_this.Bar, @base)();
-            // Should invoke the final declaration.
-            link(_this.Bar, self)();
-            // Should invoke the final declaration.
-            link(_this.Bar, final)();
+            add
+            {
+                // Should invoke source code.
+                link[_this.Bar, original] += value;
+                // Should invoke override 3.
+                link[_this.Bar, @base] += value;
+                // Should invoke the final declaration.
+                link[_this.Bar, self] += value;
+                // Should invoke the final declaration.
+                link[_this.Bar, final] += value;
+            }
+
+            remove
+            {
+                // Should invoke source code.
+                link[_this.Bar, original] -= value;
+                // Should invoke override 3.
+                link[_this.Bar, @base] -= value;
+                // Should invoke the final declaration.
+                link[_this.Bar, self] -= value;
+                // Should invoke the final declaration.
+                link[_this.Bar, final] -= value;
+            }
         }
     }
 }

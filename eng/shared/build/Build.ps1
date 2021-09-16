@@ -16,7 +16,7 @@
 
 param ( 
 
-# Defines the name of the product contained in the repository. This parameter should be provided by a facade Build.ps1 script.
+# Defines the name of the product contained in the repository. Set by the facade Build.ps1 script.
 [Parameter(Mandatory=$true)] [string] $ProductName,
 
 # Creates a release build instead of a debug one.
@@ -41,7 +41,13 @@ param (
 [switch] $Test = $false,
 
 # Verifies the test coverage (requires -Test).
-[switch] $Coverage = $false
+[switch] $Coverage = $false,
+
+# Uses msbuild command instead of dotnet command. Set by the facade Build.ps1 script.
+[switch] $UseMsBuild = $false,
+
+# Script to initialize the MSBuild shell environment. Mandatory when -UseMsBuild is set. Set by the facade Build.ps1 script.
+[string] $MsBuildInitScriptPath = ""
 
 )
 
@@ -62,6 +68,10 @@ If ( [string]::IsNullOrEmpty( $ProductName ) ) {
     throw "Product name is not set."
 }
 
+if ( $UseMsBuild -and [string]::IsNullOrEmpty( $MsBuildInitScriptPath ) ) {
+    throw "MSBuild init script path not set when MSBuild should be used."
+}
+
 $PropsFilePath = "eng\$($ProductName)Version.props"
 
 if ( $Release ) {
@@ -74,11 +84,28 @@ function CheckPrerequisities() {
     & .\eng\shared\style\LinkConfiguration.ps1 -Check
 
     if ($LASTEXITCODE -ne 0 ) { throw "Symbolic links verification failed." }
+
+    if ( $UseMsBuild ) {
+        # https://stackoverflow.com/questions/2124753/how-can-i-use-powershell-with-the-visual-studio-command-prompt
+        cmd /c "`"$MsBuildInitScriptPath`" & set" |
+        foreach {
+            if ($_ -match "=") {
+                $v = $_.split("=", 2); set-item -force -path "ENV:\$($v[0])" -value "$($v[1])"
+            }
+        }
+
+        if ($LASTEXITCODE -ne 0 ) { throw "MSBuild initialization failed." }
+    }
 }
 
 function Clean() {
 
-    & dotnet clean -p:Configuration=$configuration -v:m
+    if ( $UseMsbuild ) {
+        & msbuild /t:Clean /p:Configuration=$configuration /m
+    } else {
+        & dotnet clean -p:Configuration=$configuration -v:m
+    }
+
     if ($LASTEXITCODE -ne 0 ) { throw "Clean failed." }
 
     if (Test-Path "artifacts\bin\Debug" -PathType Container ) {
@@ -130,12 +157,22 @@ function CreateVersionFile() {
 }
 
 function Restore() {
-    & dotnet restore -p:Configuration=$configuration 
+    if ( $UseMsbuild ) {
+        & msbuild /t:Restore /p:Configuration=$configuration /m
+    } else {
+        & dotnet restore -p:Configuration=$configuration
+    }
+    
     if ($LASTEXITCODE -ne 0 ) { throw "Restore failed." }
 }
 
 function Pack() {
-    & dotnet pack -p:Configuration=$configuration --nologo --no-restore
+    if ( $UseMsbuild ) {
+        & msbuild /t:Pack /p:Configuration=$configuration /m
+    } else {
+        & dotnet pack -p:Configuration=$configuration --nologo --no-restore
+    }
+
     if ($LASTEXITCODE -ne 0 ) { throw "Build failed." }
 
     Write-Host "Build successful" -ForegroundColor Green
@@ -169,7 +206,13 @@ function Test() {
         & ./eng/shared/tools/Build.ps1
     
         # Executing tests with code coverage enabled.
-        & dotnet test -p:CollectCoverage=True -p:CoverletOutput="$testResultsDir\" -p:Configuration=$configuration -m:1 --nologo --no-restore
+        if ( $UseMsbuild ) {
+            & msbuild /t:Test /p:CollectCoverage=True /p:CoverletOutput="$testResultsDir\" /p:Configuration=$configuration /m:1
+        } else {
+            & dotnet test -p:CollectCoverage=True -p:CoverletOutput="$testResultsDir\" -p:Configuration=$configuration -m:1 --nologo --no-restore
+        }
+        
+        
         if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
     
         # Detect gaps in code coverage.
@@ -177,7 +220,11 @@ function Test() {
         if ($LASTEXITCODE -ne 0 ) { throw "Test coverage has gaps." }
     } else {
         # Executing tests without test coverage
-        & dotnet test  -p:Configuration=$configuration --nologo --no-restore
+        if ( $UseMsbuild ) {
+            & msbuild /t:Test /p:Configuration=$configuration /m
+        } else {
+            & dotnet test  -p:Configuration=$configuration --nologo --no-restore
+        }
         if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
     }
 
