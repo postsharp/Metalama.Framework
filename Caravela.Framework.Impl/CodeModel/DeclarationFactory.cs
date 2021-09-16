@@ -181,32 +181,32 @@ namespace Caravela.Framework.Impl.CodeModel
 
         object? ITypeFactory.Cast( IType type, object? value ) => new CastDynamicExpression( type, value );
 
-        internal IAttribute GetAttribute( IAttributeBuilder attributeBuilder )
+        internal IAttribute GetAttribute( AttributeBuilder attributeBuilder )
             => (IAttribute) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( attributeBuilder ),
                 l => new BuiltAttribute( (AttributeBuilder) l.Target!, this.CompilationModel ) );
 
-        internal IParameter GetParameter( IParameterBuilder parameterBuilder )
+        internal IParameter GetParameter( ParameterBuilder parameterBuilder )
             => (IParameter) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( parameterBuilder ),
                 l => new BuiltParameter( (ParameterBuilder) l.Target!, this.CompilationModel ) );
 
-        internal IGenericParameter GetGenericParameter( IGenericParameterBuilder genericParameterBuilder )
+        internal IGenericParameter GetGenericParameter( GenericParameterBuilder genericParameterBuilder )
             => (IGenericParameter) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( genericParameterBuilder ),
                 l => new BuiltGenericParameter( (GenericParameterBuilder) l.Target!, this.CompilationModel ) );
 
-        internal IMethod GetMethod( IMethodBuilder methodBuilder )
+        internal IMethod GetMethod( MethodBuilder methodBuilder )
             => (IMethod) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( methodBuilder ),
                 l => new BuiltMethod( (MethodBuilder) l.Target!, this.CompilationModel ) );
 
-        internal IProperty GetProperty( IPropertyBuilder propertyBuilder )
+        internal IProperty GetProperty( PropertyBuilder propertyBuilder )
             => (IProperty) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( propertyBuilder ),
                 l => new BuiltProperty( (PropertyBuilder) l.Target!, this.CompilationModel ) );
 
-        internal IEvent GetEvent( IEventBuilder propertyBuilder )
+        internal IEvent GetEvent( EventBuilder propertyBuilder )
             => (IEvent) this._cache.GetOrAdd(
                 DeclarationRef.FromBuilder( propertyBuilder ),
                 l => new BuiltEvent( (EventBuilder) l.Target!, this.CompilationModel ) );
@@ -214,12 +214,15 @@ namespace Caravela.Framework.Impl.CodeModel
         internal IDeclaration GetDeclaration( IDeclarationBuilder builder )
             => builder switch
             {
-                IMethodBuilder methodBuilder => this.GetMethod( methodBuilder ),
-                IPropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder ),
-                IEventBuilder eventBuilder => this.GetEvent( eventBuilder ),
-                IParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
-                IAttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
-                IGenericParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
+                MethodBuilder methodBuilder => this.GetMethod( methodBuilder ),
+                PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder ),
+                EventBuilder eventBuilder => this.GetEvent( eventBuilder ),
+                ParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
+                AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
+                GenericParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
+
+                // This is for linker tests (fake builders), which resolve to themselves.
+                IDeclarationRef<IDeclaration> reference => reference.Resolve(this.CompilationModel).AssertNotNull(),
                 _ => throw new AssertionFailedException()
             };
 
