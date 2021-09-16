@@ -122,7 +122,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             // Annotation shouldn't do any code transformations.
             // Otherwise, highlighted spans don't match the actual code.
-            if ( templateSyntaxRoot != null && annotatedTemplateSyntax != null )
+            if ( templateCompilerSuccess && templateSyntaxRoot != null && annotatedTemplateSyntax != null )
             {
                 Assert.Equal( templateSyntaxRoot.ToString(), annotatedTemplateSyntax.ToString() );
             }

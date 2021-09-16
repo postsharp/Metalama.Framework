@@ -157,7 +157,7 @@ namespace Caravela.TestFramework
                 testResult.TestInput = testInput;
                 testResult.InputCompilation = initialCompilation;
 
-                if ( this.ReportInvalidInputCompilation )
+                if ( this.ShouldStopOnInvalidInput( testInput.Options ) )
                 {
                     var diagnostics = initialCompilation.GetDiagnostics();
                     var errors = diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToArray();
@@ -327,7 +327,8 @@ namespace Caravela.TestFramework
             Assert.Equal( expectedTransformedSourceText, actualTransformedNormalizedSourceText );
         }
 
-        private protected virtual bool ReportInvalidInputCompilation => true;
+        private protected virtual bool ShouldStopOnInvalidInput( TestOptions testOptions ) 
+            => !testOptions.AcceptInvalidInput.GetValueOrDefault( true );
 
         /// <summary>
         /// Creates a new project that is used to compile the test source.

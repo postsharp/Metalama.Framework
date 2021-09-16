@@ -102,16 +102,17 @@ namespace Caravela.Framework.Impl.Templating
                 return false;
             }
 
-            // TODO: Reporting diagnostics here can result in duplicate reports because there may be several templates in one syntax tree.
             var sourceDiagnostics = semanticModel.GetDiagnostics( sourceSyntaxRoot.Span, cancellationToken );
 
             if ( sourceDiagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
             {
                 // Don't continue with errors in source code (note however that we do the annotation with errors because of real-time syntax highlighting).
+                // Diagnostics don't need to be reported because they would be reported by the compiler anyway.
+                // Note that it's ok to annotate a template that has errors. This is used by syntax highlighting. 
+                
                 annotatedSyntaxRoot = null;
                 transformedSyntaxRoot = null;
-                diagnostics.Report( sourceDiagnostics );
-
+                
                 return false;
             }
 

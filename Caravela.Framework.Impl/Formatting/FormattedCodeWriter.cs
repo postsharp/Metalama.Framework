@@ -99,13 +99,17 @@ namespace Caravela.Framework.Impl.Formatting
                 .OrderBy( c => c.TextSpan.Start )
                 .ThenBy( c => c.ClassificationType ) )
             {
-                var existingSpan = classifiedTextSpans.GetClassifiedSpans( csharpSpan.TextSpan ).SingleOrDefault();
+                foreach ( var existingSpan in classifiedTextSpans.GetClassifiedSpans( csharpSpan.TextSpan ) )
+                {
+                    var combinedClassification =
+                        existingSpan.Tags != null! && existingSpan.Tags.TryGetValue( CSharpClassTagName, out var existingClassification )
+                            ? existingClassification + ";" + csharpSpan.ClassificationType
+                            : csharpSpan.ClassificationType;
 
-                var combinedClassification = existingSpan.Tags != null! && existingSpan.Tags.TryGetValue( CSharpClassTagName, out var existingClassification )
-                    ? existingClassification + ";" + csharpSpan.ClassificationType
-                    : csharpSpan.ClassificationType;
+                    var intersection = csharpSpan.TextSpan.Intersection( csharpSpan.TextSpan ).AssertNotNull();
 
-                classifiedTextSpans.SetTag( csharpSpan.TextSpan, CSharpClassTagName, combinedClassification );
+                    classifiedTextSpans.SetTag( intersection, CSharpClassTagName, combinedClassification );
+                }
             }
 
             // Add XML doc based on the input compilation.

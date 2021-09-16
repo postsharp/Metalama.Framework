@@ -224,7 +224,8 @@ namespace Caravela.Framework.Impl.CompileTime
                     throw new AssertionFailedException( "Generic templates or aspects are not supported." );
 
                 case IErrorTypeSymbol:
-                    return TemplatingScope.Unknown;
+                    // We treat all error symbols as run-time only, by convention.
+                    return TemplatingScope.RunTimeOnly;
 
                 case IArrayTypeSymbol array:
                     return this.GetTemplatingScope( array.ElementType, recursion + 1 );
