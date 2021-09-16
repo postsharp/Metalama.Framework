@@ -5,11 +5,12 @@
     
     <ItemGroup>
         <!-- Specifically use the same version of Roslyn as we're using in Caravela Compiler -->
-        <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="$(RoslynVersion)" Condition="'$(UseCaravelaCompiler)'!='True'">
+        <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="$(RoslynVersion)" Condition="'$(UseCaravelaCompiler)'==''">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all"  Condition="'$(UseCaravelaCompiler)'=='True'" />
+        <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all"  Condition="'$(UseCaravelaCompiler)'=='Private'" />
+        <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" Condition="'$(UseCaravelaCompiler)'=='Public'" />
     </ItemGroup>
 
 </Project>

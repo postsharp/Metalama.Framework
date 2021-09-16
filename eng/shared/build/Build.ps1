@@ -237,7 +237,7 @@ function Test() {
         if ( $UseMsbuild ) {
             & msbuild $solution /t:Test /p:CollectCoverage=True /p:CoverletOutput="$testResultsDir\" /p:Configuration=$configuration /m:1 /v:$Verbosity
         } else {
-            & dotnet test -p:CollectCoverage=True -p:CoverletOutput="$testResultsDir\" -p:Configuration=$configuration -m:1 --nologo --no-restore -v:$Verbosity $solution   
+            & dotnet test -p:CollectCoverage=True -p:CoverletOutput="$testResultsDir\" -p:Configuration=$configuration -m:1 --nologo -v:$Verbosity $solution   
         }
         
         
@@ -251,7 +251,7 @@ function Test() {
         if ( $UseMsbuild ) {
             & msbuild /t:Test /p:Configuration=$configuration /m /v:$Verbosity $solution 
         } else {
-            & dotnet test  -p:Configuration=$configuration --nologo --no-restore -v:$Verbosity $solution 
+            & dotnet test  -p:Configuration=$configuration --nologo -v:$Verbosity $solution 
         }
         if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
     }

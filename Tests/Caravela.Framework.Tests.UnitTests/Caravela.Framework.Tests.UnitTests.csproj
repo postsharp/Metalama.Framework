@@ -7,7 +7,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <RootNamespace>Caravela.Framework.Tests.UnitTests</RootNamespace>
-    <UseCaravelaCompiler>True</UseCaravelaCompiler>
+    <UseCaravelaCompiler>Private</UseCaravelaCompiler>
   </PropertyGroup>
 
   <ItemGroup>

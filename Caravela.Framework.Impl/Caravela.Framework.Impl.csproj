@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CaravelaCompilerDisablePackCustomization>True</CaravelaCompilerDisablePackCustomization>
-    <UseCaravelaCompiler>True</UseCaravelaCompiler>
+    <UseCaravelaCompiler>Private</UseCaravelaCompiler>
   </PropertyGroup>
 
   <ItemGroup>

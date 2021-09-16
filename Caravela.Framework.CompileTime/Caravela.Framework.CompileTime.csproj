@@ -12,7 +12,7 @@
         <GenerateDocumentationFile>False</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);SA0001</NoWarn>
         <IsPackable>False</IsPackable>  
-        <UseCaravelaCompiler>True</UseCaravelaCompiler>
+        <UseCaravelaCompiler>Private</UseCaravelaCompiler>
     </PropertyGroup>
 
     <ItemGroup>

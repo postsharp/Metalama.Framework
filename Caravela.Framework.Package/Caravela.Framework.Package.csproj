@@ -15,7 +15,7 @@
         <!-- Disable a warning saying that we have nothing under the lib folder. -->
         <NoWarn>NU5128</NoWarn>
 
-        <UseCaravelaCompiler>True</UseCaravelaCompiler>
+        <UseCaravelaCompiler>Public</UseCaravelaCompiler>
         
         <!-- Disable the customization done by Caravela.Compiler.Sdk -->
         <CaravelaCompilerDisablePackCustomization>True</CaravelaCompilerDisablePackCustomization>
