@@ -115,42 +115,31 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="symbol">A symbol.</param>
         /// <returns></returns>
-        private TemplatingScope GetSymbolScope( ISymbol? symbol )
+        private TemplatingScope GetSymbolScope( ISymbol symbol )
         {
-            if ( symbol == null )
+            switch ( symbol )
             {
-                return GetMoreSpecificScope( TemplatingScope.Both );
-            }
-
-            // For local variables, we decide based on  _buildTimeLocals only. This collection is updated
-            // at each iteration of the algorithm based on inferences from _requireMetaExpressionStack.
-            if ( symbol is ILocalSymbol or INamedTypeSymbol { IsAnonymousType: true } )
-            {
-                if ( this._localScopes.TryGetValue( symbol, out var scope ) )
-                {
+                // For local variables, we decide based on  _buildTimeLocals only. This collection is updated
+                // at each iteration of the algorithm based on inferences from _requireMetaExpressionStack.
+                case ILocalSymbol or INamedTypeSymbol { IsAnonymousType: true } when this._localScopes.TryGetValue( symbol, out var scope ):
                     return scope;
-                }
 
                 // When a local variable is assigned to an anonymous type, the scope is unknown because the anonymous
                 // type is visited after the variable identifier.
-                return TemplatingScope.Unknown;
-            }
-            else if ( symbol is { ContainingType: { IsAnonymousType: true } containingType } )
-            {
-                return GetMoreSpecificScope( this.GetSymbolScope( containingType ) );
-            }
-            else if ( symbol is IParameterSymbol parameter )
-            {
-                if ( this._currentTemplateMember != null &&
-                     (SymbolEqualityComparer.Default.Equals( parameter.ContainingSymbol, this._currentTemplateMember ) ||
-                      (parameter.ContainingSymbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol }
-                       && SymbolEqualityComparer.Default.Equals( this._currentTemplateMember, associatedSymbol ))) )
-                {
+                case ILocalSymbol or INamedTypeSymbol { IsAnonymousType: true }:
+                    return TemplatingScope.Unknown;
+
+                case { ContainingType: { IsAnonymousType: true } containingType }:
+                    return GetMoreSpecificScope( this.GetSymbolScope( containingType ) );
+
+                case IParameterSymbol parameter when this._currentTemplateMember != null &&
+                                                     (SymbolEqualityComparer.Default.Equals( parameter.ContainingSymbol, this._currentTemplateMember ) ||
+                                                      (parameter.ContainingSymbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol }
+                                                       && SymbolEqualityComparer.Default.Equals( this._currentTemplateMember, associatedSymbol ))):
                     // In the future, we may have parameters on the template parameters changing their meaning. However, now, all template
                     // parameters map to run-time parameters of the same name.
 
                     return TemplatingScope.RunTimeOnly;
-                }
             }
 
             // The TemplateContext.runTime method must be processed separately. It is a compile-time-only method whose
@@ -490,7 +479,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
         {
-            var typeScope = this.GetSymbolScope( this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node ) );
+            var typeScope = this.GetSymbolScope( this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node ).AssertNotNull() );
 
             if ( typeScope != TemplatingScope.RunTimeOnly )
             {
@@ -1925,6 +1914,12 @@ namespace Caravela.Framework.Impl.Templating
         {
             var transformedType = this.Visit( node.Type );
             var objectType = this._syntaxTreeAnnotationMap.GetExpressionType( node );
+
+            if ( objectType == null )
+            {
+                throw new AssertionFailedException( $"Cannot get the expression type for '{node}'." );
+            }
+            
             var objectTypeScope = this.GetSymbolScope( objectType );
 
             ScopeContext? context = null;

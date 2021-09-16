@@ -53,8 +53,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Package"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Tests.InternalPipeline", "Tests\Caravela.Framework.Tests.InternalPipeline\Caravela.Framework.Tests.InternalPipeline.csproj", "{496B8623-F88E-4346-A192-DA18B19457A3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.TestRunner", "Tests\Caravela.Framework.TestApp\Caravela.Framework.TestApp.TestRunner\Caravela.Framework.TestApp.TestRunner.csproj", "{42985F2B-A0B7-46FA-BE51-73FE7FBB69CF}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.CompileTime", "Caravela.Framework.CompileTime\Caravela.Framework.CompileTime.csproj", "{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62} = {DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}
@@ -126,10 +124,6 @@ Global
 		{496B8623-F88E-4346-A192-DA18B19457A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{496B8623-F88E-4346-A192-DA18B19457A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{496B8623-F88E-4346-A192-DA18B19457A3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{42985F2B-A0B7-46FA-BE51-73FE7FBB69CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42985F2B-A0B7-46FA-BE51-73FE7FBB69CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{42985F2B-A0B7-46FA-BE51-73FE7FBB69CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{42985F2B-A0B7-46FA-BE51-73FE7FBB69CF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09CFFBA1-F2FD-4D20-BAC9-14DE163A894A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -146,7 +140,6 @@ Global
 		{7D8C16EE-B822-4AE3-B9C1-810C010573D6} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{496B8623-F88E-4346-A192-DA18B19457A3} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
-		{42985F2B-A0B7-46FA-BE51-73FE7FBB69CF} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {59CB4F2D-3547-4DDF-9712-7B3F95C1ED66}

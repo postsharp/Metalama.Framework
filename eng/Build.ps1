@@ -1,2 +1,2 @@
 # .FORWARDHELPTARGETNAME eng/shared/build/Build.ps1
-Invoke-Expression "& eng/shared/build/Build.ps1 -ProductName 'Caravela' $args"
+Invoke-Expression "& eng/shared/build/Build.ps1 -ProductName 'Caravela' $args -TestSolutions 'Caravela.sln','Tests\Caravela.Framework.TestApp\Caravela.Framework.TestApp.sln' "

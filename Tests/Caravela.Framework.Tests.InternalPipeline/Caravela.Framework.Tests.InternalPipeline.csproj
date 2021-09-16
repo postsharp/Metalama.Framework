@@ -20,6 +20,10 @@
 
 
   <ItemGroup>
+  
+   <!-- Exclude files that intentionally do not compile -->
+   <Compile Remove="Tests\**\__*.cs" />
+      
     <PackageReference Include="FakeItEasy" Version="6.2.1" />
     <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
