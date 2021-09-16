@@ -48,8 +48,8 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         // It's ok if we return an obsolete project in this case.
         internal IReadOnlyList<AspectClass>? AspectClasses => this._lastKnownConfiguration?.AspectClasses;
 
-        public DesignTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain, bool isTest )
-            : base( projectOptions, AspectExecutionScenario.DesignTime, isTest, domain )
+        public DesignTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain, bool isTest, IPathOptions? directoryOptions = null, IAssemblyLocator? assemblyLocator = null )
+            : base( projectOptions, AspectExecutionScenario.DesignTime, isTest, domain, directoryOptions, assemblyLocator )
         {
             if ( projectOptions.BuildTouchFile == null )
             {
@@ -364,7 +364,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     diagnosticList.ToImmutableArray(),
                     pipelineResult?.Diagnostics.DiagnosticSuppressions ) );
 
-            UserDiagnosticRegistrationService.GetInstance().RegisterDescriptors( result );
+            UserDiagnosticRegistrationService.GetInstance( this.ServiceProvider.GetService<IPathOptions>() ).RegisterDescriptors( result );
 
             return result;
         }

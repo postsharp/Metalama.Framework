@@ -8,6 +8,8 @@ namespace Caravela.Framework.Impl.Options
         string CompileTimeProjectCacheDirectory { get; }
 
         string AssemblyLocatorCacheDirectory { get; }
+        
+        string SettingsDirectory { get; }
 
         /// <summary>
         /// Gets the directory in which crash reports are stored, or a null or empty string to store

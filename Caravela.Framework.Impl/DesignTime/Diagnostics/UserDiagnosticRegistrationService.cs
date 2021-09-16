@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.DesignTime.Pipeline;
+using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -22,12 +24,13 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
         private readonly string _settingsFilePath;
         private UserDiagnosticRegistrationFile _registrationFile;
 
-        public static UserDiagnosticRegistrationService GetInstance()
-            => LazyInitializer.EnsureInitialized( ref _instance, () => new UserDiagnosticRegistrationService() )!;
+        public static UserDiagnosticRegistrationService GetInstance( IPathOptions? pathOptions = null )
+            => LazyInitializer.EnsureInitialized( ref _instance, () => new UserDiagnosticRegistrationService( pathOptions ) )!;
 
-        private UserDiagnosticRegistrationService()
+        private UserDiagnosticRegistrationService( IPathOptions? pathOptions = null )
         {
-            var settingsDirectory = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), "Caravela" );
+            pathOptions ??= ServiceProviderFactory.GetServiceProvider().GetService<IPathOptions>();
+            var settingsDirectory = pathOptions.SettingsDirectory;
 
             RetryHelper.Retry(
                 () =>

@@ -15,10 +15,15 @@ namespace Caravela.TestFramework
     {
         public TestProjectOptions()
         {
-            var directory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
-            this.CompileTimeProjectCacheDirectory = directory;
+            var baseTestDirectory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
 
-            Directory.CreateDirectory( directory );
+            var compileTimeProjectCacheDirectory = Path.Combine( baseTestDirectory, "Cache" );
+            this.CompileTimeProjectCacheDirectory = compileTimeProjectCacheDirectory;
+            Directory.CreateDirectory( compileTimeProjectCacheDirectory );
+
+            var settingsDirectory = Path.Combine( baseTestDirectory, "Settings" );
+            this.SettingsDirectory = settingsDirectory;
+            Directory.CreateDirectory( settingsDirectory );
         }
 
         public bool DebugCompilerProcess => false;
@@ -28,6 +33,8 @@ namespace Caravela.TestFramework
         public bool DebugIdeProcess => false;
 
         public override string CompileTimeProjectCacheDirectory { get; }
+
+        public override string SettingsDirectory { get; }
 
         public string ProjectId => "test";
 
