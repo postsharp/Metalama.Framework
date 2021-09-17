@@ -364,7 +364,8 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     diagnosticList.ToImmutableArray(),
                     pipelineResult?.Diagnostics.DiagnosticSuppressions ) );
 
-            UserDiagnosticRegistrationService.GetInstance( this.ServiceProvider.GetService<IPathOptions>() ).RegisterDescriptors( result );
+            var directoryOptions = this.ServiceProvider.GetService<IPathOptions>();
+            UserDiagnosticRegistrationService.GetInstance( directoryOptions ).RegisterDescriptors( result );
 
             return result;
         }

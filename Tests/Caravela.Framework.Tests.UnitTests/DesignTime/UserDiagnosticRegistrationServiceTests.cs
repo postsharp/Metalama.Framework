@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.DesignTime.Diagnostics;
 using Caravela.Framework.Impl.DesignTime.Pipeline;
 using Caravela.TestFramework;
 using System.Collections.Generic;
@@ -18,9 +17,8 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
         [Fact]
         public void TestUserErrorReporting()
         {
-            var code = new Dictionary<string, string>
-            {
-                ["Aspect.cs"] = @"
+            this.TestUserDiagnosticsFileContent(
+                aspectCode: @"
 using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
@@ -28,27 +26,21 @@ using Caravela.Framework.Diagnostics;
 
 namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
 {
-    internal class ReportErrorAttribute : OverrideMethodAspect
+    internal class ReportErrorAttribute : Attribute, IAspect<IMethod>
     {
-        private static readonly DiagnosticDefinition<INamedType> _userError = new(
+        private static readonly DiagnosticDefinition<IMethod> _userError = new(
              ""MY001"",
              Severity.Error,
              ""User error description."");
 
-        public override void BuildAspect(IAspectBuilder<IMethod> builder)
+        public void BuildAspect(IAspectBuilder<IMethod> builder)
         {
-            builder.Diagnostics.Report(_userError, builder.Target.DeclaringType);
-            return;
-        }
-
-        public override dynamic? OverrideMethod()
-        {
-            return meta.Proceed();
+            builder.Diagnostics.Report(_userError, builder.Target);
         }
     }
 }
 ",
-                ["Class1.cs"] = @"
+                targetCode: @"
 
 using System;
 
@@ -60,29 +52,9 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
         public void Foo() { }
     }
 }
-
-"
-            };
-
-            var compilation = CreateCSharpCompilation( code );
-
-            using var buildOptions = new TestProjectOptions();
-            using var domain = new UnloadableCompileTimeDomain();
-            DesignTimeAspectPipeline pipeline = new( buildOptions, domain, true, directoryOptions: buildOptions );
-            
-            var syntaxTree = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
-
-            var diagnosticsFileName = Path.Combine( buildOptions.SettingsDirectory, "userDiagnostics.json" );
-            
-            Assert.False( File.Exists( diagnosticsFileName ) );
-            var result = pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree ), CancellationToken.None );
-
-            Assert.False( result.Success );
-
-            var actualContent = File.ReadAllText( diagnosticsFileName );
-            
-            Assert.Equal(
-                @"{
+",
+                expectedSuccess: false,
+                expectedUserDiagnosticsFileContent: @"{
   ""Diagnostics"": {
     ""MY001"": {
       ""Severity"": 3,
@@ -92,8 +64,92 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
     }
   },
   ""Suppressions"": []
-}",
-                actualContent! );
+}" );
+        }
+
+        [Fact]
+        public void TestDiagnosticSuppression()
+        {
+            this.TestUserDiagnosticsFileContent(
+                aspectCode: @"
+using System;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
+
+namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
+{
+    internal class SuppressWarningAttribute : Attribute, IAspect<IMethod>
+    {
+        private static readonly DiagnosticDefinition<IMethod> _userWarning = new(
+             ""MY001"",
+             Severity.Warning,
+             ""User warning description."");
+
+        private static readonly SuppressionDefinition _suppressionDefinition = new(""MY001"");
+
+        public void BuildAspect(IAspectBuilder<IMethod> builder)
+        {
+            builder.Diagnostics.Suppress(builder.Target, _suppressionDefinition);
+            builder.Diagnostics.Report(_userWarning, builder.Target);
+        }
+    }
+}
+",
+                targetCode: @"
+
+using System;
+
+namespace Caravela.Framework.Tests.UnitTests.DesignTime.TestCode
+{
+    internal class TargetCode
+    {
+        [SuppressWarning]
+        public void Foo() { }
+    }
+}
+",
+                expectedSuccess: true,
+                expectedUserDiagnosticsFileContent: @"{
+  ""Diagnostics"": {
+    ""MY001"": {
+      ""Severity"": 2,
+      ""Id"": ""MY001"",
+      ""Category"": ""Caravela.User"",
+      ""Title"": ""A Caravela user diagnostic.""
+    }
+  },
+  ""Suppressions"": [
+    ""MY001""
+  ]
+}" );
+        }
+
+        private void TestUserDiagnosticsFileContent( string aspectCode, string targetCode, bool expectedSuccess, string expectedUserDiagnosticsFileContent )
+        {
+            var code = new Dictionary<string, string>
+            {
+                ["Aspect.cs"] = aspectCode,
+                ["Class1.cs"] = targetCode
+            };
+
+            var compilation = CreateCSharpCompilation( code );
+            
+            using var domain = new UnloadableCompileTimeDomain();
+            DesignTimeAspectPipeline pipeline = new( this.ProjectOptions, domain, true, directoryOptions: this.ProjectOptions );
+            
+            var syntaxTree = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
+
+            var diagnosticsFileName = Path.Combine( this.ProjectOptions.SettingsDirectory, "userDiagnostics.json" );
+            
+            Assert.False( File.Exists( diagnosticsFileName ) );
+            var result = pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree ), CancellationToken.None );
+
+            Assert.Equal( expectedSuccess, result.Success );
+
+            var actualContent = File.ReadAllText( diagnosticsFileName );
+            
+            Assert.Equal( expectedUserDiagnosticsFileContent, actualContent! );
         }
     }
 }

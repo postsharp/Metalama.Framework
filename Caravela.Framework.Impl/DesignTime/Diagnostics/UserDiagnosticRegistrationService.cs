@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -20,16 +21,18 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
     /// </summary>
     internal class UserDiagnosticRegistrationService
     {
-        private static UserDiagnosticRegistrationService? _instance;
+        // Multiple instances are needed for testing.
+        private static readonly ConcurrentDictionary<IPathOptions, UserDiagnosticRegistrationService> _instances = new();
         private readonly string _settingsFilePath;
         private UserDiagnosticRegistrationFile _registrationFile;
 
-        public static UserDiagnosticRegistrationService GetInstance( IPathOptions? pathOptions = null )
-            => LazyInitializer.EnsureInitialized( ref _instance, () => new UserDiagnosticRegistrationService( pathOptions ) )!;
+        public static UserDiagnosticRegistrationService GetInstance( IPathOptions pathOptions )
+            => _instances.GetOrAdd(
+                pathOptions, 
+                options => new UserDiagnosticRegistrationService( pathOptions ) );
 
-        private UserDiagnosticRegistrationService( IPathOptions? pathOptions = null )
+        private UserDiagnosticRegistrationService( IPathOptions pathOptions )
         {
-            pathOptions ??= ServiceProviderFactory.GetServiceProvider().GetService<IPathOptions>();
             var settingsDirectory = pathOptions.SettingsDirectory;
 
             RetryHelper.Retry(

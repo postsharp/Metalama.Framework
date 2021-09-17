@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.UnitTests
 {
@@ -22,13 +23,13 @@ namespace Caravela.Framework.Tests.UnitTests
         /// </summary>
         private const bool _doCodeExecutionTests = false;
 
-        private TestProjectOptions _projectOptions = new();
+        protected TestProjectOptions ProjectOptions { get; private set; } = new();
 
         protected ServiceProvider ServiceProvider { get; private set; }
 
         protected TestBase()
         {
-            this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this._projectOptions );
+            this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions );
         }
 
         public static CSharpCompilation CreateCSharpCompilation(
@@ -144,7 +145,7 @@ class Expression
 
         protected virtual void Dispose( bool disposing )
         {
-            this._projectOptions.Dispose();
+            this.ProjectOptions.Dispose();
             this.ServiceProvider.Dispose();
         }
 
@@ -166,7 +167,7 @@ class Expression
             {
                 this._parent = parent;
                 this._oldServiceProvider = parent.ServiceProvider;
-                this._oldProjectOptions = parent._projectOptions;
+                this._oldProjectOptions = parent.ProjectOptions;
                 this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions );
             }
 
@@ -175,7 +176,7 @@ class Expression
                 this.ProjectOptions.Dispose();
                 this.ServiceProvider.Dispose();
                 this._parent.ServiceProvider = this._oldServiceProvider;
-                this._parent._projectOptions = this._oldProjectOptions;
+                this._parent.ProjectOptions = this._oldProjectOptions;
             }
         }
     }
