@@ -13,8 +13,6 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Formatting
 {
-    // TODO: This class is essentially a UI concern so it should be moved into a different assembly e.g. DesignTime.
-
     /// <summary>
     /// Produces a <see cref="ClassifiedTextSpanCollection"/> with compile-time code given
     /// a syntax tree annotated with <see cref="TemplateAnnotator"/>.
@@ -64,6 +62,7 @@ namespace Caravela.Framework.Impl.Formatting
         {
             if ( node == null )
             {
+                // Coverage: ignore.
                 return;
             }
 
@@ -94,7 +93,9 @@ namespace Caravela.Framework.Impl.Formatting
         private void VisitType<T>( T node, Action<T> visitBase )
             where T : TypeDeclarationSyntax
         {
-            if ( node.GetScopeFromAnnotation() != TemplatingScope.RunTimeOnly )
+            var scope = node.GetScopeFromAnnotation();
+
+            if ( scope is TemplatingScope.CompileTimeOnly or TemplatingScope.Both )
             {
                 var oldIsInCompileTimeType = this._isInCompileTimeType;
 

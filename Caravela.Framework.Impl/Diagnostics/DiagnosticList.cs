@@ -35,5 +35,7 @@ namespace Caravela.Framework.Impl.Diagnostics
                 return this._list[index];
             }
         }
+
+        public override string ToString() => $"DiagnosticList Count={this.Count}";
     }
 }

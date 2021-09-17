@@ -1,0 +1,87 @@
+
+<html>
+    <head>
+        <style>
+            .cr-CompileTime,
+            .cr-Conflict,
+            .cr-TemplateKeyword,
+            .cr-Dynamic,
+            .cr-CompileTimeVariable,
+            .cr-GeneratedCode
+            {
+                background-color: rgba(50,50,90,0.1);
+            }
+
+            .cr-TemplateKeyword
+            {
+                color: rgb(250, 0, 250) !important;
+                font-weight: bold;
+            }
+
+            .cr-Dynamic
+            {
+                text-decoration: underline;
+            }
+
+            .cr-CompileTimeVariable
+            {
+                font-style: italic;
+            }
+
+            .diag-Warning
+            {
+                text-decoration: underline 1px wavy orange;
+            }
+
+            .diag-Error
+            {
+                text-decoration: underline 1px wavy red;
+            }
+
+            .legend 
+            {
+                margin-top: 100px;
+            }
+        </style>
+    </head>
+    <body><pre><code class="nohighlight">// Warning MY001 on `Method1`: `Test, including special characters: &lt;&gt;&amp;"
+// `
+<span class="cs-keyword">using</span> <span class="cs-namespace-name">System</span><span class="cs-punctuation">;</span>
+<span class="cs-keyword">using</span> <span class="cs-namespace-name">Caravela</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Aspects</span><span class="cs-punctuation">;</span>
+<span class="cs-keyword">using</span> <span class="cs-namespace-name">Caravela</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Code</span><span class="cs-punctuation">;</span>
+<span class="cs-keyword">using</span> <span class="cs-namespace-name">Caravela</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Diagnostics</span><span class="cs-punctuation">;</span>
+
+<span class="cs-keyword">namespace</span> <span class="cs-namespace-name">Caravela</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-namespace-name">Integration</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-namespace-name">Formatting</span><span class="cs-operator">.</span><span class="cs-namespace-name">Output</span><span class="cs-operator">.</span><span class="cs-namespace-name">Diagnostic</span>
+<span class="cs-punctuation">{</span>
+    <span class="cs-keyword">public</span> <span class="cs-keyword">class</span> <span class="cs-class-name">AddWarning</span> <span class="cs-punctuation">:</span> <span class="cs-class-name">Attribute</span><span class="cs-punctuation">,</span> <span class="cs-interface-name">IAspect</span><span class="cs-punctuation">&lt;</span><span class="cs-interface-name">IMethod</span><span class="cs-punctuation">&gt;</span>
+    <span class="cs-punctuation">{</span>
+        <span class="cs-comment">// We don't test errors because the pipeline would not succeed. Errors are not different than warnings anyway.</span>
+        <span class="cs-keyword">private</span> <span class="cs-keyword">static</span> <span class="cs-class-name">DiagnosticDefinition</span> <span class="cs-field-name cs-static-symbol">_warning</span> <span class="cs-operator">=</span> <span class="cs-keyword">new</span><span class="cs-punctuation">(</span><span class="cs-string">"MY001"</span><span class="cs-punctuation">,</span> <span class="cs-enum-name">Severity</span><span class="cs-operator">.</span><span class="cs-enum-member-name">Warning</span><span class="cs-punctuation">,</span> <span class="cs-string">"Test, including special characters: &lt;&gt;&amp;</span><span class="cs-string cs-string cs-escape-character">\"\n\r</span><span class="cs-string">"</span><span class="cs-punctuation">);</span>
+
+        <span class="cs-keyword">public</span> <span class="cs-keyword">void</span> <span class="cs-method-name">BuildAspect</span><span class="cs-punctuation">(</span><span class="cs-interface-name">IAspectBuilder</span><span class="cs-punctuation">&lt;</span><span class="cs-interface-name">IMethod</span><span class="cs-punctuation">&gt;</span> <span class="cs-parameter-name">builder</span><span class="cs-punctuation">)</span>
+        <span class="cs-punctuation">{</span>
+            <span class="cs-parameter-name">builder</span><span class="cs-operator">.</span><span class="cs-property-name">Diagnostics</span><span class="cs-operator">.</span><span class="cs-identifier">Report</span><span class="cs-punctuation">(</span><span class="cs-field-name cs-static-symbol">_warning</span><span class="cs-punctuation">);</span>
+        <span class="cs-punctuation">}</span>
+    <span class="cs-punctuation">}</span>
+
+    <span class="cs-keyword">public</span> <span class="cs-keyword">class</span> <span class="cs-class-name">TargetCode</span>
+    <span class="cs-punctuation">{</span>
+        <span class="cs-punctuation">[</span><span class="cs-class-name">AddWarning</span><span class="cs-punctuation">]</span>
+        <span class="cs-keyword">public</span> <span class="cs-keyword">void</span> <span class="cs-method-name diag-Warning" title="Warning MY001: Test, including special characters: &lt;&gt;&amp;&quot;&#10;">Method1</span><span class="cs-punctuation">()</span> <span class="cs-punctuation">{</span> <span class="cs-punctuation">}</span>
+    <span class="cs-punctuation">}</span>
+<span class="cs-punctuation">}</span></code></pre>
+       <p class='legend'>Legend:</p>
+       <pre>
+<span class='cr-Default'>Default</span>
+<span class='cr-RunTime'>RunTime</span>
+<span class='cr-CompileTime'>CompileTime</span>
+<span class='cr-Dynamic'>Dynamic</span>
+<span class='cr-CompileTimeVariable'>CompileTimeVariable</span>
+<span class='cr-TemplateKeyword'>TemplateKeyword</span>
+<span class='cr-Conflict'>Conflict</span>
+<span class='cr-Excluded'>Excluded</span>
+<span class='cr-GeneratedCode'>GeneratedCode</span>
+<span class='cr-SourceCode'>SourceCode</span>
+       </pre>
+   </body>
+</html>

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Caravela.Framework.Impl.Formatting
 {
@@ -15,7 +16,7 @@ namespace Caravela.Framework.Impl.Formatting
     {
         protected const string CSharpClassTagName = "csharp";
         protected const string DiagnosticTagName = "diagnostic";
-        public const string DiagnosticAnnotationName = "caravela-diagnostic";
+        private const string _diagnosticAnnotationName = "caravela-diagnostic";
 
         public static T AddDiagnosticAnnotations<T>( T syntaxRoot, string? filePath, IEnumerable<Diagnostic>? diagnostics )
             where T : SyntaxNode
@@ -33,43 +34,42 @@ namespace Caravela.Framework.Impl.Formatting
             {
                 var position = diagnostic.Location.GetLineSpan();
 
-                if ( !position.IsValid || !position.Path.EndsWith( filePath, StringComparison.OrdinalIgnoreCase ) )
+                if ( !position.IsValid || !Path.GetFileName( position.Path ).Equals( fileName, StringComparison.OrdinalIgnoreCase ) )
                 {
                     // The diagnostic is not in the current document.
                     continue;
                 }
 
-                if ( Path.GetFileName( diagnostic.Location.SourceTree!.FilePath ) == fileName )
-                {
-                    var node = outputSyntaxRoot.FindNode( diagnostic.Location.SourceSpan );
+                var serializedDiagnostic = new DiagnosticAnnotation( diagnostic );
 
-                    outputSyntaxRoot = outputSyntaxRoot.ReplaceNode(
-                        node,
-                        node.WithAdditionalAnnotations(
-                            new SyntaxAnnotation(
-                                DiagnosticAnnotationName,
-                                diagnostic.Severity + ": " + diagnostic.GetMessage() ) ) );
-                }
+                var node = outputSyntaxRoot.FindNode( diagnostic.Location.SourceSpan );
+
+                outputSyntaxRoot = outputSyntaxRoot.ReplaceNode(
+                    node,
+                    node.WithAdditionalAnnotations(
+                        new SyntaxAnnotation(
+                            _diagnosticAnnotationName,
+                            serializedDiagnostic.ToJson() ) ) );
             }
 
             return outputSyntaxRoot;
         }
 
-        protected static (SourceText SourceText, ClassifiedTextSpanCollection TextSpans) GetClassifiedTextSpans(
+        protected static async Task<ClassifiedTextSpanCollection> GetClassifiedTextSpansAsync(
             Document document,
             SyntaxNode? annotatedSyntaxRoot = null,
             IEnumerable<Diagnostic>? diagnostics = null,
             bool addTitles = false )
         {
-            var sourceText = document.GetTextAsync().Result;
-            var syntaxTree = document.GetSyntaxTreeAsync().Result!;
+            var sourceText = await document.GetTextAsync();
+            var syntaxTree = (await document.GetSyntaxTreeAsync())!;
 
-            if ( syntaxTree.GetText() != sourceText )
+            if ( await syntaxTree!.GetTextAsync() != sourceText )
             {
                 throw new AssertionFailedException();
             }
 
-            var syntaxRoot = syntaxTree.GetRoot();
+            var syntaxRoot = await syntaxTree.GetRootAsync();
 
             // Process the annotations by the template compiler.
             ClassifiedTextSpanCollection classifiedTextSpans;
@@ -86,8 +86,8 @@ namespace Caravela.Framework.Impl.Formatting
             }
 
             // Process the annotations by the aspect linker (on the output document).
-            GeneratedCodeVisitor generatedCodeVisitor = new( classifiedTextSpans );
-            generatedCodeVisitor.Visit( syntaxRoot );
+            FormattingVisitor formattingVisitor = new( classifiedTextSpans );
+            formattingVisitor.Visit( syntaxRoot );
 
             // Add C# classifications
             var semanticModel = document.Project.GetCompilationAsync().Result!.GetSemanticModel( syntaxTree );
@@ -121,30 +121,37 @@ namespace Caravela.Framework.Impl.Formatting
 
             if ( diagnostics != null && document.FilePath != null )
             {
-                foreach ( var diagnostic in diagnostics )
+                // Coverage ignore (used by Aspect Workbench).
+                AddDiagnostics( document, diagnostics, classifiedTextSpans );
+            }
+
+            return classifiedTextSpans;
+        }
+
+        // Coverage ignore (used by Aspect Workbench).
+        private static void AddDiagnostics( Document document, IEnumerable<Diagnostic> diagnostics, ClassifiedTextSpanCollection classifiedTextSpans )
+        {
+            foreach (var diagnostic in diagnostics)
+            {
+                var position = diagnostic.Location.GetLineSpan();
+
+                if (!position.IsValid || !position.Path.EndsWith( document.FilePath, StringComparison.OrdinalIgnoreCase ))
                 {
-                    var position = diagnostic.Location.GetLineSpan();
+                    // The diagnostic is not in the current document.
+                    continue;
+                }
 
-                    if ( !position.IsValid || !position.Path.EndsWith( document.FilePath, StringComparison.OrdinalIgnoreCase ) )
+                foreach (var span in classifiedTextSpans.GetClassifiedSpans( diagnostic.Location.SourceSpan ))
+                {
+                    if (diagnostic.Location.SourceSpan.IntersectsWith( span.Span ))
                     {
-                        // The diagnostic is not in the current document.
-                        continue;
-                    }
-
-                    foreach ( var span in classifiedTextSpans.GetClassifiedSpans( diagnostic.Location.SourceSpan ) )
-                    {
-                        if ( diagnostic.Location.SourceSpan.IntersectsWith( span.Span ) )
-                        {
-                            classifiedTextSpans.SetTag(
-                                diagnostic.Location.SourceSpan,
-                                DiagnosticTagName,
-                                diagnostic.Severity + ": " + diagnostic.GetMessage() );
-                        }
+                        classifiedTextSpans.SetTag(
+                            diagnostic.Location.SourceSpan,
+                            DiagnosticTagName,
+                            new DiagnosticAnnotation( diagnostic ).ToJson() );
                     }
                 }
             }
-
-            return (sourceText, classifiedTextSpans);
         }
     }
 }

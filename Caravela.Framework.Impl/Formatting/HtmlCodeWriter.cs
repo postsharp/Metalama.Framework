@@ -3,10 +3,12 @@
 
 using Caravela.Framework.DesignTime.Contracts;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Caravela.Framework.Impl.Formatting
 {
@@ -19,29 +21,22 @@ namespace Caravela.Framework.Impl.Formatting
             this._options = options;
         }
 
-        public void Write( Document document, SyntaxNode? annotatedSyntaxRoot, TextWriter textWriter )
+        public async Task WriteAsync( Document document, SyntaxNode? annotatedSyntaxRoot, TextWriter textWriter )
         {
-            var (sourceText, classifiedTextSpans) = GetClassifiedTextSpans( document, annotatedSyntaxRoot, addTitles: this._options.AddTitles );
+            var sourceText = await document.GetTextAsync( CancellationToken.None );
+            var classifiedTextSpans = await GetClassifiedTextSpansAsync( document, annotatedSyntaxRoot, addTitles: this._options.AddTitles );
 
             if ( this._options.Prolog != null )
             {
-                textWriter.Write( this._options.Prolog );
+                await textWriter.WriteAsync( this._options.Prolog );
             }
 
-            textWriter.Write( "<pre><code class=\"nohighlight\">" );
-
-            var i = 0;
+            await textWriter.WriteAsync( "<pre><code class=\"nohighlight\">" );
 
             foreach ( var classifiedSpan in classifiedTextSpans )
             {
                 // Write the text between the previous span and the current one.
                 var textSpan = classifiedSpan.Span;
-
-                if ( i < textSpan.Start )
-                {
-                    var textBefore = sourceText.GetSubText( new TextSpan( i, textSpan.Start - i ) ).ToString();
-                    textWriter.Write( HtmlEncode( textBefore ) );
-                }
 
                 var subText = sourceText.GetSubText( textSpan );
                 var spanText = subText.ToString();
@@ -49,7 +44,7 @@ namespace Caravela.Framework.Impl.Formatting
                 if ( classifiedSpan.Classification != TextSpanClassification.Excluded )
                 {
                     List<string> classes = new();
-                    string? title = null;
+                    List<string> titles = new();
 
                     var isLeadingTrivia = string.IsNullOrWhiteSpace( spanText ) && (spanText[0] == '\r' || spanText[0] == '\n');
 
@@ -71,9 +66,19 @@ namespace Caravela.Framework.Impl.Formatting
                             }
                         }
 
-                        if ( this._options.AddTitles && !classifiedSpan.Tags.TryGetValue( "title", out title ) )
+                        if ( classifiedSpan.Tags.TryGetValue( DiagnosticTagName, out var diagnosticJson ) )
                         {
-                            title = classifiedSpan.Classification switch
+                            var diagnostic = DiagnosticAnnotation.FromJson( diagnosticJson );
+                            titles.Add( diagnostic.ToString() );
+
+                            classes.Add( "diag-" + diagnostic.Severity );
+                        }
+
+                        string? docTitle = null;
+
+                        if ( this._options.AddTitles && !classifiedSpan.Tags.TryGetValue( "title", out docTitle ) )
+                        {
+                            docTitle = classifiedSpan.Classification switch
                             {
                                 TextSpanClassification.Dynamic => "Dynamic member.",
                                 TextSpanClassification.CompileTime => "Compile-time code.",
@@ -84,46 +89,44 @@ namespace Caravela.Framework.Impl.Formatting
                                 _ => null
                             };
                         }
+
+                        if ( docTitle != null )
+                        {
+                            titles.Insert( 0, docTitle );
+                        }
                     }
 
-                    if ( classes.Count > 0 || !string.IsNullOrEmpty( title ) )
+                    if ( classes.Count > 0 || titles.Count > 0 )
                     {
-                        textWriter.Write( "<span" );
+                        await textWriter.WriteAsync( "<span" );
 
                         if ( classes.Count > 0 )
                         {
-                            textWriter.Write( $" class=\"{string.Join( " ", classes )}\"" );
+                            await textWriter.WriteAsync( $" class=\"{string.Join( " ", classes )}\"" );
                         }
 
-                        if ( !string.IsNullOrEmpty( title ) )
+                        if ( titles.Count > 0 )
                         {
-                            textWriter.Write( $" title=\"{HtmlEncode( title!, true )}\"" );
+                            var joined = string.Join( "&#13;&#10;", titles.Select( t => HtmlEncode( t, true ) ) );
+                            await textWriter.WriteAsync( $" title=\"{joined}\"" );
                         }
 
-                        textWriter.Write( ">" );
-                        textWriter.Write( HtmlEncode( spanText ) );
-                        textWriter.Write( "</span>" );
+                        await textWriter.WriteAsync( ">" );
+                        await textWriter.WriteAsync( HtmlEncode( spanText ) );
+                        await textWriter.WriteAsync( "</span>" );
                     }
                     else
                     {
-                        textWriter.Write( HtmlEncode( spanText ) );
+                        await textWriter.WriteAsync( HtmlEncode( spanText ) );
                     }
                 }
-
-                i = textSpan.End;
             }
 
-            // Write the remaining text.
-            if ( i < sourceText.Length )
-            {
-                textWriter.Write( HtmlEncode( sourceText.GetSubText( i ).ToString() ) );
-            }
-
-            textWriter.WriteLine( "</code></pre>" );
+            await textWriter.WriteLineAsync( "</code></pre>" );
 
             if ( this._options.Epilogue != null )
             {
-                textWriter.Write( this._options.Epilogue );
+                await textWriter.WriteAsync( this._options.Epilogue );
             }
         }
 

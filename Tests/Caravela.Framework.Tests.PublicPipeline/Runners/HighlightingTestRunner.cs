@@ -48,6 +48,16 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 font-style: italic;
             }
 
+            .diag-Warning
+            {
+                text-decoration: underline 1px wavy orange;
+            }
+
+            .diag-Error
+            {
+                text-decoration: underline 1px wavy red;
+            }
+
             .legend 
             {
                 margin-top: 100px;
@@ -127,7 +137,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             Assert.True( File.Exists( expectedHtmlPath ) );
 
             this.Logger?.WriteLine( "Actual HTML: " + actualHtmlPath );
-            this.Logger?.WriteLine( "Expected HTML: " + actualHtmlPath );
+            this.Logger?.WriteLine( "Expected HTML: " + expectedHtmlPath );
 
             var expectedHighlightedSource = NormalizeEndOfLines( File.ReadAllText( expectedHtmlPath ) );
 

@@ -108,7 +108,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 if ( annotatedTemplateSyntax != null )
                 {
                     // Display the annotated syntax tree.
-                    this.ColoredSourceCodeDocument = SyntaxColorizer.WriteSyntaxColoring(
+                    this.ColoredSourceCodeDocument = await SyntaxColorizer.WriteSyntaxColoringAsync(
                         testResult.SyntaxTrees.First().InputDocument,
                         testResult.Diagnostics,
                         annotatedTemplateSyntax );
@@ -135,7 +135,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                     var formattedDocument3 = await OutputCodeFormatter.FormatToDocumentAsync( document3, testResult.CompileTimeCompilationDiagnostics );
 
-                    this.CompiledTemplateDocument = SyntaxColorizer.WriteSyntaxColoring( formattedDocument3.Document );
+                    this.CompiledTemplateDocument = await SyntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document );
                 }
 
                 var consolidatedOutputSyntax = testResult.GetConsolidatedTestOutput();
@@ -148,7 +148,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                     var consolidatedOutputDocument = project.AddDocument( "ConsolidatedOutput.cs", consolidatedOutputSyntax );
 
                     // Display the transformed code.
-                    this.TransformedCodeDocument = SyntaxColorizer.WriteSyntaxColoring( consolidatedOutputDocument );
+                    this.TransformedCodeDocument = await SyntaxColorizer.WriteSyntaxColoringAsync( consolidatedOutputDocument );
                 }
 
                 // Display the intermediate linker code.
@@ -157,7 +157,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                     var intermediateSyntaxTree = testResult.IntermediateLinkerCompilation.Compilation.SyntaxTrees.First();
                     var linkerProject = testRunner.CreateProject( testInput.Options );
                     var linkerDocument = linkerProject.AddDocument( "IntermediateLinkerCode.cs", await intermediateSyntaxTree.GetRootAsync() );
-                    this.IntermediateLinkerCodeCodeDocument = SyntaxColorizer.WriteSyntaxColoring( linkerDocument );
+                    this.IntermediateLinkerCodeCodeDocument = await SyntaxColorizer.WriteSyntaxColoringAsync( linkerDocument );
                 }
 
                 // Compare the output and shows the result.

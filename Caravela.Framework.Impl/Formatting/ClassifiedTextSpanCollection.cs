@@ -140,14 +140,6 @@ namespace Caravela.Framework.Impl.Formatting
                         }
                     }
                 }
-                else if ( this._spans.TryGetGreatestSmallerOrEqualValue( span.End, out var previousEndSpan ) && previousEndSpan.Span.IntersectsWith( span ) )
-                {
-                    // An existing span intersects with the end. Split it and retry.
-
-                    var (a, b) = Split( previousStartSpan, span.Start );
-                    this._spans[a.Span.Start] = a;
-                    this._spans[b.Span.Start] = b;
-                }
                 else
                 {
                     // We cannot get here because we start with a whole partition.
@@ -168,22 +160,6 @@ namespace Caravela.Framework.Impl.Formatting
                         TextSpan.FromBounds( splitPosition, textSpan.Span.End ),
                         textSpan.Classification,
                         textSpan.Tags ));
-        }
-
-        public TextSpanClassification GetCategory( in TextSpan textSpan )
-        {
-            if ( this._spans.TryGetGreatestSmallerOrEqualValue( textSpan.Start, out var markedTextSpan ) )
-            {
-                if ( markedTextSpan.Span.Contains( textSpan ) )
-                {
-                    return markedTextSpan.Classification;
-                }
-
-                return TextSpanClassification.Conflict;
-            }
-
-            // This should not happen because our partition covers [0,int.MaxValue]
-            return TextSpanClassification.Default;
         }
 
         public IEnumerable<ClassifiedTextSpan> GetClassifiedSpans( TextSpan textSpan )

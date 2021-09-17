@@ -374,7 +374,7 @@ namespace Caravela.TestFramework
             {
                 foreach ( var syntaxTree in testResult.SyntaxTrees )
                 {
-                    this.WriteHtml( syntaxTree, htmlDirectory, htmlCodeWriter );
+                    await this.WriteHtmlAsync( syntaxTree, htmlDirectory, htmlCodeWriter );
                 }
             }
 
@@ -390,7 +390,7 @@ namespace Caravela.TestFramework
 
                 await using ( var outputHtml = File.CreateText( outputHtmlPath ) )
                 {
-                    htmlCodeWriter.Write( formattedOutputDocument, null, outputHtml );
+                    await htmlCodeWriter.WriteAsync( formattedOutputDocument, null, outputHtml );
                 }
 
                 testResult.OutputHtmlPath = outputHtmlPath;
@@ -400,7 +400,7 @@ namespace Caravela.TestFramework
         private protected virtual HtmlCodeWriter CreateHtmlCodeWriter( TestOptions options )
             => new( new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault() ) );
 
-        private void WriteHtml( TestSyntaxTree testSyntaxTree, string htmlDirectory, HtmlCodeWriter htmlCodeWriter )
+        private async Task WriteHtmlAsync( TestSyntaxTree testSyntaxTree, string htmlDirectory, HtmlCodeWriter htmlCodeWriter )
         {
             var inputHtmlPath = Path.Combine(
                 htmlDirectory,
@@ -411,9 +411,9 @@ namespace Caravela.TestFramework
             this.Logger?.WriteLine( "HTML of input: " + inputHtmlPath );
 
             // Write the input document.
-            using ( var inputTextWriter = File.CreateText( inputHtmlPath ) )
+            await using ( var inputTextWriter = File.CreateText( inputHtmlPath ) )
             {
-                htmlCodeWriter.Write(
+                await htmlCodeWriter.WriteAsync(
                     testSyntaxTree.InputDocument,
                     testSyntaxTree.AnnotatedSyntaxRoot,
                     inputTextWriter );

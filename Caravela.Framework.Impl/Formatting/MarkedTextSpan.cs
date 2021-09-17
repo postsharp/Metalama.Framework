@@ -3,6 +3,7 @@
 
 using Caravela.Framework.DesignTime.Contracts;
 using Microsoft.CodeAnalysis.Text;
+using System;
 using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Formatting
@@ -22,22 +23,24 @@ namespace Caravela.Framework.Impl.Formatting
             this.Tags = tags ?? ImmutableDictionary<string, string>.Empty;
         }
 
-        public MarkedTextSpan Update( TextSpanClassification? classification, string? name, string? value )
+        public MarkedTextSpan Update( TextSpanClassification? classification, string? tagName, string? tagValue )
         {
+            if ( tagName != null && tagValue == null )
+            {
+                // Null tag values are not supported.
+                throw new ArgumentNullException( nameof(tagValue) );
+            }
+            
             var newClassification = classification != null && classification.Value > this.Classification ? classification.Value : this.Classification;
             ImmutableDictionary<string, string> newTags;
 
-            if ( name == null || (this.Tags.TryGetValue( name, out var currentTagValue ) && currentTagValue == value) )
+            if ( tagName == null || (this.Tags.TryGetValue( tagName, out var currentTagValue ) && currentTagValue == tagValue) )
             {
                 newTags = this.Tags;
             }
-            else if ( value == null )
-            {
-                newTags = this.Tags.Remove( name );
-            }
             else
             {
-                newTags = this.Tags.SetItem( name, value );
+                newTags = this.Tags.SetItem( tagName, tagValue! );
             }
 
             return new MarkedTextSpan( this.Span, newClassification, newTags );
@@ -45,6 +48,12 @@ namespace Caravela.Framework.Impl.Formatting
 
         public bool Satisfies( TextSpanClassification? classification, string? tagName, string? tagValue )
         {
+            if ( tagName != null && tagValue == null )
+            {
+                // Null tag values are not supported.
+                throw new ArgumentNullException( nameof(tagValue) );
+            }
+
             if ( classification != null && classification.Value > this.Classification )
             {
                 return false;
@@ -53,10 +62,6 @@ namespace Caravela.Framework.Impl.Formatting
             if ( tagName == null )
             {
                 return true;
-            }
-            else if ( tagValue == null )
-            {
-                return !this.Tags.ContainsKey( tagName );
             }
             else
             {
@@ -89,7 +94,7 @@ namespace Caravela.Framework.Impl.Formatting
 
         public override string ToString()
         {
-            var s = this.Span.ToString().Replace( "2147483647", "inf" ) + "=>" + this.Classification;
+            var s = this.Span.ToString().Replace( "2147483647" /* int.Max */, "inf" ) + "=>" + this.Classification;
 
             foreach ( var tag in this.Tags )
             {
