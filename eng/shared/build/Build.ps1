@@ -118,8 +118,8 @@ function Clean() {
 
     if ($LASTEXITCODE -ne 0 ) { throw "Clean failed." }
 
-    if (Test-Path "artifacts\bin\Debug" -PathType Container ) {
-        Remove-Item "artifacts\bin\Debug\*.nupkg"
+    if (Test-Path "artifacts\bin\$configuration" -PathType Container ) {
+        Remove-Item "artifacts\bin\$configuration\*.nupkg"
     }
 
     if ( Test-Path $PropsFilePath ) {
@@ -169,6 +169,10 @@ function CreateVersionFile() {
 function Restore() {
 
     Write-Host "------ Restoring ---------------------------------" -ForegroundColor Cyan
+    
+    if ( -not(Test-Path "artifacts\bin\$configuration" -PathType Container) ) {
+        mkdir "artifacts\bin\$configuration" | Out-Null
+    }
     
     if ( $UseMsbuild ) {
         & msbuild /t:Restore /p:Configuration=$configuration /m /v:$Verbosity
