@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
         /// </summary>
         /// <param name="builder"></param>
         /// <returns></returns>
-        public static DeclarationRef<IDeclaration> FromBuilder( DeclarationBuilder builder ) => new( builder );
+        public static DeclarationRef<IDeclaration> FromBuilder( IDeclarationBuilder builder ) => new( builder );
 
         /// <summary>
         /// Creates a <see cref="DeclarationRef{T}"/> from a Roslyn symbol.
@@ -191,7 +191,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
                         GetSymbolOfNode( compilation.PartialCompilation.Compilation, node ).AssertValidType<T>(),
                         kind );
 
-                case DeclarationBuilder builder:
+                case IDeclarationBuilder builder:
                     return (T) compilation.Factory.GetDeclaration( builder );
 
                 case string documentationId:

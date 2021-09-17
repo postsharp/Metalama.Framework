@@ -77,14 +77,17 @@ namespace Caravela.Framework.Impl.Linking
                  && symbol.ReturnsVoid
                  && !SymbolEqualityComparer.Default.Equals( symbol, inliningContext.CurrentDeclaration ) )
             {
-                // Add the implicit return for void methods.
-                inliningContext.UseLabel();
+                // TODO: This will not be hit until we are using results of control flow analysis. 
+                throw new AssertionFailedException( Justifications.CoverageMissing );
 
-                rewrittenBody =
-                    Block(
-                            rewrittenBody,
-                            CreateGotoStatement() )
-                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                // // Add the implicit return for void methods.
+                // inliningContext.UseLabel();
+                //
+                // rewrittenBody =
+                //     Block(
+                //             rewrittenBody,
+                //             CreateGotoStatement() )
+                //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
 
             // Add the SourceCode annotation, if it is source code.
@@ -323,9 +326,11 @@ namespace Caravela.Framework.Impl.Linking
                         switch ( rewrittenNode )
                         {
                             case null:
-                                return
-                                    Block()
-                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                            // return
+                            //     Block()
+                            //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             case ExpressionSyntax rewrittenExpression:
                                 return
@@ -344,13 +349,15 @@ namespace Caravela.Framework.Impl.Linking
                         switch ( rewrittenNode )
                         {
                             case null:
-                                return
-                                    Block(
-                                            ReturnStatement(
-                                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
-                                                LiteralExpression( SyntaxKind.DefaultLiteralExpression ),
-                                                Token( SyntaxKind.SemicolonToken ) ) )
-                                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                            // return
+                            //     Block(
+                            //             ReturnStatement(
+                            //                 Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                            //                 LiteralExpression( SyntaxKind.DefaultLiteralExpression ),
+                            //                 Token( SyntaxKind.SemicolonToken ) ) )
+                            //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             case ExpressionSyntax rewrittenExpression:
                                 return
@@ -499,9 +506,11 @@ namespace Caravela.Framework.Impl.Linking
 
             if ( this._introductionRegistry.IsLastOverride( targetSymbol ) )
             {
-                // If something is resolved to the last override, we will point to the target declaration instead.
-                targetSymbol = aspectReference.OriginalSymbol;
-                targetSemanticKind = IntermediateSymbolSemanticKind.Final;
+                throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                // // If something is resolved to the last override, we will point to the target declaration instead.
+                // targetSymbol = aspectReference.OriginalSymbol;
+                // targetSemanticKind = IntermediateSymbolSemanticKind.Final;
             }
 
             // Determine the target name. Specifically, handle case when the resolved symbol points to the original implementation.
@@ -556,14 +565,18 @@ namespace Caravela.Framework.Impl.Linking
 
                         if ( targetSymbol.IsStatic )
                         {
-                            // Static member access where the target is a different type.
-                            return
-                                MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
-                                        IdentifierName( targetMemberName ) )
-                                    .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
-                                    .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
+                            // This was possible when base was able to point to hidden member. Now every
+                            // override must point to a (potentially introduced) member of the same type. 
+                            throw new AssertionFailedException( Justifications.ObsoleteBranch );
+
+                            // // Static member access where the target is a different type.
+                            // return
+                            //     MemberAccessExpression(
+                            //             SyntaxKind.SimpleMemberAccessExpression,
+                            //             LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
+                            //             IdentifierName( targetMemberName ) )
+                            //         .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
+                            //         .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
                         }
                         else
                         {
@@ -604,6 +617,27 @@ namespace Caravela.Framework.Impl.Linking
                                 return memberAccessExpression.WithName( IdentifierName( targetMemberName ) );
                             }
                         }
+                    }
+
+                case ConditionalAccessExpressionSyntax conditionalAccessExpression:
+                    if ( SymbolEqualityComparer.Default.Equals(
+                        aspectReference.ContainingSymbol.ContainingType,
+                        targetSymbol.ContainingType ) )
+                    {
+                        if ( aspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
+                        {
+                            throw new AssertionFailedException( Justifications.CoverageMissing );
+                        }
+                        else
+                        {
+                            var rewriter = new ConditionalAccessRewriter( targetMemberName );
+
+                            return (ExpressionSyntax) rewriter.Visit( conditionalAccessExpression );
+                        }
+                    }
+                    else
+                    {
+                        throw new AssertionFailedException( Justifications.CoverageMissing );
                     }
 
                 default:

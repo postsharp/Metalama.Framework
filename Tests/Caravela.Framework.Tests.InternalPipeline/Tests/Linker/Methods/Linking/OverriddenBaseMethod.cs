@@ -1,7 +1,7 @@
 ﻿using System;
 using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Linking.OverridenBaseMethod
+namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Linking.OverriddenBaseMethod
 {
     class Base
     {

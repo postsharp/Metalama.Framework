@@ -38,8 +38,8 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly ICompileTimeCompilationBuilderObserver? _observer;
         private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
 
-        public const string PredefinedTypesFileName = "__CaravelaPredefinedTypes.cs"; 
-        
+        public const string PredefinedTypesFileName = "__CaravelaPredefinedTypes.cs";
+
         private static readonly Lazy<SyntaxTree> _predefinedTypesSyntaxTree = new(
             () =>
                 CSharpSyntaxTree.ParseText(
