@@ -40,4 +40,6 @@ return this._c;    }
 set    {
         global::System.Console.WriteLine("This is aspect code.");
 this._c=value;    }
-}    }
+}
+// Comment after.
+    }

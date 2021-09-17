@@ -224,11 +224,11 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var remainingVariables = new List<VariableDeclaratorSyntax>();
 
-                foreach (var variable in node.Variables)
+                foreach ( var variable in node.Variables )
                 {
                     var rewrittenVariable = (VariableDeclaratorSyntax?) this.Visit( variable );
 
-                    if (rewrittenVariable != null)
+                    if ( rewrittenVariable != null )
                     {
                         remainingVariables.Add( rewrittenVariable );
                     }
@@ -238,10 +238,10 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     return base.VisitVariableDeclaration( node );
                 }
-                else if (remainingVariables.Count > 0)
+                else if ( remainingVariables.Count > 0 )
                 {
                     return node
-                        .WithType((TypeSyntax)this.Visit(node.Type).AssertNotNull())
+                        .WithType( (TypeSyntax) this.Visit( node.Type ).AssertNotNull() )
                         .WithVariables( SeparatedList( remainingVariables ) )
                         .WithLeadingTrivia( this.VisitTriviaList( node.GetLeadingTrivia() ) )
                         .WithTrailingTrivia( this.VisitTriviaList( node.GetTrailingTrivia() ) );

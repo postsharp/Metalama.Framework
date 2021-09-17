@@ -10,24 +10,24 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal static class RewriterExtensions
     {
-        public static SyntaxTriviaList VisitTriviaList(this CSharpSyntaxRewriter rewriter, SyntaxTriviaList triviaList)
+        public static SyntaxTriviaList VisitTriviaList( this CSharpSyntaxRewriter rewriter, SyntaxTriviaList triviaList )
         {
             var dirty = false;
             var list = new List<SyntaxTrivia>();
 
-            foreach (var trivia in triviaList)
+            foreach ( var trivia in triviaList )
             {
                 var rewrittenTrivia = rewriter.VisitTrivia( trivia );
 
                 list.Add( rewrittenTrivia );
 
-                if (!trivia.Equals(rewrittenTrivia))
+                if ( !trivia.Equals( rewrittenTrivia ) )
                 {
                     dirty = true;
                 }
             }
 
-            if (dirty)
+            if ( dirty )
             {
                 return TriviaList( list );
             }

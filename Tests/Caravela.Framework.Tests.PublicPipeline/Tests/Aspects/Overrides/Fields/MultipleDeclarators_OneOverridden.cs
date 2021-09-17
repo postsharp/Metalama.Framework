@@ -35,6 +35,8 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Fields.MultipleD
     [Test]
     internal class TargetClass
     {
+        // Comment before.
         public int A, B, C;
+        // Comment after.
     }
 }

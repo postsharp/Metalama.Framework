@@ -1,6 +1,7 @@
     [Test]
     internal class TargetClass
     {
+        // Comment before.
         public int A,C;
 
 
@@ -15,4 +16,6 @@ return this._b;    }
 set    {
         global::System.Console.WriteLine("This is aspect code.");
 this._b=value;    }
-}    }
+}
+// Comment after.
+    }

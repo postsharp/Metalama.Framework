@@ -8,7 +8,7 @@ using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
 #pragma warning disable CS0067
 #pragma warning disable CS0649
 
-namespace Caravela.Framework.Tests.Integration.Tests.Linker.Properties.Linking.NamingConflict
+namespace Caravela.Framework.Tests.Integration.Tests.Linker.Naming.Conflicts
 {    
     // <target>
     class Target

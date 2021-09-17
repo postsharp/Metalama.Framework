@@ -37,7 +37,10 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else
                 {
-                    return node;
+                    // Template compiler currently does not generate expressions that would chain x?.y?.z without parentheses.
+                    throw new AssertionFailedException( Justifications.CoverageMissing );
+                    
+                    // return node;
                 }
             }
 
@@ -49,7 +52,10 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else
                 {
-                    return node;
+                    // Template compiler currently does not generate expressions that would chain x?.y?.z without parentheses.
+                    throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                    // return node;
                 }
             }
         }

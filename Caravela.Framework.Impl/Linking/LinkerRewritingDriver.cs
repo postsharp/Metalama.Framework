@@ -505,6 +505,7 @@ namespace Caravela.Framework.Impl.Linking
             if ( this._introductionRegistry.IsLastOverride( targetSymbol ) )
             {
                 throw new AssertionFailedException( Justifications.CoverageMissing );
+                
                 // // If something is resolved to the last override, we will point to the target declaration instead.
                 // targetSymbol = aspectReference.OriginalSymbol;
                 // targetSemanticKind = IntermediateSymbolSemanticKind.Final;
@@ -562,14 +563,18 @@ namespace Caravela.Framework.Impl.Linking
 
                         if ( targetSymbol.IsStatic )
                         {
-                            // Static member access where the target is a different type.
-                            return
-                                MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
-                                        IdentifierName( targetMemberName ) )
-                                    .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
-                                    .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
+                            // This was possible when base was able to point to hidden member. Now every
+                            // override must point to a (potentially introduced) member of the same type. 
+                            throw new AssertionFailedException( Justifications.ObsoleteBranch );
+
+                            // // Static member access where the target is a different type.
+                            // return
+                            //     MemberAccessExpression(
+                            //             SyntaxKind.SimpleMemberAccessExpression,
+                            //             LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.ContainingType ),
+                            //             IdentifierName( targetMemberName ) )
+                            //         .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
+                            //         .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
                         }
                         else
                         {

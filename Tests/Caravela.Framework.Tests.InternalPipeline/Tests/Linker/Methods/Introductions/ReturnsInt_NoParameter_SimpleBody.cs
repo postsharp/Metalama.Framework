@@ -11,5 +11,11 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Introduction
         {
             return 42;
         }
+
+        [PseudoIntroduction("TestAspect")]
+        public static int Bar()
+        {
+            return 42;
+        }
     }
 }

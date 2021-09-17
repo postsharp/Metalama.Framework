@@ -19,11 +19,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Tests\Linker\EventFields\Linking\OverriddenLocalEvent - Copy.t.cs" />
-    <Compile Remove="Tests\Linker\Fields\Linking\OverriddenLocalProperty.t.cs" />
-    <Compile Remove="Tests\Linker\Methods\Overrides\Body\ReturnsInt_Condition - Copy.t.cs" />
+    <Compile Remove="Tests\Linker\EventFields\Linking\IntroducedEvent - Copy.t.cs" />
   </ItemGroup>
-
 
   <ItemGroup>
     <PackageReference Include="FakeItEasy" Version="6.2.1" />
@@ -81,9 +78,7 @@
     <Compile Remove="**\*" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Tests\Linker\EventFields\Linking\IntroducedEvent.t.cs" />
-    <None Include="Tests\Linker\Fields\Linking\OverriddenLocalField.t.cs" />
-    <None Include="Tests\Linker\Methods\Overrides\Body\ReturnsInt_ConditionalAccess.t.cs" />
+    <None Include="Tests\Linker\EventFields\Linking\NoOverride.t.cs" />
   </ItemGroup>
   
 </Project>

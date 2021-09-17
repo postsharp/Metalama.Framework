@@ -6,13 +6,16 @@ namespace Caravela.Framework.Tests.Integration.Tests.Linker.Methods.Introduction
     // <target>
     class Target
     {
-        class T
+        [PseudoIntroduction("TestAspect")]
+        public int Foo(int x)
         {
-            [PseudoIntroduction("TestAspect")]
-            public int Foo(int x)
-            {
-                return 42;
-            }
+            return 42;
+        }
+
+        [PseudoIntroduction("TestAspect")]
+        public static int Bar(int x)
+        {
+            return 42;
         }
     }
 }

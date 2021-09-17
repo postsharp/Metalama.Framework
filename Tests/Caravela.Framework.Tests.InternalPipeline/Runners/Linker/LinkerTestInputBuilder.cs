@@ -171,7 +171,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
                 if ( transformation is IOverriddenDeclaration overriddenDeclaration )
                 {
-                    var overriddenDeclarationName = ((ITestTransformation) transformation).OverriddenDeclarationName;
+                    var overriddenDeclarationName = ((ITestTransformation) transformation).OverriddenDeclarationName.AssertNotNull();
 
                     var insertPositionNode =
                         insertPositionNodeId != null
@@ -184,7 +184,9 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     }
 
                     var overriddenMemberSymbol = containingSymbol.GetMembers()
-                        .Where( x => StringComparer.Ordinal.Equals( x.Name, overriddenDeclarationName ) )
+                        .Where( x => 
+                            StringComparer.Ordinal.Equals( x.Name, overriddenDeclarationName ) 
+                            || (overriddenDeclarationName.Contains('.', StringComparison.Ordinal) && x.Name.EndsWith( overriddenDeclarationName, StringComparison.Ordinal ) ) )
                         .Where( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) )
                         .SingleOrDefault();
 
@@ -198,7 +200,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     {
                         // Find introduction's symbol helper.
                         var overriddenMemberSymbolHelper = containingSymbol.GetMembers()
-                            .Where( x => StringComparer.Ordinal.Equals( x.Name, GetSymbolHelperName( overriddenDeclarationName.AssertNotNull() ) ) )
+                            .Where( x => StringComparer.Ordinal.Equals( x.Name, GetSymbolHelperName( overriddenDeclarationName ) ) )
                             .Where( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) )
                             .SingleOrDefault();
 

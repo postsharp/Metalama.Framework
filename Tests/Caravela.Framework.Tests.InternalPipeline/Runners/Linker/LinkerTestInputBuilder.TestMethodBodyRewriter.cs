@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Tests.Integration.Runners.Linker
@@ -27,6 +28,13 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
             {
+                if (node.Expression is MemberAccessExpressionSyntax memberAccess
+                    && memberAccess.Name is GenericNameSyntax genericName
+                    && StringComparer.Ordinal.Equals( genericName.Identifier.ValueText, nameof( Api._cast )) )
+                {
+                    return ParenthesizedExpression(CastExpression( genericName.TypeArgumentList.Arguments.Single(), (ExpressionSyntax)this.Visit(memberAccess.Expression).AssertNotNull() ));
+                }
+
                 if ( this.TransformInvocationOrElementAccess( node, node.Expression, node.ArgumentList.Arguments, out var transformedNode ) )
                 {
                     return transformedNode;

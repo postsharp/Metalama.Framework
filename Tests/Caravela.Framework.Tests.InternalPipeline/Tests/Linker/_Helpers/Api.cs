@@ -13,5 +13,7 @@
         public static dynamic _local = new object();
 
         public static dynamic link { get; set; } = new object();
+
+        public static T _cast<T>(object o) => (T)o;
     }
 }

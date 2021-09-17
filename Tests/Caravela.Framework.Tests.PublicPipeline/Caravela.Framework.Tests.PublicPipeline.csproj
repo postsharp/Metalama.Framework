@@ -17,6 +17,10 @@
     <NoWarn>1591,1572,1573,CS8892</NoWarn>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Tests\Aspects\Introductions\Interfaces\ExplicitMembers - Copy.t.cs" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
