@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;

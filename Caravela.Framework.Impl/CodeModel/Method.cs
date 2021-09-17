@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.ReflectionMocks;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;

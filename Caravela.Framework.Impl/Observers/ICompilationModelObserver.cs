@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.ServiceProvider;
 
 namespace Caravela.Framework.Impl.Observers
 {

@@ -13,8 +13,6 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Formatting
 {
-    // TODO: This class is essentially a UI concern so it should be moved into a different assembly e.g. DesignTime.
-
     /// <summary>
     /// Produces a <see cref="ClassifiedTextSpanCollection"/> with compile-time code given
     /// a syntax tree annotated with <see cref="TemplateAnnotator"/>.
@@ -22,35 +20,26 @@ namespace Caravela.Framework.Impl.Formatting
     public sealed partial class TextSpanClassifier : CSharpSyntaxWalker
     {
         private readonly SourceText _sourceText;
-        private readonly bool _processAllTypes;
         private readonly string _sourceString;
         private readonly MarkAllChildrenWalker _markAllChildrenWalker;
-        private readonly bool _detectRegion;
-        private readonly ClassifiedTextSpanCollection _classifiedTextSpans;
         private bool _isInTemplate;
         private bool _isInCompileTimeType;
-        private int _excludedRegionStart;
-        private bool _isInExcludedRegion;
         private bool _isRecursiveCall;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextSpanClassifier"/> class and specifies a backward-compatibility flag.
         /// </summary>
         /// <param name="sourceText"></param>
-        /// <param name="visitUnmarkedTypes">This is for backward compatibility with AspectWorkbench because
-        /// test aspect classes are not marked at compile time.</param>
-        public TextSpanClassifier( SourceText sourceText, bool processAllTypes = false, bool detectRegion = false )
-            : base( detectRegion ? SyntaxWalkerDepth.Trivia : SyntaxWalkerDepth.Token )
+        public TextSpanClassifier( SourceText sourceText )
+            : base( SyntaxWalkerDepth.Token )
         {
-            this._detectRegion = detectRegion;
             this._sourceText = sourceText;
-            this._processAllTypes = processAllTypes;
             this._sourceString = sourceText.ToString();
             this._markAllChildrenWalker = new MarkAllChildrenWalker( this );
-            this._classifiedTextSpans = new ClassifiedTextSpanCollection( sourceText.Length );
+            this.ClassifiedTextSpans = new ClassifiedTextSpanCollection( sourceText );
         }
 
-        public IReadOnlyClassifiedTextSpanCollection ClassifiedTextSpans => this._classifiedTextSpans;
+        public ClassifiedTextSpanCollection ClassifiedTextSpans { get; }
 
         private static bool ShouldMarkTrivia( TextSpanClassification classification )
             => classification switch
@@ -64,26 +53,16 @@ namespace Caravela.Framework.Impl.Formatting
         {
             if ( node == null )
             {
+                // Coverage: ignore.
                 return;
             }
 
             var isRecursiveCall = this._isRecursiveCall;
             this._isRecursiveCall = true;
 
-            if ( !isRecursiveCall )
-            {
-                // This is the top-level call.
-                this._isInExcludedRegion = this._detectRegion && node.ToFullString().Contains( "// <aspect>" );
-            }
-
             try
             {
                 base.Visit( node );
-
-                if ( !isRecursiveCall && this._isInExcludedRegion && this._excludedRegionStart != node.Span.End )
-                {
-                    this.Mark( TextSpan.FromBounds( this._excludedRegionStart, node.Span.End ), TextSpanClassification.Excluded );
-                }
             }
             finally
             {
@@ -91,10 +70,12 @@ namespace Caravela.Framework.Impl.Formatting
             }
         }
 
-        private void VisitType<T>( T node, Action<T> visitBase )
+        private bool VisitTypeDeclaration<T>( T node, Action<T> visitBase )
             where T : TypeDeclarationSyntax
         {
-            if ( node.GetScopeFromAnnotation() != TemplatingScope.RunTimeOnly )
+            var scope = node.GetScopeFromAnnotation();
+
+            if ( scope is TemplatingScope.CompileTimeOnly or TemplatingScope.Both )
             {
                 var oldIsInCompileTimeType = this._isInCompileTimeType;
 
@@ -109,24 +90,47 @@ namespace Caravela.Framework.Impl.Formatting
                     this.Mark( node.ConstraintClauses, TextSpanClassification.CompileTime );
                     this.Mark( node.Identifier, TextSpanClassification.CompileTime );
                     this.Mark( node.BaseList, TextSpanClassification.CompileTime );
+                    this.Mark( node.AttributeLists, TextSpanClassification.CompileTime );
+                    this.Mark( node.TypeParameterList, TextSpanClassification.CompileTime );
+
                     visitBase( node );
+
+                    return true;
                 }
                 finally
                 {
                     this._isInCompileTimeType = oldIsInCompileTimeType;
                 }
             }
-            else if ( this._processAllTypes || this._detectRegion )
+
+            return false;
+        }
+
+        public override void VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node, n => base.VisitClassDeclaration( n ) );
+
+        public override void VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node, n => base.VisitStructDeclaration( n ) );
+
+        public override void VisitRecordDeclaration( RecordDeclarationSyntax node )
+        {
+            if ( this.VisitTypeDeclaration( node, n => base.VisitRecordDeclaration( n ) ) )
             {
-                visitBase( node );
+                this.Mark( node.ParameterList, TextSpanClassification.CompileTime );
             }
         }
 
-        public override void VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitType( node, n => base.VisitClassDeclaration( n ) );
+        private void VisitSimpleTypeDeclaration( SyntaxNode node )
+        {
+            var scope = node.GetScopeFromAnnotation();
 
-        public override void VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitType( node, n => base.VisitStructDeclaration( n ) );
+            if ( scope is TemplatingScope.CompileTimeOnly or TemplatingScope.Both )
+            {
+                this.Mark( node, TextSpanClassification.CompileTime );
+            }
+        }
 
-        public override void VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitType( node, n => base.VisitRecordDeclaration( n ) );
+        public override void VisitDelegateDeclaration( DelegateDeclarationSyntax node ) => this.VisitSimpleTypeDeclaration( node );
+
+        public override void VisitEnumDeclaration( EnumDeclarationSyntax node ) => this.VisitSimpleTypeDeclaration( node );
 
         public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
@@ -138,6 +142,7 @@ namespace Caravela.Framework.Impl.Formatting
                 this.Mark( node.Identifier, TextSpanClassification.CompileTime );
                 this.Mark( node.ParameterList, TextSpanClassification.CompileTime );
                 this.Mark( node.Modifiers, TextSpanClassification.CompileTime );
+                this.Mark( node.AttributeLists, TextSpanClassification.CompileTime );
 
                 if ( node.Body != null )
                 {
@@ -324,7 +329,7 @@ namespace Caravela.Framework.Impl.Formatting
 
                 if ( triviaStart != triviaEnd )
                 {
-                    this._classifiedTextSpans.Add( TextSpan.FromBounds( triviaStart, triviaEnd ), classification );
+                    this.ClassifiedTextSpans.Add( TextSpan.FromBounds( triviaStart, triviaEnd ), classification );
                 }
             }
         }
@@ -342,7 +347,7 @@ namespace Caravela.Framework.Impl.Formatting
             var text = this._sourceText.GetSubText( span ).ToString();
 #endif
 
-            this._classifiedTextSpans.Add( span, classification );
+            this.ClassifiedTextSpans.Add( span, classification );
         }
 
         public override void VisitLiteralExpression( LiteralExpressionSyntax node )
@@ -394,52 +399,6 @@ namespace Caravela.Framework.Impl.Formatting
             }
 
             this.Visit( statement );
-        }
-
-        public override void VisitTrivia( SyntaxTrivia trivia )
-        {
-            var text = trivia.ToString();
-
-            if ( text.Contains( "// <aspect>" ) )
-            {
-                if ( this._isInExcludedRegion )
-                {
-                    // We have to exclude the trivia itself including the linebreaks but not the indentation.
-                    // We assume the trivia is a leading one.
-                    int regionStart;
-                    var lastTrivia = trivia.Token.LeadingTrivia.Last();
-
-                    if ( lastTrivia.Kind() == SyntaxKind.WhitespaceTrivia )
-                    {
-                        // This is indentation. We don't want to skip.
-                        regionStart = lastTrivia.SpanStart;
-                    }
-                    else
-                    {
-                        // No indentation.
-                        regionStart = lastTrivia.Span.End;
-                    }
-
-                    this.Mark( TextSpan.FromBounds( this._excludedRegionStart, regionStart ), TextSpanClassification.Excluded );
-                    this._isInExcludedRegion = false;
-                }
-            }
-            else if ( text.Contains( "// </aspect>" ) )
-            {
-                if ( !this._isInExcludedRegion )
-                {
-                    this._isInExcludedRegion = true;
-
-                    if ( trivia.Token.TrailingTrivia.IndexOf( trivia ) > 0 )
-                    {
-                        this._excludedRegionStart = trivia.Token.TrailingTrivia.First().SpanStart;
-                    }
-                    else
-                    {
-                        this._excludedRegionStart = trivia.Token.LeadingTrivia.First().SpanStart;
-                    }
-                }
-            }
         }
     }
 }

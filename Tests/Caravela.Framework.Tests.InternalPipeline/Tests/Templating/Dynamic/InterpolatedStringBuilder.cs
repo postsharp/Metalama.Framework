@@ -1,6 +1,6 @@
 using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code.Syntax;
+using Caravela.Framework.Code.ExpressionBuilders;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.InterpolatedStringBuilderT
@@ -27,8 +27,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.InterpolatedSt
 
             s.AddText( ")" );
 
-            var is1 = s.ToInterpolatedString();
-            var is2 = ( (IExpressionBuilder)s ).ToExpression().Value;
+            var is1 = s.ToValue();
+            var is2 = s.ToExpression().Value;
 
             return default;
         }

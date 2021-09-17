@@ -14,15 +14,13 @@ namespace Caravela.Framework.Impl.ReflectionMocks
     // This class must be public because it is referenced from compiled templates.
     public sealed class CompileTimeType : Type, ICompileTimeReflectionObject<IType>
     {
-        private readonly string _fullName;
-
         internal IDeclarationRef<IType> Target { get; }
 
         IDeclarationRef<IType> ICompileTimeReflectionObject<IType>.Target => this.Target;
 
         private CompileTimeType( IDeclarationRef<IType> typeSymbol, string fullName )
         {
-            this._fullName = fullName;
+            this.FullName = fullName;
             this.Target = typeSymbol;
         }
 
@@ -38,7 +36,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public override string Name => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        public override string FullName => this._fullName;
+        public override string FullName { get; }
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
@@ -134,5 +132,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         public override Type GetInterface( string name, bool ignoreCase ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override Type[] GetInterfaces() => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override string ToString() => $"Compile-time mock for run-time type {this.FullName}";
     }
 }

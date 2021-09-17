@@ -6,6 +6,7 @@ using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Serialization;
+using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -75,6 +76,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <param name="arguments">Arguments of the formatting string.</param>
         /// <typeparam name="T"></typeparam>
         private void ReportDiagnostic<T>( DiagnosticDefinition<T> descriptor, SyntaxNodeOrToken targetNode, T arguments )
+            where T : notnull
         {
             var location = this._syntaxTreeAnnotationMap.GetLocation( targetNode );
 
@@ -82,6 +84,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         private void ReportDiagnostic<T>( DiagnosticDefinition<T> descriptor, Location? location, T arguments )
+            where T : notnull
         {
             var diagnostic = descriptor.CreateDiagnostic( location, arguments );
             this._diagnosticAdder.Report( diagnostic );
@@ -112,42 +115,31 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="symbol">A symbol.</param>
         /// <returns></returns>
-        private TemplatingScope GetSymbolScope( ISymbol? symbol )
+        private TemplatingScope GetSymbolScope( ISymbol symbol )
         {
-            if ( symbol == null )
+            switch ( symbol )
             {
-                return GetMoreSpecificScope( TemplatingScope.Both );
-            }
-
-            // For local variables, we decide based on  _buildTimeLocals only. This collection is updated
-            // at each iteration of the algorithm based on inferences from _requireMetaExpressionStack.
-            if ( symbol is ILocalSymbol or INamedTypeSymbol { IsAnonymousType: true } )
-            {
-                if ( this._localScopes.TryGetValue( symbol, out var scope ) )
-                {
+                // For local variables, we decide based on  _buildTimeLocals only. This collection is updated
+                // at each iteration of the algorithm based on inferences from _requireMetaExpressionStack.
+                case ILocalSymbol or INamedTypeSymbol { IsAnonymousType: true } when this._localScopes.TryGetValue( symbol, out var scope ):
                     return scope;
-                }
 
                 // When a local variable is assigned to an anonymous type, the scope is unknown because the anonymous
                 // type is visited after the variable identifier.
-                return TemplatingScope.Unknown;
-            }
-            else if ( symbol is { ContainingType: { IsAnonymousType: true } containingType } )
-            {
-                return GetMoreSpecificScope( this.GetSymbolScope( containingType ) );
-            }
-            else if ( symbol is IParameterSymbol parameter )
-            {
-                if ( this._currentTemplateMember != null &&
-                     (SymbolEqualityComparer.Default.Equals( parameter.ContainingSymbol, this._currentTemplateMember ) ||
-                      (parameter.ContainingSymbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol }
-                       && SymbolEqualityComparer.Default.Equals( this._currentTemplateMember, associatedSymbol ))) )
-                {
+                case ILocalSymbol or INamedTypeSymbol { IsAnonymousType: true }:
+                    return TemplatingScope.Unknown;
+
+                case { ContainingType: { IsAnonymousType: true } containingType }:
+                    return GetMoreSpecificScope( this.GetSymbolScope( containingType ) );
+
+                case IParameterSymbol parameter when this._currentTemplateMember != null &&
+                                                     (SymbolEqualityComparer.Default.Equals( parameter.ContainingSymbol, this._currentTemplateMember ) ||
+                                                      (parameter.ContainingSymbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol }
+                                                       && SymbolEqualityComparer.Default.Equals( this._currentTemplateMember, associatedSymbol ))):
                     // In the future, we may have parameters on the template parameters changing their meaning. However, now, all template
                     // parameters map to run-time parameters of the same name.
 
                     return TemplatingScope.RunTimeOnly;
-                }
             }
 
             // The TemplateContext.runTime method must be processed separately. It is a compile-time-only method whose
@@ -486,17 +478,35 @@ namespace Caravela.Framework.Impl.Templating
         #endregion
 
         public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+            => this.VisitTypeDeclaration( node, n => base.VisitClassDeclaration( n ) );
+
+        public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node )
+            => this.VisitTypeDeclaration( node, n => base.VisitStructDeclaration( n ) );
+
+        public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
+            => this.VisitTypeDeclaration( node, n => base.VisitRecordDeclaration( n ) );
+
+        public override SyntaxNode? VisitDelegateDeclaration( DelegateDeclarationSyntax node )
+            => this.VisitTypeDeclaration( node, n => base.VisitDelegateDeclaration( n ) );
+
+        public override SyntaxNode? VisitEnumDeclaration( EnumDeclarationSyntax node )
+            => this.VisitTypeDeclaration( node, n => base.VisitEnumDeclaration( n ) );
+
+        private T VisitTypeDeclaration<T>( T node, Func<T, SyntaxNode?> callBase )
+            where T : SyntaxNode
         {
-            var typeScope = this.GetSymbolScope( this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node ) );
+            var typeScope = this.GetSymbolScope( this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node ).AssertNotNull() );
 
             if ( typeScope != TemplatingScope.RunTimeOnly )
             {
-                return base.VisitClassDeclaration( node );
+                return ((T) callBase( node )!).AddScopeAnnotation( typeScope );
             }
-
-            // This is not a build-time class so there's no need to analyze it.
-            // The scope annotation is needed for syntax highlighting.
-            return node.AddScopeAnnotation( TemplatingScope.RunTimeOnly );
+            else
+            {
+                // This is not a build-time type so there's no need to analyze it.
+                // The scope annotation is needed for syntax highlighting.
+                return node.AddScopeAnnotation( typeScope );
+            }
         }
 
         public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
@@ -1180,28 +1190,28 @@ namespace Caravela.Framework.Impl.Templating
                 using ( this.WithScopeContext(
                     ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a local variable of compile-time-only type '{node.Type}'" ) ) )
                 {
-                    var transformedVariableDeclaration = (VariableDeclarationSyntax) base.VisitVariableDeclaration( node )!;
+                    // ReSharper disable once RedundantSuppressNullableWarningExpression
+                    var transformedVariables = node.Variables.Select( v => this.Visit( v )! );
 
-                    return transformedVariableDeclaration.AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
+                    return node.Update( transformedType, SeparatedList( transformedVariables ) ).AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
                 }
             }
             else
             {
-                var transformedVariableDeclaration = (VariableDeclarationSyntax) base.VisitVariableDeclaration( node )!;
+                // ReSharper disable once RedundantSuppressNullableWarningExpression
+                var transformedVariables = node.Variables.Select( v => this.Visit( v )! ).ToList();
 
-                var variableScopes = transformedVariableDeclaration.Variables.Select( v => v.GetScopeFromAnnotation() ).Distinct().ToList();
+                var variableScopes = transformedVariables.Select( v => v.GetScopeFromAnnotation() ).Distinct().ToList();
 
-                if ( variableScopes.Count == 1 )
+                if ( variableScopes.Count != 1 )
                 {
-                    return transformedVariableDeclaration.AddScopeAnnotation( variableScopes.Single() );
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.SplitVariables,
+                        node,
+                        string.Join( ",", node.Variables.Select( v => "'" + v.Identifier.Text + "'" ) ) );
                 }
 
-                this.ReportDiagnostic(
-                    TemplatingDiagnosticDescriptors.SplitVariables,
-                    node,
-                    string.Join( ",", node.Variables.Select( v => "'" + v.Identifier.Text + "'" ) ) );
-
-                return transformedVariableDeclaration;
+                return node.Update( transformedType, SeparatedList( transformedVariables ) ).AddScopeAnnotation( variableScopes.Single() );
             }
         }
 
@@ -1520,6 +1530,13 @@ namespace Caravela.Framework.Impl.Templating
             this.ReportUnsupportedLanguageFeature( node.DoKeyword, "do" );
 
             return base.VisitDoStatement( node );
+        }
+
+        public override SyntaxNode? VisitUnsafeStatement( UnsafeStatementSyntax node )
+        {
+            this.ReportUnsupportedLanguageFeature( node.UnsafeKeyword, "unsafe" );
+
+            return base.VisitUnsafeStatement( node );
         }
 
         public override SyntaxNode? VisitGotoStatement( GotoStatementSyntax node )
@@ -1876,6 +1893,15 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
         {
             var scope = this.GetNodeScope( node );
+
+            if ( scope == TemplatingScope.Conflict )
+            {
+                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.ScopeConflict, node, node.ToString() );
+
+                // We continue with an unknown scope because other methods don't handle the Conflict scope.
+                scope = TemplatingScope.Unknown;
+            }
+
             var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
             var transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;
@@ -1906,6 +1932,12 @@ namespace Caravela.Framework.Impl.Templating
         {
             var transformedType = this.Visit( node.Type );
             var objectType = this._syntaxTreeAnnotationMap.GetExpressionType( node );
+
+            if ( objectType == null )
+            {
+                throw new AssertionFailedException( $"Cannot get the expression type for '{node}'." );
+            }
+
             var objectTypeScope = this.GetSymbolScope( objectType );
 
             ScopeContext? context = null;

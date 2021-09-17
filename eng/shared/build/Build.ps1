@@ -47,7 +47,16 @@ param (
 [switch] $UseMsBuild = $false,
 
 # Script to initialize the MSBuild shell environment. Mandatory when -UseMsBuild is set. Set by the facade Build.ps1 script.
-[string] $MsBuildInitScriptPath = ""
+[string] $MsBuildInitScriptPath = "",
+
+# Ordered list of solutions to be tested. 
+[Parameter(Mandatory=$False)]
+[string[]] $TestSolutions=@(),
+
+# Build verbosity
+[Parameter(Mandatory=$False)]
+[string] $Verbosity="m"
+
 
 )
 
@@ -64,6 +73,7 @@ If ( -Not ( Test-Path -Path ".\.git" ) ) {
     throw "This script has to run in a GIT repository root!"
 }
 
+# Check required properties.
 If ( [string]::IsNullOrEmpty( $ProductName ) ) {
     throw "Product name is not set."
 }
@@ -101,15 +111,15 @@ function CheckPrerequisities() {
 function Clean() {
 
     if ( $UseMsbuild ) {
-        & msbuild /t:Clean /p:Configuration=$configuration /m
+        & msbuild /t:Clean /p:Configuration=$configuration /m /v:$Verbosity
     } else {
-        & dotnet clean -p:Configuration=$configuration -v:m
+        & dotnet clean -p:Configuration=$configuration -v:$Verbosity
     }
 
     if ($LASTEXITCODE -ne 0 ) { throw "Clean failed." }
 
-    if (Test-Path "artifacts\bin\Debug" -PathType Container ) {
-        Remove-Item "artifacts\bin\Debug\*.nupkg"
+    if (Test-Path "artifacts\bin\$configuration" -PathType Container ) {
+        Remove-Item "artifacts\bin\$configuration\*.nupkg"
     }
 
     if ( Test-Path $PropsFilePath ) {
@@ -157,20 +167,32 @@ function CreateVersionFile() {
 }
 
 function Restore() {
+
+    Write-Host "------ Restoring ---------------------------------" -ForegroundColor Cyan
+    
+    if ( -not(Test-Path "artifacts\bin\$configuration" -PathType Container) ) {
+        mkdir "artifacts\bin\$configuration" | Out-Null
+    }
+    
     if ( $UseMsbuild ) {
-        & msbuild /t:Restore /p:Configuration=$configuration /m
+        & msbuild /t:Restore /p:Configuration=$configuration /m /v:$Verbosity
     } else {
-        & dotnet restore -p:Configuration=$configuration
+        & dotnet restore -p:Configuration=$configuration -v:$Verbosity
     }
     
     if ($LASTEXITCODE -ne 0 ) { throw "Restore failed." }
+    
+    Write-Host "Restore successful" -ForegroundColor Green
 }
 
 function Pack() {
+
+    Write-Host "------ Building ---------------------------------" -ForegroundColor Cyan
+
     if ( $UseMsbuild ) {
-        & msbuild /t:Pack /p:Configuration=$configuration /m
+        & msbuild /t:Pack /p:Configuration=$configuration /m /v:$Verbosity
     } else {
-        & dotnet pack -p:Configuration=$configuration --nologo --no-restore
+        & dotnet pack -p:Configuration=$configuration -v:$Verbosity --nologo --no-restore
     }
 
     if ($LASTEXITCODE -ne 0 ) { throw "Build failed." }
@@ -179,13 +201,19 @@ function Pack() {
 }
 
 function CopyToPublishDir() {
-    & dotnet build eng\CopyToPublishDir.proj --nologo --no-restore
+    
+    Write-Host "------ Publishing ---------------------------------" -ForegroundColor Cyan
+    
+    & dotnet build eng\CopyToPublishDir.proj --nologo --no-restore -v:$Verbosity
     if ($LASTEXITCODE -ne 0 ) { throw "Copying to publish directory failed." }
 
     Write-Host "Copying to publish directory successful" -ForegroundColor Green
 }
 
 function Sign() {
+
+    Write-Host "------ Signing ---------------------------------" -ForegroundColor Cyan
+    
     & .\eng\shared\deploy\SignAndVerify.ps1 '$ProductName'
 
     if ($LASTEXITCODE -ne 0 ) { throw "Package signing and verification failed." }
@@ -194,6 +222,10 @@ function Sign() {
 }
 
 function Test() {
+     param ( [string] $solution )
+     
+      Write-Host "------ Testing $solution ---------------------------------" -ForegroundColor Cyan
+     
      $testResultsDir = $(Get-Location).Path + "\TestResults"
 
     if ( $Coverage ) {
@@ -207,9 +239,9 @@ function Test() {
     
         # Executing tests with code coverage enabled.
         if ( $UseMsbuild ) {
-            & msbuild /t:Test /p:CollectCoverage=True /p:CoverletOutput="$testResultsDir\" /p:Configuration=$configuration /m:1
+            & msbuild $solution /t:Test /p:CollectCoverage=True /p:CoverletOutput="$testResultsDir\" /p:Configuration=$configuration /m:1 /v:$Verbosity
         } else {
-            & dotnet test -p:CollectCoverage=True -p:CoverletOutput="$testResultsDir\" -p:Configuration=$configuration -m:1 --nologo --no-restore
+            & dotnet test -p:CollectCoverage=True -p:CoverletOutput="$testResultsDir\" -p:Configuration=$configuration -m:1 --nologo -v:$Verbosity $solution   
         }
         
         
@@ -221,15 +253,13 @@ function Test() {
     } else {
         # Executing tests without test coverage
         if ( $UseMsbuild ) {
-            & msbuild /t:Test /p:Configuration=$configuration /m
+            & msbuild /t:Test /p:Configuration=$configuration /m /v:$Verbosity $solution 
         } else {
-            & dotnet test  -p:Configuration=$configuration --nologo --no-restore
+            & dotnet test  -p:Configuration=$configuration --nologo -v:$Verbosity $solution 
         }
         if ($LASTEXITCODE -ne 0 ) { throw "Tests failed." }
     }
 
-
-    Write-Host "Tests successful" -ForegroundColor Green
 }
 
 CheckPrerequisities
@@ -250,5 +280,11 @@ if ( -not( $Prepare ) ) {
 }
 
 if ( $Test ) {
-    Test
+    if ( $TestSolutions.Count -eq 0 ) {
+        Test 
+    } else {
+        foreach ( $solution in $TestSolutions ) {
+        Test $solution    
+        }
+    }
 }

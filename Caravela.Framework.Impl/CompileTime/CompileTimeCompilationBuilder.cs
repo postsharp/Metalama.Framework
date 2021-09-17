@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Observers;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Sdk;
+using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.Mapping;
 using Caravela.Framework.Impl.Utilities;
@@ -621,13 +622,13 @@ namespace Caravela.Framework.Impl.CompileTime
                         var aspectTypes = compileTimeCompilation.Assembly
                             .GetTypes()
                             .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
-                            .Select( t => t.GetReflectionNameSafe() )
+                            .Select( t => t.GetReflectionName() )
                             .ToList();
 
                         var compilerPlugInTypes = compileTimeCompilation.Assembly
                             .GetTypes()
                             .Where( t => t.GetAttributes().Any( a => a is { AttributeClass: { Name: nameof(CompilerPluginAttribute) } } ) )
-                            .Select( t => t.GetReflectionNameSafe() )
+                            .Select( t => t.GetReflectionName() )
                             .ToList();
 
                         var manifest = new CompileTimeProjectManifest(

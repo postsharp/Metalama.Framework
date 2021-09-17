@@ -4,6 +4,7 @@
     <PropertyGroup>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
+         <WarningsAsErrors>$(WarningsAsErrors);NU1603;NU1605</WarningsAsErrors>
     </PropertyGroup>
 
     <!-- Output path -->

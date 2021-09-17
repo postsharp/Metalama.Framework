@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Linking;
 using System;

@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Linking.Inlining;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

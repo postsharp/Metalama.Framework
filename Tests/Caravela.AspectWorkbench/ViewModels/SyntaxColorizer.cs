@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -85,20 +86,21 @@ namespace Caravela.AspectWorkbench.ViewModels
             { ClassificationTypeNames.RegexOtherEscape, Colors.Indigo }
         };
 
-        public static FlowDocument WriteSyntaxColoring( Document document, IEnumerable<Diagnostic>? diagnostics = null, SyntaxNode? annotatedSyntaxNode = null )
+        public async Task<FlowDocument> WriteSyntaxColoringAsync( Document document, IEnumerable<Diagnostic>? diagnostics = null )
         {
             static Color WithAlpha( Color brush, double alpha )
             {
                 return Color.FromArgb( (byte) (255 * alpha), brush.R, brush.G, brush.B );
             }
 
-            var classified = GetClassifiedTextSpans( document, annotatedSyntaxNode, diagnostics );
+            var classified = await this.GetClassifiedTextSpansAsync( document, diagnostics );
+            var sourceText = await document.GetTextAsync();
 
             var paragraph = new Paragraph();
 
-            foreach ( var span in classified.TextSpans )
+            foreach ( var span in classified )
             {
-                if ( classified.SourceText.Length < span.Span.End )
+                if ( sourceText.Length < span.Span.End )
                 {
                     // This must be due to a bug upstream. Ignore it.
                     continue;
@@ -166,7 +168,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                         break;
                 }
 
-                var run = new Run( classified.SourceText.GetSubText( span.Span ).ToString() )
+                var run = new Run( sourceText.GetSubText( span.Span ).ToString() )
                 {
                     Foreground = new SolidColorBrush( foreground ),
                     Background = new SolidColorBrush( background ),
@@ -180,14 +182,24 @@ namespace Caravela.AspectWorkbench.ViewModels
                 }
 
                 // Process diagnostic.
-                if ( span.Tags.TryGetValue( DiagnosticTagName, out var diagnostic ) )
+                if ( span.Tags.TryGetValue( DiagnosticTagName, out var serializedDiagnostic ) )
                 {
-                    run.ToolTip = diagnostic;
+                    if ( !string.IsNullOrWhiteSpace( run.ToolTip as string ) )
+                    {
+                        run.ToolTip += Environment.NewLine;
+                    }
+                    else
+                    {
+                        run.ToolTip = "";
+                    }
+
+                    var diagnosticAnnotation = DiagnosticAnnotation.FromJson( serializedDiagnostic );
+                    run.ToolTip += diagnosticAnnotation.ToString();
 
                     run.TextDecorations.Add(
                         new TextDecoration(
                             TextDecorationLocation.Underline,
-                            new Pen( diagnostic.StartsWith( "Error", StringComparison.OrdinalIgnoreCase ) ? Brushes.Red : Brushes.Orange, 1 ),
+                            new Pen( diagnosticAnnotation.Severity == DiagnosticSeverity.Error ? Brushes.Red : Brushes.Orange, 1 ),
                             3,
                             TextDecorationUnit.Pixel,
                             TextDecorationUnit.Pixel ) );
@@ -203,5 +215,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             // richTextBox.Document.SetBinding( FlowDocument.PageWidthProperty,
             //    new Binding( "ActualWidth" ) { Source = richTextBox } );
         }
+
+        public SyntaxColorizer( IServiceProvider serviceProvider ) : base( serviceProvider ) { }
     }
 }

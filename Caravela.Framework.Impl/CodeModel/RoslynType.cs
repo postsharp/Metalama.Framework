@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using SpecialType = Caravela.Framework.Code.SpecialType;

@@ -1,0 +1,112 @@
+
+<html>
+    <head>
+        <style>
+            .cr-CompileTime,
+            .cr-Conflict,
+            .cr-TemplateKeyword,
+            .cr-Dynamic,
+            .cr-CompileTimeVariable,
+            .cr-GeneratedCode
+            {
+                background-color: rgba(50,50,90,0.1);
+            }
+
+            .cr-TemplateKeyword
+            {
+                color: rgb(250, 0, 250) !important;
+                font-weight: bold;
+            }
+
+            .cr-Dynamic
+            {
+                text-decoration: underline;
+            }
+
+            .cr-CompileTimeVariable
+            {
+                font-style: italic;
+            }
+
+            .diag-Warning
+            {
+                text-decoration: underline 1px wavy orange;
+            }
+
+            .diag-Error
+            {
+                text-decoration: underline 1px wavy red;
+            }
+
+            .legend 
+            {
+                margin-top: 100px;
+            }
+        </style>
+    </head>
+    <body><pre><code class="nohighlight"><span class="cs-keyword">using</span> <span class="cs-namespace-name">System</span><span class="cs-punctuation">;</span>
+<span class="cs-keyword">using</span> <span class="cs-namespace-name">Caravela</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Aspects</span><span class="cs-punctuation">;</span>
+
+<span class="cs-preprocessor-keyword">#pragma</span> <span class="cs-preprocessor-keyword">warning</span> <span class="cs-preprocessor-keyword">disable</span> <span class="cs-identifier">CS0067</span>
+
+<span class="cs-keyword">namespace</span> <span class="cs-namespace-name">Caravela</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-namespace-name">Integration</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-namespace-name">Formatting</span><span class="cs-operator">.</span><span class="cs-namespace-name">AllDeclarations</span>
+<span class="cs-punctuation">{</span>
+    <span class="cs-comment">// We need at least an aspect otherwise the template annotator does not run.</span>
+    <span class="cr-CompileTime cs-keyword">class</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">Aspect</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">:</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">OverrideMethodAspect</span>
+    <span class="cr-CompileTime cs-punctuation">{</span>
+        <span class="cr-CompileTime cs-keyword">public</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">override</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">dynamic</span><span class="cr-CompileTime cs-operator">?</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-method-name">OverrideMethod</span><span class="cr-CompileTime cs-punctuation">()</span><span class="cr-CompileTime"> </span><span class="cr-RunTime cs-operator">=&gt;</span><span class="cr-RunTime"> </span><span class="cr-RunTime cs-keyword">null</span><span class="cs-punctuation">;</span>
+    <span class="cr-CompileTime cs-punctuation">}</span>
+    
+    <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTimeOnly</span><span class="cr-CompileTime cs-punctuation">]</span>
+    <span class="cr-CompileTime cs-keyword">struct</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-struct-name">CompileTimeStruct</span>
+    <span class="cr-CompileTime cs-punctuation">{</span>
+        <span class="cr-CompileTime cs-keyword">public</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">event</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-delegate-name">EventHandler</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-event-name">FieldEvent</span><span class="cr-CompileTime cs-punctuation">;</span>
+        <span class="cr-CompileTime cs-keyword">public</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">event</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-delegate-name">EventHandler</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-event-name">ManualEvent</span>
+        <span class="cr-CompileTime cs-punctuation">{</span>
+            <span class="cr-CompileTime cs-keyword">add</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-operator">=&gt;</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword cs-control">throw</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">new</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">Exception</span><span class="cr-CompileTime cs-punctuation">();</span>
+            <span class="cr-CompileTime cs-keyword">remove</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-operator">=&gt;</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword cs-control">throw</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">new</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">Exception</span><span class="cr-CompileTime cs-punctuation">();</span>
+        <span class="cr-CompileTime cs-punctuation">}</span>
+        
+        <span class="cr-CompileTime cs-keyword">public</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">string</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-property-name">Property</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">{</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">get</span><span class="cr-CompileTime cs-punctuation">;</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">set</span><span class="cr-CompileTime cs-punctuation">;</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">}</span>
+    <span class="cr-CompileTime cs-punctuation">}</span>
+
+    <span class="cs-keyword">struct</span> <span class="cs-struct-name">RunTimeStruct</span>
+    <span class="cs-punctuation">{</span>
+        <span class="cs-keyword">public</span> <span class="cs-keyword">event</span> <span class="cs-delegate-name">EventHandler</span> <span class="cs-event-name">FieldEvent</span><span class="cs-punctuation">;</span>
+        <span class="cs-keyword">public</span> <span class="cs-keyword">event</span> <span class="cs-delegate-name">EventHandler</span> <span class="cs-event-name">ManualEvent</span>
+        <span class="cs-punctuation">{</span>
+            <span class="cs-keyword">add</span> <span class="cs-operator">=&gt;</span> <span class="cs-keyword cs-control">throw</span> <span class="cs-keyword">new</span> <span class="cs-class-name">Exception</span><span class="cs-punctuation">();</span>
+            <span class="cs-keyword">remove</span> <span class="cs-operator">=&gt;</span> <span class="cs-keyword cs-control">throw</span> <span class="cs-keyword">new</span> <span class="cs-class-name">Exception</span><span class="cs-punctuation">();</span>
+        <span class="cs-punctuation">}</span>
+        
+        <span class="cs-keyword">public</span> <span class="cs-keyword">string</span> <span class="cs-property-name">Property</span> <span class="cs-punctuation">{</span> <span class="cs-keyword">get</span><span class="cs-punctuation">;</span> <span class="cs-keyword">set</span><span class="cs-punctuation">;</span> <span class="cs-punctuation">}</span>
+    <span class="cs-punctuation">}</span>
+
+    <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTimeOnly</span><span class="cr-CompileTime cs-punctuation">]</span>
+    <span class="cr-CompileTime cs-keyword">record</span><span class="cr-CompileTime"> CompileTimeRecord</span><span class="cr-CompileTime cs-punctuation">(</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">int</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-parameter-name">f</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">)</span><span class="cs-punctuation">;</span>
+
+    <span class="cs-keyword">record</span> RunTimeRecord<span class="cs-punctuation">(</span> <span class="cs-keyword">int</span> <span class="cs-parameter-name">f</span> <span class="cs-punctuation">);</span>
+
+    <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTimeOnly</span><span class="cr-CompileTime cs-punctuation">]</span>
+    <span class="cr-CompileTime cs-keyword">delegate</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">void</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-delegate-name">CompileTimeDelegate</span><span class="cr-CompileTime cs-punctuation">();</span>
+
+    <span class="cs-keyword">delegate</span> <span class="cs-keyword">void</span> <span class="cs-delegate-name">RunTimeDelegate</span><span class="cs-punctuation">();</span>
+
+
+
+<span class="cs-punctuation">}</span></code></pre>
+       <p class='legend'>Legend:</p>
+       <pre>
+<span class='cr-Default'>Default</span>
+<span class='cr-RunTime'>RunTime</span>
+<span class='cr-CompileTime'>CompileTime</span>
+<span class='cr-Dynamic'>Dynamic</span>
+<span class='cr-CompileTimeVariable'>CompileTimeVariable</span>
+<span class='cr-TemplateKeyword'>TemplateKeyword</span>
+<span class='cr-Conflict'>Conflict</span>
+<span class='cr-Excluded'>Excluded</span>
+<span class='cr-GeneratedCode'>GeneratedCode</span>
+<span class='cr-SourceCode'>SourceCode</span>
+       </pre>
+   </body>
+</html>

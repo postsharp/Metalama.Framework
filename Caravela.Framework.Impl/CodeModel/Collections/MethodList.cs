@@ -6,6 +6,7 @@ using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Impl.CodeModel.References;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
@@ -97,6 +98,8 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             static (IType Type, RefKind RefKind) GetParameter( IMethod context, int index )
                 => (context.Parameters[index].ParameterType, context.Parameters[index].RefKind);
         }
+
+        public IEnumerable<IMethod> OfKind( MethodKind kind ) => this.Where( m => m.MethodKind == kind );
 
         protected override MethodBaseList<IMethod> GetMemberListForType( INamedType declaringType )
         {

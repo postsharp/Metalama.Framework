@@ -34,7 +34,8 @@ namespace Caravela.TestFramework
             : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
         // We don't want the base class to report errors in the input compilation because the pipeline does.
-        private protected override bool ReportInvalidInputCompilation => false;
+
+        private protected override bool ShouldStopOnInvalidInput( TestOptions testOptions ) => false;
 
         /// <summary>
         /// Runs the aspect test with the given name and source.

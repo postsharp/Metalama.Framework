@@ -2,8 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Formatting;
+using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

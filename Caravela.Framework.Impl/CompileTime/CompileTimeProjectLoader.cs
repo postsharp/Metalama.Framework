@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Templating.Mapping;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -84,7 +85,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity, cancellationToken );
 
-            return compileTimeProject?.GetTypeOrNull( typeSymbol.GetReflectionNameSafe() );
+            return compileTimeProject?.GetTypeOrNull( typeSymbol.GetReflectionName() );
         }
 
         /// <summary>

@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Collections;
+using Caravela.Framework.Impl.Utilities;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Pseudo
