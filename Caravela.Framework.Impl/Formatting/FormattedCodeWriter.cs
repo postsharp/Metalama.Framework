@@ -69,6 +69,7 @@ namespace Caravela.Framework.Impl.Formatting
 
         protected async Task<ClassifiedTextSpanCollection> GetClassifiedTextSpansAsync(
             Document document,
+            bool areNodesAnnotated = false,
             IEnumerable<Diagnostic>? diagnostics = null,
             bool addTitles = false )
         {
@@ -82,16 +83,28 @@ namespace Caravela.Framework.Impl.Formatting
 
             var syntaxRoot = await syntaxTree.GetRootAsync();
 
-            // Annotate the whole syntax tree with the classification service.
-            // Note that we don't take into account the output of the template compiler executed from the pipeline,
-            // because the template compiler, when executed from the pipeline, only adds annotations to templates, not to the whole syntax tree.
-            var classificationService = new ClassificationService( this.ServiceProvider );
             var compilation = await document.Project.GetCompilationAsync();
             var semanticModel = compilation!.GetSemanticModel( syntaxTree );
+            var classificationService = new ClassificationService( this.ServiceProvider );
 
-            var classifiedTextSpans = classificationService.GetClassifiedTextSpans( semanticModel, CancellationToken.None );
-            
-            // Process the annotations by the aspect linker (on the output document).
+            ClassifiedTextSpanCollection classifiedTextSpans;
+
+            if ( areNodesAnnotated )
+            {
+                // Aspect Workbench uses this branch.
+                classifiedTextSpans = classificationService.GetClassifiedTextSpansOfAnnotatedSyntaxTree( syntaxTree, CancellationToken.None );
+            }
+            else
+            {
+                // Annotate the whole syntax tree with the classification service.
+                // Note that we don't take into account the output of the template compiler executed from the pipeline,
+                // because the template compiler, when executed from the pipeline, only adds annotations to templates, not to the whole syntax tree.
+
+                
+                classifiedTextSpans = classificationService.GetClassifiedTextSpans( semanticModel, CancellationToken.None );
+            }
+
+        // Process the annotations by the aspect linker (on the output document).
             FormattingVisitor formattingVisitor = new( classifiedTextSpans );
             formattingVisitor.Visit( syntaxRoot );
 
