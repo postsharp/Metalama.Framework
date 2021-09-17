@@ -106,18 +106,6 @@ namespace Caravela.Framework.Impl.Linking
                             // Remove declarators that were rewritten.
                             switch ( member )
                             {
-                                case FieldDeclarationSyntax fieldDecl:
-                                    newMembers.Add(
-                                        fieldDecl.WithDeclaration(
-                                            fieldDecl.Declaration.WithVariables(
-                                                SeparatedList(
-                                                    fieldDecl.Declaration.Variables
-                                                        .Where(
-                                                            v =>
-                                                                remainingSymbols.Contains( semanticModel.GetDeclaredSymbol( v ).AssertNotNull() ) ) ) ) ) );
-
-                                    break;
-
                                 case EventFieldDeclarationSyntax eventFieldDecl:
                                     newMembers.Add(
                                         eventFieldDecl.WithDeclaration(

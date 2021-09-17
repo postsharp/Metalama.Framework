@@ -14,43 +14,53 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             // The syntax has to be in form: <type> <local> = <annotated_method_expression>( <arguments> );
-            if ( aspectReference.ResolvedSemantic.Symbol is not IMethodSymbol )
+            if ( aspectReference.ResolvedSemantic.Symbol is not IMethodSymbol methodSymbol )
+            {
+                // Coverage: ignore (hit only when the check in base class is incorrect).
+                return false;
+            }
+
+            // Should be within invocation expression.
+            if ( aspectReference.Expression.Parent is not InvocationExpressionSyntax invocationExpression )
             {
                 return false;
             }
 
-            if ( aspectReference.Expression.Parent == null || aspectReference.Expression.Parent is not InvocationExpressionSyntax invocationExpression )
+            // Should be within equals clause.
+            if ( invocationExpression.Parent is not EqualsValueClauseSyntax equalsClause )
             {
                 return false;
             }
 
-            if ( invocationExpression.Parent == null || invocationExpression.Parent is not EqualsValueClauseSyntax equalsClause )
+            // Should be within variable declarator.
+            if ( equalsClause.Parent is not VariableDeclaratorSyntax variableDeclarator
+                 || variableDeclarator.Parent is not VariableDeclarationSyntax variableDeclaration )
             {
+                // Coverage: ignore (only incorrect code can get here).
                 return false;
             }
 
-            if ( equalsClause.Parent == null || equalsClause.Parent is not VariableDeclaratorSyntax variableDeclarator )
-            {
-                return false;
-            }
-
-            if ( variableDeclarator.Parent == null || variableDeclarator.Parent is not VariableDeclarationSyntax variableDeclaration )
-            {
-                return false;
-            }
-
+            // Should be single-variable declaration.
             if ( variableDeclaration.Variables.Count != 1 )
             {
                 return false;
             }
 
-            if ( variableDeclaration.Parent == null || variableDeclaration.Parent is not LocalDeclarationStatementSyntax _ )
+            // Variable and method return type should be equal (i.e. no implicit conversions).
+            if ( !SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( variableDeclaration.Type ).Symbol, methodSymbol.ReturnType ) )
             {
                 return false;
             }
 
+            // Should be within local declaration.
+            if ( variableDeclaration.Parent == null || variableDeclaration.Parent is not LocalDeclarationStatementSyntax )
+            {
+                // Coverage: ignore (only incorrect code can get here).
+                return false;
+            }
+
             // The invocation needs to be inlineable in itself.
-            if ( IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
+            if ( !IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
             {
                 return false;
             }

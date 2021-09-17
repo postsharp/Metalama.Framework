@@ -23,8 +23,6 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
 using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
@@ -183,14 +181,9 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 return testResult;
             }
 
-            if ( !testInput.Options.AllowCompileTimeDynamicCode.GetValueOrDefault() )
+            if ( !this.VerifyBinaryStream( testInput, testResult, buildTimeAssemblyStream ) )
             {
-                if ( !this.VerifyNoDynamicCode( buildTimeAssemblyStream ) )
-                {
-                    testResult.SetFailed( "The compiled assembly contains dynamic code." );
-
-                    return testResult;
-                }
+                return testResult;
             }
 
             buildTimeAssemblyStream.Seek( 0, SeekOrigin.Begin );
@@ -242,47 +235,6 @@ namespace Caravela.Framework.Tests.Integration.Runners
             }
 
             return testResult;
-        }
-
-        private bool VerifyNoDynamicCode( MemoryStream stream )
-        {
-            stream.Seek( 0, SeekOrigin.Begin );
-            using var peReader = new PEReader( stream, PEStreamOptions.LeaveOpen );
-            var metadataReader = peReader.GetMetadataReader();
-
-            foreach ( var typeRefHandle in metadataReader.TypeReferences )
-            {
-                var typeRef = metadataReader.GetTypeReference( typeRefHandle );
-                var ns = metadataReader.GetString( typeRef.Namespace );
-                var typeName = metadataReader.GetString( typeRef.Name );
-
-                if ( ns.Contains( "Microsoft.CSharp.RuntimeBinder", StringComparison.Ordinal ) &&
-                     string.Equals( typeName, "CSharpArgumentInfo", StringComparison.Ordinal ) )
-                {
-                    var directory = Path.Combine( Path.GetTempPath(), "Caravela", "InvalidAssemblies" );
-
-                    if ( !Directory.Exists( directory ) )
-                    {
-                        Directory.CreateDirectory( directory );
-                    }
-
-                    var diagnosticFile = Path.Combine( directory, Guid.NewGuid().ToString() + ".dll" );
-
-                    using ( var diagnosticStream = File.Create( diagnosticFile ) )
-                    {
-                        stream.Seek( 0, SeekOrigin.Begin );
-                        stream.CopyTo( diagnosticStream );
-                    }
-
-                    this.Logger?.WriteLine( "Compiled compile-time assembly: " + diagnosticFile );
-
-                    return false;
-                }
-            }
-
-            stream.Seek( 0, SeekOrigin.Begin );
-
-            return true;
         }
 
         private (TemplateExpansionContext Context, MethodDeclarationSyntax TargetMethod) CreateTemplateExpansionContext(

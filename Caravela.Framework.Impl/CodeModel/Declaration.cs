@@ -37,6 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => new AttributeList(
                 this,
                 this.Symbol.GetAttributes()
+                    .Where( a => a.AttributeConstructor != null )
                     .Select( a => new AttributeRef( a, DeclarationRef.FromSymbol<IDeclaration>( this.Symbol ) ) ) );
 
         public abstract DeclarationKind DeclarationKind { get; }

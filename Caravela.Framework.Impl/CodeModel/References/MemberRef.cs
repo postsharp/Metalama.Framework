@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
-using Caravela.Framework.Impl.CodeModel.Builders;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -23,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel.References
             this.Target = symbol;
         }
 
-        public MemberRef( MemberOrNamedTypeBuilder builder )
+        public MemberRef( IMemberOrNamedTypeBuilder builder )
         {
             this.Target = builder;
         }

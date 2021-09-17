@@ -14,6 +14,18 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             if ( aspectReference.ResolvedSemantic.Symbol is not IPropertySymbol
                  && (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol is not IPropertySymbol )
             {
+                // Coverage: ignore (hit only when the check in base class is incorrect).
+                return false;
+            }
+
+            var propertySymbol =
+                aspectReference.ResolvedSemantic.Symbol as IPropertySymbol
+                ?? (IPropertySymbol) ((aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
+
+            if ( !SymbolEqualityComparer.Default.Equals(
+                propertySymbol.Type,
+                ((IMethodSymbol) aspectReference.ContainingSymbol).ReturnType ) )
+            {
                 return false;
             }
 

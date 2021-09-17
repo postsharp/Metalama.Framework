@@ -38,39 +38,6 @@ namespace Caravela.Framework.Impl.Collections
         }
 
         /// <summary>
-        /// Selects all values in a linked list. This is typically used to select all ancestors of a tree node. This method returns distinct nodes only.
-        /// </summary>
-        /// <param name="item">The initial item.</param>
-        /// <param name="getNext">A function that gets the next item in the list.</param>
-        /// <param name="includeThis">A value indicating whether <paramref name="item"/> itself should be included in the result set.</param>
-        /// <param name="throwOnDuplicate"><c>true</c> if an exception must be thrown if a duplicate if found.</param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static IEnumerable<T> SelectRecursive<T>( this T item, Func<T, T?> getNext, bool includeThis = false, bool throwOnDuplicate = true )
-            where T : class
-        {
-            HashSet<T> list = new( ReferenceEqualityComparer<T>.Instance );
-
-            for ( var i = includeThis ? item : getNext( item ); i != null; i = getNext( i ) )
-            {
-                if ( !list.Add( i ) )
-                {
-                    // We are in a cycle.
-                    if ( throwOnDuplicate )
-                    {
-                        throw new AssertionFailedException( $"The item {i} of type {i.GetType().Name} has been visited twice." );
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
-
-            return list;
-        }
-
-        /// <summary>
         /// Selects the closure of a graph. This is typically used to select all descendants of a tree node.  This method returns distinct nodes only.
         /// </summary>
         /// <param name="item">The initial item.</param>
@@ -106,14 +73,12 @@ namespace Caravela.Framework.Impl.Collections
         /// </summary>
         /// <param name="collection">The initial collection of items.</param>
         /// <param name="getItems">A function that returns the set of all nodes connected to a given node.</param>
-        /// <param name="includeFirstLevel">A value indicating whether the items of <paramref name="collection"/> itself should be included in the result set.</param>
         /// <param name="throwOnDuplicate"><c>true</c> if an exception must be thrown if a duplicate if found.</param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public static IEnumerable<T> SelectManyRecursive<T>(
             this IEnumerable<T> collection,
             Func<T, IEnumerable<T>?> getItems,
-            bool includeFirstLevel = false,
             bool throwOnDuplicate = true )
             where T : class
         {
@@ -122,17 +87,7 @@ namespace Caravela.Framework.Impl.Collections
             // Create a dictionary for the results. The key is the item, the value is the order of insertion.
             Dictionary<T, int> results = new( ReferenceEqualityComparer<T>.Instance );
 
-            if ( includeFirstLevel )
-            {
-                VisitMany( collection, getItems, results, throwOnDuplicate, ref recursionCheck );
-            }
-            else
-            {
-                foreach ( var item in collection )
-                {
-                    VisitMany( getItems( item ), getItems, results, throwOnDuplicate, ref recursionCheck );
-                }
-            }
+            VisitMany( collection, getItems, results, throwOnDuplicate, ref recursionCheck );
 
             return results.Keys;
         }
@@ -147,49 +102,46 @@ namespace Caravela.Framework.Impl.Collections
         {
             recursionCheck++;
 
-            if ( recursionCheck > 64 )
+            try
             {
-                throw new InvalidOperationException( "Too many levels of inheritance." );
-            }
-
-            if ( collection == null )
-            {
-                return;
-            }
-
-            foreach ( var item in collection )
-            {
-                if ( results.ContainsKey( item ) )
+                if ( recursionCheck > 64 )
                 {
-                    // We are in a cycle.
+                    throw new InvalidOperationException( "Too many levels of inheritance." );
+                }
 
-                    if ( throwOnDuplicate )
+                if ( collection == null )
+                {
+                    return;
+                }
+
+                foreach ( var item in collection )
+                {
+                    if ( results.ContainsKey( item ) )
                     {
-                        throw new AssertionFailedException( $"The item {item} of type {item.GetType().Name} has been visited twice." );
+                        // We are in a cycle.
+
+                        if ( throwOnDuplicate )
+                        {
+                            throw new AssertionFailedException( $"The item {item} of type {item.GetType().Name} has been visited twice." );
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
                     else
                     {
-                        continue;
+                        results.Add( item, results.Count );
                     }
-                }
-                else
-                {
-                    results.Add( item, results.Count );
-                }
 
-                VisitMany( getItems( item ), getItems, results, throwOnDuplicate, ref recursionCheck );
+                    VisitMany( getItems( item ), getItems, results, throwOnDuplicate, ref recursionCheck );
+                }
             }
-
-            recursionCheck--;
+            finally
+            {
+                recursionCheck--;
+            }
         }
-
-        /// <summary>
-        /// Builds an <see cref="ImmutableMultiValueDictionary{TKey,TValue}"/> from an collection of <see cref="KeyValuePair{TKey,TValue}"/>.
-        /// </summary>
-        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TKey, TValue>(
-            this IEnumerable<KeyValuePair<TKey, TValue>> enumerable )
-            where TKey : notnull
-            => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, p => p.Key, p => p.Value );
 
         /// <summary>
         /// Builds an <see cref="ImmutableMultiValueDictionary{TKey,TValue}"/> from a collection, with a different value type than the input item type.
@@ -202,6 +154,9 @@ namespace Caravela.Framework.Impl.Collections
             where TKey : notnull
             => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue, keyComparer );
 
+        /// <summary>
+        /// Builds an <see cref="ImmutableMultiValueDictionary{TKey,TValue}"/> from a collection, with the same value type than the input item type.
+        /// </summary>
         /// <summary>
         /// Builds an <see cref="ImmutableMultiValueDictionary{TKey,TValue}"/> from a collection.
         /// </summary>

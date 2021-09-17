@@ -167,9 +167,10 @@ namespace Caravela.Framework.Impl.Linking
                 EventDeclaration(
                         List<AttributeListSyntax>(),
                         eventField.Modifiers,
+                        Token( SyntaxKind.EventKeyword ).WithTrailingTrivia( ElasticSpace ),
                         eventField.Declaration.Type,
                         null,
-                        Identifier( targetSymbol.Name ),
+                        eventField.Declaration.Variables.Single().Identifier,
                         AccessorList(
                             List(
                                 new[]
@@ -193,7 +194,8 @@ namespace Caravela.Framework.Impl.Linking
                                                             IdentifierName( "value" ) ) ) ) )
                                             .NormalizeWhitespace()
                                     }.Where( a => a != null )
-                                    .AssertNoneNull() ) ) )
+                                    .AssertNoneNull() ) ),
+                        default )
                     .WithLeadingTrivia( eventField.GetLeadingTrivia() )
                     .WithTrailingTrivia( eventField.GetTrailingTrivia() );
 

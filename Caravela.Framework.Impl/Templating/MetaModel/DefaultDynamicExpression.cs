@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -12,12 +13,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     {
         public DefaultDynamicExpression( IType type )
         {
-            this.ExpressionType = type;
+            this.Type = type;
         }
 
         public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null )
         {
-            var typeSymbol = this.ExpressionType.GetSymbol();
+            var typeSymbol = this.Type.GetSymbol();
             var expression = LanguageServiceFactory.CSharpSyntaxGenerator.DefaultExpression( typeSymbol );
 
             if ( expression is not DefaultExpressionSyntax )
@@ -28,11 +29,13 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     expression );
             }
 
-            return new RuntimeExpression( expression, this.ExpressionType );
+            return new RuntimeExpression( expression, this.Type );
         }
 
-        public bool IsAssignable => false;
+        public IType Type { get; }
 
-        public IType ExpressionType { get; }
+        bool IExpression.IsAssignable => false;
+
+        object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
     }
 }

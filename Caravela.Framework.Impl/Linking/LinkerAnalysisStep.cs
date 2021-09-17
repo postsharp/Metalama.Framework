@@ -68,7 +68,6 @@ namespace Caravela.Framework.Impl.Linking
 
             var analysisRegistry = new LinkerAnalysisRegistry(
                 methodBodyAnalysisResults,
-                aspectReferenceIndex,
                 reachableSemantics,
                 inliningSpecifications );
 

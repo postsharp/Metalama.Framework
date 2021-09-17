@@ -261,22 +261,18 @@ namespace Caravela.Framework.Impl.Linking
                     referenceSpecification );
             }
 
-            if ( targetMemberIntroduction?.Introduction is IReplaceMember )
-            {
-                return new ResolvedAspectReference(
-                    containingSymbol,
-                    referencedSymbol,
-                    new IntermediateSymbolSemantic( referencedSymbol, IntermediateSymbolSemanticKind.Default ),
-                    expression,
-                    referenceSpecification );
-            }
-
             // At this point resolvedIndex should be 0, equal to target introduction index, this._orderedLayers.Count or be equal to index of one of the overrides.
             Invariant.Assert(
                 resolvedIndex == default
                 || resolvedIndex == new MemberLayerIndex( this._orderedLayers.Count, 0 )
                 || overrideIndices.Any( x => x.Index == resolvedIndex )
                 || resolvedIndex == targetMemberIntroductionIndex );
+
+            if ( overrideIndices.Count > 0 && resolvedIndex == overrideIndices[overrideIndices.Count - 1].Index )
+            {
+                // If we have resolved to the last override, transition to the final declaration index.
+                resolvedIndex = new MemberLayerIndex( this._orderedLayers.Count, 0 );
+            }
 
             if ( resolvedIndex == default )
             {
@@ -304,6 +300,18 @@ namespace Caravela.Framework.Impl.Linking
                             new IntermediateSymbolSemantic(
                                 GetOverriddenSymbol( referencedSymbol ).AssertNotNull(),
                                 IntermediateSymbolSemanticKind.Default ),
+                            expression,
+                            referenceSpecification );
+                    }
+                    else if ( targetMemberIntroduction?.Introduction is IReplaceMember replaceMember
+                              && replaceMember.ReplacedMember.Resolve( this._finalCompilationModel ).GetSymbol() != null )
+                    {
+                        // Introduction replaced existing source member, resolve to default semantics, i.e. source symbol.
+
+                        return new ResolvedAspectReference(
+                            containingSymbol,
+                            referencedSymbol,
+                            new IntermediateSymbolSemantic( referencedSymbol, IntermediateSymbolSemanticKind.Default ),
                             expression,
                             referenceSpecification );
                     }
@@ -369,15 +377,19 @@ namespace Caravela.Framework.Impl.Linking
                 // One of the overrides or the introduced member.
                 if ( targetMemberIntroduction != null && resolvedIndex.MemberIndex == 0 )
                 {
-                    // There is no introduction, i.e. this is a user source symbol.
-                    return new ResolvedAspectReference(
-                        containingSymbol,
-                        referencedSymbol,
-                        new IntermediateSymbolSemantic(
-                            this.GetSymbolFromIntroducedMember( referencedSymbol, targetMemberIntroduction.AssertNotNull() ),
-                            IntermediateSymbolSemanticKind.Default ),
-                        expression,
-                        referenceSpecification );
+                    // TODO: This would happen has the introduced member contained aspect reference. Bodies of introduced members are
+                    //       currently not used.
+                    throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                    // // There is no introduction, i.e. this is a user source symbol.
+                    // return new ResolvedAspectReference(
+                    //     containingSymbol,
+                    //     referencedSymbol,
+                    //     new IntermediateSymbolSemantic(
+                    //         this.GetSymbolFromIntroducedMember( referencedSymbol, targetMemberIntroduction.AssertNotNull() ),
+                    //         IntermediateSymbolSemanticKind.Default ),
+                    //     expression,
+                    //     referenceSpecification );
                 }
                 else
                 {
@@ -460,15 +472,19 @@ namespace Caravela.Framework.Impl.Linking
                     return resolvedSymbol;
 
                 case (IMethodSymbol { MethodKind: MethodKind.PropertyGet }, IPropertySymbol propertySymbol):
+                    // Coverage: ignore (this seems to happen only in invalid compilations).
                     return propertySymbol.GetMethod.AssertNotNull();
 
                 case (IMethodSymbol { MethodKind: MethodKind.PropertySet }, IPropertySymbol propertySymbol):
+                    // Coverage: ignore (this seems to happen only in invalid compilations).
                     return propertySymbol.SetMethod.AssertNotNull();
 
                 case (IMethodSymbol { MethodKind: MethodKind.EventAdd }, IEventSymbol eventSymbol):
+                    // Coverage: ignore (this seems to happen only in invalid compilations).
                     return eventSymbol.AddMethod.AssertNotNull();
 
                 case (IMethodSymbol { MethodKind: MethodKind.EventRemove }, IEventSymbol eventSymbol):
+                    // Coverage: ignore (this seems to happen only in invalid compilations).
                     return eventSymbol.RemoveMethod.AssertNotNull();
 
                 default:

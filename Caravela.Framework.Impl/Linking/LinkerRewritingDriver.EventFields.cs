@@ -25,11 +25,13 @@ namespace Caravela.Framework.Impl.Linking
                     members.Add( GetEventBackingField( eventFieldDeclaration, symbol ) );
                 }
 
-                members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
-
-                if ( !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    members.Add( GetTrampolineEvent( eventFieldDeclaration, symbol ) );
+                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
+                }
+                else
+                {
+                    members.Add( GetTrampolineEvent( eventFieldDeclaration, lastOverride ) );
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
@@ -99,14 +101,15 @@ namespace Caravela.Framework.Impl.Linking
         {
             var accessorList =
                 AccessorList(
-                    List(
-                        new[]
-                        {
-                            AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull() ) ),
-                            AccessorDeclaration(
-                                SyntaxKind.RemoveAccessorDeclaration,
-                                GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) )
-                        } ) );
+                        List(
+                            new[]
+                            {
+                                AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull() ) ),
+                                AccessorDeclaration(
+                                    SyntaxKind.RemoveAccessorDeclaration,
+                                    GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) )
+                            } ) )
+                    .NormalizeWhitespace();
 
             return GetSpecialImplEvent( eventType, accessorList, symbol, GetOriginalImplMemberName( symbol ) );
         }
@@ -115,12 +118,13 @@ namespace Caravela.Framework.Impl.Linking
         {
             var accessorList =
                 AccessorList(
-                    List(
-                        new[]
-                        {
-                            AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, Block() ),
-                            AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, Block() )
-                        } ) );
+                        List(
+                            new[]
+                            {
+                                AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, Block() ),
+                                AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, Block() )
+                            } ) )
+                    .NormalizeWhitespace();
 
             return GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ) );
         }

@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
     {
-        private readonly SkipListIndexedDictionary<PipelineStepId, PipelineStep> _steps;
+        private readonly SkipListDictionary<PipelineStepId, PipelineStep> _steps;
         private readonly PipelineStepIdComparer _comparer;
         private readonly UserDiagnosticSink _diagnostics;
         private readonly List<INonObservableTransformation> _nonObservableTransformations = new();
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             // Create an empty collection of steps.
             this._comparer = new PipelineStepIdComparer( aspectLayers );
-            this._steps = new SkipListIndexedDictionary<PipelineStepId, PipelineStep>( this._comparer );
+            this._steps = new SkipListDictionary<PipelineStepId, PipelineStep>( this._comparer );
 
             // Add the initial steps.
             foreach ( var aspectLayer in aspectLayers )

@@ -28,19 +28,39 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
         public static T AssignNodeId<T>( T node )
             where T : SyntaxNode
         {
-            if ( node.GetAnnotations( _testNodeIdAnnotationId ).Any() )
+            if ( node is EventFieldDeclarationSyntax eventFieldDecl )
             {
-                return node;
+                var declarator = eventFieldDecl.Declaration.Variables.Single();
+                declarator = AssignNodeId( declarator );
+
+                return (T) (SyntaxNode) eventFieldDecl
+                    .WithDeclaration( eventFieldDecl.Declaration.WithVariables( SeparatedList( new[] { declarator } ) ) );
             }
+            else
+            {
+                if ( node.GetAnnotations( _testNodeIdAnnotationId ).Any() )
+                {
+                    return node;
+                }
 
-            var id = Interlocked.Increment( ref _nextNodeId ).ToString();
+                var id = Interlocked.Increment( ref _nextNodeId ).ToString();
 
-            return node.WithAdditionalAnnotations( new SyntaxAnnotation( _testNodeIdAnnotationId, id ) );
+                return node.WithAdditionalAnnotations( new SyntaxAnnotation( _testNodeIdAnnotationId, id ) );
+            }
         }
 
         private static string GetNodeId( SyntaxNode node )
         {
-            return node.GetAnnotations( _testNodeIdAnnotationId ).Select( x => x.Data.AssertNotNull() ).Single();
+            if ( node is EventFieldDeclarationSyntax eventFieldDecl )
+            {
+                var declarator = eventFieldDecl.Declaration.Variables.Single();
+
+                return GetNodeId( declarator );
+            }
+            else
+            {
+                return node.GetAnnotations( _testNodeIdAnnotationId ).Select( x => x.Data.AssertNotNull() ).Single();
+            }
         }
 
         private static IEnumerable<SyntaxNode> GetNodesWithId( SyntaxTree tree )
@@ -58,6 +78,16 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             return node.GetAnnotations( _testTemporaryNodeAnnotationId ).Any();
         }
 
+        private static string GetSymbolHelperName( string name )
+        {
+            return name + "__SymbolHelper";
+        }
+
+        private static string GetReplacedMemberName( string name )
+        {
+            return name + "__Replaced";
+        }
+
         /// <summary>
         /// Rewrites method bodies, replacing call to pseudo method called "annotate" with linker annotation.
         /// </summary>
@@ -65,9 +95,12 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
         {
             private readonly List<AspectLayerId> _orderedAspectLayers;
             private readonly List<IObservableTransformation> _observableTransformations;
+            private readonly List<IObservableTransformation> _replacedTransformations;
             private readonly List<INonObservableTransformation> _nonObservableTransformations;
 
             public IReadOnlyList<IObservableTransformation> ObservableTransformations => this._observableTransformations;
+
+            public IReadOnlyList<IObservableTransformation> ReplacedTransformations => this._replacedTransformations;
 
             public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
 
@@ -79,6 +112,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             {
                 this._orderedAspectLayers = new List<AspectLayerId>();
                 this._observableTransformations = new List<IObservableTransformation>();
+                this._replacedTransformations = new List<IObservableTransformation>();
                 this._nonObservableTransformations = new List<INonObservableTransformation>();
 
                 this.ServiceProvider = new ServiceProvider();
@@ -108,6 +142,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 var ret = typeRewriter.VisitClassDeclaration( node );
 
                 this._observableTransformations.AddRange( typeRewriter.ObservableTransformations );
+                this._replacedTransformations.AddRange( typeRewriter.ReplacedTransformations );
                 this._nonObservableTransformations.AddRange( typeRewriter.NonObservableTransformations );
 
                 return ret;
@@ -125,6 +160,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 var ret = typeRewriter.VisitRecordDeclaration( node );
 
                 this._observableTransformations.AddRange( typeRewriter.ObservableTransformations );
+                this._replacedTransformations.AddRange( typeRewriter.ReplacedTransformations );
                 this._nonObservableTransformations.AddRange( typeRewriter.NonObservableTransformations );
 
                 return ret;
@@ -142,6 +178,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 var ret = typeRewriter.VisitStructDeclaration( node );
 
                 this._observableTransformations.AddRange( typeRewriter.ObservableTransformations );
+                this._replacedTransformations.AddRange( typeRewriter.ReplacedTransformations );
                 this._nonObservableTransformations.AddRange( typeRewriter.NonObservableTransformations );
 
                 return ret;

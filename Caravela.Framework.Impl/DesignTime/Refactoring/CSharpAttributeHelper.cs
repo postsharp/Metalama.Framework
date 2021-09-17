@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
-using PostSharp.Patterns.Contracts;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -238,7 +237,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
         public static async ValueTask<Solution> AddAttributeAsync(
             Document document,
             ISymbol symbol,
-            [Required] AttributeDescription attribute,
+            AttributeDescription attribute,
             CancellationToken cancellationToken )
         {
             var currentSolution = document.Project.Solution;

@@ -1,6 +1,4 @@
-﻿// @Skipped(Broken event/property linker test preprocessing)
-
-using System;
+﻿using System;
 using static Caravela.Framework.Tests.Integration.Tests.Linker.Api;
 
 namespace Caravela.Framework.Tests.Integration.Tests.Linker.Events.Linking.IntroducedEvent

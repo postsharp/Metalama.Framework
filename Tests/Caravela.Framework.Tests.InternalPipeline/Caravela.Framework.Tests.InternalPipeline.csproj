@@ -19,6 +19,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Tests\Linker\EventFields\Linking\IntroducedEvent - Copy.t.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FakeItEasy" Version="6.2.1" />
     <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
@@ -72,6 +76,9 @@
   <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
   <ItemGroup Condition="'$(Obfuscate)'=='True'">
     <Compile Remove="**\*" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Tests\Linker\EventFields\Linking\NoOverride.t.cs" />
   </ItemGroup>
   
 </Project>

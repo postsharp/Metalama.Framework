@@ -14,6 +14,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             // The syntax has to be in form: <local> = <annotated_method_expression( <arguments> );
             if ( aspectReference.ResolvedSemantic.Symbol is not IMethodSymbol )
             {
+                // Coverage: ignore (hit only when the check in base class is incorrect).
                 return false;
             }
 
@@ -40,12 +41,6 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 return false;
             }
 
-            // Assignment should be simple.
-            if ( assignmentExpression.Kind() != SyntaxKind.SimpleAssignmentExpression )
-            {
-                return false;
-            }
-
             // The assignment should be part of expression statement.
             if ( assignmentExpression.Parent == null || assignmentExpression.Parent is not ExpressionStatementSyntax )
             {
@@ -53,7 +48,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             }
 
             // The invocation needs to be inlineable in itself.
-            if ( IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
+            if ( !IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
             {
                 return false;
             }

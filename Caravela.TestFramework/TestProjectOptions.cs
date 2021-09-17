@@ -51,7 +51,7 @@ namespace Caravela.TestFramework
         {
             if ( Directory.Exists( this.CompileTimeProjectCacheDirectory ) )
             {
-                Directory.Delete( this.CompileTimeProjectCacheDirectory, true );
+                TestExecutionContext.RegisterDisposeAction( () => Directory.Delete( this.CompileTimeProjectCacheDirectory, true ) );
             }
         }
     }

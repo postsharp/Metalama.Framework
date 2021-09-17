@@ -9,13 +9,33 @@ namespace Caravela.Framework.Impl.Collections
 {
     internal partial class ImmutableMultiValueDictionary<TKey, TValue>
     {
-        public readonly struct Builder
+        public class Builder
         {
-            private readonly ImmutableDictionary<TKey, Group>.Builder _dictionaryBuilder;
+            private readonly ImmutableMultiValueDictionary<TKey, TValue>? _initialValues;
 
-            internal Builder( ImmutableDictionary<TKey, Group>.Builder dictionaryBuilder )
+            private readonly ImmutableDictionary<TKey, ImmutableArray<TValue>.Builder>.Builder _newValuesBuilder;
+
+            // Creates a Builder initialized to an empty dictionary.
+            internal Builder( IEqualityComparer<TKey>? comparer )
             {
-                this._dictionaryBuilder = dictionaryBuilder;
+                this._newValuesBuilder = ImmutableDictionary.CreateBuilder<TKey, ImmutableArray<TValue>.Builder>( comparer );
+            }
+
+            internal Builder( ImmutableMultiValueDictionary<TKey, TValue> initialValues )
+            {
+                this._initialValues = initialValues;
+                this._newValuesBuilder = ImmutableDictionary.CreateBuilder<TKey, ImmutableArray<TValue>.Builder>( initialValues._dictionary.KeyComparer );
+            }
+
+            public void Add( TKey key, TValue value )
+            {
+                if ( !this._newValuesBuilder.TryGetValue( key, out var arrayBuilder ) )
+                {
+                    arrayBuilder = ImmutableArray.CreateBuilder<TValue>();
+                    this._newValuesBuilder[key] = arrayBuilder;
+                }
+
+                arrayBuilder.Add( value );
             }
 
             public void AddRange<TItem>( IEnumerable<TItem> source, Func<TItem, TKey> getKey, Func<TItem, TValue> getValue )
@@ -25,20 +45,40 @@ namespace Caravela.Framework.Impl.Collections
                     var key = getKey( item );
                     var value = getValue( item );
 
-                    if ( !this._dictionaryBuilder.TryGetValue( key, out var group ) )
-                    {
-                        group = new Group( key, ImmutableArray<TValue>.Empty );
-                    }
-
-                    group = group.Add( value );
-
-                    this._dictionaryBuilder[key] = group;
+                    this.Add( key, value );
                 }
             }
 
             public ImmutableMultiValueDictionary<TKey, TValue> ToImmutable()
             {
-                return new ImmutableMultiValueDictionary<TKey, TValue>( this._dictionaryBuilder.ToImmutable() );
+                if ( this._newValuesBuilder.Count == 0 )
+                {
+                    return this._initialValues ?? Empty;
+                }
+                else
+                {
+                    var dictionaryBuilder = this._initialValues?._dictionary.ToBuilder()
+                                            ?? ImmutableDictionary.CreateBuilder<TKey, Group>( this._newValuesBuilder.KeyComparer );
+
+                    foreach ( var newGroup in this._newValuesBuilder )
+                    {
+                        if ( !dictionaryBuilder.TryGetValue( newGroup.Key, out var group ) )
+                        {
+                            // This is a new group.
+
+                            group = new Group( newGroup.Key, newGroup.Value.ToImmutable() );
+                        }
+                        else
+                        {
+                            // Existing group. Need to merge.
+                            group = new Group( group.Key, group.Items.AddRange( newGroup.Value.ToImmutable() ) );
+                        }
+
+                        dictionaryBuilder[group.Key] = group;
+                    }
+
+                    return new ImmutableMultiValueDictionary<TKey, TValue>( dictionaryBuilder.ToImmutable() );
+                }
             }
         }
     }

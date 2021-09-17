@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
+using System;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -16,7 +17,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public CastDynamicExpression( IType type, object? value )
         {
-            this.ExpressionType = type;
+            this.Type = type;
             this._value = value;
         }
 
@@ -30,14 +31,15 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             };
 
             return new RuntimeExpression(
-                SyntaxFactory.ParenthesizedExpression(
-                        LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression( this.ExpressionType.GetSymbol(), expression ) )
+                SyntaxFactory.ParenthesizedExpression( LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression( this.Type.GetSymbol(), expression ) )
                     .WithAdditionalAnnotations( Simplifier.Annotation ),
-                this.ExpressionType );
+                this.Type );
         }
 
         public bool IsAssignable => false;
 
-        public IType ExpressionType { get; }
+        public IType Type { get; }
+
+        object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
     }
 }

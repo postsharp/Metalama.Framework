@@ -329,7 +329,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
             }
-            else if ( TypeExtensions.Equals( returnExpression.ExpressionType, SpecialType.Void ) )
+            else if ( TypeExtensions.Equals( returnExpression.Type, SpecialType.Void ) )
             {
                 if ( TypeExtensions.Equals( this.MetaApi.Method.ReturnType, SpecialType.Void ) )
                 {

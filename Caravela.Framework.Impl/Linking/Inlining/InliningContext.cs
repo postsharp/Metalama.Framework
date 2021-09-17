@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -15,10 +16,6 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         private readonly LinkerRewritingDriver _rewritingDriver;
         private readonly int _depth;
         private bool _labelUsed;
-
-        public Compilation Compilation => this._rewritingDriver.IntermediateCompilation;
-
-        public AspectReferenceResolver ReferenceResolver => this._rewritingDriver.ReferenceResolver;
 
         public bool HasIndirectReturn { get; }
 
@@ -95,6 +92,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         public static InliningContext Create( LinkerRewritingDriver rewritingDriver, IMethodSymbol targetDeclaration )
             => new( rewritingDriver, targetDeclaration );
 
+        [ExcludeFromCodeCoverage]
         public InliningContext WithDeclaredReturnLocal( IMethodSymbol currentDeclaration )
             => new( this, currentDeclaration, $"__aspect_return_{this._depth}", true );
 
