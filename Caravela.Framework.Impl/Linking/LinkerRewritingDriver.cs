@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 // TODO: This will not be hit until we are using results of control flow analysis. 
                 throw new AssertionFailedException( Justifications.CoverageMissing );
-                
+
                 // // Add the implicit return for void methods.
                 // inliningContext.UseLabel();
                 //
@@ -327,9 +327,10 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             case null:
                                 throw new AssertionFailedException( Justifications.CoverageMissing );
-                                // return
-                                //     Block()
-                                //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                            // return
+                            //     Block()
+                            //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             case ExpressionSyntax rewrittenExpression:
                                 return
@@ -349,13 +350,14 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             case null:
                                 throw new AssertionFailedException( Justifications.CoverageMissing );
-                                // return
-                                //     Block(
-                                //             ReturnStatement(
-                                //                 Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
-                                //                 LiteralExpression( SyntaxKind.DefaultLiteralExpression ),
-                                //                 Token( SyntaxKind.SemicolonToken ) ) )
-                                //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                            // return
+                            //     Block(
+                            //             ReturnStatement(
+                            //                 Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                            //                 LiteralExpression( SyntaxKind.DefaultLiteralExpression ),
+                            //                 Token( SyntaxKind.SemicolonToken ) ) )
+                            //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             case ExpressionSyntax rewrittenExpression:
                                 return
@@ -505,7 +507,7 @@ namespace Caravela.Framework.Impl.Linking
             if ( this._introductionRegistry.IsLastOverride( targetSymbol ) )
             {
                 throw new AssertionFailedException( Justifications.CoverageMissing );
-                
+
                 // // If something is resolved to the last override, we will point to the target declaration instead.
                 // targetSymbol = aspectReference.OriginalSymbol;
                 // targetSemanticKind = IntermediateSymbolSemanticKind.Final;
@@ -629,12 +631,13 @@ namespace Caravela.Framework.Impl.Linking
                         else
                         {
                             var rewriter = new ConditionalAccessRewriter( targetMemberName );
-                            return (ExpressionSyntax)rewriter.Visit(conditionalAccessExpression);
+
+                            return (ExpressionSyntax) rewriter.Visit( conditionalAccessExpression );
                         }
                     }
                     else
                     {
-                        throw new AssertionFailedException(Justifications.CoverageMissing);
+                        throw new AssertionFailedException( Justifications.CoverageMissing );
                     }
 
                 default:

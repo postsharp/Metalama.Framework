@@ -55,9 +55,11 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
             {
                 var rewrittenNode = this.RewriteTypeDeclaration( node, n => base.VisitClassDeclaration( n ), ( n, m ) => n.WithMembers( List( m ) ) );
-                if ( this._currentTypeStack.Count>0)
+
+                if ( this._currentTypeStack.Count > 0 )
                 {
                     this._currentTypeStack.Peek().Members.Add( rewrittenNode );
+
                     return null;
                 }
                 else
@@ -69,9 +71,11 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
             {
                 var rewrittenNode = this.RewriteTypeDeclaration( node, n => base.VisitRecordDeclaration( n ), ( n, m ) => n.WithMembers( List( m ) ) );
+
                 if ( this._currentTypeStack.Count > 0 )
                 {
                     this._currentTypeStack.Peek().Members.Add( rewrittenNode );
+
                     return null;
                 }
                 else
@@ -83,9 +87,11 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node )
             {
                 var rewrittenNode = this.RewriteTypeDeclaration( node, n => base.VisitStructDeclaration( n ), ( n, m ) => n.WithMembers( List( m ) ) );
+
                 if ( this._currentTypeStack.Count > 0 )
                 {
                     this._currentTypeStack.Peek().Members.Add( rewrittenNode );
+
                     return null;
                 }
                 else
@@ -124,30 +130,35 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
                 this._currentTypeStack.Peek().Members.AddRange( this.RewriteMemberDeclaration( node ) );
+
                 return null;
             }
 
             public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             {
                 this._currentTypeStack.Peek().Members.AddRange( this.RewriteMemberDeclaration( node ) );
+
                 return null;
             }
 
             public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
             {
                 this._currentTypeStack.Peek().Members.AddRange( this.RewriteMemberDeclaration( node ) );
+
                 return null;
             }
 
             public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
             {
                 this._currentTypeStack.Peek().Members.AddRange( this.RewriteMemberDeclaration( node ) );
+
                 return null;
             }
 
             public override SyntaxNode? VisitFieldDeclaration( FieldDeclarationSyntax node )
             {
                 this._currentTypeStack.Peek().Members.AddRange( this.RewriteMemberDeclaration( node ) );
+
                 return null;
             }
 
@@ -253,7 +264,11 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 if ( pseudoIntroductionAttribute != null )
                 {
                     // Introduction will create a temporary declaration, that will help us to provide values for IMethod member.
-                    return new[] { ( this.ProcessPseudoIntroduction( node, newAttributeLists, pseudoIntroductionAttribute, notInlineable, notDiscardable, pseudoReplacedAttribute, pseudoReplacementAttribute ), true) };
+                    return new[]
+                    {
+                        (this.ProcessPseudoIntroduction( node, newAttributeLists, pseudoIntroductionAttribute, notInlineable, notDiscardable, pseudoReplacedAttribute, pseudoReplacementAttribute ),
+                         true)
+                    };
                 }
                 else if ( pseudoOverrideAttribute != null )
                 {
@@ -261,7 +276,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
                     return new[] { (this.ProcessPseudoOverride( node, newAttributeLists, pseudoOverrideAttribute, notInlineable, notDiscardable ), true) };
                 }
-                else if (pseudoReplacedAttribute != null)
+                else if ( pseudoReplacedAttribute != null )
                 {
                     var replacedMemberName = node switch
                     {
@@ -311,7 +326,8 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 AttributeSyntax? replacedAttribute,
                 AttributeSyntax? replacementAttribute )
             {
-                if ( introductionAttribute.ArgumentList == null || introductionAttribute.ArgumentList.Arguments.Count < 1 || introductionAttribute.ArgumentList.Arguments.Count > 3 )
+                if ( introductionAttribute.ArgumentList == null || introductionAttribute.ArgumentList.Arguments.Count < 1
+                                                                || introductionAttribute.ArgumentList.Arguments.Count > 3 )
                 {
                     throw new ArgumentException( "PseudoIntroduction should have 1 or 2 arguments - aspect name and optionally layer name." );
                 }
@@ -344,10 +360,12 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     Invariant.Assert( replacedAttribute == null );
                     Invariant.Assert( replacementAttribute.ArgumentList?.Arguments.Count == 1 );
 
-                    memberNameOverride = ((InvocationExpressionSyntax) replacementAttribute.ArgumentList.Arguments[0].Expression).ArgumentList.Arguments[0].ToString();
+                    memberNameOverride = ((InvocationExpressionSyntax) replacementAttribute.ArgumentList.Arguments[0].Expression).ArgumentList.Arguments[0]
+                        .ToString();
+
                     introductionSyntax = GetFinalIntroductionSyntax( introductionSyntax, memberNameOverride );
                 }
-                else if (replacedAttribute != null)
+                else if ( replacedAttribute != null )
                 {
                     Invariant.Assert( replacementAttribute == null );
                     memberNameOverride = GetReplacedMemberName( introducedElementName );
@@ -404,7 +422,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                             _ => throw new AssertionFailedException()
                         };
 
-                        if (replacementAttribute != null)
+                        if ( replacementAttribute != null )
                         {
                             _ = o.Implements<IReplaceMember>();
                         }
@@ -414,19 +432,30 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 {
                     case DeclarationKind.Method:
                         A.CallTo( () => ((IDeclarationRef<IMethod>) transformation).Target ).Returns( transformation );
-                        A.CallTo( () => ((IDeclarationRef<IMethod>) transformation).Resolve( A<CompilationModel>.Ignored ) ).Returns( (IMethod)transformation );
+
+                        A.CallTo( () => ((IDeclarationRef<IMethod>) transformation).Resolve( A<CompilationModel>.Ignored ) )
+                            .Returns( (IMethod) transformation );
+
                         break;
+
                     case DeclarationKind.Property:
                         A.CallTo( () => ((IDeclarationRef<IProperty>) transformation).Target ).Returns( transformation );
-                        A.CallTo( () => ((IDeclarationRef<IProperty>) transformation).Resolve( A<CompilationModel>.Ignored ) ).Returns( (IProperty) transformation );
+
+                        A.CallTo( () => ((IDeclarationRef<IProperty>) transformation).Resolve( A<CompilationModel>.Ignored ) )
+                            .Returns( (IProperty) transformation );
+
                         break;
+
                     case DeclarationKind.Event:
                         A.CallTo( () => ((IDeclarationRef<IEvent>) transformation).Target ).Returns( transformation );
                         A.CallTo( () => ((IDeclarationRef<IEvent>) transformation).Resolve( A<CompilationModel>.Ignored ) ).Returns( (IEvent) transformation );
+
                         break;
+
                     case DeclarationKind.Field:
                         A.CallTo( () => ((IDeclarationRef<IField>) transformation).Target ).Returns( transformation );
                         A.CallTo( () => ((IDeclarationRef<IField>) transformation).Resolve( A<CompilationModel>.Ignored ) ).Returns( (IField) transformation );
+
                         break;
                 }
 
@@ -494,12 +523,13 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 {
                     case PropertyDeclarationSyntax propertyDecl:
                         return propertyDecl.WithIdentifier( Identifier( memberNameOverride ) );
+
                     case FieldDeclarationSyntax fieldDecl:
                         return
                             fieldDecl.WithDeclaration(
                                 fieldDecl.Declaration.WithVariables(
-                                    SingletonSeparatedList(
-                                        fieldDecl.Declaration.Variables.Single().WithIdentifier( Identifier( memberNameOverride ) ) ) ) );
+                                    SingletonSeparatedList( fieldDecl.Declaration.Variables.Single().WithIdentifier( Identifier( memberNameOverride ) ) ) ) );
+
                     default:
                         throw new AssertionFailedException();
                 }
@@ -512,7 +542,8 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 bool notInlineable,
                 bool notDiscardable )
             {
-                if ( overrideAttribute.ArgumentList == null || overrideAttribute.ArgumentList.Arguments.Count < 2 || overrideAttribute.ArgumentList.Arguments.Count > 3 )
+                if ( overrideAttribute.ArgumentList == null || overrideAttribute.ArgumentList.Arguments.Count < 2
+                                                            || overrideAttribute.ArgumentList.Arguments.Count > 3 )
                 {
                     throw new ArgumentException(
                         "PseudoOverride should have 2 or 3 arguments - overridden declaration name, aspect name and optionally layer name." );
@@ -683,7 +714,8 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     .WithDeclaration(
                         field.Declaration.WithVariables(
                             SeparatedList(
-                                field.Declaration.Variables.Select( v => v.WithIdentifier( Identifier( GetSymbolHelperName( memberNameOverride ?? v.Identifier.ValueText) ) ) ) ) ) );
+                                field.Declaration.Variables.Select(
+                                    v => v.WithIdentifier( Identifier( GetSymbolHelperName( memberNameOverride ?? v.Identifier.ValueText ) ) ) ) ) ) );
             }
 
             private static SyntaxNode GetSymbolHelperMethod( MethodDeclarationSyntax method, string? memberNameOverride )
@@ -750,7 +782,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             {
                 return @event
                     .WithAttributeLists( List<AttributeListSyntax>() )
-                    .WithIdentifier( Identifier( GetSymbolHelperName( memberNameOverride ?? @event.Identifier.ValueText) ) )
+                    .WithIdentifier( Identifier( GetSymbolHelperName( memberNameOverride ?? @event.Identifier.ValueText ) ) )
                     .WithModifiers( TokenList( @event.Modifiers.Where( m => m.Kind() != SyntaxKind.OverrideKeyword ) ) )
                     .WithAccessorList( AccessorList( List( @event.AccessorList.AssertNotNull().Accessors.Select( a => a.WithBody( Block() ) ) ) ) );
             }

@@ -33,12 +33,11 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 var declarator = eventFieldDecl.Declaration.Variables.Single();
                 declarator = AssignNodeId( declarator );
 
-                return (T)(SyntaxNode) eventFieldDecl
+                return (T) (SyntaxNode) eventFieldDecl
                     .WithDeclaration( eventFieldDecl.Declaration.WithVariables( SeparatedList( new[] { declarator } ) ) );
             }
             else
             {
-
                 if ( node.GetAnnotations( _testNodeIdAnnotationId ).Any() )
                 {
                     return node;

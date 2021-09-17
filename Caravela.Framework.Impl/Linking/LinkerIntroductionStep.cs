@@ -115,8 +115,8 @@ namespace Caravela.Framework.Impl.Linking
 
                         if ( replacedTransformation is IMemberIntroduction memberIntroduction )
                         {
-                            syntaxTransformationCollection.AddRemovedInsertPosition( 
-                                memberIntroduction.InsertPosition, 
+                            syntaxTransformationCollection.AddRemovedInsertPosition(
+                                memberIntroduction.InsertPosition,
                                 new InsertPosition( InsertPositionRelation.After, (IDeclarationBuilder) replacedTransformation ) );
                         }
 
@@ -130,7 +130,7 @@ namespace Caravela.Framework.Impl.Linking
             // Visit all transformations, respect aspect part ordering.
             foreach ( var transformation in allTransformations )
             {
-                if (replacedTransformations.Contains(transformation) )
+                if ( replacedTransformations.Contains( transformation ) )
                 {
                     continue;
                 }

@@ -101,15 +101,15 @@ namespace Caravela.Framework.Impl.Linking
         {
             var accessorList =
                 AccessorList(
-                    List(
-                        new[]
-                        {
-                            AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull() ) ),
-                            AccessorDeclaration(
-                                SyntaxKind.RemoveAccessorDeclaration,
-                                GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) )
-                        } ) )
-                .NormalizeWhitespace();
+                        List(
+                            new[]
+                            {
+                                AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, GetImplicitAdderBody( symbol.AddMethod.AssertNotNull() ) ),
+                                AccessorDeclaration(
+                                    SyntaxKind.RemoveAccessorDeclaration,
+                                    GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull() ) )
+                            } ) )
+                    .NormalizeWhitespace();
 
             return GetSpecialImplEvent( eventType, accessorList, symbol, GetOriginalImplMemberName( symbol ) );
         }
@@ -118,13 +118,13 @@ namespace Caravela.Framework.Impl.Linking
         {
             var accessorList =
                 AccessorList(
-                    List(
-                        new[]
-                        {
-                            AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, Block() ),
-                            AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, Block() )
-                        } ) )
-                .NormalizeWhitespace();
+                        List(
+                            new[]
+                            {
+                                AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, Block() ),
+                                AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, Block() )
+                            } ) )
+                    .NormalizeWhitespace();
 
             return GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ) );
         }

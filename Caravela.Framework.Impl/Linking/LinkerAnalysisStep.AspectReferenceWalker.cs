@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.Linking
 
                     return walker.FoundName.AssertNotNull();
                 }
-            }           
+            }
 
             private class ConditionalAccessExpressionWalker : CSharpSyntaxWalker
             {
@@ -78,14 +78,14 @@ namespace Caravela.Framework.Impl.Linking
 
                 public override void VisitConditionalAccessExpression( ConditionalAccessExpressionSyntax node )
                 {
-                    if (this._context == null)
+                    if ( this._context == null )
                     {
                         this._context = node;
 
                         this.Visit( node.WhenNotNull );
 
                         this._context = null;
-                    }                    
+                    }
                 }
 
                 public override void VisitMemberBindingExpression( MemberBindingExpressionSyntax node )

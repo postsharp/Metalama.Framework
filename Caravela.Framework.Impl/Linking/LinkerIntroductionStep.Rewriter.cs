@@ -176,7 +176,7 @@ namespace Caravela.Framework.Impl.Linking
                 // TODO: Try to avoid closure allocation.
                 void AddIntroductionsOnPosition( InsertPosition position )
                 {
-                    foreach ( var removedInsertPosition in this._introducedMemberCollection.GetRemovedInsertPositionsOnPosition(position))
+                    foreach ( var removedInsertPosition in this._introducedMemberCollection.GetRemovedInsertPositionsOnPosition( position ) )
                     {
                         AddIntroductionsOnPosition( removedInsertPosition );
                     }
@@ -254,14 +254,14 @@ namespace Caravela.Framework.Impl.Linking
 
             public override SyntaxNode? VisitFieldDeclaration( FieldDeclarationSyntax node )
             {
-                var rewrittenDeclaration = (VariableDeclarationSyntax?)this.Visit(node.Declaration);
+                var rewrittenDeclaration = (VariableDeclarationSyntax?) this.Visit( node.Declaration );
 
                 if ( rewrittenDeclaration == null )
                 {
                     return null;
                 }
 
-                return node.WithDeclaration(rewrittenDeclaration);
+                return node.WithDeclaration( rewrittenDeclaration );
             }
 
             public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )

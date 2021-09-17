@@ -8,7 +8,6 @@ using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -127,13 +126,13 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private static MemberDeclarationSyntax GetContainingMemberDeclaration(SyntaxNode declaringSyntax)
+        private static MemberDeclarationSyntax GetContainingMemberDeclaration( SyntaxNode declaringSyntax )
         {
             return declaringSyntax switch
             {
                 VariableDeclaratorSyntax { Parent: { Parent: MemberDeclarationSyntax memberDeclaration } } => memberDeclaration,
                 MemberDeclarationSyntax memberDeclaration => memberDeclaration,
-                _ => throw new AssertionFailedException(),
+                _ => throw new AssertionFailedException()
             };
         }
 
@@ -172,7 +171,7 @@ namespace Caravela.Framework.Impl.Linking
                 var symbolNode = intermediateNode.AssertNotNull() switch
                 {
                     EventFieldDeclarationSyntax eventFieldNode => (SyntaxNode) eventFieldNode.Declaration.Variables.First(),
-                    _ => intermediateNode,
+                    _ => intermediateNode
                 };
 
                 return intermediateSemanticModel.GetDeclaredSymbol( symbolNode );

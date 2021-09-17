@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Linking
             private readonly string _replacingIdentifier;
             private ConditionalAccessExpressionSyntax? _context;
 
-            public ConditionalAccessRewriter(string replacingIdentifier)
+            public ConditionalAccessRewriter( string replacingIdentifier )
             {
                 this._replacingIdentifier = replacingIdentifier;
             }
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     this._context = node;
 
-                    var result = node.WithWhenNotNull((ExpressionSyntax)this.Visit( node.WhenNotNull ));
+                    var result = node.WithWhenNotNull( (ExpressionSyntax) this.Visit( node.WhenNotNull ) );
 
                     this._context = null;
 
@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     // Template compiler currently does not generate expressions that would chain x?.y?.z without parentheses.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
-                    
+
                     // return node;
                 }
             }

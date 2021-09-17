@@ -79,9 +79,9 @@ namespace Caravela.Framework.Impl.Linking
                 interfaceList.AddRange( introducedInterfaces );
             }
 
-            internal void AddRemovedInsertPosition(InsertPosition insertPosition, InsertPosition removedPosition)
+            internal void AddRemovedInsertPosition( InsertPosition insertPosition, InsertPosition removedPosition )
             {
-                if (!this._removedInsertPositionsByInsertPosition.TryGetValue(insertPosition, out var removedPositionList))
+                if ( !this._removedInsertPositionsByInsertPosition.TryGetValue( insertPosition, out var removedPositionList ) )
                 {
                     this._removedInsertPositionsByInsertPosition[insertPosition] = removedPositionList = new List<InsertPosition>();
                 }
@@ -108,7 +108,7 @@ namespace Caravela.Framework.Impl.Linking
                 return this._removedVariableDeclaratorSyntax.Contains( memberDeclaration );
             }
 
-            public IEnumerable<InsertPosition> GetRemovedInsertPositionsOnPosition(InsertPosition position)
+            public IEnumerable<InsertPosition> GetRemovedInsertPositionsOnPosition( InsertPosition position )
             {
                 if ( this._removedInsertPositionsByInsertPosition.TryGetValue( position, out var removedInsertPositions ) )
                 {

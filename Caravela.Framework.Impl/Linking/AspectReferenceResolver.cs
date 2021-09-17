@@ -268,7 +268,7 @@ namespace Caravela.Framework.Impl.Linking
                 || overrideIndices.Any( x => x.Index == resolvedIndex )
                 || resolvedIndex == targetMemberIntroductionIndex );
 
-            if ( overrideIndices.Count > 0 && resolvedIndex == overrideIndices[overrideIndices.Count - 1].Index)
+            if ( overrideIndices.Count > 0 && resolvedIndex == overrideIndices[overrideIndices.Count - 1].Index )
             {
                 // If we have resolved to the last override, transition to the final declaration index.
                 resolvedIndex = new MemberLayerIndex( this._orderedLayers.Count, 0 );
@@ -303,8 +303,8 @@ namespace Caravela.Framework.Impl.Linking
                             expression,
                             referenceSpecification );
                     }
-                    else if( targetMemberIntroduction?.Introduction is IReplaceMember replaceMember
-                            && replaceMember.ReplacedMember.Resolve( this._finalCompilationModel ).GetSymbol() != null )
+                    else if ( targetMemberIntroduction?.Introduction is IReplaceMember replaceMember
+                              && replaceMember.ReplacedMember.Resolve( this._finalCompilationModel ).GetSymbol() != null )
                     {
                         // Introduction replaced existing source member, resolve to default semantics, i.e. source symbol.
 
@@ -380,7 +380,7 @@ namespace Caravela.Framework.Impl.Linking
                     // TODO: This would happen has the introduced member contained aspect reference. Bodies of introduced members are
                     //       currently not used.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
-                    
+
                     // // There is no introduction, i.e. this is a user source symbol.
                     // return new ResolvedAspectReference(
                     //     containingSymbol,

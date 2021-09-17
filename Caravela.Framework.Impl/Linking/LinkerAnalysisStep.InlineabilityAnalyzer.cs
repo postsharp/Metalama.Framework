@@ -264,7 +264,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     // TODO: Probably incorrect syntax.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
-                    
+
                     // inliningSpecification = null;
                     //
                     // return false;

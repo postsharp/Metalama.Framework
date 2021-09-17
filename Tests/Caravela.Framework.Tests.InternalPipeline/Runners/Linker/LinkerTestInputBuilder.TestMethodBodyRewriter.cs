@@ -28,11 +28,14 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
             {
-                if (node.Expression is MemberAccessExpressionSyntax memberAccess
-                    && memberAccess.Name is GenericNameSyntax genericName
-                    && StringComparer.Ordinal.Equals( genericName.Identifier.ValueText, nameof( Api._cast )) )
+                if ( node.Expression is MemberAccessExpressionSyntax memberAccess
+                     && memberAccess.Name is GenericNameSyntax genericName
+                     && StringComparer.Ordinal.Equals( genericName.Identifier.ValueText, nameof(Api._cast) ) )
                 {
-                    return ParenthesizedExpression(CastExpression( genericName.TypeArgumentList.Arguments.Single(), (ExpressionSyntax)this.Visit(memberAccess.Expression).AssertNotNull() ));
+                    return ParenthesizedExpression(
+                        CastExpression(
+                            genericName.TypeArgumentList.Arguments.Single(),
+                            (ExpressionSyntax) this.Visit( memberAccess.Expression ).AssertNotNull() ) );
                 }
 
                 if ( this.TransformInvocationOrElementAccess( node, node.Expression, node.ArgumentList.Arguments, out var transformedNode ) )
@@ -160,8 +163,8 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             {
                 if ( node.Kind() == SyntaxKind.SimpleMemberAccessExpression
                      && node.Expression is IdentifierNameSyntax identifier
-                     && (StringComparer.Ordinal.Equals( identifier.Identifier.ValueText, nameof( Api._static ) )
-                       || StringComparer.Ordinal.Equals( identifier.Identifier.ValueText, nameof( Api._local ) )) )
+                     && (StringComparer.Ordinal.Equals( identifier.Identifier.ValueText, nameof(Api._static) )
+                         || StringComparer.Ordinal.Equals( identifier.Identifier.ValueText, nameof(Api._local) )) )
                 {
                     return node.Name;
                 }

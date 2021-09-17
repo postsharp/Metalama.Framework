@@ -80,7 +80,8 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
             var layerOrderLookup = orderedLayers.ToDictionary( x => x.AspectLayerId, x => x.Order );
 
-            var replacedCompilationModel = initialCompilationModel.WithTransformations( this._rewriter.ReplacedTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList() );
+            var replacedCompilationModel = initialCompilationModel.WithTransformations(
+                this._rewriter.ReplacedTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList() );
 
             var inputCompilationModel = replacedCompilationModel.WithTransformations(
                 this._rewriter.ObservableTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList() );
@@ -131,7 +132,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     {
                         FieldDeclarationSyntax fieldDeclaration => fieldDeclaration.Declaration.Variables.Single(),
                         EventFieldDeclarationSyntax eventFieldDeclaration => eventFieldDeclaration.Declaration.Variables.Single(),
-                        _ => markedNode,
+                        _ => markedNode
                     };
 
                     var declaredSymbol = semanticModel.GetDeclaredSymbol( declaringNode );
@@ -157,7 +158,9 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                     | StructuralSymbolComparerOptions.ParameterTypes );
 
             // Update transformations to reflect the input compilation.
-            foreach ( var transformation in rewriter.ObservableTransformations.Cast<object>().Concat( rewriter.NonObservableTransformations ).Concat( rewriter.ReplacedTransformations ) )
+            foreach ( var transformation in rewriter.ObservableTransformations.Cast<object>()
+                .Concat( rewriter.NonObservableTransformations )
+                .Concat( rewriter.ReplacedTransformations ) )
             {
                 var containingNodeId = ((ITestTransformation) transformation).ContainingNodeId;
                 var insertPositionNodeId = ((ITestTransformation) transformation).InsertPositionNodeId;
@@ -178,15 +181,18 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                             ? nodeIdToSyntaxNode[insertPositionNodeId]
                             : null;
 
-                    if (insertPositionNode is VariableDeclaratorSyntax)
+                    if ( insertPositionNode is VariableDeclaratorSyntax )
                     {
                         insertPositionNode = insertPositionNode.Parent?.Parent.AssertNotNull();
                     }
 
                     var overriddenMemberSymbol = containingSymbol.GetMembers()
-                        .Where( x => 
-                            StringComparer.Ordinal.Equals( x.Name, overriddenDeclarationName ) 
-                            || (overriddenDeclarationName.Contains('.', StringComparison.Ordinal) && x.Name.EndsWith( overriddenDeclarationName, StringComparison.Ordinal ) ) )
+                        .Where(
+                            x =>
+                                StringComparer.Ordinal.Equals( x.Name, overriddenDeclarationName )
+                                || (overriddenDeclarationName.Contains( '.', StringComparison.Ordinal ) && x.Name.EndsWith(
+                                    overriddenDeclarationName,
+                                    StringComparison.Ordinal )) )
                         .Where( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) )
                         .SingleOrDefault();
 
@@ -212,7 +218,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                             .Where( t => ((ITestTransformation) t).SymbolHelperNodeId == overriddenMemberSymbolHelperNodeId )
                             .Single();
                     }
-                    
+
                     if ( insertPositionNode != null )
                     {
                         A.CallTo( () => ((IMemberIntroduction) overriddenDeclaration).InsertPosition )
@@ -241,7 +247,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         insertPositionNode = insertPositionNode.Parent?.Parent.AssertNotNull();
                     }
 
-                    if (transformation is IReplaceMember replaceMember)
+                    if ( transformation is IReplaceMember replaceMember )
                     {
                         // This only supports fields being replaced by properties.
                         var replacedElementName = ((ITestTransformation) transformation).ReplacedElementName;
@@ -250,7 +256,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                         var replacedMemberSymbol = containingSymbol.GetMembers()
                             .SingleOrDefault( x => StringComparer.Ordinal.Equals( x.Name, replacedElementName ) );
 
-                        if (replacedMemberSymbol != null)
+                        if ( replacedMemberSymbol != null )
                         {
                             // This is replaced source element.
                             A.CallTo( () => replaceMember.ReplacedMember ).Returns( new MemberRef<IMemberOrNamedType>( replacedMemberSymbol ) );
@@ -264,14 +270,16 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                             var replacedMemberSymbolHelperNode = replacedMemberSymbolHelperSymbol switch
                             {
                                 IFieldSymbol => replacedMemberSymbolHelperSymbol.GetPrimaryDeclaration()?.Parent?.Parent,
-                                _ => replacedMemberSymbolHelperSymbol.GetPrimaryDeclaration(),
+                                _ => replacedMemberSymbolHelperSymbol.GetPrimaryDeclaration()
                             };
 
                             var replacedSymbolHelperNodeId = GetNodeId( replacedMemberSymbolHelperNode.AssertNotNull() );
 
-                            var replacedTransformation = rewriter.ReplacedTransformations.Single( x => ((ITestTransformation) x).SymbolHelperNodeId == replacedSymbolHelperNodeId );
+                            var replacedTransformation =
+                                rewriter.ReplacedTransformations.Single( x => ((ITestTransformation) x).SymbolHelperNodeId == replacedSymbolHelperNodeId );
 
-                            A.CallTo( () => replaceMember.ReplacedMember ).Returns( new MemberRef<IMemberOrNamedType>( (IMemberOrNamedTypeBuilder) replacedTransformation ) );
+                            A.CallTo( () => replaceMember.ReplacedMember )
+                                .Returns( new MemberRef<IMemberOrNamedType>( (IMemberOrNamedTypeBuilder) replacedTransformation ) );
                         }
                     }
 
@@ -453,7 +461,9 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             string introducedElementName )
         {
             A.CallTo( () => observableTransformation.ContainingDeclaration ).Returns( containingDeclaration );
-            A.CallTo( () => ((IDeclarationInternal)observableTransformation).ToRef()).Returns( new DeclarationRef<IDeclaration>((IDeclarationBuilder)observableTransformation) );
+
+            A.CallTo( () => ((IDeclarationInternal) observableTransformation).ToRef() )
+                .Returns( new DeclarationRef<IDeclaration>( (IDeclarationBuilder) observableTransformation ) );
 
             if ( insertPositionNode != null )
             {
