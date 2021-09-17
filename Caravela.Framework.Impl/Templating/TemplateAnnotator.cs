@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
@@ -119,6 +120,9 @@ namespace Caravela.Framework.Impl.Templating
         {
             switch ( symbol )
             {
+                case IDiscardSymbol:
+                    return TemplatingScope.Both;
+
                 // For local variables, we decide based on  _buildTimeLocals only. This collection is updated
                 // at each iteration of the algorithm based on inferences from _requireMetaExpressionStack.
                 case ILocalSymbol or INamedTypeSymbol { IsAnonymousType: true } when this._localScopes.TryGetValue( symbol, out var scope ):
@@ -345,6 +349,7 @@ namespace Caravela.Framework.Impl.Templating
                         return TemplatingScope.CompileTimeOnlyReturningBoth;
 
                     default:
+                        // Coverage: ignore (could not find a case).
                         return TemplatingScope.CompileTimeOnly;
                 }
             }
@@ -398,14 +403,8 @@ namespace Caravela.Framework.Impl.Templating
         /// <summary>
         /// Adds scope annotation to a node that has been visited - so children are annotated but not the node itself.
         /// </summary>
-        [return: NotNullIfNotNull( "node" )]
-        private SyntaxNode? AddScopeAnnotationToVisitedNode( SyntaxNode? node, SyntaxNode? visitedNode )
+        private SyntaxNode AddScopeAnnotationToVisitedNode( SyntaxNode node, SyntaxNode visitedNode )
         {
-            if ( visitedNode == null )
-            {
-                return null;
-            }
-
             if ( this._currentScopeContext.ForceCompileTimeOnlyExpression )
             {
                 if ( visitedNode.GetScopeFromAnnotation() == TemplatingScope.RunTimeOnly ||
@@ -545,6 +544,7 @@ namespace Caravela.Framework.Impl.Templating
             switch ( symbol )
             {
                 case null:
+                    // Coverage: ignore.
                     return nodeOrToken;
 
                 case ILocalSymbol when scope == TemplatingScope.CompileTimeOnly:
@@ -755,19 +755,50 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             var expressionScope = this.GetNodeScope( transformedExpression );
-            var expressionSymbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Expression );
 
-            var parameters = expressionSymbol switch
+            ImmutableArray<IParameterSymbol> parameters;
+
+            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Expression );
+
+            switch ( symbol )
             {
-                null => default,
-                IMethodSymbol method => method.Parameters,
-                IPropertySymbol property => property.Parameters,
-                IParameterSymbol parameter when parameter.Type.TypeKind == TypeKind.Delegate => ((INamedTypeSymbol) parameter.Type).Constructors.Single()
-                    .Parameters,
-                ILocalSymbol local when local.Type.TypeKind == TypeKind.Delegate => ((INamedTypeSymbol) local.Type).Constructors.Single().Parameters,
-                IEventSymbol @event => ((INamedTypeSymbol) @event.Type).Constructors.Single().Parameters,
-                _ => throw new NotImplementedException( $"Don't know how to get the parameters of '{expressionSymbol}'." )
-            };
+                case IMethodSymbol method:
+                    parameters = method.Parameters;
+
+                    break;
+
+                default:
+                    var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression );
+                    
+                    switch ( expressionType )
+                    {
+                        case null when symbol == null:
+                            // This seems to happen when one of the argument is dynamic.
+                            // Roslyn then stops doing the symbol analysis for the whole downstream syntax tree.
+                            parameters = default;
+                            
+                            break;
+                        
+                        case { TypeKind: TypeKind.Delegate }:
+                            parameters = ((INamedTypeSymbol) expressionType).Constructors.Single().Parameters;
+
+                            break;
+
+                        case { TypeKind: TypeKind.Error }:
+                            return node;
+
+                        case { TypeKind: TypeKind.Dynamic }:
+                            // In case of invocation of a dynamic location, there is no list of parameters, only arguments.
+                            parameters = default;
+
+                            break;
+
+                        default:
+                            throw new AssertionFailedException( $"Don't know how to get the parameters of '{node.Expression}'." );
+                    }
+
+                    break;
+            }
 
             InvocationExpressionSyntax updatedInvocation;
 
@@ -1340,6 +1371,13 @@ namespace Caravela.Framework.Impl.Templating
                 transformedRight = this.Visit( node.Right );
             }
 
+            // If we have a discard assignment, take the scope from the right.
+            if ( scope == TemplatingScope.Both
+                 && this._syntaxTreeAnnotationMap.GetSymbol( node.Left ) is IDiscardSymbol )
+            {
+                scope = this.GetNodeScope( transformedRight );
+            }
+
             return node.Update( transformedLeft, node.OperatorToken, transformedRight ).AddScopeAnnotation( scope );
         }
 
@@ -1439,7 +1477,7 @@ namespace Caravela.Framework.Impl.Templating
             else
             {
                 // Use the default rule.
-                var visitedNode = base.VisitBinaryExpression( node );
+                var visitedNode = base.VisitBinaryExpression( node )!;
 
                 return this.AddScopeAnnotationToVisitedNode( node, visitedNode );
             }
@@ -1462,9 +1500,9 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             var transformedVariableDeclaration = this.Visit( node.Declaration )!;
-            var transformedInitializers = node.Initializers.Select( i => this.Visit( i ) );
+            var transformedInitializers = node.Initializers.Select( i => this.Visit( i )! );
             var transformedCondition = this.Visit( node.Condition )!;
-            var transformedIncrementors = node.Incrementors.Select( syntax => this.Visit( syntax ) );
+            var transformedIncrementors = node.Incrementors.Select( syntax => this.Visit( syntax )! );
 
             StatementSyntax transformedStatement;
 

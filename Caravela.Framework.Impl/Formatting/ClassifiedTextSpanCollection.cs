@@ -55,8 +55,9 @@ namespace Caravela.Framework.Impl.Formatting
         {
             if ( span.Start < 0 || span.End > this._length )
             {
-                throw new ArgumentOutOfRangeException( nameof(span) );
+                span = TextSpan.FromBounds( Math.Max( 0, span.Start ), Math.Min( this._length, span.End ) );
             }
+            
 
             for ( var i = 0; /* nothing */; i++ )
             {
