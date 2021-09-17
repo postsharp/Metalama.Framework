@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
@@ -112,6 +113,13 @@ namespace Caravela.Framework.Impl.Linking
                     case ISyntaxTreeTransformation replacedTransformation:
                         replacedTransformations.Add( replacedTransformation );
 
+                        if ( replacedTransformation is IMemberIntroduction memberIntroduction )
+                        {
+                            syntaxTransformationCollection.AddRemovedInsertPosition(
+                                memberIntroduction.InsertPosition,
+                                new InsertPosition( InsertPositionRelation.After, (IDeclarationBuilder) replacedTransformation ) );
+                        }
+
                         break;
 
                     default:
@@ -122,6 +130,11 @@ namespace Caravela.Framework.Impl.Linking
             // Visit all transformations, respect aspect part ordering.
             foreach ( var transformation in allTransformations )
             {
+                if ( replacedTransformations.Contains( transformation ) )
+                {
+                    continue;
+                }
+
                 if ( transformation is IMemberIntroduction memberIntroduction )
                 {
                     var introductionContext = new MemberIntroductionContext(

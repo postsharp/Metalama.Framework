@@ -11,13 +11,14 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 {
     public class LinkerInlineAssertionWalker : CSharpSyntaxWalker
     {
-        private static readonly Regex _assertionRegex = new Regex( "^[\t ]*//[\t ]*ASSERT:(?<syntax>.*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase );
+        private static readonly Regex _assertionRegex = new( "^[\t ]*//[\t ]*ASSERT:(?<syntax>.*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase );
 
         public override void Visit( SyntaxNode? node )
         {
             if ( node == null )
             {
                 base.Visit( node );
+
                 return;
             }
 
@@ -25,12 +26,14 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
             foreach ( var trivia in trivias )
             {
-                if (!trivia.HasStructure && TryParseAssertion( trivia.ToString(), out var assertedSyntax))
+                if ( !trivia.HasStructure && TryParseAssertion( trivia.ToString(), out var assertedSyntax ) )
                 {
                     var parsedAssertedTree = CSharpSyntaxTree.ParseText( assertedSyntax );
                     var parsedObservedTree = CSharpSyntaxTree.ParseText( node.ToString() );
 
-                    Assert.Equal( parsedAssertedTree.GetRoot().NormalizeWhitespace().ToString(), parsedObservedTree.GetRoot().NormalizeWhitespace().ToString() );
+                    Assert.Equal(
+                        parsedAssertedTree.GetRoot().NormalizeWhitespace().ToString(),
+                        parsedObservedTree.GetRoot().NormalizeWhitespace().ToString() );
 
                     return;
                 }
@@ -39,17 +42,19 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             base.Visit( node );
         }
 
-        private static bool TryParseAssertion(string trivia, [NotNullWhen(true)] out string? assertedSyntax)
+        private static bool TryParseAssertion( string trivia, [NotNullWhen( true )] out string? assertedSyntax )
         {
             var match = _assertionRegex.Match( trivia );
 
-            if (match.Success)
+            if ( match.Success )
             {
                 assertedSyntax = match.Groups["syntax"].Value;
+
                 return true;
             }
 
             assertedSyntax = null;
+
             return false;
         }
     }

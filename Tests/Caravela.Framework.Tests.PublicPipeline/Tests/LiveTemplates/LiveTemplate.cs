@@ -4,7 +4,7 @@ using System;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.SimpleLive
+namespace Caravela.Framework.IntegrationTests.LiveTemplates.LiveTemplate
 {
     public class TestAspect : OverrideMethodAspect
     {

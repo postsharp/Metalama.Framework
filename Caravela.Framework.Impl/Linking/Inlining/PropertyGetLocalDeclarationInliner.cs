@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
 
             // Should be within variable declarator.
             if ( equalsClause.Parent is not VariableDeclaratorSyntax variableDeclarator
-                || variableDeclarator.Parent is not VariableDeclarationSyntax variableDeclaration )
+                 || variableDeclarator.Parent is not VariableDeclarationSyntax variableDeclaration )
             {
                 // Coverage: ignore (only incorrect code can get here).
                 return false;
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             }
 
             // Variable and property type should be equal (i.e. no implicit conversions).
-            if ( !SymbolEqualityComparer.Default.Equals(semanticModel.GetSymbolInfo( variableDeclaration.Type ).Symbol, propertySymbol.Type ))
+            if ( !SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( variableDeclaration.Type ).Symbol, propertySymbol.Type ) )
             {
                 return false;
             }

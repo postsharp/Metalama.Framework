@@ -42,8 +42,5 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
                 this.handlers.Remove(value);
             }
         }
-
-        [Override]
-        public event EventHandler? EventField;
     }
 }

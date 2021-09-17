@@ -113,8 +113,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     var syntax = symbol.GetPrimaryDeclaration();
 
-                    bodyAnalysisResults[symbol] = new MethodBodyAnalysisResult(
-                        Array.Empty<ResolvedAspectReference>() );
+                    bodyAnalysisResults[symbol] = new MethodBodyAnalysisResult( Array.Empty<ResolvedAspectReference>() );
                 }
 
                 void AnalyzeIntroducedBody( IMethodSymbol symbol )
@@ -128,8 +127,7 @@ namespace Caravela.Framework.Impl.Linking
 
                     aspectReferenceCollector.Visit( syntax );
 
-                    bodyAnalysisResults[symbol] = new MethodBodyAnalysisResult(
-                        aspectReferenceCollector.AspectReferences );
+                    bodyAnalysisResults[symbol] = new MethodBodyAnalysisResult( aspectReferenceCollector.AspectReferences );
                 }
             }
         }

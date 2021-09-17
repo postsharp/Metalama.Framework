@@ -23,6 +23,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             private readonly List<LinkerIntroducedMember> _introducedMembers;
             private readonly Dictionary<InsertPosition, List<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
+            private readonly Dictionary<InsertPosition, List<InsertPosition>> _removedInsertPositionsByInsertPosition;
             private readonly Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>> _introducedInterfacesByTargetTypeDecl;
             private readonly HashSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
 
@@ -34,6 +35,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 this._introducedMembers = new List<LinkerIntroducedMember>();
                 this._introducedMembersByInsertPosition = new Dictionary<InsertPosition, List<LinkerIntroducedMember>>();
+                this._removedInsertPositionsByInsertPosition = new Dictionary<InsertPosition, List<InsertPosition>>();
                 this._introducedInterfacesByTargetTypeDecl = new Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>>();
                 this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
             }
@@ -77,6 +79,16 @@ namespace Caravela.Framework.Impl.Linking
                 interfaceList.AddRange( introducedInterfaces );
             }
 
+            internal void AddRemovedInsertPosition( InsertPosition insertPosition, InsertPosition removedPosition )
+            {
+                if ( !this._removedInsertPositionsByInsertPosition.TryGetValue( insertPosition, out var removedPositionList ) )
+                {
+                    this._removedInsertPositionsByInsertPosition[insertPosition] = removedPositionList = new List<InsertPosition>();
+                }
+
+                removedPositionList.Add( removedPosition );
+            }
+
             internal void AddRemovedSyntax( SyntaxNode removedSyntax )
             {
                 switch ( removedSyntax )
@@ -94,6 +106,16 @@ namespace Caravela.Framework.Impl.Linking
             public bool IsRemovedSyntax( VariableDeclaratorSyntax memberDeclaration )
             {
                 return this._removedVariableDeclaratorSyntax.Contains( memberDeclaration );
+            }
+
+            public IEnumerable<InsertPosition> GetRemovedInsertPositionsOnPosition( InsertPosition position )
+            {
+                if ( this._removedInsertPositionsByInsertPosition.TryGetValue( position, out var removedInsertPositions ) )
+                {
+                    return removedInsertPositions;
+                }
+
+                return Enumerable.Empty<InsertPosition>();
             }
 
             public IEnumerable<LinkerIntroducedMember> GetIntroducedMembersOnPosition( InsertPosition position )
