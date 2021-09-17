@@ -31,11 +31,13 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
         private readonly SyntaxTreeResultCache _syntaxTreeResultCache = new();
         private readonly CompileTimeDomain _domain;
+        private readonly bool _isTest;
         private int _pipelineExecutionCount;
 
-        public DesignTimeAspectPipelineCache( CompileTimeDomain domain )
+        public DesignTimeAspectPipelineCache( CompileTimeDomain domain, bool isTest = false )
         {
             this._domain = domain;
+            this._isTest = isTest;
         }
 
         /// <summary>
@@ -78,13 +80,17 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                         return pipeline;
                     }
 
-                    pipeline = new DesignTimeAspectPipeline( projectOptions, this._domain, false );
+                    pipeline = new DesignTimeAspectPipeline( projectOptions, this._domain, this._isTest );
                     pipeline.ExternalBuildStarted += this.OnExternalBuildStarted;
 
-                    // We _intentionally_ wait 5 seconds before starting a pipeline. This allows the initial burst of requests
-                    // to "settle down" and hopefully only the final will survive.
-                    // This is a temporary solution until we understand that happens.
-                    Thread.Sleep( 5000 );
+                    if ( !this._isTest )
+                    {
+                        // We _intentionally_ wait 5 seconds before starting a pipeline. This allows the initial burst of requests
+                        // to "settle down" and hopefully only the final will survive.
+                        // This is a temporary solution until we understand that happens.
+                        // TODO #29089
+                        Thread.Sleep( 5000 );
+                    }
 
                     if ( !this._pipelinesByProjectId.TryAdd( projectOptions.ProjectId, pipeline ) )
                     {

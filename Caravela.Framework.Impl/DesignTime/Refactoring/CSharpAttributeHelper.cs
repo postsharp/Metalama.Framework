@@ -185,6 +185,7 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
             return newNode.WithLeadingTrivia( oldNode.GetLeadingTrivia() );
         }
 
+        // TODO #29087
         /*
         internal static async ValueTask<Solution> AddAssemblyAttributeAsync(
             [Required] Solution currentSolution,
@@ -278,9 +279,9 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
 
             stringBuilder.Append( attribute.Name );
 
-            IDictionary<string, string> properties = attribute.Properties;
+            IList<(string Name, string Value)> properties = attribute.Properties;
 
-            var arguments = attribute.Arguments.Concat( properties.Select( keyValue => $"{keyValue.Key}={keyValue.Value}" ) )
+            var arguments = attribute.Arguments.Concat( properties.Select( property => $"{property.Name}={property.Value}" ) )
                 .ToArray();
 
             if ( arguments.Any() )
