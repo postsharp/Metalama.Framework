@@ -1,6 +1,8 @@
 using System;
 using Caravela.Framework.Aspects;
 
+#pragma warning disable CS0067
+
 namespace Caravela.Framework.Tests.Integration.Tests.Formatting.AllDeclarations
 {
     // We need at least an aspect otherwise the template annotator does not run.

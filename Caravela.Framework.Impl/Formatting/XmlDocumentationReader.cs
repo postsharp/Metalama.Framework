@@ -37,6 +37,7 @@ namespace Caravela.Framework.Impl.Formatting
             }
             else
             {
+                // Coverage: ignore.
                 this._members = new Dictionary<string, XElement>();
             }
         }
@@ -99,6 +100,8 @@ namespace Caravela.Framework.Impl.Formatting
                         var cref = see.Attribute( "cref" )!.Value;
                         var referencedSymbol = DocumentationCommentId.GetFirstSymbolForReferenceId( cref, compilation );
 
+                        stringBuilder.Append( '\'' );
+
                         if ( referencedSymbol != null )
                         {
                             stringBuilder.Append( referencedSymbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat ) );
@@ -113,6 +116,7 @@ namespace Caravela.Framework.Impl.Formatting
                             switch ( parts[0] )
                             {
                                 case "T":
+                                    // Coverage: ignore (we should not get here because the resolution works well for types).
                                     stringBuilder.Append( CleanUpName( parts[parts.Length - 1] ) );
 
                                     break;
@@ -126,16 +130,16 @@ namespace Caravela.Framework.Impl.Formatting
                             }
                         }
 
-                        break;
-
-                    case XElement paramRef when paramRef.Name == "paramRef":
-
-                        stringBuilder.Append( paramRef.Attribute( "name" ) );
+                        stringBuilder.Append( '\'' );
 
                         break;
 
-                    default:
-                        stringBuilder.Append( node );
+                    // ReSharper disable once StringLiteralTypo
+                    case XElement paramRef when paramRef.Name == "paramref" && paramRef.Attribute( "name" )?.Value is { } paramName:
+
+                        stringBuilder.Append( '\'' );
+                        stringBuilder.Append( paramName );
+                        stringBuilder.Append( '\'' );
 
                         break;
                 }

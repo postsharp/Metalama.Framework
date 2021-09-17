@@ -322,7 +322,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             // Add the symbol being processed to the cache temporarily to avoid an infinite recursion.
-            _ = AddToCache( TemplatingScope.Both );
+            _ = AddToCache( null );
 
             // From attributes.
             var scopeFromAttributes = symbol

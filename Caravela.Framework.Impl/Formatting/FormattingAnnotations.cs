@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.Formatting
         public static T WithFormattingAnnotationsFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode
         {
-             if ( source.HasAnnotation( SourceCode ) )
+            if ( source.HasAnnotation( SourceCode ) )
             {
                 return node.AddSourceCodeAnnotation();
             }

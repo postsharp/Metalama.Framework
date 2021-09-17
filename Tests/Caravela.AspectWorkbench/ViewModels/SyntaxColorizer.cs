@@ -86,14 +86,14 @@ namespace Caravela.AspectWorkbench.ViewModels
             { ClassificationTypeNames.RegexOtherEscape, Colors.Indigo }
         };
 
-        public static async Task<FlowDocument> WriteSyntaxColoringAsync( Document document, IEnumerable<Diagnostic>? diagnostics = null, SyntaxNode? annotatedSyntaxNode = null )
+        public async Task<FlowDocument> WriteSyntaxColoringAsync( Document document, IEnumerable<Diagnostic>? diagnostics = null )
         {
             static Color WithAlpha( Color brush, double alpha )
             {
                 return Color.FromArgb( (byte) (255 * alpha), brush.R, brush.G, brush.B );
             }
 
-            var classified = await GetClassifiedTextSpansAsync( document, annotatedSyntaxNode, diagnostics );
+            var classified = await this.GetClassifiedTextSpansAsync( document, diagnostics );
             var sourceText = await document.GetTextAsync();
 
             var paragraph = new Paragraph();
@@ -215,5 +215,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             // richTextBox.Document.SetBinding( FlowDocument.PageWidthProperty,
             //    new Binding( "ActualWidth" ) { Source = richTextBox } );
         }
+
+        public SyntaxColorizer( IServiceProvider serviceProvider ) : base( serviceProvider ) { }
     }
 }

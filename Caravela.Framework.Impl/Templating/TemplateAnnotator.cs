@@ -478,17 +478,35 @@ namespace Caravela.Framework.Impl.Templating
         #endregion
 
         public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+            => this.VisitTypeDeclaration( node, n => base.VisitClassDeclaration( n ) );
+
+        public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node )
+            => this.VisitTypeDeclaration( node, n => base.VisitStructDeclaration( n ) );
+
+        public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
+            => this.VisitTypeDeclaration( node, n => base.VisitRecordDeclaration( n ) );
+
+        public override SyntaxNode? VisitDelegateDeclaration( DelegateDeclarationSyntax node )
+            => this.VisitTypeDeclaration( node, n => base.VisitDelegateDeclaration( n ) );
+
+        public override SyntaxNode? VisitEnumDeclaration( EnumDeclarationSyntax node )
+            => this.VisitTypeDeclaration( node, n => base.VisitEnumDeclaration( n ) );
+
+        private T VisitTypeDeclaration<T>( T node, Func<T, SyntaxNode?> callBase )
+            where T : SyntaxNode
         {
             var typeScope = this.GetSymbolScope( this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node ).AssertNotNull() );
 
             if ( typeScope != TemplatingScope.RunTimeOnly )
             {
-                return base.VisitClassDeclaration( node );
+                return ((T) callBase( node )!).AddScopeAnnotation( typeScope );
             }
-
-            // This is not a build-time class so there's no need to analyze it.
-            // The scope annotation is needed for syntax highlighting.
-            return node.AddScopeAnnotation( TemplatingScope.RunTimeOnly );
+            else
+            {
+                // This is not a build-time type so there's no need to analyze it.
+                // The scope annotation is needed for syntax highlighting.
+                return node.AddScopeAnnotation( typeScope );
+            }
         }
 
         public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
@@ -1919,7 +1937,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 throw new AssertionFailedException( $"Cannot get the expression type for '{node}'." );
             }
-            
+
             var objectTypeScope = this.GetSymbolScope( objectType );
 
             ScopeContext? context = null;

@@ -1,13 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.DesignTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
-using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Caravela.Framework.Impl.Formatting
@@ -18,11 +19,19 @@ namespace Caravela.Framework.Impl.Formatting
         protected const string DiagnosticTagName = "diagnostic";
         private const string _diagnosticAnnotationName = "caravela-diagnostic";
 
+        public FormattedCodeWriter( IServiceProvider serviceProvider )
+        {
+            this.ServiceProvider = serviceProvider;
+        }
+
+        public IServiceProvider ServiceProvider { get; set; }
+
         public static T AddDiagnosticAnnotations<T>( T syntaxRoot, string? filePath, IEnumerable<Diagnostic>? diagnostics )
             where T : SyntaxNode
         {
             if ( diagnostics == null || filePath == null )
             {
+                // Coverage: ignore.
                 return syntaxRoot;
             }
 
@@ -55,42 +64,33 @@ namespace Caravela.Framework.Impl.Formatting
             return outputSyntaxRoot;
         }
 
-        protected static async Task<ClassifiedTextSpanCollection> GetClassifiedTextSpansAsync(
+        protected async Task<ClassifiedTextSpanCollection> GetClassifiedTextSpansAsync(
             Document document,
-            SyntaxNode? annotatedSyntaxRoot = null,
             IEnumerable<Diagnostic>? diagnostics = null,
             bool addTitles = false )
         {
             var sourceText = await document.GetTextAsync();
             var syntaxTree = (await document.GetSyntaxTreeAsync())!;
 
-            if ( await syntaxTree!.GetTextAsync() != sourceText )
+            if ( await syntaxTree.GetTextAsync() != sourceText )
             {
                 throw new AssertionFailedException();
             }
 
             var syntaxRoot = await syntaxTree.GetRootAsync();
 
-            // Process the annotations by the template compiler.
-            ClassifiedTextSpanCollection classifiedTextSpans;
+            // Annotate the whole syntax tree with the classification service.
+            // Note that we don't take into account the output of the template compiler executed from the pipeline,
+            // because the template compiler, when executed from the pipeline, only adds annotations to templates, not to the whole syntax tree.
+            var classificationService = new ClassificationService( this.ServiceProvider );
+            var compilation = await document.Project.GetCompilationAsync();
+            var semanticModel = compilation!.GetSemanticModel( syntaxTree );
 
-            if ( annotatedSyntaxRoot != null )
-            {
-                var classifier = new TextSpanClassifier( sourceText, detectRegion: true );
-                classifier.Visit( annotatedSyntaxRoot );
-                classifiedTextSpans = (ClassifiedTextSpanCollection) classifier.ClassifiedTextSpans;
-            }
-            else
-            {
-                classifiedTextSpans = new ClassifiedTextSpanCollection( sourceText );
-            }
-
+            var classifiedTextSpans = classificationService.GetClassifiedTextSpans( semanticModel, CancellationToken.None );
+            
             // Process the annotations by the aspect linker (on the output document).
             FormattingVisitor formattingVisitor = new( classifiedTextSpans );
             formattingVisitor.Visit( syntaxRoot );
-
-            // Add C# classifications
-            var semanticModel = document.Project.GetCompilationAsync().Result!.GetSemanticModel( syntaxTree );
 
             foreach ( var csharpSpan in Classifier.GetClassifiedSpans(
                     semanticModel,
@@ -121,29 +121,29 @@ namespace Caravela.Framework.Impl.Formatting
 
             if ( diagnostics != null && document.FilePath != null )
             {
-                // Coverage ignore (used by Aspect Workbench).
+                // Coverage: ignore (used by Aspect Workbench).
                 AddDiagnostics( document, diagnostics, classifiedTextSpans );
             }
 
             return classifiedTextSpans;
         }
 
-        // Coverage ignore (used by Aspect Workbench).
+        // Coverage: ignore (used by Aspect Workbench).
         private static void AddDiagnostics( Document document, IEnumerable<Diagnostic> diagnostics, ClassifiedTextSpanCollection classifiedTextSpans )
         {
-            foreach (var diagnostic in diagnostics)
+            foreach ( var diagnostic in diagnostics )
             {
                 var position = diagnostic.Location.GetLineSpan();
 
-                if (!position.IsValid || !position.Path.EndsWith( document.FilePath, StringComparison.OrdinalIgnoreCase ))
+                if ( !position.IsValid || !position.Path.EndsWith( document.FilePath, StringComparison.OrdinalIgnoreCase ) )
                 {
                     // The diagnostic is not in the current document.
                     continue;
                 }
 
-                foreach (var span in classifiedTextSpans.GetClassifiedSpans( diagnostic.Location.SourceSpan ))
+                foreach ( var span in classifiedTextSpans.GetClassifiedSpans( diagnostic.Location.SourceSpan ) )
                 {
-                    if (diagnostic.Location.SourceSpan.IntersectsWith( span.Span ))
+                    if ( diagnostic.Location.SourceSpan.IntersectsWith( span.Span ) )
                     {
                         classifiedTextSpans.SetTag(
                             diagnostic.Location.SourceSpan,

@@ -4,10 +4,14 @@
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 
+// ReSharper disable MemberCanBePrivate.Global
+#pragma warning disable 8618 // Property Id not initialized.
+
 namespace Caravela.Framework.Impl.Formatting
 {
     public class DiagnosticAnnotation
     {
+        [JsonConstructor]
         public DiagnosticAnnotation() { }
 
         public DiagnosticAnnotation( Diagnostic diagnostic )
@@ -17,11 +21,11 @@ namespace Caravela.Framework.Impl.Formatting
             this.Severity = diagnostic.Severity;
         }
 
-        public string Id { get; set; }
+        public string Id { get; init; }
 
-        public DiagnosticSeverity Severity { get; set; }
+        public DiagnosticSeverity Severity { get; init; }
 
-        public string Message { get; set; }
+        public string Message { get; init; }
 
         public string ToJson() => JsonConvert.SerializeObject( this );
 

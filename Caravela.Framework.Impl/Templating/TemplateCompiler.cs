@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Templating
             SemanticModel semanticModel,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot )
+            out SyntaxNode annotatedSyntaxRoot )
         {
             SyntaxNode currentSyntaxRoot;
 

@@ -28,10 +28,12 @@ namespace Caravela.Framework.Impl.DesignTime
             this._serviceProvider = serviceProvider;
         }
 
-        public bool TryGetClassifiedTextSpans(
+        IReadOnlyClassifiedTextSpanCollection IClassificationService.GetClassifiedTextSpans(
             SemanticModel model,
-            CancellationToken cancellationToken,
-            [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans )
+            CancellationToken cancellationToken )
+            => this.GetClassifiedTextSpans( model, cancellationToken );
+
+        public ClassifiedTextSpanCollection GetClassifiedTextSpans( SemanticModel model, CancellationToken cancellationToken )
         {
             // TODO: if the root is not "our", return false.
 
@@ -41,21 +43,11 @@ namespace Caravela.Framework.Impl.DesignTime
 
             _ = templateCompiler.TryAnnotate( model.SyntaxTree.GetRoot(), model, diagnostics, cancellationToken, out var annotatedSyntaxRoot );
 
-            if ( annotatedSyntaxRoot != null )
-            {
-                var text = model.SyntaxTree.GetText();
-                var classifier = new TextSpanClassifier( text );
-                classifier.Visit( annotatedSyntaxRoot );
-                classifiedTextSpans = classifier.ClassifiedTextSpans;
-            }
-            else
-            {
-                classifiedTextSpans = null;
+            var text = model.SyntaxTree.GetText();
+            var classifier = new TextSpanClassifier( text );
+            classifier.Visit( annotatedSyntaxRoot );
 
-                return false;
-            }
-
-            return true;
+            return classifier.ClassifiedTextSpans;
         }
     }
 }

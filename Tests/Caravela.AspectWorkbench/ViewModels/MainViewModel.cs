@@ -93,6 +93,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 using var testProjectOptions = new TestProjectOptions() { FormatCompileTimeCode = true };
                 using var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions );
+                var syntaxColorizer = new SyntaxColorizer( serviceProvider );
 
                 var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, null );
 
@@ -108,10 +109,9 @@ namespace Caravela.AspectWorkbench.ViewModels
                 if ( annotatedTemplateSyntax != null )
                 {
                     // Display the annotated syntax tree.
-                    this.ColoredSourceCodeDocument = await SyntaxColorizer.WriteSyntaxColoringAsync(
+                    this.ColoredSourceCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync(
                         testResult.SyntaxTrees.First().InputDocument,
-                        testResult.Diagnostics,
-                        annotatedTemplateSyntax );
+                        testResult.Diagnostics );
                 }
 
                 var errorsDocument = new FlowDocument();
@@ -135,7 +135,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                     var formattedDocument3 = await OutputCodeFormatter.FormatToDocumentAsync( document3, testResult.CompileTimeCompilationDiagnostics );
 
-                    this.CompiledTemplateDocument = await SyntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document );
+                    this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document );
                 }
 
                 var consolidatedOutputSyntax = testResult.GetConsolidatedTestOutput();
@@ -148,7 +148,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                     var consolidatedOutputDocument = project.AddDocument( "ConsolidatedOutput.cs", consolidatedOutputSyntax );
 
                     // Display the transformed code.
-                    this.TransformedCodeDocument = await SyntaxColorizer.WriteSyntaxColoringAsync( consolidatedOutputDocument );
+                    this.TransformedCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync( consolidatedOutputDocument );
                 }
 
                 // Display the intermediate linker code.
@@ -157,7 +157,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                     var intermediateSyntaxTree = testResult.IntermediateLinkerCompilation.Compilation.SyntaxTrees.First();
                     var linkerProject = testRunner.CreateProject( testInput.Options );
                     var linkerDocument = linkerProject.AddDocument( "IntermediateLinkerCode.cs", await intermediateSyntaxTree.GetRootAsync() );
-                    this.IntermediateLinkerCodeCodeDocument = await SyntaxColorizer.WriteSyntaxColoringAsync( linkerDocument );
+                    this.IntermediateLinkerCodeCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync( linkerDocument );
                 }
 
                 // Compare the output and shows the result.

@@ -94,8 +94,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
         private protected override bool CompareTransformedCode => false;
 
-        private protected override HtmlCodeWriter CreateHtmlCodeWriter( TestOptions options )
-            => new( new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault(), _htmlProlog, this._htmlEpilogue ) );
+        private protected override HtmlCodeWriter CreateHtmlCodeWriter( IServiceProvider serviceProvider, TestOptions options )
+            => new( serviceProvider, new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault(), _htmlProlog, this._htmlEpilogue ) );
 
         private protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {

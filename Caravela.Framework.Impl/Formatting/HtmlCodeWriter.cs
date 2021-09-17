@@ -3,6 +3,7 @@
 
 using Caravela.Framework.DesignTime.Contracts;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,15 +17,16 @@ namespace Caravela.Framework.Impl.Formatting
     {
         private readonly HtmlCodeWriterOptions _options;
 
-        public HtmlCodeWriter( HtmlCodeWriterOptions options )
+        public HtmlCodeWriter( IServiceProvider serviceProvider, HtmlCodeWriterOptions options ) : base( serviceProvider )
         {
             this._options = options;
         }
 
-        public async Task WriteAsync( Document document, SyntaxNode? annotatedSyntaxRoot, TextWriter textWriter )
+        public async Task WriteAsync( Document document, TextWriter textWriter )
         {
             var sourceText = await document.GetTextAsync( CancellationToken.None );
-            var classifiedTextSpans = await GetClassifiedTextSpansAsync( document, annotatedSyntaxRoot, addTitles: this._options.AddTitles );
+
+            var classifiedTextSpans = await this.GetClassifiedTextSpansAsync( document, addTitles: this._options.AddTitles );
 
             if ( this._options.Prolog != null )
             {

@@ -327,8 +327,7 @@ namespace Caravela.TestFramework
             Assert.Equal( expectedTransformedSourceText, actualTransformedNormalizedSourceText );
         }
 
-        private protected virtual bool ShouldStopOnInvalidInput( TestOptions testOptions ) 
-            => !testOptions.AcceptInvalidInput.GetValueOrDefault( true );
+        private protected virtual bool ShouldStopOnInvalidInput( TestOptions testOptions ) => !testOptions.AcceptInvalidInput.GetValueOrDefault( true );
 
         /// <summary>
         /// Creates a new project that is used to compile the test source.
@@ -356,7 +355,7 @@ namespace Caravela.TestFramework
 
         private protected async Task WriteHtmlAsync( TestInput testInput, TestResult testResult )
         {
-            var htmlCodeWriter = this.CreateHtmlCodeWriter( testInput.Options );
+            var htmlCodeWriter = this.CreateHtmlCodeWriter( this.ServiceProvider, testInput.Options );
 
             var htmlDirectory = Path.Combine(
                 this.ProjectDirectory!,
@@ -390,15 +389,15 @@ namespace Caravela.TestFramework
 
                 await using ( var outputHtml = File.CreateText( outputHtmlPath ) )
                 {
-                    await htmlCodeWriter.WriteAsync( formattedOutputDocument, null, outputHtml );
+                    await htmlCodeWriter.WriteAsync( formattedOutputDocument, outputHtml );
                 }
 
                 testResult.OutputHtmlPath = outputHtmlPath;
             }
         }
 
-        private protected virtual HtmlCodeWriter CreateHtmlCodeWriter( TestOptions options )
-            => new( new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault() ) );
+        private protected virtual HtmlCodeWriter CreateHtmlCodeWriter( IServiceProvider serviceProvider, TestOptions options )
+            => new( serviceProvider, new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault() ) );
 
         private async Task WriteHtmlAsync( TestSyntaxTree testSyntaxTree, string htmlDirectory, HtmlCodeWriter htmlCodeWriter )
         {
@@ -415,7 +414,6 @@ namespace Caravela.TestFramework
             {
                 await htmlCodeWriter.WriteAsync(
                     testSyntaxTree.InputDocument,
-                    testSyntaxTree.AnnotatedSyntaxRoot,
                     inputTextWriter );
             }
 
