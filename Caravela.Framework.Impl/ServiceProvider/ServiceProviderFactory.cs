@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Utilities;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.ServiceProvider
@@ -19,6 +20,7 @@ namespace Caravela.Framework.Impl.ServiceProvider
         /// Registers a global service, which will be available in the <see cref="GlobalProvider"/> provider and in all
         /// instances returned by <see cref="GetServiceProvider"/>. This method is used by TryCaravela to register hooks.
         /// </summary>
+        [ExcludeFromCodeCoverage]
         public static void AddGlobalService<T>( T service )
             where T : IService
         {
