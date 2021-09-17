@@ -305,7 +305,7 @@ namespace Caravela.Framework.Impl.Linking
                             expression,
                             referenceSpecification );
                     }
-                    else if ( targetMemberIntroduction?.Introduction is IReplaceMember replaceMember
+                    else if ( targetMemberIntroduction.Introduction is IReplaceMember replaceMember
                               && replaceMember.ReplacedMember.Resolve( this._finalCompilationModel ).GetSymbol() != null )
                     {
                         // Introduction replaced existing source member, resolve to default semantics, i.e. source symbol.

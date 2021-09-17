@@ -192,7 +192,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 node = AssignNodeId( node );
                 this._currentInsertPosition = new InsertPosition( InsertPositionRelation.After, node );
 
-                return new[] { node };
+                return new MemberDeclarationSyntax[] { node };
             }
 
             private static bool HasPseudoAttribute( MemberDeclarationSyntax node )

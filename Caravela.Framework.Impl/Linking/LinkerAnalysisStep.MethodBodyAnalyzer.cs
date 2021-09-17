@@ -112,8 +112,6 @@ namespace Caravela.Framework.Impl.Linking
 
                 void AnalyzeOverriddenBody( IMethodSymbol symbol )
                 {
-                    var syntax = symbol.GetPrimaryDeclaration();
-
                     bodyAnalysisResults[symbol] = new MethodBodyAnalysisResult( Array.Empty<ResolvedAspectReference>() );
                 }
 
