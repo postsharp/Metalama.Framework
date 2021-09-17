@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Formatting
         public static T AddDiagnosticAnnotations<T>( T syntaxRoot, string? filePath, IEnumerable<Diagnostic>? diagnostics )
             where T : SyntaxNode
         {
-            if ( diagnostics == null || filePath == null )
+            if ( diagnostics == null || filePath == null || syntaxRoot.Span.IsEmpty )
             {
                 // Coverage: ignore.
                 return syntaxRoot;
@@ -51,14 +51,17 @@ namespace Caravela.Framework.Impl.Formatting
 
                 var serializedDiagnostic = new DiagnosticAnnotation( diagnostic );
 
-                var node = outputSyntaxRoot.FindNode( diagnostic.Location.SourceSpan );
+                if ( outputSyntaxRoot.Span.Contains( diagnostic.Location.SourceSpan ) )
+                {
+                    var node = outputSyntaxRoot.FindNode( diagnostic.Location.SourceSpan );
 
-                outputSyntaxRoot = outputSyntaxRoot.ReplaceNode(
-                    node,
-                    node.WithAdditionalAnnotations(
-                        new SyntaxAnnotation(
-                            _diagnosticAnnotationName,
-                            serializedDiagnostic.ToJson() ) ) );
+                    outputSyntaxRoot = outputSyntaxRoot.ReplaceNode(
+                        node,
+                        node.WithAdditionalAnnotations(
+                            new SyntaxAnnotation(
+                                _diagnosticAnnotationName,
+                                serializedDiagnostic.ToJson() ) ) );
+                }
             }
 
             return outputSyntaxRoot;
