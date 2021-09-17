@@ -34,12 +34,11 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 var declarator = eventFieldDecl.Declaration.Variables.Single();
                 declarator = AssignNodeId( declarator );
 
-                return (T)(SyntaxNode) eventFieldDecl
+                return (T) (SyntaxNode) eventFieldDecl
                     .WithDeclaration( eventFieldDecl.Declaration.WithVariables( SeparatedList( new[] { declarator } ) ) );
             }
             else
             {
-
                 if ( node.GetAnnotations( _testNodeIdAnnotationId ).Any() )
                 {
                     return node;
@@ -80,6 +79,16 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             return node.GetAnnotations( _testTemporaryNodeAnnotationId ).Any();
         }
 
+        private static string GetSymbolHelperName( string name )
+        {
+            return name + "__SymbolHelper";
+        }
+
+        private static string GetReplacedMemberName( string name )
+        {
+            return name + "__Replaced";
+        }
+
         /// <summary>
         /// Rewrites method bodies, replacing call to pseudo method called "annotate" with linker annotation.
         /// </summary>
@@ -87,9 +96,12 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
         {
             private readonly List<AspectLayerId> _orderedAspectLayers;
             private readonly List<IObservableTransformation> _observableTransformations;
+            private readonly List<IObservableTransformation> _replacedTransformations;
             private readonly List<INonObservableTransformation> _nonObservableTransformations;
 
             public IReadOnlyList<IObservableTransformation> ObservableTransformations => this._observableTransformations;
+
+            public IReadOnlyList<IObservableTransformation> ReplacedTransformations => this._replacedTransformations;
 
             public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
 
@@ -101,6 +113,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             {
                 this._orderedAspectLayers = new List<AspectLayerId>();
                 this._observableTransformations = new List<IObservableTransformation>();
+                this._replacedTransformations = new List<IObservableTransformation>();
                 this._nonObservableTransformations = new List<INonObservableTransformation>();
 
                 this.ServiceProvider = new ServiceProvider();
@@ -130,6 +143,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 var ret = typeRewriter.VisitClassDeclaration( node );
 
                 this._observableTransformations.AddRange( typeRewriter.ObservableTransformations );
+                this._replacedTransformations.AddRange( typeRewriter.ReplacedTransformations );
                 this._nonObservableTransformations.AddRange( typeRewriter.NonObservableTransformations );
 
                 return ret;
@@ -147,6 +161,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 var ret = typeRewriter.VisitRecordDeclaration( node );
 
                 this._observableTransformations.AddRange( typeRewriter.ObservableTransformations );
+                this._replacedTransformations.AddRange( typeRewriter.ReplacedTransformations );
                 this._nonObservableTransformations.AddRange( typeRewriter.NonObservableTransformations );
 
                 return ret;
@@ -164,6 +179,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 var ret = typeRewriter.VisitStructDeclaration( node );
 
                 this._observableTransformations.AddRange( typeRewriter.ObservableTransformations );
+                this._replacedTransformations.AddRange( typeRewriter.ReplacedTransformations );
                 this._nonObservableTransformations.AddRange( typeRewriter.NonObservableTransformations );
 
                 return ret;

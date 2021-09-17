@@ -36,6 +36,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 if ( node == null )
                 {
+                    // Coverage: ignore (irrelevant).
                     return;
                 }
 
@@ -43,7 +44,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     var nodeWithSymbol = node switch
                     {
-                        ConditionalAccessExpressionSyntax conditionalAccess => conditionalAccess.WhenNotNull,
+                        ConditionalAccessExpressionSyntax conditionalAccess => GetConditionalMemberName( conditionalAccess ),
                         _ => node
                     };
 
@@ -59,6 +60,42 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 base.Visit( node );
+
+                static MemberBindingExpressionSyntax GetConditionalMemberName( ConditionalAccessExpressionSyntax conditionalAccess )
+                {
+                    var walker = new ConditionalAccessExpressionWalker();
+
+                    walker.Visit( conditionalAccess );
+
+                    return walker.FoundName.AssertNotNull();
+                }
+            }
+
+            private class ConditionalAccessExpressionWalker : CSharpSyntaxWalker
+            {
+                private ConditionalAccessExpressionSyntax? _context;
+
+                public MemberBindingExpressionSyntax? FoundName { get; private set; }
+
+                public override void VisitConditionalAccessExpression( ConditionalAccessExpressionSyntax node )
+                {
+                    if ( this._context == null )
+                    {
+                        this._context = node;
+
+                        this.Visit( node.WhenNotNull );
+
+                        this._context = null;
+                    }
+                }
+
+                public override void VisitMemberBindingExpression( MemberBindingExpressionSyntax node )
+                {
+                    if ( this._context != null )
+                    {
+                        this.FoundName = node;
+                    }
+                }
             }
         }
     }

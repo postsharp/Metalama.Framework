@@ -47,6 +47,11 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
             /// Gets the syntax node that will appear in introduced member.
             /// </summary>
             string SymbolHelperNodeId { get; }
+
+            /// <summary>
+            /// Gets the name of the member replaced by this declaration.
+            /// </summary>
+            string ReplacedElementName { get; }
         }
     }
 }

@@ -52,16 +52,23 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         public DesignTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain, bool isTest )
             : base( projectOptions, AspectExecutionScenario.DesignTime, isTest, domain )
         {
-            if ( projectOptions.BuildTouchFile != null )
+            if ( projectOptions.BuildTouchFile == null )
             {
-                var watchedFilter = "*" + Path.GetExtension( projectOptions.BuildTouchFile );
-                var watchedDirectory = Path.GetDirectoryName( projectOptions.BuildTouchFile );
-
-                this._fileSystemWatcher = new FileSystemWatcher( watchedDirectory, watchedFilter ) { IncludeSubdirectories = false };
-
-                this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
-                this._fileSystemWatcher.EnableRaisingEvents = true;
+                return;
             }
+
+            var watchedFilter = "*" + Path.GetExtension( projectOptions.BuildTouchFile );
+            var watchedDirectory = Path.GetDirectoryName( projectOptions.BuildTouchFile );
+
+            if ( watchedDirectory == null )
+            {
+                return;
+            }
+
+            this._fileSystemWatcher = new FileSystemWatcher( watchedDirectory, watchedFilter ) { IncludeSubdirectories = false };
+
+            this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
+            this._fileSystemWatcher.EnableRaisingEvents = true;
         }
 
         public event EventHandler? ExternalBuildStarted;

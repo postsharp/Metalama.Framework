@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -91,9 +92,8 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         public static InliningContext Create( LinkerRewritingDriver rewritingDriver, IMethodSymbol targetDeclaration )
             => new( rewritingDriver, targetDeclaration );
 
+        [ExcludeFromCodeCoverage]
         public InliningContext WithDeclaredReturnLocal( IMethodSymbol currentDeclaration )
-
-            // Coverage: ignore (not used yet)
             => new( this, currentDeclaration, $"__aspect_return_{this._depth}", true );
 
         public InliningContext WithReturnLocal( IMethodSymbol currentDeclaration, string valueText ) => new( this, currentDeclaration, valueText );

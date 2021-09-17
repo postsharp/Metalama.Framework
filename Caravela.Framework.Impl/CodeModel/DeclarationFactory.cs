@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Code.Types;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.References;
@@ -211,7 +212,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 DeclarationRef.FromBuilder( propertyBuilder ),
                 l => new BuiltEvent( (EventBuilder) l.Target!, this.CompilationModel ) );
 
-        internal IDeclaration GetDeclaration( DeclarationBuilder builder )
+        internal IDeclaration GetDeclaration( IDeclarationBuilder builder )
             => builder switch
             {
                 MethodBuilder methodBuilder => this.GetMethod( methodBuilder ),
@@ -220,6 +221,9 @@ namespace Caravela.Framework.Impl.CodeModel
                 ParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
                 GenericParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
+
+                // This is for linker tests (fake builders), which resolve to themselves.
+                IDeclarationRef<IDeclaration> reference => reference.Resolve( this.CompilationModel ).AssertNotNull(),
                 _ => throw new AssertionFailedException()
             };
 

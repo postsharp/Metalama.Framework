@@ -8,10 +8,10 @@ using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
@@ -88,7 +88,9 @@ namespace Caravela.Framework.Impl.Linking
                 return Array.Empty<LinkerIntroducedMember>();
             }
 
-            var annotation = declaringSyntax.GetAnnotations( IntroducedNodeIdAnnotationId ).SingleOrDefault();
+            var memberDeclaration = GetContainingMemberDeclaration( declaringSyntax );
+
+            var annotation = memberDeclaration.GetAnnotations( IntroducedNodeIdAnnotationId ).SingleOrDefault();
 
             if ( annotation == null )
             {
@@ -124,15 +126,21 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
+        private static MemberDeclarationSyntax GetContainingMemberDeclaration( SyntaxNode declaringSyntax )
+        {
+            return declaringSyntax switch
+            {
+                VariableDeclaratorSyntax { Parent: { Parent: MemberDeclarationSyntax memberDeclaration } } => memberDeclaration,
+                MemberDeclarationSyntax memberDeclaration => memberDeclaration,
+                _ => throw new AssertionFailedException()
+            };
+        }
+
         public ISymbol? GetOverrideTarget( LinkerIntroducedMember overrideIntroducedMember )
         {
-            if ( overrideIntroducedMember == null )
-            {
-                return null;
-            }
-
             if ( !this._overrideTargetMap.TryGetValue( overrideIntroducedMember, out var overrideTarget ) )
             {
+                // Coverage: ignore (coverage is irrelevant, needed for correctness)
                 return null;
             }
 
@@ -160,7 +168,13 @@ namespace Caravela.Framework.Impl.Linking
                 var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
                 var intermediateSemanticModel = this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree );
 
-                return intermediateSemanticModel.GetDeclaredSymbol( intermediateNode );
+                var symbolNode = intermediateNode.AssertNotNull() switch
+                {
+                    EventFieldDeclarationSyntax eventFieldNode => (SyntaxNode) eventFieldNode.Declaration.Variables.First(),
+                    _ => intermediateNode
+                };
+
+                return intermediateSemanticModel.GetDeclaredSymbol( symbolNode );
             }
         }
 
@@ -174,9 +188,11 @@ namespace Caravela.Framework.Impl.Linking
             switch ( symbol )
             {
                 case IMethodSymbol { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } propertyAccessorSymbol:
+                    // Coverage: ignore (coverage is irrelevant, needed for correctness).
                     return this.GetIntroducedMemberForSymbol( propertyAccessorSymbol.AssociatedSymbol.AssertNotNull() );
 
                 case IMethodSymbol { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove } eventAccessorSymbol:
+                    // Coverage: ignore (coverage is irrelevant, needed for correctness).
                     return this.GetIntroducedMemberForSymbol( eventAccessorSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
@@ -268,15 +284,19 @@ namespace Caravela.Framework.Impl.Linking
             switch ( symbol )
             {
                 case IMethodSymbol { MethodKind: MethodKind.PropertyGet } getterSymbol:
+                    // Coverage: ignore (coverage is irrelevant, needed for correctness).
                     return ((IPropertySymbol?) this.GetOverrideTarget( getterSymbol.AssociatedSymbol.AssertNotNull() ))?.GetMethod;
 
                 case IMethodSymbol { MethodKind: MethodKind.PropertySet } setterSymbol:
+                    // Coverage: ignore (coverage is irrelevant, needed for correctness).
                     return ((IPropertySymbol?) this.GetOverrideTarget( setterSymbol.AssociatedSymbol.AssertNotNull() ))?.SetMethod;
 
                 case IMethodSymbol { MethodKind: MethodKind.EventAdd } adderSymbol:
+                    // Coverage: ignore (coverage is irrelevant, needed for correctness).
                     return ((IEventSymbol?) this.GetOverrideTarget( adderSymbol.AssociatedSymbol.AssertNotNull() ))?.AddMethod;
 
                 case IMethodSymbol { MethodKind: MethodKind.EventRemove } removerSymbol:
+                    // Coverage: ignore (coverage is irrelevant, needed for correctness).
                     return ((IEventSymbol?) this.GetOverrideTarget( removerSymbol.AssociatedSymbol.AssertNotNull() ))?.RemoveMethod;
 
                 default:
@@ -317,6 +337,7 @@ namespace Caravela.Framework.Impl.Linking
 
                     if ( lastOverride == null )
                     {
+                        // Coverage: ignore (coverage is irrelevant, needed for correctness).
                         return symbol;
                     }
 
@@ -376,6 +397,8 @@ namespace Caravela.Framework.Impl.Linking
                 this.GetLastOverride( this.GetOverrideTarget( symbol ).AssertNotNull() ) );
         }
 
+        // Not yet used.
+        [ExcludeFromCodeCoverage]
         public ISymbol? GetPreviousOverride( ISymbol symbol )
         {
             var overrideTarget = this.GetOverrideTarget( symbol );

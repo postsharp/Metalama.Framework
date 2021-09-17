@@ -36,6 +36,7 @@ namespace Caravela.Framework.Impl.Linking
                 return methodBodyInfo.AspectReferences;
             }
 
+            // Coverage: ignore (irrelevant)
             return Array.Empty<ResolvedAspectReference>();
         }
 
