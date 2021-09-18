@@ -769,16 +769,16 @@ namespace Caravela.Framework.Impl.Templating
 
                 default:
                     var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression );
-                    
+
                     switch ( expressionType )
                     {
                         case null when symbol == null:
                             // This seems to happen when one of the argument is dynamic.
                             // Roslyn then stops doing the symbol analysis for the whole downstream syntax tree.
                             parameters = default;
-                            
+
                             break;
-                        
+
                         case { TypeKind: TypeKind.Delegate }:
                             parameters = ((INamedTypeSymbol) expressionType).Constructors.Single().Parameters;
 
@@ -1489,7 +1489,6 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             return node.Update( annotatedLeft, node.OperatorToken, annotatedRight ).AddScopeAnnotation( combinedScope );
-           
         }
 
         public override SyntaxNode? VisitForStatement( ForStatementSyntax node )
@@ -1502,8 +1501,12 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             var transformedVariableDeclaration = this.Visit( node.Declaration )!;
+            
+            // ReSharper disable once RedundantSuppressNullableWarningExpression
             var transformedInitializers = node.Initializers.Select( i => this.Visit( i )! );
             var transformedCondition = this.Visit( node.Condition )!;
+            
+            // ReSharper disable once RedundantSuppressNullableWarningExpression
             var transformedIncrementors = node.Incrementors.Select( syntax => this.Visit( syntax )! );
 
             StatementSyntax transformedStatement;

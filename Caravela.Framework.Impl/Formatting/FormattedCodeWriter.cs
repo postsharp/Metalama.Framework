@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.Formatting
             if ( areNodesAnnotated )
             {
                 // Aspect Workbench uses this branch.
-                classifiedTextSpans = classificationService.GetClassifiedTextSpansOfAnnotatedSyntaxTree( syntaxTree, CancellationToken.None );
+                classifiedTextSpans = ClassificationService.GetClassifiedTextSpansOfAnnotatedSyntaxTree( syntaxTree, CancellationToken.None );
             }
             else
             {
@@ -100,11 +100,10 @@ namespace Caravela.Framework.Impl.Formatting
                 // Note that we don't take into account the output of the template compiler executed from the pipeline,
                 // because the template compiler, when executed from the pipeline, only adds annotations to templates, not to the whole syntax tree.
 
-                
                 classifiedTextSpans = classificationService.GetClassifiedTextSpans( semanticModel, CancellationToken.None );
             }
 
-        // Process the annotations by the aspect linker (on the output document).
+            // Process the annotations by the aspect linker (on the output document).
             FormattingVisitor formattingVisitor = new( classifiedTextSpans );
             formattingVisitor.Visit( syntaxRoot );
 

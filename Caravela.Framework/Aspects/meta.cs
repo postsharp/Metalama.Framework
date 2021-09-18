@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.SyntaxBuilders;
 using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -219,6 +220,15 @@ namespace Caravela.Framework.Aspects
         [TemplateKeyword]
         public static void InsertComment( params string?[] lines ) => throw CreateException();
 
+        [TemplateKeyword]
+        public static void InsertStatement( IStatement statement ) => throw CreateException();
+
+        [TemplateKeyword]
+        public static void InsertStatement( IExpression statement ) => throw CreateException();
+
+        [TemplateKeyword]
+        public static void InsertStatement( string statement ) => throw CreateException();
+
         /// <summary>
         /// Creates a compile-time object that represents a run-time <i>expression</i>, i.e. the syntax or code, and not the result
         /// itself. The returned <see cref="IExpression"/> can then be used in other run-time expressions. This method allows to generate expressions that
@@ -232,9 +242,17 @@ namespace Caravela.Framework.Aspects
             => definedException = CurrentContext.CodeBuilder.Expression( expression );
 
         /// <summary>
-        /// Parses a string containing a C# expression and returns an <see cref="IExpression"/> allowing to use this expression in a template.
+        /// Parses a string containing a C# expression and returns an <see cref="IExpression"/>. The <see cref="IExpression.Value"/> property
+        /// allows to use this expression in a template.
         /// </summary>
-        public static IExpression ParseExpression( string code ) => CurrentContext.CodeBuilder.Parse( code );
+        public static IExpression ParseExpression( string code ) => CurrentContext.CodeBuilder.ParseExpression( code );
+
+        /// <summary>
+        /// Parses a string containing a C# statement and returns an <see cref="IStatement"/>, which can be inserted into the run-time code
+        /// using <see cref="InsertStatement(Caravela.Framework.Code.SyntaxBuilders.IStatement)"/>. The string must contain a single statement,
+        /// and must be finished by a semicolon or a closing bracket.
+        /// </summary>
+        public static IStatement ParseStatement( string code ) => CurrentContext.CodeBuilder.ParseStatement( code );
 
         internal static IDisposable WithContext( IMetaApi current )
         {

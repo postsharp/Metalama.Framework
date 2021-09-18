@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-namespace Caravela.Framework.Code.Builders
+namespace Caravela.Framework.Code.DeclarationBuilders
 {
     /// <summary>
     /// Allows to add members to an attribute created by <see cref="IDeclarationBuilder.AddAttribute"/>.

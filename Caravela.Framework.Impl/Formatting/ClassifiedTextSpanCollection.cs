@@ -57,7 +57,6 @@ namespace Caravela.Framework.Impl.Formatting
             {
                 span = TextSpan.FromBounds( Math.Max( 0, span.Start ), Math.Min( this._length, span.End ) );
             }
-            
 
             for ( var i = 0; /* nothing */; i++ )
             {

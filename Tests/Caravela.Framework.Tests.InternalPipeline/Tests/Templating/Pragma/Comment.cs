@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Pragma.Comments
         [TestTemplate]
         dynamic? Template()
         {
-            meta.InsertComment("Oops 1", null, "Oops 2");
+            meta.InsertComment("Oops 1", null, "Oops 2", "Multi\nline");
             return meta.Proceed();
         }
     }

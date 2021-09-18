@@ -111,6 +111,9 @@ namespace Caravela.Framework.Impl.Templating
 
                     case nameof(meta.InsertComment):
                         return MetaMemberKind.InsertComment;
+                    
+                    case nameof(meta.InsertStatement):
+                        return MetaMemberKind.InsertStatement;
 
                     case nameof(meta.Proceed):
                         return MetaMemberKind.Proceed;

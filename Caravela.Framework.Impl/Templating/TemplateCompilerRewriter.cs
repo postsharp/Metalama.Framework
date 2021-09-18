@@ -457,8 +457,8 @@ namespace Caravela.Framework.Impl.Templating
                 case SyntaxKind.DefaultExpression:
                     return InvocationExpression(
                             this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
-                        .AddArgumentListArguments( Argument( this.MetaSyntaxFactory.DefaultExpression( this.Transform( ((DefaultExpressionSyntax) expression).Type ) ) ) );
-                    return expression;
+                        .AddArgumentListArguments(
+                            Argument( this.MetaSyntaxFactory.DefaultExpression( this.Transform( ((DefaultExpressionSyntax) expression).Type ) ) ) );
 
                 case SyntaxKind.IdentifierName:
                     {
@@ -738,21 +738,42 @@ namespace Caravela.Framework.Impl.Templating
                 switch ( this._templateMemberClassifier.GetMetaMemberKind( node.Expression ) )
                 {
                     case MetaMemberKind.InsertComment:
-                        var arguments = node.ArgumentList.Arguments.Insert(
-                            0,
-                            Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) );
+                        {
+                            var arguments = node.ArgumentList.Arguments.Insert(
+                                0,
+                                Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) );
 
-                        // TemplateSyntaxFactory.AddComments( __s, comments );
-                        var add =
-                            this.DeepIndent(
-                                ExpressionStatement(
-                                    InvocationExpression(
-                                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddComments) ),
-                                        ArgumentList( arguments ) ) ) );
+                            // TemplateSyntaxFactory.AddComments( __s, comments );
+                            var add =
+                                this.DeepIndent(
+                                    ExpressionStatement(
+                                        InvocationExpression(
+                                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddComments) ),
+                                            ArgumentList( arguments ) ) ) );
 
-                        this._currentMetaContext.Statements.Add( add );
+                            this._currentMetaContext.Statements.Add( add );
 
-                        return null;
+                            return null;
+                        }
+
+                    case MetaMemberKind.InsertStatement:
+                        {
+                            // TemplateSyntaxFactory.AddStatement( __s, comments );
+                            var arguments = node.ArgumentList.Arguments.Insert(
+                                0,
+                                Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) );
+
+                            var add =
+                                this.DeepIndent(
+                                    ExpressionStatement(
+                                        InvocationExpression(
+                                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddStatement) ),
+                                            ArgumentList( arguments ) ) ) );
+
+                            this._currentMetaContext.Statements.Add( add );
+
+                            return null;
+                        }
                 }
             }
 

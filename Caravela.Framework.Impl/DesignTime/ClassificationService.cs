@@ -49,16 +49,14 @@ namespace Caravela.Framework.Impl.DesignTime
 
             return classifier.ClassifiedTextSpans;
         }
-        
-        public ClassifiedTextSpanCollection GetClassifiedTextSpansOfAnnotatedSyntaxTree( SyntaxTree syntaxTree, CancellationToken cancellationToken )
+
+        public static ClassifiedTextSpanCollection GetClassifiedTextSpansOfAnnotatedSyntaxTree( SyntaxTree syntaxTree, CancellationToken cancellationToken )
         {
             var text = syntaxTree.GetText();
             var classifier = new TextSpanClassifier( text );
-            classifier.Visit( syntaxTree.GetRoot( ) );
+            classifier.Visit( syntaxTree.GetRoot() );
 
             return classifier.ClassifiedTextSpans;
         }
-        
-        
     }
 }

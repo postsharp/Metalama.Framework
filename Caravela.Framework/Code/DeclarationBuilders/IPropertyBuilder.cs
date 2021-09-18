@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Caravela.Framework.Code.Builders
+namespace Caravela.Framework.Code.DeclarationBuilders
 {
     /// <summary>
     /// Allows to complete the construction ofa property that has been created by an advice.

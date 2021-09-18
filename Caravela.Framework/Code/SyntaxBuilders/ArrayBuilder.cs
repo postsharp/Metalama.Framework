@@ -5,7 +5,7 @@ using Caravela.Framework.Aspects;
 using System;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Code.ExpressionBuilders
+namespace Caravela.Framework.Code.SyntaxBuilders
 {
     /// <summary>
     /// Compile-time object that allows to build a run-time array.

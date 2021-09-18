@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Code.DeclarationBuilders;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using static Caravela.Framework.Diagnostics.Severity;
