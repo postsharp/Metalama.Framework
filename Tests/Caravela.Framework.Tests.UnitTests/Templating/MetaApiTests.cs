@@ -29,7 +29,7 @@ namespace Caravela.Framework.Tests.UnitTests.Templating
             Assert.Throws<InvalidOperationException>( () => meta.CompileTime( 0 ) );
             Assert.Throws<InvalidOperationException>( () => meta.RunTime( 0 ) );
             Assert.Throws<InvalidOperationException>( meta.DebugBreak );
-            Assert.Throws<InvalidOperationException>( () => meta.Comment( "" ) );
+            Assert.Throws<InvalidOperationException>( () => meta.InsertComment( "" ) );
             Assert.Throws<InvalidOperationException>( () => meta.DefineExpression( "", out _ ) );
             Assert.Throws<InvalidOperationException>( () => meta.ParseExpression( "" ) );
         }

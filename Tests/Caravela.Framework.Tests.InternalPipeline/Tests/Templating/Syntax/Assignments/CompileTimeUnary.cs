@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.CompileTimeUnar
             
             
             
-            meta.Comment( "x = " + x.ToString() );
+            meta.InsertComment( "x = " + x.ToString() );
             return null;
         }
     }

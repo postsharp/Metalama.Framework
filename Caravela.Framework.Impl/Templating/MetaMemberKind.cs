@@ -20,9 +20,9 @@ namespace Caravela.Framework.Impl.Templating
         Default,
 
         /// <summary>
-        /// The <see cref="meta.Comment"/> method.
+        /// The <see cref="meta.InsertComment"/> method.
         /// </summary>
-        Comment,
+        InsertComment,
 
         /// <summary>
         /// The <see cref="meta.This"/> property.

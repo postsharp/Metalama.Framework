@@ -8,8 +8,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.Pragma.TwoComments
         [TestTemplate]
         dynamic? Template()
         {
-            meta.Comment("Oops 1", null, "Oops 2");
-            meta.Comment("Oops 3", null, "Oops 4");
+            meta.InsertComment("Oops 1", null, "Oops 2");
+            meta.InsertComment("Oops 3", null, "Oops 4");
             return meta.Proceed();
         }
     }

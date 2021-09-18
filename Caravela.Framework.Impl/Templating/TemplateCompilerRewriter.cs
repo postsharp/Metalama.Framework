@@ -737,7 +737,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 switch ( this._templateMemberClassifier.GetMetaMemberKind( node.Expression ) )
                 {
-                    case MetaMemberKind.Comment:
+                    case MetaMemberKind.InsertComment:
                         var arguments = node.ArgumentList.Arguments.Insert(
                             0,
                             Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) );

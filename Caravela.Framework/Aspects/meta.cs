@@ -217,7 +217,7 @@ namespace Caravela.Framework.Aspects
         /// This method is not able to add a comment to an empty block. The block must contain at least one statement.
         /// </remarks>
         [TemplateKeyword]
-        public static void Comment( params string?[] lines ) => throw CreateException();
+        public static void InsertComment( params string?[] lines ) => throw CreateException();
 
         /// <summary>
         /// Creates a compile-time object that represents a run-time <i>expression</i>, i.e. the syntax or code, and not the result
