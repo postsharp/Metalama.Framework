@@ -9,19 +9,20 @@ namespace Caravela.Framework.Impl.DesignTime.Refactoring
     {
         public AttributeDescription(
             string name,
-            ImmutableDictionary<string, string>? properties = null,
+            ImmutableList<(string Name, string Value)>? properties = null,
             ImmutableList<string>? arguments = null,
             ImmutableList<string>? imports = null )
         {
             this.Name = name;
-            this.Properties = properties ?? ImmutableDictionary<string, string>.Empty;
+            this.Properties = properties ?? ImmutableList<(string, string)>.Empty;
             this.Arguments = arguments ?? ImmutableList<string>.Empty;
             this.Imports = imports ?? ImmutableList<string>.Empty;
         }
 
         public string Name { get; }
 
-        public ImmutableDictionary<string, string> Properties { get; }
+        // We don't use dictionary here to preserve the order
+        public ImmutableList<(string Name, string Value)> Properties { get; }
 
         public ImmutableList<string> Arguments { get; }
 

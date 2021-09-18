@@ -17,12 +17,17 @@ namespace Caravela.Framework.Impl.Formatting
     public sealed class ClassifiedTextSpanCollection : IReadOnlyClassifiedTextSpanCollection
     {
         private readonly SkipListDictionary<int, MarkedTextSpan> _spans = new();
+        private readonly int _length;
 
         // For test only.
         internal ClassifiedTextSpanCollection() : this( int.MaxValue ) { }
 
-        public ClassifiedTextSpanCollection( int length )
+        public ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length ) { }
+
+        private ClassifiedTextSpanCollection( int length )
         {
+            this._length = length;
+
             // Start with a single default span. This avoid gaps in the partition later.
             this._spans.Add( 0, new MarkedTextSpan( new TextSpan( 0, length ), TextSpanClassification.Default, null ) );
         }
@@ -48,6 +53,11 @@ namespace Caravela.Framework.Impl.Formatting
 
         private void SetSpanImpl( TextSpan span, TextSpanClassification? classification, string? tagName, string? tagValue )
         {
+            if ( span.Start < 0 || span.End > this._length )
+            {
+                throw new ArgumentOutOfRangeException( nameof(span) );
+            }
+
             for ( var i = 0; /* nothing */; i++ )
             {
                 if ( i > 4 )
@@ -130,14 +140,6 @@ namespace Caravela.Framework.Impl.Formatting
                         }
                     }
                 }
-                else if ( this._spans.TryGetGreatestSmallerOrEqualValue( span.End, out var previousEndSpan ) && previousEndSpan.Span.IntersectsWith( span ) )
-                {
-                    // An existing span intersects with the end. Split it and retry.
-
-                    var (a, b) = Split( previousStartSpan, span.Start );
-                    this._spans[a.Span.Start] = a;
-                    this._spans[b.Span.Start] = b;
-                }
                 else
                 {
                     // We cannot get here because we start with a whole partition.
@@ -158,22 +160,6 @@ namespace Caravela.Framework.Impl.Formatting
                         TextSpan.FromBounds( splitPosition, textSpan.Span.End ),
                         textSpan.Classification,
                         textSpan.Tags ));
-        }
-
-        public TextSpanClassification GetCategory( in TextSpan textSpan )
-        {
-            if ( this._spans.TryGetGreatestSmallerOrEqualValue( textSpan.Start, out var markedTextSpan ) )
-            {
-                if ( markedTextSpan.Span.Contains( textSpan ) )
-                {
-                    return markedTextSpan.Classification;
-                }
-
-                return TextSpanClassification.Conflict;
-            }
-
-            // This should not happen because our partition covers [0,int.MaxValue]
-            return TextSpanClassification.Default;
         }
 
         public IEnumerable<ClassifiedTextSpan> GetClassifiedSpans( TextSpan textSpan )

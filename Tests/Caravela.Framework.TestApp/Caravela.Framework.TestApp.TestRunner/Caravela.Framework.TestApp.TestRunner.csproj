@@ -10,13 +10,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="README.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
   </ItemGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
-  <!-- Here we override the target called by the `dotnet test` command. The override has to be defined after the import of Sdk.targets. -->
-  <Target Name="VSTest">
-    <Exec Command="dotnet build ..\Caravela.Framework.TestApp\Caravela.Framework.TestApp.csproj --nologo" WorkingDirectory="$(MSBuildThisFileDirectory)" />
+  <!-- Here we override the target called by the `dotnet test` command so we suppress the warning that there is no test. -->
+  <Target Name="VSTest" DependsOnTargets="Build">
+    
   </Target>
 </Project>

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.ReflectionMocks;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 case IArrayTypeSymbol arrayType:
                     {
-                        var elementType = this.GetCompileTimeType( arrayType.ElementType, fallbackToMock, cancellationToken );
+                        var elementType = this.GetCompileTimeType( arrayType.ElementType, false, cancellationToken );
 
                         if ( elementType == null )
                         {
@@ -45,7 +46,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         }
                     }
 
-                case INamedTypeSymbol { IsGenericType: true, IsUnboundGenericType: false } genericType:
+                case INamedTypeSymbol { IsGenericType: true } genericType when !genericType.IsGenericTypeDefinition():
                     {
                         var typeDefinition = this.GetCompileTimeNamedType( genericType.ConstructedFrom );
 
@@ -70,11 +71,12 @@ namespace Caravela.Framework.Impl.CompileTime
                     return this.GetCompileTimeNamedType( namedType, cancellationToken ) ?? NullOrMock();
 
                 case IDynamicTypeSymbol:
-                    return typeof(object);
+                    // This cannot happen because the method is called only for types constructed with typeof, and typeof(dynamic) is forbidden.
+                    throw new AssertionFailedException();
 
                 case IPointerTypeSymbol pointerType:
                     {
-                        var elementType = this.GetCompileTimeType( pointerType.PointedAtType, fallbackToMock, cancellationToken );
+                        var elementType = this.GetCompileTimeType( pointerType.PointedAtType, false, cancellationToken );
 
                         if ( elementType == null )
                         {
@@ -86,24 +88,10 @@ namespace Caravela.Framework.Impl.CompileTime
                         }
                     }
 
-                case ITypeParameterSymbol { DeclaringType: { } declaringType } genericTypeParameter:
+                case ITypeParameterSymbol:
                     {
-                        var typeDefinition = this.GetCompileTimeNamedType( declaringType );
-
-                        if ( typeDefinition == null )
-                        {
-                            return NullOrMock();
-                        }
-                        else
-                        {
-                            return typeDefinition.GetGenericArguments()[genericTypeParameter.Ordinal];
-                        }
-                    }
-
-                case ITypeParameterSymbol { DeclaringMethod: { } }:
-                    {
-                        // TODO #29096: Conversion of ITypeParameterSymbol to a system type
-                        throw new NotImplementedException( "Getting a CLR type for a generic parameter is not implemented." );
+                        // It is not possible to get this symbol using a typeof expression on a custom attribute.
+                        throw new AssertionFailedException();
                     }
 
                 default:

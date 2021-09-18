@@ -105,6 +105,8 @@ namespace Caravela.TestFramework
         /// Gets or sets a value indicating whether the `Program.Main` method should be executed if it exists. The default value is <c>true</c>.
         /// </summary>
         public bool? ExecuteProgram { get; set; }
+        
+        public bool? AcceptInvalidInput { get; set; }
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -139,6 +141,8 @@ namespace Caravela.TestFramework
             this.AllowCompileTimeDynamicCode ??= baseOptions.AllowCompileTimeDynamicCode;
 
             this.ExecuteProgram ??= baseOptions.ExecuteProgram;
+
+            this.AcceptInvalidInput ??= baseOptions.AcceptInvalidInput;
 
             if ( !this.ClearIgnoredDiagnostics.GetValueOrDefault() )
             {
@@ -195,6 +199,12 @@ namespace Caravela.TestFramework
                             "Caravela.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory, Caravela.Framework.Tests.PublicPipeline";
 
                         break;
+                    
+                    case "LiveTemplate":
+                        this.TestRunnerFactoryType =
+                            "Caravela.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Caravela.Framework.Tests.PublicPipeline";
+
+                        break;
 
                     case "WriteInputHtml":
                         this.WriteInputHtml = true;
@@ -235,6 +245,11 @@ namespace Caravela.TestFramework
                     case "AllowCompileTimeDynamicCode":
                         this.AllowCompileTimeDynamicCode = true;
 
+                        break;
+                    
+                    case "AcceptInvalidInput":
+                        this.AcceptInvalidInput = true;
+                        
                         break;
 
                     default:

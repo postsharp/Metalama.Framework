@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
+using Caravela.Framework.Impl.Utilities;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders

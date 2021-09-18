@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Code.Builders;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
 using Caravela.Framework.Impl.Diagnostics;
@@ -191,7 +192,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 node = AssignNodeId( node );
                 this._currentInsertPosition = new InsertPosition( InsertPositionRelation.After, node );
 
-                return new[] { node };
+                return new MemberDeclarationSyntax[] { node };
             }
 
             private static bool HasPseudoAttribute( MemberDeclarationSyntax node )

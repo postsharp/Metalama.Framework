@@ -16,11 +16,6 @@ namespace Caravela.Framework.DesignTime.Contracts
     public interface IReadOnlyClassifiedTextSpanCollection : IReadOnlyCollection<ClassifiedTextSpan>
     {
         /// <summary>
-        /// Gets the classification of a given <see cref="TextSpan"/>.
-        /// </summary>
-        TextSpanClassification GetCategory( in TextSpan textSpan );
-
-        /// <summary>
         /// Gets all <see cref="ClassifiedTextSpan"/> in a given <see cref="TextSpan"/>. 
         /// </summary>
         IEnumerable<ClassifiedTextSpan> GetClassifiedSpans( TextSpan textSpan );

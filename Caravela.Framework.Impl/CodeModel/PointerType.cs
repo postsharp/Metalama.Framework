@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Types;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 

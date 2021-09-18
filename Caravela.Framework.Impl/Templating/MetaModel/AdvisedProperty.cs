@@ -6,6 +6,7 @@ using Caravela.Framework.Code.Advised;
 using Caravela.Framework.Code.Collections;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Utilities;
 using System.Collections.Generic;
 using System.Reflection;
 

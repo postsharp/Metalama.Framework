@@ -57,15 +57,10 @@ namespace Caravela.Framework.Impl.Formatting
             where T : SyntaxNode
             => node?.AddAnnotationInsideBlock( SourceCode );
 
-        [return: NotNullIfNotNull( "node" )]
-        public static T? WithFormattingAnnotationsFrom<T>( this T? node, SyntaxNode source )
+        public static T WithFormattingAnnotationsFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode
         {
-            if ( node == null )
-            {
-                return null;
-            }
-            else if ( source.HasAnnotation( SourceCode ) )
+            if ( source.HasAnnotation( SourceCode ) )
             {
                 return node.AddSourceCodeAnnotation();
             }

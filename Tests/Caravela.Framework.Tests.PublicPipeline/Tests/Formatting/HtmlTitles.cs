@@ -20,10 +20,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
         {
         }
     }
+    
 
+    // Base list should be documented.
     [CompileTime]
     class Aspect : OverrideMethodAspect, IAspect<INamedType>
     {
+        
+        // Override should be documented.
         public override dynamic? OverrideMethod()
         {
             throw new System.NotImplementedException();
@@ -33,6 +37,9 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
         {
             
         }
+
+        // Explicit interface implementation should be documented.
+        void IAspect<INamedType>.BuildAspect( IAspectBuilder<INamedType> builder ) { }
 
         [Template]
         dynamic? Template()

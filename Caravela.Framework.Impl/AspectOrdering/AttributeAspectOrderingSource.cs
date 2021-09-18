@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
@@ -26,12 +27,14 @@ namespace Caravela.Framework.Impl.AspectOrdering
             var roslynCompilation = this._compilation;
 
             // Get compile-time level attributes of the current assembly and all referenced assemblies.
+            var orderAttributeName = typeof(AspectOrderAttribute).FullName;
+
             var attributes =
                 roslynCompilation.Assembly.Modules
                     .SelectMany( m => m.ReferencedAssemblySymbols )
                     .Concat( new[] { roslynCompilation.Assembly } )
                     .SelectMany( assembly => assembly.GetAttributes().Select( attribute => (attribute, assembly) ) )
-                    .Where( a => a.attribute.AttributeClass?.Is( typeof(AspectOrderAttribute) ) ?? false );
+                    .Where( a => a.attribute.AttributeClass?.GetReflectionName() == orderAttributeName );
 
             return attributes.Select(
                     attribute =>

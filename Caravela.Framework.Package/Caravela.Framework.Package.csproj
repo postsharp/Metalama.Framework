@@ -14,6 +14,8 @@
 
         <!-- Disable a warning saying that we have nothing under the lib folder. -->
         <NoWarn>NU5128</NoWarn>
+
+        <UseCaravelaCompiler>Public</UseCaravelaCompiler>
         
         <!-- Disable the customization done by Caravela.Compiler.Sdk -->
         <CaravelaCompilerDisablePackCustomization>True</CaravelaCompilerDisablePackCustomization>
@@ -43,7 +45,6 @@
     		<ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" PrivateAssets="none" />
     		
     		<PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" PrivateAssets="none" />
-    		<PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="none" />
 </ItemGroup>
     
     

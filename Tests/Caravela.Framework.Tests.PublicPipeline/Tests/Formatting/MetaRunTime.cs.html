@@ -28,6 +28,16 @@
                 font-style: italic;
             }
 
+            .diag-Warning
+            {
+                text-decoration: underline 1px wavy orange;
+            }
+
+            .diag-Error
+            {
+                text-decoration: underline 1px wavy red;
+            }
+
             .legend 
             {
                 margin-top: 100px;
@@ -41,10 +51,10 @@
 <span class="cs-keyword">namespace</span> <span class="cs-namespace-name">Caravela</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-namespace-name">Integration</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-namespace-name">Formatting</span><span class="cs-operator">.</span><span class="cs-namespace-name">MetaRunTime</span>
 <span class="cs-punctuation">{</span>
    
-    <span class="cs-punctuation">[</span><span class="cs-class-name">CompileTime</span><span class="cs-punctuation">]</span>
+    <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">CompileTime</span><span class="cr-CompileTime cs-punctuation">]</span>
     <span class="cr-CompileTime cs-keyword">class</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">Aspect</span>
     <span class="cr-CompileTime cs-punctuation">{</span>
-        <span class="cs-punctuation">[</span><span class="cs-class-name">TestTemplate</span><span class="cs-punctuation">]</span>
+        <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">TestTemplate</span><span class="cr-CompileTime cs-punctuation">]</span>
         <span class="cr-CompileTime cs-keyword">dynamic</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-method-name">Template</span><span class="cr-CompileTime cs-punctuation">()</span>
         <span class="cr-CompileTime cs-punctuation">{</span>
             <span class="cr-RunTime cs-keyword cs-control">return</span><span class="cr-RunTime"> </span><span class="cr-TemplateKeyword cs-class-name cs-static-symbol">meta</span><span class="cr-TemplateKeyword cs-operator">.</span><span class="cr-TemplateKeyword cs-method-name cs-static-symbol">RunTime</span><span class="cr-RunTime cs-punctuation">(</span><span class="cr-RunTime"> </span><span class="cr-RunTime cs-struct-name">DateTime</span><span class="cr-RunTime cs-operator">.</span><span class="cr-RunTime cs-property-name cs-static-symbol">Now</span><span class="cr-RunTime"> </span><span class="cr-RunTime cs-punctuation">);</span>

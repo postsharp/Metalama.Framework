@@ -234,6 +234,7 @@ namespace Caravela.Framework.Impl.Templating
                     return node.WithAdditionalAnnotations( _buildTimeTargetAnnotation );
 
                 case TemplatingScope.RunTimeOnly:
+                case TemplatingScope.Unknown: // Fall back to RunTimeOnly.
                     return node.WithAdditionalAnnotations( _runTimeTargetAnnotation );
 
                 default:

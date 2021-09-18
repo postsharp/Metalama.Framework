@@ -12,23 +12,27 @@
         <GenerateDocumentationFile>False</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);SA0001</NoWarn>
         <IsPackable>False</IsPackable>  
+        <UseCaravelaCompiler>Private</UseCaravelaCompiler>
     </PropertyGroup>
 
-    <Import Project="..\Caravela.Framework.Shared\Caravela.Framework.Shared.projitems" Label="Shared" />
+    <ItemGroup>
+        <Compile Include="..\NullableAttributes.cs" Link="NullableAttributes.cs" />
+        <!-- Include all files from the Caravela.Framework project, but only in real builds because we don't want to import the files
+             several times in the IDE. -->
+        <Compile Include="..\Caravela.Framework\**\*.cs" Exclude="..\Caravela.Framework\bin\**\*.cs;..\Caravela.Framework\obj\**\*.cs"  Condition="'$(DesignTimeBuild)'!='True'" />
+    </ItemGroup>
     
     <ItemGroup>
     
         <CompilerVisibleProperty Include="ChangeDynamicToObject"/>
         
-        
         <!-- Intentionally skipping Microsoft.CSharp to be sure not to have support for dynamic code at compile time,
              but we need the support in the IDE -->
-        <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" Condition="'$(BuildingProject)'!='true'" />
+
         <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
         
         <!-- The following references change 'dynamic' into 'object' -->
         <ProjectReference Include="..\Build\Caravela.SourceTransformer\Caravela.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-        <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" />
     </ItemGroup>
 
 </Project>

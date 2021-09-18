@@ -1,6 +1,6 @@
 using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code.Syntax;
+using Caravela.Framework.Code.ExpressionBuilders;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicArrayBuilder
@@ -18,8 +18,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicArrayBu
                 array.Add( p.Value );
             }
 
-            var array1 = array.ToArray();
-            var array2 = ( (IExpressionBuilder)array ).ToExpression().Value;
+            var array1 = array.ToValue();
+            var array2 = array.ToExpression().Value;
 
             return default;
         }

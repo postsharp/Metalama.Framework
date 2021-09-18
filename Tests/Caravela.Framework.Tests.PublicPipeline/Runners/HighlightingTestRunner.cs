@@ -48,6 +48,16 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 font-style: italic;
             }
 
+            .diag-Warning
+            {
+                text-decoration: underline 1px wavy orange;
+            }
+
+            .diag-Error
+            {
+                text-decoration: underline 1px wavy red;
+            }
+
             .legend 
             {
                 margin-top: 100px;
@@ -84,8 +94,8 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
         private protected override bool CompareTransformedCode => false;
 
-        private protected override HtmlCodeWriter CreateHtmlCodeWriter( TestOptions options )
-            => new( new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault(), _htmlProlog, this._htmlEpilogue ) );
+        private protected override HtmlCodeWriter CreateHtmlCodeWriter( IServiceProvider serviceProvider, TestOptions options )
+            => new( serviceProvider, new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault(), _htmlProlog, this._htmlEpilogue ) );
 
         private protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
@@ -127,7 +137,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             Assert.True( File.Exists( expectedHtmlPath ) );
 
             this.Logger?.WriteLine( "Actual HTML: " + actualHtmlPath );
-            this.Logger?.WriteLine( "Expected HTML: " + actualHtmlPath );
+            this.Logger?.WriteLine( "Expected HTML: " + expectedHtmlPath );
 
             var expectedHighlightedSource = NormalizeEndOfLines( File.ReadAllText( expectedHtmlPath ) );
 

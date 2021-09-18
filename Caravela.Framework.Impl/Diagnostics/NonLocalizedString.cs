@@ -23,8 +23,47 @@ namespace Caravela.Framework.Impl.Diagnostics
                 ? this._message
                 : string.Format( DiagnosticFormatter.Instance, this._message, this._arguments );
 
-        protected override int GetHash() => this._message.GetHashCode();
+        protected override int GetHash()
+        {
+            var hashCode = default(HashCode);
+            hashCode.Add( this._message );
 
-        protected override bool AreEqual( object? other ) => ReferenceEquals( this, other );
+            foreach ( var arg in this._arguments )
+            {
+                hashCode.Add( arg );
+            }
+
+            return hashCode.ToHashCode();
+        }
+
+        protected override bool AreEqual( object? other )
+        {
+            if ( other is not NonLocalizedString otherLocalizedString )
+            {
+                return false;
+            }
+
+            if ( !this._message.Equals( otherLocalizedString._message, StringComparison.Ordinal ) )
+            {
+                // Coverage: ignore.
+                return false;
+            }
+
+            if ( this._arguments.Length != otherLocalizedString._arguments.Length )
+            {
+                // Coverage: ignore.
+                return false;
+            }
+
+            for ( var i = 0; i < this._arguments.Length; i++ )
+            {
+                if ( !Equals( this._arguments[i], otherLocalizedString._arguments[i] ) )
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

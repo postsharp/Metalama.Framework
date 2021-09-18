@@ -220,5 +220,13 @@ namespace Caravela.Framework.Impl.Templating
                     "The call to '{0}' must be explicitly cast to IExpression.",
                     _category,
                     Error );
+
+        internal static readonly DiagnosticDefinition<string> ScopeConflict
+            = new(
+                "CR0226",
+                "The generic type combines run-time-only and compile-time-only types.",
+                "The generic type '{0}' combines run-time-only and compile-time-only types.",
+                _category,
+                Error );
     }
 }

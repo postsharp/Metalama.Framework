@@ -2,11 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
+using Microsoft.CodeAnalysis;
 using System;
+using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class UserExpression : IExpression
+    internal class UserExpression : IDynamicExpression
     {
         public IDynamicExpression Underlying { get; }
 
@@ -35,6 +38,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             get => this.ToExpression();
             set => throw new NotSupportedException();
         }
+
+        RuntimeExpression IDynamicExpression.CreateExpression( string? expressionText, Location? location )
+            => this.Underlying.CreateExpression( expressionText, location );
 
         private IExpression ToExpression() => this.Underlying;
     }

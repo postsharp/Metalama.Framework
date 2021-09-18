@@ -19,14 +19,19 @@ namespace Caravela.Framework.Impl.Diagnostics
         /// in case of precondition failure (i.e. when the responsibility of the error lays on the user).
         /// </summary>
         public static Exception CreateException<T>( this DiagnosticDefinition<T> definition, T arguments )
+            where T : notnull
             => new InvalidUserCodeException( definition.CreateDiagnostic( DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
 
+        // Coverage: ignore (trivial)
         public static Exception CreateException<T>( this DiagnosticDefinition<T> definition, Location? location, T arguments )
+            where T : notnull
             => new InvalidUserCodeException( definition.CreateDiagnostic( location ?? DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
 
+        // Coverage: ignore (trivial)
         public static Exception CreateException( this DiagnosticDefinition definition, params object[] arguments )
             => new InvalidUserCodeException( definition.CreateDiagnostic( DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
 
+        // Coverage: ignore (trivial)
         public static Exception CreateException( this DiagnosticDefinition definition, Location? location, params object[] arguments )
             => new InvalidUserCodeException( definition.CreateDiagnostic( location ?? DiagnosticContext.CurrentLocation?.GetLocation(), arguments ) );
 
@@ -38,12 +43,8 @@ namespace Caravela.Framework.Impl.Diagnostics
             Location? location,
             T arguments,
             IEnumerable<Location>? additionalLocations = null )
+            where T : notnull
         {
-            if ( arguments == null )
-            {
-                throw new ArgumentNullException( nameof(arguments) );
-            }
-
             object[] argumentArray;
 
             if ( typeof(T).Name.StartsWith( nameof(ValueTuple), StringComparison.OrdinalIgnoreCase ) )
