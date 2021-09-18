@@ -455,8 +455,9 @@ namespace Caravela.Framework.Impl.Templating
                         .AddArgumentListArguments( Argument( this.MetaSyntaxFactory.LiteralExpression( this.Transform( expression.Kind() ) ) ) );
 
                 case SyntaxKind.DefaultExpression:
-                    // Don't transform default or null.
-                    // When we do that, we can try to cast a dynamic 'default' or 'null' into a SyntaxFactory.
+                    return InvocationExpression(
+                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
+                        .AddArgumentListArguments( Argument( this.MetaSyntaxFactory.DefaultExpression( this.Transform( ((DefaultExpressionSyntax) expression).Type ) ) ) );
                     return expression;
 
                 case SyntaxKind.IdentifierName:

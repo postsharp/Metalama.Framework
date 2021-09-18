@@ -1385,7 +1385,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             var transformedExpression = this.Visit( node.Expression );
             var expressionScope = this.GetNodeScope( transformedExpression );
-            var statementScope = expressionScope.GetExpressionExecutionScope();
+            var statementScope = expressionScope.GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.RunTimeOnly );
 
             return node.WithExpression( transformedExpression ).AddScopeAnnotation( expressionScope ).AddTargetScopeAnnotation( statementScope );
         }
@@ -1436,58 +1436,60 @@ namespace Caravela.Framework.Impl.Templating
                     return this.VisitCoalesceExpression( node );
             }
 
-            var visitedNode = base.VisitBinaryExpression( node );
+            var visitedNode = base.VisitBinaryExpression( node )!;
 
             return this.AddScopeAnnotationToVisitedNode( node, visitedNode );
         }
 
         private SyntaxNode? AnnotateCastExpression( SyntaxNode transformedCastNode, TypeSyntax annotatedType, ExpressionSyntax annotatedExpression )
         {
-            // TODO: Verify
             var combinedScope = this.GetNodeScope( annotatedType ) == TemplatingScope.Both
                 ? this.GetNodeScope( annotatedExpression ).GetExpressionValueScope()
                 : this.GetExpressionScope( new[] { annotatedExpression }, transformedCastNode );
 
-            if ( combinedScope != TemplatingScope.Both )
-            {
-                return transformedCastNode.AddScopeAnnotation( combinedScope );
-            }
-
-            return transformedCastNode;
+            return transformedCastNode.AddScopeAnnotation( combinedScope );
         }
 
         private SyntaxNode? VisitCoalesceExpression( BinaryExpressionSyntax node )
         {
-            // The scope is determined by the left part. The right part must follow.
+            // The scope is determined by the left part, unless the left part is indeterminate. The right part must follow.
 
             var annotatedLeft = this.Visit( node.Left );
             var leftScope = this.GetNodeScope( annotatedLeft );
 
-            ScopeContext context;
+            ExpressionSyntax annotatedRight;
+            TemplatingScope combinedScope;
 
-            if ( leftScope == TemplatingScope.CompileTimeOnly )
+            if ( !leftScope.IsUndetermined() )
             {
-                context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"right part of the compile-time '{node.Left} ??'" );
-            }
-            else if ( leftScope.IsRunTime() )
-            {
-                context = ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, $"right part of the run-time '{node.Left} ??'" );
-                leftScope = TemplatingScope.RunTimeOnly;
+                ScopeContext context;
+
+                if ( leftScope.IsRunTime() )
+                {
+                    context = ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, $"right part of the run-time '{node.Left} ??'" );
+                    combinedScope = TemplatingScope.RunTimeOnly;
+                }
+                else
+                {
+                    context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"right part of the compile-time '{node.Left} ??'" );
+                    combinedScope = leftScope;
+                }
+
+                using ( this.WithScopeContext( context ) )
+                {
+                    annotatedRight = this.Visit( node.Right );
+                }
             }
             else
             {
                 // Use the default rule.
-                var visitedNode = base.VisitBinaryExpression( node )!;
-
-                return this.AddScopeAnnotationToVisitedNode( node, visitedNode );
+                annotatedRight = this.Visit( node.Right );
+                var rightScope = this.GetNodeScope( annotatedRight );
+                combinedScope = this.GetExpressionScope( new[] { leftScope, rightScope }, node );
             }
 
-            using ( this.WithScopeContext( context ) )
-            {
-                var annotatedRight = this.Visit( node.Right );
-
-                return node.Update( annotatedLeft, node.OperatorToken, annotatedRight ).AddScopeAnnotation( leftScope );
-            }
+            return node.Update( annotatedLeft, node.OperatorToken, annotatedRight ).AddScopeAnnotation( combinedScope );
+           
         }
 
         public override SyntaxNode? VisitForStatement( ForStatementSyntax node )
