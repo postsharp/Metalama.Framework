@@ -558,9 +558,12 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         if ( targetSymbol.ContainingType.TypeKind == TypeKind.Interface )
                         {
-                            return memberAccessExpression
-                                .WithExpression( ThisExpression() )
-                                .WithName( IdentifierName( targetMemberName ) );
+                            // Overrides are always targeting member defined in the current type.
+                            throw new AssertionFailedException( Justifications.CoverageMissing );
+                            
+                            // return memberAccessExpression
+                            //     .WithExpression( ThisExpression() )
+                            //     .WithName( IdentifierName( targetMemberName ) );
                         }
 
                         if ( targetSymbol.IsStatic )

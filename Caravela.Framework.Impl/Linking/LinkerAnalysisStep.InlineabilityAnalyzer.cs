@@ -252,22 +252,16 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( addAspectReferences.Count > 1 || removeAspectReferences.Count > 1 )
                 {
-                    // TODO: Probably incorrect syntax.
-                    throw new AssertionFailedException( Justifications.CoverageMissing );
+                    inliningSpecification = null;
 
-                    // inliningSpecification = null;
-                    //
-                    // return false;
+                    return false;
                 }
 
                 if ( addAspectReferences.Count == 0 && removeAspectReferences.Count == 0 )
                 {
-                    // TODO: Probably incorrect syntax.
-                    throw new AssertionFailedException( Justifications.CoverageMissing );
+                    inliningSpecification = null;
 
-                    // inliningSpecification = null;
-                    //
-                    // return false;
+                    return false;
                 }
 
                 Inliner? adderInliner = null;

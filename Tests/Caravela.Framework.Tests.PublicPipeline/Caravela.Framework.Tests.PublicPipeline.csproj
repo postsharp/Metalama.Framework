@@ -19,6 +19,10 @@
 
   <ItemGroup>
     <Compile Remove="Tests\Aspects\Introductions\Interfaces\ExplicitMembers - Copy.t.cs" />
+    <Compile Remove="Tests\Aspects\Introductions\Interfaces\ExplicitMembers_TwoAspects - Copy.t.cs" />
+    <Compile Remove="Tests\Aspects\Introductions\Interfaces\ImplicitMembers_Override - Copy.t.cs" />
+    <Compile Remove="Tests\Aspects\Overrides\Events\NoProceed.t.cs" />
+    <Compile Remove="Tests\Aspects\Overrides\Properties\Uninlineable - Copy.t.cs" />
   </ItemGroup>
 
 
@@ -44,6 +48,14 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Tests\Aspects\Introductions\Interfaces\ExplicitMembers_Override_NotInlineable.t.cs" />
+    <None Include="Tests\Aspects\Introductions\Interfaces\ImplicitMembers_Override_NotInlineable.t.cs" />
+    <None Include="Tests\Aspects\Introductions\Interfaces\ImplicitMembers_Override.t.cs" />
+    <None Include="Tests\Aspects\Overrides\Events\NoProceed.t.cs" />
+    <None Include="Tests\Aspects\Overrides\Properties\NoProceed.t.cs" />
   </ItemGroup>
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
