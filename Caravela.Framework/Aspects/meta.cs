@@ -220,19 +220,31 @@ namespace Caravela.Framework.Aspects
         [TemplateKeyword]
         public static void InsertComment( params string?[] lines ) => throw CreateException();
 
+        /// <summary>
+        /// Inserts a statement into the target code, where the statement is given as an <see cref="IStatement"/>.
+        /// </summary>
         [TemplateKeyword]
         public static void InsertStatement( IStatement statement ) => throw CreateException();
 
+        /// <summary>
+        /// Inserts a statement into the target code, where the statement is given as an <see cref="IExpression"/>.
+        /// Note that not all expressions can be used as statements.
+        /// </summary>
         [TemplateKeyword]
         public static void InsertStatement( IExpression statement ) => throw CreateException();
 
+        /// <summary>
+        /// Inserts a statement into the target code, where the statement is given as a <see cref="string"/>.
+        /// Calling this overload is equivalent to calling the <see cref="InsertStatement(Caravela.Framework.Code.SyntaxBuilders.IStatement)"/> overload
+        /// with the result of the <see cref="ParseStatement"/> method.
+        /// </summary>
         [TemplateKeyword]
         public static void InsertStatement( string statement ) => throw CreateException();
 
         /// <summary>
         /// Creates a compile-time object that represents a run-time <i>expression</i>, i.e. the syntax or code, and not the result
-        /// itself. The returned <see cref="IExpression"/> can then be used in other run-time expressions. This method allows to generate expressions that
-        /// depend on compile-time conditions.
+        /// itself. The returned <see cref="IExpression"/> can then be used in run-time C# code thanks to the <see cref="IExpression.Value"/> property.
+        /// This mechanism allows to generate expressions that depend on a compile-time control flow.
         /// </summary>
         /// <param name="expression">A run-time expression, possibly containing compile-time sub-expressions.</param>
         /// <param name="definedException">A compile-time object representing <paramref name="expression"/>. Note that may have to specify the

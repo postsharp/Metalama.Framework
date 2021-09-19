@@ -26,7 +26,6 @@ namespace Caravela.Framework.Code.SyntaxBuilders
         /// <summary>
         /// Returns a clone of the current <see cref="ExpressionBuilder"/>.
         /// </summary>
-        /// <returns></returns>
         public ExpressionBuilder Clone() => new( this );
     }
 }

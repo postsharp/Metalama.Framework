@@ -223,6 +223,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 GenericParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
 
                 // This is for linker tests (fake builders), which resolve to themselves.
+                // ReSharper disable once SuspiciousTypeConversion.Global
                 IDeclarationRef<IDeclaration> reference => reference.Resolve( this.CompilationModel ).AssertNotNull(),
                 _ => throw new AssertionFailedException()
             };
