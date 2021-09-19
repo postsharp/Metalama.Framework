@@ -228,7 +228,18 @@ namespace Caravela.Framework.Impl.CompileTime
                     return TemplatingScope.RunTimeOnly;
 
                 case IArrayTypeSymbol array:
-                    return this.GetTemplatingScope( array.ElementType, recursion + 1 );
+                    {
+                        var arrayScope = this.GetTemplatingScope( array.ElementType, recursion + 1 );
+
+                        if ( arrayScope == TemplatingScope.Dynamic )
+                        {
+                            return TemplatingScope.Invalid;
+                        }
+                        else
+                        {
+                            return arrayScope;
+                        }
+                    }
 
                 case IPointerTypeSymbol pointer:
                     return this.GetTemplatingScope( pointer.PointedAtType, recursion + 1 );
@@ -250,7 +261,20 @@ namespace Caravela.Framework.Impl.CompileTime
                             switch ( scope )
                             {
                                 case TemplatingScope.Dynamic:
-                                    return TemplatingScope.Dynamic;
+                                    // Only a few well-known types can have dynamic generic arguments, other are unsupported.
+                                    switch ( namedType.Name )
+                                    {
+                                        case nameof(Task<object>):
+                                        case nameof(ValueTask<object>):
+                                        case nameof(IEnumerable<object>):
+                                        case nameof(IEnumerator<object>):
+                                        case nameof(IAsyncEnumerable<object>):
+                                        case nameof(IAsyncEnumerator<object>):
+                                            return TemplatingScope.Dynamic;
+                                        
+                                        default:
+                                            return TemplatingScope.Invalid;
+                                    }
 
                                 case TemplatingScope.RunTimeOnly:
                                     runtimeCount++;

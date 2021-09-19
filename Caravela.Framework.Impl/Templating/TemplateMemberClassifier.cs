@@ -38,7 +38,15 @@ namespace Caravela.Framework.Impl.Templating
             => symbol != null && this._symbolClassifier.GetTemplatingScope( symbol ).GetExpressionExecutionScope()
                 == TemplatingScope.CompileTimeOnly;
 
-        public bool IsDynamicParameter( ArgumentSyntax argument ) => this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type.IsDynamic() ?? false;
+        public bool IsDynamicParameter( ArgumentSyntax argument ) => IsDynamicParameter( this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type );
+        public static bool IsDynamicParameter( ITypeSymbol? type )
+            => type switch
+            {
+                null => false,
+                IDynamicTypeSymbol => true,
+                IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } => true,
+                _ => false
+            };
 
         public bool IsRunTimeMethod( ISymbol symbol )
             => symbol.Name == nameof(meta.RunTime) &&
@@ -52,7 +60,7 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="originalNode"></param>
         /// <returns></returns>
-        public bool IsDynamicType( SyntaxNode originalNode, bool strict = false )
+        public bool IsNodeOfDynamicType( SyntaxNode originalNode )
         {
             var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( originalNode );
 
@@ -68,15 +76,15 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
 
-            if ( expressionType.IsDynamic() )
+            if ( expressionType != null && this._symbolClassifier.GetTemplatingScope( expressionType ) == TemplatingScope.Dynamic )
             {
                 return true;
             }
 
             var nodeSymbol = this._syntaxTreeAnnotationMap.GetSymbol( originalNode );
 
-            return (nodeSymbol is IMethodSymbol method && method.ReturnType.IsDynamic( strict )) ||
-                   (nodeSymbol is IPropertySymbol property && property.Type.IsDynamic( strict ));
+            return (nodeSymbol is IMethodSymbol method && this._symbolClassifier.GetTemplatingScope( method.ReturnType ) == TemplatingScope.Dynamic) ||
+                   (nodeSymbol is IPropertySymbol property && this._symbolClassifier.GetTemplatingScope( property.Type ) == TemplatingScope.Dynamic); 
         }
 
 #pragma warning disable CA1822 // Static anyway.

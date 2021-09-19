@@ -228,12 +228,12 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // If the node is dynamic, it is run-time only.
-            if ( this._templateMemberClassifier.IsDynamicType( node ) )
+            if ( this._templateMemberClassifier.IsNodeOfDynamicType( node ) )
             {
                 var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
                 // Dynamic local variables are considered compile-time because they must be transformed. 
-                return this._templateMemberClassifier.RequiresCompileTimeExecution( symbol ) || (symbol is ILocalSymbol local && local.Type.IsDynamic( true ))
+                return this._templateMemberClassifier.RequiresCompileTimeExecution( symbol ) || symbol is ILocalSymbol { Type: IDynamicTypeSymbol }
                     ? TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
                     : TemplatingScope.Dynamic;
             }
@@ -408,7 +408,7 @@ namespace Caravela.Framework.Impl.Templating
             if ( this._currentScopeContext.ForceCompileTimeOnlyExpression )
             {
                 if ( visitedNode.GetScopeFromAnnotation() == TemplatingScope.RunTimeOnly ||
-                     this._templateMemberClassifier.IsDynamicType( visitedNode ) )
+                     this._templateMemberClassifier.IsNodeOfDynamicType( visitedNode ) )
                 {
                     // The current expression is obliged to be compile-time-only by inference.
                     // Emit an error if the type of the expression is inferred to be runtime-only.
@@ -517,6 +517,11 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var scope = this.GetSymbolScope( symbol );
 
+                if ( scope == TemplatingScope.Invalid )
+                {
+                    scope = TemplatingScope.RunTimeOnly;
+                }
+
                 if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                 {
                     // Template code cannot be referenced in a template until this is implemented.
@@ -563,7 +568,7 @@ namespace Caravela.Framework.Impl.Templating
                             var node = nodeOrToken.AsNode() ?? nodeOrToken.Parent;
 
                             if ( node != null &&
-                                 this._templateMemberClassifier.IsDynamicType( node ) &&
+                                 this._templateMemberClassifier.IsNodeOfDynamicType( node ) &&
                                  symbol is not ITypeSymbol )
                             {
                                 // Annotate dynamic members differently for syntax coloring.
@@ -596,7 +601,9 @@ namespace Caravela.Framework.Impl.Templating
                 out var transformedOperator,
                 out var scope );
 
-            return node.Update( transformedExpression, transformedOperator, (SimpleNameSyntax) transformedName ).AddScopeAnnotation( scope );
+            return node
+                .Update( transformedExpression, transformedOperator, (SimpleNameSyntax) transformedName )
+                .AddScopeAnnotation( scope );
         }
 
         public override SyntaxNode? VisitConditionalAccessExpression( ConditionalAccessExpressionSyntax node )
@@ -610,7 +617,9 @@ namespace Caravela.Framework.Impl.Templating
                 out var transformedOperator,
                 out var scope );
 
-            return node.Update( transformedExpression, transformedOperator, transformedWhenNotNull ).AddScopeAnnotation( scope );
+            return node
+                .Update( transformedExpression, transformedOperator, transformedWhenNotNull )
+                .AddScopeAnnotation( scope );
         }
 
         private void VisitAccessExceptionCore(
@@ -831,7 +840,7 @@ namespace Caravela.Framework.Impl.Templating
                     ExpressionSyntax transformedArgumentValue;
 
                     // Transform the argument value.
-                    if ( expressionScope.IsDynamic() || argumentType.IsDynamic() )
+                    if ( expressionScope.IsDynamic() || TemplateMemberClassifier.IsDynamicParameter(  argumentType ) )
                     {
                         // dynamic or dynamic[]
 
@@ -1204,7 +1213,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             var transformedType = this.Visit( node.Type );
 
-            if ( this._templateMemberClassifier.IsDynamicType( transformedType )
+            if ( this._templateMemberClassifier.IsNodeOfDynamicType( transformedType )
                  && !(node.Type is IdentifierNameSyntax { Identifier: { Text: "var" } }) )
             {
                 foreach ( var variable in node.Variables.Where( v => v.Initializer == null ) )
@@ -1261,7 +1270,7 @@ namespace Caravela.Framework.Impl.Templating
                 // Don't process attributes.
                 node;
 
-        private T? VisitMemberDeclaration<T>( T node, Func<T, SyntaxNode?> callBase )
+        private T? VisitMemberDeclaration<T>( T node, Func<T, T> visitImplementation )
             where T : SyntaxNode
         {
             var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node )!;
@@ -1279,7 +1288,9 @@ namespace Caravela.Framework.Impl.Templating
 
                 try
                 {
-                    return (T) callBase( node )!.AddIsTemplateAnnotation();
+                    // We don't want to visit the whole member because only the implementation must be annotated and transformed
+                    // as a template.
+                    return visitImplementation( node )!.AddIsTemplateAnnotation();
                 }
                 finally
                 {
@@ -1288,21 +1299,24 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                return (T?) callBase( node );
+                // Don't visit members that are not templates.
+                return node;
             }
         }
 
         public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
-            => this.VisitMemberDeclaration( node, n => base.VisitMethodDeclaration( n ) );
+            => this.VisitMemberDeclaration( node, n => node.WithBody( this.Visit( node.Body ) ).WithExpressionBody( this.Visit( node.ExpressionBody ) ) );
 
         public override SyntaxNode? VisitAccessorDeclaration( AccessorDeclarationSyntax node )
-            => this.VisitMemberDeclaration( node, n => base.VisitAccessorDeclaration( n ) );
+            => this.VisitMemberDeclaration( node, n => node.WithBody( this.Visit( node.Body ) ).WithExpressionBody( this.Visit( node.ExpressionBody ) ) );
 
         public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
-            => this.VisitMemberDeclaration( node, n => base.VisitPropertyDeclaration( n ) );
+            => this.VisitMemberDeclaration(
+                node, n => node.WithAccessorList( this.Visit( node.AccessorList ) )
+                                                .WithExpressionBody( this.Visit( node.ExpressionBody ) ) );
 
         public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
-            => this.VisitMemberDeclaration( node, n => base.VisitEventDeclaration( n ) );
+            => this.VisitMemberDeclaration( node, n => node.WithAccessorList( this.Visit( node.AccessorList ) ) );
 
         private static bool IsMutatingUnaryOperator( SyntaxToken token ) => token.Kind() is SyntaxKind.PlusPlusToken or SyntaxKind.MinusMinusToken;
 
@@ -1721,7 +1735,7 @@ namespace Caravela.Framework.Impl.Templating
             var governingExpressionScope = transformedGoverningExpression.GetScopeFromAnnotation().GetValueOrDefault();
 
             if ( (governingExpressionScope == TemplatingScope.CompileTimeOnly
-                  && this._templateMemberClassifier.IsDynamicType( transformedGoverningExpression ))
+                  && this._templateMemberClassifier.IsNodeOfDynamicType( transformedGoverningExpression ))
                  || governingExpressionScope != TemplatingScope.CompileTimeOnly )
             {
                 governingExpressionScope = TemplatingScope.RunTimeOnly;
@@ -1757,7 +1771,7 @@ namespace Caravela.Framework.Impl.Templating
             TemplatingScope switchScope;
             string scopeReason;
 
-            if ( (expressionScope == TemplatingScope.CompileTimeOnly && this._templateMemberClassifier.IsDynamicType( annotatedExpression ))
+            if ( (expressionScope == TemplatingScope.CompileTimeOnly && this._templateMemberClassifier.IsNodeOfDynamicType( annotatedExpression ))
                  || expressionScope != TemplatingScope.CompileTimeOnly )
             {
                 switchScope = TemplatingScope.RunTimeOnly;
@@ -1933,6 +1947,21 @@ namespace Caravela.Framework.Impl.Templating
                 .AddScopeAnnotation( TemplatingScope.RunTimeOnly );
         }
 
+        public override SyntaxNode? VisitArrayType( ArrayTypeSyntax node )
+        {
+            var transformedNode = (ArrayTypeSyntax) base.VisitArrayType( node )!;
+
+            var scope = this.GetNodeScope( transformedNode.ElementType );
+
+            if ( scope == TemplatingScope.Dynamic )
+            {
+                // We cannot have generic type instances of dynamic.
+                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction, node, node.ToString() );
+            }
+            
+            return transformedNode;
+        }
+
         public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
         {
             var scope = this.GetNodeScope( node );
@@ -1943,6 +1972,13 @@ namespace Caravela.Framework.Impl.Templating
 
                 // We continue with an unknown scope because other methods don't handle the Conflict scope.
                 scope = TemplatingScope.Unknown;
+            }
+            else if ( scope == TemplatingScope.Invalid )
+            {
+                // We cannot have generic type instances of dynamic.
+                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction, node, node.ToString() );
+                
+                scope = TemplatingScope.RunTimeOnly;
             }
 
             var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );

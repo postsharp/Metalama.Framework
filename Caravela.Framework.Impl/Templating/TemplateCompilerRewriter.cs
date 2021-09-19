@@ -615,7 +615,7 @@ namespace Caravela.Framework.Impl.Templating
             // In the default implementation, such case would result in an exception.
 
             if ( this.GetTransformationKind( node ) == TransformationKind.Transform
-                 || this._templateMemberClassifier.IsDynamicType( node.Expression ) )
+                 || this._templateMemberClassifier.IsNodeOfDynamicType( node.Expression ) )
             {
                 return this.TransformExpressionStatement( node );
             }
@@ -720,7 +720,7 @@ namespace Caravela.Framework.Impl.Templating
                     (ExpressionSyntax) this.Visit( node.Expression )!,
                     ArgumentList( SeparatedList( transformedArguments )! ) );
             }
-            else if ( this._templateMemberClassifier.IsDynamicType( node.Expression ) )
+            else if ( this._templateMemberClassifier.IsNodeOfDynamicType( node.Expression ) )
             {
                 // We are in an invocation like: `meta.This.Foo(...)`.
             }
