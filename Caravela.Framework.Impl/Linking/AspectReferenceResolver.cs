@@ -120,7 +120,9 @@ namespace Caravela.Framework.Impl.Linking
             var containedInTargetOverride =
                 this._introductionRegistry.IsOverrideTarget( referencedSymbol )
                 && referencedDeclarationOverrides.Any(
-                    x => SymbolEqualityComparer.Default.Equals( this._introductionRegistry.GetSymbolForIntroducedMember( x ), GetPrimarySymbol( containingSymbol ) ) );
+                    x => SymbolEqualityComparer.Default.Equals(
+                        this._introductionRegistry.GetSymbolForIntroducedMember( x ),
+                        GetPrimarySymbol( containingSymbol ) ) );
 
             // TODO: Optimize (most of this can be precomputed).
             // TODO: Support multiple overrides in the same layer (the memberIndex has to be determined).
@@ -457,7 +459,8 @@ namespace Caravela.Framework.Impl.Linking
             => symbol switch
             {
                 IMethodSymbol { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } methodSymbol => methodSymbol.AssociatedSymbol,
-                IMethodSymbol { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove or MethodKind.EventRaise } methodSymbol => methodSymbol.AssociatedSymbol,
+                IMethodSymbol { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove or MethodKind.EventRaise } methodSymbol => methodSymbol
+                    .AssociatedSymbol,
                 IMethodSymbol methodSymbol => methodSymbol,
                 IPropertySymbol propertySymbol => propertySymbol,
                 IEventSymbol eventSymbol => eventSymbol,
@@ -488,25 +491,25 @@ namespace Caravela.Framework.Impl.Linking
                     // This seems to happen only in invalid compilations.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
 
-                    // return propertySymbol.GetMethod.AssertNotNull();
+                // return propertySymbol.GetMethod.AssertNotNull();
 
                 case (IMethodSymbol { MethodKind: MethodKind.PropertySet }, IPropertySymbol propertySymbol):
                     // This seems to happen only in invalid compilations.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
 
-                    // return propertySymbol.SetMethod.AssertNotNull();
+                // return propertySymbol.SetMethod.AssertNotNull();
 
                 case (IMethodSymbol { MethodKind: MethodKind.EventAdd }, IEventSymbol eventSymbol):
                     // This seems to happen only in invalid compilations.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
 
-                    // return eventSymbol.AddMethod.AssertNotNull();
+                // return eventSymbol.AddMethod.AssertNotNull();
 
                 case (IMethodSymbol { MethodKind: MethodKind.EventRemove }, IEventSymbol eventSymbol):
                     // This seems to happen only in invalid compilations.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
 
-                    // return eventSymbol.RemoveMethod.AssertNotNull();
+                // return eventSymbol.RemoveMethod.AssertNotNull();
 
                 default:
                     throw new AssertionFailedException();

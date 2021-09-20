@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 // Not used anywhere yet. 
                 throw new AssertionFailedException( Justifications.CoverageMissing );
-                
+
                 // var rewrittenTrivia = rewriter.VisitTrivia( trivia );
                 //
                 // list.Add( rewrittenTrivia );
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 // Not used anywhere yet. 
                 throw new AssertionFailedException( Justifications.CoverageMissing );
-                
+
                 // return TriviaList( list );
             }
             else

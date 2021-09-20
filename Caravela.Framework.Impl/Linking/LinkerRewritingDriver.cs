@@ -562,7 +562,7 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             // Overrides are always targeting member defined in the current type.
                             throw new AssertionFailedException( Justifications.CoverageMissing );
-                            
+
                             // return memberAccessExpression
                             //     .WithExpression( ThisExpression() )
                             //     .WithName( IdentifierName( targetMemberName ) );

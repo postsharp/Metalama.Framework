@@ -6,7 +6,7 @@ namespace Caravela.Framework.Code.Collections
     /// <summary>
     /// Read-only list of <see cref="IEvent"/>.
     /// </summary>
-    public interface IEventList : IMemberList<IEvent> 
+    public interface IEventList : IMemberList<IEvent>
     {
         /// <summary>
         /// Gets an event that exactly matches the specified signature.

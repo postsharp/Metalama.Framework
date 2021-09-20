@@ -31,7 +31,9 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         /// <returns></returns>
         public virtual bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
-            if ( !SymbolEqualityComparer.Default.Equals(aspectReference.ContainingSymbol.ContainingType, aspectReference.ResolvedSemantic.Symbol.ContainingType) )
+            if ( !SymbolEqualityComparer.Default.Equals(
+                aspectReference.ContainingSymbol.ContainingType,
+                aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
             {
                 return false;
             }
