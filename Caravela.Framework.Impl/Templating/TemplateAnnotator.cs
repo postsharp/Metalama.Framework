@@ -1305,19 +1305,19 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
-            => this.VisitMemberDeclaration( node, n => node.WithBody( this.Visit( node.Body ) ).WithExpressionBody( this.Visit( node.ExpressionBody ) ) );
+            => this.VisitMemberDeclaration( node, n => node.WithBody( this.Visit( n.Body ) ).WithExpressionBody( this.Visit( n.ExpressionBody ) ) );
 
         public override SyntaxNode? VisitAccessorDeclaration( AccessorDeclarationSyntax node )
-            => this.VisitMemberDeclaration( node, n => node.WithBody( this.Visit( node.Body ) ).WithExpressionBody( this.Visit( node.ExpressionBody ) ) );
+            => this.VisitMemberDeclaration( node, n => node.WithBody( this.Visit( n.Body ) ).WithExpressionBody( this.Visit( n.ExpressionBody ) ) );
 
         public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             => this.VisitMemberDeclaration(
                 node,
-                n => node.WithAccessorList( this.Visit( node.AccessorList ) )
-                    .WithExpressionBody( this.Visit( node.ExpressionBody ) ) );
+                n => n.WithAccessorList( this.Visit( n.AccessorList ) )
+                    .WithExpressionBody( this.Visit( n.ExpressionBody ) ) );
 
         public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
-            => this.VisitMemberDeclaration( node, n => node.WithAccessorList( this.Visit( node.AccessorList ) ) );
+            => this.VisitMemberDeclaration( node, n => n.WithAccessorList( this.Visit( n.AccessorList ) ) );
 
         private static bool IsMutatingUnaryOperator( SyntaxToken token ) => token.Kind() is SyntaxKind.PlusPlusToken or SyntaxKind.MinusMinusToken;
 

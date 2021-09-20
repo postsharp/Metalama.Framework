@@ -4,6 +4,8 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code.SyntaxBuilders;
 using Caravela.TestFramework;
 
+#pragma warning disable CS0168
+
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicGenericInstanceError
 {
     [CompileTime]

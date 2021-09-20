@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 
+#pragma warning disable CS8618
 
 namespace Caravela.Framework.Tests.InternalPipeline.Templating.Syntax.Invocation.RunTimeTargets
 {
