@@ -3,10 +3,12 @@
 
 using System;
 using System.IO;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.Utilities
 {
-    public interface IFileSystemWatcher : IDisposable
+    [Obfuscation( Exclude = true )]
+    internal interface IFileSystemWatcher : IDisposable
     {
         bool EnableRaisingEvents { get; set; }
         

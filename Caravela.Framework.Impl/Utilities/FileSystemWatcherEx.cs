@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Caravela.Framework.Impl.Utilities
 {
-    public class FileSystemWatcherEx : FileSystemWatcher, IFileSystemWatcher
+    internal class FileSystemWatcherEx : FileSystemWatcher, IFileSystemWatcher
     {
         public FileSystemWatcherEx() { }
 

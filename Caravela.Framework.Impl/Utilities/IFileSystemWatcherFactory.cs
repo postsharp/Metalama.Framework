@@ -3,7 +3,7 @@
 
 namespace Caravela.Framework.Impl.Utilities
 {
-    public interface IFileSystemWatcherFactory
+    internal interface IFileSystemWatcherFactory
     {
         IFileSystemWatcher Create();
         
