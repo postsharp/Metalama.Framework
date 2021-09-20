@@ -32,37 +32,6 @@
     <!-- Exclude files that intentionally do not compile -->
     <Compile Remove="Tests\**\__*.cs" />
     </ItemGroup>
-  
-  <ItemGroup>
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictFail - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictFail.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictIgnore - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictIgnore.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictNew - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictNew.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictOverride - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictOverride.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictOverrideBaseNonVirtual - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictOverrideBaseNonVirtual.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictOverrideBaseSealed - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictOverrideBaseSealed.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictOverrideDifferentEventType - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingConflictOverrideDifferentReturnType.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingDifferentStaticity - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\ExistingDifferentStaticity.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Events\Programmatic.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Interfaces\ImplicitMembers - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Interfaces\IncorrectMemberReturnTypes - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Interfaces\IncorrectMembers - Copy - Copy (2).t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Interfaces\IncorrectMembers - Copy - Copy - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Interfaces\IncorrectMembers - Copy - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Interfaces\IncorrectMembers - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Interfaces\MissingMembers - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Introductions\Properties\ExistingDifferentStaticity.t.cs" />
-    <Compile Remove="Tests\Aspects\Invokers\Methods\AnotherInstance_BaseInvoker_error - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Invokers\Methods\AnotherType_BaseInvoker - Copy.t.cs" />
-    <Compile Remove="Tests\Aspects\Overrides\Events\NoProceed - Copy.t.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" />
@@ -72,47 +41,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Tests\Aspects\Introductions\Events\ExistingConflictFail_EventField.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\ExistingConflictFail.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\ExistingConflictIgnore_EventField.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\ExistingConflictIgnore.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\ExistingConflictNew_EventField.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\ExistingConflictNew.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\ExistingConflictOverrideBaseNonVirtual_EventField.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\ExistingConflictOverrideBaseSealed_EventField.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\ExistingConflictOverrideDifferentEventType_EventField.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\ExistingConflictOverride_EventField.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\ExistingConflictOverride.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\ExistingConflictOverrideBaseNonVirtual.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\ExistingConflictOverrideBaseSealed.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\ExistingConflictOverrideDifferentEventType.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\ExistingDifferentStaticity_EventField.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\ExistingDifferentStaticity.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Events\Programmatic.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Interfaces\IncorrectMembers - Copy - Copy (2).t.cs">
-      <DependentUpon>IncorrectMemberReturnTypes.t.cs</DependentUpon>
-    </None>
-    <None Include="Tests\Aspects\Introductions\Interfaces\IncorrectMembers - Copy - Copy - Copy.t.cs">
-      <DependentUpon>IncorrectMembers - Copy - Copy.t.cs</DependentUpon>
-    </None>
-    <None Include="Tests\Aspects\Introductions\Interfaces\IncorrectMembers - Copy - Copy.t.cs">
-      <DependentUpon>IncorrectMemberReturnTypes.t.cs</DependentUpon>
-    </None>
-    <None Include="Tests\Aspects\Introductions\Interfaces\IncorrectMembers - Copy.t.cs">
-      <DependentUpon>IncorrectMemberReturnTypes.t.cs</DependentUpon>
-    </None>
-    <None Include="Tests\Aspects\Introductions\Interfaces\MissingMembers - Copy.t.cs">
-      <DependentUpon>MissingMembers.t.cs</DependentUpon>
-    </None>
-    <None Include="Tests\Aspects\Introductions\Interfaces\MissingMembers.t.cs" />
-    <None Include="Tests\Aspects\Introductions\Properties\ExistingDifferentStaticity.t.cs" />
-    <None Include="Tests\Aspects\Invokers\Methods\AnotherType_BaseInvoker - Copy.t.cs">
-      <DependentUpon>AnotherType_BaseInvoker.t.cs</DependentUpon>
-    </None>
-    <None Include="Tests\Aspects\Invokers\Methods\AnotherType_BaseInvoker.t.cs" />
   </ItemGroup>
 
   <Import Project="..\..\Caravela.TestFramework\Caravela.TestFramework.targets" />
