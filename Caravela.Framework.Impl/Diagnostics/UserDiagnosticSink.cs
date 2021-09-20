@@ -106,6 +106,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         }
 
         public void Report<T>( IDiagnosticLocation? location, DiagnosticDefinition<T> definition, T arguments )
+            where T : notnull
         {
             this.ValidateUserReport( definition );
             this.Report( definition.CreateDiagnostic( this.GetLocation( location ), arguments ) );

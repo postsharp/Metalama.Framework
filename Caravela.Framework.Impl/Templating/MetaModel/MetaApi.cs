@@ -4,10 +4,13 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Advised;
-using Caravela.Framework.Code.Syntax;
+using Caravela.Framework.Code.ExpressionBuilders;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.Aspects;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.ServiceProvider;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Formatting;
@@ -15,6 +18,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -108,9 +113,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IExpression Expression( object? expression )
             => new UserExpression( RuntimeExpression.FromValue( expression, this.Compilation ), this.Compilation );
 
-        public object BuildArray( ArrayBuilder arrayBuilder ) => new ArrayDynamicExpression( arrayBuilder );
+        public IExpression BuildArray( ArrayBuilder arrayBuilder ) => new ArrayDynamicExpression( arrayBuilder );
 
-        public object BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder )
+        public IExpression BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder )
             => new InterpolatedStringDynamicExpression( interpolatedStringBuilder, this.Compilation );
 
         public IExpression Parse( string code )
@@ -119,6 +124,61 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
             return new UserExpression( new RuntimeExpression( expression, this.Compilation ), this.Compilation );
         }
+
+        public void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped )
+        {
+            if ( value == null )
+            {
+                stringBuilder.Append( stronglyTyped ? "default(string)" : "null" );
+            }
+            else
+            {
+                var code = SyntaxFactoryEx.LiteralExpression( value ).Token.Text;
+
+                var suffix = specialType switch
+                {
+                    SpecialType.UInt32 => "u",
+                    SpecialType.Int64 => "l",
+                    SpecialType.UInt64 => "ul",
+                    SpecialType.Single => "f",
+                    SpecialType.Double => "d",
+                    SpecialType.Decimal => "m",
+                    _ => ""
+                };
+
+                var prefix = specialType switch
+                {
+                    SpecialType.Byte => "(byte) ",
+                    SpecialType.SByte => "(sbyte) ",
+                    SpecialType.Int16 => "(short) ",
+                    SpecialType.UInt16 => "(ushort) ",
+                    _ => ""
+                };
+
+                stringBuilder.Append( prefix );
+                stringBuilder.Append( code );
+                stringBuilder.Append( suffix );
+            }
+        }
+
+        public void AppendTypeName( IType type, StringBuilder stringBuilder )
+        {
+            var code = LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( type.GetSymbol().AssertNotNull() ).ToString();
+            stringBuilder.Append( code );
+        }
+
+        public void AppendTypeName( Type type, StringBuilder stringBuilder )
+            => this.AppendTypeName(
+                this.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( type ),
+                stringBuilder );
+
+        public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
+        {
+            stringBuilder.Append( ((IDynamicExpression) expression.Value!).CreateExpression().Syntax.NormalizeWhitespace().ToFullString() );
+        }
+
+        public void AppendDynamic( object? expression, StringBuilder stringBuilder )
+            => stringBuilder.Append( expression == null ? "null" : ((RuntimeExpression) expression).Syntax.NormalizeWhitespace().ToFullString() );
 
         public AspectExecutionScenario ExecutionScenario => this._common.PipelineDescription.ExecutionScenario;
 

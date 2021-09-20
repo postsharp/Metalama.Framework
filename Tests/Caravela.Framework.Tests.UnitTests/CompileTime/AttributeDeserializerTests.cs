@@ -26,7 +26,10 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
 
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )
         {
-            var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( {property} = {value} )] "
+            var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( {property} = {value} )]"
+                       + " enum RunTimeEnum { Value = 1}"
+                       + " class GenericRunTimeType<T> {}"
+                       + " struct GenericStruct {} "
                        + additionalCode;
 
             var compilation = CreateCompilationModel( code, dependentCode );
@@ -139,6 +142,43 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         }
 
         [Fact]
+        public void TestRunTimeTypes()
+        {
+            Assert.IsType<CompileTimeType>(
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(RunTimeEnum)" ) );
+
+            Assert.IsType<CompileTimeType>(
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(RunTimeEnum[])" ) );
+
+            Assert.IsType<CompileTimeType>(
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(System.Collections.Generic.List<RunTimeEnum>)" ) );
+
+            Assert.IsType<CompileTimeType>(
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(GenericRunTimeType<int>)" ) );
+
+            Assert.IsType<CompileTimeType>(
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(GenericStruct*)" ) );
+
+            var dependentCode = "public class MyExternClass {} public enum MyExternEnum { A, B }";
+            var typeValue = this.GetDeserializedProperty( nameof(TestAttribute.TypeProperty), "typeof(MyExternClass)", dependentCode );
+            Assert.Equal( "MyExternClass", Assert.IsType<CompileTimeType>( typeValue ).FullName );
+
+            // When assigning to a run-time-only enum, the enum primitive value is used. 
+            var objectValue = this.GetDeserializedProperty( nameof(TestAttribute.ObjectProperty), "MyExternEnum.B", dependentCode );
+            Assert.Equal( 1, objectValue );
+        }
+
+        [Fact]
         public void TestArrayType()
         {
             Assert.Equal(
@@ -152,6 +192,22 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.TypeProperty),
                     "typeof(int[,])" ) );
+        }
+
+        [Fact]
+        public void TestPointerType()
+        {
+            Assert.Equal(
+                typeof(int*),
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(int*)" ) );
+
+            Assert.Equal(
+                typeof(int*[]),
+                this.GetDeserializedProperty(
+                    nameof(TestAttribute.TypeProperty),
+                    "typeof(int*[])" ) );
         }
 
         [Fact]
@@ -180,17 +236,6 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
                 this.GetDeserializedProperty(
                     nameof(TestAttribute.TypeProperty),
                     "typeof(System.Collections.Generic.List<int[]>)" ) );
-        }
-
-        [Fact]
-        public void TestNonRunTimeType()
-        {
-            var dependentCode = "public class MyExternClass {} public enum MyExternEnum { A, B }";
-            var typeValue = this.GetDeserializedProperty( nameof(TestAttribute.TypeProperty), "typeof(MyExternClass)", dependentCode );
-            Assert.Equal( "MyExternClass", Assert.IsType<CompileTimeType>( typeValue ).FullName );
-
-            var objectValue = this.GetDeserializedProperty( nameof(TestAttribute.ObjectProperty), "MyExternEnum.B", dependentCode );
-            Assert.Equal( 1, objectValue );
         }
 
         [Fact]

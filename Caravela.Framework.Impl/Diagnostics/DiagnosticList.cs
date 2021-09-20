@@ -29,11 +29,13 @@ namespace Caravela.Framework.Impl.Diagnostics
             {
                 if ( this._list == null )
                 {
-                    throw new InvalidOperationException();
+                    throw new ArgumentOutOfRangeException();
                 }
 
                 return this._list[index];
             }
         }
+
+        public override string ToString() => $"DiagnosticList Count={this.Count}";
     }
 }

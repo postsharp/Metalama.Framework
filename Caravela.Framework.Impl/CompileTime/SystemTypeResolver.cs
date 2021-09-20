@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.ServiceProvider;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
@@ -39,6 +40,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 // We don't allow loading new assemblies to the AppDomain.
                 if ( AppDomain.CurrentDomain.GetAssemblies().All( a => a.GetName().Name != assemblyName ) )
                 {
+                    // Coverage: ignore
                     return null;
                 }
 

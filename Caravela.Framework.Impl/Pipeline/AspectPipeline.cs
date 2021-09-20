@@ -3,11 +3,13 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Sdk;
+using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using MoreLinq;
@@ -31,7 +33,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         private readonly CompileTimeDomain _domain;
 
-        public ServiceProvider ServiceProvider { get; }
+        public ServiceProvider.ServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectPipeline"/> class.

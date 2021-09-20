@@ -3,8 +3,10 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Serialization;
+using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Utilities;

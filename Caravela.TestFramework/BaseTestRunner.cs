@@ -105,7 +105,13 @@ namespace Caravela.TestFramework
                 // Source. Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
                 // which is more difficult to test.
                 var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER", "CARAVELA" );
-                var project = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions );
+
+                var compilationOptions = new CSharpCompilationOptions(
+                    OutputKind.DynamicallyLinkedLibrary,
+                    allowUnsafe: true,
+                    nullableContextOptions: NullableContextOptions.Enable );
+
+                var project = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions ).WithCompilationOptions( compilationOptions );
 
                 Document AddDocument( string fileName, string sourceCode )
                 {
@@ -151,7 +157,7 @@ namespace Caravela.TestFramework
                 testResult.TestInput = testInput;
                 testResult.InputCompilation = initialCompilation;
 
-                if ( this.ReportInvalidInputCompilation )
+                if ( this.ShouldStopOnInvalidInput( testInput.Options ) )
                 {
                     var diagnostics = initialCompilation.GetDiagnostics();
                     var errors = diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToArray();
@@ -321,7 +327,7 @@ namespace Caravela.TestFramework
             Assert.Equal( expectedTransformedSourceText, actualTransformedNormalizedSourceText );
         }
 
-        private protected virtual bool ReportInvalidInputCompilation => true;
+        private protected virtual bool ShouldStopOnInvalidInput( TestOptions testOptions ) => !testOptions.AcceptInvalidInput.GetValueOrDefault( true );
 
         /// <summary>
         /// Creates a new project that is used to compile the test source.
@@ -349,7 +355,7 @@ namespace Caravela.TestFramework
 
         private protected async Task WriteHtmlAsync( TestInput testInput, TestResult testResult )
         {
-            var htmlCodeWriter = this.CreateHtmlCodeWriter( testInput.Options );
+            var htmlCodeWriter = this.CreateHtmlCodeWriter( this.ServiceProvider, testInput.Options );
 
             var htmlDirectory = Path.Combine(
                 this.ProjectDirectory!,
@@ -367,7 +373,7 @@ namespace Caravela.TestFramework
             {
                 foreach ( var syntaxTree in testResult.SyntaxTrees )
                 {
-                    this.WriteHtml( syntaxTree, htmlDirectory, htmlCodeWriter );
+                    await this.WriteHtmlAsync( syntaxTree, htmlDirectory, htmlCodeWriter );
                 }
             }
 
@@ -383,17 +389,17 @@ namespace Caravela.TestFramework
 
                 await using ( var outputHtml = File.CreateText( outputHtmlPath ) )
                 {
-                    htmlCodeWriter.Write( formattedOutputDocument, null, outputHtml );
+                    await htmlCodeWriter.WriteAsync( formattedOutputDocument, outputHtml );
                 }
 
                 testResult.OutputHtmlPath = outputHtmlPath;
             }
         }
 
-        private protected virtual HtmlCodeWriter CreateHtmlCodeWriter( TestOptions options )
-            => new( new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault() ) );
+        private protected virtual HtmlCodeWriter CreateHtmlCodeWriter( IServiceProvider serviceProvider, TestOptions options )
+            => new( serviceProvider, new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault() ) );
 
-        private void WriteHtml( TestSyntaxTree testSyntaxTree, string htmlDirectory, HtmlCodeWriter htmlCodeWriter )
+        private async Task WriteHtmlAsync( TestSyntaxTree testSyntaxTree, string htmlDirectory, HtmlCodeWriter htmlCodeWriter )
         {
             var inputHtmlPath = Path.Combine(
                 htmlDirectory,
@@ -404,11 +410,10 @@ namespace Caravela.TestFramework
             this.Logger?.WriteLine( "HTML of input: " + inputHtmlPath );
 
             // Write the input document.
-            using ( var inputTextWriter = File.CreateText( inputHtmlPath ) )
+            await using ( var inputTextWriter = File.CreateText( inputHtmlPath ) )
             {
-                htmlCodeWriter.Write(
+                await htmlCodeWriter.WriteAsync(
                     testSyntaxTree.InputDocument,
-                    testSyntaxTree.AnnotatedSyntaxRoot,
                     inputTextWriter );
             }
 

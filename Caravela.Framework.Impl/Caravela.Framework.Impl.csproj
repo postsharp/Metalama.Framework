@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CaravelaCompilerDisablePackCustomization>True</CaravelaCompilerDisablePackCustomization>
+    <UseCaravelaCompiler>Private</UseCaravelaCompiler>
   </PropertyGroup>
 
   <ItemGroup>
@@ -43,7 +44,6 @@
     
     <!-- The following references handle [Memo] -->
     <ProjectReference Include="..\Build\Caravela.SourceTransformer\Caravela.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" />
     
   </ItemGroup>
     

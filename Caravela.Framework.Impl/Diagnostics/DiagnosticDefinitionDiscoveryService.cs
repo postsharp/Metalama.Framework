@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;

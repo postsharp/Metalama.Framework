@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Reflection;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
 
@@ -23,6 +24,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer
             var property = meta.RunTime( meta.Target.Method.DeclaringType.Properties.Single().ToPropertyInfo() );
             var constructor = meta.RunTime( meta.Target.Method.DeclaringType.Constructors.Single().ToConstructorInfo() );
             var constructorParameter = meta.RunTime( meta.Target.Method.DeclaringType.Constructors.Single().Parameters.Single().ToParameterInfo() );
+            var array = meta.RunTime( new MemberInfo[] { meta.Target.Method.ToMethodInfo(), meta.Target.Type.ToType() } );
             
             return default;
         }

@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.References;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
 using System.Reflection;
@@ -23,19 +22,6 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         public static MethodInfo Create( IMethod method )
         {
             return new CompileTimeMethodInfo( method );
-        }
-
-        public static ITypeSymbol? FindDeclaringTypeSymbol( MemberOrNamedType method )
-        {
-            var methodDeclaringType = (method.DeclaringType as ITypeInternal)!;
-            var typeSymbol = methodDeclaringType.TypeSymbol;
-
-            if ( typeSymbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.TypeParameters.Length > 0 )
-            {
-                return namedTypeSymbol;
-            }
-
-            return null;
         }
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();

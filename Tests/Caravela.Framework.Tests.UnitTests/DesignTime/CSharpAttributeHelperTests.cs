@@ -44,7 +44,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             {
                 this._logger.WriteLine( item?.ToString() ?? "<null>" );
 
-                if ( expectedItem!.Equals( item ) )
+                if ( expectedItem.Equals( item ) )
                 {
                     actualOccurrences++;
                 }

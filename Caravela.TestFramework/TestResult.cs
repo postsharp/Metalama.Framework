@@ -245,7 +245,7 @@ namespace Caravela.TestFramework
                 var outputSyntaxRoot = FormattedCodeWriter.AddDiagnosticAnnotations(
                     outputSyntaxTree.OutputRunTimeSyntaxRoot,
                     outputSyntaxTree.InputPath,
-                    this.OutputCompilationDiagnostics );
+                    this.OutputCompilationDiagnostics.Concat( this.PipelineDiagnostics ).ToArray() );
 
                 // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
                 // passed to this method.
