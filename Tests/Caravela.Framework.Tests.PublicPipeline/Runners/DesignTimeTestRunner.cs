@@ -33,7 +33,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             using var buildOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
 
-            var pipeline = new DesignTimeAspectPipeline( buildOptions, domain, true );
+            using var pipeline = new DesignTimeAspectPipeline( buildOptions, domain, true );
             var pipelineResult = pipeline.Execute( PartialCompilation.CreateComplete( testResult.InputCompilation! ), CancellationToken.None );
 
             testResult.PipelineDiagnostics.Report( pipelineResult.Diagnostics.ReportedDiagnostics );

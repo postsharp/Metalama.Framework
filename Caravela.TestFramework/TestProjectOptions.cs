@@ -15,11 +15,22 @@ namespace Caravela.TestFramework
     {
         public TestProjectOptions()
         {
-            var directory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
-            this.CompileTimeProjectCacheDirectory = directory;
+            this.BaseTestDirectory = Path.Combine( Path.GetTempPath(), "Caravela", "Tests", Guid.NewGuid().ToString() );
 
-            Directory.CreateDirectory( directory );
+            var compileTimeProjectCacheDirectory = Path.Combine( this.BaseTestDirectory, "Cache" );
+            this.CompileTimeProjectCacheDirectory = compileTimeProjectCacheDirectory;
+            Directory.CreateDirectory( compileTimeProjectCacheDirectory );
+
+            var settingsDirectory = Path.Combine( this.BaseTestDirectory, "Settings" );
+            this.SettingsDirectory = settingsDirectory;
+            Directory.CreateDirectory( settingsDirectory );
+
+            var projectDirectory = Path.Combine( this.BaseTestDirectory, "Project" );
+            this.ProjectDirectory = projectDirectory;
+            Directory.CreateDirectory( projectDirectory );
         }
+        
+        protected string BaseTestDirectory { get; }
 
         public bool DebugCompilerProcess => false;
 
@@ -29,9 +40,11 @@ namespace Caravela.TestFramework
 
         public override string CompileTimeProjectCacheDirectory { get; }
 
+        public override string SettingsDirectory { get; }
+
         public string ProjectId => "test";
 
-        public string? BuildTouchFile => null;
+        public virtual string? BuildTouchFile => null;
 
         public string? AssemblyName => null;
 
@@ -45,13 +58,15 @@ namespace Caravela.TestFramework
 
         public bool IsUserCodeTrusted => true;
 
+        public string ProjectDirectory { get; }
+
         public IProjectOptions Apply( IProjectOptions options ) => options;
 
         public void Dispose()
         {
-            if ( Directory.Exists( this.CompileTimeProjectCacheDirectory ) )
+            if ( Directory.Exists( this.BaseTestDirectory ) )
             {
-                TestExecutionContext.RegisterDisposeAction( () => Directory.Delete( this.CompileTimeProjectCacheDirectory, true ) );
+                TestExecutionContext.RegisterDisposeAction( () => Directory.Delete( this.BaseTestDirectory, true ) );
             }
         }
     }

@@ -36,7 +36,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             using var domain = new UnloadableCompileTimeDomain();
             var compilation = CompilationModel.CreateInitialInstance( testResult.InputCompilation! );
 
-            var designTimePipeline = new DesignTimeAspectPipeline( buildOptions, domain, true );
+            using var designTimePipeline = new DesignTimeAspectPipeline( buildOptions, domain, true );
 
             designTimePipeline.TryGetConfiguration(
                 PartialCompilation.CreateComplete( testResult.InputCompilation! ),
