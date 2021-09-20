@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// An expression that contains conflicting children.
         /// </summary>
         Conflict,
-        
+
         /// <summary>
         /// A type construction that is forbidden in a template.
         /// </summary>

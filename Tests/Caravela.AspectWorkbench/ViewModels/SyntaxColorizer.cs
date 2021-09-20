@@ -86,7 +86,10 @@ namespace Caravela.AspectWorkbench.ViewModels
             { ClassificationTypeNames.RegexOtherEscape, Colors.Indigo }
         };
 
-        public async Task<FlowDocument> WriteSyntaxColoringAsync( Document document, bool areNodesAnnotated = false, IEnumerable<Diagnostic>? diagnostics = null )
+        public async Task<FlowDocument> WriteSyntaxColoringAsync(
+            Document document,
+            bool areNodesAnnotated = false,
+            IEnumerable<Diagnostic>? diagnostics = null )
         {
             static Color WithAlpha( Color brush, double alpha )
             {

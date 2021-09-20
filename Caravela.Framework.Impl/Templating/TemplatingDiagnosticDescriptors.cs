@@ -228,7 +228,7 @@ namespace Caravela.Framework.Impl.Templating
                 "The generic type '{0}' combines run-time-only and compile-time-only types.",
                 _category,
                 Error );
-        
+
         internal static readonly DiagnosticDefinition<string> InvalidDynamicTypeConstruction
             = new(
                 "CR0227",

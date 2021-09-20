@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Formatting
                 // Null tag values are not supported.
                 throw new ArgumentNullException( nameof(tagValue) );
             }
-            
+
             var newClassification = classification != null && classification.Value > this.Classification ? classification.Value : this.Classification;
             ImmutableDictionary<string, string> newTags;
 

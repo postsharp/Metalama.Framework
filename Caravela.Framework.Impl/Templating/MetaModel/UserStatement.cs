@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     {
         public StatementSyntax Syntax { get; }
 
-        public UserStatement( StatementSyntax syntax ) 
+        public UserStatement( StatementSyntax syntax )
         {
             this.Syntax = syntax;
         }

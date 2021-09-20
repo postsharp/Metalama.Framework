@@ -39,6 +39,7 @@ namespace Caravela.Framework.Impl.Templating
                 == TemplatingScope.CompileTimeOnly;
 
         public bool IsDynamicParameter( ArgumentSyntax argument ) => IsDynamicParameter( this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type );
+
         public static bool IsDynamicParameter( ITypeSymbol? type )
             => type switch
             {
@@ -84,7 +85,7 @@ namespace Caravela.Framework.Impl.Templating
             var nodeSymbol = this._syntaxTreeAnnotationMap.GetSymbol( originalNode );
 
             return (nodeSymbol is IMethodSymbol method && this._symbolClassifier.GetTemplatingScope( method.ReturnType ) == TemplatingScope.Dynamic) ||
-                   (nodeSymbol is IPropertySymbol property && this._symbolClassifier.GetTemplatingScope( property.Type ) == TemplatingScope.Dynamic); 
+                   (nodeSymbol is IPropertySymbol property && this._symbolClassifier.GetTemplatingScope( property.Type ) == TemplatingScope.Dynamic);
         }
 
 #pragma warning disable CA1822 // Static anyway.
@@ -119,7 +120,7 @@ namespace Caravela.Framework.Impl.Templating
 
                     case nameof(meta.InsertComment):
                         return MetaMemberKind.InsertComment;
-                    
+
                     case nameof(meta.InsertStatement):
                         return MetaMemberKind.InsertStatement;
 

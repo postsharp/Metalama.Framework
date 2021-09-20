@@ -271,7 +271,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                         case nameof(IAsyncEnumerable<object>):
                                         case nameof(IAsyncEnumerator<object>):
                                             return TemplatingScope.Dynamic;
-                                        
+
                                         default:
                                             return TemplatingScope.Invalid;
                                     }

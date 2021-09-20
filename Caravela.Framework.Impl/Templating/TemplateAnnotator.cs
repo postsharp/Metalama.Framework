@@ -840,7 +840,7 @@ namespace Caravela.Framework.Impl.Templating
                     ExpressionSyntax transformedArgumentValue;
 
                     // Transform the argument value.
-                    if ( expressionScope.IsDynamic() || TemplateMemberClassifier.IsDynamicParameter(  argumentType ) )
+                    if ( expressionScope.IsDynamic() || TemplateMemberClassifier.IsDynamicParameter( argumentType ) )
                     {
                         // dynamic or dynamic[]
 
@@ -1312,8 +1312,9 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             => this.VisitMemberDeclaration(
-                node, n => node.WithAccessorList( this.Visit( node.AccessorList ) )
-                                                .WithExpressionBody( this.Visit( node.ExpressionBody ) ) );
+                node,
+                n => node.WithAccessorList( this.Visit( node.AccessorList ) )
+                    .WithExpressionBody( this.Visit( node.ExpressionBody ) ) );
 
         public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
             => this.VisitMemberDeclaration( node, n => node.WithAccessorList( this.Visit( node.AccessorList ) ) );
@@ -1515,11 +1516,11 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             var transformedVariableDeclaration = this.Visit( node.Declaration )!;
-            
+
             // ReSharper disable once RedundantSuppressNullableWarningExpression
             var transformedInitializers = node.Initializers.Select( i => this.Visit( i )! );
             var transformedCondition = this.Visit( node.Condition )!;
-            
+
             // ReSharper disable once RedundantSuppressNullableWarningExpression
             var transformedIncrementors = node.Incrementors.Select( syntax => this.Visit( syntax )! );
 
@@ -1958,7 +1959,7 @@ namespace Caravela.Framework.Impl.Templating
                 // We cannot have generic type instances of dynamic.
                 this.ReportDiagnostic( TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction, node, node.ToString() );
             }
-            
+
             return transformedNode;
         }
 
@@ -1977,7 +1978,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // We cannot have generic type instances of dynamic.
                 this.ReportDiagnostic( TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction, node, node.ToString() );
-                
+
                 scope = TemplatingScope.RunTimeOnly;
             }
 

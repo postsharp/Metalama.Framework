@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Templating
         /// The <see cref="meta.InsertComment"/> method.
         /// </summary>
         InsertComment,
-        
+
         /// <summary>
         /// The <see cref="meta.InsertStatement(Caravela.Framework.Code.SyntaxBuilders.IStatement)"/> method (or another overload).
         /// </summary>

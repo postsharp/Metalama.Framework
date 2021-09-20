@@ -21,8 +21,8 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
     public class CSharpAttributeHelperTests : IDisposable
     {
         private readonly ITestOutputHelper _logger;
-        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        private readonly AdhocWorkspace _workspace = new AdhocWorkspace();
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
+        private readonly AdhocWorkspace _workspace = new();
         private Document? _testFileDocument;
 
         public CSharpAttributeHelperTests( ITestOutputHelper logger )
@@ -37,9 +37,9 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
             this._logger.WriteLine( "Expected:" );
             this._logger.WriteLine( expectedItem!.ToString() );
             this._logger.WriteLine( "Actual:" );
-            
+
             var actualOccurrences = 0;
-            
+
             foreach ( var item in enumerable )
             {
                 this._logger.WriteLine( item?.ToString() ?? "<null>" );
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
                     actualOccurrences++;
                 }
             }
-            
+
             Assert.Equal( expectedOccurrences, actualOccurrences );
         }
 
@@ -109,7 +109,7 @@ public class Class
                 .First()
                 .AttributeLists
                 .Select( list => list.ToString() );
-            
+
             this.LogAndAssertContains( resultAttributes, "[TestAttribute(ARG1, ARG2, Prop1 = 111, Prop2 = 222)]" );
         }
 
@@ -539,7 +539,7 @@ namespace Test
 //             SyntaxNode newRoot = await CSharpAttributeHelper.AddAttributeAsync( originalRoot, originalRoot, new AttributeDescription( "TestAttribute" ), this.cancellationTokenSource.Token );
 //
 //             Assert.Equal(expectedSyntax, newRoot.ToFullString());
-            
+
             return Task.CompletedTask;
         }
 
