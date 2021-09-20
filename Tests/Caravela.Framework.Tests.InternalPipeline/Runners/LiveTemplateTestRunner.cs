@@ -21,7 +21,11 @@ namespace Caravela.Framework.Tests.Integration.Runners
 {
     public class LiveTemplateTestRunner : BaseTestRunner
     {
-        public LiveTemplateTestRunner( IServiceProvider serviceProvider, string? projectDirectory, MetadataReference[] metadataReferences, ITestOutputHelper? logger )
+        public LiveTemplateTestRunner(
+            IServiceProvider serviceProvider,
+            string? projectDirectory,
+            MetadataReference[] metadataReferences,
+            ITestOutputHelper? logger )
             : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
 
         private protected override async Task<TestResult> RunAsync( TestInput testInput, Dictionary<string, object?> state )
@@ -44,7 +48,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             var partialCompilation = PartialCompilation.CreateComplete( testResult.InputCompilation! );
             var target = compilation.DeclaredTypes.OfName( "TargetClass" ).Single().Methods.OfName( "TargetMethod" ).Single().GetSymbol();
             var aspectClass = designTimePipeline.AspectClasses!.Single( a => a.DisplayName == "TestAspect" );
-            
+
             var success = LiveTemplateAspectPipeline.TryExecute(
                 buildOptions,
                 domain,
@@ -52,7 +56,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 aspectClass,
                 partialCompilation,
                 target!,
-                CancellationToken.None, 
+                CancellationToken.None,
                 out var outputCompilation,
                 out var diagnostics );
 
@@ -63,7 +67,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 testResult.HasOutputCode = true;
 
                 var formattedOutputCompilation = await OutputCodeFormatter.FormatToSyntaxAsync( outputCompilation!, CancellationToken.None );
-                
+
                 var transformedSyntaxTree = formattedOutputCompilation.Compilation.SyntaxTrees.SingleOrDefault();
 
                 var transformedSyntaxRoot = transformedSyntaxTree == null

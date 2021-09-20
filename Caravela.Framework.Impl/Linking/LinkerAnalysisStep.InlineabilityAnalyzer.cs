@@ -251,24 +251,12 @@ namespace Caravela.Framework.Impl.Linking
                     return false;
                 }
 
-                if ( addAspectReferences.Count > 1 || removeAspectReferences.Count > 1 )
+                if ( addAspectReferences.Count > 1 || removeAspectReferences.Count > 1
+                                                   || (addAspectReferences.Count == 0 && removeAspectReferences.Count == 0) )
                 {
-                    // TODO: Probably incorrect syntax.
-                    throw new AssertionFailedException( Justifications.CoverageMissing );
+                    inliningSpecification = null;
 
-                    // inliningSpecification = null;
-                    //
-                    // return false;
-                }
-
-                if ( addAspectReferences.Count == 0 && removeAspectReferences.Count == 0 )
-                {
-                    // TODO: Probably incorrect syntax.
-                    throw new AssertionFailedException( Justifications.CoverageMissing );
-
-                    // inliningSpecification = null;
-                    //
-                    // return false;
+                    return false;
                 }
 
                 Inliner? adderInliner = null;

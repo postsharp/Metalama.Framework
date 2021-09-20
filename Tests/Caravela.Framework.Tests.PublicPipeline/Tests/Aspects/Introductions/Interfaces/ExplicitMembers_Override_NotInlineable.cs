@@ -2,13 +2,13 @@
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 using System;
-using Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_TwoAspects;
+using Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable;
 
-[assembly:AspectOrder(typeof(IntroductionAttribute), typeof(OverrideAttribute))]
-    
 #pragma warning disable CS0067
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_TwoAspects
+[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+
+namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers_Override_NotInlineable
 {
     /*
      * Simple case with explicit interface members for a single interface.
@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         int InterfaceMethod();
 
-        event EventHandler Event;
+        event EventHandler? Event;
 
         event EventHandler? EventField;
 
@@ -84,7 +84,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
         {
-            foreach(var method in aspectBuilder.Target.Methods)
+            foreach (var method in aspectBuilder.Target.Methods)
             {
                 if (method.IsExplicitInterfaceImplementation)
                 {
@@ -113,6 +113,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         public dynamic? Template()
         {
             Console.WriteLine("This is overridden method.");
+            _ = meta.Proceed();
             return meta.Proceed();
         }
     }

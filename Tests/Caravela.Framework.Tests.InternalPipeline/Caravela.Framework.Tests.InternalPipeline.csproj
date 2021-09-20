@@ -19,10 +19,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Tests\Linker\EventFields\Linking\IntroducedEvent - Copy.t.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
   
    <!-- Exclude files that intentionally do not compile -->
    <Compile Remove="Tests\**\__*.cs" />

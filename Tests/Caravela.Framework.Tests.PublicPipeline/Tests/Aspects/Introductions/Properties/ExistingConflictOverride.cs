@@ -8,6 +8,16 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.E
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
         [Introduce(WhenExists = OverrideStrategy.Override)]
+        public int ExistingBaseProperty
+        {
+            get
+            {
+                Console.WriteLine("This is introduced property.");
+                return meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.Override)]
         public int ExistingProperty
         {
             get
@@ -28,7 +38,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.E
         }
 
         [Introduce(WhenExists = OverrideStrategy.Override)]
-        public int NonExistingProperty
+        public int NotExistingProperty
         {
             get
             {
@@ -38,7 +48,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.E
         }
 
         [Introduce(WhenExists = OverrideStrategy.Override)]
-        public static int NonExistingProperty_Static
+        public static int NotExistingProperty_Static
         {
             get
             {
@@ -50,6 +60,10 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.E
 
     internal class BaseClass
     {
+        public virtual int ExistingBaseProperty
+        {
+            get => 27;
+        }
     }
 
     // <target>

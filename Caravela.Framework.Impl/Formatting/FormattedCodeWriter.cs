@@ -90,7 +90,7 @@ namespace Caravela.Framework.Impl.Formatting
             var semanticModel = compilation!.GetSemanticModel( syntaxTree );
 
             var classifiedTextSpans = classificationService.GetClassifiedTextSpans( semanticModel, CancellationToken.None );
-            
+
             // Process the annotations by the aspect linker (on the output document).
             FormattingVisitor formattingVisitor = new( classifiedTextSpans );
             formattingVisitor.Visit( syntaxRoot );

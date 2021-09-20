@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Linking
                 if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField )
                      && this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    // Backing field for auto property.
+                    // Backing field for event field.
                     members.Add( GetEventBackingField( eventDeclaration, symbol ) );
                 }
 

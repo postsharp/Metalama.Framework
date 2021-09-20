@@ -28,6 +28,7 @@ namespace Caravela.Framework.Aspects
         /// template for all methods, pass a string.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property
         ///     of the <see cref="meta"/> API.</param>
+        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of advices is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         void OverrideMethod( IMethod method, in MethodTemplateSelector templateSelector, Dictionary<string, object?>? tags = null );
 
@@ -63,6 +64,7 @@ namespace Caravela.Framework.Aspects
         /// This property must be annotated with <see cref="TemplateAttribute"/>.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template property and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
+        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of advices is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         void OverrideFieldOrProperty(
             IFieldOrProperty targetDeclaration,
@@ -84,6 +86,7 @@ namespace Caravela.Framework.Aspects
         /// be <c>void Set(T value</c>  where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
+        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of advices is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         void OverrideFieldOrPropertyAccessors(
             IFieldOrProperty targetDeclaration,
@@ -175,6 +178,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="raiseTemplate">Not yet implemented.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
+        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of advices is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         void OverrideEventAccessors(
             IEvent targetEvent,

@@ -4,7 +4,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -13,23 +12,31 @@ namespace Caravela.Framework.Impl.Linking
         public static SyntaxTriviaList VisitTriviaList( this CSharpSyntaxRewriter rewriter, SyntaxTriviaList triviaList )
         {
             var dirty = false;
+
+#pragma warning disable IDE0059
             var list = new List<SyntaxTrivia>();
 
             foreach ( var trivia in triviaList )
             {
-                var rewrittenTrivia = rewriter.VisitTrivia( trivia );
+                // Not used anywhere yet. 
+                throw new AssertionFailedException( Justifications.CoverageMissing );
 
-                list.Add( rewrittenTrivia );
-
-                if ( !trivia.Equals( rewrittenTrivia ) )
-                {
-                    dirty = true;
-                }
+                // var rewrittenTrivia = rewriter.VisitTrivia( trivia );
+                //
+                // list.Add( rewrittenTrivia );
+                //
+                // if ( !trivia.Equals( rewrittenTrivia ) )
+                // {
+                //     dirty = true;
+                // }
             }
 
             if ( dirty )
             {
-                return TriviaList( list );
+                // Not used anywhere yet. 
+                throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                // return TriviaList( list );
             }
             else
             {

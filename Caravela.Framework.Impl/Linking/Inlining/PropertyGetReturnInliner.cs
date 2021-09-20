@@ -10,6 +10,11 @@ namespace Caravela.Framework.Impl.Linking.Inlining
     {
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
+            if ( !base.CanInline( aspectReference, semanticModel ) )
+            {
+                return false;
+            }
+
             // The syntax needs to be in form: return <annotated_property_expression>;
             if ( aspectReference.ResolvedSemantic.Symbol is not IPropertySymbol
                  && (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol is not IPropertySymbol )

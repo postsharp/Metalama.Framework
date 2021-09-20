@@ -560,9 +560,12 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         if ( targetSymbol.ContainingType.TypeKind == TypeKind.Interface )
                         {
-                            return memberAccessExpression
-                                .WithExpression( ThisExpression() )
-                                .WithName( IdentifierName( targetMemberName ) );
+                            // Overrides are always targeting member defined in the current type.
+                            throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                            // return memberAccessExpression
+                            //     .WithExpression( ThisExpression() )
+                            //     .WithName( IdentifierName( targetMemberName ) );
                         }
 
                         if ( targetSymbol.IsStatic )
@@ -606,7 +609,7 @@ namespace Caravela.Framework.Impl.Linking
                                         var aspectInstance = this.ResolveAspectInstance( aspectReference );
 
                                         this.DiagnosticSink.Report(
-                                            AspectLinkerDiagnosticDescriptors.CannotUseBaseInvokerWithInstanceExpression.CreateDiagnostic(
+                                            AspectLinkerDiagnosticDescriptors.CannotUseBaseInvokerWithNonInstanceExpression.CreateDiagnostic(
                                                 aspectInstance.TargetDeclaration.GetDiagnosticLocation(),
                                                 (aspectInstance.AspectClass.DisplayName, aspectInstance.TargetDeclaration) ) );
 

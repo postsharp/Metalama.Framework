@@ -109,10 +109,10 @@ namespace Caravela.Framework.Impl.Templating
                 // Don't continue with errors in source code (note however that we do the annotation with errors because of real-time syntax highlighting).
                 // Diagnostics don't need to be reported because they would be reported by the compiler anyway.
                 // Note that it's ok to annotate a template that has errors. This is used by syntax highlighting. 
-                
+
                 annotatedSyntaxRoot = null;
                 transformedSyntaxRoot = null;
-                
+
                 return false;
             }
 
