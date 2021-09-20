@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Linking
         private const string _category = "Caravela.Linker";
 
         public static readonly DiagnosticDefinition<(string AspectType, IDeclaration TargetDeclaration)>
-            CannotUseBaseInvokerWithInstanceExpression = new(
+            CannotUseBaseInvokerWithNonInstanceExpression = new(
                 "CR0600",
                 "Cannot use Base invoker with non-this instance expression.",
                 "The aspect '{0}' on '{1}' uses Base invoker with an instance expression different than 'this'."

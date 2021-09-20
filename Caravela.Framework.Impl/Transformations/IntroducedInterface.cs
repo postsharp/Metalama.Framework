@@ -53,7 +53,8 @@ namespace Caravela.Framework.Impl.Transformations
             }
             else
             {
-                return Enumerable.Empty<BaseTypeSyntax>();
+                // Transformation should not be created iff the interface is not present on the target type.
+                throw new AssertionFailedException();
             }
         }
     }

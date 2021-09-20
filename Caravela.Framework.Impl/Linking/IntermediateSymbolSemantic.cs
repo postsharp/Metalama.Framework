@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.Linking
         }
     }
 
-    internal readonly struct IntermediateSymbolSemantic<TSymbol>
+    internal readonly struct IntermediateSymbolSemantic<TSymbol> : IEquatable<IntermediateSymbolSemantic<TSymbol>>
         where TSymbol : ISymbol
     {
         public TSymbol Symbol { get; }
@@ -57,19 +57,23 @@ namespace Caravela.Framework.Impl.Linking
             this.Kind = semantic;
         }
 
-        public bool Equals( IntermediateSymbolSemantic other )
+        public bool Equals( IntermediateSymbolSemantic<TSymbol> other )
         {
-            // Coverage: ignore (no typed dictionary at the moment)
-            return SymbolEqualityComparer.Default.Equals( this.Symbol, other.Symbol )
-                   && other.Kind == this.Kind;
+            // No typed dictionary at the moment.
+            throw new AssertionFailedException( Justifications.CoverageMissing );
+
+            // return SymbolEqualityComparer.Default.Equals( this.Symbol, other.Symbol )
+            //       && other.Kind == this.Kind;
         }
 
         public override int GetHashCode()
         {
-            // Coverage: ignore (no typed dictionary at the moment)
-            return HashCode.Combine(
-                SymbolEqualityComparer.Default.GetHashCode( this.Symbol ),
-                this.Kind );
+            // No typed dictionary at the moment.
+            throw new AssertionFailedException( Justifications.CoverageMissing );
+
+            // return HashCode.Combine(
+            //    SymbolEqualityComparer.Default.GetHashCode( this.Symbol ),
+            //    this.Kind );
         }
 
         public static implicit operator IntermediateSymbolSemantic( IntermediateSymbolSemantic<TSymbol> value )

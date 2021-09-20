@@ -609,7 +609,7 @@ namespace Caravela.Framework.Impl.Linking
                                         var aspectInstance = this.ResolveAspectInstance( aspectReference );
 
                                         this.DiagnosticSink.Report(
-                                            AspectLinkerDiagnosticDescriptors.CannotUseBaseInvokerWithInstanceExpression.CreateDiagnostic(
+                                            AspectLinkerDiagnosticDescriptors.CannotUseBaseInvokerWithNonInstanceExpression.CreateDiagnostic(
                                                 aspectInstance.TargetDeclaration.GetDiagnosticLocation(),
                                                 (aspectInstance.AspectClass.DisplayName, aspectInstance.TargetDeclaration) ) );
 

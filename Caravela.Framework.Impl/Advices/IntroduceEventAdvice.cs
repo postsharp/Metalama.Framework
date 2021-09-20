@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.Advices
         public override AdviceResult ToResult( ICompilation compilation )
         {
             // TODO: Override transformations.
-            var existingDeclaration = this.TargetDeclaration.Events.OfName( this.MemberBuilder.Name ).SingleOrDefault();
+            var existingDeclaration = this.TargetDeclaration.Events.OfExactSignature( this.MemberBuilder, false, false );
             var hasNoOverrideSemantics = this.TemplateMember != null && this.TemplateMember.IsEventField();
 
             if ( existingDeclaration == null )
@@ -200,14 +200,14 @@ namespace Caravela.Framework.Impl.Advices
                             }
                             else
                             {
-                                var overriddenMethod = new OverriddenEvent(
+                                var overriddenEvent = new OverriddenEvent(
                                     this,
                                     this.MemberBuilder,
                                     this.Template,
                                     this._addTemplate,
                                     this._removeTemplate );
 
-                                return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
+                                return AdviceResult.Create( this.MemberBuilder, overriddenEvent );
                             }
                         }
 

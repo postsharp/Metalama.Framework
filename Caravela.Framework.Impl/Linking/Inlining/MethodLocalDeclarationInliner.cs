@@ -13,6 +13,11 @@ namespace Caravela.Framework.Impl.Linking.Inlining
     {
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
+            if ( !base.CanInline( aspectReference, semanticModel ) )
+            {
+                return false;
+            }
+
             // The syntax has to be in form: <type> <local> = <annotated_method_expression>( <arguments> );
             if ( aspectReference.ResolvedSemantic.Symbol is not IMethodSymbol methodSymbol )
             {
@@ -36,8 +41,10 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             if ( equalsClause.Parent is not VariableDeclaratorSyntax variableDeclarator
                  || variableDeclarator.Parent is not VariableDeclarationSyntax variableDeclaration )
             {
-                // Coverage: ignore (only incorrect code can get here).
-                return false;
+                // Only incorrect code can get here.
+                throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                // return false;
             }
 
             // Should be single-variable declaration.
@@ -55,8 +62,10 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             // Should be within local declaration.
             if ( variableDeclaration.Parent == null || variableDeclaration.Parent is not LocalDeclarationStatementSyntax )
             {
-                // Coverage: ignore (only incorrect code can get here).
-                return false;
+                // Only incorrect code can get here.
+                throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                // return false;
             }
 
             // The invocation needs to be inlineable in itself.

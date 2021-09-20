@@ -251,14 +251,8 @@ namespace Caravela.Framework.Impl.Linking
                     return false;
                 }
 
-                if ( addAspectReferences.Count > 1 || removeAspectReferences.Count > 1 )
-                {
-                    inliningSpecification = null;
-
-                    return false;
-                }
-
-                if ( addAspectReferences.Count == 0 && removeAspectReferences.Count == 0 )
+                if ( addAspectReferences.Count > 1 || removeAspectReferences.Count > 1
+                     || ( addAspectReferences.Count == 0 && removeAspectReferences.Count == 0 ) )
                 {
                     inliningSpecification = null;
 
