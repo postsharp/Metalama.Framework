@@ -69,7 +69,7 @@ class Class<T>
 
             this._buildOptions = new TestProjectOptions();
             this._domain = new UnloadableCompileTimeDomain();
-            DesignTimeAspectPipeline pipeline = new( this._buildOptions, this._domain, true );
+            using DesignTimeAspectPipeline pipeline = new( this._buildOptions, this._domain, true );
 
             pipeline.TryGetConfiguration(
                 PartialCompilation.CreateComplete( compilation.RoslynCompilation ),

@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Tests.UnitTests.Utilities;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -10,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.UnitTests
 {
@@ -23,14 +23,17 @@ namespace Caravela.Framework.Tests.UnitTests
         /// </summary>
         private const bool _doCodeExecutionTests = false;
 
-        protected TestProjectOptions ProjectOptions { get; private set; } = new();
+        protected TestProjectOptions ProjectOptions { get; private set; }
 
         protected ServiceProvider ServiceProvider { get; private set; }
 
-        protected TestBase()
+        protected TestBase( TestProjectOptions options )
         {
+            this.ProjectOptions = options;
             this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions );
         }
+        
+        protected TestBase() : this( new TestProjectOptions() ) { }
 
         public static CSharpCompilation CreateCSharpCompilation(
             string code,

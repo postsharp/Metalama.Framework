@@ -293,6 +293,15 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 out diagnostics );
         }
 
-        public void Dispose() => this._domain.Dispose();
+        public void Dispose()
+        {
+            foreach ( var designTimeAspectPipeline in this._pipelinesByProjectId.Values )
+            {
+                designTimeAspectPipeline.Dispose();
+            }
+            
+            this._pipelinesByProjectId.Clear();
+            this._domain.Dispose();
+        }
     }
 }

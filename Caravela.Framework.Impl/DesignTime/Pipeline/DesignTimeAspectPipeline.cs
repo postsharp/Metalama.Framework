@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
     {
         private readonly object _configureSync = new();
         private readonly CompilationChangeTracker _compilationChangeTracker = new();
-        private readonly FileSystemWatcher? _fileSystemWatcher;
+        private readonly IFileSystemWatcher? _fileSystemWatcher;
 
         // Syntax trees that may have compile time code based on namespaces. When a syntax tree is known to be compile-time but
         // has been invalidated, we don't remove it from the dictionary, but we set its value to null. It allows to know
@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         // It's ok if we return an obsolete project in this case.
         internal IReadOnlyList<AspectClass>? AspectClasses => this._lastKnownConfiguration?.AspectClasses;
 
-        public DesignTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain, bool isTest, IPathOptions? directoryOptions = null, IAssemblyLocator? assemblyLocator = null )
+        public DesignTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain, bool isTest, IPathOptions? directoryOptions = null, IAssemblyLocator? assemblyLocator = null, IFileSystemWatcherFactory? fileSystemWatcherFactory = null )
             : base( projectOptions, AspectExecutionScenario.DesignTime, isTest, domain, directoryOptions, assemblyLocator )
         {
             if ( projectOptions.BuildTouchFile == null )
@@ -64,7 +64,9 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 return;
             }
 
-            this._fileSystemWatcher = new FileSystemWatcher( watchedDirectory, watchedFilter ) { IncludeSubdirectories = false };
+            fileSystemWatcherFactory ??= new FileSystemWatcherFactory();
+            this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
+            this._fileSystemWatcher.IncludeSubdirectories = false;
 
             this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
             this._fileSystemWatcher.EnableRaisingEvents = true;
@@ -314,7 +316,9 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 {
                     if ( this.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild )
                     {
-                        throw new InvalidOperationException();
+                        configuration = null;
+
+                        return false;
                     }
 
                     // We have a valid configuration and it is not outdated.
