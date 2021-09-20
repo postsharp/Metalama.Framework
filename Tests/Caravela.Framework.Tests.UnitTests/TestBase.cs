@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.ServiceProvider;
-using Caravela.Framework.Tests.UnitTests.Utilities;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

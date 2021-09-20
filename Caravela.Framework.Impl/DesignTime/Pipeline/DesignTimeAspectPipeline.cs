@@ -50,7 +50,21 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         // It's ok if we return an obsolete project in this case.
         internal IReadOnlyList<AspectClass>? AspectClasses => this._lastKnownConfiguration?.AspectClasses;
 
-        public DesignTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain, bool isTest, IPathOptions? directoryOptions = null, IAssemblyLocator? assemblyLocator = null, IFileSystemWatcherFactory? fileSystemWatcherFactory = null )
+        public DesignTimeAspectPipeline(
+            IProjectOptions projectOptions,
+            CompileTimeDomain domain,
+            bool isTest,
+            IPathOptions? directoryOptions = null,
+            IAssemblyLocator? assemblyLocator = null )
+            : this( projectOptions, domain, isTest, directoryOptions, assemblyLocator, null ) { }
+        
+        internal DesignTimeAspectPipeline(
+            IProjectOptions projectOptions,
+            CompileTimeDomain domain,
+            bool isTest,
+            IPathOptions? directoryOptions,
+            IAssemblyLocator? assemblyLocator,
+            IFileSystemWatcherFactory? fileSystemWatcherFactory )
             : base( projectOptions, AspectExecutionScenario.DesignTime, isTest, domain, directoryOptions, assemblyLocator )
         {
             if ( projectOptions.BuildTouchFile == null )

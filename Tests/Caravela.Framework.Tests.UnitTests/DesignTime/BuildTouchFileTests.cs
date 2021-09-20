@@ -85,7 +85,13 @@ using Caravela.Framework.Code;
             var compilation = CreateCSharpCompilation( code );
             
             using var domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( this.ProjectOptions, domain, true, directoryOptions: this.ProjectOptions, fileSystemWatcherFactory: fileSystemWatcherFactory );
+            using DesignTimeAspectPipeline pipeline = new(
+                this.ProjectOptions,
+                domain,
+                true,
+                directoryOptions: this.ProjectOptions,
+                assemblyLocator: null,
+                fileSystemWatcherFactory: fileSystemWatcherFactory );
 
             pipeline.ExternalBuildStarted += ( _, _ ) =>
             {

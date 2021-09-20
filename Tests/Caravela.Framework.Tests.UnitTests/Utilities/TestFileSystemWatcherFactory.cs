@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Tests.UnitTests.Utilities
 {
-    public class TestFileSystemWatcherFactory : IFileSystemWatcherFactory
+    internal class TestFileSystemWatcherFactory : IFileSystemWatcherFactory
     {
         private readonly Dictionary<(string Path, string Filter), IFileSystemWatcher> _watchers = new();
 
