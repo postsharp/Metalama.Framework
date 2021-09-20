@@ -5,7 +5,9 @@ using Caravela.Compiler;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Serialization;
+using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System;
@@ -53,7 +55,8 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
                 CompilerServiceProvider.Initialize();
             }
 
-            var userDefinedDescriptors = UserDiagnosticRegistrationService.GetInstance().GetSupportedDescriptors();
+            var directoryOptions = ServiceProviderFactory.GetServiceProvider().GetService<IPathOptions>();
+            var userDefinedDescriptors = UserDiagnosticRegistrationService.GetInstance( directoryOptions ).GetSupportedDescriptors();
 
             // The file may contain system descriptors by mistake. We must remove them otherwise we will have some duplicate key issue.
 

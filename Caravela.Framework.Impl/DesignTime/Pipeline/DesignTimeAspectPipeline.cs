@@ -11,6 +11,7 @@ using Caravela.Framework.Impl.DesignTime.Diff;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Options;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -29,7 +30,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
     {
         private readonly object _configureSync = new();
         private readonly CompilationChangeTracker _compilationChangeTracker = new();
-        private readonly FileSystemWatcher? _fileSystemWatcher;
+        private readonly IFileSystemWatcher? _fileSystemWatcher;
 
         // Syntax trees that may have compile time code based on namespaces. When a syntax tree is known to be compile-time but
         // has been invalidated, we don't remove it from the dictionary, but we set its value to null. It allows to know
@@ -49,8 +50,22 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
         // It's ok if we return an obsolete project in this case.
         internal IReadOnlyList<AspectClass>? AspectClasses => this._lastKnownConfiguration?.AspectClasses;
 
-        public DesignTimeAspectPipeline( IProjectOptions projectOptions, CompileTimeDomain domain, bool isTest )
-            : base( projectOptions, AspectExecutionScenario.DesignTime, isTest, domain )
+        public DesignTimeAspectPipeline(
+            IProjectOptions projectOptions,
+            CompileTimeDomain domain,
+            bool isTest,
+            IPathOptions? directoryOptions = null,
+            IAssemblyLocator? assemblyLocator = null )
+            : this( projectOptions, domain, isTest, directoryOptions, assemblyLocator, null ) { }
+        
+        internal DesignTimeAspectPipeline(
+            IProjectOptions projectOptions,
+            CompileTimeDomain domain,
+            bool isTest,
+            IPathOptions? directoryOptions,
+            IAssemblyLocator? assemblyLocator,
+            IFileSystemWatcherFactory? fileSystemWatcherFactory )
+            : base( projectOptions, AspectExecutionScenario.DesignTime, isTest, domain, directoryOptions, assemblyLocator )
         {
             if ( projectOptions.BuildTouchFile == null )
             {
@@ -65,7 +80,9 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 return;
             }
 
-            this._fileSystemWatcher = new FileSystemWatcher( watchedDirectory, watchedFilter ) { IncludeSubdirectories = false };
+            fileSystemWatcherFactory ??= new FileSystemWatcherFactory();
+            this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
+            this._fileSystemWatcher.IncludeSubdirectories = false;
 
             this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
             this._fileSystemWatcher.EnableRaisingEvents = true;
@@ -315,7 +332,9 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                 {
                     if ( this.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild )
                     {
-                        throw new InvalidOperationException();
+                        configuration = null;
+
+                        return false;
                     }
 
                     // We have a valid configuration and it is not outdated.
@@ -365,7 +384,8 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
                     diagnosticList.ToImmutableArray(),
                     pipelineResult?.Diagnostics.DiagnosticSuppressions ) );
 
-            UserDiagnosticRegistrationService.GetInstance().RegisterDescriptors( result );
+            var directoryOptions = this.ServiceProvider.GetService<IPathOptions>();
+            UserDiagnosticRegistrationService.GetInstance( directoryOptions ).RegisterDescriptors( result );
 
             return result;
         }

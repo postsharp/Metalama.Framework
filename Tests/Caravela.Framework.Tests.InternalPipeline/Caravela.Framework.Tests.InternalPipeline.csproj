@@ -81,8 +81,5 @@
   <ItemGroup Condition="'$(Obfuscate)'=='True'">
     <Compile Remove="**\*" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Tests\Linker\EventFields\Linking\NoOverride.t.cs" />
-  </ItemGroup>
   
 </Project>
