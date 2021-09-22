@@ -109,25 +109,27 @@ namespace Caravela.Framework.Impl.Transformations
 
                 returnType ??= LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.OverriddenDeclaration.ReturnType.GetSymbol() );
 
+                var introducedMethod = MethodDeclaration(
+                    List<AttributeListSyntax>(),
+                    modifiers,
+                    returnType,
+                    null,
+                    Identifier(
+                        context.IntroductionNameProvider.GetOverrideName(
+                            this.OverriddenDeclaration.DeclaringType,
+                            this.Advice.AspectLayerId,
+                            this.OverriddenDeclaration ) ),
+                    SyntaxHelpers.CreateSyntaxForTypeParameterList( this.OverriddenDeclaration ),
+                    SyntaxHelpers.CreateSyntaxForParameterList( this.OverriddenDeclaration ),
+                    SyntaxHelpers.CreateSyntaxForConstraintClauses( this.OverriddenDeclaration ),
+                    newMethodBody,
+                    null );
+
                 var overrides = new[]
                 {
                     new IntroducedMember(
                         this,
-                        MethodDeclaration(
-                            List<AttributeListSyntax>(),
-                            modifiers,
-                            returnType,
-                            null,
-                            Identifier(
-                                context.IntroductionNameProvider.GetOverrideName(
-                                    this.OverriddenDeclaration.DeclaringType,
-                                    this.Advice.AspectLayerId,
-                                    this.OverriddenDeclaration ) ),
-                            SyntaxHelpers.CreateSyntaxForTypeParameterList( this.OverriddenDeclaration ),
-                            SyntaxHelpers.CreateSyntaxForParameterList( this.OverriddenDeclaration ),
-                            SyntaxHelpers.CreateSyntaxForConstraintClauses( this.OverriddenDeclaration ),
-                            newMethodBody,
-                            null ),
+                        introducedMethod,
                         this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.Override,
                         this.OverriddenDeclaration )

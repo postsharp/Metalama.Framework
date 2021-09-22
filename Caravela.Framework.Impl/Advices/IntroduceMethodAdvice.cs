@@ -69,15 +69,13 @@ namespace Caravela.Framework.Impl.Advices
             foreach ( var templateGenericParameter in this.TemplateMember.GenericParameters )
             {
                 var genericParameterBuilder = this.MemberBuilder.AddGenericParameter( templateGenericParameter.Name );
-                genericParameterBuilder.IsContravariant = templateGenericParameter.IsContravariant;
-                genericParameterBuilder.IsCovariant = templateGenericParameter.IsCovariant;
+                genericParameterBuilder.Variance = templateGenericParameter.Variance;
                 genericParameterBuilder.HasDefaultConstructorConstraint = templateGenericParameter.HasDefaultConstructorConstraint;
-                genericParameterBuilder.HasNonNullableValueTypeConstraint = templateGenericParameter.HasNonNullableValueTypeConstraint;
-                genericParameterBuilder.HasReferenceTypeConstraint = templateGenericParameter.HasReferenceTypeConstraint;
+                genericParameterBuilder.TypeKindConstraint = templateGenericParameter.TypeKindConstraint;
 
-                foreach ( var templateGenericParameterConstraint in genericParameterBuilder.TypeConstraints )
+                foreach ( var templateGenericParameterConstraint in templateGenericParameter.TypeConstraints )
                 {
-                    genericParameterBuilder.TypeConstraints.Add( templateGenericParameterConstraint );
+                    genericParameterBuilder.AddTypeConstraint( templateGenericParameterConstraint );
                 }
 
                 CopyAttributes( templateGenericParameter.AssertNotNull(), genericParameterBuilder );

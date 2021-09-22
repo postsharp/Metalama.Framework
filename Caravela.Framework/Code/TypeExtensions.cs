@@ -65,7 +65,7 @@ namespace Caravela.Framework.Code
         /// Generates the <c>default(T)</c> syntax for the type.
         /// </summary>
         public static dynamic? DefaultValue( this IType type ) => type.Compilation.TypeFactory.DefaultValue( type );
-
+        
         public static AsyncInfo GetAsyncInfo( this IType type ) => ((ICompilationInternal) type.Compilation).Helpers.GetAsyncInfo( type );
     }
 }

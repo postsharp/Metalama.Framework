@@ -74,8 +74,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IGenericParameterList GenericParameters => GenericParameterList.Empty;
 
-        public IReadOnlyList<IType> GenericArguments => this.AccessorBuilder.GenericArguments;
-
         public bool IsOpenGeneric => true;
 
         public IMethod WithGenericArguments( params IType[] genericArguments ) => this.AccessorBuilder.WithGenericArguments( genericArguments );

@@ -64,8 +64,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 this,
                 this.MethodBuilder.GenericParameters.AsBuilderList.Select( DeclarationRef.FromBuilder<IGenericParameter, GenericParameterBuilder> ) );
 
-        public IReadOnlyList<IType> GenericArguments => throw new NotImplementedException();
-
         public bool IsOpenGeneric => true;
 
         public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();

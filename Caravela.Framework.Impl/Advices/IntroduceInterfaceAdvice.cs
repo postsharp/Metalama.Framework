@@ -406,15 +406,13 @@ namespace Caravela.Framework.Impl.Advices
             {
                 // TODO: Move this initialization into a second overload of add generic parameter.
                 var genericParameterBuilder = methodBuilder.AddGenericParameter( interfaceGenericParameter.Name );
-                genericParameterBuilder.IsContravariant = interfaceGenericParameter.IsContravariant;
-                genericParameterBuilder.IsCovariant = interfaceGenericParameter.IsCovariant;
+                genericParameterBuilder.Variance = interfaceGenericParameter.Variance;
+                genericParameterBuilder.TypeKindConstraint = interfaceGenericParameter.TypeKindConstraint;
                 genericParameterBuilder.HasDefaultConstructorConstraint = interfaceGenericParameter.HasDefaultConstructorConstraint;
-                genericParameterBuilder.HasNonNullableValueTypeConstraint = interfaceGenericParameter.HasNonNullableValueTypeConstraint;
-                genericParameterBuilder.HasReferenceTypeConstraint = interfaceGenericParameter.HasReferenceTypeConstraint;
-
+                
                 foreach ( var templateGenericParameterConstraint in genericParameterBuilder.TypeConstraints )
                 {
-                    genericParameterBuilder.TypeConstraints.Add( templateGenericParameterConstraint );
+                    genericParameterBuilder.AddTypeConstraint( templateGenericParameterConstraint );
                 }
             }
 

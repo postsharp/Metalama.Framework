@@ -12,7 +12,6 @@ using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
@@ -43,10 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
-        [Memo]
-        public IReadOnlyList<IType> GenericArguments => this.MethodSymbol.TypeArguments.Select( this.Compilation.Factory.GetIType ).ToImmutableList();
-
-        public bool IsOpenGeneric => this.GenericArguments.Any( ga => ga is IGenericParameter ) || this.DeclaringType.IsOpenGeneric;
+        public bool IsOpenGeneric => this.GenericParameters.Count > 0 || this.DeclaringType.IsOpenGeneric;
 
         public IMethod WithGenericArguments( params IType[] genericArguments )
         {

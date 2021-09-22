@@ -48,9 +48,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IGenericParameterList GenericParameters => GenericParameterList.Empty;
 
-        [Memo]
-        public IReadOnlyList<IType> GenericArguments => Array.Empty<IType>();
-
         public bool IsOpenGeneric => false;
 
         [Memo]

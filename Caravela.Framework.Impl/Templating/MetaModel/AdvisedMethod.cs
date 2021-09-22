@@ -54,8 +54,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IGenericParameterList GenericParameters => this.Underlying.GenericParameters;
 
-        public IReadOnlyList<IType> GenericArguments => this.Underlying.GenericArguments;
-
         public bool IsOpenGeneric => this.Underlying.IsOpenGeneric;
 
         public IMethod WithGenericArguments( params IType[] genericArguments ) => this.Underlying.WithGenericArguments( genericArguments );

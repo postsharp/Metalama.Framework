@@ -5,6 +5,24 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
 {
+    public enum TypeKindConstraint
+    {
+        None,
+        Class,
+        NullableClass,
+        Struct,
+        Unmanaged,
+        NotNull,
+        Default
+    }
+
+    public enum VarianceKind
+    {
+        None,
+        In,
+        Out
+    }
+    
     /// <summary>
     /// Represents a generic parameter of a method or type.
     /// </summary>
@@ -20,32 +38,13 @@ namespace Caravela.Framework.Code
         /// </summary>
         IReadOnlyList<IType> TypeConstraints { get; }
 
-        /// <summary>
-        /// Gets a value indicating whether the generic parameter is covariant (i.e., <c>out</c>).
-        /// </summary>
-        bool IsCovariant { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the generic parameter is contravariant (i.e., <c>in</c>).
-        /// </summary>
-        bool IsContravariant { get; }
+        TypeKindConstraint TypeKindConstraint { get; }
+        
+        VarianceKind Variance { get; }
 
         /// <summary>
         /// Gets a value indicating whether the generic parameter has the <c>new()</c> constraint.
         /// </summary>
         bool HasDefaultConstructorConstraint { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the generic parameter has the <c>class</c> constraint.
-        /// </summary>
-        bool HasReferenceTypeConstraint { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the generic parameter has the <c>notnull</c> constraint.
-        /// </summary>
-        bool HasNonNullableValueTypeConstraint { get; }
-
-        // TODO: nullable reference type constraints
-        // TODO: Unmanaged
     }
 }

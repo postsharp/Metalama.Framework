@@ -81,15 +81,16 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// Runs the template test with name and source provided in the <paramref name="testInput"/>.
         /// </summary>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
+        /// <param name="testResult1"></param>
         /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
-        private protected override async Task<TestResult> RunAsync( TestInput testInput, Dictionary<string, object?> state )
+        private protected override async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
-            var testResult = await base.RunAsync( testInput, state );
+            await base.RunAsync( testInput,testResult, state );
 
             if ( !testResult.Success )
             {
-                return testResult;
+                return;
             }
 
             var testSyntaxTree = testResult.SyntaxTrees.Single();
@@ -146,7 +147,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
             {
                 testResult.SetFailed( "TestTemplateCompiler.TryCompile failed." );
 
-                return testResult;
+                return;
             }
 
             testResult.HasOutputCode = true;
@@ -180,12 +181,12 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 testResult.PipelineDiagnostics.Report( emitResult.Diagnostics );
                 testResult.SetFailed( "The final template compilation failed." );
 
-                return testResult;
+                return;
             }
 
             if ( !this.VerifyBinaryStream( testInput, testResult, buildTimeAssemblyStream ) )
             {
-                return testResult;
+                return;
             }
 
             buildTimeAssemblyStream.Seek( 0, SeekOrigin.Begin );
@@ -222,7 +223,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 {
                     testResult.SetFailed( "The compiled template failed." );
 
-                    return testResult;
+                    return;
                 }
 
                 await testSyntaxTree.SetRunTimeCodeAsync( targetMethod.WithBody( output! ) );
@@ -236,7 +237,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                 assemblyLoadContext.Unload();
             }
 
-            return testResult;
+            return;
         }
 
         private (TemplateExpansionContext Context, MethodDeclarationSyntax TargetMethod) CreateTemplateExpansionContext(

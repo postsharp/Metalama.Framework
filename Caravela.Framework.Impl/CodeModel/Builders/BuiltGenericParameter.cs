@@ -30,16 +30,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public int Index => this.GenericParameterBuilder.Index;
 
-        public IReadOnlyList<IType> TypeConstraints => throw new NotImplementedException();
+        public IReadOnlyList<IType> TypeConstraints => this.GenericParameterBuilder.ReadOnlyTypeConstraints;
 
-        public bool IsCovariant => this.GenericParameterBuilder.IsCovariant;
+        public TypeKindConstraint TypeKindConstraint => this.GenericParameterBuilder.TypeKindConstraint;
 
-        public bool IsContravariant => this.GenericParameterBuilder.IsContravariant;
+        public VarianceKind Variance => this.GenericParameterBuilder.Variance;
 
         public bool HasDefaultConstructorConstraint => this.GenericParameterBuilder.HasDefaultConstructorConstraint;
 
-        public bool HasReferenceTypeConstraint => this.GenericParameterBuilder.HasReferenceTypeConstraint;
-
-        public bool HasNonNullableValueTypeConstraint => this.GenericParameterBuilder.HasNonNullableValueTypeConstraint;
     }
 }

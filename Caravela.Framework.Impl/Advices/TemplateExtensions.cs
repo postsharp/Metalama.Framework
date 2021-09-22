@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 return true;
             }
-            else if ( fromType is INamedType { IsGeneric: true } fromNamedType && toType is INamedType toNamedType )
+            else if ( fromType is INamedType fromNamedType && fromNamedType.GenericArguments.Count > 0 && toType is INamedType toNamedType )
             {
                 if ( fromNamedType.OriginalDeclaration.SpecialType == SpecialType.Task_T
                      && fromNamedType.GenericArguments[0].TypeKind == TypeKind.Dynamic )

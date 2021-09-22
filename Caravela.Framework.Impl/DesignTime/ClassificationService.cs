@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
@@ -37,11 +38,12 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             // TODO: if the root is not "our", return false.
 
+            var syntaxRoot = model.SyntaxTree.GetRoot();
             var diagnostics = new DiagnosticList();
 
             var templateCompiler = new TemplateCompiler( this._serviceProvider, model.Compilation );
 
-            _ = templateCompiler.TryAnnotate( model.SyntaxTree.GetRoot(), model, diagnostics, cancellationToken, out var annotatedSyntaxRoot );
+            _ = templateCompiler.TryAnnotate( syntaxRoot, model, diagnostics, cancellationToken, out var annotatedSyntaxRoot );
 
             var text = model.SyntaxTree.GetText();
             var classifier = new TextSpanClassifier( text );

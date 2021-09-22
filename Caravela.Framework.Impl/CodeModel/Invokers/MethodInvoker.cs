@@ -8,7 +8,6 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Invokers
 {
@@ -74,11 +73,12 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         private object InvokeDefaultMethod( object? instance, object?[] args )
         {
-            var name = this._method.GenericArguments.Any()
-                ? LanguageServiceFactory.CSharpSyntaxGenerator.GenericName(
-                    this._method.Name,
-                    this._method.GenericArguments.Select( a => a.GetSymbol() ) )
-                : SyntaxFactory.IdentifierName( this._method.Name );
+            if ( this._method.GenericParameters.Count > 0 )
+            {
+                throw new NotImplementedException();
+            }
+
+            var name = SyntaxFactory.IdentifierName( this._method.Name );
 
             var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromValue( args, this.Compilation ) );
 

@@ -14,7 +14,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -56,7 +55,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             return this.AddParameter( name, iType, refKind, typeConstant );
         }
 
-        public IGenericParameterBuilder AddGenericParameter( string name ) => throw new NotImplementedException();
+        public IGenericParameterBuilder AddGenericParameter( string name )
+        {
+            var builder = new GenericParameterBuilder( this, this.GenericParameters.Count, name );
+            this.GenericParameters.Add( builder );
+
+            return builder;
+        }
 
         IParameterBuilder IMethodBuilder.ReturnParameter => this.ReturnParameter;
 
@@ -76,11 +81,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IParameterList IHasParameters.Parameters => this.Parameters;
 
-        IGenericParameterList IMethod.GenericParameters => this.GenericParameters;
+        IGenericParameterList IGeneric.GenericParameters => this.GenericParameters;
 
-        IReadOnlyList<IType> IMethod.GenericArguments => ImmutableArray<IType>.Empty;
-
-        bool IMethod.IsOpenGeneric => this.GenericParameters.Count > 0;
+        bool IGeneric.IsOpenGeneric => this.GenericParameters.Count > 0;
 
         // We don't currently support adding other methods than default ones.
         public MethodKind MethodKind => MethodKind.Default;

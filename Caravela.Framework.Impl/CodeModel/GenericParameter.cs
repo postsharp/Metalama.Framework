@@ -11,6 +11,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using SpecialType = Caravela.Framework.Code.SpecialType;
 using TypeKind = Caravela.Framework.Code.TypeKind;
+using VarianceKind = Caravela.Framework.Code.VarianceKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -39,15 +40,50 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReadOnlyList<IType> TypeConstraints
             => this._typeSymbol.ConstraintTypes.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
 
-        public bool IsCovariant => this._typeSymbol.Variance == VarianceKind.Out;
+        public TypeKindConstraint TypeKindConstraint
+        {
+            get
+            {
+                if ( this._typeSymbol.HasUnmanagedTypeConstraint )
+                {
+                    return TypeKindConstraint.Unmanaged;
+                }
+                else if ( this._typeSymbol.HasValueTypeConstraint )
+                {
+                    return TypeKindConstraint.Struct;
+                }
+                else if ( this._typeSymbol.HasReferenceTypeConstraint )
+                {
+                    if ( this._typeSymbol.ReferenceTypeConstraintNullableAnnotation == NullableAnnotation.Annotated )
+                    {
+                        return TypeKindConstraint.NullableClass;
+                    }
+                    else
+                    {
+                        return TypeKindConstraint.Class;
+                    }
+                }
+                else if ( this._typeSymbol.HasNotNullConstraint )
+                {
+                    return TypeKindConstraint.NotNull;
+                }
+                else
+                {
+                    return TypeKindConstraint.None;
+                }
+            }
+        }
 
-        public bool IsContravariant => this._typeSymbol.Variance == VarianceKind.In;
+        public VarianceKind Variance
+            => this._typeSymbol.Variance switch
+            {
+                Microsoft.CodeAnalysis.VarianceKind.In => VarianceKind.In,
+                Microsoft.CodeAnalysis.VarianceKind.Out => VarianceKind.Out,
+                _ => VarianceKind.None
+            };
+        
 
         public bool HasDefaultConstructorConstraint => this._typeSymbol.HasConstructorConstraint;
-
-        public bool HasReferenceTypeConstraint => this._typeSymbol.HasReferenceTypeConstraint;
-
-        public bool HasNonNullableValueTypeConstraint => this._typeSymbol.HasValueTypeConstraint;
 
         [Memo]
         public override IDeclaration ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this._typeSymbol.ContainingSymbol );

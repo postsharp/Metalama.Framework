@@ -12,12 +12,12 @@ namespace Caravela.Framework.Code
     /// </summary>
     /// <remarks>
     /// <para>This code model represents both generic type definitions and generic type instances
-    /// with the <see cref="INamedType"/>. Generic types have a non-empty collection of <see cref="GenericParameters"/>.
+    /// with the <see cref="INamedType"/>. Generic types have a non-empty collection of <see cref="IGeneric.GenericParameters"/>.
     /// Generic type definitions have an empty <see cref="GenericArguments"/> collection, while
-    /// generic type instances have the same number of items in <see cref="GenericParameters"/> and <see cref="GenericArguments"/>.
+    /// generic type instances have the same number of items in <see cref="IGeneric.GenericParameters"/> and <see cref="GenericArguments"/>.
     /// </para>
     /// </remarks>
-    public interface INamedType : IType, IMemberOrNamedType
+    public interface INamedType : IType, IGeneric
     {
         /// <summary>
         /// Gets a value indicating whether the type is marked as <c>partial</c> in source code. 
@@ -61,22 +61,6 @@ namespace Caravela.Framework.Code
         /// an empty collection if the type an open generic type definition or if the type is non-generic.
         /// </summary>
         IReadOnlyList<IType> GenericArguments { get; }
-
-        /// <summary>
-        /// Gets the generic parameters of the type, or an empty collection if the
-        /// type is not generic.
-        /// </summary>
-        IGenericParameterList GenericParameters { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the current type or any of its containers does not have generic arguments set.
-        /// </summary>
-        bool IsOpenGeneric { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the current type is a generic types, i.e. it has generic parameters or generic arguments.
-        /// </summary>
-        bool IsGeneric { get; }
 
         /// <summary>
         /// Gets the original type declaration. In case of generic type instances, this property returns the type declaration. Otherwise,

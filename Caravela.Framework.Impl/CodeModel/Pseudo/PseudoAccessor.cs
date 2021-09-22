@@ -43,9 +43,6 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
         [Memo]
         public IGenericParameterList GenericParameters => new GenericParameterList( this, Enumerable.Empty<DeclarationRef<IGenericParameter>>() );
 
-        [Memo]
-        public IReadOnlyList<IType> GenericArguments => ImmutableList<IType>.Empty;
-
         public bool IsOpenGeneric => this.DeclaringMember.DeclaringType.IsOpenGeneric;
 
         [Memo]
