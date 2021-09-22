@@ -3,7 +3,9 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Code.SyntaxBuilders;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
@@ -43,13 +45,34 @@ namespace Caravela.Framework.Impl.Templating
             return new InitializeCookie();
         }
 
-        public static void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement ) => list.Add( new StatementOrTrivia( statement ) );
+        public static void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement ) => list.Add( new StatementOrTrivia( statement, false ) );
 
-        public static void AddComments( List<StatementOrTrivia> list, params string[]? comments )
+        public static void AddStatement( List<StatementOrTrivia> list, IStatement statement )
+            => list.Add( new StatementOrTrivia( ((UserStatement) statement).Syntax, true ) );
+
+        public static void AddStatement( List<StatementOrTrivia> list, IExpression statement )
+            => list.Add( new StatementOrTrivia( SyntaxFactory.ExpressionStatement( ((IDynamicExpression) statement).CreateExpression().Syntax ), true ) );
+
+        public static void AddStatement( List<StatementOrTrivia> list, string statement )
+            => list.Add( new StatementOrTrivia( SyntaxFactory.ParseStatement( statement ), true ) );
+
+        public static void AddComments( List<StatementOrTrivia> list, params string?[]? comments )
         {
-            if ( comments != null && comments.Length > 0 )
+            static SyntaxTrivia CreateTrivia( string comment )
             {
-                list.Add( new StatementOrTrivia( SyntaxFactory.TriviaList( comments.Select( c => SyntaxFactory.Comment( "// " + c + "\n" ) ) ) ) );
+                if ( comment.Contains( '\n' ) || comment.Contains( '\r' ) )
+                {
+                    return SyntaxFactory.Comment( "/* " + comment + " */" + "\n" );
+                }
+                else
+                {
+                    return SyntaxFactory.Comment( "// " + comment + "\n" );
+                }
+            }
+
+            if ( comments != null )
+            {
+                list.Add( new StatementOrTrivia( SyntaxFactory.TriviaList( comments.WhereNotNull().Select( CreateTrivia ) ) ) );
             }
         }
 
@@ -66,7 +89,7 @@ namespace Caravela.Framework.Impl.Templating
 
             foreach ( var statementOrTrivia in list )
             {
-                switch ( statementOrTrivia.Content )
+                switch ( statementOrTrivia.Statement )
                 {
                     case StatementSyntax statement:
                         // Add

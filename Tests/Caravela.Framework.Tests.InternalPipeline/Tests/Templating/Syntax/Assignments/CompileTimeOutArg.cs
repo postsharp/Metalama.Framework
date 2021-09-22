@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.CompileTimeOutA
             var d = meta.CompileTime(new Dictionary<int,int>());
             d.Add(0, 5);
             d.TryGetValue( 0, out x );
-            meta.Comment("x = "+x);
+            meta.InsertComment("x = "+x);
 
             return null;
         }

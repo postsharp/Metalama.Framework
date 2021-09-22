@@ -1,6 +1,6 @@
 using System;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code.ExpressionBuilders;
+using Caravela.Framework.Code.SyntaxBuilders;
 using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicExpressionBuilder
@@ -16,6 +16,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicExpress
             expressionBuilder.AppendLiteral(1);
             expressionBuilder.AppendVerbatim(", ");
             expressionBuilder.AppendLiteral(1D);
+            expressionBuilder.AppendVerbatim(", ");
+            expressionBuilder.AppendLiteral(1D, true);
             expressionBuilder.AppendVerbatim(", ");
             expressionBuilder.AppendLiteral(1F);
             expressionBuilder.AppendVerbatim(", ");

@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
             int b = 0;
             try
             {
-                meta.Comment("comment");
+                meta.InsertComment("comment");
                 Console.WriteLine(a);
                 
                 var x = 100 / 1;
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
             }
             catch(Exception e) when (e.GetType().Name.Contains("DivideByZero"))
             {
-                meta.Comment("comment");
+                meta.InsertComment("comment");
                 b =  1;
             }
 

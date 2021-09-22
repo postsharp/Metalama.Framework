@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Pragma.CommentInEmptyB
         {
             if ( false )
             {
-                meta.Comment("Oops 1");
+                meta.InsertComment("Oops 1");
             }
 
             return meta.Proceed();
