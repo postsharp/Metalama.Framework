@@ -1,4 +1,4 @@
-﻿// @Skipped #28907 Linker: conditional access expression
+﻿// @Skipped(#28907 Linker: conditional access expression)
 
 using System;
 using Caravela.Framework.Aspects;
