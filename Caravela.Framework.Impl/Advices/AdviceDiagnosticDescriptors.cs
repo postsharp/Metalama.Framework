@@ -72,7 +72,7 @@ namespace Caravela.Framework.Impl.Advices
                 "CR0510",
                 "Declarative interface member introduction is missing.",
                 "The aspect '{0}' cannot implicitly introduce interface '{1}' into the type '{2}' because it" +
-                " does not contain a declarative introduction (using [Introduce]) for the interface member '{3}'.",
+                " does not contain a declarative introduction (using [InterfaceMember]) for the interface member '{3}'.",
                 _category,
                 Error );
 
@@ -98,8 +98,8 @@ namespace Caravela.Framework.Impl.Advices
             InterfaceIsAlreadyIntroducedByTheAspect = new(
                 "CR0513",
                 "Cannot introduce an interface was already introduced by the aspect.",
-                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because it has already introduced an implementation of this interface. " +
-                "If interface introductions with shared .",
+                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because there is already introduced an implementation of this interface. " +
+                "This happens when you introduce an interface after introducing another interface that extends it.",
                 _category,
                 Error );
     }

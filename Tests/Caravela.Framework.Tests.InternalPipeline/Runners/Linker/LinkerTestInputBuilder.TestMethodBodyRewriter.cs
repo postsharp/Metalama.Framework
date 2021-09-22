@@ -66,9 +66,9 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 if ( expression is IdentifierNameSyntax identifier && identifier.Identifier.ValueText == "link" )
                 {
                     // TODO: Annotation order.
-                    if ( arguments.Count != 1 && arguments.Count != 2 )
+                    if ( arguments.Count < 1 || arguments.Count > 3 )
                     {
-                        throw new ArgumentException( "link method should have 1 or 2 arguments." );
+                        throw new ArgumentException( "link method should have 1 to 3 arguments." );
                     }
 
                     var annotatedExpression = arguments[0].Expression;

@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.Utilities
                     if ( !_attachDebuggerRequested )
                     {
                         // We try to request to attach the debugger a single time, even if the user refuses or if the debugger gets
-                        // detaches. It makes a better debugging experience.
+                        // detached. It makes a better debugging experience.
                         _attachDebuggerRequested = true;
 
                         if ( !Debugger.IsAttached )

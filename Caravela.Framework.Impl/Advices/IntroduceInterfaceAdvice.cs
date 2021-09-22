@@ -268,9 +268,10 @@ namespace Caravela.Framework.Impl.Advices
                         }
                     }
 
-                    this._introducedAndImplementedInterfaces.Add( interfaceType, (true, default) );
+                    this._introducedAndImplementedInterfaces.Add( introducedInterface, (true, default) );
 
-                    this._introducedInterfaceTypes.Add( new IntroducedInterfaceSpecification( interfaceType, memberSpecifications, overrideStrategy, tags ) );
+                    this._introducedInterfaceTypes.Add(
+                        new IntroducedInterfaceSpecification( introducedInterface, memberSpecifications, overrideStrategy, tags ) );
                 }
             }
             else
@@ -444,11 +445,14 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var interfaceParameter in interfaceProperty.Parameters )
             {
-                _ = propertyBuilder.AddParameter(
-                    interfaceParameter.Name,
-                    interfaceParameter.ParameterType,
-                    interfaceParameter.RefKind,
-                    interfaceParameter.DefaultValue );
+                // Property parameters - we will be probably removing them and there will be a special override for indexers.
+                throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                // _ = propertyBuilder.AddParameter(
+                //     interfaceParameter.Name,
+                //     interfaceParameter.ParameterType,
+                //     interfaceParameter.RefKind,
+                //     interfaceParameter.DefaultValue );
             }
 
             if ( isExplicit )

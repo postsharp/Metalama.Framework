@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Transformations
             this.RemoveTemplate = removeTemplate;
 
             this.AddTemplate.ValidateTarget( overriddenDeclaration.AddMethod );
-            this.AddTemplate.ValidateTarget( overriddenDeclaration.RemoveMethod );
+            this.RemoveTemplate.ValidateTarget( overriddenDeclaration.RemoveMethod );
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )

@@ -5,7 +5,6 @@ using Caravela.Framework.Impl.Linking.Inlining;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -50,13 +49,7 @@ namespace Caravela.Framework.Impl.Linking
             }
             else
             {
-                if ( !this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                     || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
-                {
-                    return Array.Empty<MemberDeclarationSyntax>();
-                }
-
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+                throw new AssertionFailedException();
             }
 
             MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )

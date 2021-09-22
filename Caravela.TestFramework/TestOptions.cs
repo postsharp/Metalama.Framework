@@ -202,7 +202,7 @@ namespace Caravela.TestFramework
 
                     case "LiveTemplate":
                         this.TestRunnerFactoryType =
-                            "Caravela.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Caravela.Framework.Tests.PublicPipeline";
+                            "Caravela.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Caravela.Framework.Tests.InternalPipeline";
 
                         break;
 

@@ -2,9 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.DesignTime.Pipeline;
+using Caravela.Framework.Impl.Options;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -18,16 +21,19 @@ namespace Caravela.Framework.Impl.DesignTime.Diagnostics
     /// </summary>
     internal class UserDiagnosticRegistrationService
     {
-        private static UserDiagnosticRegistrationService? _instance;
+        // Multiple instances are needed for testing.
+        private static readonly ConcurrentDictionary<IPathOptions, UserDiagnosticRegistrationService> _instances = new();
         private readonly string _settingsFilePath;
         private UserDiagnosticRegistrationFile _registrationFile;
 
-        public static UserDiagnosticRegistrationService GetInstance()
-            => LazyInitializer.EnsureInitialized( ref _instance, () => new UserDiagnosticRegistrationService() )!;
+        public static UserDiagnosticRegistrationService GetInstance( IPathOptions pathOptions )
+            => _instances.GetOrAdd(
+                pathOptions, 
+                options => new UserDiagnosticRegistrationService( pathOptions ) );
 
-        private UserDiagnosticRegistrationService()
+        private UserDiagnosticRegistrationService( IPathOptions pathOptions )
         {
-            var settingsDirectory = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), "Caravela" );
+            var settingsDirectory = pathOptions.SettingsDirectory;
 
             RetryHelper.Retry(
                 () =>

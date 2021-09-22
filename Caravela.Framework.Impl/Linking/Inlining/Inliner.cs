@@ -29,7 +29,17 @@ namespace Caravela.Framework.Impl.Linking.Inlining
         /// </summary>
         /// <param name="aspectReference">Resolved aspect reference.</param>
         /// <returns></returns>
-        public abstract bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel );
+        public virtual bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
+        {
+            if ( !SymbolEqualityComparer.Default.Equals(
+                aspectReference.ContainingSymbol.ContainingType,
+                aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
+            {
+                return false;
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Inlines the target of the annotated expression by specifying node to be replaced and the replacing node.

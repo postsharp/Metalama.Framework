@@ -1,4 +1,4 @@
-[Introduction]
+    [Introduction]
     internal class TargetClass : BaseClass
     {
         public int ExistingProperty
@@ -6,22 +6,29 @@
         global::System.Console.WriteLine("This is introduced property.");
 return 27;    }
 }
-    
+
         public static int ExistingProperty_Static
 {get    {
         global::System.Console.WriteLine("This is introduced property.");
 return 27;    }
 }
-    
-    
-public global::System.Int32 NonExistingProperty
+
+
+public override global::System.Int32 ExistingBaseProperty
+{get    {
+        global::System.Console.WriteLine("This is introduced property.");
+        return base.ExistingBaseProperty;
+    }
+}
+
+public global::System.Int32 NotExistingProperty
 {get    {
         global::System.Console.WriteLine("This is introduced property.");
         return default(global::System.Int32);
     }
 }
-    
-public static global::System.Int32 NonExistingProperty_Static
+
+public static global::System.Int32 NotExistingProperty_Static
 {get    {
         global::System.Console.WriteLine("This is introduced property.");
         return default(global::System.Int32);

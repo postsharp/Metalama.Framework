@@ -1,0 +1,657 @@
+﻿using System;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
+using Caravela.TestFramework;
+
+namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNew
+{
+    public class IntroductionAttribute : Attribute, IAspect<INamedType>
+    {
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public event EventHandler BaseClassEvent
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public static event EventHandler BaseClassEvent_Static
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public event EventHandler HiddenBaseClassEvent
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public static event EventHandler HiddenBaseClassEvent_Static
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public event EventHandler HiddenBaseClassVirtualEvent
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public event EventHandler HiddenVirtualBaseClassVirtualEvent
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public event EventHandler BaseClassVirtualEvent
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public event EventHandler BaseClassVirtualSealedEvent
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public event EventHandler BaseClassVirtualOverridenEvent
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public event EventHandler BaseClassAbstractEvent
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public event EventHandler BaseClassAbstractSealedEvent
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public event EventHandler DerivedClassEvent
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public static event EventHandler DerivedClassEvent_Static
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public event EventHandler DerivedClassVirtualEvent
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public event EventHandler DerivedClassVirtualSealedEvent
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public event EventHandler ExistingEvent
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public static event EventHandler ExistingEvent_Static
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public event EventHandler ExistingVirtualEvent
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public event EventHandler NonExistentEvent
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public static event EventHandler NonExistentEvent_Static
+        {
+            add
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+
+            remove
+            {
+                Console.WriteLine("This is introduced event.");
+                meta.Proceed();
+            }
+        }
+    }
+
+    internal abstract class BaseClass
+    {
+        public event EventHandler BaseClassEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public static event EventHandler BaseClassEvent_Static
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public event EventHandler HiddenBaseClassEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public static event EventHandler HiddenBaseClassEvent_Static
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public event EventHandler HiddenBaseClassVirtualEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public event EventHandler HiddenVirtualBaseClassVirtualEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public virtual event EventHandler BaseClassVirtualEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public virtual event EventHandler BaseClassVirtualSealedEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public virtual event EventHandler BaseClassVirtualOverridenEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public abstract event EventHandler BaseClassAbstractEvent;
+
+        public abstract event EventHandler BaseClassAbstractSealedEvent;
+    }
+
+    internal class DerivedClass : BaseClass
+    {
+        public new event EventHandler HiddenBaseClassEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public new static event EventHandler HiddenBaseClassEvent_Static
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public new event EventHandler HiddenBaseClassVirtualEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public new virtual event EventHandler HiddenVirtualBaseClassVirtualEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public sealed override event EventHandler BaseClassVirtualSealedEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public override event EventHandler BaseClassVirtualOverridenEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public override event EventHandler BaseClassAbstractEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public sealed override event EventHandler BaseClassAbstractSealedEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public event EventHandler DerivedClassEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public static event EventHandler DerivedClassEvent_Static
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public virtual event EventHandler DerivedClassVirtualEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public virtual event EventHandler DerivedClassVirtualSealedEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+    }
+
+    // <target>
+    [Introduction]
+    internal class TargetClass : DerivedClass
+    {
+        public event EventHandler ExistingEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public static event EventHandler ExistingEvent_Static
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+
+        public virtual event EventHandler ExistingVirtualEvent
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
+    }
+}

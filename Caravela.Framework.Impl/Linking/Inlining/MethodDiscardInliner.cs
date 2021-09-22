@@ -15,6 +15,11 @@ namespace Caravela.Framework.Impl.Linking.Inlining
     {
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
+            if ( !base.CanInline( aspectReference, semanticModel ) )
+            {
+                return false;
+            }
+
             // The syntax has to be in form: _ = <annotated_method_expression( <arguments> );
             if ( aspectReference.ResolvedSemantic.Symbol is not IMethodSymbol )
             {
@@ -35,8 +40,10 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             // Invocation should be on the right.
             if ( assignmentExpression.Right != invocationExpression )
             {
-                // Coverage: ignore (only incorrect code can get here).
-                return false;
+                // Only incorrect code can get here.
+                throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                // return false;
             }
 
             // Assignment should have a discard identifier on the left (TODO: ref returns).

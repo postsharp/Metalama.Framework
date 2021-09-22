@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
             using var buildOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
-            DesignTimeAspectPipeline pipeline = new( buildOptions, domain, true );
+            using DesignTimeAspectPipeline pipeline = new( buildOptions, domain, true );
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
             pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree1 ), CancellationToken.None );
 
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Tests.UnitTests.DesignTime
 
             using var buildOptions = new TestProjectOptions();
             using var domain = new UnloadableCompileTimeDomain();
-            DesignTimeAspectPipeline pipeline = new( buildOptions, domain, true );
+            using DesignTimeAspectPipeline pipeline = new( buildOptions, domain, true );
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
             pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree1 ), CancellationToken.None );
 

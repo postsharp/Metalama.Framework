@@ -19,10 +19,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Tests\Linker\EventFields\Linking\IntroducedEvent - Copy.t.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
   
    <!-- Exclude files that intentionally do not compile -->
    <Compile Remove="Tests\**\__*.cs" />
@@ -80,9 +76,6 @@
   <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
   <ItemGroup Condition="'$(Obfuscate)'=='True'">
     <Compile Remove="**\*" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Tests\Linker\EventFields\Linking\NoOverride.t.cs" />
   </ItemGroup>
   
 </Project>

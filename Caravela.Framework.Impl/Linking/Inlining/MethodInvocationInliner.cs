@@ -13,6 +13,11 @@ namespace Caravela.Framework.Impl.Linking.Inlining
     {
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
+            if ( !base.CanInline( aspectReference, semanticModel ) )
+            {
+                return false;
+            }
+
             // The syntax has to be in form: <annotated_method_expression( <arguments> );
             if ( aspectReference.ResolvedSemantic.Symbol is not IMethodSymbol )
             {

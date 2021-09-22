@@ -1,0 +1,4 @@
+// CompileTimeAspectPipeline.TryExecute failed. 
+// Error CR0510 on `TargetClass`: `The aspect 'Introduction' cannot implicitly introduce interface 'TargetClass' into the type 'IInterface' because it does not contain a declarative introduction (using [InterfaceMember]) for the interface member 'IInterface.Event'.`
+// Error CR0510 on `TargetClass`: `The aspect 'Introduction' cannot implicitly introduce interface 'TargetClass' into the type 'IInterface' because it does not contain a declarative introduction (using [InterfaceMember]) for the interface member 'IInterface.Method()'.`
+// Error CR0510 on `TargetClass`: `The aspect 'Introduction' cannot implicitly introduce interface 'TargetClass' into the type 'IInterface' because it does not contain a declarative introduction (using [InterfaceMember]) for the interface member 'IInterface.Property'.`

@@ -120,28 +120,28 @@ namespace Caravela.Framework.Impl.Advices
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverriddenProperty(
+                            var overriddenProperty = new OverriddenProperty(
                                 this,
                                 existingDeclaration,
                                 this.Template,
                                 this._getTemplate,
                                 this._setTemplate );
 
-                            return AdviceResult.Create( overriddenMethod );
+                            return AdviceResult.Create( overriddenProperty );
                         }
                         else
                         {
                             this.MemberBuilder.IsNew = true;
                             this.MemberBuilder.OverriddenProperty = existingDeclaration;
 
-                            var overriddenMethod = new OverriddenProperty(
+                            var overriddenProperty = new OverriddenProperty(
                                 this,
                                 this.MemberBuilder,
                                 this.Template,
                                 this._getTemplate,
                                 this._setTemplate );
 
-                            return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
+                            return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
                         }
 
                     case OverrideStrategy.Override:
@@ -179,14 +179,14 @@ namespace Caravela.Framework.Impl.Advices
                             this.MemberBuilder.IsOverride = true;
                             this.MemberBuilder.OverriddenProperty = existingDeclaration;
 
-                            var overriddenMethod = new OverriddenProperty(
+                            var overriddenProperty = new OverriddenProperty(
                                 this,
                                 this.MemberBuilder,
                                 this.Template,
                                 this._getTemplate,
                                 this._setTemplate );
 
-                            return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
+                            return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
                         }
 
                     default:

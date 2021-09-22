@@ -12,6 +12,11 @@ namespace Caravela.Framework.Impl.Linking.Inlining
     {
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
+            if ( !base.CanInline( aspectReference, semanticModel ) )
+            {
+                return false;
+            }
+
             // The syntax needs to be in form: <annotated_property_expression> -= value;
             if ( aspectReference.ResolvedSemantic.Symbol is not IEventSymbol
                  && (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol is not IEventSymbol )
@@ -47,8 +52,10 @@ namespace Caravela.Framework.Impl.Linking.Inlining
             // The assignment should be part of expression statement.
             if ( assignmentExpression.Parent == null || assignmentExpression.Parent is not ExpressionStatementSyntax )
             {
-                // Coverage: ignore (only incorrect code can get here).
-                return false;
+                // Only incorrect code can get here.
+                throw new AssertionFailedException( Justifications.CoverageMissing );
+
+                // return false;
             }
 
             return true;

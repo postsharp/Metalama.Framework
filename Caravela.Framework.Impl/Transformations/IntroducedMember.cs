@@ -55,15 +55,5 @@ namespace Caravela.Framework.Impl.Transformations
             this.Semantic = semantic;
             this.Declaration = declaration;
         }
-
-        /// <summary>
-        /// Gets introduced member with replaced syntax.
-        /// </summary>
-        /// <param name="syntax">Syntax to be used.</param>
-        /// <returns>A new instance with specified syntax.</returns>
-        public IntroducedMember WithSyntax( MemberDeclarationSyntax syntax )
-        {
-            return new IntroducedMember( this.Introduction, syntax, this.AspectLayerId, this.Semantic, this.Declaration );
-        }
     }
 }
