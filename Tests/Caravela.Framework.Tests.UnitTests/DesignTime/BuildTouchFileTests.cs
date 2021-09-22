@@ -85,6 +85,7 @@ using Caravela.Framework.Code;
             var compilation = CreateCSharpCompilation( code );
             
             using var domain = new UnloadableCompileTimeDomain();
+
             using DesignTimeAspectPipeline pipeline = new(
                 this.ProjectOptions,
                 domain,

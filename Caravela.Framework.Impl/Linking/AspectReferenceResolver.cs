@@ -487,25 +487,25 @@ namespace Caravela.Framework.Impl.Linking
                 case (IFieldSymbol, IFieldSymbol):
                     return resolvedSymbol;
 #pragma warning disable IDE0059
-                case (IMethodSymbol { MethodKind: MethodKind.PropertyGet }, IPropertySymbol propertySymbol):
+                case (IMethodSymbol { MethodKind: MethodKind.PropertyGet }, IPropertySymbol):
                     // This seems to happen only in invalid compilations.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
 
                 // return propertySymbol.GetMethod.AssertNotNull();
 
-                case (IMethodSymbol { MethodKind: MethodKind.PropertySet }, IPropertySymbol propertySymbol):
+                case (IMethodSymbol { MethodKind: MethodKind.PropertySet }, IPropertySymbol):
                     // This seems to happen only in invalid compilations.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
 
                 // return propertySymbol.SetMethod.AssertNotNull();
 
-                case (IMethodSymbol { MethodKind: MethodKind.EventAdd }, IEventSymbol eventSymbol):
+                case (IMethodSymbol { MethodKind: MethodKind.EventAdd }, IEventSymbol):
                     // This seems to happen only in invalid compilations.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
 
                 // return eventSymbol.AddMethod.AssertNotNull();
 
-                case (IMethodSymbol { MethodKind: MethodKind.EventRemove }, IEventSymbol eventSymbol):
+                case (IMethodSymbol { MethodKind: MethodKind.EventRemove }, IEventSymbol):
                     // This seems to happen only in invalid compilations.
                     throw new AssertionFailedException( Justifications.CoverageMissing );
 

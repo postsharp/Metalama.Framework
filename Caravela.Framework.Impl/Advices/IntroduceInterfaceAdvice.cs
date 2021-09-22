@@ -445,6 +445,8 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var interfaceParameter in interfaceProperty.Parameters )
             {
+                _ = interfaceParameter;
+                
                 // Property parameters - we will be probably removing them and there will be a special override for indexers.
                 throw new AssertionFailedException( Justifications.CoverageMissing );
 

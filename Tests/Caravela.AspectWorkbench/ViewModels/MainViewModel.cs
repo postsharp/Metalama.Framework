@@ -4,7 +4,9 @@
 using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.ServiceProvider;
+#pragma warning disable IDE0005
 using Caravela.Framework.Tests.Integration.Runners;
+#pragma warning restore IDE0005
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using PostSharp.Patterns.Model;
