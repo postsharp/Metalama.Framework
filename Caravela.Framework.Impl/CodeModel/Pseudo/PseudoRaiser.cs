@@ -15,9 +15,9 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
         [Memo]
         public override IParameterList Parameters
             => new PseudoParameterList(
-                this.DeclaringMember.EventType.Methods.OfName( "Invoke" )
+                this.DeclaringMember.Type.Methods.OfName( "Invoke" )
                     .Single()
-                    .Parameters.Select( p => new PseudoParameter( this, p.Index, p.ParameterType, p.Name ) ) );
+                    .Parameters.Select( p => new PseudoParameter( this, p.Index, p.Type, p.Name ) ) );
 
         public override string Name => "raise_" + this.DeclaringMember.Name;
     }

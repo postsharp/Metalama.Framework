@@ -18,14 +18,12 @@ namespace Caravela.Framework.Code
     /// <item>Arrays as <c>IReadOnlyList&lt;object&gt;</c>.</item>
     /// </list>
     /// </remarks>
-    public interface IAttribute : IDeclaration
+    public interface IAttribute : IDeclaration, IHasType
     {
-        // TODO: add TargetElement?
-
         /// <summary>
         /// Gets the custom attribute type.
         /// </summary>
-        INamedType Type { get; }
+        new INamedType Type { get; }
 
         /// <summary>
         /// Gets the constructor to be used to instantiate the custom attribute.

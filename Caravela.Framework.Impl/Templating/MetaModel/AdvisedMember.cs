@@ -9,7 +9,7 @@ using System.Reflection;
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
     internal abstract class AdvisedMember<T> : AdvisedDeclaration<T>, IMember
-        where T : IMember, IDeclarationInternal
+        where T : IMember, IDeclarationImpl
     {
         protected AdvisedMember( T underlying ) : base( underlying ) { }
 

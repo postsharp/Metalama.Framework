@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     /// The base class for the read-only facade of introduced declarations, represented by <see cref="DeclarationBuilder"/>. Facades
     /// are consistent with the consuming <see cref="CompilationModel"/>, while builders are consistent with the producing <see cref="CompilationModel"/>. 
     /// </summary>
-    internal abstract class BuiltDeclaration : IDeclarationInternal
+    internal abstract class BuiltDeclaration : IDeclarationImpl
     {
         protected BuiltDeclaration( CompilationModel compilation )
         {
@@ -58,5 +58,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
 
         public override string ToString() => this.Builder.ToString();
+
+        [Memo]
+        public IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Builder.OriginalDefinition );
     }
 }

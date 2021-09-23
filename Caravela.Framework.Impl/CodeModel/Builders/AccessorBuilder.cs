@@ -10,12 +10,13 @@ using Caravela.Framework.Impl.CodeModel.Invokers;
 using Caravela.Framework.Impl.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder, IMethodInternal
+    internal partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder, IMethodImpl
     {
         private readonly MemberBuilder _containingDeclaration;
 
@@ -41,14 +42,18 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IType ReturnType
         {
-            get => this.ReturnParameter.ParameterType;
+            get => this.ReturnParameter.Type;
             set => throw new NotSupportedException( "Cannot directly change the return type of an accessor." );
         }
 
         [Memo]
-        public IGenericParameterList GenericParameters => GenericParameterList.Empty;
+        public IGenericParameterList TypeParameters => GenericParameterList.Empty;
+
+        public IReadOnlyList<IType> TypeArguments => ImmutableArray<IType>.Empty;
 
         public bool IsOpenGeneric => false;
+
+        public bool IsGeneric => false;
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers
@@ -196,7 +201,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
             => throw new NotSupportedException( "Cannot directly add parameters to accessors." );
 
-        public IMethod WithGenericArguments( params IType[] genericArguments )
+        public IGeneric ConstructGenericInstance( params IType[] typeArguments )
             => throw new NotSupportedException( "Cannot add generic parameters to accessors." );
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations

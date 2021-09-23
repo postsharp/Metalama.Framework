@@ -50,12 +50,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
-        INamedType IAttribute.Type => this.Constructor.DeclaringType;
+        public INamedType Type => this.Constructor.DeclaringType;
 
         public IConstructor Constructor { get; }
 
         public IReadOnlyList<TypedConstant> ConstructorArguments { get; }
 
         INamedArgumentList IAttribute.NamedArguments => this.NamedArguments;
+
+        IType IHasType.Type => this.Type;
     }
 }

@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code.Collections;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Code
@@ -10,13 +9,6 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a class, struct, enum, or delegate.
     /// </summary>
-    /// <remarks>
-    /// <para>This code model represents both generic type definitions and generic type instances
-    /// with the <see cref="INamedType"/>. Generic types have a non-empty collection of <see cref="IGeneric.GenericParameters"/>.
-    /// Generic type definitions have an empty <see cref="GenericArguments"/> collection, while
-    /// generic type instances have the same number of items in <see cref="IGeneric.GenericParameters"/> and <see cref="GenericArguments"/>.
-    /// </para>
-    /// </remarks>
     public interface INamedType : IType, IGeneric
     {
         /// <summary>
@@ -54,19 +46,6 @@ namespace Caravela.Framework.Code
         /// Gets the name of the type including its namespace.
         /// </summary>
         string FullName { get; }
-
-        /// <summary>
-        /// Gets the generic type arguments of the current type, which are the type values
-        /// applied to the <see cref="GenericParameters"/> of the current type. Returns
-        /// an empty collection if the type an open generic type definition or if the type is non-generic.
-        /// </summary>
-        IReadOnlyList<IType> GenericArguments { get; }
-
-        /// <summary>
-        /// Gets the original type declaration. In case of generic type instances, this property returns the type declaration. Otherwise,
-        /// this property returns the current type. 
-        /// </summary>
-        INamedType OriginalDeclaration { get; }
 
         /// <summary>
         /// Gets the nested types of the current type.
@@ -120,13 +99,6 @@ namespace Caravela.Framework.Code
         /// Gets a value indicating whether the type is <c>readonly</c>.
         /// </summary>
         bool IsReadOnly { get; }
-
-        /// <summary>
-        /// Makes a generic instance of the current generic type definition.
-        /// </summary>
-        /// <param name="genericArguments"></param>
-        /// <returns></returns>
-        INamedType WithGenericArguments( params IType[] genericArguments );
 
         /// <summary>
         /// Gets the assembly that declared this type.

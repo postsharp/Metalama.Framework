@@ -15,7 +15,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Pseudo
 {
-    internal sealed class PseudoParameter : IParameter, IDeclarationInternal
+    internal sealed class PseudoParameter : IParameter, IDeclarationImpl
     {
         private readonly string? _name;
 
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
                 _ => throw new AssertionFailedException()
             };
 
-        public IType ParameterType { get; }
+        public IType Type { get; }
 
         public string Name => this._name ?? throw new NotSupportedException( "Cannot get the name of a return parameter." );
 
@@ -54,11 +54,11 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         public ICompilation Compilation => this.DeclaringAccessor.Compilation;
 
-        public PseudoParameter( IMethod declaringAccessor, int index, IType parameterType, string? name )
+        public PseudoParameter( IMethod declaringAccessor, int index, IType type, string? name )
         {
             this.DeclaringAccessor = declaringAccessor;
             this.Index = index;
-            this.ParameterType = parameterType;
+            this.Type = type;
             this._name = name;
         }
 
@@ -70,8 +70,10 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
 
         ISymbol? ISdkDeclaration.Symbol => null;
 
-        DeclarationRef<IDeclaration> IDeclarationInternal.ToRef() => throw new NotImplementedException();
+        DeclarationRef<IDeclaration> IDeclarationImpl.ToRef() => throw new NotImplementedException();
 
-        ImmutableArray<SyntaxReference> IDeclarationInternal.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
+        ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
+
+        public IDeclaration OriginalDefinition => throw new NotImplementedException();
     }
 }

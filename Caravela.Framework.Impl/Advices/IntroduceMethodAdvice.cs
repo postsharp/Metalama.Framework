@@ -42,14 +42,14 @@ namespace Caravela.Framework.Impl.Advices
             this.MemberBuilder.IsAsync = this.TemplateMember!.IsAsync;
 
             // Handle return type.
-            if ( this.TemplateMember.ReturnParameter.ParameterType.TypeKind == TypeKind.Dynamic )
+            if ( this.TemplateMember.ReturnParameter.Type.TypeKind == TypeKind.Dynamic )
             {
                 // Templates with dynamic return value result in object return type of the introduced member.
-                this.MemberBuilder.ReturnParameter.ParameterType = this.MemberBuilder.Compilation.Factory.GetTypeByReflectionType( typeof(object) );
+                this.MemberBuilder.ReturnParameter.Type = this.MemberBuilder.Compilation.Factory.GetTypeByReflectionType( typeof(object) );
             }
             else
             {
-                this.MemberBuilder.ReturnParameter.ParameterType = this.TemplateMember.ReturnParameter.ParameterType;
+                this.MemberBuilder.ReturnParameter.Type = this.TemplateMember.ReturnParameter.Type;
                 this.MemberBuilder.ReturnParameter.RefKind = this.TemplateMember.ReturnParameter.RefKind;
             }
 
@@ -59,14 +59,14 @@ namespace Caravela.Framework.Impl.Advices
             {
                 var parameterBuilder = this.MemberBuilder.AddParameter(
                     templateParameter.Name,
-                    templateParameter.ParameterType,
+                    templateParameter.Type,
                     templateParameter.RefKind,
                     templateParameter.DefaultValue );
 
                 CopyAttributes( templateParameter, parameterBuilder );
             }
 
-            foreach ( var templateGenericParameter in this.TemplateMember.GenericParameters )
+            foreach ( var templateGenericParameter in this.TemplateMember.TypeParameters )
             {
                 var genericParameterBuilder = this.MemberBuilder.AddGenericParameter( templateGenericParameter.Name );
                 genericParameterBuilder.Variance = templateGenericParameter.Variance;

@@ -11,7 +11,7 @@ namespace Caravela.Framework.Code.DeclarationBuilders
         /// <summary>
         /// Gets or sets the event type (i.e. the type of the delegates handled by this event).
         /// </summary>
-        new INamedType EventType { get; set; }
+        new INamedType Type { get; set; }
 
         /// <summary>
         /// Gets the <see cref="IMethodBuilder"/> for the event adder.

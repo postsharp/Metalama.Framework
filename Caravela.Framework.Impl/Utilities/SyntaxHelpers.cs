@@ -21,18 +21,18 @@ namespace Caravela.Framework.Impl.Utilities
             => LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( property.Type.GetSymbol() );
 
         public static TypeSyntax CreateSyntaxForEventType( IEvent property )
-            => LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( property.EventType.GetSymbol() );
+            => LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( property.Type.GetSymbol() );
 
         public static TypeParameterListSyntax? CreateSyntaxForTypeParameterList( IMethod method )
         {
-            if ( method.GenericParameters.Count == 0 )
+            if ( method.TypeParameters.Count == 0 )
             {
                 return null;
             }
             else
             {
                 var list = SyntaxFactory.TypeParameterList(
-                    SyntaxFactory.SeparatedList( method.GenericParameters.Select( CreateSyntaxForTypeParameter ).ToArray() ) );
+                    SyntaxFactory.SeparatedList( method.TypeParameters.Select( CreateSyntaxForTypeParameter ).ToArray() ) );
 
                 return list;
             }
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.Utilities
                             p => SyntaxFactory.Parameter(
                                 SyntaxFactory.List<AttributeListSyntax>(),
                                 p.GetSyntaxModifierList(),
-                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( p.ParameterType.GetSymbol() ),
+                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( p.Type.GetSymbol() ),
                                 SyntaxFactory.Identifier( p.Name ),
                                 null ) ) ) );
 
@@ -76,7 +76,7 @@ namespace Caravela.Framework.Impl.Utilities
         {
             List<TypeParameterConstraintClauseSyntax>? clauses = null;
 
-            foreach ( var genericParameter in method.GenericParameters )
+            foreach ( var genericParameter in method.TypeParameters )
             {
                 List<TypeParameterConstraintSyntax>? constraints = null;
 

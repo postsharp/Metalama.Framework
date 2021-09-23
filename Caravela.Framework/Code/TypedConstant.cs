@@ -13,7 +13,7 @@ namespace Caravela.Framework.Code
     /// type is compile-time, <see cref="Value"/> is of enum type.
     /// </summary>
     [CompileTimeOnly]
-    public readonly struct TypedConstant
+    public readonly struct TypedConstant : IHasType
     {
         // ReSharper disable once UnassignedReadonlyField
         public static readonly TypedConstant Null;

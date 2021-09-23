@@ -20,11 +20,15 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodInternal
+    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
     {
         public ParameterBuilderList Parameters { get; } = new();
 
         public GenericParameterBuilderList GenericParameters { get; } = new();
+
+        // A builder is never accessed directly from user code and never represents a generic type instance,
+        // so we don't need an implementation of GenericArguments.
+        public IReadOnlyList<IType> TypeArguments => throw new NotSupportedException();
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers
@@ -67,11 +71,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IType IMethodBuilder.ReturnType
         {
-            get => this.ReturnParameter.ParameterType;
-            set => this.ReturnParameter.ParameterType = value ?? throw new ArgumentNullException( nameof(value) );
+            get => this.ReturnParameter.Type;
+            set => this.ReturnParameter.Type = value ?? throw new ArgumentNullException( nameof(value) );
         }
 
-        IType IMethod.ReturnType => this.ReturnParameter.ParameterType;
+        IType IMethod.ReturnType => this.ReturnParameter.Type;
 
         public ParameterBuilder ReturnParameter { get; }
 
@@ -81,9 +85,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IParameterList IHasParameters.Parameters => this.Parameters;
 
-        IGenericParameterList IGeneric.GenericParameters => this.GenericParameters;
+        IGenericParameterList IGeneric.TypeParameters => this.GenericParameters;
 
-        bool IGeneric.IsOpenGeneric => this.GenericParameters.Count > 0;
+        public bool IsOpenGeneric => this.GenericParameters.Count > 0 || this.DeclaringType.IsOpenGeneric;
+
+        public bool IsGeneric => this.GenericParameters.Count > 0;
 
         // We don't currently support adding other methods than default ones.
         public MethodKind MethodKind => MethodKind.Default;
@@ -92,7 +98,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
 
-        IMethod IMethod.WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
+        IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments ) => throw new NotImplementedException();
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
@@ -129,12 +135,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     SyntaxHelpers.CreateSyntaxForConstraintClauses( this ),
                     Block(
                         List(
-                            !this.ReturnParameter.ParameterType.Is( typeof(void) )
+                            !this.ReturnParameter.Type.Is( typeof(void) )
                                 ? new[]
                                 {
                                     ReturnStatement(
                                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
-                                        DefaultExpression( syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ),
+                                        DefaultExpression( syntaxGenerator.TypeExpression( this.ReturnParameter.Type.GetSymbol() ) ),
                                         Token( SyntaxKind.SemicolonToken ) )
                                 }
                                 : Array.Empty<StatementSyntax>() ) ),
@@ -168,7 +174,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     stringBuilder.Append( ", " );
                 }
 
-                stringBuilder.Append( parameter.ParameterType.ToDisplayString( format, context ) );
+                stringBuilder.Append( parameter.Type.ToDisplayString( format, context ) );
             }
 
             stringBuilder.Append( ")" );

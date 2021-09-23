@@ -19,7 +19,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherTyp
         [Template]
         public dynamic? OverrideMethod()
         {
-            var parameterType = (INamedType)meta.Target.Method.Parameters[0].Type;
+            var parameterType = (INamedType)( (IExpression)meta.Target.Method.Parameters[0] ).Type;
             var barMethod = parameterType.Methods.OfName("Bar").First();
             return barMethod.Invokers.Base!.Invoke(meta.Target.Method.Parameters[0].Value);
         }

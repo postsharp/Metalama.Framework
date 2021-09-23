@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.Advices
                             $"Cannot use the template '{template.Declaration}' on method '{targetMethod}': the target method does not contain a parameter '{templateParameter.Name}'." ) );
                 }
 
-                if ( !VerifyTemplateType( templateParameter.ParameterType, methodParameter.ParameterType ) )
+                if ( !VerifyTemplateType( templateParameter.Type, methodParameter.Type ) )
                 {
                     throw new InvalidAdviceTargetException(
                         UserMessageFormatter.Format(
@@ -50,9 +50,9 @@ namespace Caravela.Framework.Impl.Advices
             }
 
             // Check that template generic parameters match the target.
-            foreach ( var templateParameter in template.Declaration.GenericParameters )
+            foreach ( var templateParameter in template.Declaration.TypeParameters )
             {
-                var methodParameter = targetMethod.GenericParameters.SingleOrDefault( p => p.Name == templateParameter.Name );
+                var methodParameter = targetMethod.TypeParameters.SingleOrDefault( p => p.Name == templateParameter.Name );
 
                 if ( methodParameter == null )
                 {
@@ -110,21 +110,23 @@ namespace Caravela.Framework.Impl.Advices
             {
                 return true;
             }
-            else if ( fromType is INamedType fromNamedType && fromNamedType.GenericArguments.Count > 0 && toType is INamedType toNamedType )
+            else if ( fromType is INamedType fromNamedType && fromNamedType.TypeArguments.Count > 0 && toType is INamedType toNamedType )
             {
-                if ( fromNamedType.OriginalDeclaration.SpecialType == SpecialType.Task_T
-                     && fromNamedType.GenericArguments[0].TypeKind == TypeKind.Dynamic )
+                var fromOriginalDefinition = fromNamedType.GetOriginalDefinition();
+
+                if ( fromOriginalDefinition.SpecialType == SpecialType.Task_T
+                     && fromNamedType.TypeArguments[0].TypeKind == TypeKind.Dynamic )
                 {
                     // We accept Task<dynamic> for any awaitable.
 
                     if ( toType.SpecialType == SpecialType.Void || toType.GetAsyncInfo().IsAwaitable ||
-                         toNamedType.OriginalDeclaration.SpecialType is SpecialType.IAsyncEnumerable_T or SpecialType.IAsyncEnumerator_T )
+                         toNamedType.GetOriginalDefinition().SpecialType is SpecialType.IAsyncEnumerable_T or SpecialType.IAsyncEnumerator_T )
                     {
                         return true;
                     }
                 }
-                else if ( fromNamedType.OriginalDeclaration.Equals( toNamedType.OriginalDeclaration ) &&
-                          VerifyTemplateType( fromNamedType.GenericArguments, toNamedType.GenericArguments ) )
+                else if ( fromOriginalDefinition.Equals( toNamedType.GetOriginalDefinition() ) &&
+                          VerifyTemplateType( fromNamedType.TypeArguments, toNamedType.TypeArguments ) )
                 {
                     return true;
                 }

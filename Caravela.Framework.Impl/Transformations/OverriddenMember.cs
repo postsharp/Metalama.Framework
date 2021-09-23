@@ -46,11 +46,10 @@ namespace Caravela.Framework.Impl.Transformations
 
             SimpleNameSyntax memberName = IdentifierName( this.OverriddenDeclaration.Name );
 
-            if ( this.OverriddenDeclaration is IGeneric generic && generic.GenericParameters.Count > 0 )
+            if ( this.OverriddenDeclaration is IGeneric generic && generic.TypeParameters.Count > 0 )
             {
                 memberName = GenericName( this.OverriddenDeclaration.Name )
-                    .WithTypeArgumentList(
-                        TypeArgumentList( SeparatedList( generic.GenericParameters.Select( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
+                    .WithTypeArgumentList( TypeArgumentList( SeparatedList( generic.TypeParameters.Select( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
             }
 
             if ( !this.OverriddenDeclaration.IsStatic )

@@ -11,13 +11,8 @@ namespace Caravela.Framework.Code
     /// </summary>
     [CompileTimeOnly]
     [InternalImplement]
-    public interface IExpression
+    public interface IExpression : IHasType
     {
-        /// <summary>
-        /// Gets the expression type.
-        /// </summary>
-        IType Type { get; }
-
         /// <summary>
         /// Gets a value indicating whether the <see cref="Value"/> can be set.
         /// </summary>

@@ -191,8 +191,8 @@ namespace Caravela.Framework.Impl.Advices
                         }
                         else if (
                             !compilation.InvariantComparer.Equals(
-                                interfaceMethod.ReturnParameter.ParameterType,
-                                matchingAspectMethod.Method.ReturnParameter.ParameterType )
+                                interfaceMethod.ReturnParameter.Type,
+                                matchingAspectMethod.Method.ReturnParameter.Type )
                             || interfaceMethod.ReturnParameter.RefKind != matchingAspectMethod.Method.ReturnParameter.RefKind )
                         {
                             diagnosticAdder.Report(
@@ -253,7 +253,7 @@ namespace Caravela.Framework.Impl.Advices
                                     this.TargetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.DisplayName, this.TargetDeclaration, interfaceType, interfaceEvent) ) );
                         }
-                        else if ( !compilation.InvariantComparer.Equals( interfaceEvent.EventType, matchingAspectEvent.Event.EventType ) )
+                        else if ( !compilation.InvariantComparer.Equals( interfaceEvent.Type, matchingAspectEvent.Event.Type ) )
                         {
                             diagnosticAdder.Report(
                                 AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateDiagnostic(
@@ -394,19 +394,19 @@ namespace Caravela.Framework.Impl.Advices
         {
             var methodBuilder = new MethodBuilder( this, this.TargetDeclaration, interfaceMethod.Name );
 
-            methodBuilder.ReturnParameter.ParameterType = interfaceMethod.ReturnParameter.ParameterType;
+            methodBuilder.ReturnParameter.Type = interfaceMethod.ReturnParameter.Type;
             methodBuilder.ReturnParameter.RefKind = interfaceMethod.ReturnParameter.RefKind;
 
             foreach ( var interfaceParameter in interfaceMethod.Parameters )
             {
                 _ = methodBuilder.AddParameter(
                     interfaceParameter.Name,
-                    interfaceParameter.ParameterType,
+                    interfaceParameter.Type,
                     interfaceParameter.RefKind,
                     interfaceParameter.DefaultValue );
             }
 
-            foreach ( var interfaceGenericParameter in interfaceMethod.GenericParameters )
+            foreach ( var interfaceGenericParameter in interfaceMethod.TypeParameters )
             {
                 // TODO: Move this initialization into a second overload of add generic parameter.
                 var genericParameterBuilder = methodBuilder.AddGenericParameter( interfaceGenericParameter.Name );
@@ -503,7 +503,7 @@ namespace Caravela.Framework.Impl.Advices
                 interfaceEvent.Name,
                 isEventField );
 
-            eventBuilder.EventType = interfaceEvent.EventType;
+            eventBuilder.Type = interfaceEvent.Type;
 
             if ( isExplicit )
             {

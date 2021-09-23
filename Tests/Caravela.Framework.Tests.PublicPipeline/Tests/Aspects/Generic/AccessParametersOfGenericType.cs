@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Generic.AccessParamete
 {
     class Aspect : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             foreach ( var parameter in meta.Target.Parameters )
             {

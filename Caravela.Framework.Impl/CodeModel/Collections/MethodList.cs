@@ -89,14 +89,14 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             return this.OfExactSignature(
                 signatureTemplate,
                 signatureTemplate.Name,
-                signatureTemplate.GenericParameters.Count,
+                signatureTemplate.TypeParameters.Count,
                 signatureTemplate.Parameters.Count,
                 GetParameter,
                 matchIsStatic ? signatureTemplate.IsStatic : null,
                 declaredOnly );
 
             static (IType Type, RefKind RefKind) GetParameter( IMethod context, int index )
-                => (context.Parameters[index].ParameterType, context.Parameters[index].RefKind);
+                => (context.Parameters[index].Type, context.Parameters[index].RefKind);
         }
 
         public IEnumerable<IMethod> OfKind( MethodKind kind ) => this.Where( m => m.MethodKind == kind );
@@ -108,7 +108,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         protected override int GetGenericParameterCount( IMethod x )
         {
-            return x.GenericParameters.Count;
+            return x.TypeParameters.Count;
         }
     }
 }

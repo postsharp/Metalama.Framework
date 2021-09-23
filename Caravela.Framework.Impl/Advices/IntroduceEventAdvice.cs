@@ -53,8 +53,8 @@ namespace Caravela.Framework.Impl.Advices
 
             // TODO: Checks.
 
-            this.MemberBuilder.EventType =
-                (this.TemplateMember?.EventType ?? (INamedType?) this._addTemplate.Declaration?.Parameters.FirstOrDefault().AssertNotNull().ParameterType)
+            this.MemberBuilder.Type =
+                (this.TemplateMember?.Type ?? (INamedType?) this._addTemplate.Declaration?.Parameters.FirstOrDefault().AssertNotNull().Type)
                 .AssertNotNull();
 
             this.MemberBuilder.Accessibility = (this.TemplateMember?.Accessibility ?? this._addTemplate.Declaration?.Accessibility).AssertNotNull();
@@ -180,14 +180,14 @@ namespace Caravela.Framework.Impl.Advices
                                         (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
                         }
-                        else if ( !compilation.InvariantComparer.Equals( this.Builder.EventType, existingDeclaration.EventType ) )
+                        else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingDeclaration.Type ) )
                         {
                             return
                                 AdviceResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateDiagnostic(
                                         this.TargetDeclaration.GetDiagnosticLocation(),
                                         (this.Aspect.AspectClass.DisplayName, this.MemberBuilder, this.TargetDeclaration,
-                                         existingDeclaration.DeclaringType, existingDeclaration.EventType) ) );
+                                         existingDeclaration.DeclaringType, existingDeclaration.Type) ) );
                         }
                         else
                         {

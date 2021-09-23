@@ -30,9 +30,9 @@ namespace Caravela.Framework.Code
                     throw new InvalidOperationException( $"Cannot get the {nameof(this.ItemType)} property because the method is not available." );
                 }
 
-                if ( this._method.ReturnType is INamedType namedType && namedType.GenericArguments.Count > 0 )
+                if ( this._method.ReturnType is INamedType namedType && namedType.TypeArguments.Count > 0 )
                 {
-                    return namedType.GenericArguments[0];
+                    return namedType.TypeArguments[0];
                 }
                 else
                 {

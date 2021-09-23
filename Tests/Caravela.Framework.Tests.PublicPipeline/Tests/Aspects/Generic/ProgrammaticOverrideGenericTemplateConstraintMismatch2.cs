@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Generic.ProgrammaticOv
         {
             Console.WriteLine( a );
 
-            return meta.Proceed();
+            return meta.Proceed()!;
         }
     }
 

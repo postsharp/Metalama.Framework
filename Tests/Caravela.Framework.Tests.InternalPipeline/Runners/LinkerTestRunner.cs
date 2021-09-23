@@ -36,7 +36,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// Runs the template test with name and source provided in the <paramref name="testInput"/>.
         /// </summary>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
-        /// <param name="testResult1"></param>
+        /// <param name="testResult"></param>
         /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
         private protected override async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )

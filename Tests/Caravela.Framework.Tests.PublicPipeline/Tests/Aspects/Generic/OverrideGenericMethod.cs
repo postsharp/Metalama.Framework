@@ -8,7 +8,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Generic.OverrideGeneri
 {
     class Aspect : OverrideMethodAspect
     {
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             return meta.Proceed();
         }

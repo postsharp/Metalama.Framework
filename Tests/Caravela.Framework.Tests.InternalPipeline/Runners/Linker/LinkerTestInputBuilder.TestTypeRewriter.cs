@@ -411,7 +411,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                             .Implements<IObservableTransformation>()
                             .Implements<IMemberIntroduction>()
                             .Implements<IMemberOrNamedTypeBuilder>()
-                            .Implements<IDeclarationInternal>()
+                            .Implements<IDeclarationImpl>()
                             .Implements<ITestTransformation>();
 
                         _ = declarationKind switch

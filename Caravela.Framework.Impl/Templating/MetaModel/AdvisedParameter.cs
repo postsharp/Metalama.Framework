@@ -10,9 +10,9 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdvisedParameter : AdvisedDeclaration<IParameterInternal>, IAdvisedParameter
+    internal class AdvisedParameter : AdvisedDeclaration<IParameterImpl>, IAdvisedParameter
     {
-        public AdvisedParameter( IParameter p ) : base( (IParameterInternal) p ) { }
+        public AdvisedParameter( IParameter p ) : base( (IParameterImpl) p ) { }
 
         public RefKind RefKind => this.Underlying.RefKind;
 
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public bool IsReturnParameter => this.Underlying.IsReturnParameter;
 
-        public IType ParameterType => this.Underlying.ParameterType;
+        public IType ParameterType => this.Underlying.Type;
 
         public string Name => this.Underlying.Name.AssertNotNull();
 
@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         DeclarationOrigin IDeclaration.Origin => this.Underlying.Origin;
 
-        public IType Type => this.Underlying.ParameterType;
+        public IType Type => this.Underlying.Type;
 
         public bool IsAssignable => true;
 
@@ -44,7 +44,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             set => throw new NotSupportedException();
         }
 
-        private IExpression ToExpression()
-            => new DynamicExpression( SyntaxFactory.IdentifierName( this.Underlying.Name ), this.Underlying.ParameterType, true, true );
+        private IExpression ToExpression() => new DynamicExpression( SyntaxFactory.IdentifierName( this.Underlying.Name ), this.Underlying.Type, true, true );
     }
 }

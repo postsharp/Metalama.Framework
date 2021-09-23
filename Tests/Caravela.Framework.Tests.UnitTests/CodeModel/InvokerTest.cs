@@ -1,11 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Linq;
 using Xunit;
 
@@ -97,14 +99,23 @@ class TargetCode
                     new RuntimeExpression( generator.IdentifierName( "y" ), compilation ) ) );
         }
 
-        [Fact( Skip = "https://tp.postsharp.net/entity/28959" )]
-        public void Generics()
+        [Fact]
+        public void OpenGenerics()
         {
             var code = @"
 class TargetCode
 {
     class Nested<T1> {
-        static void Foo<T2>() {}
+        static void StaticGenericMethod<T2>() {}
+        static void StaticNonGenericMethod() {}
+        static int StaticField;
+        static string StaticProperty {get;set;}
+        static event System.Action<object> StaticEvent;
+        void InstanceGenericMethod<T2>() {}
+        void InstanceNonGenericMethod() {}
+        int InstanceField;
+        string InstanceProperty {get;set;}
+        event System.Action<object> InstanceEvent;
     }
 
     void Method()
@@ -115,12 +126,122 @@ class TargetCode
             var compilation = CreateCompilationModel( code );
 
             var type = compilation.DeclaredTypes.OfName( "TargetCode" ).Single();
-            var nestedType = type.NestedTypes.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof(string) ) );
-            var method = nestedType.Methods.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof(int) ) );
+            var nestedType = type.NestedTypes.Single();
+
+            // Testing static members.
+            var staticGenericMethod = nestedType.Methods.OfName( "StaticGenericMethod" ).Single();
+            var staticNonGenericMethod = nestedType.Methods.OfName( "StaticNonGenericMethod" ).Single();
+            var staticField = nestedType.Fields.OfName( "StaticField" ).Single();
+            var staticProperty = nestedType.Properties.OfName( "StaticProperty" ).Single();
+            var staticEvent = nestedType.Events.OfName( "StaticEvent" ).Single();
+
+            Assert.Throws<InvalidOperationException>( () => staticGenericMethod.Invokers.Final.Invoke( null ) );
+
+            Assert.Throws<InvalidOperationException>( () => staticNonGenericMethod.Invokers.Final.Invoke( null ) );
+
+            Assert.Throws<InvalidOperationException>( () => staticField.Invokers.Final.GetValue( null ) );
+            Assert.Throws<InvalidOperationException>( () => staticProperty.Invokers.Final.GetValue( null ) );
+            Assert.Throws<InvalidOperationException>( () => staticEvent.Invokers.Final.Add( null, null ) );
+
+            // Testing instance members on a generic type.
+            var instance = new RuntimeExpression( SyntaxFactory.ParseExpression( "abc" ), compilation );
+            var instanceGenericMethod = nestedType.Methods.OfName( "InstanceGenericMethod" ).Single();
+            var instanceNonGenericMethod = nestedType.Methods.OfName( "InstanceNonGenericMethod" ).Single();
+            var instanceField = nestedType.Fields.OfName( "InstanceField" ).Single();
+            var instanceProperty = nestedType.Properties.OfName( "InstanceProperty" ).Single();
+            var instanceEvent = nestedType.Events.OfName( "InstanceEvent" ).Single();
+
+            Assert.Throws<InvalidOperationException>( () => instanceGenericMethod.Invokers.Final.Invoke( instance ) );
+
+            Assert.Throws<InvalidOperationException>( () => instanceNonGenericMethod.Invokers.Final.Invoke( instance ) );
+
+            Assert.Throws<InvalidOperationException>( () => instanceField.Invokers.Final.GetValue( instance ) );
+            Assert.Throws<InvalidOperationException>( () => instanceProperty.Invokers.Final.GetValue( instance ) );
+            Assert.Throws<InvalidOperationException>( () => instanceEvent.Invokers.Final.Add( instance, null ) );
+        }
+
+        [Fact]
+        public void Generics()
+        {
+            var code = @"
+class TargetCode
+{
+    class Nested<T1> {
+        static void StaticGenericMethod<T2>() {}
+        static void StaticNonGenericMethod() {}
+        static int StaticField;
+        static string StaticProperty {get;set;}
+        static event System.Action<object> StaticEvent;
+        void InstanceGenericMethod<T2>() {}
+        void InstanceNonGenericMethod() {}
+        int InstanceField;
+        string InstanceProperty {get;set;}
+        event System.Action<object> InstanceEvent;
+    }
+
+    void Method()
+    {
+    }
+}";
+
+            var compilation = CreateCompilationModel( code );
+
+            var type = compilation.DeclaredTypes.OfName( "TargetCode" ).Single();
+            var nestedType = type.NestedTypes.Single().ConstructGenericInstance( compilation.Factory.GetTypeByReflectionType( typeof(string) ) );
+
+            // Testing static members.
+            var staticGenericMethod = nestedType.Methods.OfName( "StaticGenericMethod" )
+                .Single()
+                .ConstructGenericInstance( compilation.Factory.GetTypeByReflectionType( typeof(int) ) );
+
+            var staticNonGenericMethod = nestedType.Methods.OfName( "StaticNonGenericMethod" ).Single();
+            var staticField = nestedType.Fields.OfName( "StaticField" ).Single();
+            var staticProperty = nestedType.Properties.OfName( "StaticProperty" ).Single();
+            var staticEvent = nestedType.Events.OfName( "StaticEvent" ).Single();
 
             AssertEx.DynamicEquals(
-                method.Invokers.Final.Invoke( null ),
-                @"global::TargetCode.Nested<global::System.String>.Foo<global::System.Int32>()" );
+                staticGenericMethod.Invokers.Final.Invoke( null ),
+                @"global::TargetCode.Nested<global::System.String>.StaticGenericMethod<global::System.Int32>()" );
+
+            AssertEx.DynamicEquals(
+                staticNonGenericMethod.Invokers.Final.Invoke( null ),
+                @"global::TargetCode.Nested<global::System.String>.StaticNonGenericMethod()" );
+
+            AssertEx.DynamicEquals( staticField.Invokers.Final.GetValue( null ), "global::TargetCode.Nested<global::System.String>.StaticField" );
+            AssertEx.DynamicEquals( staticProperty.Invokers.Final.GetValue( null ), "global::TargetCode.Nested<global::System.String>.StaticProperty" );
+            AssertEx.DynamicEquals( staticEvent.Invokers.Final.Add( null, null ), "global::TargetCode.Nested<global::System.String>.StaticEvent += null" );
+
+            // Testing instance members on a generic type.
+            var instance = new RuntimeExpression( SyntaxFactory.ParseExpression( "abc" ), compilation );
+
+            var instanceGenericMethod = nestedType.Methods.OfName( "InstanceGenericMethod" )
+                .Single()
+                .ConstructGenericInstance( compilation.Factory.GetTypeByReflectionType( typeof(int) ) );
+
+            var instanceNonGenericMethod = nestedType.Methods.OfName( "InstanceNonGenericMethod" ).Single();
+            var instanceField = nestedType.Fields.OfName( "InstanceField" ).Single();
+            var instanceProperty = nestedType.Properties.OfName( "InstanceProperty" ).Single();
+            var instanceEvent = nestedType.Events.OfName( "InstanceEvent" ).Single();
+
+            AssertEx.DynamicEquals(
+                instanceGenericMethod.Invokers.Final.Invoke( instance ),
+                @"((global::TargetCode.Nested<global::System.String>)(abc)).InstanceGenericMethod<global::System.Int32>()" );
+
+            AssertEx.DynamicEquals(
+                instanceNonGenericMethod.Invokers.Final.Invoke( instance ),
+                @"((global::TargetCode.Nested<global::System.String>)(abc)).InstanceNonGenericMethod()" );
+
+            AssertEx.DynamicEquals(
+                instanceField.Invokers.Final.GetValue( instance ),
+                "((global::TargetCode.Nested<global::System.String>)(abc)).InstanceField" );
+
+            AssertEx.DynamicEquals(
+                instanceProperty.Invokers.Final.GetValue( instance ),
+                "((global::TargetCode.Nested<global::System.String>)(abc)).InstanceProperty" );
+
+            AssertEx.DynamicEquals(
+                instanceEvent.Invokers.Final.Add( instance, null ),
+                "((global::TargetCode.Nested<global::System.String>)(abc)).InstanceEvent += null" );
         }
 
         [Fact]

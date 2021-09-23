@@ -19,7 +19,7 @@ using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltAccessor : BuiltDeclaration, IMethodInternal, IMemberRef<IMethod>
+    internal class BuiltAccessor : BuiltDeclaration, IMethodImpl, IMemberRef<IMethod>
     {
         private readonly BuiltMember _builtMember;
 
@@ -69,14 +69,18 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IParameter ReturnParameter => new BuiltParameter( this.AccessorBuilder.ReturnParameter, this.Compilation );
 
         [Memo]
-        public IType ReturnType => this.Compilation.Factory.GetIType( this.AccessorBuilder.ReturnParameter.ParameterType );
+        public IType ReturnType => this.Compilation.Factory.GetIType( this.AccessorBuilder.ReturnParameter.Type );
 
         [Memo]
-        public IGenericParameterList GenericParameters => GenericParameterList.Empty;
+        public IGenericParameterList TypeParameters => GenericParameterList.Empty;
 
-        public bool IsOpenGeneric => true;
+        public IReadOnlyList<IType> TypeArguments => this.AccessorBuilder.TypeArguments;
 
-        public IMethod WithGenericArguments( params IType[] genericArguments ) => this.AccessorBuilder.WithGenericArguments( genericArguments );
+        public bool IsOpenGeneric => this.AccessorBuilder.IsOpenGeneric;
+
+        public bool IsGeneric => this.AccessorBuilder.IsGeneric;
+
+        IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments ) => this.AccessorBuilder.ConstructGenericInstance( typeArguments );
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers

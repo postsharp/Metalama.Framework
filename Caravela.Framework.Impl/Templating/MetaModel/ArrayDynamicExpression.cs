@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this._arrayBuilder = arrayBuilder;
 
             this._itemType = this._arrayBuilder.ItemType;
-            this.Type = this._itemType.MakeArrayType();
+            this.Type = this._itemType.ConstructArrayType();
         }
 
         public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null )

@@ -12,9 +12,9 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdvisedProperty : AdvisedFieldOrProperty<IPropertyInternal>, IAdvisedProperty
+    internal class AdvisedProperty : AdvisedFieldOrProperty<IPropertyImpl>, IAdvisedProperty
     {
-        public AdvisedProperty( IProperty underlying ) : base( (IPropertyInternal) underlying ) { }
+        public AdvisedProperty( IProperty underlying ) : base( (IPropertyImpl) underlying ) { }
 
         public RefKind RefKind => this.Underlying.RefKind;
 

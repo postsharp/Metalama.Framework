@@ -371,7 +371,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
 
             A.CallTo( () => ((IMethod) observableTransformation).LocalFunctions ).Returns( symbolHelperElement.LocalFunctions );
             A.CallTo( () => ((IMethod) observableTransformation).Parameters ).Returns( symbolHelperElement.Parameters );
-            A.CallTo( () => ((IMethod) observableTransformation).GenericParameters ).Returns( symbolHelperElement.GenericParameters );
+            A.CallTo( () => ((IMethod) observableTransformation).TypeParameters ).Returns( symbolHelperElement.TypeParameters );
             A.CallTo( () => ((IMethod) observableTransformation).ReturnParameter ).Returns( symbolHelperElement.ReturnParameter );
             A.CallTo( () => ((IMethod) observableTransformation).ReturnType ).Returns( symbolHelperElement.ReturnType );
             A.CallTo( () => ((IMethod) observableTransformation).IsOpenGeneric ).Returns( symbolHelperElement.IsOpenGeneric );
@@ -446,7 +446,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
                 insertPositionBuilder,
                 introducedElementName );
 
-            A.CallTo( () => ((IEvent) observableTransformation).EventType ).Returns( symbolHelperElement.EventType );
+            A.CallTo( () => ((IEvent) observableTransformation).Type ).Returns( symbolHelperElement.Type );
         }
 
         private static void FinalizeTransformation(
@@ -461,7 +461,7 @@ namespace Caravela.Framework.Tests.Integration.Runners.Linker
         {
             A.CallTo( () => observableTransformation.ContainingDeclaration ).Returns( containingDeclaration );
 
-            A.CallTo( () => ((IDeclarationInternal) observableTransformation).ToRef() )
+            A.CallTo( () => ((IDeclarationImpl) observableTransformation).ToRef() )
                 .Returns( new DeclarationRef<IDeclaration>( (IDeclarationBuilder) observableTransformation ) );
 
             if ( insertPositionNode != null )

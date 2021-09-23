@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+
 #pragma warning restore IDE0005
 
 namespace Caravela.AspectWorkbench.ViewModels

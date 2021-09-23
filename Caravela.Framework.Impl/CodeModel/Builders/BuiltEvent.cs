@@ -15,7 +15,7 @@ using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltEvent : BuiltMember, IEventInternal, IMemberRef<IEvent>
+    internal class BuiltEvent : BuiltMember, IEventImpl, IMemberRef<IEvent>
     {
         public BuiltEvent( EventBuilder builder, CompilationModel compilation ) : base( compilation )
         {
@@ -28,9 +28,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.EventBuilder;
 
-        public INamedType EventType => this.EventBuilder.EventType;
+        public INamedType Type => this.EventBuilder.Type;
 
-        public IMethod Signature => this.EventType.Methods.OfName( "Invoke" ).Single();
+        public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
         public IMethod AddMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.AddMethod );
@@ -58,5 +58,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
         public IEnumerable<IMethod> Accessors => this.EventBuilder.Accessors;
+
+        IType IHasType.Type => this.Type;
     }
 }

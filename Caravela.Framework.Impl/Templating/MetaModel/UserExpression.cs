@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             {
                 var type = underlying.ExpressionType != null
                     ? compilation.GetCompilationModel().Factory.GetIType( underlying.ExpressionType )
-                    : compilation.TypeFactory.GetSpecialType( SpecialType.Object ).MakeNullable();
+                    : compilation.TypeFactory.GetSpecialType( SpecialType.Object ).ConstructNullable();
 
                 this.Underlying = new DynamicExpression( underlying.Syntax, type );
             }

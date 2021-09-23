@@ -12,22 +12,22 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class AdvisedEvent : AdvisedMember<IEventInternal>, IAdvisedEvent
+    internal class AdvisedEvent : AdvisedMember<IEventImpl>, IAdvisedEvent
     {
-        public AdvisedEvent( IEvent underlying ) : base( (IEventInternal) underlying ) { }
+        public AdvisedEvent( IEvent underlying ) : base( (IEventImpl) underlying ) { }
 
-        public INamedType EventType => this.Underlying.EventType;
+        public INamedType Type => this.Underlying.Type;
 
-        public IMethod Signature => this.EventType.Methods.OfName( "Invoke" ).Single();
-
-        [Memo]
-        public IAdvisedMethod AddMethod => new AdvisedMethod( (IMethodInternal) this.Underlying.AddMethod );
+        public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
-        public IAdvisedMethod RemoveMethod => new AdvisedMethod( (IMethodInternal) this.Underlying.RemoveMethod );
+        public IAdvisedMethod AddMethod => new AdvisedMethod( (IMethodImpl) this.Underlying.AddMethod );
 
         [Memo]
-        public IAdvisedMethod? RaiseMethod => this.Underlying.RaiseMethod != null ? new AdvisedMethod( (IMethodInternal) this.Underlying.RaiseMethod ) : null;
+        public IAdvisedMethod RemoveMethod => new AdvisedMethod( (IMethodImpl) this.Underlying.RemoveMethod );
+
+        [Memo]
+        public IAdvisedMethod? RaiseMethod => this.Underlying.RaiseMethod != null ? new AdvisedMethod( (IMethodImpl) this.Underlying.RaiseMethod ) : null;
 
         public IInvokerFactory<IEventInvoker> Invokers => this.Underlying.Invokers;
 
@@ -46,5 +46,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
         public IEnumerable<IMethod> Accessors => this.Underlying.Accessors;
+
+        IType IHasType.Type => this.Type;
     }
 }

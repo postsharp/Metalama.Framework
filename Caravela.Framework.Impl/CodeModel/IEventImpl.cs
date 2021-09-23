@@ -5,5 +5,5 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal interface IEventInternal : IEvent, IDeclarationInternal { }
+    internal interface IEventImpl : IEvent, IDeclarationImpl { }
 }

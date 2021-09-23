@@ -8,14 +8,14 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class ParameterBuilder : DeclarationBuilder, IParameterBuilder, IParameterInternal
+    internal sealed class ParameterBuilder : DeclarationBuilder, IParameterBuilder, IParameterImpl
     {
         private string? _name;
         private TypedConstant _defaultValue;
 
         public RefKind RefKind { get; set; }
 
-        public IType ParameterType { get; set; }
+        public IType Type { get; set; }
 
         public string Name
         {
@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             this.DeclaringMember = declaringMember;
             this.Index = index;
             this._name = name;
-            this.ParameterType = type;
+            this.Type = type;
             this.RefKind = refKind;
         }
 
