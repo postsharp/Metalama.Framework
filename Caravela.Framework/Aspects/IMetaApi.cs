@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Code.ExpressionBuilders;
+using Caravela.Framework.Code.SyntaxBuilders;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Validation;
 using System;
@@ -59,7 +59,9 @@ namespace Caravela.Framework.Aspects
 
         IExpression BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder );
 
-        IExpression Parse( string code );
+        IExpression ParseExpression( string code );
+
+        IStatement ParseStatement( string code );
 
         void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped );
 

@@ -14,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.RunTimeToCompil
             x = y = 1;
             
             
-            meta.Comment( "y = " + y.ToString());
+            meta.InsertComment( "y = " + y.ToString());
             return null;
         }
     }

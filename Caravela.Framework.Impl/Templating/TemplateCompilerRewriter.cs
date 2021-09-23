@@ -455,9 +455,10 @@ namespace Caravela.Framework.Impl.Templating
                         .AddArgumentListArguments( Argument( this.MetaSyntaxFactory.LiteralExpression( this.Transform( expression.Kind() ) ) ) );
 
                 case SyntaxKind.DefaultExpression:
-                    // Don't transform default or null.
-                    // When we do that, we can try to cast a dynamic 'default' or 'null' into a SyntaxFactory.
-                    return expression;
+                    return InvocationExpression(
+                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
+                        .AddArgumentListArguments(
+                            Argument( this.MetaSyntaxFactory.DefaultExpression( this.Transform( ((DefaultExpressionSyntax) expression).Type ) ) ) );
 
                 case SyntaxKind.IdentifierName:
                     {
@@ -614,7 +615,7 @@ namespace Caravela.Framework.Impl.Templating
             // In the default implementation, such case would result in an exception.
 
             if ( this.GetTransformationKind( node ) == TransformationKind.Transform
-                 || this._templateMemberClassifier.IsDynamicType( node.Expression ) )
+                 || this._templateMemberClassifier.IsNodeOfDynamicType( node.Expression ) )
             {
                 return this.TransformExpressionStatement( node );
             }
@@ -719,7 +720,7 @@ namespace Caravela.Framework.Impl.Templating
                     (ExpressionSyntax) this.Visit( node.Expression )!,
                     ArgumentList( SeparatedList( transformedArguments )! ) );
             }
-            else if ( this._templateMemberClassifier.IsDynamicType( node.Expression ) )
+            else if ( this._templateMemberClassifier.IsNodeOfDynamicType( node.Expression ) )
             {
                 // We are in an invocation like: `meta.This.Foo(...)`.
             }
@@ -736,22 +737,43 @@ namespace Caravela.Framework.Impl.Templating
 
                 switch ( this._templateMemberClassifier.GetMetaMemberKind( node.Expression ) )
                 {
-                    case MetaMemberKind.Comment:
-                        var arguments = node.ArgumentList.Arguments.Insert(
-                            0,
-                            Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) );
+                    case MetaMemberKind.InsertComment:
+                        {
+                            var arguments = node.ArgumentList.Arguments.Insert(
+                                0,
+                                Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) );
 
-                        // TemplateSyntaxFactory.AddComments( __s, comments );
-                        var add =
-                            this.DeepIndent(
-                                ExpressionStatement(
-                                    InvocationExpression(
-                                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddComments) ),
-                                        ArgumentList( arguments ) ) ) );
+                            // TemplateSyntaxFactory.AddComments( __s, comments );
+                            var add =
+                                this.DeepIndent(
+                                    ExpressionStatement(
+                                        InvocationExpression(
+                                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddComments) ),
+                                            ArgumentList( arguments ) ) ) );
 
-                        this._currentMetaContext.Statements.Add( add );
+                            this._currentMetaContext.Statements.Add( add );
 
-                        return null;
+                            return null;
+                        }
+
+                    case MetaMemberKind.InsertStatement:
+                        {
+                            // TemplateSyntaxFactory.AddStatement( __s, comments );
+                            var arguments = node.ArgumentList.Arguments.Insert(
+                                0,
+                                Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) );
+
+                            var add =
+                                this.DeepIndent(
+                                    ExpressionStatement(
+                                        InvocationExpression(
+                                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddStatement) ),
+                                            ArgumentList( arguments ) ) ) );
+
+                            this._currentMetaContext.Statements.Add( add );
+
+                            return null;
+                        }
                 }
             }
 

@@ -111,7 +111,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                     // Display the annotated syntax tree.
                     this.ColoredSourceCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync(
                         testResult.SyntaxTrees.First().InputDocument,
-                        testResult.Diagnostics );
+                        diagnostics: testResult.Diagnostics );
                 }
 
                 var errorsDocument = new FlowDocument();
@@ -135,7 +135,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                     var formattedDocument3 = await OutputCodeFormatter.FormatToDocumentAsync( document3, testResult.CompileTimeCompilationDiagnostics );
 
-                    this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document );
+                    this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
                 }
 
                 var consolidatedOutputSyntax = testResult.GetConsolidatedTestOutput();

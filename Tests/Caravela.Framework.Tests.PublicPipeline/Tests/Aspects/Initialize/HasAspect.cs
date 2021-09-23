@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Code.Builders;
 
 namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Initialize.HasAspect
 {

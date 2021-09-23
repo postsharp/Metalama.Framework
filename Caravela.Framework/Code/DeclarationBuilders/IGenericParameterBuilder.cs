@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Code.Builders
+namespace Caravela.Framework.Code.DeclarationBuilders
 {
     public interface IGenericParameterBuilder : IDeclarationBuilder, IGenericParameter
     {
