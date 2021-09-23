@@ -124,8 +124,6 @@ namespace Caravela.TestFramework
             {
                 await this.WriteHtmlAsync( testInput, testResult );
             }
-
-            return;
         }
 
         private static async Task ExecuteTestProgramAsync( TestInput testInput, TestResult testResult, MemoryStream peStream, MemoryStream? pdbStream = null )

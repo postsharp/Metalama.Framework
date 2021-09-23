@@ -77,8 +77,6 @@ namespace Caravela.Framework.Tests.Integration.Runners
             {
                 testResult.SetFailed( "Final Compilation.Emit failed." );
             }
-
-            return;
         }
 
         private protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )

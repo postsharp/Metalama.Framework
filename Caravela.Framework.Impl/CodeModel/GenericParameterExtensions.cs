@@ -8,8 +8,6 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal static class GenericParameterExtensions
     {
-        static GenericParameterExtensions() { }
-
         public static bool IsCompatibleWith( this IGenericParameter a, IGenericParameter b )
         {
             // Check new() constraint.

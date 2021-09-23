@@ -20,7 +20,7 @@ using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.CodeModel.Pseudo
 {
-    internal abstract class PseudoAccessor<T> : IMethodImpl, IDeclarationImpl
+    internal abstract class PseudoAccessor<T> : IMethodImpl
         where T : IMember
     {
         protected T DeclaringMember { get; }

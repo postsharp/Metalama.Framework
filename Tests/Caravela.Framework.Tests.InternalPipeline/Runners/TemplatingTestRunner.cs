@@ -236,8 +236,6 @@ namespace Caravela.Framework.Tests.Integration.Runners
             {
                 assemblyLoadContext.Unload();
             }
-
-            return;
         }
 
         private (TemplateExpansionContext Context, MethodDeclarationSyntax TargetMethod) CreateTemplateExpansionContext(

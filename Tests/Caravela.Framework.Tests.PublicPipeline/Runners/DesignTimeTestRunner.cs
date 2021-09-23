@@ -54,8 +54,6 @@ namespace Caravela.Framework.Tests.Integration.Runners
             {
                 testResult.SetFailed( "DesignTimeAspectPipeline.Execute failed." );
             }
-
-            return;
         }
     }
 }
