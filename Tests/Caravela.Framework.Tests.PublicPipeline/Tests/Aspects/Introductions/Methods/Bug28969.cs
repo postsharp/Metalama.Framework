@@ -9,7 +9,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
     {
         public void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var methodBuilder = builder.AdviceFactory.IntroduceMethod(
+            var methodBuilder = builder.Advices.IntroduceMethod(
                 builder.Target, 
                 nameof(Method));
 

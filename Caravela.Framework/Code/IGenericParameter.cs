@@ -9,6 +9,8 @@ namespace Caravela.Framework.Code
     {
         None,
         Class,
+
+        // TODO: Must be handled differently, as in Roslyn.
         NullableClass,
         Struct,
         Unmanaged,
@@ -22,7 +24,7 @@ namespace Caravela.Framework.Code
         In,
         Out
     }
-    
+
     /// <summary>
     /// Represents a generic parameter of a method or type.
     /// </summary>
@@ -39,7 +41,7 @@ namespace Caravela.Framework.Code
         IReadOnlyList<IType> TypeConstraints { get; }
 
         TypeKindConstraint TypeKindConstraint { get; }
-        
+
         VarianceKind Variance { get; }
 
         /// <summary>

@@ -74,13 +74,16 @@ namespace Caravela.Framework.Impl.Advices
                                 break;
 
                             case IProperty templateProperty:
+                                var propertyTemplate = Template.Create( templateProperty, template, TemplateKind.Introduction );
+                                var accessorTemplates = propertyTemplate.GetAccessorTemplates();
+
                                 var introducePropertyAdvice = new IntroducePropertyAdvice(
                                     aspect,
                                     targetType,
                                     null,
-                                    Template.Create( templateProperty, template, TemplateKind.Introduction ),
-                                    default,
-                                    default,
+                                    propertyTemplate,
+                                    accessorTemplates.Get,
+                                    accessorTemplates.Set,
                                     template.Attribute.Scope,
                                     template.Attribute.WhenExists,
                                     layerName,

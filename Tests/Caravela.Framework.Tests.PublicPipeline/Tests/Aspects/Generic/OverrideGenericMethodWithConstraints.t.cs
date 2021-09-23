@@ -1,4 +1,4 @@
-class TargetCode
+class TargetCode : Base
     {
         [Aspect]
         T MethodWithTypeConstraint<T>(T a)
@@ -49,5 +49,11 @@ class TargetCode
             where T : class?, IDisposable
 {
             return a;
+}
+
+        [Aspect]
+        public override void VirtualMethod<T>() where T : default
+{
+    return;
 }
     }

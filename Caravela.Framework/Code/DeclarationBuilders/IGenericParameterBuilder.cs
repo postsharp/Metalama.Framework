@@ -8,11 +8,11 @@ namespace Caravela.Framework.Code.DeclarationBuilders
     public interface IGenericParameterBuilder : IDeclarationBuilder, IGenericParameter
     {
         new string Name { get; set; }
-        
+
         new TypeKindConstraint TypeKindConstraint { get; set; }
-        
+
         new VarianceKind Variance { get; set; }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether the generic parameter has the <c>new()</c> constraint.
         /// </summary>

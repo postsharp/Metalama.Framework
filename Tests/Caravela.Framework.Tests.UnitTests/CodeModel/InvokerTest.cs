@@ -52,7 +52,7 @@ class TargetCode
                 @"((global::TargetCode)(this)).ToString((global::System.String)(""x""))" );
 
             AssertEx.DynamicEquals(
-                toString.Invokers.FinalConditional.Invoke(
+                toString.Invokers.ConditionalFinal.Invoke(
                     new RuntimeExpression( generator.IdentifierName( "a" ), compilation ),
                     new RuntimeExpression( generator.LiteralExpression( "x" ), compilation ) ),
                 @"((global::TargetCode)(a))?.ToString((global::System.String)(""x""))" );
@@ -97,7 +97,7 @@ class TargetCode
                     new RuntimeExpression( generator.IdentifierName( "y" ), compilation ) ) );
         }
 
-        [Fact]
+        [Fact( Skip = "https://tp.postsharp.net/entity/28959" )]
         public void Generics()
         {
             var code = @"
@@ -194,7 +194,7 @@ class TargetCode
             AssertEx.DynamicEquals( property.Invokers.Final.GetValue( thisExpression ), @"((global::TargetCode)(this)).P" );
 
             AssertEx.DynamicEquals(
-                property.Invokers.FinalConditional.GetValue( SyntaxFactory.IdentifierName( "a" ) ),
+                property.Invokers.ConditionalFinal.GetValue( SyntaxFactory.IdentifierName( "a" ) ),
                 @"((global::TargetCode)(a))?.P" );
 
             AssertEx.DynamicEquals(
@@ -225,7 +225,7 @@ class TargetCode
             AssertEx.DynamicEquals( property.Invokers.Final.GetValue( thisExpression ), @"((global::TargetCode)(this)).P" );
 
             AssertEx.DynamicEquals(
-                property.GetMethod!.Invokers.FinalConditional.Invoke( SyntaxFactory.IdentifierName( "a" ) ),
+                property.GetMethod!.Invokers.ConditionalFinal.Invoke( SyntaxFactory.IdentifierName( "a" ) ),
                 @"((global::TargetCode)(a))?.P" );
 
             AssertEx.DynamicEquals(

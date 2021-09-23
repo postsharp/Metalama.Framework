@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Formatting.Output
     {
         public void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            var typedMethod = builder.AdviceFactory.IntroduceMethod(
+            var typedMethod = builder.Advices.IntroduceMethod(
                 builder.Target,
                 nameof(CloneImpl),
                 whenExists: OverrideStrategy.Override);
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Tests.Integration.Tests.Formatting.Output
             typedMethod.Name = "Clone";
             typedMethod.ReturnType = builder.Target;
 
-            builder.AdviceFactory.ImplementInterface(
+            builder.Advices.ImplementInterface(
                 builder.Target,
                 typeof(ICloneable),
                 whenExists: OverrideStrategy.Ignore);

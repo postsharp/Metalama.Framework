@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Options
         public virtual string CompileTimeProjectCacheDirectory => TempPathHelper.GetTempPath( "CompileTime" );
 
         public virtual string AssemblyLocatorCacheDirectory => TempPathHelper.GetTempPath( "AssemblyLocator" );
-        
+
         public virtual string SettingsDirectory => Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), "Caravela" );
 
         public virtual string CrashReportDirectory => TempPathHelper.GetTempPath( "CrashReports" );

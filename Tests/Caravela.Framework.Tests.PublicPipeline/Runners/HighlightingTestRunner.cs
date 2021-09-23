@@ -3,7 +3,6 @@
 
 #pragma warning disable IDE0005
 using Caravela.Framework.DesignTime.Contracts;
-#pragma warning restore IDE0005
 using Caravela.Framework.Impl.Formatting;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
@@ -13,6 +12,7 @@ using System.IO;
 using System.Text;
 using Xunit;
 using Xunit.Abstractions;
+#pragma warning restore IDE0005
 
 // ReSharper disable StringLiteralTypo
 

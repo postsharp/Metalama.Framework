@@ -8,12 +8,12 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Initialize.TwoIAspectImpl
     {
         public void BuildAspect(IAspectBuilder<IMethod> builder ) 
         {
-            builder.AdviceFactory.OverrideMethod(builder.Target, nameof(this.OverrideMethod));
+            builder.Advices.OverrideMethod(builder.Target, nameof(this.OverrideMethod));
         }
 
         public void BuildAspect(IAspectBuilder<IFieldOrProperty> builder) 
         {
-            builder.AdviceFactory.OverrideFieldOrProperty(builder.Target, nameof(this.OverrideProperty));
+            builder.Advices.OverrideFieldOrProperty(builder.Target, nameof(this.OverrideProperty));
         }
 
         [Template]

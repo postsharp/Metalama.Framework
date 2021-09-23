@@ -80,7 +80,6 @@ namespace Caravela.Framework.Tests.Integration.Runners
             {
                 testResult.SetFailed( "LiveTemplateAspectPipeline.TryExecute failed." );
             }
-            
         }
     }
 }

@@ -17,6 +17,7 @@ using System.Linq;
 using System.Reflection;
 using Accessibility = Caravela.Framework.Code.Accessibility;
 using MethodKind = Caravela.Framework.Code.MethodKind;
+using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.CodeModel.Pseudo
 {
@@ -34,11 +35,10 @@ namespace Caravela.Framework.Impl.CodeModel.Pseudo
         [Memo]
         public IParameter ReturnParameter => new PseudoParameter( this, -1, this.ReturnType, null );
 
-        [Memo]
         public IType ReturnType
             => this.MethodKind != MethodKind.PropertyGet
-                ? this.DeclaringMember.Compilation.TypeFactory.GetTypeByReflectionType( typeof(void) )
-                : ((IProperty) this.DeclaringMember).Type;
+                ? this.DeclaringMember.Compilation.TypeFactory.GetSpecialType( SpecialType.Void )
+                : ((IFieldOrProperty) this.DeclaringMember).Type;
 
         [Memo]
         public IGenericParameterList GenericParameters => new GenericParameterList( this, Enumerable.Empty<DeclarationRef<IGenericParameter>>() );

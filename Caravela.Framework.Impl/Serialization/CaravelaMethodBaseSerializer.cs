@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Serialization
         public CaravelaMethodBaseSerializer( SyntaxSerializationService service ) : base( service ) { }
 
         internal ExpressionSyntax SerializeMethodBase( ICompileTimeReflectionObject<IMethodBase> method, ICompilationElementFactory syntaxFactory )
-            => CaravelaMethodBaseSerializer<TInput, TOutput>.SerializeMethodBase(
+            => SerializeMethodBase(
                 (IMethodSymbol) method.Target.GetSymbol( syntaxFactory.Compilation ).AssertNotNull( Justifications.SerializersNotImplementedForIntroductions ),
                 syntaxFactory );
 

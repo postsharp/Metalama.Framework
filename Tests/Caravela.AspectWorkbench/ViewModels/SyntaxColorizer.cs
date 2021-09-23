@@ -3,7 +3,6 @@
 
 #pragma warning disable IDE0005
 using Caravela.Framework.DesignTime.Contracts;
-#pragma warning restore IDE0005
 using Caravela.Framework.Impl.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
@@ -14,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+#pragma warning restore IDE0005
 
 namespace Caravela.AspectWorkbench.ViewModels
 {

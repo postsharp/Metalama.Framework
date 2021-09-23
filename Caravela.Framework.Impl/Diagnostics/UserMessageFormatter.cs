@@ -13,11 +13,13 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// <summary>
     /// Formats arguments passed to a diagnostic.
     /// </summary>
-    internal sealed class DiagnosticFormatter : IFormatProvider, ICustomFormatter
+    internal sealed class UserMessageFormatter : IFormatProvider, ICustomFormatter
     {
-        public static readonly DiagnosticFormatter Instance = new();
+        public static readonly UserMessageFormatter Instance = new();
 
         object? IFormatProvider.GetFormat( Type formatType ) => formatType == typeof(ICustomFormatter) ? this : null;
+
+        public static string Format( FormattableString message ) => message.ToString( Instance );
 
         public string Format( string format, object? arg, IFormatProvider formatProvider )
         {

@@ -154,7 +154,7 @@ namespace Caravela.TestFramework
                     // This is the "Intrinsics" syntax tree.
                     continue;
                 }
-                
+
                 i++;
                 var syntaxNode = await syntaxTree.GetRootAsync();
 

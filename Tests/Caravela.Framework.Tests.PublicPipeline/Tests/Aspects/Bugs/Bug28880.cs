@@ -35,7 +35,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Bugs.Bug28880
         
         public void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.AdviceFactory.OverrideFieldOrProperty( builder.Target, nameof(OverrideProperty));
+            builder.Advices.OverrideFieldOrProperty( builder.Target, nameof(OverrideProperty));
         }
     }
     

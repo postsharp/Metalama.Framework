@@ -86,7 +86,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
         /// <returns>The result of the test execution.</returns>
         private protected override async Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {
-            await base.RunAsync( testInput,testResult, state );
+            await base.RunAsync( testInput, testResult, state );
 
             if ( !testResult.Success )
             {

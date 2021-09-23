@@ -29,7 +29,7 @@ namespace Caravela.TestFramework
             this.ProjectDirectory = projectDirectory;
             Directory.CreateDirectory( projectDirectory );
         }
-        
+
         protected string BaseTestDirectory { get; }
 
         public bool DebugCompilerProcess => false;

@@ -13,7 +13,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherTyp
     {
         public void BuildAspect(IAspectBuilder<IMethod> aspectBuilder)
         {
-            aspectBuilder.AdviceFactory.OverrideMethod(aspectBuilder.Target, nameof(OverrideMethod));
+            aspectBuilder.Advices.OverrideMethod(aspectBuilder.Target, nameof(OverrideMethod));
         }
 
         [Template]

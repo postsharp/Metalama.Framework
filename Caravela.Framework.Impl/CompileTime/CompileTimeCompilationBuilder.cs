@@ -39,7 +39,6 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly ICompileTimeCompilationBuilderObserver? _observer;
         private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
 
-        
         private static readonly Lazy<SyntaxTree> _predefinedTypesSyntaxTree = new(
             () =>
                 CSharpSyntaxTree.ParseText(
@@ -47,7 +46,6 @@ namespace Caravela.Framework.Impl.CompileTime
                     path: CompileTimeConstants.PredefinedTypesFileName ) );
 
         private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
-
 
         public CompileTimeCompilationBuilder( IServiceProvider serviceProvider, CompileTimeDomain domain )
         {

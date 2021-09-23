@@ -4,9 +4,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Sdk;
 using Caravela.Framework.Impl.Templating;
-#pragma warning disable IDE0005
-using Caravela.Framework.Tests.Integration.Runners;
-#pragma warning restore IDE0005
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -17,6 +14,9 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+#pragma warning disable IDE0005
+using Caravela.Framework.Tests.Integration.Runners;
+#pragma warning restore IDE0005
 
 namespace Caravela.AspectWorkbench.CodeEditor
 {

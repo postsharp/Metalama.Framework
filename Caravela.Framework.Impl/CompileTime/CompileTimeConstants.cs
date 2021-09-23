@@ -8,6 +8,5 @@ namespace Caravela.Framework.Impl.CompileTime
         public const string PredefinedTypesFileName = "__CaravelaPredefinedTypes.cs";
 
         public const string ResourceName = "Caravela.CompileTimeAssembly";
-
     }
 }

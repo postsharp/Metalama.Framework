@@ -317,7 +317,8 @@ namespace Caravela.Framework.Impl.Advices
                             break;
 
                         case IProperty interfaceProperty:
-                            var buildAutoProperty = ((IProperty?) memberSpec.AspectInterfaceMember)?.IsAutoPropertyOrField == true;
+                            var aspectProperty = (IProperty?) memberSpec.AspectInterfaceMember;
+                            var buildAutoProperty = aspectProperty?.IsAutoPropertyOrField == true;
 
                             memberBuilder = this.GetImplPropertyBuilder(
                                 interfaceProperty,
@@ -327,16 +328,19 @@ namespace Caravela.Framework.Impl.Advices
 
                             interfaceMemberMap.Add( interfaceProperty, memberBuilder );
 
-                            if ( ((IProperty?) memberSpec.AspectInterfaceMember)?.IsAutoPropertyOrField != true )
+                            if ( aspectProperty?.IsAutoPropertyOrField != true )
                             {
+                                var propertyTemplate = Template.Create( aspectProperty, memberSpec.TemplateInfo, TemplateKind.Introduction );
+                                var accessorTemplates = propertyTemplate.GetAccessorTemplates();
+
                                 overrides.Add(
                                     memberSpec.AspectInterfaceMember != null
                                         ? new OverriddenProperty(
                                             this,
                                             (IProperty) memberBuilder,
-                                            Template.Create( (IProperty) memberSpec.AspectInterfaceMember, memberSpec.TemplateInfo, TemplateKind.Introduction ),
-                                            default,
-                                            default )
+                                            propertyTemplate,
+                                            accessorTemplates.Get,
+                                            accessorTemplates.Set )
                                         : new RedirectedProperty(
                                             this,
                                             (IProperty) memberBuilder,
@@ -409,7 +413,7 @@ namespace Caravela.Framework.Impl.Advices
                 genericParameterBuilder.Variance = interfaceGenericParameter.Variance;
                 genericParameterBuilder.TypeKindConstraint = interfaceGenericParameter.TypeKindConstraint;
                 genericParameterBuilder.HasDefaultConstructorConstraint = interfaceGenericParameter.HasDefaultConstructorConstraint;
-                
+
                 foreach ( var templateGenericParameterConstraint in genericParameterBuilder.TypeConstraints )
                 {
                     genericParameterBuilder.AddTypeConstraint( templateGenericParameterConstraint );
@@ -444,7 +448,7 @@ namespace Caravela.Framework.Impl.Advices
             foreach ( var interfaceParameter in interfaceProperty.Parameters )
             {
                 _ = interfaceParameter;
-                
+
                 // Property parameters - we will be probably removing them and there will be a special override for indexers.
                 throw new AssertionFailedException( Justifications.CoverageMissing );
 

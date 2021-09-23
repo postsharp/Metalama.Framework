@@ -81,7 +81,6 @@ namespace Caravela.Framework.Impl.CodeModel
                 Microsoft.CodeAnalysis.VarianceKind.Out => VarianceKind.Out,
                 _ => VarianceKind.None
             };
-        
 
         public bool HasDefaultConstructorConstraint => this._typeSymbol.HasConstructorConstraint;
 

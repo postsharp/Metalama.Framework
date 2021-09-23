@@ -4,8 +4,8 @@
 
 
 public T GenericMethod<T>(T a)
-    where T : notnull, global::System.IDisposable, new()
 {
+    global::System.Console.WriteLine(typeof(T).Name);
     return (T)(a);
 }        
     }

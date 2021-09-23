@@ -4,9 +4,6 @@
 using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.Impl.Formatting;
 using Caravela.Framework.Impl.ServiceProvider;
-#pragma warning disable IDE0005
-using Caravela.Framework.Tests.Integration.Runners;
-#pragma warning restore IDE0005
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using PostSharp.Patterns.Model;
@@ -18,6 +15,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
+#pragma warning disable IDE0005
+using Caravela.Framework.Tests.Integration.Runners;
+#pragma warning restore IDE0005
 
 namespace Caravela.AspectWorkbench.ViewModels
 {
@@ -101,6 +101,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             using var testResult = new TestResult();
 
             Exception? exception = null;
+
             try
             {
                 await testRunner.RunAsync( testInput, testResult );
@@ -123,7 +124,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 // Display the annotated syntax tree.
                 this.ColoredSourceCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync(
                     testResult.SyntaxTrees.First().InputDocument,
-                        diagnostics: testResult.Diagnostics );
+                    diagnostics: testResult.Diagnostics );
             }
 
             var errorsDocument = new FlowDocument();
@@ -147,7 +148,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 var formattedDocument3 = await OutputCodeFormatter.FormatToDocumentAsync( document3, testResult.CompileTimeCompilationDiagnostics );
 
-                    this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
+                this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
             }
 
             var consolidatedOutputSyntax = testResult.GetConsolidatedTestOutput();
@@ -178,7 +179,6 @@ namespace Caravela.AspectWorkbench.ViewModels
             }
             else
             {
-
                 // Compare the output and shows the result.
                 if ( BaseTestRunner.NormalizeTestOutput( this.ExpectedTransformedCode, false ) ==
                      BaseTestRunner.NormalizeTestOutput( consolidatedOutputText.ToString(), false ) )
@@ -223,11 +223,8 @@ namespace Caravela.AspectWorkbench.ViewModels
             }
             else
             {
-                errorsDocument.Blocks.Add(
-                    new Paragraph( new Run( "The program output code is different than expectations." ) { Foreground = Brushes.Red } ) );
+                errorsDocument.Blocks.Add( new Paragraph( new Run( "The program output code is different than expectations." ) { Foreground = Brushes.Red } ) );
             }
-        
-            
         }
 
         public void NewTest( string path )

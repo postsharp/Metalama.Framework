@@ -300,7 +300,7 @@ namespace Caravela.Framework.Impl.DesignTime.Pipeline
             {
                 designTimeAspectPipeline.Dispose();
             }
-            
+
             this._pipelinesByProjectId.Clear();
             this._domain.Dispose();
         }

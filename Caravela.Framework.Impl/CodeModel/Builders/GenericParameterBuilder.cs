@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal sealed class GenericParameterBuilder : DeclarationBuilder, IGenericParameterBuilder
     {
-        private readonly List<IType> _typeConstraints = new List<IType>();
+        private readonly List<IType> _typeConstraints = new();
 
         public string Name { get; set; }
 
@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         IReadOnlyList<IType> IGenericParameter.TypeConstraints => this._typeConstraints;
 
         public IReadOnlyList<IType> ReadOnlyTypeConstraints => this._typeConstraints;
-        
+
         public TypeKindConstraint TypeKindConstraint { get; set; }
 
         public VarianceKind Variance { get; set; }

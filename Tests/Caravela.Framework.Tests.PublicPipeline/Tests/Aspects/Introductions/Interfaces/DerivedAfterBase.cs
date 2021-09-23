@@ -25,8 +25,8 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
         {
-            aspectBuilder.AdviceFactory.ImplementInterface(aspectBuilder.Target, typeof(IBaseInterface));
-            aspectBuilder.AdviceFactory.ImplementInterface(aspectBuilder.Target, typeof(IDerivedInterface), OverrideStrategy.Ignore);
+            aspectBuilder.Advices.ImplementInterface(aspectBuilder.Target, typeof(IBaseInterface));
+            aspectBuilder.Advices.ImplementInterface(aspectBuilder.Target, typeof(IDerivedInterface), OverrideStrategy.Ignore);
         }
 
         [InterfaceMember]

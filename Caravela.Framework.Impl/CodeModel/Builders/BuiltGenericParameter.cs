@@ -37,6 +37,5 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public VarianceKind Variance => this.GenericParameterBuilder.Variance;
 
         public bool HasDefaultConstructorConstraint => this.GenericParameterBuilder.HasDefaultConstructorConstraint;
-
     }
 }

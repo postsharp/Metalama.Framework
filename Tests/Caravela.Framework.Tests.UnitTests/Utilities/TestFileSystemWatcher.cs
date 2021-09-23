@@ -25,7 +25,7 @@ namespace Caravela.Framework.Tests.UnitTests.Utilities
         public bool IncludeSubdirectories { get; set; }
 
         public void Dispose() { }
-        
+
         public void Notify( FileSystemEventArgs args )
         {
             this.Changed?.Invoke( this, args );

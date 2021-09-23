@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         void IAspect<IProperty>.BuildAspect(IAspectBuilder<IProperty> builder)
         {
-            builder.AdviceFactory.OverrideFieldOrPropertyAccessors(builder.Target, nameof(GetTemplate), nameof(SetTemplate));
+            builder.Advices.OverrideFieldOrPropertyAccessors(builder.Target, nameof(GetTemplate), nameof(SetTemplate));
         }
         
         [Template]
