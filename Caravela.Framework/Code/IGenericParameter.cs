@@ -5,26 +5,6 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
 {
-    public enum TypeKindConstraint
-    {
-        None,
-        Class,
-
-        // TODO: Must be handled differently, as in Roslyn.
-        NullableClass,
-        Struct,
-        Unmanaged,
-        NotNull,
-        Default
-    }
-
-    public enum VarianceKind
-    {
-        None,
-        In,
-        Out
-    }
-
     /// <summary>
     /// Represents a generic parameter of a method or type.
     /// </summary>
@@ -36,12 +16,18 @@ namespace Caravela.Framework.Code
         int Index { get; }
 
         /// <summary>
-        /// Gets the type constraints of the generic parameter.
+        /// Gets the type (interface) constraints of the generic parameter.
         /// </summary>
         IReadOnlyList<IType> TypeConstraints { get; }
 
+        /// <summary>
+        /// Gets the constraint on the kind of type, e.g. <see cref="Code.TypeKindConstraint.Class"/> or <see cref="Code.TypeKindConstraint.Struct"/>.
+        /// </summary>
         TypeKindConstraint TypeKindConstraint { get; }
 
+        /// <summary>
+        /// Gets the kind variance: <see cref="VarianceKind.In"/>, <see cref="VarianceKind.Out"/> or <see cref="VarianceKind.None"/>.
+        /// </summary>
         VarianceKind Variance { get; }
 
         /// <summary>

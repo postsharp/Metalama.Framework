@@ -51,8 +51,6 @@ namespace Caravela.Framework.Impl.Advices
         {
             base.Initialize( declarativeAdvices, diagnosticAdder );
 
-            // TODO: Checks.
-
             this.MemberBuilder.Type =
                 (this.TemplateMember?.Type ?? (INamedType?) this._addTemplate.Declaration?.Parameters.FirstOrDefault().AssertNotNull().Type)
                 .AssertNotNull();
