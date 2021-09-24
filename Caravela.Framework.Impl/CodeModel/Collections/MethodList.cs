@@ -22,7 +22,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public IEnumerable<IMethod> OfCompatibleSignature(
             string name,
-            int? genericParameterCount,
             IReadOnlyList<Type?>? argumentTypes,
             bool? isStatic = false,
             bool declaredOnly = true )
@@ -30,7 +29,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             return this.OfCompatibleSignature(
                 (argumentTypes, this.ContainingDeclaration.AssertNotNull().Compilation),
                 name,
-                genericParameterCount,
                 argumentTypes?.Count,
                 GetParameter,
                 isStatic,
@@ -44,7 +42,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public IEnumerable<IMethod> OfCompatibleSignature(
             string name,
-            int? genericParameterCount = null,
             IReadOnlyList<IType?>? argumentTypes = null,
             IReadOnlyList<RefKind?>? refKinds = null,
             bool? isStatic = false,
@@ -53,7 +50,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             return this.OfCompatibleSignature(
                 (argumentTypes, refKinds),
                 name,
-                genericParameterCount,
                 argumentTypes?.Count,
                 GetParameter,
                 isStatic,
@@ -65,7 +61,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public IMethod? OfExactSignature(
             string name,
-            int genericParameterCount,
             IReadOnlyList<IType> parameterTypes,
             IReadOnlyList<RefKind>? refKinds = null,
             bool? isStatic = false,
@@ -74,7 +69,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             return this.OfExactSignature(
                 (parameterTypes, refKinds),
                 name,
-                genericParameterCount,
                 parameterTypes.Count,
                 GetParameter,
                 isStatic,
@@ -89,7 +83,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             return this.OfExactSignature(
                 signatureTemplate,
                 signatureTemplate.Name,
-                signatureTemplate.TypeParameters.Count,
                 signatureTemplate.Parameters.Count,
                 GetParameter,
                 matchIsStatic ? signatureTemplate.IsStatic : null,

@@ -33,13 +33,13 @@ class C
             var type = compilation.DeclaredTypes[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
-            var matchedMethod1 = type.Methods.OfExactSignature( "Foo", 0, Array.Empty<IType>() );
+            var matchedMethod1 = type.Methods.OfExactSignature( "Foo", Array.Empty<IType>() );
             Assert.Same( type.Methods[0], matchedMethod1 );
-            var matchedMethod2 = type.Methods.OfExactSignature( "Foo", 0, new[] { intType } );
+            var matchedMethod2 = type.Methods.OfExactSignature( "Foo", new[] { intType } );
             Assert.Same( type.Methods[1], matchedMethod2 );
-            var matchedMethod3 = type.Methods.OfExactSignature( "Foo", 0, new[] { intType, intType } );
+            var matchedMethod3 = type.Methods.OfExactSignature( "Foo", new[] { intType, intType } );
             Assert.Same( type.Methods[2], matchedMethod3 );
-            var matchedMethod4 = type.Methods.OfExactSignature( "Foo", 0, new[] { intType, intType, intType } );
+            var matchedMethod4 = type.Methods.OfExactSignature( "Foo", new[] { intType, intType, intType } );
             Assert.Null( matchedMethod4 );
         }
 
@@ -75,55 +75,15 @@ class C
             var intArrayType = compilation.Factory.GetTypeByReflectionType( typeof(int[]) );
             var objectArrayType = compilation.Factory.GetTypeByReflectionType( typeof(string[]) );
 
-            var matchedMethod1 = type.Methods.OfExactSignature( "Foo", 0, new[] { objectType } );
+            var matchedMethod1 = type.Methods.OfExactSignature( "Foo", new[] { objectType } );
             Assert.Same( type.Methods[0], matchedMethod1 );
-            var matchedMethod2 = type.Methods.OfExactSignature( "Foo", 0, new[] { intType } );
+            var matchedMethod2 = type.Methods.OfExactSignature( "Foo", new[] { intType } );
             Assert.Same( type.Methods[1], matchedMethod2 );
-            var matchedMethod3 = type.Methods.OfExactSignature( "Foo", 0, new[] { stringType } );
+            var matchedMethod3 = type.Methods.OfExactSignature( "Foo", new[] { stringType } );
             Assert.Same( type.Methods[2], matchedMethod3 );
-            var matchedMethod4 = type.Methods.OfExactSignature( "Foo", 0, new[] { intArrayType } );
+            var matchedMethod4 = type.Methods.OfExactSignature( "Foo", new[] { intArrayType } );
             Assert.Same( type.Methods[3], matchedMethod4 );
-            var matchedMethod5 = type.Methods.OfExactSignature( "Foo", 0, new[] { objectArrayType } );
-            Assert.Null( matchedMethod5 );
-        }
-
-        [Fact]
-        public void Matches_GenericParameterCount()
-        {
-            var code = @"
-class C
-{
-    public void Foo(int x)
-    {
-    }
-
-    public void Foo<T1>(int x)
-    {
-    }
-
-    public void Foo<T1,T2>(int x)
-    {
-    }
-
-    public void Foo<T1,T2,T3>(int x)
-    {
-    }
-}
-";
-
-            var compilation = CreateCompilationModel( code );
-            var type = compilation.DeclaredTypes[0];
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
-
-            var matchedMethod1 = type.Methods.OfExactSignature( "Foo", 0, new[] { intType } );
-            Assert.Same( type.Methods[0], matchedMethod1 );
-            var matchedMethod2 = type.Methods.OfExactSignature( "Foo", 1, new[] { intType } );
-            Assert.Same( type.Methods[1], matchedMethod2 );
-            var matchedMethod3 = type.Methods.OfExactSignature( "Foo", 2, new[] { intType } );
-            Assert.Same( type.Methods[2], matchedMethod3 );
-            var matchedMethod4 = type.Methods.OfExactSignature( "Foo", 3, new[] { intType } );
-            Assert.Same( type.Methods[3], matchedMethod4 );
-            var matchedMethod5 = type.Methods.OfExactSignature( "Foo", 4, new[] { intType } );
+            var matchedMethod5 = type.Methods.OfExactSignature( "Foo", new[] { objectArrayType } );
             Assert.Null( matchedMethod5 );
         }
 
@@ -156,21 +116,21 @@ class C
             var type = compilation.DeclaredTypes[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
-            var matchedMethod1 = type.Methods.OfExactSignature( "Foo", 0, new[] { intType } );
+            var matchedMethod1 = type.Methods.OfExactSignature( "Foo", new[] { intType } );
             Assert.Same( type.Methods[0], matchedMethod1 );
-            var matchedMethod2 = type.Methods.OfExactSignature( "Foo", 0, new[] { intType }, new[] { RefKind.None } );
+            var matchedMethod2 = type.Methods.OfExactSignature( "Foo", new[] { intType }, new[] { RefKind.None } );
             Assert.Same( type.Methods[0], matchedMethod2 );
-            var matchedMethod3 = type.Methods.OfExactSignature( "Foo", 0, new[] { intType }, new[] { RefKind.Ref } );
+            var matchedMethod3 = type.Methods.OfExactSignature( "Foo", new[] { intType }, new[] { RefKind.Ref } );
             Assert.Same( type.Methods[1], matchedMethod3 );
-            var matchedMethod4 = type.Methods.OfExactSignature( "Bar", 0, new[] { intType }, new[] { RefKind.In } );
+            var matchedMethod4 = type.Methods.OfExactSignature( "Bar", new[] { intType }, new[] { RefKind.In } );
             Assert.Same( type.Methods[2], matchedMethod4 );
-            var matchedMethod5 = type.Methods.OfExactSignature( "Quz", 0, new[] { intType }, new[] { RefKind.Out } );
+            var matchedMethod5 = type.Methods.OfExactSignature( "Quz", new[] { intType }, new[] { RefKind.Out } );
             Assert.Same( type.Methods[3], matchedMethod5 );
-            var matchedMethod6 = type.Methods.OfExactSignature( "Foo", 0, new[] { intType }, new[] { RefKind.In } );
+            var matchedMethod6 = type.Methods.OfExactSignature( "Foo", new[] { intType }, new[] { RefKind.In } );
             Assert.Null( matchedMethod6 );
-            var matchedMethod7 = type.Methods.OfExactSignature( "Bar", 0, new[] { intType }, new[] { RefKind.Out } );
+            var matchedMethod7 = type.Methods.OfExactSignature( "Bar", new[] { intType }, new[] { RefKind.Out } );
             Assert.Null( matchedMethod7 );
-            var matchedMethod8 = type.Methods.OfExactSignature( "Quz", 0, new[] { intType }, new[] { RefKind.Ref } );
+            var matchedMethod8 = type.Methods.OfExactSignature( "Quz", new[] { intType }, new[] { RefKind.Ref } );
             Assert.Null( matchedMethod8 );
         }
 
@@ -204,11 +164,11 @@ class C : B
             var type = compilation.DeclaredTypes[2];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
-            var matchedMethod1 = type.Methods.OfExactSignature( "Foo", 0, Array.Empty<IType>() );
+            var matchedMethod1 = type.Methods.OfExactSignature( "Foo", Array.Empty<IType>() );
             Assert.Null( matchedMethod1 );
-            var matchedMethod2 = type.Methods.OfExactSignature( "Foo", 0, new[] { intType } );
+            var matchedMethod2 = type.Methods.OfExactSignature( "Foo", new[] { intType } );
             Assert.Null( matchedMethod2 );
-            var matchedMethod3 = type.Methods.OfExactSignature( "Foo", 0, new[] { intType, intType } );
+            var matchedMethod3 = type.Methods.OfExactSignature( "Foo", new[] { intType, intType } );
             Assert.Same( type.Methods[0], matchedMethod3 );
         }
 
@@ -244,11 +204,11 @@ class C : B
             var typeC = compilation.DeclaredTypes[2];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
-            var matchedMethod1 = typeC.Methods.OfExactSignature( "Foo", 0, Array.Empty<IType>(), declaredOnly: false );
+            var matchedMethod1 = typeC.Methods.OfExactSignature( "Foo", Array.Empty<IType>(), declaredOnly: false );
             Assert.Same( typeA.Methods[0], matchedMethod1 );
-            var matchedMethod2 = typeC.Methods.OfExactSignature( "Foo", 0, new[] { intType }, declaredOnly: false );
+            var matchedMethod2 = typeC.Methods.OfExactSignature( "Foo", new[] { intType }, declaredOnly: false );
             Assert.Same( typeB.Methods[0], matchedMethod2 );
-            var matchedMethod3 = typeC.Methods.OfExactSignature( "Foo", 0, new[] { intType, intType }, declaredOnly: false );
+            var matchedMethod3 = typeC.Methods.OfExactSignature( "Foo", new[] { intType, intType }, declaredOnly: false );
             Assert.Same( typeC.Methods[0], matchedMethod3 );
         }
 
@@ -263,7 +223,7 @@ class A : System.Collections.Generic.List<int> { }
             var typeA = compilation.DeclaredTypes[0];
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
-            var matchedMethod1 = typeA.Methods.OfExactSignature( "Add", 0, new[] { intType }, declaredOnly: false );
+            var matchedMethod1 = typeA.Methods.OfExactSignature( "Add", new[] { intType }, declaredOnly: false );
 
             Assert.NotNull( matchedMethod1 );
             Assert.Equal( "List", matchedMethod1!.DeclaringType.Name );
@@ -288,17 +248,17 @@ class C
             var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes[0];
 
-            var matchedMethod1 = type.Methods.OfExactSignature( "Foo", 0, Array.Empty<IType>(), isStatic: false );
+            var matchedMethod1 = type.Methods.OfExactSignature( "Foo", Array.Empty<IType>(), isStatic: false );
             Assert.Same( type.Methods[0], matchedMethod1 );
-            var matchedMethod2 = type.Methods.OfExactSignature( "Foo", 0, Array.Empty<IType>(), isStatic: true );
+            var matchedMethod2 = type.Methods.OfExactSignature( "Foo", Array.Empty<IType>(), isStatic: true );
             Assert.Null( matchedMethod2 );
-            var matchedMethod3 = type.Methods.OfExactSignature( "Foo", 0, Array.Empty<IType>(), isStatic: null );
+            var matchedMethod3 = type.Methods.OfExactSignature( "Foo", Array.Empty<IType>(), isStatic: null );
             Assert.Same( type.Methods[0], matchedMethod3 );
-            var matchedMethod4 = type.Methods.OfExactSignature( "Bar", 0, Array.Empty<IType>(), isStatic: false );
+            var matchedMethod4 = type.Methods.OfExactSignature( "Bar", Array.Empty<IType>(), isStatic: false );
             Assert.Null( matchedMethod4 );
-            var matchedMethod5 = type.Methods.OfExactSignature( "Bar", 0, Array.Empty<IType>(), isStatic: true );
+            var matchedMethod5 = type.Methods.OfExactSignature( "Bar", Array.Empty<IType>(), isStatic: true );
             Assert.Same( type.Methods[1], matchedMethod5 );
-            var matchedMethod6 = type.Methods.OfExactSignature( "Bar", 0, Array.Empty<IType>(), isStatic: null );
+            var matchedMethod6 = type.Methods.OfExactSignature( "Bar", Array.Empty<IType>(), isStatic: null );
             Assert.Same( type.Methods[1], matchedMethod6 );
         }
     }
