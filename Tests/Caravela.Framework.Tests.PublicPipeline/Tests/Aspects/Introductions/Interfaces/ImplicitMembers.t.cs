@@ -11,7 +11,7 @@ public global::System.Int32 InterfaceMethod()
 public global::System.Int32 Property
 {get    {
         global::System.Console.WriteLine("This is introduced interface member.");
-        return (global::System.Int32)(42);
+        return (global::System.Int32)42;
     }
 
 set    {

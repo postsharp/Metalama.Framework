@@ -91,7 +91,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                 Block(
                         LocalDeclarationStatement(
                             VariableDeclaration(
-                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( targetSymbol.Type ).WithTrailingTrivia( Whitespace( " " ) ),
+                                SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( targetSymbol.Type ).WithTrailingTrivia( Whitespace( " " ) ),
                                 SingletonSeparatedList( VariableDeclarator( variableDeclarator.Identifier ) ) ) ),
                         inlinedTargetBody )
                     .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );

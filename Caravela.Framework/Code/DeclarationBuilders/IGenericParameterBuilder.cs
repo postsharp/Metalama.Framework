@@ -7,6 +7,8 @@ namespace Caravela.Framework.Code.DeclarationBuilders
 {
     public interface IGenericParameterBuilder : IDeclarationBuilder, IGenericParameter
     {
+        new bool? IsConstraintNullable { get; set; }
+        
         new string Name { get; set; }
 
         new TypeKindConstraint TypeKindConstraint { get; set; }

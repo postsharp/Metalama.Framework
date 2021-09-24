@@ -198,7 +198,7 @@ namespace Caravela.Framework.Impl.Templating
                 switch ( type )
                 {
                     case IdentifierNameSyntax { IsVar: true }:
-                        variableType = LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( Microsoft.CodeAnalysis.SpecialType.System_Object );
+                        variableType = SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( Microsoft.CodeAnalysis.SpecialType.System_Object );
                         variableValue = SyntaxFactoryEx.Null;
 
                         break;

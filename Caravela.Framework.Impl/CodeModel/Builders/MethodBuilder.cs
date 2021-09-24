@@ -118,7 +118,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
+            var syntaxGenerator = SyntaxGeneratorFactory.DefaultSyntaxGenerator;
 
             var method =
                 MethodDeclaration(
@@ -127,7 +127,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     SyntaxHelpers.CreateSyntaxForReturnType( this ),
                     this.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier(
-                            (NameSyntax) syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                            (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                         : null,
                     Identifier( this.Name ),
                     SyntaxHelpers.CreateSyntaxForTypeParameterList( this ),
@@ -140,7 +140,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                                 {
                                     ReturnStatement(
                                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
-                                        DefaultExpression( syntaxGenerator.TypeExpression( this.ReturnParameter.Type.GetSymbol() ) ),
+                                        DefaultExpression( syntaxGenerator.Type( this.ReturnParameter.Type.GetSymbol() ) ),
                                         Token( SyntaxKind.SemicolonToken ) )
                                 }
                                 : Array.Empty<StatementSyntax>() ) ),

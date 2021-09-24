@@ -19,12 +19,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null )
         {
             var typeSymbol = this.Type.GetSymbol();
-            var expression = LanguageServiceFactory.CSharpSyntaxGenerator.DefaultExpression( typeSymbol );
+            var expression = SyntaxGeneratorFactory.DefaultSyntaxGenerator.DefaultExpression( typeSymbol );
 
             if ( expression is not DefaultExpressionSyntax )
             {
                 // We need to specify the type explicitly to preserve the typing.
-                expression = LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression(
+                expression = SyntaxGeneratorFactory.DefaultSyntaxGenerator.CastExpression(
                     typeSymbol.IsReferenceType ? typeSymbol.WithNullableAnnotation( NullableAnnotation.Annotated ) : typeSymbol,
                     expression );
             }

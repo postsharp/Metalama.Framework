@@ -180,7 +180,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public void AppendTypeName( IType type, StringBuilder stringBuilder )
         {
-            var code = LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( type.GetSymbol().AssertNotNull() ).ToString();
+            var code = SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( type.GetSymbol().AssertNotNull() ).ToString();
             stringBuilder.Append( code );
         }
 

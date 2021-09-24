@@ -8,11 +8,11 @@ private int _turtles;
         var value = global::Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\SOFTWARE\\Company\\Product\\Animals", "Turtles", null);
         if (value != null)
         {
-            return (global::System.Int32)(global::System.Convert.ChangeType(value, typeof(global::System.Int32)));
+            return (global::System.Int32)global::System.Convert.ChangeType(value, typeof(global::System.Int32));
         }
         else
         {
-            return (global::System.Int32)(0);
+            return default(global::System.Int32);
         }
     }
 

@@ -102,12 +102,12 @@ namespace Caravela.Framework.Impl.Transformations
 
                     if ( TypeExtensions.Equals( this.OverriddenDeclaration.ReturnType, SpecialType.Void ) )
                     {
-                        returnType = LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression(
+                        returnType = SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type(
                             this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.ValueTask ).GetSymbol() );
                     }
                 }
 
-                returnType ??= LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this.OverriddenDeclaration.ReturnType.GetSymbol() );
+                returnType ??= SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( this.OverriddenDeclaration.ReturnType.GetSymbol() );
 
                 var introducedMethod = MethodDeclaration(
                     List<AttributeListSyntax>(),

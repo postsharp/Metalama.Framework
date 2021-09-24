@@ -24,6 +24,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public Type ToType() => throw new NotImplementedException();
 
+        public bool? IsReferenceType => this.GenericParameterBuilder.IsReferenceType;
+
+        public bool? IsNullable => this.GenericParameterBuilder.IsNullable;
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public string Name => this.GenericParameterBuilder.Name;
@@ -35,6 +39,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public TypeKindConstraint TypeKindConstraint => this.GenericParameterBuilder.TypeKindConstraint;
 
         public VarianceKind Variance => this.GenericParameterBuilder.Variance;
+
+        public bool? IsConstraintNullable => this.GenericParameterBuilder.IsConstraintNullable;
 
         public bool HasDefaultConstructorConstraint => this.GenericParameterBuilder.HasDefaultConstructorConstraint;
     }

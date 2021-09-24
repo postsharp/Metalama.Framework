@@ -1,4 +1,4 @@
-    [Introduction]
+[Introduction]
     [Override]
     public class TargetClass:global::Caravela.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers_Override_NotInlineable.IInterface    {
 
@@ -34,7 +34,7 @@ set    {
 public global::System.Int32 Property_Introduction
 {get    {
         global::System.Console.WriteLine("This is introduced interface member.");
-        return (global::System.Int32)(42);
+        return (global::System.Int32)42;
     }
 
 set    {

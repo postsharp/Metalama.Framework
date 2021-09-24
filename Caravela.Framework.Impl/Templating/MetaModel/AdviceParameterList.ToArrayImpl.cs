@@ -25,10 +25,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
             public RuntimeExpression CreateExpression( string? expressionText, Location? location = null )
             {
-                var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
+                var syntaxGenerator = SyntaxGeneratorFactory.DefaultSyntaxGenerator;
 
                 var array = (ExpressionSyntax) syntaxGenerator.ArrayCreationExpression(
-                    syntaxGenerator.TypeExpression( SpecialType.System_Object ),
+                    syntaxGenerator.Type( SpecialType.System_Object ),
                     this._parent._parameters.Select(
                         p =>
                             p.RefKind.IsReadable()

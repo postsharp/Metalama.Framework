@@ -55,7 +55,7 @@ global::Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.Dec
 public global::System.Int32 IntroducedProperty_Accessors
 {get    {
         global::System.Console.WriteLine("Get");
-        return (global::System.Int32)(42);
+        return (global::System.Int32)42;
     }
 
 set    {

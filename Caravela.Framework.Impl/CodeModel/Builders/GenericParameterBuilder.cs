@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     internal sealed class GenericParameterBuilder : DeclarationBuilder, IGenericParameterBuilder
     {
         private readonly List<IType> _typeConstraints = new();
-
+        
         public string Name { get; set; }
 
         public int Index { get; }
@@ -24,6 +24,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public VarianceKind Variance { get; set; }
 
+        public bool? IsConstraintNullable { get; set; }
+
         public bool HasDefaultConstructorConstraint { get; set; }
 
         public void AddTypeConstraint( IType type ) => this._typeConstraints.Add( type );
@@ -35,6 +37,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public SpecialType SpecialType => SpecialType.None;
 
         public Type ToType() => throw new NotImplementedException();
+
+        public bool? IsReferenceType => this.IsReferenceTypeImpl();
+
+        public bool? IsNullable => this.IsNullableImpl();
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 

@@ -27,10 +27,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         {
             var items = this._arrayBuilder.Items.Select( i => RuntimeExpression.FromValue( i, this.Type.Compilation ).Syntax ).ToArray();
 
-            var generator = LanguageServiceFactory.CSharpSyntaxGenerator;
+            var generator = SyntaxGeneratorFactory.DefaultSyntaxGenerator;
 
             var arrayCreation = generator.ArrayCreationExpression(
-                generator.TypeExpression( this._itemType.GetSymbol() ),
+                generator.Type( this._itemType.GetSymbol() ),
                 items );
 
             return new RuntimeExpression( arrayCreation, this.Type );

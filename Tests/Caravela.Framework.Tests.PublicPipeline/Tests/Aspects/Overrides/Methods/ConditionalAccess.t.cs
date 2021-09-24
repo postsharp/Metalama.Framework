@@ -1,17 +1,17 @@
-    internal class TargetClass
+internal class TargetClass
     {
         [Override]
         public void TargetMethod_Void()
 {
     global::System.Console.WriteLine("This is the overriding method.");
     var x = this;
-    ((global::Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.ConditionalAccess.TargetClass)(x))?.TargetMethod_Void_Source();
+    ((global::Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.ConditionalAccess.TargetClass)x)?.TargetMethod_Void_Source();
     return;
 }
 
 private void TargetMethod_Void_Source()
         {
-            Console.WriteLine("This is the original method.");
+            Console.WriteLine( "This is the original method." );
         }
 
         [Override]
@@ -19,12 +19,13 @@ private void TargetMethod_Void_Source()
 {
     global::System.Console.WriteLine("This is the overriding method.");
     var x = this;
-    return ((global::Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.ConditionalAccess.TargetClass)(x))?.TargetMethod_Int_Source();
+    return ((global::Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.ConditionalAccess.TargetClass)x)?.TargetMethod_Int_Source();
 }
 
 private int? TargetMethod_Int_Source()
         {
-            Console.WriteLine("This is the original method.");
+            Console.WriteLine( "This is the original method." );
+
             return 42;
         }
     }

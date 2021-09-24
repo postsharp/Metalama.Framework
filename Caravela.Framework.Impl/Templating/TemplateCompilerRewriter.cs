@@ -1401,7 +1401,7 @@ namespace Caravela.Framework.Impl.Templating
 
                     if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                     {
-                        return this.Transform( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( namespaceOrType ) );
+                        return this.Transform( SyntaxGeneratorFactory.DefaultSyntaxGenerator.NameExpression( namespaceOrType ) );
                     }
                     else if ( symbol is { IsStatic: true } && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
                     {
@@ -1414,7 +1414,7 @@ namespace Caravela.Framework.Impl.Templating
                                 // We have an access to a field or method with a "using static", or a non-qualified static member access.
                                 return this.MetaSyntaxFactory.MemberAccessExpression(
                                     this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
-                                    this.Transform( LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( symbol.ContainingType ) ),
+                                    this.Transform( SyntaxGeneratorFactory.DefaultSyntaxGenerator.NameExpression( symbol.ContainingType ) ),
                                     this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
                         }
                     }
@@ -1443,7 +1443,7 @@ namespace Caravela.Framework.Impl.Templating
             switch ( symbol )
             {
                 case INamespaceOrTypeSymbol namespaceOrType:
-                    var nameExpression = LanguageServiceFactory.CSharpSyntaxGenerator.NameExpression( namespaceOrType );
+                    var nameExpression = SyntaxGeneratorFactory.DefaultSyntaxGenerator.NameExpression( namespaceOrType );
 
                     transformedNode = this.GetTransformationKind( node ) == TransformationKind.Transform
                         ? this.WithCallToAddSimplifierAnnotation( this.Transform( nameExpression ) )

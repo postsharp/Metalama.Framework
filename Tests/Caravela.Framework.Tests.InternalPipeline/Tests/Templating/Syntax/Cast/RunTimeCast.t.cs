@@ -13,8 +13,8 @@ string Method(string a)
     string text = obj as string;
     if (text != null)
     {
-        return (global::System.String)(text.Trim());
+        return (global::System.String)text.Trim();
     }
 
-    return (global::System.String)(obj);
+    return (global::System.String)obj;
 }

@@ -7,13 +7,13 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal partial class AnnotatingSyntaxGenerator
+    internal partial class SyntaxGenerator
     {
-        private class GenericInstanceTypeOfRewriter : TypeOfRewriter
+        private class RemoveReferenceNullableAnnotationsRewriter : CSharpSyntaxRewriter
         {
             private ITypeSymbol _type;
 
-            public GenericInstanceTypeOfRewriter( ITypeSymbol type )
+            public RemoveReferenceNullableAnnotationsRewriter( ITypeSymbol type )
             {
                 this._type = type;
             }

@@ -3,32 +3,50 @@
 
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Simplification;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal partial class AnnotatingSyntaxGenerator
+    internal partial class SyntaxGenerator
     {
-        private readonly SyntaxGenerator _syntaxGenerator;
+        private readonly Microsoft.CodeAnalysis.Editing.SyntaxGenerator _syntaxGenerator;
+        private readonly bool emitNullabilityAnnotations;
 
-        public AnnotatingSyntaxGenerator( SyntaxGenerator syntaxGenerator )
+        public SyntaxGenerator( Microsoft.CodeAnalysis.Editing.SyntaxGenerator syntaxGenerator, bool emitNullabilityAnnotations )
         {
             this._syntaxGenerator = syntaxGenerator;
+            this.emitNullabilityAnnotations = emitNullabilityAnnotations;
         }
 
         public TypeOfExpressionSyntax TypeOfExpression( ITypeSymbol type )
         {
-            var typeSyntax = this.TypeExpression( type.WithNullableAnnotation( NullableAnnotation.NotAnnotated ) );
+            var typeSyntax = this.Type( type.WithNullableAnnotation( NullableAnnotation.NotAnnotated ) );
 
+            if ( type is INamedTypeSymbol { IsGenericType: true } namedType )
+            {
+                if ( namedType.IsGenericTypeDefinition() )
+                {
+                    // In generic definitions, we must remove type arguments.
+                    typeSyntax = (TypeSyntax) RemoveTypeArgumentsRewriter.Instance.Visit( typeSyntax );
+                }
+            }
+
+            // In any typeof, we must remove ? annotations of nullable types.
+            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax );
+            
+            // In any typeof, we must change dynamic to object.
+            typeSyntax = (TypeSyntax) DynamicToVarRewriter.Instance.Visit( typeSyntax );
+
+            
             var rewriter = type switch
             {
-                INamedTypeSymbol { IsGenericType: true } genericType when genericType.IsGenericTypeDefinition() => GenericDefinitionTypeOfRewriter.Instance,
-                INamedTypeSymbol { IsGenericType: true } => new GenericInstanceTypeOfRewriter( type ),
-                _ => TypeOfRewriter.Instance
+                INamedTypeSymbol { IsGenericType: true } genericType when genericType.IsGenericTypeDefinition() => RemoveTypeArgumentsRewriter.Instance,
+                INamedTypeSymbol { IsGenericType: true } => new RemoveReferenceNullableAnnotationsRewriter( type ),
+                _ => DynamicToVarRewriter.Instance
             };
 
             var rewrittenTypeSyntax = rewriter.Visit( typeSyntax );
@@ -36,16 +54,20 @@ namespace Caravela.Framework.Impl.CodeModel
             return (TypeOfExpressionSyntax) this._syntaxGenerator.TypeOfExpression( rewrittenTypeSyntax );
         }
 
-        public TypeSyntax TypeExpression( ITypeSymbol symbol )
-            => (TypeSyntax) this._syntaxGenerator.TypeExpression( symbol )
-                .WithAdditionalAnnotations( Simplifier.Annotation );
+        public TypeSyntax Type( ITypeSymbol symbol )
+        {
+            var typeSyntax = (TypeSyntax) this._syntaxGenerator.TypeExpression( symbol ).WithAdditionalAnnotations( Simplifier.Annotation );
 
-        public SimpleNameSyntax GenericName( string methodName, IEnumerable<ITypeSymbol> @select )
-            => (SimpleNameSyntax) this._syntaxGenerator.GenericName( methodName, select )
-                .WithAdditionalAnnotations( Simplifier.Annotation );
+            if ( !this.emitNullabilityAnnotations )
+            {
+                typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax );
+            }
+
+            return typeSyntax;
+        }
 
         public ExpressionSyntax DefaultExpression( ITypeSymbol typeSymbol )
-            => (ExpressionSyntax) this._syntaxGenerator.DefaultExpression( typeSymbol )
+            =>  SyntaxFactory.DefaultExpression( this.Type( typeSymbol ) )
                 .WithAdditionalAnnotations( Simplifier.Annotation );
 
         public ArrayCreationExpressionSyntax ArrayCreationExpression( TypeSyntax type, IEnumerable<SyntaxNode> elements )
@@ -55,15 +77,24 @@ namespace Caravela.Framework.Impl.CodeModel
             return array.WithType( array.Type.WithAdditionalAnnotations( Simplifier.Annotation ) );
         }
 
-        public TypeSyntax TypeExpression( SpecialType specialType )
+        public TypeSyntax Type( SpecialType specialType )
             => (TypeSyntax) this._syntaxGenerator.TypeExpression( specialType )
                 .WithAdditionalAnnotations( Simplifier.Annotation );
 
         public CastExpressionSyntax CastExpression( ITypeSymbol targetTypeSymbol, ExpressionSyntax expression )
         {
-            var cast = (CastExpressionSyntax) this._syntaxGenerator.CastExpression( targetTypeSymbol, expression );
+            switch (expression)
+            {
+                case BinaryExpressionSyntax:
+                case ConditionalExpressionSyntax:
+                case CastExpressionSyntax:
+                case PrefixUnaryExpressionSyntax:
+                    expression = ParenthesizedExpression( expression );
 
-            return cast.WithType( cast.Type.WithAdditionalAnnotations( Simplifier.Annotation ) );
+                    break;
+            }
+
+            return SyntaxFactory.CastExpression( this.Type( targetTypeSymbol ), expression ).WithAdditionalAnnotations( Simplifier.Annotation );
         }
 
         public ExpressionSyntax NameExpression( INamespaceOrTypeSymbol symbol )
@@ -73,21 +104,10 @@ namespace Caravela.Framework.Impl.CodeModel
             switch ( symbol )
             {
                 case ITypeSymbol typeSymbol:
-                    if ( typeSymbol.NullableAnnotation == NullableAnnotation.Annotated )
-                    {
-                        return NullableType(
-                            (TypeSyntax) this._syntaxGenerator.NameExpression( typeSymbol.WithNullableAnnotation( NullableAnnotation.None ) ) );
-                    }
-                    else
-                    {
-                        expression = (ExpressionSyntax) this._syntaxGenerator.NameExpression( typeSymbol );
-                    }
-
-                    break;
+                    return this.Type( typeSymbol );
 
                 case INamespaceSymbol namespaceSymbol:
                     expression = (ExpressionSyntax) this._syntaxGenerator.NameExpression( namespaceSymbol );
-
                     break;
 
                 default:
@@ -103,7 +123,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IdentifierNameSyntax IdentifierName( string identifier ) => (IdentifierNameSyntax) this._syntaxGenerator.IdentifierName( identifier );
 
-        public TypeSyntax ArrayTypeExpression( ExpressionSyntax type )
+        public TypeSyntax ArrayTypeExpression( TypeSyntax type )
         {
             var arrayType = (ArrayTypeSyntax) this._syntaxGenerator.ArrayTypeExpression( type ).WithAdditionalAnnotations( Simplifier.Annotation );
 
@@ -112,5 +132,6 @@ namespace Caravela.Framework.Impl.CodeModel
             return arrayType.WithRankSpecifiers(
                 SingletonList( ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) );
         }
+
     }
 }

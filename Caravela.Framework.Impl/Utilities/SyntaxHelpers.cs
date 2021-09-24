@@ -15,13 +15,13 @@ namespace Caravela.Framework.Impl.Utilities
     internal static class SyntaxHelpers
     {
         public static TypeSyntax CreateSyntaxForReturnType( IMethod method )
-            => LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( method.ReturnType.GetSymbol() );
+            => SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( method.ReturnType.GetSymbol() );
 
         public static TypeSyntax CreateSyntaxForPropertyType( IProperty property )
-            => LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( property.Type.GetSymbol() );
+            => SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( property.Type.GetSymbol() );
 
         public static TypeSyntax CreateSyntaxForEventType( IEvent property )
-            => LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( property.Type.GetSymbol() );
+            => SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( property.Type.GetSymbol() );
 
         public static TypeParameterListSyntax? CreateSyntaxForTypeParameterList( IMethod method )
         {
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.Utilities
                             p => SyntaxFactory.Parameter(
                                 SyntaxFactory.List<AttributeListSyntax>(),
                                 p.GetSyntaxModifierList(),
-                                LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( p.Type.GetSymbol() ),
+                                SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( p.Type.GetSymbol() ),
                                 SyntaxFactory.Identifier( p.Name ),
                                 null ) ) ) );
 
@@ -84,16 +84,14 @@ namespace Caravela.Framework.Impl.Utilities
                 {
                     case TypeKindConstraint.Class:
                         constraints ??= new List<TypeParameterConstraintSyntax>();
-                        constraints.Add( SyntaxFactory.ClassOrStructConstraint( SyntaxKind.ClassConstraint ) );
+                        var constraint = SyntaxFactory.ClassOrStructConstraint( SyntaxKind.ClassConstraint );
 
-                        break;
-
-                    case TypeKindConstraint.NullableClass:
-                        constraints ??= new List<TypeParameterConstraintSyntax>();
-
-                        constraints.Add(
-                            SyntaxFactory.ClassOrStructConstraint( SyntaxKind.ClassConstraint )
-                                .WithQuestionToken( SyntaxFactory.Token( SyntaxKind.QuestionToken ) ) );
+                        if ( genericParameter.HasDefaultConstructorConstraint == true )
+                        {
+                            constraint = constraint.WithQuestionToken( SyntaxFactory.Token( SyntaxKind.QuestionToken ) );
+                        }
+                            
+                        constraints.Add( constraint );
 
                         break;
 
@@ -131,7 +129,7 @@ namespace Caravela.Framework.Impl.Utilities
                     constraints ??= new List<TypeParameterConstraintSyntax>();
 
                     constraints.Add(
-                        SyntaxFactory.TypeConstraint( LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( typeConstraint.GetSymbol() ) ) );
+                        SyntaxFactory.TypeConstraint( SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( typeConstraint.GetSymbol() ) ) );
                 }
 
                 if ( genericParameter.HasDefaultConstructorConstraint )

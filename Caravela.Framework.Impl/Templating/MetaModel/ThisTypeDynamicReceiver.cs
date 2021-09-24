@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             => new(
                 SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( this._type.GetSymbol() ),
+                        SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( this._type.GetSymbol() ),
                         SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
                     .WithAspectReferenceAnnotation( this._linkerAnnotation ),
                 this._type.Compilation );

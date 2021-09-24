@@ -86,7 +86,7 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
                             SyntaxFactory.SeparatedList(
                                 this._method.TypeArguments.Select(
                                         t =>
-                                            LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( t.GetSymbol() ) )
+                                            SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( t.GetSymbol() ) )
                                     .ToArray() ) ) );
             }
             else

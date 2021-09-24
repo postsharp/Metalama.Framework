@@ -29,7 +29,14 @@ namespace Caravela.Framework.Code
         /// Gets the kind variance: <see cref="VarianceKind.In"/>, <see cref="VarianceKind.Out"/> or <see cref="VarianceKind.None"/>.
         /// </summary>
         VarianceKind Variance { get; }
-
+        
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="Code.TypeKindConstraint.Class"/> constraint has the nullable annotation (?).
+        /// This property returns <c>null</c> if the <see cref="TypeKindConstraint"/> has a different value than <see cref="Code.TypeKindConstraint.Class"/>
+        /// or if the nullability of the generic parameter is not analyzed.
+        /// </summary>
+        bool? IsConstraintNullable { get; }
+        
         /// <summary>
         /// Gets a value indicating whether the generic parameter has the <c>new()</c> constraint.
         /// </summary>

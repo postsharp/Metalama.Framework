@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.Linking.Inlining
                                     this.DeclaresReturnVariable
                                         ? LocalDeclarationStatement(
                                                 VariableDeclaration(
-                                                    LanguageServiceFactory.CSharpSyntaxGenerator.TypeExpression( semantic.Symbol.ReturnType ),
+                                                    SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( semantic.Symbol.ReturnType ),
                                                     SingletonSeparatedList( VariableDeclarator( this.ReturnVariableName.AssertNotNull() ) ) ) )
                                             .WithLeadingTrivia( ElasticLineFeed )
                                             .AddGeneratedCodeAnnotation()

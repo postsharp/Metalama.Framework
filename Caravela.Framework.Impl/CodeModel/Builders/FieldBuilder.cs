@@ -55,14 +55,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
+            var syntaxGenerator = SyntaxGeneratorFactory.DefaultSyntaxGenerator;
 
             var field =
                 FieldDeclaration(
                     List<AttributeListSyntax>(), // TODO: Attributes.
                     this.GetSyntaxModifierList(),
                     VariableDeclaration(
-                        syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
+                        syntaxGenerator.Type( this.Type.GetSymbol() ),
                         SingletonSeparatedList(
                             VariableDeclarator(
                                 Identifier( this.Name ),

@@ -166,7 +166,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
 
                     // Add non-implemented members of IAspect and IEligible.
-                    var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
+                    var syntaxGenerator = SyntaxGeneratorFactory.DefaultSyntaxGenerator;
                     var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces, throwOnDuplicate: false );
 
                     foreach ( var implementedInterface in allImplementedInterfaces )
@@ -190,8 +190,8 @@ namespace Caravela.Framework.Impl.CompileTime
                                     var newMethod = MethodDeclaration(
                                             default,
                                             default,
-                                            syntaxGenerator.TypeExpression( method.ReturnType ),
-                                            ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.TypeExpression( implementedInterface ) ),
+                                            syntaxGenerator.Type( method.ReturnType ),
+                                            ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( implementedInterface ) ),
                                             Identifier( method.Name ),
                                             default,
                                             ParameterList(
@@ -200,7 +200,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                                         p => Parameter(
                                                             default,
                                                             default,
-                                                            syntaxGenerator.TypeExpression( p.Type ),
+                                                            syntaxGenerator.Type( p.Type ),
                                                             Identifier( p.Name ),
                                                             default ) ) ) ),
                                             default,

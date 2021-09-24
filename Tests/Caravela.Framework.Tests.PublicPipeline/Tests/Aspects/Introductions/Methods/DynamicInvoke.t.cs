@@ -31,6 +31,6 @@ public void IntroduceVoid()
 public global::System.Int32 IntroduceInt()
 {
     global::System.Console.WriteLine("Introduced");
-    return 0;
+    return default(global::System.Int32);
 }        
     }

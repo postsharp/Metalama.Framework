@@ -10,7 +10,7 @@ class TargetCode
     global::System.Console.WriteLine("Async intercept");
     await global::System.Threading.Tasks.Task.Yield();
     var result = await this.AsyncMethod_Aspect2(a);
-    return (global::System.Int32)(result);
+    return (global::System.Int32)result;
 }
 
 private async Task<int> AsyncMethod_Source(int a)
@@ -32,7 +32,7 @@ public global::System.Threading.Tasks.Task<global::System.Int32> AsyncMethod_Asp
     global::System.Console.WriteLine("Async intercept");
     await global::System.Threading.Tasks.Task.Yield();
     var result = await this.NonAsyncMethod_Aspect2(a);
-    return (global::System.Int32)(result);
+    return (global::System.Int32)result;
 }
 
 

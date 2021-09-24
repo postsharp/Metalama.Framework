@@ -101,6 +101,30 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public Type ToType() => CompileTimeType.Create( this );
 
+        public bool? IsReferenceType => this.TypeSymbol.IsReferenceType;
+
+        public bool? IsNullable
+        {
+            get
+            {
+                if ( this.TypeSymbol.IsReferenceType )
+                {
+                    return this.TypeSymbol.NullableAnnotation switch
+                    {
+                        NullableAnnotation.Annotated => true,
+                        NullableAnnotation.NotAnnotated => false,
+                        _ => null
+                    };
+
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+        
+
         public override MemberInfo ToMemberInfo() => this.ToType();
 
         public bool IsReadOnly => this.TypeSymbol.IsReadOnly;

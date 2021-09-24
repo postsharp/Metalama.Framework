@@ -9,6 +9,6 @@ global::System.Threading.Tasks.ValueTask<global::System.Int32> task;
 task=ValueTask.FromResult(a);
 goto __aspect_return_1;
 __aspect_return_1:    global::System.Console.WriteLine("Got task");
-    return (global::System.Threading.Tasks.ValueTask<global::System.Int32>)(task);
+    return (global::System.Threading.Tasks.ValueTask<global::System.Int32>)task;
 }
     }

@@ -148,17 +148,17 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = LanguageServiceFactory.CSharpSyntaxGenerator;
+            var syntaxGenerator = SyntaxGeneratorFactory.DefaultSyntaxGenerator;
 
             // TODO: Indexers.
             var property =
                 PropertyDeclaration(
                     List<AttributeListSyntax>(), // TODO: Attributes.
                     this.GetSyntaxModifierList(),
-                    syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
+                    syntaxGenerator.Type( this.Type.GetSymbol() ),
                     this.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier(
-                            (NameSyntax) syntaxGenerator.TypeExpression( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                            (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                         : null,
                     Identifier( this.Name ),
                     GenerateAccessorList(),
@@ -211,7 +211,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                                 : Block(
                                     ReturnStatement(
                                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
-                                        DefaultExpression( syntaxGenerator.TypeExpression( this.Type.GetSymbol() ) ),
+                                        DefaultExpression( syntaxGenerator.Type( this.Type.GetSymbol() ) ),
                                         Token( SyntaxKind.SemicolonToken ) ) ),
                             null,
                             this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default )

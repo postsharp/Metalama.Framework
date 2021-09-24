@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Serialization
         {
             // We always use typeof, regardless of the type accessibility. This means that the type must be accessible from the calling
             // context, but this is a reasonable assumption.
-            return LanguageServiceFactory.CSharpSyntaxGenerator.TypeOfExpression( typeSymbol );
+            return SyntaxGeneratorFactory.DefaultSyntaxGenerator.TypeOfExpression( typeSymbol );
         }
 
         public TypeSerializer( SyntaxSerializationService service ) : base( service ) { }

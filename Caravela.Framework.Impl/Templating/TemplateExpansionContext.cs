@@ -143,7 +143,7 @@ namespace Caravela.Framework.Impl.Templating
                     return
                         ReturnStatement(
                             Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                            LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression( returnType.GetSymbol(), returnExpression )
+                            SyntaxGeneratorFactory.DefaultSyntaxGenerator.CastExpression( returnType.GetSymbol(), returnExpression )
                                 .WithAdditionalAnnotations( Simplifier.Annotation ),
                             Token( SyntaxKind.SemicolonToken ) );
                 }

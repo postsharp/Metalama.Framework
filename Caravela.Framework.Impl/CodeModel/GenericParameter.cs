@@ -32,6 +32,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public Type ToType() => CompileTimeType.Create( this );
 
+        public bool? IsReferenceType => this.IsReferenceTypeImpl();
+
+        public bool? IsNullable => this.IsNullableImpl();
+
         public string Name => this._typeSymbol.Name;
 
         public int Index => this._typeSymbol.Ordinal;
@@ -54,14 +58,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
                 else if ( this._typeSymbol.HasReferenceTypeConstraint )
                 {
-                    if ( this._typeSymbol.ReferenceTypeConstraintNullableAnnotation == NullableAnnotation.Annotated )
-                    {
-                        return TypeKindConstraint.NullableClass;
-                    }
-                    else
-                    {
-                        return TypeKindConstraint.Class;
-                    }
+                    return TypeKindConstraint.Class;
                 }
                 else if ( this._typeSymbol.HasNotNullConstraint )
                 {
@@ -80,6 +77,14 @@ namespace Caravela.Framework.Impl.CodeModel
                 Microsoft.CodeAnalysis.VarianceKind.In => VarianceKind.In,
                 Microsoft.CodeAnalysis.VarianceKind.Out => VarianceKind.Out,
                 _ => VarianceKind.None
+            };
+
+        public bool? IsConstraintNullable
+            => this._typeSymbol.ReferenceTypeConstraintNullableAnnotation switch
+            {
+                NullableAnnotation.Annotated => true,
+                NullableAnnotation.NotAnnotated => false,
+                _ => null
             };
 
         public bool HasDefaultConstructorConstraint => this._typeSymbol.HasConstructorConstraint;

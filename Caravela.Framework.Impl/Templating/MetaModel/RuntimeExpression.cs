@@ -200,7 +200,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
 
             // We may need a cast. We are not sure, but we cannot do more. This could be removed later in the simplification step.
-            var cast = (ExpressionSyntax) LanguageServiceFactory.CSharpSyntaxGenerator.CastExpression( targetTypeSymbol, this.Syntax );
+            var cast = (ExpressionSyntax) SyntaxGeneratorFactory.DefaultSyntaxGenerator.CastExpression( targetTypeSymbol, this.Syntax );
 
             var expression = (addsParenthesis ? SyntaxFactory.ParenthesizedExpression( cast ) : cast).WithAdditionalAnnotations( Simplifier.Annotation );
 
