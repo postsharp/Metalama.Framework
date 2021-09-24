@@ -28,8 +28,10 @@ namespace Caravela.TestFramework
             var projectDirectory = Path.Combine( this.BaseTestDirectory, "Project" );
             this.ProjectDirectory = projectDirectory;
             Directory.CreateDirectory( projectDirectory );
+
+            this.DotNetSdkVersion = TestOptions.DotNetSdkVersion;
         }
-        
+
         protected string BaseTestDirectory { get; }
 
         public bool DebugCompilerProcess => false;
@@ -59,6 +61,8 @@ namespace Caravela.TestFramework
         public bool IsUserCodeTrusted => true;
 
         public string ProjectDirectory { get; }
+
+        public string? DotNetSdkVersion { get; }
 
         public IProjectOptions Apply( IProjectOptions options ) => options;
 

@@ -1,9 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using Xunit.Sdk;
 
 namespace Caravela.TestFramework
 {
@@ -16,6 +20,22 @@ namespace Caravela.TestFramework
         private static readonly Regex _optionRegex = new( @"^\s*//\s*@(?<name>\w+)\s*(\((?<arg>[^\)]*)\))?", RegexOptions.Multiline );
         private readonly List<string> _invalidSourceOptions = new();
 
+        public static string DotNetSdkVersion { get; }
+
+        static TestOptions()
+        {
+            var attribute = new ReflectionAssemblyInfo( typeof(TestProjectOptions).Assembly )
+                .GetCustomAttributes( typeof(AssemblyMetadataAttribute) )
+                .SingleOrDefault( a => string.Equals( (string) a.GetConstructorArguments().First<object>(), "NETCoreSdkVersion", StringComparison.Ordinal ) );
+
+            if ( attribute == null )
+            {
+                throw new InvalidOperationException( "The test assembly must have a single AssemblyMetadataAttribute with Key = \"NETCoreSdkVersion\"." );
+            }
+
+            DotNetSdkVersion = (string) attribute.GetConstructorArguments().ElementAt( 1 )!;
+        }
+        
         public string? SkipReason { get; set; }
 
         public bool IsSkipped => this.SkipReason != null;

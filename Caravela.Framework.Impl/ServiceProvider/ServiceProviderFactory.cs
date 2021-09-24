@@ -39,9 +39,9 @@ namespace Caravela.Framework.Impl.ServiceProvider
         /// of <see cref="IPathOptions"/> than the default one cannot call <see cref="GetServiceProvider"/>
         /// because it does not control the calling point. A typical consumer of this method is TryCaravela.
         /// </summary>
-        public static void InitializeAsyncLocalProvider( IPathOptions? directoryOptions = null )
+        public static void InitializeAsyncLocalProvider( IPathOptions directoryOptions, IProjectOptions projectOptions )
         {
-            _asyncLocalInstance.Value = CreateBaseServiceProvider( directoryOptions ?? DefaultPathOptions.Instance, true );
+            _asyncLocalInstance.Value = CreateBaseServiceProvider( directoryOptions, projectOptions, true );
         }
 
         public static bool HasAsyncLocalProvider => _asyncLocalInstance.Value != null;
@@ -65,10 +65,16 @@ namespace Caravela.Framework.Impl.ServiceProvider
             _asyncLocalInstance.Value = newServices;
         }
 
-        private static ServiceProvider CreateBaseServiceProvider( IPathOptions pathOptions, bool freeze )
+        private static ServiceProvider CreateBaseServiceProvider( IPathOptions? pathOptions, IProjectOptions? projectOptions, bool freeze )
         {
             ServiceProvider serviceProvider = new();
-            serviceProvider.AddService( pathOptions );
+            serviceProvider.AddService( pathOptions ?? DefaultPathOptions.Instance );
+
+            if ( projectOptions != null )
+            {
+                serviceProvider.AddService( projectOptions );
+            }
+            
             serviceProvider.AddService( new ReferenceAssemblyLocator( serviceProvider ) );
             serviceProvider.AddService( new SymbolClassificationService( serviceProvider ) );
             serviceProvider.AddService( new SyntaxSerializationService() );
@@ -88,7 +94,7 @@ namespace Caravela.Framework.Impl.ServiceProvider
         /// Gets the default <see cref="ServiceProvider"/> instance.
         /// </summary>
         public static ServiceProvider GlobalProvider
-            => LazyInitializer.EnsureInitialized( ref _globalInstance, () => CreateBaseServiceProvider( DefaultPathOptions.Instance, true ) )!;
+            => LazyInitializer.EnsureInitialized( ref _globalInstance, () => CreateBaseServiceProvider( null, null, true ) )!;
 
         internal static ServiceProvider AsyncLocalProvider => _asyncLocalInstance.Value ??= GlobalProvider;
 
@@ -98,11 +104,11 @@ namespace Caravela.Framework.Impl.ServiceProvider
         /// <see cref="AddAsyncLocalService"/> are ignored). This scenario is used in tests. Otherwise, a shallow clone of the async-local or the global
         /// provider is provided.
         /// </summary>
-        public static ServiceProvider GetServiceProvider( IPathOptions? directoryOptions = null, IAssemblyLocator? assemblyLocator = null )
+        public static ServiceProvider GetServiceProvider( IPathOptions? directoryOptions = null, IProjectOptions? projectOptions = null, IAssemblyLocator? assemblyLocator = null )
         {
             ServiceProvider serviceProvider;
 
-            if ( directoryOptions == null )
+            if ( directoryOptions == null && projectOptions == null )
             {
                 // If we are not given specific directories, we try to provide shared, singleton instances of the services that don't depend on
                 // any other configuration. This avoids redundant initializations and improves performance.
@@ -110,7 +116,7 @@ namespace Caravela.Framework.Impl.ServiceProvider
             }
             else
             {
-                serviceProvider = CreateBaseServiceProvider( directoryOptions, false );
+                serviceProvider = CreateBaseServiceProvider( directoryOptions, projectOptions, false );
             }
 
             if ( assemblyLocator != null )

@@ -92,7 +92,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 }
 
                 using var testProjectOptions = new TestProjectOptions() { FormatCompileTimeCode = true };
-                using var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions );
+                using var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions, testProjectOptions );
                 var syntaxColorizer = new SyntaxColorizer( serviceProvider );
 
                 var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, null );

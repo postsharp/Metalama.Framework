@@ -25,6 +25,7 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         private const string _compileTimeFrameworkAssemblyName = "Caravela.Framework";
         private readonly string _cacheDirectory;
+        private readonly string? _dotNetSdkVersion;
 
         /// <summary>
         /// Gets the name (without path and extension) of Caravela assemblies.
@@ -64,6 +65,7 @@ namespace Caravela.Framework.Impl.CompileTime
         public ReferenceAssemblyLocator( IServiceProvider serviceProvider )
         {
             this._cacheDirectory = serviceProvider.GetService<IPathOptions>().AssemblyLocatorCacheDirectory;
+            this._dotNetSdkVersion = serviceProvider.GetOptionalService<IProjectOptions>()?.DotNetSdkVersion;
 
             this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
 
@@ -110,6 +112,37 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private IEnumerable<string> GetSystemAssemblyPaths()
         {
+            var dotNetSdkDirectoryName = this._dotNetSdkVersion ?? "default";
+            var tempProjectDirectory = Path.Combine( this._cacheDirectory, nameof(ReferenceAssemblyLocator), dotNetSdkDirectoryName );
+
+            using var mutex = MutexHelper.WithGlobalLock( tempProjectDirectory );
+            var referenceAssemblyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
+
+            if ( File.Exists( referenceAssemblyListFile ) )
+            {
+                var referenceAssemblies = File.ReadAllLines( referenceAssemblyListFile );
+
+                if ( referenceAssemblies.All( File.Exists ) )
+                {
+                    return referenceAssemblies;
+                }
+            }
+            
+            Directory.CreateDirectory( tempProjectDirectory );
+
+            if ( this._dotNetSdkVersion != null )
+            {
+                var globalJsonText =
+                    $@"{{
+  ""sdk"": {{
+    ""version"": ""{this._dotNetSdkVersion}"",
+    ""rollForward"": ""disable""
+  }}
+}}";
+
+                File.WriteAllText( Path.Combine( tempProjectDirectory, "global.json" ), globalJsonText );
+            }
+
             var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
 
             // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
@@ -129,25 +162,9 @@ namespace Caravela.Framework.Impl.CompileTime
   </Target>
 </Project>";
 
-            var tempProjectDirectory = Path.Combine( this._cacheDirectory, nameof(ReferenceAssemblyLocator) );
-
-            using var mutex = MutexHelper.WithGlobalLock( tempProjectDirectory );
-            var referenceAssemblyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
-
-            if ( File.Exists( referenceAssemblyListFile ) )
-            {
-                var referenceAssemblies = File.ReadAllLines( referenceAssemblyListFile );
-
-                if ( referenceAssemblies.All( File.Exists ) )
-                {
-                    return referenceAssemblies;
-                }
-            }
-
-            Directory.CreateDirectory( tempProjectDirectory );
-
             File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), projectText );
 
+            // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
             var psi = new ProcessStartInfo( "dotnet", "build -t:WriteReferenceAssemblies" )
             {
                 // We cannot call dotnet.exe with a \\?\-prefixed path because MSBuild would fail.
@@ -166,7 +183,8 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 throw new InvalidOperationException(
                     "Error while building temporary project to locate reference assemblies:" + Environment.NewLine
-                                                                                             + string.Join( Environment.NewLine, lines ) );
+                                                                                             + string.Join( Environment.NewLine, lines )
+                                                                                             + Environment.NewLine );
             }
 
             return File.ReadAllLines( referenceAssemblyListFile );

@@ -29,7 +29,7 @@ namespace Caravela.Framework.Tests.UnitTests
         protected TestBase( TestProjectOptions options )
         {
             this.ProjectOptions = options;
-            this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions );
+            this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions, this.ProjectOptions );
         }
         
         protected TestBase() : this( new TestProjectOptions() ) { }
@@ -172,7 +172,7 @@ class Expression
                 this._parent = parent;
                 this._oldServiceProvider = parent.ServiceProvider;
                 this._oldProjectOptions = parent.ProjectOptions;
-                this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions );
+                this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions, this.ProjectOptions );
             }
 
             public void Dispose()
