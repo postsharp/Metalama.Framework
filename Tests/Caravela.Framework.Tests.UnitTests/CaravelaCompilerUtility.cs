@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Utilities;
-using Caravela.TestFramework;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -21,15 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests
 
             void WriteFile( string name, string text ) => File.WriteAllText( Path.Combine( dir, name ), text );
 
-            var globalJsonText =
-                $@"{{
-  ""sdk"": {{
-    ""version"": ""{TestOptions.DotNetSdkVersion}"",
-    ""rollForward"": ""disable""
-  }}
-}}";
-            
-            WriteFile( "global.json", globalJsonText );
+            GlobalJsonWriter.TryWriteCurrentVersion( dir );
 
             var metadataReader = AssemblyMetadataReader.GetInstance( typeof(CaravelaCompilerUtility).Assembly );
 

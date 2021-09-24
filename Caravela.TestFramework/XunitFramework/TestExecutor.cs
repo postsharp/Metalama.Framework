@@ -91,7 +91,7 @@ namespace Caravela.TestFramework.XunitFramework
                                 try
                                 {
                                     using var testOptions = new TestProjectOptions();
-                                    using var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions, testOptions );
+                                    using var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
                                     var testInput = TestInput.FromFile( directoryOptionsReader, testCase.UniqueID );
                                     testInput.Options.References.AddRange( references );
 

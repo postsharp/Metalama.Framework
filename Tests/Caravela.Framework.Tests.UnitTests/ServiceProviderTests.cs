@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests
 
             TestProjectOptions myOptions = new();
 
-            ServiceProviderFactory.InitializeAsyncLocalProvider( myOptions, myOptions );
+            ServiceProviderFactory.InitializeAsyncLocalProvider( myOptions );
             Assert.True( ServiceProviderFactory.HasAsyncLocalProvider );
 
             Assert.Same( myOptions, ServiceProviderFactory.GetServiceProvider().GetService<IPathOptions>() );
@@ -43,8 +43,7 @@ namespace Caravela.Framework.Tests.UnitTests
         public void ExplicitAssemblyLocator()
         {
             TestAssemblyLocator assemblyLocator = new();
-            TestProjectOptions projectOptions = new();
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( projectOptions: projectOptions, assemblyLocator: assemblyLocator );
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( assemblyLocator: assemblyLocator );
             Assert.Same( assemblyLocator, serviceProvider.GetService<IAssemblyLocator>() );
         }
 

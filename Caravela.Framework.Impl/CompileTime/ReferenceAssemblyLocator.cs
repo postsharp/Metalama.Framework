@@ -25,7 +25,6 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         private const string _compileTimeFrameworkAssemblyName = "Caravela.Framework";
         private readonly string _cacheDirectory;
-        private readonly string? _dotNetSdkVersion;
 
         /// <summary>
         /// Gets the name (without path and extension) of Caravela assemblies.
@@ -65,7 +64,6 @@ namespace Caravela.Framework.Impl.CompileTime
         public ReferenceAssemblyLocator( IServiceProvider serviceProvider )
         {
             this._cacheDirectory = serviceProvider.GetService<IPathOptions>().AssemblyLocatorCacheDirectory;
-            this._dotNetSdkVersion = serviceProvider.GetOptionalService<IProjectOptions>()?.DotNetSdkVersion;
 
             this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
 
@@ -112,8 +110,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private IEnumerable<string> GetSystemAssemblyPaths()
         {
-            var dotNetSdkDirectoryName = this._dotNetSdkVersion ?? "default";
-            var tempProjectDirectory = Path.Combine( this._cacheDirectory, nameof(ReferenceAssemblyLocator), dotNetSdkDirectoryName );
+            var tempProjectDirectory = Path.Combine( this._cacheDirectory, nameof(ReferenceAssemblyLocator) );
 
             using var mutex = MutexHelper.WithGlobalLock( tempProjectDirectory );
             var referenceAssemblyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
@@ -130,18 +127,7 @@ namespace Caravela.Framework.Impl.CompileTime
             
             Directory.CreateDirectory( tempProjectDirectory );
 
-            if ( this._dotNetSdkVersion != null )
-            {
-                var globalJsonText =
-                    $@"{{
-  ""sdk"": {{
-    ""version"": ""{this._dotNetSdkVersion}"",
-    ""rollForward"": ""disable""
-  }}
-}}";
-
-                File.WriteAllText( Path.Combine( tempProjectDirectory, "global.json" ), globalJsonText );
-            }
+            GlobalJsonWriter.TryWriteCurrentVersion( tempProjectDirectory );
 
             var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
 

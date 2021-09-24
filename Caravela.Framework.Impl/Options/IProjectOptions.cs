@@ -39,11 +39,6 @@ namespace Caravela.Framework.Impl.Options
         bool IsUserCodeTrusted { get; }
 
         /// <summary>
-        /// Gets the version of .NET SDK used.
-        /// </summary>
-        string? DotNetSdkVersion { get; }
-
-        /// <summary>
         /// Invoked when project options have been applied globally or contextually through the <see cref="ServiceProviderFactory"/>,
         /// and are then overridden by options provided by the compiler.
         /// </summary>

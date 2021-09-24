@@ -52,8 +52,6 @@ namespace Caravela.Framework.Impl.Options
 
         public bool IsUserCodeTrusted => this.GetBooleanOption( "CaravelaUserCodeTrusted", true );
 
-        public string? DotNetSdkVersion => this.GetStringOption( "NETCoreSdkVersion" );
-
         private bool GetBooleanOption( string name, bool defaultValue = false )
         {
             if ( this._source.TryGetValue( $"build_property.{name}", out var flagString ) && bool.TryParse( flagString, out var flagValue ) )
