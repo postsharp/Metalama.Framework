@@ -39,9 +39,9 @@ namespace Caravela.Framework.Impl.ServiceProvider
         /// of <see cref="IPathOptions"/> than the default one cannot call <see cref="GetServiceProvider"/>
         /// because it does not control the calling point. A typical consumer of this method is TryCaravela.
         /// </summary>
-        public static void InitializeAsyncLocalProvider( IPathOptions directoryOptions )
+        public static void InitializeAsyncLocalProvider( IPathOptions? directoryOptions = null )
         {
-            _asyncLocalInstance.Value = CreateBaseServiceProvider( directoryOptions, true );
+            _asyncLocalInstance.Value = CreateBaseServiceProvider( directoryOptions ?? DefaultPathOptions.Instance, true );
         }
 
         public static bool HasAsyncLocalProvider => _asyncLocalInstance.Value != null;
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.ServiceProvider
         private static ServiceProvider CreateBaseServiceProvider( IPathOptions pathOptions, bool freeze )
         {
             ServiceProvider serviceProvider = new();
-            serviceProvider.AddService( pathOptions ?? DefaultPathOptions.Instance );
+            serviceProvider.AddService( pathOptions );
             serviceProvider.AddService( new ReferenceAssemblyLocator( serviceProvider ) );
             serviceProvider.AddService( new SymbolClassificationService( serviceProvider ) );
             serviceProvider.AddService( new SyntaxSerializationService() );

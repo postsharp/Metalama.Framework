@@ -13,9 +13,13 @@ namespace Caravela.Framework.Impl.Utilities
         /// The file sets the .NET SDK version to the same as is used in the current environment. 
         /// </summary>
         /// <param name="targetDirectory">The directory where the globals.json file is written to.</param>
-        /// <returns><code>false</code> when the current .NET SDK version could not be determined.</returns>
+        /// <returns>
+        /// <code>false</code> when the current .NET SDK version could not be determined.
+        /// The global.json file is not written in that case.
+        /// <code>true</code> when the global.json file was written.
+        /// </returns>
         /// <remarks>
-        /// When the dotnet.exe command is executed from withing a build process, certain .NET SDK version specific
+        /// When the dotnet.exe command is executed from within the build process, certain .NET SDK version specific
         /// environment variables are passed to the new process. If the child process attempts to use
         /// a different .NET SDK version than the parent process, these environment variables could break
         /// the executed command. 

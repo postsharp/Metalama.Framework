@@ -151,6 +151,7 @@ namespace Caravela.Framework.Impl.CompileTime
             File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), projectText );
 
             // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
+            // This way we wouldn't need to require a .NET SDK to be installed.
             var psi = new ProcessStartInfo( "dotnet", "build -t:WriteReferenceAssemblies" )
             {
                 // We cannot call dotnet.exe with a \\?\-prefixed path because MSBuild would fail.
@@ -169,8 +170,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 throw new InvalidOperationException(
                     "Error while building temporary project to locate reference assemblies:" + Environment.NewLine
-                                                                                             + string.Join( Environment.NewLine, lines )
-                                                                                             + Environment.NewLine );
+                                                                                             + string.Join( Environment.NewLine, lines ) );
             }
 
             return File.ReadAllLines( referenceAssemblyListFile );

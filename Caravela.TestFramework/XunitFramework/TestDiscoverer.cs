@@ -38,50 +38,31 @@ namespace Caravela.TestFramework.XunitFramework
 
         void IDisposable.Dispose() { }
 
-        private string? FindMetadataString( string name )
+        public string FindProjectDirectory()
         {
             var projectDirectoryAttributes = this._assembly
-                .GetCustomAttributes( typeof( AssemblyMetadataAttribute ) )
-                .Where( a => string.Equals( (string) a.GetConstructorArguments().First(), name, StringComparison.Ordinal ) )
+                .GetCustomAttributes( typeof(AssemblyMetadataAttribute) )
+                .Where( a => string.Equals( (string) a.GetConstructorArguments().First(), "ProjectDirectory", StringComparison.Ordinal ) )
                 .ToList();
-
+            
             var projectDirectoryAttribute = projectDirectoryAttributes.FirstOrDefault();
-
+            
             if ( projectDirectoryAttribute == null )
             {
                 throw new InvalidOperationException(
-                    $"The assembly '{this._assembly.AssemblyPath}' must have a single AssemblyMetadataAttribute with Key = \"{name}\"." );
+                    $"The assembly '{this._assembly.AssemblyPath}' must have a single AssemblyMetadataAttribute with Key = \"ProjectDirectory\"." );
             }
-
-            return (string?) projectDirectoryAttribute.GetConstructorArguments().ElementAt( 1 );
-        }
-
-        public string FindProjectDirectory()
-        {
-            var projectDirectory = this.FindMetadataString( "ProjectDirectory" );
-
-            if ( string.IsNullOrEmpty( projectDirectory ) )
+            
+            var value = (string?) projectDirectoryAttribute.GetConstructorArguments().ElementAt( 1 );
+            
+            if ( string.IsNullOrEmpty( value ) )
             {
                 throw new InvalidOperationException(
                     "The project directory cannot be null or empty."
                     + " The project directory is stored as a value of the AssemblyMetadataAttribute with Key = \"ProjectDirectory\"." );
             }
-
-            return projectDirectory;
-        }
-
-        public string FindDotNetSdkVersion()
-        {
-            var msBuildExtensionsPath = this.FindMetadataString( "MSBuildExtensionsPath" );
-
-            if ( string.IsNullOrEmpty( msBuildExtensionsPath ) )
-            {
-                throw new InvalidOperationException(
-                    "The MSBuildExtensionsPath cannot be null or empty."
-                    + " The MSBuildExtensionsPath is stored as a value of the AssemblyMetadataAttribute with Key = \"MSBuildExtensionsPath\"." );
-            }
-
-            return Path.GetFileName( msBuildExtensionsPath );
+            
+            return value;
         }
 
         public List<TestCase> Discover( string subDirectory, ImmutableHashSet<string> excludedDirectories )
