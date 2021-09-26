@@ -246,6 +246,32 @@ namespace Caravela.Framework.Impl.CompileTime
                     return false;
                 }
             }
+            
+            private void CheckNullableContext( MemberDeclarationSyntax member, SyntaxToken name )
+            {
+                if ( this.RunTimeCompilation.GetSemanticModel( member.SyntaxTree ).GetNullableContext( member.SpanStart ) != NullableContext.Enabled )
+                {
+                    this.Success = false;
+
+                    this._diagnosticAdder.Report(
+                        TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateDiagnostic(
+                            name.GetLocation(),
+                            name.Text ) );
+                }
+                
+                foreach ( var trivia in member.DescendantNodes( descendIntoTrivia: true ).Where( t => t.Kind() == SyntaxKind.NullableDirectiveTrivia ) )
+                {
+                    if ( ((NullableDirectiveTriviaSyntax) trivia).SettingToken.Kind() != SyntaxKind.EnableKeyword )
+                    {
+                        this.Success = false;
+
+                        this._diagnosticAdder.Report(
+                            TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateDiagnostic(
+                                trivia.GetLocation(),
+                                name.Text ) );
+                    }
+                }
+            }
 
             private new IEnumerable<MethodDeclarationSyntax> VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
@@ -262,6 +288,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     yield break;
                 }
+                
+                this.CheckNullableContext( node, node.Identifier );
 
                 var success =
                     this._templateCompiler.TryCompile(
@@ -436,6 +464,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     yield break;
                 }
+                
+                this.CheckNullableContext( node, node.Identifier );
 
                 var success = true;
                 SyntaxNode? transformedAddDeclaration = null;
