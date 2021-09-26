@@ -7,6 +7,7 @@ using Caravela.Framework.Code.SyntaxBuilders;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Formatting;
+using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,7 +17,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using SpecialType = Caravela.Framework.Code.SpecialType;
 
@@ -33,25 +33,16 @@ namespace Caravela.Framework.Impl.Templating
     {
         private static readonly SyntaxAnnotation _flattenBlockAnnotation = new( "Caravela_Flatten" );
 
-        private static readonly AsyncLocal<TemplateExpansionContext?> _expansionContext = new();
-
-        private static TemplateExpansionContext ExpansionContext
-            => _expansionContext.Value ?? throw new InvalidOperationException( "ExpansionContext cannot be null." );
-
-        internal static IDisposable WithContext( TemplateExpansionContext expansionContext )
-        {
-            _expansionContext.Value = expansionContext;
-
-            return new InitializeCookie();
-        }
-
         public static void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement ) => list.Add( new StatementOrTrivia( statement, false ) );
 
         public static void AddStatement( List<StatementOrTrivia> list, IStatement statement )
             => list.Add( new StatementOrTrivia( ((UserStatement) statement).Syntax, true ) );
 
         public static void AddStatement( List<StatementOrTrivia> list, IExpression statement )
-            => list.Add( new StatementOrTrivia( SyntaxFactory.ExpressionStatement( ((IDynamicExpression) statement).CreateExpression().Syntax ), true ) );
+            => list.Add(
+                new StatementOrTrivia(
+                    SyntaxFactory.ExpressionStatement( ((IUserExpression) statement).ToRunTimeExpression().Syntax ),
+                    true ) );
 
         public static void AddStatement( List<StatementOrTrivia> list, string statement )
             => list.Add( new StatementOrTrivia( SyntaxFactory.ParseStatement( statement ), true ) );
@@ -146,13 +137,14 @@ namespace Caravela.Framework.Impl.Templating
         public static SyntaxKind Boolean( bool value ) => value ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression;
 
         // This method is called when the expression of 'return' is a non-dynamic expression.
-        public static StatementSyntax ReturnStatement( ExpressionSyntax? returnExpression ) => ExpansionContext.CreateReturnStatement( returnExpression );
+        public static StatementSyntax ReturnStatement( ExpressionSyntax? returnExpression )
+            => TemplateExpansionContext.Current.CreateReturnStatement( returnExpression );
 
         // This overload is called when the expression of 'return' is a compile-time expression returning a dynamic value.
-        public static StatementSyntax DynamicReturnStatement( IDynamicExpression? returnExpression, string? expressionText = null, Location? location = null )
-            => ExpansionContext.CreateReturnStatement( returnExpression, expressionText, location );
+        public static StatementSyntax DynamicReturnStatement( IUserExpression returnExpression )
+            => TemplateExpansionContext.Current.CreateReturnStatement( returnExpression );
 
-        public static StatementSyntax DynamicDiscardAssignment( IDynamicExpression? expression, string? expressionText = null, Location? location = null )
+        public static StatementSyntax DynamicDiscardAssignment( IUserExpression? expression )
         {
             if ( expression == null )
             {
@@ -160,7 +152,7 @@ namespace Caravela.Framework.Impl.Templating
             }
             else if ( TypeExtensions.Equals( expression.Type, SpecialType.Void ) )
             {
-                return SyntaxFactory.ExpressionStatement( expression.CreateExpression( expressionText, location ) );
+                return SyntaxFactory.ExpressionStatement( expression.ToRunTimeExpression() );
             }
             else
             {
@@ -168,7 +160,7 @@ namespace Caravela.Framework.Impl.Templating
                     SyntaxFactory.AssignmentExpression(
                         SyntaxKind.SimpleAssignmentExpression,
                         SyntaxFactoryEx.DiscardToken,
-                        expression.CreateExpression( expressionText, location ) ) );
+                        expression.ToRunTimeExpression() ) );
             }
         }
 
@@ -176,9 +168,7 @@ namespace Caravela.Framework.Impl.Templating
         public static StatementSyntax DynamicLocalDeclaration(
             TypeSyntax type,
             SyntaxToken identifier,
-            IDynamicExpression? value,
-            string? expressionText = null,
-            Location? location = null )
+            IUserExpression? value )
         {
             if ( value == null )
             {
@@ -186,7 +176,7 @@ namespace Caravela.Framework.Impl.Templating
                 throw new AssertionFailedException();
             }
 
-            var runtimeExpression = value.CreateExpression( expressionText, location );
+            var runtimeExpression = value.ToRunTimeExpression();
 
             if ( TypeExtensions.Equals( value.Type, SpecialType.Void ) )
             {
@@ -198,7 +188,9 @@ namespace Caravela.Framework.Impl.Templating
                 switch ( type )
                 {
                     case IdentifierNameSyntax { IsVar: true }:
-                        variableType = SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( Microsoft.CodeAnalysis.SpecialType.System_Object );
+                        variableType = TemplateExpansionContext.CurrentSyntaxGenerationContext.SyntaxGenerator.Type(
+                            Microsoft.CodeAnalysis.SpecialType.System_Object );
+
                         variableValue = SyntaxFactoryEx.Null;
 
                         break;
@@ -245,14 +237,14 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public static RuntimeExpression? DynamicMemberAccessExpression( IDynamicExpression dynamicExpression, string member )
+        public static RuntimeExpression? DynamicMemberAccessExpression( IUserExpression userExpression, string member )
         {
-            if ( dynamicExpression is IDynamicReceiver dynamicMemberAccess )
+            if ( userExpression is IUserReceiver dynamicMemberAccess )
             {
                 return dynamicMemberAccess.CreateMemberAccessExpression( member );
             }
 
-            var expression = dynamicExpression.CreateExpression();
+            var expression = userExpression.ToRunTimeExpression();
 
             return new RuntimeExpression(
                 SyntaxFactory.MemberAccessExpression(
@@ -260,12 +252,18 @@ namespace Caravela.Framework.Impl.Templating
                         expression.Syntax,
                         SyntaxFactory.IdentifierName( member ) )
                     .WithAdditionalAnnotations( Simplifier.Annotation ),
-                ExpansionContext.Compilation );
+                TemplateExpansionContext.Current.Compilation );
         }
 
-        public static SyntaxToken GetUniqueIdentifier( string hint ) => SyntaxFactory.Identifier( ExpansionContext.LexicalScope.GetUniqueIdentifier( hint ) );
+        public static SyntaxToken GetUniqueIdentifier( string hint )
+            => SyntaxFactory.Identifier( TemplateExpansionContext.Current.LexicalScope.GetUniqueIdentifier( hint ) );
 
-        public static ExpressionSyntax Serialize<T>( T o ) => ExpansionContext.SyntaxSerializationService.Serialize( o, ExpansionContext.SyntaxFactory );
+        public static ExpressionSyntax Serialize<T>( T o )
+            => TemplateExpansionContext.Current.SyntaxSerializationService.Serialize(
+                o,
+                new SyntaxSerializationContext(
+                    TemplateExpansionContext.Current.Compilation.GetCompilationModel(),
+                    TemplateExpansionContext.CurrentSyntaxGenerationContext.SyntaxGenerator ) );
 
         public static T AddSimplifierAnnotations<T>( T node )
             where T : SyntaxNode
@@ -330,13 +328,11 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public static IDynamicExpression? Proceed( string methodName ) => ExpansionContext.Proceed( methodName );
-
-        public static StatementSyntax YieldProceed() => ExpansionContext.CreateYieldProceedStatement();
+        public static IUserExpression? Proceed( string methodName ) => TemplateExpansionContext.Current.Proceed( methodName );
 
         public static ValueTask<object?> ProceedAsync() => meta.Proceed();
 
-        public static ExpressionSyntax? GetDynamicSyntax( object? expression, string? expressionText, Location? location = null )
+        public static ExpressionSyntax? GetDynamicSyntax( object? expression )
         {
             switch ( expression )
             {
@@ -344,8 +340,8 @@ namespace Caravela.Framework.Impl.Templating
                     // This is typically because we are emitting the return value of a void method.
                     return null;
 
-                case IDynamicExpression dynamicExpression:
-                    return dynamicExpression.CreateExpression( expressionText, location );
+                case IUserExpression dynamicExpression:
+                    return dynamicExpression.ToRunTimeExpression();
 
                 default:
                     throw new ArgumentOutOfRangeException( nameof(expression), $"Don't know how to extract the syntax from '{expression}'." );
@@ -354,15 +350,13 @@ namespace Caravela.Framework.Impl.Templating
 
         public static RuntimeExpression RuntimeExpression( ExpressionSyntax syntax, string? type = null )
         {
-            var compilation = ExpansionContext.Compilation.GetCompilationModel().RoslynCompilation;
-            var expressionType = type != null ? (ITypeSymbol?) DocumentationCommentId.GetFirstSymbolForDeclarationId( type, compilation ) : null;
+            var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-            return new RuntimeExpression( syntax, compilation, expressionType, false );
-        }
+            var expressionType = type != null
+                ? (ITypeSymbol?) DocumentationCommentId.GetFirstSymbolForDeclarationId( type, syntaxGenerationContext.Compilation )
+                : null;
 
-        private class InitializeCookie : IDisposable
-        {
-            public void Dispose() => _expansionContext.Value = null;
+            return new RuntimeExpression( syntax, expressionType, syntaxGenerationContext, false );
         }
     }
 }

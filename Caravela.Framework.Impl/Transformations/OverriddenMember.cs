@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.Transformations
                         SyntaxKind.SimpleMemberAccessExpression,
                         ParenthesizedExpression(
                             CastExpression(
-                                SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
+                                OurSyntaxGenerator.Default.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
                                 ThisExpression() ) ),
                         memberName );
                 }
@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.Transformations
                 expression =
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( this.OverriddenDeclaration.DeclaringType.GetSymbol() ),
+                        OurSyntaxGenerator.Default.Type( this.OverriddenDeclaration.DeclaringType.GetSymbol() ),
                         memberName );
             }
 

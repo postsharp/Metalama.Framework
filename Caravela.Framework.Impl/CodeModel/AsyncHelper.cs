@@ -117,8 +117,8 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         public static TypeSyntax GetIntermediateMethodReturnType( Compilation compilation, IMethodSymbol method, TypeSyntax? returnTypeSyntax )
             => method.IsAsync && method.ReturnsVoid
-                ? SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( ReflectionMapper.GetInstance( compilation ).GetTypeSymbol( typeof(ValueTask) ) )
-                : returnTypeSyntax ?? SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( method.ReturnType );
+                ? OurSyntaxGenerator.Default.Type( ReflectionMapper.GetInstance( compilation ).GetTypeSymbol( typeof(ValueTask) ) )
+                : returnTypeSyntax ?? OurSyntaxGenerator.Default.Type( method.ReturnType );
 
         private record AsyncInfoSymbol( ITypeSymbol ResultType, bool HasMethodBuilder );
     }

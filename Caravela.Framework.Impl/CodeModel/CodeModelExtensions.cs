@@ -16,8 +16,6 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         public static CompilationModel GetCompilationModel( this ICompilationElement declaration ) => (CompilationModel) declaration.Compilation;
 
-        public static ISyntaxFactory GetSyntaxFactory( this IDeclaration declaration ) => declaration.GetCompilationModel().ReflectionMapper;
-
         public static AttributeData GetAttributeData( this IAttribute attribute )
         {
             if ( attribute is Attribute attributeModel )

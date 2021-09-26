@@ -4,18 +4,17 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.SyntaxBuilders;
 using Caravela.Framework.Impl.CodeModel;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class ArrayDynamicExpression : IDynamicExpression
+    internal class ArrayUserExpression : IUserExpression
     {
         private readonly ArrayBuilder _arrayBuilder;
         private readonly IType _itemType;
 
-        public ArrayDynamicExpression( ArrayBuilder arrayBuilder )
+        public ArrayUserExpression( ArrayBuilder arrayBuilder )
         {
             this._arrayBuilder = arrayBuilder;
 
@@ -23,17 +22,20 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this.Type = this._itemType.ConstructArrayType();
         }
 
-        public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null )
+        public RuntimeExpression ToRunTimeExpression()
         {
-            var items = this._arrayBuilder.Items.Select( i => RuntimeExpression.FromValue( i, this.Type.Compilation ).Syntax ).ToArray();
+            var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-            var generator = SyntaxGeneratorFactory.DefaultSyntaxGenerator;
+            var items = this._arrayBuilder.Items.Select( i => RuntimeExpression.FromValue( i, this.Type.Compilation, syntaxGenerationContext ).Syntax )
+                .ToArray();
 
-            var arrayCreation = generator.ArrayCreationExpression(
+            var generator = OurSyntaxGenerator.Default;
+
+            var syntax = generator.ArrayCreationExpression(
                 generator.Type( this._itemType.GetSymbol() ),
                 items );
 
-            return new RuntimeExpression( arrayCreation, this.Type );
+            return new RuntimeExpression( syntax, this.Type, syntaxGenerationContext );
         }
 
         public bool IsAssignable => false;

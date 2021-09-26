@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ServiceProvider;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -119,8 +120,12 @@ namespace Caravela.Framework.Impl.Serialization
         /// Returns the set of types that can be serialized by <see cref="SyntaxSerializationService"/>. This result can be used to
         /// determine the possibility to serialize a type when the template is compiled. It may return false positives.
         /// </summary>
-        public SerializableTypes GetSerializableTypes( ISyntaxFactory syntaxFactory )
-            => new( this._supportedContractTypes.Keys.Distinct().Select( syntaxFactory.GetTypeSymbol ).ToImmutableHashSet() );
+        public SerializableTypes GetSerializableTypes( ReflectionMapper reflectionMapper )
+        {
+            return new SerializableTypes( this._supportedContractTypes.Keys.Distinct().Select( reflectionMapper.GetTypeSymbol ).ToImmutableHashSet() );
+        }
+
+        public SerializableTypes GetSerializableTypes( Compilation compilation ) => this.GetSerializableTypes( ReflectionMapper.GetInstance( compilation ) );
 
         private bool TryGetSerializer<T>( T obj, [NotNullWhen( true )] out ObjectSerializer? serializer )
         {
@@ -226,10 +231,9 @@ namespace Caravela.Framework.Impl.Serialization
         /// Serializes an object into a Roslyn expression that would create it. For example, serializes a list containing "4" and "8" into <c>new System.Collections.Generic.List&lt;System.Int32&gt;{4, 8}</c>.
         /// </summary>
         /// <param name="o">An object to serialize.</param>
-        /// <param name="syntaxFactory"></param>
         /// <returns>An expression that would create the object.</returns>
         /// <exception cref="InvalidUserCodeException">When the object cannot be serialized, for example if it's of an unsupported type.</exception>
-        public ExpressionSyntax Serialize<T>( T? o, ICompilationElementFactory syntaxFactory )
+        public ExpressionSyntax Serialize<T>( T? o, SyntaxSerializationContext serializationContext )
         {
             if ( o == null )
             {
@@ -241,7 +245,7 @@ namespace Caravela.Framework.Impl.Serialization
                 throw SerializationDiagnosticDescriptors.UnsupportedSerialization.CreateException( o.GetType() );
             }
 
-            return serializer.Serialize( o, syntaxFactory );
+            return serializer.Serialize( o, serializationContext );
         }
     }
 }

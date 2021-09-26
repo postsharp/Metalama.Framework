@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
@@ -15,18 +14,48 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
+using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SpecialType = Caravela.Framework.Code.SpecialType;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    // TODO: This is a temporary implementation of TemplateExpansionContext.
-
     internal partial class TemplateExpansionContext
     {
         private readonly Template<IMethod> _templateMethod;
-        private readonly Func<TemplateExpansionContext, StatementSyntax>? _expandYieldProceed;
-        private readonly IDynamicExpression? _proceedExpression;
+        private readonly IUserExpression? _proceedExpression;
+        private static readonly AsyncLocal<TemplateExpansionContext?> _current = new();
+        private static readonly AsyncLocal<SyntaxGenerationContext?> _currentSyntaxGenerationContext = new();
+
+        internal static TemplateExpansionContext Current
+            => _current.Value ?? throw new InvalidOperationException( "TemplateExpansionContext.Current has not be set." );
+
+        /// <summary>
+        /// Gets the current <see cref="SyntaxGenerationContext"/>.
+        /// </summary>
+        internal static SyntaxGenerationContext CurrentSyntaxGenerationContext
+            => _current.Value?.SyntaxGenerationContext
+               ?? _currentSyntaxGenerationContext.Value
+               ?? throw new InvalidOperationException( "TemplateExpansionContext.CurrentSyntaxGenerationContext has not be set." );
+
+        internal static IDisposable WithTemplateExpansionContext( TemplateExpansionContext expansionContext )
+        {
+            _current.Value = expansionContext;
+
+            return new DisposeCookie( () => _current.Value = null );
+        }
+
+        /// <summary>
+        /// Sets the <see cref="CurrentSyntaxGenerationContext"/> but not the <see cref="Current"/> property.
+        /// This method is used in tests, when the <see cref="CurrentSyntaxGenerationContext"/> property is needed but not the <see cref="Current"/>
+        /// one.
+        /// </summary>
+        internal static IDisposable WithSyntaxGenerationContext( SyntaxGenerationContext generationContext )
+        {
+            _currentSyntaxGenerationContext.Value = generationContext;
+
+            return new DisposeCookie( () => _currentSyntaxGenerationContext.Value = null );
+        }
 
         public TemplateLexicalScope LexicalScope { get; }
 
@@ -38,18 +67,16 @@ namespace Caravela.Framework.Impl.Templating
             ICompilation compilation,
             TemplateLexicalScope lexicalScope,
             SyntaxSerializationService syntaxSerializationService,
-            ICompilationElementFactory syntaxFactory,
+            SyntaxGenerationContext syntaxGenerationContext,
             Template<IMethod> templateMethod,
-            IDynamicExpression? proceedExpression,
-            Func<TemplateExpansionContext, StatementSyntax>? expandYieldProceed = null )
+            IUserExpression? proceedExpression )
         {
             this._templateMethod = templateMethod;
-            this._expandYieldProceed = expandYieldProceed;
             this.TemplateInstance = templateInstance;
             this.MetaApi = metaApi;
             this.Compilation = compilation;
             this.SyntaxSerializationService = syntaxSerializationService;
-            this.SyntaxFactory = syntaxFactory;
+            this.SyntaxGenerationContext = syntaxGenerationContext;
             this.LexicalScope = lexicalScope;
             this._proceedExpression = proceedExpression;
             Invariant.Assert( this.DiagnosticSink.DefaultScope != null );
@@ -62,7 +89,9 @@ namespace Caravela.Framework.Impl.Templating
 
         public SyntaxSerializationService SyntaxSerializationService { get; }
 
-        public ICompilationElementFactory SyntaxFactory { get; }
+        public SyntaxGenerationContext SyntaxGenerationContext { get; }
+
+        public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
         public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
         {
@@ -109,11 +138,11 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                return CreateReturnStatementDefault( returnExpression, returnType );
+                return this.CreateReturnStatementDefault( returnExpression, returnType );
             }
         }
 
-        private static StatementSyntax CreateReturnStatementDefault( ExpressionSyntax returnExpression, IType returnType )
+        private StatementSyntax CreateReturnStatementDefault( ExpressionSyntax returnExpression, IType returnType )
         {
             if ( returnExpression.Kind() is SyntaxKind.DefaultLiteralExpression or SyntaxKind.NullLiteralExpression )
             {
@@ -143,7 +172,7 @@ namespace Caravela.Framework.Impl.Templating
                     return
                         ReturnStatement(
                             Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                            SyntaxGeneratorFactory.DefaultSyntaxGenerator.CastExpression( returnType.GetSymbol(), returnExpression )
+                            this.SyntaxGenerator.CastExpression( returnType.GetSymbol(), returnExpression )
                                 .WithAdditionalAnnotations( Simplifier.Annotation ),
                             Token( SyntaxKind.SemicolonToken ) );
                 }
@@ -323,7 +352,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public UserDiagnosticSink DiagnosticSink => this.MetaApi.Diagnostics;
 
-        public StatementSyntax CreateReturnStatement( IDynamicExpression? returnExpression, string? expressionText = null, Location? location = null )
+        public StatementSyntax CreateReturnStatement( IUserExpression? returnExpression )
         {
             if ( returnExpression == null )
             {
@@ -335,7 +364,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     return
                         Block(
-                                ExpressionStatement( returnExpression.CreateExpression( expressionText, location ) ),
+                                ExpressionStatement( returnExpression.ToRunTimeExpression() ),
                                 ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
                             .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
@@ -347,32 +376,30 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                return this.CreateReturnStatement( returnExpression.CreateExpression( expressionText, location ) );
+                return this.CreateReturnStatement( returnExpression.ToRunTimeExpression() );
             }
         }
 
-        public IDynamicExpression? Proceed( string methodName )
+        public IUserExpression? Proceed( string methodName )
         {
             if ( this._proceedExpression == null )
             {
                 throw new AssertionFailedException( "No proceed expression was provided." );
             }
 
-            return new ProceedExpression( methodName, this );
+            return new ProceedUserExpression( methodName, this );
         }
 
-        public StatementSyntax CreateYieldProceedStatement()
+        private class DisposeCookie : IDisposable
         {
-            if ( this._expandYieldProceed != null )
+            private readonly Action _action;
+
+            public DisposeCookie( Action action )
             {
-                return this._expandYieldProceed( this );
+                this._action = action;
             }
-            else
-            {
-                return YieldStatement(
-                    SyntaxKind.YieldReturnStatement,
-                    ((IDynamicExpression) meta.Proceed()!).CreateExpression() );
-            }
+
+            public void Dispose() => this._action();
         }
     }
 }

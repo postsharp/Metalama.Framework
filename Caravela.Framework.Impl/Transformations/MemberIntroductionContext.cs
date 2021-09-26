@@ -17,20 +17,22 @@ namespace Caravela.Framework.Impl.Transformations
 
         public ITemplateLexicalScopeProvider LexicalScopeProvider { get; }
 
-        public ISyntaxFactory SyntaxFactory { get; }
+        public SyntaxGenerationContext SyntaxGenerationContext { get; }
+
+        public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
         public MemberIntroductionContext(
             UserDiagnosticSink diagnosticSink,
             IntroductionNameProvider introductionNameProvider,
             ITemplateLexicalScopeProvider lexicalScopeProvider,
-            ISyntaxFactory syntaxFactory,
+            SyntaxGenerationContext syntaxGenerationContext,
             IServiceProvider serviceProvider )
         {
             this.DiagnosticSink = diagnosticSink;
             this.LexicalScopeProvider = lexicalScopeProvider;
-            this.SyntaxFactory = syntaxFactory;
             this.ServiceProvider = serviceProvider;
             this.IntroductionNameProvider = introductionNameProvider;
+            this.SyntaxGenerationContext = syntaxGenerationContext;
         }
     }
 }

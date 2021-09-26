@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Aspects;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.ServiceProvider;
 using Caravela.Framework.Impl.Templating;
@@ -116,7 +115,7 @@ namespace Caravela.Framework.Impl.Transformations
                         EventDeclaration(
                             List<AttributeListSyntax>(),
                             this.OverriddenDeclaration.GetSyntaxModifierList(),
-                            SyntaxHelpers.CreateSyntaxForEventType( this.OverriddenDeclaration ),
+                            context.SyntaxGenerator.EventType( this.OverriddenDeclaration ),
                             null,
                             Identifier( eventName ),
                             AccessorList(
@@ -151,14 +150,15 @@ namespace Caravela.Framework.Impl.Transformations
         {
             using ( context.DiagnosticSink.WithDefaultScope( accessor ) )
             {
-                var proceedExpression = new DynamicExpression(
+                var proceedExpression = new UserExpression(
                     accessor.MethodKind switch
                     {
                         MethodKind.EventAdd => this.CreateAddExpression(),
                         MethodKind.EventRemove => this.CreateRemoveExpression(),
                         _ => throw new AssertionFailedException()
                     },
-                    this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ) );
+                    this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
+                    context.SyntaxGenerationContext );
 
                 var metaApi = MetaApi.ForEvent(
                     this.OverriddenDeclaration,
@@ -168,6 +168,7 @@ namespace Caravela.Framework.Impl.Transformations
                         accessorTemplate.Cast(),
                         this.Advice.ReadOnlyTags,
                         this.Advice.AspectLayerId,
+                        context.SyntaxGenerationContext,
                         context.ServiceProvider ) );
 
                 var expansionContext = new TemplateExpansionContext(
@@ -176,7 +177,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration.Compilation,
                     context.LexicalScopeProvider.GetLexicalScope( accessor ),
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
-                    (ICompilationElementFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
+                    context.SyntaxGenerationContext,
                     default,
                     proceedExpression );
 

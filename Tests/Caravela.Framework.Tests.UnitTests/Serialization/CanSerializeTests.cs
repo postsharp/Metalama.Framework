@@ -17,13 +17,13 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
         public CanSerializeTests()
         {
-            this._serializableTypes = this.SerializationService.GetSerializableTypes( this.SyntaxFactory );
+            this._serializableTypes = this.SerializationService.GetSerializableTypes( this.SerializationContext.Compilation );
         }
 
         private void AssertCanSerialize( bool expected, Type type )
         {
             var diagnosticList = new DiagnosticList();
-            var result = this._serializableTypes.IsSerializable( this.SyntaxFactory.GetTypeSymbol( type ), Location.None, diagnosticList );
+            var result = this._serializableTypes.IsSerializable( this.SerializationContext.GetTypeSymbol( type ), Location.None, diagnosticList );
 
             Assert.Equal( expected, result );
 

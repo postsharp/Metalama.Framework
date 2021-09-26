@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Aspects;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.ServiceProvider;
@@ -20,6 +21,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         Template<IMemberOrNamedType> Template,
         IReadOnlyDictionary<string, object?> Tags,
         AspectLayerId AspectLayerId,
+        SyntaxGenerationContext SyntaxGenerationContext,
         IServiceProvider ServiceProvider )
     {
         public AspectPipelineDescription PipelineDescription { get; } = ServiceProvider.GetService<AspectPipelineDescription>();

@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
+using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -34,25 +35,32 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
         }
 
         public object GetIndexerValue( object? instance, params object?[] args )
-            => new DynamicExpression(
+        {
+            var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
+
+            return new UserExpression(
                 this.CreateIndexerAccess(
-                    RuntimeExpression.FromValue( instance, this.Compilation ),
-                    RuntimeExpression.FromValue( args, this.Compilation ) ),
+                    RuntimeExpression.FromValue( instance, this.Compilation, syntaxGenerationContext ),
+                    RuntimeExpression.FromValue( args, this.Compilation, syntaxGenerationContext ) ),
                 this.Member.Type,
-                this.Member.Writeability != Writeability.None );
+                syntaxGenerationContext,
+                isReferenceable: this.Member.Writeability != Writeability.None );
+        }
 
         public object SetIndexerValue( object? instance, object value, params object?[] args )
         {
+            var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
+
             var propertyAccess = this.CreateIndexerAccess(
-                RuntimeExpression.FromValue( instance, this.Compilation ),
-                RuntimeExpression.FromValue( args, this.Compilation ) );
+                RuntimeExpression.FromValue( instance, this.Compilation, syntaxGenerationContext ),
+                RuntimeExpression.FromValue( args, this.Compilation, syntaxGenerationContext ) );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
+                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation, syntaxGenerationContext ) );
 
-            return new DynamicExpression( expression, this.Member.Type );
+            return new UserExpression( expression, this.Member.Type, syntaxGenerationContext );
         }
 
         public PropertyInvoker( IProperty member, InvokerOrder order, InvokerOperator invokerOperator ) : base( member, order, invokerOperator ) { }

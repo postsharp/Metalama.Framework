@@ -15,23 +15,34 @@ namespace Caravela.Framework.Impl.Templating
         private static readonly ConditionalWeakTable<Compilation, SymbolIdGenerator> _instances = new();
         private readonly ConcurrentDictionary<ISymbol, string> _symbolsToIds = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<string, ISymbol> _idsToSymbols = new( StringComparer.Ordinal );
-        private long _nextId;
+        private readonly string _compilationId;
+        private long _nextSymbolId;
+        private static long _nextCompilationId;
 
-        private SymbolIdGenerator() { }
+        private SymbolIdGenerator()
+        {
+            this._compilationId = Interlocked.Increment( ref _nextCompilationId ).ToString( CultureInfo.InvariantCulture );
+        }
 
         public static SymbolIdGenerator GetInstance( Compilation compilation ) => _instances.GetValue( compilation, _ => new SymbolIdGenerator() );
 
         public string GetId( ISymbol symbol )
-            => this._symbolsToIds.GetOrAdd(
+        {
+            return this._symbolsToIds.GetOrAdd(
                 symbol,
                 s =>
                 {
-                    var id = Interlocked.Increment( ref this._nextId ).ToString( CultureInfo.InvariantCulture );
+                    var id =
+                        $"node={Interlocked.Increment( ref this._nextSymbolId ).ToString( CultureInfo.InvariantCulture )},compilation={this._compilationId}";
+
                     this._idsToSymbols[id] = s;
 
                     return id;
                 } );
+        }
 
         public ISymbol GetSymbol( string id ) => this._idsToSymbols[id];
+
+        public override string ToString() => this._compilationId;
     }
 }

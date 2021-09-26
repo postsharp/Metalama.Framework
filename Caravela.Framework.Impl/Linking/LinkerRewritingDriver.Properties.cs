@@ -161,7 +161,7 @@ namespace Caravela.Framework.Impl.Linking
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
-                                ? SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( symbol.ContainingType )
+                                ? OurSyntaxGenerator.Default.Type( symbol.ContainingType )
                                 : ThisExpression(),
                             IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         Token( SyntaxKind.SemicolonToken ) ) )
@@ -175,7 +175,7 @@ namespace Caravela.Framework.Impl.Linking
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 symbol.IsStatic
-                                    ? SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( symbol.ContainingType )
+                                    ? OurSyntaxGenerator.Default.Type( symbol.ContainingType )
                                     : ThisExpression(),
                                 IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                             IdentifierName( "value" ) ) ) )

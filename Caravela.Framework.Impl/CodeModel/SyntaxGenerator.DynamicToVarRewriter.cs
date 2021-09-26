@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal partial class SyntaxGenerator
+    internal partial class OurSyntaxGenerator
     {
         private class DynamicToVarRewriter : CSharpSyntaxRewriter
         {

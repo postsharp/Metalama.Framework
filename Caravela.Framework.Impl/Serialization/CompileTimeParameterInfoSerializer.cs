@@ -14,9 +14,9 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class CompileTimeParameterInfoSerializer : ObjectSerializer<CompileTimeParameterInfo, ParameterInfo>
     {
-        public override ExpressionSyntax Serialize( CompileTimeParameterInfo obj, ICompilationElementFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimeParameterInfo obj, SyntaxSerializationContext serializationContext )
         {
-            var parameter = obj.Target.Resolve( syntaxFactory.CompilationModel ).AssertNotNull();
+            var parameter = obj.Target.Resolve( serializationContext.CompilationModel ).AssertNotNull();
             var declaringMember = parameter.DeclaringMember;
             var method = declaringMember as IMethodBase;
             var ordinal = parameter.Index;
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Serialization
 
             var retrieveMethodBase = CompileTimeMethodInfoSerializer.SerializeMethodBase(
                 method.GetSymbol().AssertNotNull( Justifications.SerializersNotImplementedForIntroductions ),
-                syntaxFactory );
+                serializationContext );
 
             return ElementAccessExpression(
                     InvocationExpression(

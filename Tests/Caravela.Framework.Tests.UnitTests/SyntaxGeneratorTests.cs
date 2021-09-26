@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
-using System;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
@@ -19,6 +18,7 @@ namespace Caravela.Framework.Tests.UnitTests
         }
 
         [Theory]
+
         // With nullable context.
         [InlineData( "int?", "typeof(global::System.Int32?)", true )]
         [InlineData( "string?", "typeof(global::System.String)", true )]
@@ -32,6 +32,7 @@ namespace Caravela.Framework.Tests.UnitTests
         [InlineData( "List<string?[]?>?", "typeof(global::System.Collections.Generic.List<global::System.String[]>)", true )]
         [InlineData( "List<int[]?>", "typeof(global::System.Collections.Generic.List<global::System.Int32[]>)", true )]
         [InlineData( "List<int?[]>", "typeof(global::System.Collections.Generic.List<global::System.Int32?[]>)", true )]
+
         // Without nullable context.
         [InlineData( "int?", "typeof(global::System.Int32?)", false )]
         [InlineData( "string?", "typeof(global::System.String)", false )]
@@ -51,7 +52,7 @@ namespace Caravela.Framework.Tests.UnitTests
             var compilation = CreateCompilationModel( code );
             var fieldType = compilation.DeclaredTypes.Single().Fields.Single().Type.GetSymbol();
 
-            var defaultSyntaxGenerator = SyntaxGeneratorFactory.GetSyntaxGenerator( nullable );
+            var defaultSyntaxGenerator = OurSyntaxGenerator.GetInstance( nullable );
 
             var typeOf = defaultSyntaxGenerator.TypeOfExpression( fieldType ).ToString();
 
@@ -59,8 +60,9 @@ namespace Caravela.Framework.Tests.UnitTests
 
             Assert.Equal( expectedTypeOf, typeOf );
         }
-        
-          [Theory]
+
+        [Theory]
+
         // With nullable context.
         [InlineData( "int?", "global::System.Int32?", true )]
         [InlineData( "string?", "global::System.String?", true )]
@@ -74,6 +76,7 @@ namespace Caravela.Framework.Tests.UnitTests
         [InlineData( "List<string?[]?>?", "global::System.Collections.Generic.List<global::System.String?[]?>?", true )]
         [InlineData( "List<int[]?>", "global::System.Collections.Generic.List<global::System.Int32[]?>", true )]
         [InlineData( "List<int?[]>", "global::System.Collections.Generic.List<global::System.Int32?[]>", true )]
+
         // Without nullable context.
         [InlineData( "int?", "global::System.Int32?", false )]
         [InlineData( "string?", "global::System.String", false )]
@@ -93,7 +96,7 @@ namespace Caravela.Framework.Tests.UnitTests
             var compilation = CreateCompilationModel( code );
             var fieldType = compilation.DeclaredTypes.Single().Fields.Single().Type.GetSymbol();
 
-            var defaultSyntaxGenerator = SyntaxGeneratorFactory.GetSyntaxGenerator( nullable );
+            var defaultSyntaxGenerator = OurSyntaxGenerator.GetInstance( nullable );
 
             var typeOf = defaultSyntaxGenerator.Type( fieldType ).ToString();
 

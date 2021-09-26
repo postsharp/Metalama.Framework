@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -78,7 +79,6 @@ namespace Caravela.Framework.Impl.Linking
             var nameProvider = new LinkerIntroductionNameProvider();
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
             var syntaxTransformationCollection = new SyntaxTransformationCollection();
-            var syntaxFactory = ReflectionMapper.GetInstance( input.CompilationModel.RoslynCompilation );
 
             // TODO: Merge observable and non-observable transformations so that the order is preserved.
             //       Maybe have all transformations already together in the input?
@@ -138,11 +138,42 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( transformation is IMemberIntroduction memberIntroduction )
                 {
+                    // Create the SyntaxGenerationContext for the insertion point.
+                    var positionInSyntaxTree = 0;
+
+                    if ( memberIntroduction.InsertPosition.SyntaxNode != null )
+                    {
+                        switch ( memberIntroduction.InsertPosition.Relation )
+                        {
+                            case InsertPositionRelation.After:
+                                positionInSyntaxTree = memberIntroduction.InsertPosition.SyntaxNode.Span.End + 1;
+
+                                break;
+
+                            case InsertPositionRelation.Within:
+                                positionInSyntaxTree = ((BaseTypeDeclarationSyntax) memberIntroduction.InsertPosition.SyntaxNode).CloseBraceToken.Span.Start
+                                                       - 1;
+
+                                break;
+
+                            default:
+                                positionInSyntaxTree = 0;
+
+                                break;
+                        }
+                    }
+
+                    var syntaxGenerationContext = SyntaxGenerationContext.Create(
+                        input.InitialCompilation.Compilation,
+                        memberIntroduction.TargetSyntaxTree,
+                        positionInSyntaxTree );
+
+                    // Call GetIntroducedMembers
                     var introductionContext = new MemberIntroductionContext(
                         diagnostics,
                         nameProvider,
                         lexicalScopeFactory,
-                        syntaxFactory,
+                        syntaxGenerationContext,
                         this._serviceProvider );
 
                     var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );

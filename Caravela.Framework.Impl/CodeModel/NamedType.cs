@@ -115,7 +115,6 @@ namespace Caravela.Framework.Impl.CodeModel
                         NullableAnnotation.NotAnnotated => false,
                         _ => null
                     };
-
                 }
                 else
                 {
@@ -123,7 +122,6 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
             }
         }
-        
 
         public override MemberInfo ToMemberInfo() => this.ToType();
 

@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = SyntaxGeneratorFactory.DefaultSyntaxGenerator;
+            var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
             var field =
                 FieldDeclaration(

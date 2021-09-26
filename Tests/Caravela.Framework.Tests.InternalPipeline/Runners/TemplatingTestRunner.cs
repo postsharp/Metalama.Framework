@@ -273,11 +273,13 @@ namespace Caravela.Framework.Tests.Integration.Runners
 
             // ReSharper disable once SuspiciousTypeConversion.Global
             var lexicalScope = new TemplateLexicalScope( ((Declaration) targetMethod).LookupSymbols() );
+            var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( compilation.RoslynCompilation );
 
             var proceedExpression =
-                new DynamicExpression(
+                new UserExpression(
                     GetProceedInvocation( targetMethod ),
-                    targetMethod.ReturnType );
+                    targetMethod.ReturnType,
+                    syntaxGenerationContext );
 
             var additionalServices = new ServiceProvider();
             additionalServices.AddService( new AspectPipelineDescription( AspectExecutionScenario.CompileTime, true ) );
@@ -290,6 +292,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                     template,
                     ImmutableDictionary.Create<string, object?>().Add( "TestKey", "TestValue" ),
                     default,
+                    syntaxGenerationContext,
                     augmentedServiceProvider ) );
 
             return (new TemplateExpansionContext(
@@ -298,7 +301,7 @@ namespace Caravela.Framework.Tests.Integration.Runners
                         compilation,
                         lexicalScope,
                         this._syntaxSerializationService,
-                        compilation.Factory,
+                        syntaxGenerationContext,
                         default,
                         proceedExpression ), roslynTargetMethod);
 

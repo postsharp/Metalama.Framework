@@ -12,7 +12,6 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
 {
     public class CodeModelMethodListOfCompatibleSignatureTests : TestBase
     {
-
         [Fact]
         public void Matches_ParameterTypes()
         {
@@ -189,7 +188,7 @@ class C
 
             var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", Array.Empty<IType>(), isStatic: false );
             Assert.Equal( new[] { type.Methods[0] }, matchedMethods1 );
-            var matchedMethods2 = type.Methods.OfCompatibleSignature( "Foo",Array.Empty<IType>(), isStatic: true );
+            var matchedMethods2 = type.Methods.OfCompatibleSignature( "Foo", Array.Empty<IType>(), isStatic: true );
             Assert.Equal( Array.Empty<IMethod>(), matchedMethods2 );
             var matchedMethods3 = type.Methods.OfCompatibleSignature( "Foo", Array.Empty<IType>(), isStatic: null );
             Assert.Equal( new[] { type.Methods[0] }, matchedMethods3 );
@@ -316,17 +315,17 @@ class C : B
             Assert.Equal( new[] { typeA.Methods[1] }, matchedMethods2 );
             var matchedMethods3 = typeC.Methods.OfCompatibleSignature( "Baz", Array.Empty<IType>(), declaredOnly: false );
             Assert.Equal( new[] { typeB.Methods[1] }, matchedMethods3 );
-            var matchedMethods4 = typeC.Methods.OfCompatibleSignature( "Qux",Array.Empty<IType>(), declaredOnly: false );
+            var matchedMethods4 = typeC.Methods.OfCompatibleSignature( "Qux", Array.Empty<IType>(), declaredOnly: false );
             Assert.Equal( new[] { typeA.Methods[3] }, matchedMethods4 );
-            var matchedMethods5 = typeC.Methods.OfCompatibleSignature( "Quz",Array.Empty<IType>(), declaredOnly: false );
+            var matchedMethods5 = typeC.Methods.OfCompatibleSignature( "Quz", Array.Empty<IType>(), declaredOnly: false );
             Assert.Equal( new[] { typeB.Methods[2] }, matchedMethods5 );
-            var matchedMethods6 = typeC.Methods.OfCompatibleSignature( "Qur", Array.Empty<IType>(),declaredOnly: false );
+            var matchedMethods6 = typeC.Methods.OfCompatibleSignature( "Qur", Array.Empty<IType>(), declaredOnly: false );
             Assert.Equal( new[] { typeB.Methods[3] }, matchedMethods6 );
-            var matchedMethods7 = typeC.Methods.OfCompatibleSignature( "Trx",Array.Empty<IType>(), declaredOnly: false );
+            var matchedMethods7 = typeC.Methods.OfCompatibleSignature( "Trx", Array.Empty<IType>(), declaredOnly: false );
             Assert.Equal( new[] { typeC.Methods[0] }, matchedMethods7 );
-            var matchedMethods8 = typeC.Methods.OfCompatibleSignature( "Trw",Array.Empty<IType>(), declaredOnly: false );
+            var matchedMethods8 = typeC.Methods.OfCompatibleSignature( "Trw", Array.Empty<IType>(), declaredOnly: false );
             Assert.Equal( new[] { typeC.Methods[1] }, matchedMethods8 );
-            var matchedMethods9 = typeC.Methods.OfCompatibleSignature( "Xyzzy",Array.Empty<IType>(), declaredOnly: false );
+            var matchedMethods9 = typeC.Methods.OfCompatibleSignature( "Xyzzy", Array.Empty<IType>(), declaredOnly: false );
             Assert.Equal( Array.Empty<IMethod>(), matchedMethods9 );
         }
     }

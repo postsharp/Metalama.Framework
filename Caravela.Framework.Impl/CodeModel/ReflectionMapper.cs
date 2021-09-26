@@ -4,7 +4,6 @@
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Globalization;
@@ -16,11 +15,10 @@ namespace Caravela.Framework.Impl.CodeModel
     /// <summary>
     /// Maps System.Reflection objects to Roslyn symbols.
     /// </summary>
-    internal class ReflectionMapper : ISyntaxFactory
+    internal class ReflectionMapper
     {
         private static readonly ConditionalWeakTable<Compilation, ReflectionMapper> _instances = new();
         private readonly ConcurrentDictionary<Type, ITypeSymbol> _symbolCache = new();
-        private readonly ConcurrentDictionary<Type, TypeSyntax> _syntaxCache = new();
 
         private ReflectionMapper( Compilation compilation )
         {
@@ -83,14 +81,6 @@ namespace Caravela.Framework.Impl.CodeModel
                     return this._symbolCache.GetOrAdd( type, this.GetTypeSymbolCore );
             }
         }
-
-        /// <summary>
-        /// Gets a fully-qualified <see cref="NameSyntax"/> for a given reflection <see cref="Type"/>.
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public TypeSyntax GetTypeSyntax( Type type )
-            => this._syntaxCache.GetOrAdd( type, t => SyntaxGeneratorFactory.DefaultSyntaxGenerator.Type( this.GetTypeSymbol( t ) ) );
 
         private ITypeSymbol GetTypeSymbolCore( Type type )
         {

@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Code.Invokers;
 using Caravela.Framework.Impl.Aspects;
+using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -48,49 +49,56 @@ namespace Caravela.Framework.Impl.CodeModel.Invokers
 
         public object Add( object? instance, object? value )
         {
+            var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
+
             var eventAccess = this.CreateEventExpression(
-                RuntimeExpression.FromValue( instance, this.Compilation ),
+                RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.EventAddAccessor );
 
             var expression = AssignmentExpression(
                 SyntaxKind.AddAssignmentExpression,
                 eventAccess,
-                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
+                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
 
-            return new DynamicExpression( expression, this._event.Type );
+            return new UserExpression( expression, this._event.Type, generationContext );
         }
 
         public object Remove( object? instance, object? value )
         {
+            var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
+
             var eventAccess = this.CreateEventExpression(
-                RuntimeExpression.FromValue( instance, this.Compilation ),
+                RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.EventRemoveAccessor );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SubtractAssignmentExpression,
                 eventAccess,
-                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation ) );
+                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
 
-            return new DynamicExpression( expression, this._event.Type );
+            return new UserExpression( expression, this._event.Type, in generationContext );
         }
 
         public object? Raise( object? instance, params object?[] args )
         {
+            var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
+
             var eventAccess = this.CreateEventExpression(
-                RuntimeExpression.FromValue( instance, this.Compilation ),
+                RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.EventRaiseAccessor );
 
-            var arguments = this._event.GetArguments( this._event.Signature.Parameters, RuntimeExpression.FromValue( args, this.Compilation ) );
+            var arguments = this._event.GetArguments(
+                this._event.Signature.Parameters,
+                RuntimeExpression.FromValue( args, this.Compilation, generationContext ) );
 
             var expression = ConditionalAccessExpression(
                 eventAccess,
                 InvocationExpression( MemberBindingExpression( IdentifierName( "Invoke" ) ) ).AddArgumentListArguments( arguments ) );
 
-            return new DynamicExpression(
+            return new UserExpression(
                 expression,
-                this._event.Signature.ReturnType );
+                this._event.Signature.ReturnType,
+                generationContext );
         }
-
-        public IEventInvoker Base => throw new NotImplementedException();
     }
 }

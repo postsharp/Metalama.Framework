@@ -38,10 +38,11 @@ namespace Caravela.Framework.Impl.CompileTime
             private readonly IDiagnosticAdder _diagnosticAdder;
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
+            private readonly TypeSyntax _compileTimeType;
             private Context _currentContext;
             private HashSet<string>? _currentTypeTemplateNames;
             private string? _currentTypeName;
-
+            
             public bool Success { get; private set; } = true;
 
             public bool FoundCompileTimeCode { get; private set; }
@@ -60,6 +61,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._templateCompiler = templateCompiler;
                 this._cancellationToken = cancellationToken;
                 this._currentContext = new Context( TemplatingScope.Both, this );
+
+                this._compileTimeType =
+                    OurSyntaxGenerator.Default.Type( ReflectionMapper.GetInstance( this._compileTimeCompilation ).GetTypeSymbol( typeof(CompileTimeType) ) );
             }
 
             // TODO: assembly and module-level attributes?
@@ -166,7 +170,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
 
                     // Add non-implemented members of IAspect and IEligible.
-                    var syntaxGenerator = SyntaxGeneratorFactory.DefaultSyntaxGenerator;
+                    var syntaxGenerator = OurSyntaxGenerator.Default;
                     var allImplementedInterfaces = symbol.SelectManyRecursive( i => i.Interfaces, throwOnDuplicate: false );
 
                     foreach ( var implementedInterface in allImplementedInterfaces )
@@ -543,13 +547,11 @@ namespace Caravela.Framework.Impl.CompileTime
                     {
                         // We are in a compile-time-only block but we have a typeof to a run-time-only block. 
                         // This is a situation we can handle by rewriting the typeof to a call to CompileTimeType.CreateFromDocumentationId.
-                        var compileTimeType =
-                            ReflectionMapper.GetInstance( this._compileTimeCompilation ).GetTypeSyntax( typeof(CompileTimeType) );
 
                         var memberAccess =
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
-                                compileTimeType,
+                                this._compileTimeType,
                                 IdentifierName( nameof(CompileTimeType.CreateFromDocumentationId) ) );
 
                         var invocation = InvocationExpression(

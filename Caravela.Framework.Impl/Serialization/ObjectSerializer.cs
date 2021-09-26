@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -26,9 +25,8 @@ namespace Caravela.Framework.Impl.Serialization
         /// Serializes an object of a type supported by this object serializer into a Roslyn expression that creates such an object.
         /// </summary>
         /// <param name="obj"></param>
-        /// <param name="syntaxFactory"></param>
         /// <returns>An expression that creates such an object.</returns>
-        public abstract ExpressionSyntax Serialize( object obj, ICompilationElementFactory syntaxFactory );
+        public abstract ExpressionSyntax Serialize( object obj, SyntaxSerializationContext serializationContext );
 
         /// <summary>
         /// Throws a <see cref="InvalidUserCodeException"/> if we are in an infinite recursion cycle because of an attempt to serialize <paramref name="obj"/>.

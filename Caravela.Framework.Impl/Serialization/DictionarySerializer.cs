@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,13 +18,13 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public DictionarySerializer( SyntaxSerializationService serializers ) : base( serializers ) { }
 
-        public override ExpressionSyntax Serialize( object dictionary, ICompilationElementFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( object dictionary, SyntaxSerializationContext serializationContext )
         {
             var dictionaryType = dictionary.GetType();
             var keyType = dictionaryType.GetGenericArguments()[0];
             var valueType = dictionaryType.GetGenericArguments()[1];
 
-            var creationExpression = ObjectCreationExpression( syntaxFactory.GetTypeSyntax( dictionaryType ) );
+            var creationExpression = ObjectCreationExpression( serializationContext.GetTypeSyntax( dictionaryType ) );
 
             var defaultComparer = typeof(EqualityComparer<>)
                 .MakeGenericType( keyType )
@@ -89,7 +88,7 @@ namespace Caravela.Framework.Impl.Serialization
                 {
                     var comparerExpression = MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            syntaxFactory.GetTypeSyntax( typeof(StringComparer) ),
+                            serializationContext.GetTypeSyntax( typeof(StringComparer) ),
                             IdentifierName( comparerName ) )
                         .NormalizeWhitespace();
 
@@ -117,7 +116,9 @@ namespace Caravela.Framework.Impl.Serialization
                         SeparatedList<ExpressionSyntax>(
                             new SyntaxNodeOrToken[]
                             {
-                                this.Service.Serialize( key, syntaxFactory ), Token( SyntaxKind.CommaToken ), this.Service.Serialize( value, syntaxFactory )
+                                this.Service.Serialize( key, serializationContext ),
+                                Token( SyntaxKind.CommaToken ),
+                                this.Service.Serialize( value, serializationContext )
                             } ) ) );
             }
 

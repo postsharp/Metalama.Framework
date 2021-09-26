@@ -214,7 +214,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // The node itself does not need to be transformed because it is compile time, but it needs to be converted
                 // into a run-time value. However, calls to variants of Proceed must be transformed into calls to the standard Proceed.
-                return this.CreateRunTimeExpression( (ExpressionSyntax) this._buildTimeOnlyRewriter.Visit( node ), node );
+                return this.CreateRunTimeExpression( (ExpressionSyntax) this._buildTimeOnlyRewriter.Visit( node ) );
             }
             else
             {
@@ -437,13 +437,13 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression )
-            => this.CreateRunTimeExpression( expression, originalExpression );
+            => this.CreateRunTimeExpression( expression );
 
         /// <summary>
         /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="RuntimeExpression"/>
         /// that represents the input.
         /// </summary>
-        private ExpressionSyntax CreateRunTimeExpression( ExpressionSyntax expression, SyntaxNode originalExpression )
+        private ExpressionSyntax CreateRunTimeExpression( ExpressionSyntax expression )
         {
             switch ( expression.Kind() )
             {
@@ -520,14 +520,9 @@ namespace Caravela.Framework.Impl.Templating
                     when type is INamedTypeSymbol { IsGenericType: true } namedType2 && namedType2.TypeArguments[0] is IDynamicTypeSymbol &&
                          type.ContainingNamespace.ToDisplayString() == "System.Collections.Generic":
 
-                    var expressionText = SyntaxFactoryEx.LiteralExpression( originalExpression.ToString() );
-                    var location = this._templateMetaSyntaxFactory.Location( this._syntaxTreeAnnotationMap.GetLocation( originalExpression ) );
-
                     return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.GetDynamicSyntax) ) )
                         .AddArgumentListArguments(
-                            Argument( CastExpression( NullableType( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ) ), expression ) ),
-                            Argument( expressionText ),
-                            Argument( location ) );
+                            Argument( CastExpression( NullableType( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ) ), expression ) ) );
 
                 case "String":
                     return CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind.StringLiteralExpression );
@@ -705,7 +700,7 @@ namespace Caravela.Framework.Impl.Templating
                                 return Argument( transformedExpression );
 
                             default:
-                                return Argument( this.CreateRunTimeExpression( transformedExpression, a.Expression ) );
+                                return Argument( this.CreateRunTimeExpression( transformedExpression ) );
                         }
                     }
                     else
@@ -729,7 +724,7 @@ namespace Caravela.Framework.Impl.Templating
                 // Replace `meta.RunTime(x)` to `x`.
                 var expression = node.ArgumentList.Arguments[0].Expression;
 
-                return this.CreateRunTimeExpression( expression, expression );
+                return this.CreateRunTimeExpression( expression );
             }
             else
             {
@@ -1318,7 +1313,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         /// <summary>
-        /// Determines if the expression will be transformed into syntax that instantiates an <see cref="IDynamicExpression"/>.
+        /// Determines if the expression will be transformed into syntax that instantiates an <see cref="IUserExpression"/>.
         /// </summary>
         private bool IsCompileTimeDynamic( ExpressionSyntax? expression )
             => expression != null
@@ -1340,8 +1335,6 @@ namespace Caravela.Framework.Impl.Templating
                 invocationExpression = InvocationExpression(
                         this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicReturnStatement) ) )
                     .AddArgumentListArguments( Argument( this.CastToDynamicExpression( expression ) ) );
-
-                // TODO: pass expressionText and Location
             }
             else
             {
@@ -1357,7 +1350,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private CastExpressionSyntax CastToDynamicExpression( ExpressionSyntax expression )
             => CastExpression(
-                this.MetaSyntaxFactory.Type( typeof(IDynamicExpression) ),
+                this.MetaSyntaxFactory.Type( typeof(IUserExpression) ),
                 expression );
 
         public override SyntaxNode VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
@@ -1380,8 +1373,6 @@ namespace Caravela.Framework.Impl.Templating
                                 Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( declarator.Initializer.Value )! ) ) );
 
                         return this.WithCallToAddSimplifierAnnotation( invocationExpression );
-
-                        // TODO: pass expressionText and Location
                     }
                 }
             }
@@ -1401,7 +1392,7 @@ namespace Caravela.Framework.Impl.Templating
 
                     if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                     {
-                        return this.Transform( SyntaxGeneratorFactory.DefaultSyntaxGenerator.NameExpression( namespaceOrType ) );
+                        return this.Transform( OurSyntaxGenerator.CompileTime.NameExpression( namespaceOrType ) );
                     }
                     else if ( symbol is { IsStatic: true } && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
                     {
@@ -1414,7 +1405,7 @@ namespace Caravela.Framework.Impl.Templating
                                 // We have an access to a field or method with a "using static", or a non-qualified static member access.
                                 return this.MetaSyntaxFactory.MemberAccessExpression(
                                     this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
-                                    this.Transform( SyntaxGeneratorFactory.DefaultSyntaxGenerator.NameExpression( symbol.ContainingType ) ),
+                                    this.Transform( OurSyntaxGenerator.CompileTime.NameExpression( symbol.ContainingType ) ),
                                     this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
                         }
                     }
@@ -1443,7 +1434,7 @@ namespace Caravela.Framework.Impl.Templating
             switch ( symbol )
             {
                 case INamespaceOrTypeSymbol namespaceOrType:
-                    var nameExpression = SyntaxGeneratorFactory.DefaultSyntaxGenerator.NameExpression( namespaceOrType );
+                    var nameExpression = OurSyntaxGenerator.CompileTime.NameExpression( namespaceOrType );
 
                     transformedNode = this.GetTransformationKind( node ) == TransformationKind.Transform
                         ? this.WithCallToAddSimplifierAnnotation( this.Transform( nameExpression ) )

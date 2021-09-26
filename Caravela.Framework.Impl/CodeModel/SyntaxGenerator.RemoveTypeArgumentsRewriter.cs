@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal partial class SyntaxGenerator
+    internal partial class OurSyntaxGenerator
     {
         private sealed class RemoveTypeArgumentsRewriter : CSharpSyntaxRewriter
         {

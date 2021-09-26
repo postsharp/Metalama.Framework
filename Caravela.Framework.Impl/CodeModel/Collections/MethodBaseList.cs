@@ -41,7 +41,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         /// <typeparam name="TPayload">Payload type for the <paramref name="argumentGetter"/>.</typeparam>
         /// <param name="payload">Payload object, passed to <paramref name="argumentGetter"/>.</param>
         /// <param name="name">Required name, or <see langword="null"/> if there is no requirement.</param>
-        /// <param name="genericParameterCount">Required number of generic parameters, or <see langword="null"/> if there is no requirement.</param>
         /// <param name="argumentCount">Required number of parameters, or <see langword="null"/> if there is no requirement.</param>
         /// <param name="argumentGetter">Predicate for matching parameters.</param>
         /// <param name="isStatic">Specifies whether the staticity should be matched (it is normally not a part of signature).</param>

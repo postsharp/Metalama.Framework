@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,9 +11,9 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class CultureInfoSerializer : ObjectSerializer<CultureInfo>
     {
-        public override ExpressionSyntax Serialize( CultureInfo obj, ICompilationElementFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CultureInfo obj, SyntaxSerializationContext serializationContext )
         {
-            return ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof(CultureInfo) ) )
+            return ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof(CultureInfo) ) )
                 .AddArgumentListArguments(
                     Argument(
                         LiteralExpression(

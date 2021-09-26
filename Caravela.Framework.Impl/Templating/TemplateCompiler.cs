@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Observers;
 using Caravela.Framework.Impl.Serialization;
@@ -27,7 +26,7 @@ namespace Caravela.Framework.Impl.Templating
             this._syntaxTreeAnnotationMap = new SyntaxTreeAnnotationMap( runTimeCompilation );
             this._serviceProvider = serviceProvider;
             var syntaxSerializationService = serviceProvider.GetService<SyntaxSerializationService>();
-            this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( runTimeCompilation ) );
+            this._serializableTypes = syntaxSerializationService.GetSerializableTypes( runTimeCompilation );
 
             this._observer = serviceProvider.GetOptionalService<ITemplateCompilerObserver>();
         }

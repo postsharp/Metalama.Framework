@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,7 +15,7 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public ArraySerializer( SyntaxSerializationService serializers ) : base( serializers ) { }
 
-        public override ExpressionSyntax Serialize( object obj, ICompilationElementFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( object obj, SyntaxSerializationContext serializationContext )
         {
             var array = (Array) obj;
 
@@ -32,11 +31,11 @@ namespace Caravela.Framework.Impl.Serialization
             foreach ( var o in array )
             {
                 ThrowIfStackTooDeep( o );
-                lt.Add( this.Service.Serialize( o, syntaxFactory ) );
+                lt.Add( this.Service.Serialize( o, serializationContext ) );
             }
 
             return ArrayCreationExpression(
-                    ArrayType( syntaxFactory.GetTypeSyntax( elementType ) )
+                    ArrayType( serializationContext.GetTypeSyntax( elementType ) )
                         .WithRankSpecifiers( SingletonList( ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) )
                 .WithInitializer(
                     InitializerExpression(

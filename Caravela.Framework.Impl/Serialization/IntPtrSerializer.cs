@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -10,9 +9,9 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class IntPtrSerializer : ObjectSerializer<IntPtr>
     {
-        public override ExpressionSyntax Serialize( IntPtr obj, ICompilationElementFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( IntPtr obj, SyntaxSerializationContext serializationContext )
         {
-            return SyntaxFactory.ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof(IntPtr) ) )
+            return SyntaxFactory.ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof(IntPtr) ) )
                 .AddArgumentListArguments(
                     SyntaxFactory.Argument(
                         SyntaxFactory.LiteralExpression(

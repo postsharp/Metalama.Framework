@@ -19,11 +19,15 @@ namespace Caravela.Framework.Impl.Transformations
 {
     internal static class ProceedHelper
     {
-        public static DynamicExpression CreateProceedDynamicExpression(
+        public static UserExpression CreateProceedDynamicExpression(
+            in SyntaxGenerationContext generationContext,
             ExpressionSyntax invocationExpression,
             Template<IMethod> template,
             IMethod overriddenMethod )
         {
+            var runtimeAspectHelperType =
+                generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(RunTimeAspectHelper) ) );
+
             switch ( template.SelectedKind )
             {
                 case TemplateKind.Default when overriddenMethod.GetIteratorInfoImpl() is { IsIterator: true } iteratorInfo:
@@ -41,7 +45,7 @@ namespace Caravela.Framework.Impl.Transformations
                                 SyntaxFactory.InvocationExpression(
                                         SyntaxFactory.MemberAccessExpression(
                                             SyntaxKind.SimpleMemberAccessExpression,
-                                            overriddenMethod.GetSyntaxFactory().GetTypeSyntax( typeof(RunTimeAspectHelper) ),
+                                            runtimeAspectHelperType,
                                             SyntaxFactory.IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
                                     .WithArgumentList(
                                         SyntaxFactory.ArgumentList( SyntaxFactory.SingletonSeparatedList( SyntaxFactory.Argument( invocationExpression ) ) ) )
@@ -55,7 +59,7 @@ namespace Caravela.Framework.Impl.Transformations
                             expression = GenerateAwaitBufferAsync();
                         }
 
-                        return new DynamicExpression( expression, overriddenMethod.ReturnType );
+                        return new UserExpression( expression, overriddenMethod.ReturnType, generationContext );
                     }
 
                 case TemplateKind.Default when overriddenMethod.GetAsyncInfoImpl() is { IsAsync: true, IsAwaitableOrVoid: true } asyncInfo:
@@ -65,10 +69,11 @@ namespace Caravela.Framework.Impl.Transformations
 
                         var taskResultType = asyncInfo.ResultType;
 
-                        return new DynamicExpression(
+                        return new UserExpression(
                             SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( invocationExpression ) )
                                 .WithAdditionalAnnotations( Simplifier.Annotation ),
-                            taskResultType );
+                            taskResultType,
+                            generationContext );
                     }
 
                 case TemplateKind.Async when overriddenMethod.GetIteratorInfoImpl() is
@@ -76,15 +81,16 @@ namespace Caravela.Framework.Impl.Transformations
                     {
                         var expression = GenerateAwaitBufferAsync();
 
-                        return new DynamicExpression( expression, overriddenMethod.ReturnType );
+                        return new UserExpression( expression, overriddenMethod.ReturnType, generationContext );
                     }
             }
 
             // This is a default method, or a non-default template.
             // Generate: `BASE(ARGS)`
-            return new DynamicExpression(
+            return new UserExpression(
                 invocationExpression,
-                overriddenMethod.ReturnType );
+                overriddenMethod.ReturnType,
+                generationContext );
 
             ExpressionSyntax GenerateAwaitBufferAsync()
             {
@@ -103,7 +109,7 @@ namespace Caravela.Framework.Impl.Transformations
                     SyntaxFactory.InvocationExpression(
                             SyntaxFactory.MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
-                                overriddenMethod.GetSyntaxFactory().GetTypeSyntax( typeof(RunTimeAspectHelper) ),
+                                runtimeAspectHelperType,
                                 SyntaxFactory.IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
                         .WithArgumentList( arguments )
                         .WithAdditionalAnnotations( Simplifier.Annotation );

@@ -45,16 +45,16 @@ namespace Caravela.Framework.Impl.Transformations
                     MethodDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        SyntaxHelpers.CreateSyntaxForReturnType( this.OverriddenDeclaration ),
+                        context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ),
                         null,
                         Identifier(
                             context.IntroductionNameProvider.GetOverrideName(
                                 this.OverriddenDeclaration.DeclaringType,
                                 this.Advice.AspectLayerId,
                                 this.OverriddenDeclaration ) ),
-                        SyntaxHelpers.CreateSyntaxForTypeParameterList( this.OverriddenDeclaration ),
-                        SyntaxHelpers.CreateSyntaxForParameterList( this.OverriddenDeclaration ),
-                        SyntaxHelpers.CreateSyntaxForConstraintClauses( this.OverriddenDeclaration ),
+                        context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration ),
+                        context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration ),
+                        context.SyntaxGenerator.ConstraintClauses( this.OverriddenDeclaration ),
                         body,
                         null ),
                     this.Advice.AspectLayerId,
