@@ -9,7 +9,7 @@ namespace Caravela.Framework.Tests.PublicPipeline.Aspects.Nullable.NullableConte
     internal class Aspect : Attribute, IAspect<INamedType>
     {
         [Introduce]
-        private string? Introduced1( string? a ) => a!.ToString();
+        private string Introduced1( string a ) => a.ToString();
         
           #nullable enable
         [Introduce]
